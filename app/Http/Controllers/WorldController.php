@@ -401,7 +401,7 @@ class WorldController extends Controller
      */
     public function getRecipes(Request $request)
     {
-        $query = Recipe::query();
+        $query = Recipe::active();
         $data = $request->only(['name', 'sort']);
         if(isset($data['name']))
             $query->where('name', 'LIKE', '%'.$data['name'].'%');
@@ -443,7 +443,7 @@ class WorldController extends Controller
     {
         $recipe = Recipe::where('id', $id)->first();
         if(!$recipe) abort(404);
-
+        if($recipe->active()->first() == false) abort(404);
         return view('world.recipes._recipe_page', [
             'recipe' => $recipe,
             'imageUrl' => $recipe->imageUrl,

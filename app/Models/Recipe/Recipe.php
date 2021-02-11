@@ -5,6 +5,7 @@ namespace App\Models\Recipe;
 use Config;
 use DB;
 use App\Models\Model;
+use Carbon\Carbon;
 
 class Recipe extends Model
 {
@@ -14,7 +15,7 @@ class Recipe extends Model
      * @var array
      */
     protected $fillable = [
-        'name', 'has_image', 'needs_unlocking', 'description', 'parsed_description', 'reference_url', 'artist_alias' ,'artist_url', 'is_limited'
+        'name', 'has_image', 'needs_unlocking', 'description', 'parsed_description', 'reference_url', 'artist_alias' ,'artist_url', 'is_limited', 'open_at', 'close_at', 'time'
     ];
 
     protected $appends = ['image_url'];
@@ -80,6 +81,22 @@ class Recipe extends Model
         SCOPES
 
     **********************************************************************************************/
+
+    /**
+     * Scope a query to only include active prompts.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeActive($query)
+    {
+        return $query->where(function($query) {
+                $query->whereNull('open_at')->orWhere('open_at', '<', Carbon::now());
+            })->where(function($query) {
+                $query->whereNull('close_at')->orWhere('close_at', '>', Carbon::now());
+        });
+
+    }
 
     /**
      * Scope a query to sort items in alphabetical order.

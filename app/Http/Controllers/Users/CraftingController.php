@@ -38,7 +38,7 @@ class CraftingController extends Controller
     public function getIndex(Request $request)
     {
         return view('home.crafting.index', [
-            'default' => Recipe::where('needs_unlocking','0')->get(),
+            'default' => Recipe::active()->where('needs_unlocking','0')->get(),
         ]);
     }
 
@@ -54,6 +54,7 @@ class CraftingController extends Controller
         $selected = [];
 
         if(!$recipe || !Auth::user()) abort(404);
+        if($recipe->active()->first() == false) abort(404);
 
         // foreach ingredient, search for a qualifying item in the users inv, and select items up to the quantity, if insufficient continue onto the next entry
         // until there are no more eligible items, then proceed to the next item
@@ -81,7 +82,7 @@ class CraftingController extends Controller
     {
         $recipe = Recipe::find($id);
         if(!$recipe) abort(404);
-
+        if($recipe->active()->first() == false) abort(404);
         if($service->craftRecipe($request->only(['stack_id', 'stack_quantity']), $recipe, Auth::user())) {
             flash('Recipe crafted successfully.')->success();
         }

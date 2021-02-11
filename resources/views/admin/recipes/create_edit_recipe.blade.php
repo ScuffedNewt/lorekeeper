@@ -36,6 +36,27 @@
 {!! Form::checkbox('needs_unlocking', 1, $recipe->needs_unlocking, ['class' => 'form-check-input', 'data-toggle' => 'toggle', 'data-on' => 'Needs to be Unlocked', 'data-off' => 'Automatically Unlocked']) !!}
 </div>
 
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            {!! Form::label('open_att', 'Open Time (Optional)') !!} {!! add_help('Recipes cannot be viewed or crafted until the starting time.') !!}
+            {!! Form::text('open_at', $recipe->open_at, ['class' => 'form-control datepicker']) !!}
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            {!! Form::label('close_at', 'Close Time (Optional)') !!} {!! add_help('Recipes cannot be viewed or crafted after the ending time.') !!}
+            {!! Form::text('close_at', $recipe->close_at, ['class' => 'form-control datepicker']) !!}
+        </div>
+    </div>
+    <div class="alert alert-info">Recipes that have been unlocked (if set to require unlocking) cannot be crafted if the recipe is not ''open'' or is ''closed''</div>
+</div>
+
+<div class="form-group">
+    {!! Form::label('Time to Craft (Optional)') !!} <p>The amount of time (in minutes, e.g 1 hour -> 60) that a recipe will take to craft</p>
+    {!! Form::number('time', $recipe->time, ['class' => 'form-control']) !!}
+</div>
+
 <div class="form-group">
     {!! Form::label('Description (Optional)') !!}
     {!! Form::textarea('description', $recipe->description, ['class' => 'form-control wysiwyg']) !!}
@@ -97,6 +118,11 @@ $( document ).ready(function() {
         $('.br-form-group').css('display',this.checked ? 'block' : 'none')
             })
         $('.br-form-group').css('display',$('.is-limited-class').prop('checked') ? 'block' : 'none')
+
+        $( ".datepicker" ).datetimepicker({
+        dateFormat: "yy-mm-dd",
+        timeFormat: 'HH:mm:ss',
+    });
 });
     
 </script>

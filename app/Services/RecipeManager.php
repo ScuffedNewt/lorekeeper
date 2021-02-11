@@ -100,13 +100,20 @@ class RecipeManager extends Service
                 if(!$service->debitCurrency($user, null, 'Crafting', 'Used in '.$recipe->name.' Recipe', Currency::find($ingredient->data[0]), $ingredient->quantity)) throw new \Exception('Currency could not be debited.');
             }
 
-            // Credit rewards
-            $logType = 'Crafting Reward';
-            $craftingData = [
-                'data' => 'Received rewards from '. $recipe->displayName .' recipe'
-            ];
+            // if the recipe has a cook time we need to use a different function
+            if($recipe->time != NULL)
+            {
+                // create a log in the pending_recipes
+            }
+            else {
+                // Credit rewards
+                $logType = 'Crafting Reward';
+                $craftingData = [
+                    'data' => 'Received rewards from '. $recipe->displayName .' recipe'
+                ];
 
-            if(!fillUserAssets($recipe->rewardItems, null, $user, $logType, $craftingData)) throw new \Exception("Failed to distribute rewards to user.");
+                if(!fillUserAssets($recipe->rewardItems, null, $user, $logType, $craftingData)) throw new \Exception("Failed to distribute rewards to user.");
+            }
 
             return $this->commitReturn(true);
         } catch(\Exception $e) {
