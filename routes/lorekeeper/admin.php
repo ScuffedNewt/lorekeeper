@@ -174,9 +174,11 @@ Route::group(['prefix' => 'data', 'namespace' => 'Data', 'middleware' => 'power:
     Route::get('traits/create', 'FeatureController@getCreateFeature');
     Route::get('traits/edit/{id}', 'FeatureController@getEditFeature');
     Route::get('traits/delete/{id}', 'FeatureController@getDeleteFeature');
+    Route::get('traits/delete/mass/{id}', 'FeatureController@getMassDeleteFeature');
     Route::post('traits/create', 'FeatureController@postCreateEditFeature');
     Route::post('traits/edit/{id?}', 'FeatureController@postCreateEditFeature');
     Route::post('traits/delete/{id}', 'FeatureController@postDeleteFeature');
+    Route::post('traits/delete/mass/{id}', 'FeatureController@postMassDeleteFeature');
 
     # CHARACTER CATEGORIES
     Route::get('character-categories', 'CharacterCategoryController@getIndex');

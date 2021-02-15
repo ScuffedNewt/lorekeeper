@@ -9,6 +9,7 @@ use App\Models\Feature\FeatureCategory;
 use App\Models\Feature\Feature;
 use App\Models\Species\Species;
 use App\Models\Species\Subtype;
+use App\Models\Character\CharacterFeature;
 
 class FeatureService extends Service
 {
@@ -308,6 +309,34 @@ class FeatureService extends Service
         try {
             // Check first if the feature is currently in use
             if(DB::table('character_features')->where('feature_id', $feature->id)->exists()) throw new \Exception("A character with this trait exists. Please remove the trait first.");
+            
+            if($feature->has_image) $this->deleteImage($feature->imagePath, $feature->imageFileName); 
+            $feature->delete();
+
+            return $this->commitReturn(true);
+        } catch(\Exception $e) { 
+            $this->setError('error', $e->getMessage());
+        }
+        return $this->rollbackReturn(false);
+    }
+
+        /**
+     * Deletes a feature.
+     *
+     * @param  \App\Models\Feature\Feature  $feature
+     * @return bool
+     */
+    public function deleteMassFeature($feature)
+    {
+        DB::beginTransaction();
+
+        try {
+            // Check first if the feature is currently in use
+            $features = CharacterFeature::where('feature_id', $feature->id);
+            foreach($features as $featured)
+            {
+                $featured->delete();
+            }
             
             if($feature->has_image) $this->deleteImage($feature->imagePath, $feature->imageFileName); 
             $feature->delete();
