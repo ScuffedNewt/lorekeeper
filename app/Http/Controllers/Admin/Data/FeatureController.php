@@ -311,7 +311,7 @@ class FeatureController extends Controller
             flash('Confirmation check not selected. Please double check which delete button you meant to use.')->error();
             return redirect()->back();
         }
-        if($id && $service->deleteMassFeature(Feature::find($id))) {
+        if($id && $service->deleteMassFeature(Feature::find($id), $data)) {
             flash('Trait deleted successfully.')->success();
         }
         else {

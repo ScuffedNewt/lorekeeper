@@ -326,17 +326,24 @@ class FeatureService extends Service
      * @param  \App\Models\Feature\Feature  $feature
      * @return bool
      */
-    public function deleteMassFeature($feature)
+    public function deleteMassFeature($feature, $check)
     {
         DB::beginTransaction();
 
         try {
+            if(!$check || $check != 1) throw new \Exception('Error confirming');
             // Check first if the feature is currently in use
             $features = CharacterFeature::where('feature_id', $feature->id);
+            
+            $count = $features->count();
+            
             foreach($features as $featured)
             {
                 $featured->delete();
             }
+
+            if($count) flash($count . ' characters had this trait deleted.');
+            else flash('0 Characters had this trait.');
             
             if($feature->has_image) $this->deleteImage($feature->imagePath, $feature->imageFileName); 
             $feature->delete();
