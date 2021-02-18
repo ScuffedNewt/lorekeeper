@@ -16,6 +16,9 @@ use App\Models\User\User;
 use App\Models\User\UserItem;
 use App\Models\Currency\Currency;
 
+use App\Models\Recipe\CraftingSlot;
+use App\Models\User\UserCraftingSlot;
+
 use App\Services\RecipeService;
 use App\Services\RecipeManager;
 class CraftingController extends Controller
@@ -39,6 +42,7 @@ class CraftingController extends Controller
     {
         return view('home.crafting.index', [
             'default' => Recipe::active()->where('needs_unlocking','0')->get(),
+            'slots' => UserCraftingSlot::where('recipe_id', '!=', null)->where('started_at', '!=', null)->get()
         ]);
     }
 
@@ -90,6 +94,20 @@ class CraftingController extends Controller
             foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
         }
         return redirect()->back();
+    }
+
+    /**
+     * 
+     *  SLOTS
+     * 
+     */
+
+    public function getSlotIndex()
+    {
+        return view('home.crafting.slot_index', [
+            'slots' => CraftingSlot::all(),
+            'user' => Auth::user()
+        ]);
     }
 
 }

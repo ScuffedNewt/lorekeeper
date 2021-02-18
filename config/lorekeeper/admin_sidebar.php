@@ -184,6 +184,10 @@ return [
                 'name' => 'Recipes',
                 'url' => 'admin/data/recipes'
             ],
+            [
+                'name' => 'Crafting Slots',
+                'url' => 'admin/data/slots'
+            ],
         ]
     ],
     'Raffles' => [

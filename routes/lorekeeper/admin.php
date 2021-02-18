@@ -157,6 +157,13 @@ Route::group(['prefix' => 'data', 'namespace' => 'Data', 'middleware' => 'power:
     Route::post('recipes/create', 'RecipeController@postCreateEditRecipe');
     Route::post('recipes/edit/{id?}', 'RecipeController@postCreateEditRecipe');
     Route::post('recipes/delete/{id}', 'RecipeController@postDeleteRecipe');
+
+    # CRAFTING SLOTS
+    Route::get('slots', 'SlotController@getIndex');
+    Route::get('slots/create', 'SlotController@getCreateSlot');
+    Route::get('slots/edit/{id}', 'SlotController@getEditSlot');
+    Route::post('slots/create', 'SlotController@postCreateEditSlot');
+    Route::post('slots/edit/{id}', 'SlotController@postCreateEditSlot');
     
     # SHOPS
     Route::get('shops', 'ShopController@getIndex');

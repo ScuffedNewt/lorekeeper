@@ -39,6 +39,29 @@
     <a href="{{ url(Auth::user()->url.'/recipe-logs') }}">View logs...</a>
 </div>
 
+<hr>
+
+<h3>In Progress...</h3>
+
+<div class="row ml-2">
+    @foreach($slots as $slot)
+        <div class="card text-center" style="width: 200px; height: 200px; background-color: grey;">
+            <img src="{{$slot->recipe->imageUrl}}">
+            @php
+                $start = Carbon\Carbon::parse($slot->started_at);
+                $date = $start->addMinutes($occupy->ingredient->time);
+                $diff = $now->diffInMinutes($date, false);
+            @endphp
+            @if($date >= $now)
+                @if($diff >= 0 && $diff < 1) 1> minute till you finish cooking! @else {{ $diff }} minutes till you finish cooking!@endif
+            @else
+                {!! Form::open(['url' => 'crafting/claim/' . $slot->id]) !!}
+                {!! Form::submit('Claim!', ['class' => 'btn btn-sm btn-primary']) !!}
+                {!! Form::close() !!}
+            @endif
+        </div>
+    @endforeach
+</div>
 
 @endsection
 
