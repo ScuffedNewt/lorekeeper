@@ -52,18 +52,24 @@
         {{-- Check if sufficient ingredients have been selected? --}}
         {!! Form::open(['url' => 'crafting/craft/'.$recipe->id]) !!}
         @if($recipe->time != NULL)
-            @if(!$slots)
+            @if(!$slots->count())
             <p class="alert alert-danger">This recipe requires time to craft! However, you do not have any slots available right now.</p>
             @else
             <p class="alert alert-info">This recipe requires time to craft! Please select the slot # you'd like to use.</p>
             {!! Form::select('slot_id', $slots, null, ['class' => 'form-control mb-2']) !!}
-            @endif
-        @endif
             @include('widgets._inventory_select', ['user' => Auth::user(), 'inventory' => $inventory, 'categories' => $categories, 'selected' => $selected, 'page' => $page])
             <div class="text-right">
                 {!! Form::submit('Craft', ['class' => 'btn btn-primary']) !!}
             </div>
         {!! Form::close() !!}
+        @endif
+        @else
+            @include('widgets._inventory_select', ['user' => Auth::user(), 'inventory' => $inventory, 'categories' => $categories, 'selected' => $selected, 'page' => $page])
+            <div class="text-right">
+                {!! Form::submit('Craft', ['class' => 'btn btn-primary']) !!}
+            </div>
+        {!! Form::close() !!}
+    @endif
     @else
         <div class="alert alert-danger">You do not have all of the required recipe ingredients.</div>
     @endif
