@@ -22,7 +22,9 @@ class UserCraftingSlot extends Model
      *
      * @var string
      */
-    public $timestamps = ['started_at'];
+    public $timestamps = false;
+
+    protected $dates = ['started_at', 'end_at'];
 
     /**
      * The table associated with the model.

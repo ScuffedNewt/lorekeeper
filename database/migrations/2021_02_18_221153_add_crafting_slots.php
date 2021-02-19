@@ -29,6 +29,7 @@ class AddCraftingSlots extends Migration
             $table->unsignedInteger('slot_id');
             $table->unsignedInteger('recipe_id')->nullable()->default(null);
             $table->timestamp('started_at')->nullable();
+            $table->timestamp('end_at')->nullable();
 
             $table->foreign('recipe_id')->references('id')->on('recipes');
             $table->foreign('user_id')->references('id')->on('users');

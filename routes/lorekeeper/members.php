@@ -80,6 +80,8 @@ Route::group(['prefix' => 'crafting', 'namespace' => 'Users'], function() {
     Route::get('craft/{id}', 'CraftingController@getCraftRecipe');
     Route::post('craft/{id}', 'CraftingController@postCraftRecipe');
     Route::get('/slots', 'CraftingController@getSlotIndex');
+    Route::post('/slots/purchase/{id}', 'CraftingController@postPurchaseSlot');
+    Route::post('/claim/{id}', 'CraftingController@postClaim');
 });
 
 /**************************************************************************************************

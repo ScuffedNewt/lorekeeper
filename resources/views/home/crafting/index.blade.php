@@ -46,14 +46,14 @@
 <div class="row ml-2">
     @foreach($slots as $slot)
         <div class="card text-center" style="width: 200px; height: 200px; background-color: grey;">
-            <img src="{{$slot->recipe->imageUrl}}">
+            <img src="{{$slot->recipe->imageUrl}}" class="my-auto" style="width: 150px; height:150px;">
             @php
-                $start = Carbon\Carbon::parse($slot->started_at);
-                $date = $start->addMinutes($occupy->ingredient->time);
-                $diff = $now->diffInMinutes($date, false);
+                $now = Carbon\Carbon::now();
+                $diff = $now->diffInMinutes($slot->end_at, false);
             @endphp
-            @if($date >= $now)
-                @if($diff >= 0 && $diff < 1) 1> minute till you finish cooking! @else {{ $diff }} minutes till you finish cooking!@endif
+            @if($slot->end_at >= $now)
+                <div class="text-white">@if($diff >= 0 && $diff < 1) 1> minute till you finish crafting! @else {{ $diff }} minutes till you finish crafting!@endif</div>
+                <p>Started {!! pretty_date($slot->started_at)!!}
             @else
                 {!! Form::open(['url' => 'crafting/claim/' . $slot->id]) !!}
                 {!! Form::submit('Claim!', ['class' => 'btn btn-sm btn-primary']) !!}

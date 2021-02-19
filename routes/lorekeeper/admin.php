@@ -164,6 +164,9 @@ Route::group(['prefix' => 'data', 'namespace' => 'Data', 'middleware' => 'power:
     Route::get('slots/edit/{id}', 'SlotController@getEditSlot');
     Route::post('slots/create', 'SlotController@postCreateEditSlot');
     Route::post('slots/edit/{id}', 'SlotController@postCreateEditSlot');
+    Route::get('slots/delete/{id}', 'SlotController@getDeleteSlot');
+    Route::post('slots/delete/{id}', 'SlotController@postDeleteSlot');
+
     
     # SHOPS
     Route::get('shops', 'ShopController@getIndex');

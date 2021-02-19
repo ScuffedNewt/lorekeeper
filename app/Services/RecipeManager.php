@@ -6,10 +6,13 @@ use DB;
 use Notifications;
 use Config;
 
+use Carbon\Carbon;
+
 use App\Models\User\User;
 use App\Models\User\UserItem;
 use App\Models\User\UserCurrency;
 use App\Models\User\UserRecipe;
+use App\Models\User\UserCraftingSlot;
 
 use App\Models\Recipe\Recipe;
 use App\Models\Recipe\RecipeIngredient;
@@ -104,6 +107,13 @@ class RecipeManager extends Service
             if($recipe->time != NULL)
             {
                 // create a log in the pending_recipes
+                if(!isset($data['slot_id'])) throw new \Exception('Invalid slot selected');
+                $userSlot = UserCraftingSlot::find($data['slot_id']);
+                // save things
+                $userSlot->recipe_id = $recipe->id;
+                $userSlot->started_at = Carbon::now();
+                $userSlot->end_at = Carbon::now()->addMinutes($recipe->time);
+                $userSlot->save();
             }
             else {
                 // Credit rewards
@@ -172,5 +182,35 @@ class RecipeManager extends Service
             if($quantity_left > 0) return null;
         }
         return $plucked;
+    }
+
+    public function claimRecipe($userSlot, $user)
+    {        
+        DB::beginTransaction();
+
+        try {
+            if(!$userSlot) throw new \Exception('Invalid slot.');
+            $recipe = Recipe::find($userSlot->recipe_id);
+            if(!$recipe) throw new \Exception('Invalid recipe stored.');
+
+            // Credit rewards
+            $logType = 'Crafting Reward';
+            $craftingData = [
+                'data' => 'Received rewards from '. $recipe->displayName .' recipe'
+            ];
+
+            if(!fillUserAssets($recipe->rewardItems, null, $user, $logType, $craftingData)) throw new \Exception("Failed to distribute rewards to user.");
+
+            $userSlot->recipe_id = null;
+            $userSlot->started_at = null;
+            $userSlot->end_at = null;
+            $userSlot->save();
+
+            return $this->commitReturn(true);
+        } catch(\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+        return $this->rollbackReturn(false);
+
     }
 }

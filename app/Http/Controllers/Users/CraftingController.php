@@ -21,6 +21,7 @@ use App\Models\User\UserCraftingSlot;
 
 use App\Services\RecipeService;
 use App\Services\RecipeManager;
+use App\Services\SlotManager;
 class CraftingController extends Controller
 {
     /*
@@ -42,7 +43,7 @@ class CraftingController extends Controller
     {
         return view('home.crafting.index', [
             'default' => Recipe::active()->where('needs_unlocking','0')->get(),
-            'slots' => UserCraftingSlot::where('recipe_id', '!=', null)->where('started_at', '!=', null)->get()
+            'slots' => UserCraftingSlot::where('recipe_id', '!=', null)->where('started_at', '!=', null)->where('end_at', '!=', null)->get()
         ]);
     }
 
@@ -59,7 +60,6 @@ class CraftingController extends Controller
 
         if(!$recipe || !Auth::user()) abort(404);
         if($recipe->active()->first() == false) abort(404);
-
         // foreach ingredient, search for a qualifying item in the users inv, and select items up to the quantity, if insufficient continue onto the next entry
         // until there are no more eligible items, then proceed to the next item
         $selected = $service->pluckIngredients(Auth::user(), $recipe);
@@ -72,7 +72,8 @@ class CraftingController extends Controller
             'item_filter' => Item::orderBy('name')->get()->keyBy('id'),
             'inventory' => $inventory,
             'page' => 'craft',
-            'selected' => $selected
+            'selected' => $selected,
+            'slots' => Auth::user()->craftingslots->where('recipe_id', null)->where('started_at', null)->where('end_at', null)->pluck('slot_id', 'id'),
         ]);
     }
 
@@ -87,8 +88,21 @@ class CraftingController extends Controller
         $recipe = Recipe::find($id);
         if(!$recipe) abort(404);
         if($recipe->active()->first() == false) abort(404);
-        if($service->craftRecipe($request->only(['stack_id', 'stack_quantity']), $recipe, Auth::user())) {
+        if($service->craftRecipe($request->only(['stack_id', 'stack_quantity', 'slot_id']), $recipe, Auth::user())) {
             flash('Recipe crafted successfully.')->success();
+        }
+        else {
+            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+        }
+        return redirect()->back();
+    }
+
+    public function postClaim(RecipeManager $service, $id)
+    {
+        UserCraftingSlot::find($id);
+
+        if($service->claimRecipe(UserCraftingSlot::find($id), Auth::user())) {
+            flash('Recipe claimed successfully!')->success();
         }
         else {
             foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
@@ -108,6 +122,19 @@ class CraftingController extends Controller
             'slots' => CraftingSlot::all(),
             'user' => Auth::user()
         ]);
+    }
+
+    public function postPurchaseSlot($id, SlotManager $service)
+    {
+        $slot = CraftingSlot::find($id);
+        if(!$slot) abort(404);
+        if($service->purchaseSlot($slot, Auth::user())) {
+            flash('Slot purchased successfully.')->success();
+        }
+        else {
+            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+        }
+        return redirect()->back();
     }
 
 }
