@@ -78,7 +78,6 @@ class SlotService extends Service
             if(DB::table('user_crafting_slots')->where([['slot_id', '=', $slot->id]])->exists()) throw new \Exception("At least one user currently owns this slot. Please remove the slot(s) before deleting it.");
 
             DB::table('user_crafting_slots')->where('slot_id', $slot->id)->delete();
-            DB::table('crafting_slot_logs')->where('slot_id', $slot->id)->delete();
 
             $slot->delete();
 

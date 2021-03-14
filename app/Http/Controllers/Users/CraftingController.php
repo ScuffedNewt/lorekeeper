@@ -43,7 +43,7 @@ class CraftingController extends Controller
     {
         return view('home.crafting.index', [
             'default' => Recipe::active()->where('needs_unlocking','0')->get(),
-            'slots' => UserCraftingSlot::where('recipe_id', '!=', null)->where('started_at', '!=', null)->where('end_at', '!=', null)->get()
+            'slots' => UserCraftingSlot::where('user_id', Auth::user()->id)->where('recipe_id', '!=', null)->where('started_at', '!=', null)->where('end_at', '!=', null)->get()
         ]);
     }
 
