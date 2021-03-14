@@ -34,18 +34,6 @@ class AddCraftingSlots extends Migration
             $table->foreign('recipe_id')->references('id')->on('recipes');
             $table->foreign('user_id')->references('id')->on('users');
         });
-
-        Schema::create('crafting_slot_logs', function (Blueprint $table) {
-            $table->increments('id');
-            $table->unsignedInteger('user_id');
-            $table->unsignedInteger('slot_id');
-            $table->string('log')->nullable();
-            $table->string('log_type'); 
-            $table->string('data', 1024)->nullable();
-
-            $table->foreign('user_id')->references('id')->on('users');
-            $table->foreign('slot_id')->references('id')->on('crafting_slots');
-        });
     }
 
     /**
@@ -56,7 +44,6 @@ class AddCraftingSlots extends Migration
     public function down()
     {
         //
-        Schema::dropIfExists('crafting_slot_logs');
         Schema::dropIfExists('user_crafting_slots');
         Schema::dropIfExists('crafting_slots');
     }
