@@ -19,6 +19,8 @@ use App\Models\Submission\Submission;
 use App\Models\Submission\SubmissionCharacter;
 use App\Models\Prompt\Prompt;
 use App\Models\Pet\Pet;
+use App\Models\Claymore\Gear;
+use App\Models\Claymore\Weapon;
 
 use App\Services\SubmissionManager;
 
