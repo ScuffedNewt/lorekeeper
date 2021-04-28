@@ -19,13 +19,6 @@ class AddTimesToRecipes extends Migration
             $table->timestamp('close_at')->nullable()->default(null);
             $table->integer('time')->nullable()->default(null);
         });
-
-        Schema::create('pending_crafts', function (Blueprint $table) {
-            $table->increments('id');
-            $table->unsignedInteger('user_id');
-            $table->unsignedInteger('recipe_id');
-            $table->timestamp('finished_at');
-        });
     }
 
     /**
@@ -41,7 +34,5 @@ class AddTimesToRecipes extends Migration
             $table->dropColumn('close_at');
             $table->dropColumn('time');
         });
-
-        Schema::dropIfExists('pending_crafts');
     }
 }
