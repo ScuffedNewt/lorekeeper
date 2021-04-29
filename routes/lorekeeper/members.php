@@ -190,3 +190,10 @@ Route::group(['prefix' => 'comments', 'namespace' => 'Comments'], function() {
     Route::post('/{comment}', 'CommentController@reply')->name('comments.reply');
     Route::post('/{id}/feature', 'CommentController@feature')->name('comments.feature');
 });
+
+/**************************************************************************************************
+Garden
+**************************************************************************************************/
+Route::group(['prefix' => 'gardens', 'namespaces' => 'Gardens'],  function(){
+    Route::get('/', 'GardenController@getIndex');
+});
