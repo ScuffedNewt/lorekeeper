@@ -194,6 +194,6 @@ Route::group(['prefix' => 'comments', 'namespace' => 'Comments'], function() {
 /**************************************************************************************************
 Garden
 **************************************************************************************************/
-Route::group(['prefix' => 'gardens', 'namespaces' => 'Gardens'],  function(){
+Route::group(['prefix' => 'gardens', 'namespaces' => 'Games'],  function(){
     Route::get('/', 'GardenController@getIndex');
 });
