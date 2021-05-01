@@ -5,7 +5,7 @@
 @section('content')
 <link rel="stylesheet" type="text/css" href="{{ url('/css/gardens.css') }}" />
     <div>
-      <h1>Gardens</h1>
+      <h3>Gardens</h3>
         <div class="row grid-container">
           <div class="col-4 grid-item">1</div>
           <div class="col-4 grid-item">2</div>
@@ -18,4 +18,30 @@
           <div class="col-4 grid-item">9</div>
         </div>
     </div>
+
+    <!--------------------------------------------->
+    <div class="row ml-2">
+      <!--- -->
+      @foreach($userPlots as $plot)
+          <div class="card text-center" style="width: 200px; height: 200px; background-color: grey;">
+              <img src="{{ $slot->seed->imageUrl }}" class="my-auto" style="width: 150px; height:150px;">
+              @php
+                  $now = Carbon\Carbon::now();
+                  $diff = $now->diffInMinutes($slot->end_at, false);
+              @endphp
+              @if($slot->end_at >= $now)
+                  <div class="text-white">@if($diff >= 0 && $diff < 1) 1> minute till you finish crafting! @else {{ $diff }} minutes till you finish crafting!@endif</div>
+                  <p>Started {!! pretty_date($slot->started_at)!!}
+              @else
+                  {!! Form::open(['url' => 'crafting/claim/' . $slot->id]) !!}
+                  {!! Form::submit('Claim!', ['class' => 'btn btn-sm btn-primary']) !!}
+                  {!! Form::close() !!}
+              @endif
+          </div>
+      @endforeach
+      @foreach($notOwnedPlots as $unowned)
+      user_plot -> id contains plot_id
+      the id that the plot uses is the user_plot id
+      @endforeach
+  </div>
 @endsection
