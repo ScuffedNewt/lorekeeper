@@ -39,8 +39,5 @@
               @endif
           </div>
       @endforeach
-      @foreach($notOwnedPlots as $unowned)
-
-      @endforeach
   </div>
 @endsection
