@@ -40,8 +40,7 @@
           </div>
       @endforeach
       @foreach($notOwnedPlots as $unowned)
-      user_plot -> id contains plot_id
-      the id that the plot uses is the user_plot id
+
       @endforeach
   </div>
 @endsection

@@ -401,7 +401,7 @@ class ItemService extends Service
             if(!$item->tags()->where('tag', $tag)->exists()) throw new \Exception("This item does not have this tag attached to it.");
 
             $tag = $item->tags()->where('tag', $tag)->first();
-
+            if($tag->tag == 'seed') $data['item'] = $item;
             $service = $tag->service;
             if(!$service->updateData($tag, $data)) {
                 $this->setErrors($service->errors());
