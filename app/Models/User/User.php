@@ -172,6 +172,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany('App\Models\Gallery\GalleryFavorite')->where('user_id', $this->id);
     }
 
+    public function gardenPlots()
+    {
+        return $this->hasMany('App\Models\User\UserGardenPlot');
+    }
+    
     /**********************************************************************************************
 
         SCOPES

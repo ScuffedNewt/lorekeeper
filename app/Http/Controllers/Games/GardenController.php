@@ -22,4 +22,29 @@ class GardenController extends Controller
             'userPlots' => $check,
         ]);
     }
+
+    /******************************************************************************************************
+     *  PLOTS
+     ******************************************************************************************************/
+
+    public function getPlotIndex()
+    {
+        return view('home.garden.plot_index', [
+            'plots' => GardenPlot::all(),
+            'user' => Auth::user()
+        ]);
+    }
+
+    public function postPurchasePlot($id, PlotManager $service)
+    {
+        $plot = GardenPlot::find($id);
+        if(!$plot) abort(404);
+        if($service->purchasePlot($plot, Auth::user())) {
+            flash('Plot purchased successfully.')->success();
+        }
+        else {
+            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+        }
+        return redirect()->back();
+    }
 }
