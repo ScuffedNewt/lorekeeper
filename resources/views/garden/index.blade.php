@@ -24,16 +24,16 @@
       <!--- -->
       @foreach($userPlots as $plot)
           <div class="card text-center" style="width: 200px; height: 200px; background-color: grey;">
-              <img src="{{ $slot->seed->imageUrl }}" class="my-auto" style="width: 150px; height:150px;">
+              <img src="{{ $plot }}" class="my-auto" style="width: 150px; height:150px;">
               @php
                   $now = Carbon\Carbon::now();
-                  $diff = $now->diffInMinutes($slot->end_at, false);
+                  $diff = $now->diffInMinutes($plot->end_at, false);
               @endphp
-              @if($slot->end_at >= $now)
+              @if($plot->end_at >= $now)
                   <div class="text-white">@if($diff >= 0 && $diff < 1) 1> minute till you finish gardening! @else {{ $diff }} minutes till you finish gardening!@endif</div>
-                  <p>Started {!! pretty_date($slot->started_at)!!}
+                  <p>Started {!! pretty_date($plot->started_at)!!}
               @else
-                  {!! Form::open(['url' => 'garden/claim/' . $slot->id]) !!}
+                  {!! Form::open(['url' => 'garden/claim/' . $plot->id]) !!}
                   {!! Form::submit('Claim!', ['class' => 'btn btn-sm btn-primary']) !!}
                   {!! Form::close() !!}
               @endif

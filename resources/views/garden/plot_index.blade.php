@@ -10,7 +10,7 @@
 </h1>
 
 <div class="card-deck">
-@foreach($plots as $plot)
+@foreach($userPlots as $plot)
     <div class="card text-center" style="width: 200px; height: 200px; background-color: grey;">
         <h3 class="pt-2"> Plot #{{ $plot->id }}</h3>
         @if($user->gardenplots->contains('plot_id', $plot->id))

@@ -9,6 +9,8 @@ use App\Models\User\UserGardenPlot;
 use App\Models\Item\Item;
 use App\Models\Item\ItemTag;
 use App\Models\User\UserItem;
+
+use App\Services\PlotManager;
 class GardenController extends Controller
 {
     /**
@@ -20,8 +22,9 @@ class GardenController extends Controller
         $itemIds = $seedId->pluck('item_id'); // Could be combined with above
         $check = UserItem::with('item')->whereIn('item_id', $itemIds)->where('user_id', auth::user()->id)->where('count', '>', 0)->get()->pluck('item.name', 'id');
 
-        return view('gardens.index', [
-            'userPlots' => $check,
+        return view('garden.index', [
+            'userSeeds' => $check,
+            'userPlots' => Auth::user()->gardenPlots()->get(),
         ]);
     }
 
@@ -31,7 +34,7 @@ class GardenController extends Controller
 
     public function getPlotIndex()
     {
-        return view('home.garden.plot_index', [
+        return view('garden.plot_index', [
             'plots' => GardenPlot::all(),
             'user' => Auth::user()
         ]);
