@@ -30,10 +30,10 @@
                   $diff = $now->diffInMinutes($slot->end_at, false);
               @endphp
               @if($slot->end_at >= $now)
-                  <div class="text-white">@if($diff >= 0 && $diff < 1) 1> minute till you finish crafting! @else {{ $diff }} minutes till you finish crafting!@endif</div>
+                  <div class="text-white">@if($diff >= 0 && $diff < 1) 1> minute till you finish gardening! @else {{ $diff }} minutes till you finish gardening!@endif</div>
                   <p>Started {!! pretty_date($slot->started_at)!!}
               @else
-                  {!! Form::open(['url' => 'crafting/claim/' . $slot->id]) !!}
+                  {!! Form::open(['url' => 'garden/claim/' . $slot->id]) !!}
                   {!! Form::submit('Claim!', ['class' => 'btn btn-sm btn-primary']) !!}
                   {!! Form::close() !!}
               @endif
