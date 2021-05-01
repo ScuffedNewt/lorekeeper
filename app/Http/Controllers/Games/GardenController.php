@@ -1,11 +1,13 @@
 <?php namespace App\Http\Controllers\Games;
 
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
 
 use Auth;
 use App\Models\User\GardenPlot;
 use App\Models\User\UserGardenPlot;
 use App\Models\Item\Item;
+use App\Models\Item\ItemTag;
 
 class GardenController extends Controller
 {
