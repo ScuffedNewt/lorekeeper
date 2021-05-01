@@ -8,7 +8,7 @@ use App\Models\User\GardenPlot;
 use App\Models\User\UserGardenPlot;
 use App\Models\Item\Item;
 use App\Models\Item\ItemTag;
-
+use App\Models\User\UserItem;
 class GardenController extends Controller
 {
     /**
