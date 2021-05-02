@@ -28,6 +28,21 @@ class GardenController extends Controller
         ]);
     }
 
+    /**
+     * plant seed
+     */
+    public function getPlantSeed(Request $request)
+    {
+        $data = $request->only(['seed', 'plot']);
+        $service = new PlotManager;
+        if($service->plant(Auth::user(), $data)) {
+            flash('Planted successfully!')->success();
+        }
+        else {
+            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+        }
+    }
+
     /******************************************************************************************************
      *  PLOTS
      ******************************************************************************************************/
@@ -43,12 +58,5 @@ class GardenController extends Controller
             foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
         }
         return redirect()->back();
-    }
-
-    public function postPlantSeed(Request $request)
-    {
-        $data = $request->all();
-        console.log("we droppin");
-        return response()->json(['success'=>'Hey we planted']);
     }
 }

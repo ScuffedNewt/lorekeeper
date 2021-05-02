@@ -3,7 +3,10 @@
 @section('title') Garden @endsection
 
 @section('content')
-<link rel="stylesheet" type="text/css" href="{{ url('/css/gardens.css') }}" />
+<head>
+    <link rel="stylesheet" type="text/css" href="{{ url('/css/gardens.css') }}" />
+</head>
+
 <h1>garden</h1>
 <hr>
     <!--------------------------------------------->
@@ -28,12 +31,9 @@
                                 <div class="text-white">@if($diff >= 0 && $diff < 1) 1> minute till you finish gardening! @else {{ $diff }} minutes till you finish gardening!@endif</div>
                                 <p>Started {!! pretty_date($plot->started_at)!!}
                             @elseif($plot->end_at == null)
-                                <button 
-                                    type="button" 
-                                    class="btn btn-primary" style="width:100%; height :100%;" 
-                                    id="button" 
-                                    onclick="plantSeed({{Auth::user()->gardenplots->where('plot_id', $plot->id)->first()->id}})"
-                                >Plant Here</button>
+                                <button type="button" class="btn btn-primary" style="width:100%; height :100%;" id="button" onclick="plantSeed({{ Auth::user()->gardenplots->where('plot_id', $plot->id)->first()->id }})">
+                                    Plant Here
+                                </button>
                             @else
                                 {!! Form::open(['url' => 'garden/claim/' . $plot->id]) !!}
                                 {!! Form::submit('Claim!', ['class' => 'btn btn-sm btn-primary']) !!}
@@ -69,7 +69,6 @@
         </div>
     </div>
 </div>
-
 @endsection
 @section('scripts')
     <script>
@@ -77,33 +76,31 @@
         
         $("#seedSelector input:radio").change(function() {
             selectedSeed = $(this).val();
-            console.log(selectedSeed);
         });
 
-
-        function plantSeed(plotID){
+        function plantSeed(plotID) {
             if(selectedSeed == null){
-                console.log("bruh pls, choose a seed first")
+                alert("Please select a seed!");
             }
-            else{
-                console.log(plotID);
-                console.log(selectedSeed);
-
+            else {
+                console.log('test');
                 $.ajax({
-                    type: "POST", 
-                    url:"/garden/plant",
-                    data:{
-                        plotID:plotID,
-                        seedID:selectedSeed
+                url: "{{ url('garden/plant') }}",
+                method: 'post',
+                data:{
+                    _token: '{{ csrf_token() }}',
+                    plotID:plotID,
+                    seedID:selectedSeed
                     },
-                    success:function(data){
-                        alert(data.success);
-                    }
-                });
+                dataType: 'json',
+                success: function(data) {
+
+                },
+                error: function(error) {
+                    alert("AJAX call failed: " + error);
+                }
+            });
             }
         }
-
     </script>
-
-
 @endsection

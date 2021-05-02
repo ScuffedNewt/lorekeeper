@@ -54,6 +54,9 @@ class PlotManager extends Service
         return $this->rollbackReturn(false);
     }
 
+    /**
+     * 
+     */
     public function createPlot($user, $plot)
     {
         DB::beginTransaction();
@@ -66,6 +69,22 @@ class PlotManager extends Service
                 'plot_id' => $plot->id,
             ]);
 
+            return $this->commitReturn($madePlot);
+        } catch(\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+        return $this->rollbackReturn(false);
+    }
+
+    /**
+     * 
+     */
+    public function plant()
+    {
+        DB::beginTransaction();
+
+        try {
+            
             return $this->commitReturn($madePlot);
         } catch(\Exception $e) {
             $this->setError('error', $e->getMessage());
