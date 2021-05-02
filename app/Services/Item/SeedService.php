@@ -70,13 +70,6 @@ class SeedService extends Service
             $seedData['waterings'] = isset($tag->data['waterings']) ? $tag->data['waterings'] : null;    
 
             //
-            $image1 = null;
-            if(isset($data['image_1']) && $data['image_1']) {
-                $image1 = $data['image_1'];
-                $this->handleImage($image1, public_path('images/data/seeds'), $data['item']->name . '-s1.png');
-
-            }
-            //
             $image2 = null;
             if(isset($data['image_2']) && $data['image_2']) {
                 $image2 = $data['image_2'];

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title') Gardens @endsection
+@section('title') Garden @endsection
 
 @section('content')
 <link rel="stylesheet" type="text/css" href="{{ url('/css/gardens.css') }}" />

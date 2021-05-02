@@ -14,12 +14,12 @@
     <div class="card text-center" style="width: 200px; height: 200px; background-color: grey;">
         <h3 class="pt-2"> Plot #{{ $plot->id }}</h3>
         @if($user->gardenplots->contains('plot_id', $plot->id))
-        You own this plot already!
+            You own this plot already!
         @else
-        This plot {{ $plot->free ? 'is free!' : 'costs ' . $plot->plot_cost . ' ' . $plot->currency->name }}
-        {!! Form::open(['url' => 'garden/plots/purchase/' . $plot->id]) !!}
-        {!! Form::submit('Purchase plot?', ['class' => 'btn btn-sm btn-primary mt-3']) !!}
-        {!! Form::close() !!}
+            This plot {{ $plot->free ? 'is free!' : 'costs ' . $plot->plot_cost . ' ' . $plot->currency->name }}
+            {!! Form::open(['url' => 'garden/plots/purchase/' . $plot->id]) !!}
+            {!! Form::submit('Purchase plot?', ['class' => 'btn btn-sm btn-primary mt-3']) !!}
+            {!! Form::close() !!}
         @endif
     </div>
 @endforeach

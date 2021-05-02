@@ -4,12 +4,6 @@
 {!! Form::number('waterings', $tag->getData()['waterings'], ['class' => 'form-control mb-1', 'min' => 1]) !!}
 
 <div class="form-group">
-    {!! Form::label('Stage 1 Img') !!} 
-    <div>{!! Form::file('image_1') !!}</div>
-    <div class="text-muted">Recommended size: 100px x 100px</div>
-</div>
-
-<div class="form-group">
     {!! Form::label('Stage 2 Img') !!}
     <div>{!! Form::file('images_2') !!}</div>
     <div class="text-muted">Recommended size: 100px x 100px</div>
