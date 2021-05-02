@@ -7,13 +7,17 @@
 <h3>Gardens</h3>
     <!--------------------------------------------->
     <div class="row">
-    <div class="col-10">
+    <div class="col-1">
+    </div>
+    <div class="col-9 text-center">
+        @foreach($plots->chunk(3) as $chunk)
         <div class="row ml-2">
-            @foreach($plots as $plot)
-            <div class="card text-center my-auto mx-auto py-5" style="width: 200px; height: 200px; background-color: rgb(100, 60, 41);">
+            @foreach($chunk as $plot)
+            <div class="card text-center m-1" style="width: 200px; height: 200px; background-color: rgb(100, 60, 41);">
                 <!---- if user owns plot --->
                     @if(Auth::user()->gardenplots->contains('plot_id', $plot->id))
                         @php
+                        // get time
                             $now = Carbon\Carbon::now();
                             $diff = $now->diffInMinutes($plot->end_at, false);
                         @endphp
@@ -38,6 +42,7 @@
                 </div>
             @endforeach
         </div>
+        @endforeach
     </div>
     <div class="col-2 text-center">
         <h4>Seeds</h4>
@@ -45,11 +50,16 @@
             @foreach($userSeeds as $seed)
                 @foreach($seed->chunk(4) as $chunk)
                     @foreach($chunk as $stack)
+                    <div id="{{ $stack->first()->item_id }}">
                         <img src="{{ $stack->first()->imageUrl }}">
                         <div class="text-small text-white"> {!!$stack->first()->name !!} <br>Quantity: x{{ $stack->sum('pivot.count') }}</div>
+                    </div>
                     @endforeach
                 @endforeach
             @endforeach
         </div>
+
+@endsection
+@section('scripts')
 
 @endsection
