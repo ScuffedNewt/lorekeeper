@@ -32,14 +32,6 @@ class GardenController extends Controller
      *  PLOTS
      ******************************************************************************************************/
 
-    public function getPlotIndex()
-    {
-        return view('garden.plot_index', [
-            'plots' => GardenPlot::all(),
-            'user' => Auth::user()
-        ]);
-    }
-
     public function postPurchasePlot($id, PlotManager $service)
     {
         $plot = GardenPlot::find($id);
