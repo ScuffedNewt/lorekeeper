@@ -30,4 +30,10 @@ return [
         'text_color' => '#ffffff',
         'background_color' => '#97ed26'
     ],
+
+    'fertiliser' => [
+        'name' => 'Fertiliser',
+        'text_color' => '#ffffff',
+        'background_color' => '#6e493d'
+    ],
 ];
