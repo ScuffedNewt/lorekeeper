@@ -4,62 +4,72 @@
 
 @section('content')
 <link rel="stylesheet" type="text/css" href="{{ url('/css/gardens.css') }}" />
-<h3>Gardens</h3>
+<h1>dagardens</h1>
+<hr>
     <!--------------------------------------------->
     <div class="row">
-    <div class="col-1">
-    </div>
-    <div class="col-9 text-center">
-        @foreach($plots->chunk(3) as $chunk)
-        <div class="row ml-2">
-            @foreach($chunk as $plot)
-            <div class="card text-center m-1" style="width: 200px; height: 200px; background-color: rgb(100, 60, 41);">
-                <!---- if user owns plot --->
-                    @if(Auth::user()->gardenplots->contains('plot_id', $plot->id))
-                        @php
-                        // get time
-                            $now = Carbon\Carbon::now();
-                            $diff = $now->diffInMinutes($plot->end_at, false);
-                        @endphp
-                        @if($plot->end_at >= $now)
-                            <img src="{{ asset('images/data/seeds/seed.png') }}" class="my-auto mx-auto" style="width: 100px; height:100px;">
-                            <div class="text-white">@if($diff >= 0 && $diff < 1) 1> minute till you finish gardening! @else {{ $diff }} minutes till you finish gardening!@endif</div>
-                            <p>Started {!! pretty_date($plot->started_at)!!}
-                        @elseif($plot->end_at == null)
-                                plant shit!!!!!
+        <div class="col-10">
+            <h3>Plots</h3>
+
+            <div class="row ml-2">
+                @foreach($plots as $plot)
+                <div class="card text-center my-auto mx-auto py-5" style="width: 200px; height: 200px; background-color: rgb(100, 60, 41);">
+                    <!---- if user owns plot --->
+                        @if(Auth::user()->gardenplots->contains('plot_id', $plot->id))
+                            @php
+                                $now = Carbon\Carbon::now();
+                                $diff = $now->diffInMinutes($plot->end_at, false);
+                            @endphp
+                            @if($plot->end_at >= $now)
+                                <img src="{{ asset('images/data/seeds/seed.png') }}" class="my-auto mx-auto" style="width: 100px; height:100px;">
+                                <div class="text-white">@if($diff >= 0 && $diff < 1) 1> minute till you finish gardening! @else {{ $diff }} minutes till you finish gardening!@endif</div>
+                                <p>Started {!! pretty_date($plot->started_at)!!}
+                            @elseif($plot->end_at == null)
+                                    plant shit!!!!!
+                            @else
+                                {!! Form::open(['url' => 'garden/claim/' . $plot->id]) !!}
+                                {!! Form::submit('Claim!', ['class' => 'btn btn-sm btn-primary']) !!}
+                                {!! Form::close() !!}
+                            @endif
+                    <!---- if not owned plot --->
                         @else
-                            {!! Form::open(['url' => 'garden/claim/' . $plot->id]) !!}
-                            {!! Form::submit('Claim!', ['class' => 'btn btn-sm btn-primary']) !!}
+                            This plot {{ $plot->free ? 'is free!' : 'costs ' . $plot->plot_cost . ' ' . $plot->currency->name }}
+                            {!! Form::open(['url' => 'garden/plots/purchase/' . $plot->id]) !!}
+                            {!! Form::submit('Purchase plot?', ['class' => 'btn btn-sm btn-primary mt-3']) !!}
                             {!! Form::close() !!}
                         @endif
-                <!---- if not owned plot --->
-                    @else
-                        This plot {{ $plot->free ? 'is free!' : 'costs ' . $plot->plot_cost . ' ' . $plot->currency->name }}
-                        {!! Form::open(['url' => 'garden/plots/purchase/' . $plot->id]) !!}
-                        {!! Form::submit('Purchase plot?', ['class' => 'btn btn-sm btn-primary mt-3']) !!}
-                        {!! Form::close() !!}
-                    @endif
-                </div>
-            @endforeach
-        </div>
-        @endforeach
-    </div>
-    <div class="col-2 text-center">
-        <h4>Seeds</h4>
-        <div class="bg-dark p-2" style="overflow-y: scroll; height: 300px;">
-            @foreach($userSeeds as $seed)
-                @foreach($seed->chunk(4) as $chunk)
-                    @foreach($chunk as $stack)
-                    <div id="{{ $stack->first()->item_id }}">
-                        <img src="{{ $stack->first()->imageUrl }}">
-                        <div class="text-small text-white"> {!!$stack->first()->name !!} <br>Quantity: x{{ $stack->sum('pivot.count') }}</div>
                     </div>
+                @endforeach
+            </div>
+        </div>
+        <div class="col-2 text-center">
+            <h4>Seeds</h4>
+            <div class="bg-dark p-2 btn-group-vertical btn-group-toggle" id="seedSelector" data-toggle="buttons" style="overflow-y: scroll; height: 300px;">
+                @foreach($userSeeds as $seed)
+                    @foreach($seed->chunk(4) as $chunk)
+                        @foreach($chunk as $stack)
+                        
+                            <label type="button" class="btn btn-secondary" type="radio" autocomplete="off">
+                                <input type="radio" name="options" autocomplete="off" value="{{$stack->first()->id}}" >
+                                    <img src="{{ $stack->first()->imageUrl }}" style="width: 100%">
+                                <div class="text-small text-white"> {!!$stack->first()->name !!} <br>Quantity: x{{ $stack->sum('pivot.count') }}</div>
+                            </label>
+                        @endforeach
                     @endforeach
                 @endforeach
-            @endforeach
+            </div>
         </div>
-
+    </div>
 @endsection
-@section('scripts')
 
+@section('scripts')
+    <script>
+        let selectedSeed;
+        
+        $("#seedSelector input:radio").change(function() {
+            selectedSeed = $(this).val();
+            console.log(selectedSeed);
+        });
+
+    </script>
 @endsection
