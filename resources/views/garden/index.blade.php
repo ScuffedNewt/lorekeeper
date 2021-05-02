@@ -28,7 +28,12 @@
                                 <div class="text-white">@if($diff >= 0 && $diff < 1) 1> minute till you finish gardening! @else {{ $diff }} minutes till you finish gardening!@endif</div>
                                 <p>Started {!! pretty_date($plot->started_at)!!}
                             @elseif($plot->end_at == null)
-                                    plant shit!!!!!
+                                <button 
+                                    type="button" 
+                                    class="btn btn-primary" style="width:100%; height :100%;" 
+                                    id="button" 
+                                    onclick="plantSeed({{Auth::user()->gardenplots->where('plot_id', $plot->id)->first()->id}})"
+                                >Plant Here</button>
                             @else
                                 {!! Form::open(['url' => 'garden/claim/' . $plot->id]) !!}
                                 {!! Form::submit('Claim!', ['class' => 'btn btn-sm btn-primary']) !!}
@@ -75,5 +80,30 @@
             console.log(selectedSeed);
         });
 
+
+        function plantSeed(plotID){
+            if(selectedSeed == null){
+                console.log("bruh pls, choose a seed first")
+            }
+            else{
+                console.log(plotID);
+                console.log(selectedSeed);
+
+                $.ajax({
+                    type: "POST", 
+                    url:"/garden/plant",
+                    data:{
+                        plotID:plotID,
+                        seedID:selectedSeed
+                    },
+                    success:function(data){
+                        alert(data.success);
+                    }
+                });
+            }
+        }
+
     </script>
+
+
 @endsection

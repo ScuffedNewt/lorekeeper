@@ -197,7 +197,7 @@ Garden
 Route::group(['prefix' => 'garden', 'namespace' => 'Games'],  function(){
     Route::get('/', 'GardenController@getIndex');
     Route::get('plant/{id}', 'GardenController@getPlantSeed');
-    Route::post('plant/{id}', 'GardenController@postPlantSeed');
+    Route::post('/plant', 'GardenController@postPlantSeed');
     Route::get('/plots', 'GardenController@getPlotIndex');
     Route::post('/plots/purchase/{id}', 'GardenController@postPurchasePlot');
     Route::post('/claim/{id}', 'GardenController@postClaim');

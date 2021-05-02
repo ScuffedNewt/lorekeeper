@@ -44,4 +44,11 @@ class GardenController extends Controller
         }
         return redirect()->back();
     }
+
+    public function postPlantSeed(Request $request)
+    {
+        $data = $request->all();
+        console.log("we droppin");
+        return response()->json(['success'=>'Hey we planted']);
+    }
 }
