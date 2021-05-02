@@ -112,4 +112,27 @@ class PlotManager extends Service
         }
         return $this->rollbackReturn(false);
     }
+
+    /**
+     * 
+     */
+    public function water($user, $data)
+    {
+        DB::beginTransaction();
+
+        try { 
+            
+            $plot = UserGardenPlot::find($data['plotID']);
+            if(!$plot) throw new \Exception("Invalid plot.");
+
+            $plot->waterings += 1;
+            $plot->water_at = Carbon::now()->addHours($plot->time);
+            $plot->save();
+
+            return $this->commitReturn(true);
+        } catch(\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+        return $this->rollbackReturn(false);
+    }
 }

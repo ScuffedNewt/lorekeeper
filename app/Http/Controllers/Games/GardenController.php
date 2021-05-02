@@ -4,6 +4,8 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 
 use Auth;
+use Carbon\Carbon; 
+
 use App\Models\User\GardenPlot;
 use App\Models\User\UserGardenPlot;
 use App\Models\Item\Item;
@@ -22,6 +24,8 @@ class GardenController extends Controller
         $itemIds = $seedId->pluck('item_id'); // Could be combined with above
         $check = Auth::user()->items()->whereIn('item_id', $itemIds)->where('count', '>', 0)->get()->groupBy(['item_id', 'id']);
 
+        $this->checkPlots(Auth::user());
+
         return view('garden.index', [
             'userSeeds' => $check,
             'plots' => GardenPlot::all(),
@@ -29,14 +33,30 @@ class GardenController extends Controller
     }
 
     /**
-     * plant seed
+     * Plant seed
      */
-    public function getPlantSeed(Request $request)
+    public function postPlantSeed(Request $request)
     {
         $data = $request->only(['seedID', 'plotID']);
         $service = new PlotManager;
         if($service->plant(Auth::user(), $data)) {
             flash('Planted successfully!')->success();
+        }
+        else {
+            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+        }
+        return redirect()->back();
+    }
+
+    /**
+     * Water plot
+     */
+    public function postWaterPlot(Request $request)
+    {
+        $data = $request->input(['plotID']);
+        $service = new PlotManager;
+        if($service->water(Auth::user(), $data)) {
+            flash('Watered successfully!')->success();
         }
         else {
             foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
@@ -59,5 +79,21 @@ class GardenController extends Controller
             foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
         }
         return redirect()->back();
+    }
+
+    public function checkPlots($user)
+    {
+        $check = null;
+        foreach($user->gardenplots as $plot)
+        {
+            if($plot->water_at < Carbon::now()->subHours($plot->time))
+            {
+                $plot->is_dead = 1;
+                $plot->save();
+
+                $check = 1;
+            }
+        }
+        if($check = 1) flash('One of your plants has died due to lack of watering.')->error();
     }
 }

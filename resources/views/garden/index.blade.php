@@ -25,20 +25,30 @@
                             @php
                                 $userPlot = Auth::user()->gardenplots->where('plot_id', $plot->id)->first();
                                 $now = Carbon\Carbon::now();
-                                $diff = $now->diffInMinutes($userPlot->water_at, true);
                             @endphp
                             @if($userPlot->started_at != null)
-                                <img src="{{ asset('images/data/seeds/seed.png') }}" class="my-auto mx-auto" style="width: 100px; height:100px;">
-                                <div class="text-white">{{ $diff }}</div>
-                                <p class="text-white">Started {!! pretty_date($userPlot->started_at)!!}
-                            @elseif($userPlot->started_at == null)
+                                @if($userPlot->water_at > $now)
+                                    <img src="{{ asset('images/data/seeds/seed.png') }}" class="my-auto mx-auto" style="width: 100px; height:100px;">
+                                    <div class="text-white">Next watering {!! pretty_date($userPlot->water_at) !!}</div>
+                                    <p class="text-white">Started {!! pretty_date($userPlot->started_at)!!}
+                                @else
+                                <!--- if we can water, check if the plant is complete or if it's ready to be watered again -->
+                                    @if($userPlot->watering == $userPlot->item->tags->where('tag', 'seed')->first()->data['waterings']))
+                                        <img src="{{ asset('images/data/seeds/seed.png') }}" class="my-auto mx-auto" style="width: 100px; height:100px;">
+                                        {!! Form::open(['url' => 'garden/claim/' . $userPlot->id]) !!}
+                                        {!! Form::submit('Claim!', ['class' => 'btn btn-sm btn-primary']) !!}
+                                        {!! Form::close() !!}
+                                    @else
+                                        <img src="{{ asset('images/data/seeds/seed.png') }}" class="my-auto mx-auto" style="width: 100px; height:100px;">
+                                        <button type="button" class="btn btn-primary" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="waterPlot({{ $userPlot->id }})">
+                                            Water <i class="fas fa-water"></i>
+                                        </button>
+                                    @endif
+                                @endif
+                            @else
                                 <button type="button" class="btn btn-primary" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="plantSeed({{ $userPlot->id }})">
                                     Plant Here
                                 </button>
-                            @else
-                                {!! Form::open(['url' => 'garden/claim/' . $userPlot->id]) !!}
-                                {!! Form::submit('Claim!', ['class' => 'btn btn-sm btn-primary']) !!}
-                                {!! Form::close() !!}
                             @endif
                     <!---- if not owned plot --->
                         @else
@@ -70,13 +80,6 @@
         </div>
     </div>
 </div>
-{!! Form::open(['url' => 'garden/plant']) !!}
-{!! Form::hidden('seedID', 1) !!}
-{!! Form::hidden('plotID', 1) !!}
-<div class="text-right">
-    {!! Form::submit('Edit', ['class' => 'btn btn-primary']) !!}
-</div>
-{!! Form::close() !!}
 @endsection
 @section('scripts')
     <script>
@@ -91,7 +94,6 @@
                 alert("Please select a seed!");
             }
             else {
-                console.log('test');
                 $.ajax({
                 url: "{{ url('garden/plant') }}",
                 method: 'post',
@@ -111,6 +113,26 @@
                 }
             });
             }
+        }
+
+        function waterPlot(plotID) {
+            $.ajax({
+                url: "{{ url('garden/water') }}",
+                method: 'post',
+                data:{
+                    _token: '{{ csrf_token() }}',
+                    plotID:plotID,
+                    },
+                dataType: 'json',
+                success: function(data) {
+                    $("body").load(" #app");
+                },
+                error: function(error) {
+                    console.log(error);
+                    alert("AJAX call failed: " + error);
+                    $("body").load(" #app");
+                }
+            });
         }
     </script>
 @endsection
