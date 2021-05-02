@@ -108,7 +108,7 @@ class GardenController extends Controller
         foreach($user->gardenplots as $plot)
         {
             $water = Carbon::parse($plot->water_at)->addHours($plot->time);
-            if($water < Carbon::now()->subHours($plot->time))
+            if($water < Carbon::now())
             {
                 if($plot->is_dead != 1)
                 {
@@ -119,6 +119,6 @@ class GardenController extends Controller
                 }
             }
         }
-        if($check == 1) flash('One of your plants has died due to lack of watering.')->error();
+        if($check == 1) flash('One or more of your plants has died due to lack of watering.')->error();
     }
 }
