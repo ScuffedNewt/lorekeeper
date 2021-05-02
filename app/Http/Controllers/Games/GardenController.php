@@ -64,7 +64,7 @@ class GardenController extends Controller
      */
     public function postWaterPlot(Request $request)
     {
-        $data = $request->input(['plotID']);
+        $data = $request->input('plotID');
         $service = new PlotManager;
         if($service->water(Auth::user(), $data)) {
             flash('Watered successfully!')->success();
@@ -96,6 +96,11 @@ class GardenController extends Controller
             foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
         }
     }
+
+    public function postClaim()
+    {
+        ////
+    }
     
     /******************************************************************************************************
      *  PLOTS
@@ -107,10 +112,6 @@ class GardenController extends Controller
         if(!$plot) abort(404);
         if($service->purchasePlot($plot, Auth::user())) {
             flash('Plot purchased successfully.')->success();
-            $response = array(
-                'status' => 'success',
-                'msg' => $request->message,
-            );
         }
         else {
             foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();

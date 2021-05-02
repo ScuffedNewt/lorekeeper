@@ -128,7 +128,7 @@ class PlotManager extends Service
 
         try { 
             
-            $plot = UserGardenPlot::find($data['plotID']);
+            $plot = UserGardenPlot::find($data);
             if(!$plot) throw new \Exception("Invalid plot.");
 
             $plot->waterings += 1;
