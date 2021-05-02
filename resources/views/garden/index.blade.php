@@ -7,13 +7,15 @@
 <h1>dagardens</h1>
 <hr>
     <!--------------------------------------------->
-    <div class="row">
-        <div class="col-10">
+    <div class="row col-12">
+        <div class="col-1">
+        </div>
+        <div class="col-9">
             <h3>Plots</h3>
-
+            @foreach($plots->chunk(3) as $chunk)
             <div class="row ml-2">
-                @foreach($plots as $plot)
-                <div class="card text-center my-auto mx-auto py-5" style="width: 200px; height: 200px; background-color: rgb(100, 60, 41);">
+                @foreach($chunk as $plot)
+                <div class="card text-center m-1" style="width: 200px; height: 200px; background-color: rgb(100, 60, 41);">
                     <!---- if user owns plot --->
                         @if(Auth::user()->gardenplots->contains('plot_id', $plot->id))
                             @php
@@ -41,6 +43,7 @@
                     </div>
                 @endforeach
             </div>
+            @endforeach
         </div>
         <div class="col-2 text-center">
             <h4>Seeds</h4>
@@ -48,7 +51,6 @@
                 @foreach($userSeeds as $seed)
                     @foreach($seed->chunk(4) as $chunk)
                         @foreach($chunk as $stack)
-                        
                             <label type="button" class="btn btn-secondary" type="radio" autocomplete="off">
                                 <input type="radio" name="options" autocomplete="off" value="{{$stack->first()->id}}" >
                                     <img src="{{ $stack->first()->imageUrl }}" style="width: 100%">
