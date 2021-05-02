@@ -11,6 +11,25 @@
 <hr>
     <!--------------------------------------------->
 <div class="container" id="content">
+    <div class="row">
+        <div class="text-center">
+            <h4></h4>
+            <div class="bg-dark p-2 btn-group btn-group-toggle" id="modifierSelector" data-toggle="buttons">
+                @foreach($userSeeds as $seed)
+                    @foreach($seed->chunk(4) as $chunk)
+                        @foreach($chunk as $stack)
+                            <label type="button" class="btn btn-secondary my-1" type="radio" autocomplete="off">
+                                <input type="radio" name="options" autocomplete="off" value="{{$stack->first()->id}}" >
+                                <img class="img-fluid" src="{{ $stack->first()->imageUrl }}" style="height: 100px">
+                                <div class="text-small text-white"> {!!$stack->first()->name !!} <br>Quantity: x{{ $stack->sum('pivot.count') }}</div>
+                            </label>
+                        @endforeach
+                    @endforeach
+                @endforeach
+            </div>
+        </div>
+    </div>
+    
     <div class="row col-12">
         <div class="col-1">
         </div>

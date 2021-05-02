@@ -20,14 +20,19 @@ class GardenController extends Controller
      */
     public function getIndex()
     {
+        //getting users seeds items
         $seedId = ItemTag::where('tag', 'seed')->where('is_active', 1); // Removed get()
-        $itemIds = $seedId->pluck('item_id'); // Could be combined with above
-        $check = Auth::user()->items()->whereIn('item_id', $itemIds)->where('count', '>', 0)->get()->groupBy(['item_id', 'id']);
+        $checkSeeds = Auth::user()->items()->whereIn('item_id', $seedId->pluck('item_id'))->where('count', '>', 0)->get()->groupBy(['item_id', 'id']);
+
+        //getting users modifer items
+        $ModifiersId = ItemTag::where('tag', 'fertiliser')->where('is_active', 1); // Removed get()
+        $checkModifiers = Auth::user()->items()->whereIn('item_id', $ModifiersId->pluck('item_id'))->where('count', '>', 0)->get()->groupBy(['item_id', 'id']);
 
         $this->checkPlots(Auth::user());
 
         return view('garden.index', [
-            'userSeeds' => $check,
+            'userSeeds' => $checkSeeds,
+            'userModifiers' => $checkModifiers,
             'plots' => GardenPlot::all(),
         ]);
     }
