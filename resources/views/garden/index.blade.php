@@ -10,7 +10,7 @@
 <h1>garden</h1>
 <hr>
     <!--------------------------------------------->
-<div class="container">
+<div class="container" id="content">
     <div class="row col-12">
         <div class="col-1">
         </div>
@@ -31,7 +31,7 @@
                                 <div class="text-white">@if($diff >= 0 && $diff < 1) 1> minute till you finish gardening! @else {{ $diff }} minutes till you finish gardening!@endif</div>
                                 <p>Started {!! pretty_date($plot->started_at)!!}
                             @elseif($plot->end_at == null)
-                                <button type="button" class="btn btn-primary" style="width:100%; height :100%;" id="button" onclick="plantSeed({{ Auth::user()->gardenplots->where('plot_id', $plot->id)->first()->id }})">
+                                <button type="button" class="btn btn-primary" style="width:100%; height :100%;" id="{{Auth::user()->gardenplots->where('plot_id', $plot->id)->first()->id}}-button" onclick="plantSeed({{ Auth::user()->gardenplots->where('plot_id', $plot->id)->first()->id }})">
                                     Plant Here
                                 </button>
                             @else
@@ -94,10 +94,11 @@
                     },
                 dataType: 'json',
                 success: function(data) {
-
+                    $("body").load(" #app");
                 },
                 error: function(error) {
                     alert("AJAX call failed: " + error);
+                    $("body").load(" #app");
                 }
             });
             }
