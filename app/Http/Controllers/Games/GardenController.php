@@ -45,10 +45,17 @@ class GardenController extends Controller
         $data = $request->only(['seedID', 'plotID']);
         $service = new PlotManager;
         if($service->plant(Auth::user(), $data)) {
+            
             flash('Planted successfully!')->success();
+            $response = array(
+                'status' => 'success',
+                'msg' => $request->message,
+            );
+            return response()->json($response); 
         }
         else {
-            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+            foreach($service->errors()->getMessages()['error'] as $error) 
+            flash($error)->error();
         }
     }
 
@@ -61,6 +68,10 @@ class GardenController extends Controller
         $service = new PlotManager;
         if($service->water(Auth::user(), $data)) {
             flash('Watered successfully!')->success();
+            $response = array(
+                'status' => 'success',
+                'msg' => $request->message,
+            );
         }
         else {
             foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
@@ -76,6 +87,10 @@ class GardenController extends Controller
         $service = new PlotManager;
         if($service->clear(Auth::user(), $data)) {
             flash('Cleared successfully!')->success();
+            $response = array(
+                'status' => 'success',
+                'msg' => $request->message,
+            );
         }
         else {
             foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
@@ -92,6 +107,10 @@ class GardenController extends Controller
         if(!$plot) abort(404);
         if($service->purchasePlot($plot, Auth::user())) {
             flash('Plot purchased successfully.')->success();
+            $response = array(
+                'status' => 'success',
+                'msg' => $request->message,
+            );
         }
         else {
             foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
