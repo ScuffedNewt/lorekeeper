@@ -73,13 +73,13 @@ class SeedService extends Service
             $image2 = null;
             if(isset($data['image_2']) && $data['image_2']) {
                 $image2 = $data['image_2'];
-                $this->handleImage($image2, public_path('images/data/seeds'), $data['item']->name . '-s2.png');
+                if ($image2) $this->handleImage($image2, public_path('images/data/seeds'), $data['item']->name . '-s2.png');
             }
             //
             $image3 = null;
             if(isset($data['image_3']) && $data['image_3']) {
                 $image3 = $data['image_3'];
-                $this->handleImage($image3, public_path('images/data/seeds'), $data['item']->name . '-s3.png');
+                if ($image3) $this->handleImage($image3, public_path('images/data/seeds'), $data['item']->name . '-s3.png');
             }
 
             $tag->update(['data' => json_encode($seedData)]);
