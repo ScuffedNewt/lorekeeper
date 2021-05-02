@@ -41,33 +41,44 @@
                 <div class="card text-center m-1" style="width: 200px; height: 200px; background-color: rgb(100, 60, 41);">
                     <!---- if user owns plot --->
                         @if(Auth::user()->gardenplots->contains('plot_id', $plot->id))
-                            @php
-                                $userPlot = Auth::user()->gardenplots->where('plot_id', $plot->id)->first();
-                                $now = Carbon\Carbon::now();
-                            @endphp
-                            @if($userPlot->started_at != null)
-                                @if($userPlot->water_at > $now)
-                                    <img src="{{ asset('images/data/seeds/seed.png') }}" class="my-auto mx-auto" style="width: 100px; height:100px;">
-                                    <div class="text-white">Next watering {!! pretty_date($userPlot->water_at) !!}</div>
-                                    <p class="text-white">Started {!! pretty_date($userPlot->started_at)!!}
-                                @else
-                                <!--- if we can water, check if the plant is complete or if it's ready to be watered again -->
-                                    @if($userPlot->watering == $userPlot->item->tags->where('tag', 'seed')->first()->data['waterings']))
-                                        <img src="{{ asset('images/data/seeds/seed.png') }}" class="my-auto mx-auto" style="width: 100px; height:100px;">
-                                        {!! Form::open(['url' => 'garden/claim/' . $userPlot->id]) !!}
-                                        {!! Form::submit('Claim!', ['class' => 'btn btn-sm btn-primary']) !!}
-                                        {!! Form::close() !!}
-                                    @else
-                                        <img src="{{ asset('images/data/seeds/seed.png') }}" class="my-auto mx-auto" style="width: 100px; height:100px;">
-                                        <button type="button" class="btn btn-primary" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="waterPlot({{ $userPlot->id }})">
-                                            Water <i class="fas fa-water"></i>
-                                        </button>
-                                    @endif
-                                @endif
+                        @php
+                            $userPlot = Auth::user()->gardenplots->where('plot_id', $plot->id)->first();
+                            $now = Carbon\Carbon::now();
+                        @endphp
+                        <!--- If plant is dead show dead thing --->
+                            @if($userPlot->is_dead)
+                            <button type="button" class="btn btn-dark" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="clearPlot({{ $userPlot->id }})">
+                                <img src="{{ asset('images/data/seeds/dead.png') }}" class="my-auto mx-auto" style="width: 100px; height:100px;">
+                                <div class="text-danger">Your plant has died.
+                                    <br> Click to clear.</div>
+                            </button>
+                        <!--- if not dead show not dead thing --->
                             @else
-                                <button type="button" class="btn btn-primary" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="plantSeed({{ $userPlot->id }})">
-                                    Plant Here
-                                </button>
+                                @if($userPlot->started_at != null)
+                                    @if($userPlot->water_at > $now)
+                                        <img src="{{ asset('images/data/seeds/seed.png') }}" class="my-auto mx-auto" style="width: 100px; height:100px;">
+                                        <div class="text-white">Next watering {!! pretty_date($userPlot->water_at) !!}</div>
+                                        <p class="text-white">Started {!! pretty_date($userPlot->started_at)!!}
+                                    @else
+                                    <!--- if we can water, check if the plant is complete or if it's ready to be watered again -->
+                                        @if($userPlot->watering == $userPlot->item->tags->where('tag', 'seed')->first()->data['waterings']))
+                                            <img src="{{ asset('images/data/seeds/seed.png') }}" class="my-auto mx-auto" style="width: 100px; height:100px;">
+                                            {!! Form::open(['url' => 'garden/claim/' . $userPlot->id]) !!}
+                                            {!! Form::submit('Claim!', ['class' => 'btn btn-sm btn-primary']) !!}
+                                            {!! Form::close() !!}
+                                    <!---->
+                                        @else
+                                            <button type="button" class="btn btn-primary" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="waterPlot({{ $userPlot->id }})">
+                                                <img src="{{ asset('images/data/seeds/seed.png') }}" class="my-auto mx-auto" style="width: 100px; height:100px;">
+                                                Water <i class="fas fa-water"></i>
+                                            </button>
+                                        @endif
+                                    @endif
+                                @else
+                                    <button type="button" class="btn btn-primary" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="plantSeed({{ $userPlot->id }})">
+                                        Plant Seed!
+                                    </button>
+                                @endif
                             @endif
                     <!---- if not owned plot --->
                         @else
@@ -81,6 +92,7 @@
             </div>
             @endforeach
         </div>
+        <!-------------------- SEEDS -------------------------->
         <div class="col-2 text-center">
             <h4>Seeds</h4>
             <div class="bg-dark p-2 btn-group-vertical btn-group-toggle" id="seedSelector" data-toggle="buttons" style="overflow-y: scroll;">
@@ -137,6 +149,26 @@
         function waterPlot(plotID) {
             $.ajax({
                 url: "{{ url('garden/water') }}",
+                method: 'post',
+                data:{
+                    _token: '{{ csrf_token() }}',
+                    plotID:plotID,
+                    },
+                dataType: 'json',
+                success: function(data) {
+                    $("body").load(" #app");
+                },
+                error: function(error) {
+                    console.log(error);
+                    alert("AJAX call failed: " + error);
+                    $("body").load(" #app");
+                }
+            });
+        }
+
+        function clearPlot(plotID) {
+            $.ajax({
+                url: "{{ url('garden/clear') }}",
                 method: 'post',
                 data:{
                     _token: '{{ csrf_token() }}',

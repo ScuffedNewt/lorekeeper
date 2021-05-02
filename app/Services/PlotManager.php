@@ -79,6 +79,12 @@ class PlotManager extends Service
         return $this->rollbackReturn(false);
     }
 
+    /***************************************************************************************************************
+     * 
+     * GARDENING RELATED
+     * 
+     ***************************************************************************************************************/
+
     /**
      * 
      */
@@ -127,6 +133,33 @@ class PlotManager extends Service
 
             $plot->waterings += 1;
             $plot->water_at = Carbon::now()->addHours($plot->time);
+            $plot->save();
+
+            return $this->commitReturn(true);
+        } catch(\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+        return $this->rollbackReturn(false);
+    }
+
+    /**
+     * 
+     */
+    public function clear($user, $data)
+    {
+        DB::beginTransaction();
+
+        try { 
+
+            $plot = UserGardenPlot::find($data);
+            if(!$plot) throw new \Exception("Invalid plot.");
+
+            $plot->modifiers = null;
+            $plot->started_at = null;
+            $plot->water_at = null;
+            $plot->waterings = null;
+            $plot->is_dead = 0;
+            $plot->time = null;
             $plot->save();
 
             return $this->commitReturn(true);

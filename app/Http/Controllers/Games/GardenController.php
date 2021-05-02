@@ -69,6 +69,22 @@ class GardenController extends Controller
         return redirect()->back();
     }
 
+    /**
+     * 
+     */
+    public function postClearPlot(Request $request)
+    {
+        $data = $request->input(['plotID']);
+        $service = new PlotManager;
+        if($service->clear(Auth::user(), $data)) {
+            flash('Cleared successfully!')->success();
+        }
+        else {
+            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+        }
+        return redirect()->back();
+    }
+    
     /******************************************************************************************************
      *  PLOTS
      ******************************************************************************************************/
@@ -86,19 +102,26 @@ class GardenController extends Controller
         return redirect()->back();
     }
 
+    /**
+     * 
+     */
     public function checkPlots($user)
     {
-        $check = null;
+        $check = 0;
         foreach($user->gardenplots as $plot)
         {
-            if($plot->water_at < Carbon::now()->subHours($plot->time))
+            $water = Carbon::parse($plot->water_at)->addHours($plot->time);
+            if($water < Carbon::now()->subHours($plot->time))
             {
-                $plot->is_dead = 1;
-                $plot->save();
+                if($plot->is_dead != 1)
+                {
+                    $plot->is_dead = 1;
+                    $plot->save();
 
-                $check = 1;
+                    $check = 1;
+                }
             }
         }
-        if($check = 1) flash('One of your plants has died due to lack of watering.')->error();
+        if($check == 1) flash('One of your plants has died due to lack of watering.')->error();
     }
 }
