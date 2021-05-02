@@ -4,9 +4,10 @@
 
 @section('content')
 <link rel="stylesheet" type="text/css" href="{{ url('/css/gardens.css') }}" />
-<h1>dagardens</h1>
+<h1>garden</h1>
 <hr>
     <!--------------------------------------------->
+<div class="container">
     <div class="row col-12">
         <div class="col-1">
         </div>
@@ -47,11 +48,11 @@
         </div>
         <div class="col-2 text-center">
             <h4>Seeds</h4>
-            <div class="bg-dark p-2 btn-group-vertical btn-group-toggle" id="seedSelector" data-toggle="buttons" style="overflow-y: scroll; height: 300px;">
+            <div class="bg-dark p-2 btn-group-vertical btn-group-toggle" id="seedSelector" data-toggle="buttons" style="overflow-y: scroll;">
                 @foreach($userSeeds as $seed)
                     @foreach($seed->chunk(4) as $chunk)
                         @foreach($chunk as $stack)
-                            <label type="button" class="btn btn-secondary" type="radio" autocomplete="off">
+                            <label type="button" class="btn btn-secondary my-1" type="radio" autocomplete="off">
                                 <input type="radio" name="options" autocomplete="off" value="{{$stack->first()->id}}" >
                                     <img src="{{ $stack->first()->imageUrl }}" style="width: 100%">
                                 <div class="text-small text-white"> {!!$stack->first()->name !!} <br>Quantity: x{{ $stack->sum('pivot.count') }}</div>
@@ -62,8 +63,9 @@
             </div>
         </div>
     </div>
-@endsection
+</div>
 
+@endsection
 @section('scripts')
     <script>
         let selectedSeed;
