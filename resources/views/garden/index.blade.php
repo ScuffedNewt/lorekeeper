@@ -23,19 +23,20 @@
                     <!---- if user owns plot --->
                         @if(Auth::user()->gardenplots->contains('plot_id', $plot->id))
                             @php
+                                $userPlot = Auth::user()->gardenplots->where('plot_id', $plot->id)->first();
                                 $now = Carbon\Carbon::now();
-                                $diff = $now->diffInMinutes($plot->end_at, false);
+                                $diff = $now->diffInMinutes($plot->water_at, false);
                             @endphp
-                            @if($plot->end_at >= $now)
+                            @if($userPlot->started_at != null)
                                 <img src="{{ asset('images/data/seeds/seed.png') }}" class="my-auto mx-auto" style="width: 100px; height:100px;">
-                                <div class="text-white">@if($diff >= 0 && $diff < 1) 1> minute till you finish gardening! @else {{ $diff }} minutes till you finish gardening!@endif</div>
-                                <p>Started {!! pretty_date($plot->started_at)!!}
-                            @elseif($plot->end_at == null)
-                                <button type="button" class="btn btn-primary" style="width:100%; height :100%;" id="button" onclick="plantSeed({{ Auth::user()->gardenplots->where('plot_id', $plot->id)->first()->id }})">
+                                <div class="text-white">{{ $diff }}</div>
+                                <p>Started {!! pretty_date($userPlot->started_at)!!}
+                            @elseif($userPlot->started_at == null)
+                                <button type="button" class="btn btn-primary" style="width:100%; height :100%;" id="button" onclick="plantSeed({{ $userPlot->id }})">
                                     Plant Here
                                 </button>
                             @else
-                                {!! Form::open(['url' => 'garden/claim/' . $plot->id]) !!}
+                                {!! Form::open(['url' => 'garden/claim/' . $userPlot->id]) !!}
                                 {!! Form::submit('Claim!', ['class' => 'btn btn-sm btn-primary']) !!}
                                 {!! Form::close() !!}
                             @endif
@@ -69,6 +70,13 @@
         </div>
     </div>
 </div>
+{!! Form::open(['url' => 'garden/plant']) !!}
+{!! Form::hidden('seedID', 1) !!}
+{!! Form::hidden('plotID', 1) !!}
+<div class="text-right">
+    {!! Form::submit('Edit', ['class' => 'btn btn-primary']) !!}
+</div>
+{!! Form::close() !!}
 @endsection
 @section('scripts')
     <script>
@@ -97,6 +105,7 @@
 
                 },
                 error: function(error) {
+                    console.log(error);
                     alert("AJAX call failed: " + error);
                 }
             });
