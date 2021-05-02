@@ -38,6 +38,7 @@ class SeedService extends Service
     public function getEditData()
     {
         return [
+            'items' => Item::orderBy('name')->pluck('name', 'id'),
         ];
     }
 
@@ -51,6 +52,7 @@ class SeedService extends Service
     {
         //fetch data from DB, if there is no data then set to NULL instead
         $data['waterings'] = isset($tag->data['waterings']) ? $tag->data['waterings'] : null;
+        $data['plant_id'] = isset($tag->data['plant_id']) ? $tag->data['plant_id'] : null;
 
         return $data;
     }
@@ -67,20 +69,10 @@ class SeedService extends Service
         DB::beginTransaction();
 
         try {
-            $seedData['waterings'] = isset($tag->data['waterings']) ? $tag->data['waterings'] : null;    
+            $seedData['waterings'] = isset($data['waterings']) ? $data['waterings'] : null; 
+            $seedData['plant_id'] = isset($data['plant_id']) ? $data['plant_id'] : null;    
 
-            //
-            $image2 = null;
-            if(isset($data['image_2']) && $data['image_2']) {
-                $image2 = $data['image_2'];
-                if ($image2) $this->handleImage($image2, public_path('images/data/seeds'), $data['item']->name . '-s2.png');
-            }
-            //
-            $image3 = null;
-            if(isset($data['image_3']) && $data['image_3']) {
-                $image3 = $data['image_3'];
-                if ($image3) $this->handleImage($image3, public_path('images/data/seeds'), $data['item']->name . '-s3.png');
-            }
+            if($seedData['plant_id'] == $tag->item->id) throw new \Exception('Cannot be the same item as the seed.');
 
             $tag->update(['data' => json_encode($seedData)]);
 
