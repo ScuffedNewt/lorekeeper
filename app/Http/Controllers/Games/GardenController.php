@@ -24,7 +24,7 @@ class GardenController extends Controller
 
         return view('garden.index', [
             'userSeeds' => $check,
-            'userPlots' => Auth::user()->gardenPlots()->get(),
+            'plots' => GardenPlot::all(),
         ]);
     }
 
