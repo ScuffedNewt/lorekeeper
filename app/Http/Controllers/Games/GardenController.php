@@ -20,7 +20,7 @@ class GardenController extends Controller
     {
         $seedId = ItemTag::where('tag', 'seed')->where('is_active', 1); // Removed get()
         $itemIds = $seedId->pluck('item_id'); // Could be combined with above
-        $check = UserItem::with('item')->whereIn('item_id', $itemIds)->where('user_id', auth::user()->id)->where('count', '>', 0)->get();
+        $check = Auth::user()->items()->whereIn('item_id', $itemIds)->where('count', '>', 0)->get()->groupBy(['item_id', 'id']);
 
         return view('garden.index', [
             'userSeeds' => $check,

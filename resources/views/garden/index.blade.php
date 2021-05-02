@@ -41,11 +41,15 @@
     </div>
     <div class="col-2 text-center">
         <h4>Seeds</h4>
-        <div class="bg-dark  p-2" style="overflow-y: scroll; height: 300px;">
+        <div class="bg-dark p-2" style="overflow-y: scroll; height: 300px;">
             @foreach($userSeeds as $seed)
-                <img src="{{ $seed->item->imageUrl }}">
-                <div class="text-small text-white"> {!!$seed->item->name !!} <br>Quantity: x{{ $seed->count }}</div>
+                @foreach($seed->chunk(4) as $chunk)
+                    @foreach($chunk as $stack)
+                        <img src="{{ $stack->first()->imageUrl }}">
+                        <div class="text-small text-white"> {!!$stack->first()->name !!} <br>Quantity: x{{ $stack->sum('pivot.count') }}</div>
+                    @endforeach
+                @endforeach
             @endforeach
         </div>
-    </div>
+
 @endsection
