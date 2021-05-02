@@ -10,7 +10,7 @@
 <h1>garden</h1>
 <hr>
     <!--------------------------------------------->
-<div class="container">
+<div class="container" id="content">
     <div class="row col-12">
         <div class="col-1">
         </div>
@@ -25,14 +25,14 @@
                             @php
                                 $userPlot = Auth::user()->gardenplots->where('plot_id', $plot->id)->first();
                                 $now = Carbon\Carbon::now();
-                                $diff = $now->diffInMinutes($plot->water_at, false);
+                                $diff = $now->diffInMinutes($userPlot->water_at, true);
                             @endphp
                             @if($userPlot->started_at != null)
                                 <img src="{{ asset('images/data/seeds/seed.png') }}" class="my-auto mx-auto" style="width: 100px; height:100px;">
                                 <div class="text-white">{{ $diff }}</div>
-                                <p>Started {!! pretty_date($userPlot->started_at)!!}
+                                <p class="text-white">Started {!! pretty_date($userPlot->started_at)!!}
                             @elseif($userPlot->started_at == null)
-                                <button type="button" class="btn btn-primary" style="width:100%; height :100%;" id="button" onclick="plantSeed({{ $userPlot->id }})">
+                                <button type="button" class="btn btn-primary" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="plantSeed({{ $userPlot->id }})">
                                     Plant Here
                                 </button>
                             @else
@@ -102,11 +102,12 @@
                     },
                 dataType: 'json',
                 success: function(data) {
-
+                    $("body").load(" #app");
                 },
                 error: function(error) {
                     console.log(error);
                     alert("AJAX call failed: " + error);
+                    $("body").load(" #app");
                 }
             });
             }

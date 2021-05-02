@@ -33,7 +33,7 @@ class GardenController extends Controller
      */
     public function getPlantSeed(Request $request)
     {
-        $data = $request->only(['seed', 'plot']);
+        $data = $request->only(['seedID', 'plotID']);
         $service = new PlotManager;
         if($service->plant(Auth::user(), $data)) {
             flash('Planted successfully!')->success();
@@ -41,6 +41,7 @@ class GardenController extends Controller
         else {
             foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
         }
+        return redirect()->back();
     }
 
     /******************************************************************************************************

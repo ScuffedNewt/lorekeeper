@@ -4,12 +4,15 @@ use App\Services\Service;
 
 use DB;
 use Config;
+use Carbon\Carbon;
 
 use App\Models\User\GardenPlot;
 use App\Models\Currency\Currency;
 use App\Models\User\UserGardenPlot;
 use App\Services\CurrencyManager;
 
+use App\Models\Item\Item;
+use App\Models\User\UserItem;
 class PlotManager extends Service
 {   
     /**
@@ -79,13 +82,31 @@ class PlotManager extends Service
     /**
      * 
      */
-    public function plant()
+    public function plant($user, $data)
     {
         DB::beginTransaction();
 
-        try {
-            
-            return $this->commitReturn($madePlot);
+        try {   
+
+            $plot = UserGardenPlot::find($data['plotID']);
+            if(!$plot) throw new \Exception("Invalid plot.");
+
+            $seed = UserItem::find($data['seedID']);
+            if(!$seed) throw new \Exception("Invalid seed.");
+
+            $invman = new InventoryManager;
+            if(!$invman->debitStack($user, null, ['data' => 'Seed planted in garden.'], $seed, 1)) throw new \Exception('Could not debit seed.');
+
+            $plot->item_id = $seed->item->id;
+            $plot->started_at = Carbon::now();
+            // this is where we set the plot time between each waterings
+            // because this is a function we can add things later
+            $plot->time = 24; // default 24 hours
+            $plot->waterings = 0; // the user can water immediately, but we must set a base line to increment
+            $plot->water_at = Carbon::now()->addHours($plot->time);
+            $plot->save();
+
+            return $this->commitReturn(true);
         } catch(\Exception $e) {
             $this->setError('error', $e->getMessage());
         }
