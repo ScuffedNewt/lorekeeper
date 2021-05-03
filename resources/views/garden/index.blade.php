@@ -7,33 +7,33 @@
     <link rel="stylesheet" type="text/css" href="{{ url('/css/gardens.css') }}" />
 </head>
 
-<h1>garden</h1>
+<h1 class="display-4">garden</h1>
 <hr>
     <!--------------------------------------------->
 <div class="container" id="content">
-    <div class="row bg-dark bg-light overflow-auto" style="overflow-x: scroll;">
-        <div class="bg-dark p-2 btn-group btn-group-toggle" data-toggle="buttons" >
+    <h5 class="h5">Modifiers</h5>
+    <div class="row bg-light overflow-auto card" style="overflow-x: scroll;">
+        <div class=" p-2 btn-group btn-group-toggle" data-toggle="buttons" >
             @foreach($userModifiers as $modifier)
                 @foreach($modifier->chunk(4) as $chunk)
                     @foreach($chunk as $stack)
-                        <label type="button" class="btn btn-secondary my-1"  type="radio" autocomplete="off">
+                        <label type="button" class="btn btn-warning mr-2"  type="radio" autocomplete="off">
                             <input type="radio" name="options" autocomplete="off" value="{{$stack->first()->id}}" >
                             <img class="img-fluid" src="{{ $stack->first()->imageUrl }}" style="height: 100px">
-                            <div class="text-small text-white"> {!!$stack->first()->name !!} <br>Quantity: x{{ $stack->sum('pivot.count') }}</div>
+                            <div class="text-small font-weight-bold text-secondary"> {!!$stack->first()->name !!} <br>Quantity: x{{ $stack->sum('pivot.count') }}</div>
                         </label>
                     @endforeach
                 @endforeach
             @endforeach
         </div>
     </div>
-    
     <div class="row bg-light">
-        <div class="col-md-9" >
-            <h3>Plots</h3>
+        <div class="col-lg-10 col-md-9 card" >
+            <h5>Plots</h5>
+            <div class="row ">
             @foreach($plots->chunk(3) as $chunk)
-            <div class="row ml-2">
                 @foreach($chunk as $plot)
-                <div class="card text-center m-1" style="width: 200px; height: 200px; background-color: rgb(100, 60, 41);">
+                <div class="card text-center m-1 col-lg-3 col-sm-5" style="width: 200px; height: 200px; background-color: rgb(100, 60, 41);">
                     <!---- if user owns plot --->
                         @if(Auth::user()->gardenplots->contains('plot_id', $plot->id))
                         @php
@@ -84,17 +84,18 @@
                         @endif
                     </div>
                 @endforeach
-            </div>
             @endforeach
         </div>
+
+        </div>
         <!-------------------- SEEDS -------------------------->
-        <div class="col-md-3 text-center">
-            <h4>Seeds</h4>
-            <div class="bg-dark p-2 btn-group-vertical btn-group-toggle" id="seedSelector" data-toggle="buttons" style="overflow-y: scroll;">
+        <div class="col-lg-2 col-md-3 text-center card" style="overflow-y: scroll;">
+            <h5 class="text-left">Seeds</h5>
+            <div class=" p-2 btn-group-vertical btn-group-toggle" id="seedSelector" data-toggle="buttons" >
                 @foreach($userSeeds as $seed)
                     @foreach($seed->chunk(4) as $chunk)
                         @foreach($chunk as $stack)
-                            <label type="button" class="btn btn-secondary my-1" type="radio" autocomplete="off">
+                            <label type="button" class="btn btn-secondary my-1" type="radio" autocomplete="off" >
                                 <input type="radio" name="options" autocomplete="off" value="{{$stack->first()->id}}" >
                                     <img src="{{ $stack->first()->imageUrl }}" style="width: 100%">
                                 <div class="text-small text-white"> {!!$stack->first()->name !!} <br>Quantity: x{{ $stack->sum('pivot.count') }}</div>
