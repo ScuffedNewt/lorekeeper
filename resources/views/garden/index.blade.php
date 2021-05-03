@@ -11,30 +11,24 @@
 <hr>
     <!--------------------------------------------->
 <div class="container" id="content">
-    <div class="row">
-        <div class="text-center">
-            <nav class="navbar navbar-light bg-light btn-group btn-group-toggle" id="modifierSelector" data-toggle="buttons">
-                @foreach($userModifiers as $modifier)
-                    @foreach($modifier->chunk(4) as $chunk)
-                        @foreach($chunk as $stack)
-                            <a type="button" class="btn btn-secondary my-1" type="radio" autocomplete="off">
-                                <input type="radio" name="options" autocomplete="off" value="{{$stack->first()->id}}" >
-                                <img class="img-fluid" src="{{ $stack->first()->imageUrl }}" style="height: 100px">
-                                <div class="text-small text-white"> {!!$stack->first()->name !!} <br>Quantity: x{{ $stack->sum('pivot.count') }}</div>
-                            </a>
-                        @endforeach
+    <div class="row bg-dark bg-light overflow-auto" style="overflow-x: scroll;">
+        <div class="bg-dark p-2 btn-group btn-group-toggle" data-toggle="buttons" >
+            @foreach($userModifiers as $modifier)
+                @foreach($modifier->chunk(4) as $chunk)
+                    @foreach($chunk as $stack)
+                        <label type="button" class="btn btn-secondary my-1"  type="radio" autocomplete="off">
+                            <input type="radio" name="options" autocomplete="off" value="{{$stack->first()->id}}" >
+                            <img class="img-fluid" src="{{ $stack->first()->imageUrl }}" style="height: 100px">
+                            <div class="text-small text-white"> {!!$stack->first()->name !!} <br>Quantity: x{{ $stack->sum('pivot.count') }}</div>
+                        </label>
                     @endforeach
                 @endforeach
-            </nav>
+            @endforeach
         </div>
     </div>
     
-    <div class="row col-12">
-
-        <div class="col-1">
-        </div>
-        
-        <div class="col-9">
+    <div class="row bg-light">
+        <div class="col-md-9" >
             <h3>Plots</h3>
             @foreach($plots->chunk(3) as $chunk)
             <div class="row ml-2">
@@ -70,7 +64,7 @@
                                     <!---->
                                         @else
                                             <button type="button" class="btn btn-primary" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="waterPlot({{ $userPlot->id }})">
-                                                <img src="{{ asset('images/data/seeds/seed.png') }}" class="my-auto mx-auto" style="width: 100px; height:100px;"><br>
+                                                <img src="{{ asset('images/data/seeds/seed.png') }}" class="my-auto mx-auto" style="width: 100px; height:100px;">
                                                 Water <i class="fas fa-water"></i>
                                             </button>
                                         @endif
@@ -94,7 +88,7 @@
             @endforeach
         </div>
         <!-------------------- SEEDS -------------------------->
-        <div class="col-2 text-center">
+        <div class="col-md-3 text-center">
             <h4>Seeds</h4>
             <div class="bg-dark p-2 btn-group-vertical btn-group-toggle" id="seedSelector" data-toggle="buttons" style="overflow-y: scroll;">
                 @foreach($userSeeds as $seed)
