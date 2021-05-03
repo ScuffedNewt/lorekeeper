@@ -13,7 +13,7 @@
 <div class="container" id="content">
     <h5 class="h5">Modifiers</h5>
     <div class="row bg-light overflow-auto card" style="overflow-x: scroll;">
-        <div class=" p-2 btn-group btn-group-toggle" id="modifierSelector" data-toggle="buttons" >
+        <div class=" p-2 btn-group btn-group-toggle" data-toggle="buttons" >
             @foreach($userModifiers as $modifier)
                 @foreach($modifier->chunk(4) as $chunk)
                     @foreach($chunk as $stack)
@@ -29,7 +29,7 @@
     </div>
     <div class="row bg-light">
         <div class="col-lg-10 col-md-9 card" >
-            <h5 class="mt-1">Plots</h5>
+            <h5>Plots</h5>
             <div class="row ">
             @foreach($plots->chunk(3) as $chunk)
                 @foreach($chunk as $plot)
@@ -43,7 +43,7 @@
                         <!--- If plant is dead show dead thing --->
                             @if($userPlot->is_dead)
                             <button type="button" class="btn btn-dark" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="clearPlot({{ $userPlot->id }})">
-                                <img class="img-fluid mx-auto pt-2" src="{{ asset('images/data/seeds/dead.png') }}" class="my-auto mx-auto" style="width: 100px; height:100px;">
+                                <img src="{{ asset('images/data/seeds/dead.png') }}" class="my-auto mx-auto" style="width: 100px; height:100px;">
                                 <div class="text-danger">Your plant has died.
                                     <br> Click to clear.</div>
                             </button>
@@ -51,41 +51,52 @@
                             @else
                                 @if($userPlot->started_at != null)
                                     @if($userPlot->water_at > $now)
-                                        <img class="img-fluid mx-auto pt-2" src="{{ asset('images/data/seeds/seed.png') }}" class="my-auto mx-auto" style="width: 100px; height:100px;">
-                                        <div class="text-white">Next watering {!! pretty_date($userPlot->water_at) !!}</div>
+                                        <img src="{{ asset('images/data/seeds/seed.png') }}" class="my-auto mx-auto" style="width: 100px; height:100px;">
+                                        <div id="{{$userPlot->id}}-water-text" class ="text-white">Next watering {{$userPlot->water_at}}</div>
                                         <p class="text-white">Started {!! pretty_date($userPlot->started_at)!!}
+                                            
+                                        <script>
+                                            function waterCount(id, timer) {
+                                                setInterval(function(){ 
+                                                    
+                                                var date = new Date(timer-=1000);
+                                                var text = "Next watering in "+ date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+                                                $("#"+id+"-water-text").text(text);
+                                            }, 1000)}
+
+                                            var wateringLeft = Date.parse("<?php echo $userPlot->water_at ?>");
+                                            var waterTextId = "<?php echo $userPlot->id ?>"
+                                        
+                                            setInterval(waterCount(waterTextId, wateringLeft), 1000);
+                                        </script>
+
                                     @else
                                     <!--- if we can water, check if the plant is complete or if it's ready to be watered again -->
                                         @if($userPlot->watering == $userPlot->item->tags->where('tag', 'seed')->first()->data['waterings']))
-                                            <img class="img-fluid" src="{{ asset('images/data/seeds/seed.png') }}" class="my-auto mx-auto" style="width: 100px; height:100px;">
+                                            <img src="{{ asset('images/data/seeds/seed.png') }}" class="my-auto mx-auto" style="width: 100px; height:100px;">
                                             {!! Form::open(['url' => 'garden/claim/' . $userPlot->id]) !!}
                                             {!! Form::submit('Claim!', ['class' => 'btn btn-sm btn-primary']) !!}
                                             {!! Form::close() !!}
                                     <!---->
                                         @else
                                             <button type="button" class="btn btn-primary" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="waterPlot({{ $userPlot->id }})">
-                                                <img class="img-fluid mx-auto pt-2" src="{{ asset('images/data/seeds/seed.png') }}" class="my-auto mx-auto" style="width: 100px; height:100px;">
+                                                <img src="{{ asset('images/data/seeds/seed.png') }}" class="my-auto mx-auto" style="width: 100px; height:100px;">
                                                 Water <i class="fas fa-water"></i>
                                             </button>
                                         @endif
                                     @endif
                                 @else
-                                    <button id="seed" type="button" class="btn btn-success hide" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="plantSeed({{ $userPlot->id }})">
+                                    <button type="button" class="btn btn-primary" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="plantSeed({{ $userPlot->id }})">
                                         Plant Seed!
-                                    </button>
-                                    <button id="mod" type="button" class="btn btn-warning text-white hide" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="addModifier({{ $userPlot->id }})">
-                                        Apply Modifier!
                                     </button>
                                 @endif
                             @endif
                     <!---- if not owned plot --->
                         @else
-                            <div class="p-5 container text-white">
-                                This plot {{ $plot->free ? 'is free!' : 'costs ' . $plot->plot_cost . ' ' . $plot->currency->name }}
-                                {!! Form::open(['url' => 'garden/plots/purchase/' . $plot->id]) !!}
-                                {!! Form::submit('Purchase plot?', ['class' => 'btn btn-sm btn-primary mt-3']) !!}
-                                {!! Form::close() !!}
-                            </div>
+                            This plot {{ $plot->free ? 'is free!' : 'costs ' . $plot->plot_cost . ' ' . $plot->currency->name }}
+                            {!! Form::open(['url' => 'garden/plots/purchase/' . $plot->id]) !!}
+                            {!! Form::submit('Purchase plot?', ['class' => 'btn btn-sm btn-primary mt-3']) !!}
+                            {!! Form::close() !!}
                         @endif
                     </div>
                 @endforeach
@@ -100,10 +111,10 @@
                 @foreach($userSeeds as $seed)
                     @foreach($seed->chunk(4) as $chunk)
                         @foreach($chunk as $stack)
-                            <label type="button" class="btn btn-light my-1" type="radio" autocomplete="off" >
+                            <label type="button" class="btn btn-secondary my-1" type="radio" autocomplete="off" >
                                 <input type="radio" name="options" autocomplete="off" value="{{$stack->first()->id}}" >
-                                    <img class="img-fluid" src="{{ $stack->first()->imageUrl }}" style="width: 100%">
-                                <div class="text-small font-weight-bold text-dark"> {!!$stack->first()->name !!} <br>Quantity: x{{ $stack->sum('pivot.count') }}</div>
+                                    <img src="{{ $stack->first()->imageUrl }}" style="width: 100%">
+                                <div class="text-small text-white"> {!!$stack->first()->name !!} <br>Quantity: x{{ $stack->sum('pivot.count') }}</div>
                             </label>
                         @endforeach
                     @endforeach
@@ -120,14 +131,10 @@
         
         $("#seedSelector input:radio").change(function() {
             selectedSeed = $(this).val();
-            $("#seed").removeClass('hide');
-            $("#mod").addClass('hide');
         });
 
         $("#modifierSelector input:radio").change(function() {
             selectedModifier = $(this).val();
-            $("#mod").removeClass('hide');
-            $("#seed").addClass('hide');
         });
 
         function plantSeed(plotID) {
@@ -142,32 +149,6 @@
                     _token: '{{ csrf_token() }}',
                     plotID:plotID,
                     seedID:selectedSeed
-                    },
-                dataType: 'json',
-                success: function(data) {
-                    $("body").load(" #app");
-                },
-                error: function(error) {
-                    console.log(error);
-                    alert("AJAX call failed: " + error);
-                    $("body").load(" #app");
-                }
-            });
-            }
-        }
-
-        function addModifier(plotID) {
-            if(selectedModifier == null){
-                alert("Please select a modifier!");
-            }
-            else {
-                $.ajax({
-                url: "{{ url('garden/mod') }}",
-                method: 'post',
-                data:{
-                    _token: '{{ csrf_token() }}',
-                    plotID:plotID,
-                    modID:selectedModifier
                     },
                 dataType: 'json',
                 success: function(data) {
@@ -221,6 +202,9 @@
                 }
             });
         }
+
+
+
 
     </script>
 @endsection
