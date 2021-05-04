@@ -52,7 +52,7 @@
                             @else
                                 @if($userPlot->started_at != null)
                                     @if($userPlot->water_at > $now)
-                                        <img class="img-fluid image-zoom my-auto mx-auto pt-2" src="{{ asset('images/data/seeds/seed.png') }}" data-toggle="tooltip" title="{{ $userPlot->waterings }} {{ $userPlot->waterings > 1 ? 'waterings' : 'watering' }} done!" style="width: 10em; height: 10em;">
+                                        <img class="img-fluid image-zoom my-auto mx-auto pt-2" src="{{ asset('images/data/seeds/seed.png') }}" data-toggle="tooltip" title="{{ $userPlot->waterings }} {{ $userPlot->waterings == 1 ? 'watering' : 'waterings' }} done!" style="width: 10em; height: 10em;">
                                         <div id="{{ $userPlot->id }}-water-text" class ="text-white">Next watering {{ $userPlot->water_at }}</div>
                                         <p class="text-white">Started {!! pretty_date($userPlot->started_at)!!}
                                         <!---- Water times -->

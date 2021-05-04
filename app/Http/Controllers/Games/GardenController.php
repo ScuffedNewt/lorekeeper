@@ -109,11 +109,13 @@ class GardenController extends Controller
         $data = $request->input(['plotID']);
         $service = new PlotManager;
         if($service->clear(Auth::user(), $data)) {
+            
             flash('Cleared successfully!')->success();
             $response = array(
                 'status' => 'success',
                 'msg' => $request->message,
             );
+            return response()->json($response); 
         }
         else {
             foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
