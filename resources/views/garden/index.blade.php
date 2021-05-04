@@ -17,9 +17,9 @@
             @foreach($userModifiers as $modifier)
                 @foreach($modifier->chunk(4) as $chunk)
                     @foreach($chunk as $stack)
-                        <label type="button" class="btn btn-warning mr-2"  type="radio" autocomplete="off">
+                        <label type="button" class="modifier-btn btn btn-warning mr-2"  type="radio" autocomplete="off">
                             <input type="radio" name="options" autocomplete="off" value="{{$stack->first()->id}}" >
-                            <img class="img-fluid" src="{{ $stack->first()->imageUrl }}" style="height: 100px">
+                            <img class="img-fluid image-zoom" src="{{ $stack->first()->imageUrl }}" style="height: 6em">
                             <div class="text-small font-weight-bold text-secondary"> {!!$stack->first()->name !!} <br>Quantity: x{{ $stack->sum('pivot.count') }}</div>
                         </label>
                     @endforeach
@@ -27,13 +27,13 @@
             @endforeach
         </div>
     </div>
-    <div class="row bg-light">
-        <div class="col-lg-10 col-md-9 card" >
+    <div class="row bg-light" style=" font-size: 100% !important">
+        <div class="col-lg-10 col-md-9 card">
             <h5>Plots</h5>
             <div class="row ">
             @foreach($plots->chunk(3) as $chunk)
                 @foreach($chunk as $plot)
-                <div class="card text-center m-1 col-lg-3 col-sm-5" style="width: 200px; height: 200px; background-color: rgb(100, 60, 41);">
+                <div class="card text-center m-1 col-lg-3 col-md-4" style="width: 15em; height: 15em; background-color: rgb(100, 60, 41);">
                     <!---- if user owns plot --->
                         @if(Auth::user()->gardenplots->contains('plot_id', $plot->id))
                         @php
@@ -42,8 +42,8 @@
                         @endphp
                         <!--- If plant is dead show dead thing --->
                             @if($userPlot->is_dead)
-                            <button type="button" class="btn btn-dark" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="clearPlot({{ $userPlot->id }})">
-                                <img src="{{ asset('images/data/seeds/dead.png') }}" class="my-auto mx-auto" style="width: 100px; height:100px;">
+                            <button type="button" class="btn btn-dark" style="width:15em; height :15em;" id="{{ $userPlot->id }}-button" onclick="clearPlot({{ $userPlot->id }})">
+                                <img src="{{ asset('images/data/seeds/dead.png') }}" class="my-auto mx-auto" style="width: 5em; height:5em;">
                                 <div class="text-danger">Your plant has died.
                                     <br> Click to clear.</div>
                             </button>
@@ -101,20 +101,20 @@
                     </div>
                 @endforeach
             @endforeach
-        </div>
-
+            </div>
+        
         </div>
         <!-------------------- SEEDS -------------------------->
-        <div class="col-lg-2 col-md-3 text-center card" style="overflow-y: scroll;">
+        <div class="col-md-3  col-lg-2 text-center card " style="overflow-y: scroll; ">
             <h5 class="text-left">Seeds</h5>
-            <div class=" p-2 btn-group-vertical btn-group-toggle" id="seedSelector" data-toggle="buttons" >
+            <div class=" p-2 btn-group-vertical btn-group-toggle" id="seedSelector" data-toggle="buttons">
                 @foreach($userSeeds as $seed)
                     @foreach($seed->chunk(4) as $chunk)
                         @foreach($chunk as $stack)
-                            <label type="button" class="btn btn-secondary my-1" type="radio" autocomplete="off" >
+                            <label type="button" class="btn btn-secondary my-1 btn-block" type="radio" autocomplete="off">
                                 <input type="radio" name="options" autocomplete="off" value="{{$stack->first()->id}}" >
-                                    <img src="{{ $stack->first()->imageUrl }}" style="width: 100%">
-                                <div class="text-small text-white"> {!!$stack->first()->name !!} <br>Quantity: x{{ $stack->sum('pivot.count') }}</div>
+                                    <img src="{{ $stack->first()->imageUrl }}" class="image-zoom" style="width: 100%">
+                                <div class="text-small text-white text-center" > {!!$stack->first()->name !!} <br>Quantity: x{{ $stack->sum('pivot.count') }}</div>
                             </label>
                         @endforeach
                     @endforeach
