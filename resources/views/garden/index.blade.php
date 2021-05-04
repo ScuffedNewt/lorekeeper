@@ -27,13 +27,14 @@
             @endforeach
         </div>
     </div>
+    <!--------------------------------------------->
     <div class="row bg-light" style=" font-size: 100% !important">
         <div class="col-lg-10 col-md-9 card">
             <h5 class="mt-1">Plots</h5>
             <div class="row ">
             @foreach($plots->chunk(3) as $chunk)
                 @foreach($chunk as $plot)
-                <div class="card text-center m-1 col-lg-3 col-md-4" style="width: 15em; height: 15em; background-color: rgb(100, 60, 41);">
+                <div class="card text-center m-1 col-lg-3 col-md-4" style="width: 15em; height: 15em; background-color: rgb(100, 60, 41); justify-content: center;">
                     <!---- if user owns plot --->
                         @if(Auth::user()->gardenplots->contains('plot_id', $plot->id))
                         @php
@@ -42,19 +43,19 @@
                         @endphp
                         <!--- If plant is dead show dead thing --->
                             @if($userPlot->is_dead)
-                            <button type="button" class="btn btn-dark" style="width:15em; height :15em;" id="{{ $userPlot->id }}-button" onclick="clearPlot({{ $userPlot->id }})">
-                                <img class="img-fluid mx-auto pt-2" src="{{ asset('images/data/seeds/dead.png') }}" class="my-auto mx-auto" style="width: 5em; height:5em;">
-                                <div class="text-danger">Your plant has died.
+                                <button type="button" class="btn btn-dark" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="clearPlot({{ $userPlot->id }})">
+                                    <img class="img-fluid my-auto mx-auto pt-2" src="{{ asset('images/data/seeds/dead.png') }}" style="width: 5em; height:5em;">
+                                    <div class="text-danger">Your plant has died.
                                     <br> Click to clear.</div>
-                            </button>
+                                </button>
                         <!--- if not dead show not dead thing --->
                             @else
                                 @if($userPlot->started_at != null)
                                     @if($userPlot->water_at > $now)
-                                        <img class="img-fluid mx-auto pt-2" src="{{ asset('images/data/seeds/seed.png') }}" class="my-auto mx-auto" style="width: 100px; height:100px;">
-                                        <div id="{{$userPlot->id}}-water-text" class ="text-white">Next watering {{$userPlot->water_at}}</div>
+                                        <img class="img-fluid image-zoom my-auto mx-auto pt-2" src="{{ asset('images/data/seeds/seed.png') }}" data-toggle="tooltip" title="{{ $userPlot->waterings }} {{ $userPlot->waterings > 1 ? 'waterings' : 'watering' }} done!" style="width: 10em; height: 10em;">
+                                        <div id="{{ $userPlot->id }}-water-text" class ="text-white">Next watering {{ $userPlot->water_at }}</div>
                                         <p class="text-white">Started {!! pretty_date($userPlot->started_at)!!}
-                                            
+                                        <!---- Water times -->
                                         <script>
                                             function waterCount(id, timer) {
                                                 setInterval(function(){ 
@@ -69,18 +70,18 @@
                                         
                                             setInterval(waterCount(waterTextId, wateringLeft), 1000);
                                         </script>
-
+                                        <!------------------>
                                     @else
                                     <!--- if we can water, check if the plant is complete or if it's ready to be watered again -->
                                         @if($userPlot->watering == $userPlot->item->tags->where('tag', 'seed')->first()->data['waterings']))
-                                            <img class="img-fluid mx-auto pt-2" src="{{ asset('images/data/seeds/seed.png') }}" class="my-auto mx-auto" style="width: 100px; height:100px;">
+                                            <img class="img-fluid my-auto mx-auto pt-2" src="{{ asset('images/data/seeds/seed.png') }}" style="width: 10em; height:10em;">
                                             {!! Form::open(['url' => 'garden/claim/' . $userPlot->id]) !!}
                                             {!! Form::submit('Claim!', ['class' => 'btn btn-sm btn-primary']) !!}
                                             {!! Form::close() !!}
                                     <!---->
                                         @else
                                             <button type="button" class="btn btn-primary" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="waterPlot({{ $userPlot->id }})">
-                                                <img class="img-fluid mx-auto pt-2" src="{{ asset('images/data/seeds/seed.png') }}" class="my-auto mx-auto" style="width: 100px; height:100px;">
+                                                <img class="img-fluid my-auto mx-auto pt-2" src="{{ asset('images/data/seeds/seed.png') }}" style="width: 10em; height: 10em;">
                                                 <br> Water <i class="fas fa-water"></i>
                                             </button>
                                         @endif
@@ -126,6 +127,7 @@
                 @endforeach
             </div>
         </div>
+        <!--------------------------------------------->
     </div>
 </div>
 @endsection

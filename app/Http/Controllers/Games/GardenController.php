@@ -66,9 +66,9 @@ class GardenController extends Controller
     {
         $data = $request->only(['modID', 'plotID']);
         $service = new PlotManager;
-        if($service->plant(Auth::user(), $data)) {
+        if($service->mod(Auth::user(), $data)) {
             
-            flash('Planted successfully!')->success();
+            flash('Added modifier successfully!')->success();
             $response = array(
                 'status' => 'success',
                 'msg' => $request->message,
