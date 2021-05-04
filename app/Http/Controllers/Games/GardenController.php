@@ -60,6 +60,28 @@ class GardenController extends Controller
     }
 
     /**
+     * Add Modifier
+     */
+    public function postAddMod(Request $request)
+    {
+        $data = $request->only(['modID', 'plotID']);
+        $service = new PlotManager;
+        if($service->plant(Auth::user(), $data)) {
+            
+            flash('Planted successfully!')->success();
+            $response = array(
+                'status' => 'success',
+                'msg' => $request->message,
+            );
+            return response()->json($response); 
+        }
+        else {
+            foreach($service->errors()->getMessages()['error'] as $error) 
+            flash($error)->error();
+        }
+    }
+
+    /**
      * Water plot
      */
     public function postWaterPlot(Request $request)
@@ -72,6 +94,7 @@ class GardenController extends Controller
                 'status' => 'success',
                 'msg' => $request->message,
             );
+            return response()->json($response); 
         }
         else {
             foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
