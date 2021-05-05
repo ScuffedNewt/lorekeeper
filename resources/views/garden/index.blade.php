@@ -14,7 +14,7 @@
     <h5 class="h5">Modifiers</h5>
     <div class=" bg-light overflow-auto card" style="overflow-x: scroll;">
         <div class=" p-2 btn-group btn-group-toggle" id="modifierSelector" data-toggle="buttons" >
-            <label type="button" class="modifier-btn btn  mr-2 modifier-button" type="radio" autocomplete="off">
+            <label type="button" class="modifier-btn btn mr-2 modifier-button" type="radio" autocomplete="off">
                 <input type="radio" name="options" autocomplete="off" value=null >
                     <img class="img-fluid image-zoom"  src="{{ asset('images/close.png') }}" style="height: 6em">
                 <div class="text-small font-weight-bold text-secondary">No Modifier</div>
@@ -33,13 +33,13 @@
         </div>
     </div>
     <!--------------------------------------------->
-    <div class="d-flex justify-content-between bg-light" style=" font-size: 100% !important">
-        <div class="col-9 card">
+    <div class="d-flex justify-content-between bg-light" style=" font-size: 100% !important  ">
+        <div class="col card" style=" max-height:60em;">
             <h5 class="mt-1">Plots</h5>
             <div class="row ">
             @foreach($plots->chunk(3) as $chunk)
                 @foreach($chunk as $plot)
-                <div class="card text-center m-1 col-lg-3 col-md-4" style="width: 15em; height: 15em; background-color: rgb(100, 60, 41); justify-content: center;">
+                <div class="card text-center m-1 col-lg-3 col-md-4" style="min-width: 14em; min-height: 14em; background-color: rgb(100, 60, 41); justify-content: center;">
                     <!---- if user owns plot --->
                         @if(Auth::user()->gardenplots->contains('plot_id', $plot->id))
                         @php
@@ -116,8 +116,8 @@
         
         </div>
         <!-------------------- SEEDS -------------------------->
-        <div class="text-center card" style="overflow-y: scroll; overflow-x: hidden; flex 0 0 8em; min-width: 11em;">
-            <h5 class="text-left">Seeds</h5>
+        <div class="text-center card" style="overflow-y: scroll; overflow-x: hidden; flex 0 0 8em; min-width: 11em; max-width: 11em; max-height:60em;">
+            <h5 class="text-left">Seeds</h5> 
             <div class=" p-2 btn-group-vertical btn-group-toggle" id="seedSelector" data-toggle="buttons">
                 <label type="button" class="btn  my-1 btn-block seed-button" type="radio" autocomplete="off" >
                     <input type="radio" name="options" autocomplete="off" value=null >
