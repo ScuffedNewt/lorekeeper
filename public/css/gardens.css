@@ -1,3 +1,9 @@
+:root{
+  --modifier-button-color: hsl(50, 100%, 50%);
+  --seed-button-color: hsl(75, 50%, 50%);
+
+}
+
 .active {
   outline: .5em solid rgba(255, 0, 0, 0.3) !important;
   outline-offset: -4px;
@@ -13,4 +19,45 @@
 
 .image-zoom:hover {
   transform: scale(1.2);
+}
+
+
+.modifier-button {
+  background-color: var(--modifier-button-color) !important;
+}
+
+.modifier-button:hover {
+  background-color: var(--modifier-button-color) !important;
+  filter: saturate(120%)
+}
+
+.modifier-button:active {
+  background-color: var(--modifier-button-color) !important;
+  filter: saturate(150%)
+}
+
+.modifier-button:not(:disabled):not(.disabled).active {
+  background-color: var(--modifier-button-color) !important;
+  filter: saturate(130%)
+
+}
+
+.seed-button {
+  background-color: var(--seed-button-color) !important;
+}
+
+.seed-button:hover {
+  background-color: var(--seed-button-color) !important;
+  filter: saturate(120%)
+}
+
+.seed-button:active {
+  background-color: var(--seed-button-color) !important;
+  filter: saturate(150%)
+}
+
+.seed-button:not(:disabled):not(.disabled).active {
+  background-color: var(--seed-button-color) !important;
+  filter: saturate(130%)
+
 }

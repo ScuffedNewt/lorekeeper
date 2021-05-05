@@ -14,10 +14,15 @@
     <h5 class="h5">Modifiers</h5>
     <div class="row bg-light overflow-auto card" style="overflow-x: scroll;">
         <div class=" p-2 btn-group btn-group-toggle" id="modifierSelector" data-toggle="buttons" >
+            <label type="button" class="modifier-btn btn  mr-2 modifier-button" type="radio" autocomplete="off">
+                <input type="radio" name="options" autocomplete="off" value=null >
+                    <img class="img-fluid image-zoom"  src="{{ asset('images/close.png') }}" style="height: 6em">
+                <div class="text-small font-weight-bold text-secondary">No Modifier</div>
+            </label>
             @foreach($userModifiers as $modifier)
                 @foreach($modifier->chunk(4) as $chunk)
                     @foreach($chunk as $stack)
-                        <label type="button" class="modifier-btn btn btn-warning mr-2"  type="radio" autocomplete="off">
+                        <label type="button" class="modifier-btn btn  mr-2 modifier-button" type="radio" autocomplete="off">
                             <input type="radio" name="options" autocomplete="off" value="{{$stack->first()->id}}" >
                             <img class="img-fluid image-zoom" src="{{ $stack->first()->imageUrl }}" style="height: 6em">
                             <div class="text-small font-weight-bold text-secondary"> {!!$stack->first()->name !!} <br>Quantity: x{{ $stack->sum('pivot.count') }}</div>
@@ -28,7 +33,7 @@
         </div>
     </div>
     <!--------------------------------------------->
-    <div class="row bg-light" style=" font-size: 100% !important">
+    <div class="d-flex justify-content-between bg-light" style=" font-size: 100% !important">
         <div class="col-lg-10 col-md-9 card">
             <h5 class="mt-1">Plots</h5>
             <div class="row ">
@@ -114,10 +119,15 @@
         <div class="col-md-3  col-lg-2 text-center card " style="overflow-y: scroll; ">
             <h5 class="text-left">Seeds</h5>
             <div class=" p-2 btn-group-vertical btn-group-toggle" id="seedSelector" data-toggle="buttons">
+                <label type="button" class="btn  my-1 btn-block seed-button" type="radio" autocomplete="off">
+                    <input type="radio" name="options" autocomplete="off" value=null >
+                        <img class="img-fluid image-zoom"  src="{{ asset('images/close.png') }}" style="width: 100%">
+                    <div class="text-small text-white text-center" >No Seed</div>
+                </label>
                 @foreach($userSeeds as $seed)
                     @foreach($seed->chunk(4) as $chunk)
                         @foreach($chunk as $stack)
-                            <label type="button" class="btn btn-secondary my-1 btn-block" type="radio" autocomplete="off">
+                            <label type="button" class="btn  my-1 btn-block seed-button" type="radio" autocomplete="off">
                                 <input type="radio" name="options" autocomplete="off" value="{{$stack->first()->id}}" >
                                     <img class="img-fluid image-zoom"  src="{{ $stack->first()->imageUrl }}" style="width: 100%">
                                 <div class="text-small text-white text-center" > {!!$stack->first()->name !!} <br>Quantity: x{{ $stack->sum('pivot.count') }}</div>
