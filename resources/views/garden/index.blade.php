@@ -116,13 +116,13 @@
         
         </div>
         <!-------------------- SEEDS -------------------------->
-        <div class="text-center card" style="overflow-y: scroll; overflow-x: hidden; flex 0 0 8em;">
+        <div class="text-center card" style="overflow-y: scroll; overflow-x: hidden; flex 0 0 8em; min-width: 11em;">
             <h5 class="text-left">Seeds</h5>
             <div class=" p-2 btn-group-vertical btn-group-toggle" id="seedSelector" data-toggle="buttons">
-                <label type="button" class="btn  my-1 btn-block seed-button" type="radio" autocomplete="off">
+                <label type="button" class="btn  my-1 btn-block seed-button" type="radio" autocomplete="off" >
                     <input type="radio" name="options" autocomplete="off" value=null >
                         <img class="img-fluid image-zoom"  src="{{ asset('images/close.png') }}" style="width: 100%">
-                    <div class="text-small text-white text-center">No Seed</div>
+                    <div class="text-small text-white text-center" style="font-size:1rem;">No Seed</div>
                 </label>
                 @foreach($userSeeds as $seed)
                     @foreach($seed->chunk(4) as $chunk)
@@ -130,7 +130,7 @@
                             <label type="button" class="btn  my-1 btn-block seed-button" type="radio" autocomplete="off">
                                 <input type="radio" name="options" autocomplete="off" value="{{$stack->first()->id}}" >
                                     <img class="img-fluid image-zoom"  src="{{ $stack->first()->imageUrl }}" style="width: 100%">
-                                <div class="text-small text-white text-center"> {!!$stack->first()->name !!} <br>Quantity: x{{ $stack->sum('pivot.count') }}</div>
+                                <div class="text-small text-white text-center  text-wrap" style="font-size:1rem;"> {!!$stack->first()->name !!} <br>Quantity: <br> x{{ $stack->sum('pivot.count') }}</div>
                             </label>
                         @endforeach
                     @endforeach
