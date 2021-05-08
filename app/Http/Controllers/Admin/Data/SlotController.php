@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use Auth;
 
 use App\Models\Slot\Slot;
-use App\Models\Slot\SlotCategory;
 use App\Models\Loot\LootTable;
 use App\Models\Raffle\Raffle;
 use App\Models\Currency\Currency;
