@@ -132,7 +132,7 @@
         
         </div>
         <!-------------------- SEEDS -------------------------->
-        <div class="text-center card" style="overflow-y: scroll; overflow-x: hidden; flex 0 0 7em; min-width: 11em; max-width: 11em; max-height:51em;">
+        <div class="text-center card" style="overflow-y: scroll; overflow-x: hidden; flex 0 0 7em; width: 11em; height:51em;">
             <h5 class="text-left">Seeds</h5> 
             <div class=" p-2 btn-group-vertical btn-group-toggle" id="seedSelector" data-toggle="buttons">
                 <label type="button" class="btn  my-1 btn-block seed-button" type="radio" autocomplete="off" >
