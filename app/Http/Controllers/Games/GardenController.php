@@ -131,6 +131,9 @@ class GardenController extends Controller
      *  PLOTS
      ******************************************************************************************************/
 
+     /**
+      * Buys the plots
+      */
     public function postPurchasePlot($id, PlotManager $service)
     {
         $plot = GardenPlot::find($id);
@@ -145,7 +148,7 @@ class GardenController extends Controller
     }
 
     /**
-     * 
+     * Checks if any plants have died since the user has last logged on
      */
     public function checkPlots($user)
     {

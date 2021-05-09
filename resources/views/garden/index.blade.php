@@ -16,16 +16,16 @@
         <div class=" p-2 btn-group btn-group-toggle" id="modifierSelector" data-toggle="buttons" >
             <label type="button" class="modifier-btn btn mr-2 modifier-button" type="radio" autocomplete="off">
                 <input type="radio" name="options" autocomplete="off" value=null >
-                    <img class="img-fluid image-zoom"  src="{{ asset('images/close.png') }}" style="height: 6em">
-                <div class="text-small font-weight-bold text-secondary">No Modifier</div>
+                    <i class="fas fa-times fa-5x text-white"></i>
+                    <div class="text-small font-weight-bold text-secondary">No Modifier</div>
             </label>
             @foreach($userModifiers as $modifier)
                 @foreach($modifier->chunk(4) as $chunk)
                     @foreach($chunk as $stack)
                         <label type="button" class="modifier-btn btn  mr-2 modifier-button" type="radio" autocomplete="off">
-                            <input type="radio" name="options" autocomplete="off" value="{{$stack->first()->id}}" >
+                            <input type="radio" name="options" autocomplete="off" value="{{ $stack->first()->id }}" >
                             <img class="img-fluid image-zoom" src="{{ $stack->first()->imageUrl }}" style="height: 6em">
-                            <div class="text-small font-weight-bold text-secondary"> {!!$stack->first()->name !!} <br>Quantity: x{{ $stack->sum('pivot.count') }}</div>
+                            <div class="text-small font-weight-bold text-secondary"> {!! $stack->first()->name !!} <br>Quantity: x{{ $stack->sum('pivot.count') }}</div>
                         </label>
                     @endforeach
                 @endforeach
@@ -56,6 +56,7 @@
                         <!--- if not dead show not dead thing --->
                             @else
                                 @if($userPlot->started_at != null)
+                                <!----If there is a plant growing --->
                                     @if($userPlot->water_at > $now)
                                         <img class="img-fluid image-zoom my-auto mx-auto pt-2" src="{{ asset('images/data/seeds/seed.png') }}" data-toggle="tooltip" title="{{ $userPlot->waterings }} {{ $userPlot->waterings == 1 ? 'watering' : 'waterings' }} done!" style="width: 10em; height: 10em;">
                                         <div id="{{ $userPlot->id }}-water-text" class ="text-white">Next watering {{ $userPlot->water_at }}</div>
@@ -92,6 +93,15 @@
                                         @endif
                                     @endif
                                 @else
+                                <!----If there is NO plant growing --->
+                                <i class="fas fa-seedling text-white m-1"></i>
+                                    @if($userPlot->modifiers != null)
+                                            @php $mods = json_decode($userPlot->modifiers, true); @endphp
+                                            @if($mods['fertiliser'])
+                                                <p class="text-white"><i class="fas fa-star"></i> Fertiliser Quality: {{ $mods['fertiliser'] }}</p>
+                                            @endif
+                                    @endif
+
                                     <button id="seed" type="button" class="btn btn-success hide" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="plantSeed({{ $userPlot->id }})">
                                         Plant Seed!
                                     </button>
@@ -121,8 +131,8 @@
             <div class=" p-2 btn-group-vertical btn-group-toggle" id="seedSelector" data-toggle="buttons">
                 <label type="button" class="btn  my-1 btn-block seed-button" type="radio" autocomplete="off" >
                     <input type="radio" name="options" autocomplete="off" value=null >
-                        <img class="img-fluid image-zoom"  src="{{ asset('images/close.png') }}" style="width: 100%">
-                    <div class="text-small text-white text-center" style="font-size:1rem;">No Seed</div>
+                        <i class="fas fa-times fa-5x text-white"></i>
+                        <div class="text-small text-white text-center" style="font-size:1rem;">No Seed</div>
                 </label>
                 @foreach($userSeeds as $seed)
                     @foreach($seed->chunk(4) as $chunk)
@@ -176,8 +186,8 @@
                     $("body").load(" #app");
                 },
                 error: function(error) {
-                    console.log(error);
-                    alert("AJAX call failed: " + error);
+                    console.log(error.responseJSON);
+                    alert("AJAX call failed: " +  error);
                     $("body").load(" #app");
                 }
             });
