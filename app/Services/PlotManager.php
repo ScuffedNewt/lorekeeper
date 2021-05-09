@@ -108,7 +108,15 @@ class PlotManager extends Service
             $plot->started_at = Carbon::now();
             // this is where we set the plot time between each waterings
             // because this is a function we can add things later
-            $plot->time = 24; // default 24 hours
+            if($plot->modifiers)
+            {
+                $mods = json_decode($plot->modifiers, true);
+                if($mods['fertiliser'])
+                {
+                    $time = 24 - $mods['fertiliser'];
+                    $plot->time = $time; // default 24 hours
+                }
+            }
             $plot->waterings = 0; // the user can water immediately, but we must set a base line to increment
             $plot->water_at = Carbon::now()->addHours($plot->time);
             $plot->save();
@@ -191,8 +199,11 @@ class PlotManager extends Service
             $tag = $mod->item->tags()->where('tag', 'fertiliser')->first();
             if(!$tag) throw new \Exception("No data attached to this modifier.");
 
-            $current = [];
             $current = json_decode($plot->modifiers, true);
+            if($current == null) {
+                $current = [];
+                $current['fertiliser'] = null;
+            }
             $current['fertiliser'] += $tag['data']['quality'];
 
             $plot->modifiers = json_encode($current);
