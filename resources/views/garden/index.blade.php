@@ -34,7 +34,7 @@
     </div>
     <!--------------------------------------------->
     <div class="d-flex justify-content-between bg-light" style="font-size: 100% !important; overflow-y: auto;">
-        <div class="col card" style=" max-height:55em;">
+        <div class="col card">
             <h5 class="mt-1">Plots</h5>
             <div class="row justify-content-center">
             @foreach($plots->chunk(3) as $chunk)
