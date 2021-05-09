@@ -15,7 +15,7 @@
     <div class=" bg-light overflow-auto card" style="overflow-x: scroll;">
         <div class=" p-2 btn-group btn-group-toggle" id="modifierSelector" data-toggle="buttons" >
             <label type="button" class="modifier-btn btn mr-2 modifier-button" type="radio" autocomplete="off">
-                <input type="radio" name="options" autocomplete="off" value=null >
+                <input type="radio" name="options" autocomplete="off" value="0" >
                     <i class="fas fa-times fa-5x text-white"></i>
                     <div class="text-small font-weight-bold text-secondary">No Modifier</div>
             </label>
@@ -130,7 +130,7 @@
             <h5 class="text-left">Seeds</h5> 
             <div class=" p-2 btn-group-vertical btn-group-toggle" id="seedSelector" data-toggle="buttons">
                 <label type="button" class="btn  my-1 btn-block seed-button" type="radio" autocomplete="off" >
-                    <input type="radio" name="options" autocomplete="off" value=null >
+                    <input type="radio" name="options" autocomplete="off" value="0" >
                         <i class="fas fa-times fa-5x text-white"></i>
                         <div class="text-small text-white text-center" style="font-size:1rem;">No Seed</div>
                 </label>
@@ -158,14 +158,20 @@
         
         $("#seedSelector input:radio").change(function() {
             selectedSeed = $(this).val();
-            $("#seed").removeClass('hide');
-            $("#mod").addClass('hide');
+            if(selectedSeed == null || selectedSeed == 0) $("#seed").addClass('hide');
+            else {
+                $("#seed").removeClass('hide');
+                $("#mod").addClass('hide');
+            }
         });
 
         $("#modifierSelector input:radio").change(function() {
             selectedModifier = $(this).val();
-            $("#mod").removeClass('hide');
-            $("#seed").addClass('hide');
+            if(selectedModifier == null || selectedModifier ==  0) $("#mod").addClass('hide');
+            else {
+                $("#mod").removeClass('hide');
+                $("#seed").addClass('hide');
+            }
         });
 
         function plantSeed(plotID) {
