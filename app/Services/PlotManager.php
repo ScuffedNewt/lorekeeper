@@ -102,7 +102,7 @@ class PlotManager extends Service
             if(!$seed) throw new \Exception("Invalid seed.");
             
             $invman = new InventoryManager;
-            if(!$invman->debitStack($user, null, 'Seed Planted', ['data' => 'Seed planted in garden.'], $seed, 1)) throw new \Exception('Could not debit seed.');
+            if(!$invman->debitStack($user, 'Seed Planted', ['data' => 'Seed planted in garden.'], $seed, 1)) throw new \Exception('Could not debit seed.');
 
             $plot->item_id = $seed->item->id;
             $plot->started_at = Carbon::now();
