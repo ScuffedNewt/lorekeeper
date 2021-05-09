@@ -34,9 +34,9 @@
     </div>
     <!--------------------------------------------->
     <div class="d-flex justify-content-between bg-light" style=" font-size: 100% !important  ">
-        <div class="col card" style=" max-height:50em;">
+        <div class="col card overflow-y: scroll; " style=" max-height:50em;">
             <h5 class="mt-1">Plots</h5>
-            <div class="row ">
+            <div class="row justify-content-center">
             @foreach($plots->chunk(3) as $chunk)
                 @foreach($chunk as $plot)
                 <div class="card text-center m-1 col-lg-3 col-md-4" style="min-width: 14em; min-height: 14em; background-color: rgb(100, 60, 41); justify-content: center; margin:0; padding:0;">
