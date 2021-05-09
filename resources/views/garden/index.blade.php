@@ -39,7 +39,7 @@
             <div class="row ">
             @foreach($plots->chunk(3) as $chunk)
                 @foreach($chunk as $plot)
-                <div class="card text-center m-1 col-lg-3 col-md-4" style="min-width: 14em; min-height: 14em; background-color: rgb(100, 60, 41); justify-content: center;">
+                <div class="card text-center m-1 col-lg-3 col-md-4" style="min-width: 14em; min-height: 14em; background-color: rgb(100, 60, 41); justify-content: center; margin:0; padding:0;">
                     <!---- if user owns plot --->
                         @if(Auth::user()->gardenplots->contains('plot_id', $plot->id))
                         @php
@@ -102,10 +102,11 @@
                                                 <p class="text-white"><i class="fas fa-star"></i> Fertiliser Quality: {{ $mods['fertiliser'] }}</p>
                                             @endif
                                     @endif
-                                    <button id="seed" type="button" class="btn btn-success hide" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="plantSeed({{ $userPlot->id }})">
+
+                                    <button type="button" class="seed-button-plant btn btn-success hide" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="plantSeed({{ $userPlot->id }})">
                                         Plant Seed!
                                     </button>
-                                    <button id="mod" type="button" class="btn btn-warning text-white hide" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="addModifier({{ $userPlot->id }})">
+                                    <button type="button" class="mod-button-plant btn btn-warning text-white hide" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="addModifier({{ $userPlot->id }})">
                                         Apply Modifier!
                                     </button>
                                 @endif
@@ -158,19 +159,37 @@
         
         $("#seedSelector input:radio").change(function() {
             selectedSeed = $(this).val();
-            if(selectedSeed == null || selectedSeed == 0) $("#seed").addClass('hide');
+            if(selectedSeed == null || selectedSeed == 0) {
+                $(".seed-button-plant").each( function(){
+                $(this).addClass('hide');
+                })
+            }
             else {
-                $("#seed").removeClass('hide');
-                $("#mod").addClass('hide');
+                $(".seed-button-plant").each( function() {
+                    console.log("fdhd");
+                    $(this).removeClass('hide');
+                })
+                $(".mod-button-plant").each( function(){
+                    $(this).addClass('hide');
+                })
             }
         });
 
         $("#modifierSelector input:radio").change(function() {
             selectedModifier = $(this).val();
-            if(selectedModifier == null || selectedModifier ==  0) $("#mod").addClass('hide');
+            if(selectedModifier == null || selectedModifier ==  0){
+                $(".mod-button-plant").each( function(){
+                    $(this).addClass('hide');
+                })
+            }
             else {
-                $("#mod").removeClass('hide');
-                $("#seed").addClass('hide');
+                $(".seed-button-plant").each( function() {
+                    console.log("fdhd");
+                    $(this).addClass('hide');
+                })
+                $(".mod-button-plant").each( function(){
+                    $(this).removeClass('hide');
+                })
             }
         });
 
