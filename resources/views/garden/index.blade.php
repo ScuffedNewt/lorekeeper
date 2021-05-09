@@ -49,7 +49,7 @@
                         <!--- If plant is dead show dead thing --->
                             @if($userPlot->is_dead)
                                 <button type="button" class="btn btn-dark" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="clearPlot({{ $userPlot->id }})">
-                                    <img class="img-fluid my-auto mx-auto pt-2" src="{{ asset('images/data/seeds/dead.png') }}" style="width: 5em; height:5em;">
+                                    <img class="img-fluid my-auto mx-auto pt-2" src="{{ asset('images/data/seeds/dead.png') }}" style="width: 7em; height:7em;">
                                     <div class="text-danger">Your plant has died.
                                     <br> Click to clear.</div>
                                 </button>
@@ -81,14 +81,14 @@
                                     <!--- if we can water, check if the plant is complete or if it's ready to be watered again -->
                                         @if($userPlot->waterings >= $userPlot->item->tags->where('tag', 'seed')->first()->data['waterings'])
                                             <i class="fas fa-seedling text-white mt-1"></i>
-                                            <img class="img-fluid my-auto mx-auto pt-2" src="{{ asset('images/data/seeds/seed.png') }}" style="width: 10em; height:10em;">
+                                            <img class="img-fluid my-auto mx-auto pt-2" src="{{ asset('images/data/seeds/seed.png') }}" style="width: 7em; height:7em;">
                                             {!! Form::open(['url' => 'garden/claim/' . $userPlot->id]) !!}
                                             {!! Form::submit('Claim!', ['class' => 'btn btn-sm btn-primary']) !!}
                                             {!! Form::close() !!}
                                     <!---->
                                         @else
                                             <button type="button" class="btn btn-primary" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="waterPlot({{ $userPlot->id }})">
-                                                <img class="img-fluid my-auto mx-auto pt-2" src="{{ asset('images/data/seeds/seed.png') }}" style="width: 10em; height: 10em;">
+                                                <img class="img-fluid my-auto mx-auto pt-2" src="{{ asset('images/data/seeds/seed.png') }}" style="width: 7em; height: 7em;">
                                                 <br> Water <i class="fas fa-water"></i>
                                             </button>
                                         @endif
@@ -127,7 +127,7 @@
         
         </div>
         <!-------------------- SEEDS -------------------------->
-        <div class="text-center card" style="overflow-y: scroll; overflow-x: hidden; flex 0 0 8em; min-width: 11em; max-width: 11em; max-height:60em;">
+        <div class="text-center card" style="overflow-y: scroll; overflow-x: hidden; flex 0 0 7em; min-width: 11em; max-width: 11em; max-height:60em;">
             <h5 class="text-left">Seeds</h5> 
             <div class=" p-2 btn-group-vertical btn-group-toggle" id="seedSelector" data-toggle="buttons">
                 <label type="button" class="btn  my-1 btn-block seed-button" type="radio" autocomplete="off" >
