@@ -170,7 +170,6 @@
             }
             else {
                 $(".seed-button-plant").each( function() {
-                    console.log("fdhd");
                     $(this).removeClass('hide');
                 })
                 $(".mod-button-plant").each( function(){
@@ -188,7 +187,6 @@
             }
             else {
                 $(".seed-button-plant").each( function() {
-                    console.log("fdhd");
                     $(this).addClass('hide');
                 })
                 $(".mod-button-plant").each( function(){
