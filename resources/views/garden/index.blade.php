@@ -34,7 +34,7 @@
     </div>
     <!--------------------------------------------->
     <div class="d-flex justify-content-between bg-light" style=" font-size: 100% !important  ">
-        <div class="col card" style=" max-height:60em;">
+        <div class="col card" style=" max-height:50em;">
             <h5 class="mt-1">Plots</h5>
             <div class="row ">
             @foreach($plots->chunk(3) as $chunk)
@@ -109,6 +109,10 @@
                                     <button type="button" class="mod-button-plant btn btn-warning text-white hide" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="addModifier({{ $userPlot->id }})">
                                         Apply Modifier!
                                     </button>
+
+                                    <button type="button" class="skull-button">
+                                        <i class="fas fa-skull-crossbones"></i>
+                                    </button>
                                 @endif
                             @endif
                     <!---- if not owned plot --->
@@ -127,7 +131,7 @@
         
         </div>
         <!-------------------- SEEDS -------------------------->
-        <div class="text-center card" style="overflow-y: scroll; overflow-x: hidden; flex 0 0 7em; min-width: 11em; max-width: 11em; max-height:60em;">
+        <div class="text-center card" style="overflow-y: scroll; overflow-x: hidden; flex 0 0 7em; min-width: 11em; max-width: 11em; max-height:50em;">
             <h5 class="text-left">Seeds</h5> 
             <div class=" p-2 btn-group-vertical btn-group-toggle" id="seedSelector" data-toggle="buttons">
                 <label type="button" class="btn  my-1 btn-block seed-button" type="radio" autocomplete="off" >
