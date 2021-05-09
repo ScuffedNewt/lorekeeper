@@ -211,8 +211,6 @@
                     $("body").load(" #app");
                 },
                 error: function(error) {
-                    console.log(error.responseJSON);
-                    alert("AJAX call failed: " +  error);
                     $("body").load(" #app");
                 }
             });
@@ -237,8 +235,6 @@
                     $("body").load(" #app");
                 },
                 error: function(error) {
-                    console.log(error);
-                    alert("AJAX call failed: " + error);
                     $("body").load(" #app");
                 }
             });
@@ -258,8 +254,6 @@
                     $("body").load(" #app");
                 },
                 error: function(error) {
-                    console.log(error);
-                    alert("AJAX call failed: " + error);
                     $("body").load(" #app");
                 }
             });
@@ -278,8 +272,6 @@
                     $("body").load(" #app");
                 },
                 error: function(error) {
-                    console.log(error);
-                    alert("AJAX call failed: " + error);
                     $("body").load(" #app");
                 }
             });

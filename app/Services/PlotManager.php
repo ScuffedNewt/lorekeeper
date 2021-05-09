@@ -204,6 +204,9 @@ class PlotManager extends Service
                 $current = [];
                 $current['fertiliser'] = null;
             }
+            else {
+                if($current['fertiliser'] == 5) throw new \Exception('Max quality reached!');
+            }
             $current['fertiliser'] += $tag['data']['quality'];
 
             $plot->modifiers = json_encode($current);
