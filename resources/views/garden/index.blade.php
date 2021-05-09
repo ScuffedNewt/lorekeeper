@@ -33,7 +33,7 @@
         </div>
     </div>
     <!--------------------------------------------->
-    <div class="d-flex justify-content-between bg-light" style="font-size: 100% !important; overflow-y: auto;">
+    <div class="d-flex justify-content-between bg-light" style="font-size: 100% !important;">
         <div class="col card">
             <h5 class="mt-1">Plots</h5>
             <div class="row justify-content-center">
