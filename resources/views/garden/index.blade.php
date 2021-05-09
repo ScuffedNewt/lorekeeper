@@ -7,7 +7,7 @@
     <link rel="stylesheet" type="text/css" href="{{ url('/css/gardens.css') }}" />
 </head>
 
-<h1 class="display-4">garden</h1>
+<h1>garden</h1>
 <hr>
     <!--------------------------------------------->
 <div class="container" id="content">
@@ -33,8 +33,13 @@
         </div>
     </div>
     <!--------------------------------------------->
+<<<<<<< HEAD
     <div class="d-flex justify-content-between bg-light" style=" font-size: 100% !important  ">
         <div class="col card overflow-y: scroll; " style=" max-height:50em;">
+=======
+    <div class="d-flex justify-content-between bg-light" style="font-size: 100% !important; overflow-y: auto;">
+        <div class="col card" style=" max-height:50em;">
+>>>>>>> 4ba0c5893b6d3bb885137defc4512743f1c9bd97
             <h5 class="mt-1">Plots</h5>
             <div class="row justify-content-center">
             @foreach($plots->chunk(3) as $chunk)
