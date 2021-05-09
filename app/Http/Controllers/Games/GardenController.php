@@ -178,4 +178,31 @@ class GardenController extends Controller
         }
         if($check == 1) flash('One or more of your plants has died due to lack of watering.')->error();
     }
+
+    /**
+     * Get skull modal
+     */
+    public function getSkull($id)
+    {
+        $plot = UserGardenPlot::find($id);
+        if(!$plot) abort(404);
+
+        return view('garden._skull_modal', [
+            'plot' => $plot
+        ]);
+    }
+
+    /**
+     * 
+     */
+    public function destroyCrop($id, PlotManager $service)
+    {
+        if($service->clear(Auth::user(), $id)) {
+            flash('Crop destroyed successfully!')->success();
+        }
+        else {
+            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+        }
+        return redirect()->back();
+    }
 }

@@ -33,18 +33,14 @@
         </div>
     </div>
     <!--------------------------------------------->
-<<<<<<< HEAD
-    <div class="d-flex justify-content-between bg-light" style=" font-size: 100% !important  ">
-        <div class="col card overflow-y: scroll; " style=" max-height:50em;">
-=======
     <div class="d-flex justify-content-between bg-light" style="font-size: 100% !important; overflow-y: auto;">
-        <div class="col card" style=" max-height:50em;">
->>>>>>> 4ba0c5893b6d3bb885137defc4512743f1c9bd97
+        <div class="col card" style=" max-height:55em;">
             <h5 class="mt-1">Plots</h5>
             <div class="row justify-content-center">
             @foreach($plots->chunk(3) as $chunk)
                 @foreach($chunk as $plot)
                 <div class="card text-center m-1 col-lg-3 col-md-4" style="min-width: 14em; min-height: 14em; background-color: rgb(100, 60, 41); justify-content: center; margin:0; padding:0;">
+                    <span class="plotid">#{{$plot->id}}</span>
                     <!---- if user owns plot --->
                         @if(Auth::user()->gardenplots->contains('plot_id', $plot->id))
                         @php
@@ -61,11 +57,12 @@
                         <!--- if not dead show not dead thing --->
                             @else
                                 @if($userPlot->started_at != null)
-                                <!----If there is a plant growing --->
+                                    <!----If there is a plant growing --->
                                     @if($userPlot->water_at > $now && $userPlot->waterings < $userPlot->item->tags->where('tag', 'seed')->first()->data['waterings'])
                                         <img class="img-fluid image-zoom my-auto mx-auto pt-2" src="{{ asset('images/data/seeds/seed.png') }}" data-toggle="tooltip" title="{{ $userPlot->waterings }} {{ $userPlot->waterings == 1 ? 'watering' : 'waterings' }} done!" style="width: 10em; height: 10em;">
+                                        <span class="text-muted"> Growing {!! $userPlot->item->name !!} seeds</span>
                                         <div id="{{ $userPlot->id }}-water-text" class ="text-white">Next watering {{ $userPlot->water_at }}</div>
-                                        <p class="text-white">Started {!! pretty_date($userPlot->started_at)!!}
+                                        <p class="text-white">Started {!! pretty_date($userPlot->started_at)!!}</p>
                                         <!---- Water times -->
                                         <script>
                                             function waterCount(id, timer) {
@@ -82,15 +79,18 @@
                                             setInterval(waterCount(waterTextId, wateringLeft), 1000);
                                         </script>
                                         <!------------------>
+                                        <button type="button" class="skull-button" value="{{ $userPlot->id }}">
+                                            <i class="fas fa-skull-crossbones"></i>
+                                        </button>
                                     @else
-                                    <!--- if we can water, check if the plant is complete or if it's ready to be watered again -->
+                                        <!--- if we can water, check if the plant is complete or if it's ready to be watered again -->
                                         @if($userPlot->waterings >= $userPlot->item->tags->where('tag', 'seed')->first()->data['waterings'])
                                             <i class="fas fa-seedling text-white mt-1"></i>
                                             <img class="img-fluid my-auto mx-auto pt-2" src="{{ asset('images/data/seeds/seed.png') }}" style="width: 7em; height:7em;">
                                             {!! Form::open(['url' => 'garden/claim/' . $userPlot->id]) !!}
                                             {!! Form::submit('Claim!', ['class' => 'btn btn-sm btn-primary']) !!}
                                             {!! Form::close() !!}
-                                    <!---->
+                                        <!---->
                                         @else
                                             <button type="button" class="btn btn-primary" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="waterPlot({{ $userPlot->id }})">
                                                 <img class="img-fluid my-auto mx-auto pt-2" src="{{ asset('images/data/seeds/seed.png') }}" style="width: 7em; height: 7em;">
@@ -114,10 +114,6 @@
                                     <button type="button" class="mod-button-plant btn btn-warning text-white hide" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="addModifier({{ $userPlot->id }})">
                                         Apply Modifier!
                                     </button>
-
-                                    <button type="button" class="skull-button">
-                                        <i class="fas fa-skull-crossbones"></i>
-                                    </button>
                                 @endif
                             @endif
                     <!---- if not owned plot --->
@@ -136,7 +132,7 @@
         
         </div>
         <!-------------------- SEEDS -------------------------->
-        <div class="text-center card" style="overflow-y: scroll; overflow-x: hidden; flex 0 0 7em; min-width: 11em; max-width: 11em; max-height:50em;">
+        <div class="text-center card" style="overflow-y: scroll; overflow-x: hidden; flex 0 0 7em; min-width: 11em; max-width: 11em; max-height:51em;">
             <h5 class="text-left">Seeds</h5> 
             <div class=" p-2 btn-group-vertical btn-group-toggle" id="seedSelector" data-toggle="buttons">
                 <label type="button" class="btn  my-1 btn-block seed-button" type="radio" autocomplete="off" >
@@ -198,6 +194,12 @@
                     $(this).removeClass('hide');
                 })
             }
+        });
+
+        $('.skull-button').on('click', function(e) {
+            e.preventDefault();
+            var $this = $(this);
+            loadModal("{{ url('garden/skull') }}" + '/' + $this.attr("value"), 'Destroy Crop?');
         });
 
         function plantSeed(plotID) {

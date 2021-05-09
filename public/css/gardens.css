@@ -14,17 +14,16 @@
 }
 
 .image-zoom{
-  filter: grayscale(40%);
   transition: transform .2s;
 }
 
 .image-zoom:hover {
-  filter: grayscale(0%);
   transform: scale(1.2);
 }
 
 .modifier-button {
   background-color: var(--modifier-button-color) !important;
+  filter: grayscale(40%);
 }
 
 .modifier-button:hover {
@@ -51,6 +50,7 @@
 }
 
 .seed-button {
+  filter: grayscale(40%);
   background-color: var(--seed-button-color) !important;
 }
 
@@ -79,7 +79,7 @@
 
 .skull-button{
   position: absolute;
-  top: 12em;
+  top: 13.5em;
   right: 0;
   width: 2em;
   height: 2em;
@@ -94,4 +94,11 @@
 
 .skull-button:hover{
   opacity: 1;
+}
+
+.plotid {
+  color: #ddd;
+  position: absolute;
+  top: 0;
+  left: 0.25em;
 }
