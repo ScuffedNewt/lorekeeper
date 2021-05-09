@@ -57,7 +57,7 @@
                             @else
                                 @if($userPlot->started_at != null)
                                 <!----If there is a plant growing --->
-                                    @if($userPlot->water_at > $now)
+                                    @if($userPlot->water_at > $now && $userPlot->waterings < $userPlot->item->tags->where('tag', 'seed')->first()->data['waterings'])
                                         <img class="img-fluid image-zoom my-auto mx-auto pt-2" src="{{ asset('images/data/seeds/seed.png') }}" data-toggle="tooltip" title="{{ $userPlot->waterings }} {{ $userPlot->waterings == 1 ? 'watering' : 'waterings' }} done!" style="width: 10em; height: 10em;">
                                         <div id="{{ $userPlot->id }}-water-text" class ="text-white">Next watering {{ $userPlot->water_at }}</div>
                                         <p class="text-white">Started {!! pretty_date($userPlot->started_at)!!}
@@ -79,7 +79,7 @@
                                         <!------------------>
                                     @else
                                     <!--- if we can water, check if the plant is complete or if it's ready to be watered again -->
-                                        @if($userPlot->watering == $userPlot->item->tags->where('tag', 'seed')->first()->data['waterings']))
+                                        @if($userPlot->waterings <= $userPlot->item->tags->where('tag', 'seed')->first()->data['waterings']))
                                             <img class="img-fluid my-auto mx-auto pt-2" src="{{ asset('images/data/seeds/seed.png') }}" style="width: 10em; height:10em;">
                                             {!! Form::open(['url' => 'garden/claim/' . $userPlot->id]) !!}
                                             {!! Form::submit('Claim!', ['class' => 'btn btn-sm btn-primary']) !!}
