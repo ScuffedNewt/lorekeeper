@@ -190,7 +190,7 @@ class PlotManager extends Service
             $plot = UserGardenPlot::find($data['plotID']);
             if(!$plot) throw new \Exception("Invalid plot.");
 
-            $mod = UserItem::where('item_id', $data['modID'])->first();
+            $mod = UserItem::where('item_id', $data['modID'])->where('count', '>', 0)->first();
             if(!$mod) throw new \Exception("Invalid modifier.");
 
             $invman = new InventoryManager;
@@ -234,7 +234,8 @@ class PlotManager extends Service
             $tag = $plot->item->tags()->where('tag', 'seed')->first();
             $item = Item::find($tag['data']['plant_id']);
 
-            $quantity = mt_rand(1, $tag['data']['quantity']);
+            if($tag['data']['quantity']) $quantity = mt_rand(1, $tag['data']['quantity']);
+            else $quantity = 1;
 
             $invman = new InventoryManager;
             if(!$invman->creditItem($user, $user, 'Garden Harvest', ['data' => 'Crop from garden'], $item, $quantity)) throw new \Exception('Could not credit plant.');
