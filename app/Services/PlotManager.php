@@ -98,11 +98,11 @@ class PlotManager extends Service
             $plot = UserGardenPlot::find($data['plotID']);
             if(!$plot) throw new \Exception("Invalid plot.");
 
-            $seed = UserItem::where('item_id', $data['seedID'])->first();
+            $seed = UserItem::where('item_id', $data['seedID'])->where('count', '>', 0)->first();
             if(!$seed) throw new \Exception("Invalid seed.");
-
+            
             $invman = new InventoryManager;
-            if(!$invman->debitStack($user, null, ['data' => 'Seed planted in garden.'], $seed, 1)) throw new \Exception('Could not debit seed.');
+            if(!$invman->debitStack($user, null, 'Seed Planted', ['data' => 'Seed planted in garden.'], $seed, 1)) throw new \Exception('Could not debit seed.');
 
             $plot->item_id = $seed->item->id;
             $plot->started_at = Carbon::now();
@@ -194,7 +194,7 @@ class PlotManager extends Service
             if(!$mod) throw new \Exception("Invalid modifier.");
 
             $invman = new InventoryManager;
-            if(!$invman->debitStack($user, null, ['data' => 'Modifier used in garden.'], $mod, 1)) throw new \Exception('Could not debit modifier.');
+            if(!$invman->debitStack($user, null, 'Added Modifier to Garden', ['data' => 'Modifier used in garden.'], $mod, 1)) throw new \Exception('Could not debit modifier.');
 
             $tag = $mod->item->tags()->where('tag', 'fertiliser')->first();
             if(!$tag) throw new \Exception("No data attached to this modifier.");
