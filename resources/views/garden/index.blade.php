@@ -208,10 +208,10 @@
                     },
                 dataType: 'json',
                 success: function(data) {
-                    $("body").load(" #app");
+                    refreshThePage();
                 },
                 error: function(error) {
-                    $("body").load(" #app");
+                    refreshThePage();
                 }
             });
             }
@@ -232,10 +232,10 @@
                     },
                 dataType: 'json',
                 success: function(data) {
-                    $("body").load(" #app");
+                    refreshThePage();
                 },
                 error: function(error) {
-                    $("body").load(" #app");
+                    refreshThePage();
                 }
             });
             }
@@ -251,10 +251,10 @@
                     },
                 dataType: 'json',
                 success: function(data) {
-                    $("body").load(" #app");
+                    refreshThePage();
                 },
                 error: function(error) {
-                    $("body").load(" #app");
+                    refreshThePage();
                 }
             });
         }
@@ -269,13 +269,16 @@
                     },
                 dataType: 'json',
                 success: function(data) {
-                    $("body").load(" #app");
+                    refreshThePage();
                 },
                 error: function(error) {
-                    $("body").load(" #app");
+                    refreshThePage();
                 }
             });
         }
 
+        function refreshThePage(){
+            location.reload();
+        }
     </script>
 @endsection
