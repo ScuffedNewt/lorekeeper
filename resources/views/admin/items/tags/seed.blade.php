@@ -3,6 +3,9 @@
 {!! Form::label('Waterings') !!}
 {!! Form::number('waterings', $tag->getData()['waterings'], ['class' => 'form-control mb-1', 'min' => 1]) !!}
 
+{!! Form::label('Max Quantity') !!} {!! add_help('Input the maximum amount of crop that can be grown from one seed.') !!}
+{!! Form::number('quantity', $tag->getData()['quantity'], ['class' => 'form-control mb-1', 'min' => 1]) !!}
+
 {!! Form::label('Final Plant') !!}
 {!! Form::select('plant_id', $items, $tag->getData()['plant_id'], ['class' => 'form-control mb-2']) !!}
 

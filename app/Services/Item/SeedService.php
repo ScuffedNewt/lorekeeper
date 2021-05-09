@@ -44,6 +44,7 @@ class SeedService extends Service
         //fetch data from DB, if there is no data then set to NULL instead
         $data['waterings'] = isset($tag->data['waterings']) ? $tag->data['waterings'] : null;
         $data['plant_id'] = isset($tag->data['plant_id']) ? $tag->data['plant_id'] : null;
+        $data['quantity'] = isset($tag->data['quantity']) ? $tag->data['quantity'] : 1;    
 
         return $data;
     }
@@ -61,7 +62,8 @@ class SeedService extends Service
 
         try {
             $seedData['waterings'] = isset($data['waterings']) ? $data['waterings'] : null; 
-            $seedData['plant_id'] = isset($data['plant_id']) ? $data['plant_id'] : null;    
+            $seedData['plant_id'] = isset($data['plant_id']) ? $data['plant_id'] : null; 
+            $seedData['quantity'] = isset($data['quantity']) ? $data['quantity'] : 1;    
 
             if($seedData['plant_id'] == $tag->item->id) throw new \Exception('Cannot be the same item as the seed.');
 

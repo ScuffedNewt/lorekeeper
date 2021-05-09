@@ -79,7 +79,8 @@
                                         <!------------------>
                                     @else
                                     <!--- if we can water, check if the plant is complete or if it's ready to be watered again -->
-                                        @if($userPlot->waterings <= $userPlot->item->tags->where('tag', 'seed')->first()->data['waterings']))
+                                        @if($userPlot->waterings >= $userPlot->item->tags->where('tag', 'seed')->first()->data['waterings'])
+                                            <i class="fas fa-seedling text-white mt-1"></i>
                                             <img class="img-fluid my-auto mx-auto pt-2" src="{{ asset('images/data/seeds/seed.png') }}" style="width: 10em; height:10em;">
                                             {!! Form::open(['url' => 'garden/claim/' . $userPlot->id]) !!}
                                             {!! Form::submit('Claim!', ['class' => 'btn btn-sm btn-primary']) !!}
@@ -101,7 +102,6 @@
                                                 <p class="text-white"><i class="fas fa-star"></i> Fertiliser Quality: {{ $mods['fertiliser'] }}</p>
                                             @endif
                                     @endif
-
                                     <button id="seed" type="button" class="btn btn-success hide" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="plantSeed({{ $userPlot->id }})">
                                         Plant Seed!
                                     </button>

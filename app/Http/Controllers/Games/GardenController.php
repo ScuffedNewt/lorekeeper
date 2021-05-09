@@ -122,9 +122,18 @@ class GardenController extends Controller
         }
     }
 
-    public function postClaim()
+    /**
+     * Claim thing
+     */
+    public function postClaim($id, PlotManager $service)
     {
-        ////
+        if($service->claim(Auth::user(), $id)) {
+            flash('Claimed successfully!')->success();
+        }
+        else {
+            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+        }
+        return redirect()->back();
     }
     
     /******************************************************************************************************

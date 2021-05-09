@@ -204,4 +204,39 @@ class PlotManager extends Service
         }
         return $this->rollbackReturn(false);
     }
+
+    /**
+     * OwO
+     */
+    public function claim($user, $id)
+    {
+        DB::beginTransaction();
+
+        try { 
+
+            $plot = UserGardenPlot::find($id);
+            if(!$plot) throw new \Exception("Invalid plot.");
+
+            $tag = $plot->item->tags()->where('tag', 'seed')->first();
+            $item = Item::find($tag['data']['plant_id']);
+
+            $quantity = mt_rand(1, $tag['data']['quantity']);
+
+            $invman = new InventoryManager;
+            if(!$invman->creditItem($user, $user, 'Garden Harvest', ['data' => 'Crop from garden'], $item, $quantity)) throw new \Exception('Could not credit plant.');
+
+            $plot->modifiers = null;
+            $plot->started_at = null;
+            $plot->water_at = null;
+            $plot->waterings = null;
+            $plot->is_dead = 0;
+            $plot->time = null;
+            $plot->save();
+
+            return $this->commitReturn(true);
+        } catch(\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+        return $this->rollbackReturn(false);
+    }
 }

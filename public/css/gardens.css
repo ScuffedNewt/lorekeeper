@@ -14,13 +14,14 @@
 }
 
 .image-zoom{
+  filter: grayscale(40%);
   transition: transform .2s;
 }
 
 .image-zoom:hover {
+  filter: grayscale(0%);
   transform: scale(1.2);
 }
-
 
 .modifier-button {
   background-color: var(--modifier-button-color) !important;
@@ -33,13 +34,20 @@
 
 .modifier-button:active {
   background-color: var(--modifier-button-color) !important;
-  filter: saturate(150%)
+  filter: saturate(150%);
 }
 
 .modifier-button:not(:disabled):not(.disabled).active {
   background-color: var(--modifier-button-color) !important;
   filter: saturate(130%)
+}
 
+.modifier-button:active img {
+  filter: grayscale(0%);
+}
+
+.modifier-button:not(:disabled):not(.disabled).active img {
+  filter: grayscale(0%);
 }
 
 .seed-button {
@@ -59,5 +67,12 @@
 .seed-button:not(:disabled):not(.disabled).active {
   background-color: var(--seed-button-color) !important;
   filter: saturate(130%)
+}
 
+.seed-button:active img {
+  filter: grayscale(0%);
+}
+
+.seed-button:not(:disabled):not(.disabled).active img {
+  filter: grayscale(0%);
 }
