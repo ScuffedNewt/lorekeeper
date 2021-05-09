@@ -114,9 +114,12 @@ class PlotManager extends Service
                 if($mods['fertiliser'])
                 {
                     $time = 24 - $mods['fertiliser'];
-                    $plot->time = $time; // default 24 hours
                 }
             }
+            else {
+                $time = 24;
+            }
+            $plot->time = $time; // default 24 hours
             $plot->waterings = 0; // the user can water immediately, but we must set a base line to increment
             $plot->water_at = Carbon::now()->addHours($plot->time);
             $plot->save();
