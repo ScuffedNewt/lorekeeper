@@ -197,7 +197,6 @@
 
         $('.skull-button').on('click', function(e) {
             e.preventDefault();
-            console.log
             loadModal("{{ url('garden/skull') }}" + '/' + $this.data('value'), 'Destroy Crop?');
         });
 
