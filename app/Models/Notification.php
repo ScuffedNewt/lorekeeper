@@ -146,6 +146,8 @@ class Notification extends Model
     const REPORT_CLOSED                     = 221;
     const COMMENT_MADE                      = 239;
     const COMMENT_REPLY                     = 240;
+    const TRANSFER_REQUEST_DENIED           = 270;
+    const TRANSFER_REQUEST_ACCEPTED         = 271;
     const CHARACTER_ITEM_GRANT              = 501;
     const CHARACTER_ITEM_REMOVAL            = 502;
     const GALLERY_SUBMISSION_COLLABORATOR   = 505;

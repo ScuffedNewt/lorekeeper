@@ -172,5 +172,22 @@
             </div>
         </div>
     @endif
+    <div class="col-sm-6">
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Transfer Requests @if($transferRequestCount)<span class="badge badge-primary">{{ $transferRequestCount }}</span>@endif</h5>
+                <p class="card-text">
+                    @if($transferRequestCount)
+                        {{ $transferRequestCount }} request{{ $transferRequestCount == 1 ? '' : 's' }} awaiting processing.
+                    @else
+                        The transfer request queue is clear. Hooray!
+                    @endif
+                </p>
+                <div class="text-right">
+                    <a href="{{ url('admin/transfer-requests/pending') }}" class="card-link">View Queue <span class="fas fa-caret-right ml-1"></span></a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection

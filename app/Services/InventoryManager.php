@@ -9,6 +9,7 @@ use Config;
 use Notifications;
 
 use Illuminate\Support\Arr;
+use App\Models\TransferRequest;
 use App\Models\User\User;
 use App\Models\Item\Item;
 use App\Models\Item\ItemCategory;
@@ -497,6 +498,61 @@ class InventoryManager extends Service
                 $stack['stack_name'] = $name;
                 $stack->save();
             }
+            return $this->commitReturn(true);
+        } catch(\Exception $e) { 
+            $this->setError('error', $e->getMessage());
+        }
+        return $this->rollbackReturn(false);
+    }
+
+    /********************************************************************************
+     * 
+     ********************************************************************************/
+    /**
+     * Transfers items between user stacks.
+     *
+     * @param  \App\Models\User\User      $sender
+     * @param  \App\Models\User\User      $recipient
+     * @param  \App\Models\User\UserItem  $stacks
+     * @param  int                        $quantities
+     * @return bool
+     */
+    public function queuetransferStack($sender, $recipient, $stacks, $quantities, $reason)
+    {
+        DB::beginTransaction();
+
+        try {
+
+            $json = null;
+
+            foreach($stacks as $key=>$stack) {
+                $quantity = $quantities[$key];
+                if(!$sender->hasAlias) throw new \Exception("You need to have a linked social media account before you can perform this action.");
+                if(!$stack) throw new \Exception("An invalid item was selected.");
+                if($stack->user_id != $sender->id && !$sender->hasPower('edit_inventories')) throw new \Exception("You do not own one of the selected items.");
+                if($stack->user_id == $recipient->id) throw new \Exception("Cannot send items to the item's owner.");
+                if(!$recipient) throw new \Exception("Invalid recipient selected.");
+                if(!$recipient->hasAlias) throw new \Exception("Cannot transfer items to a non-verified member.");
+                if($recipient->is_banned) throw new \Exception("Cannot transfer items to a banned member.");
+                if((!$stack->item->allow_transfer || isset($stack->data['disallow_transfer'])) && !$sender->hasPower('edit_inventories')) throw new \Exception("One of the selected items cannot be transferred.");
+                if($stack->count < $quantity) throw new \Exception("Quantity to transfer exceeds item count.");
+
+                $json['stack_id'][] = $stack->id;
+                $json['quantity'][] = $quantity;
+
+                $stack->transfer_count += $quantity;
+                $stack->save();
+            }
+
+            $json = json_encode($json);
+
+            TransferRequest::create([
+                'sender_id' => $stack->user_id,
+                'recipient_id' => $recipient->id,
+                'items' => $json,
+                'reason' => $reason ? $reason : null,
+            ]);
+
             return $this->commitReturn(true);
         } catch(\Exception $e) { 
             $this->setError('error', $e->getMessage());

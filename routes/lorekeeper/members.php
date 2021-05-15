@@ -198,3 +198,7 @@ Route::group(['prefix' => 'comments', 'namespace' => 'Comments'], function() {
     Route::post('/{comment}', 'CommentController@reply')->name('comments.reply');
     Route::post('/{id}/feature', 'CommentController@feature')->name('comments.feature');
 });
+
+Route::group(['prefix' => 'transfer-requests', 'namespace' => 'Admin'], function() {
+    Route::get('/', 'TransferRequestController@getIndex');
+});  

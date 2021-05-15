@@ -109,6 +109,10 @@
                             {!! Form::label('user_id', 'Recipient') !!} {!! add_help('You can only transfer items to verified users.') !!}
                             {!! Form::select('user_id', $userOptions, null, ['class'=>'form-control']) !!}
                         </div>
+                        <div class="form-group">
+                            {!! Form::label('reason', 'Transfer Reason') !!} {!! add_help('You must provide a reason why you wish to transfer the item.') !!}
+                            {!! Form::text('reason', null, ['class'=>'form-control']) !!}
+                        </div>
                         <div class="text-right">
                             {!! Form::button('Transfer', ['class' => 'btn btn-primary', 'name' => 'action', 'value' => 'transfer', 'type' => 'submit']) !!}
                         </div>

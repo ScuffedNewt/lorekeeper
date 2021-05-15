@@ -69,6 +69,9 @@
                             <a class="dropdown-item" href="{{ url('trades/open') }}">
                                 Trades
                             </a>
+                            <a class="dropdown-item" href="{{ url('transfer-requests') }}">
+                                Transfer Requests
+                            </a>
                         </div>
                     </li>
                 @endif

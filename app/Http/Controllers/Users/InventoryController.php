@@ -163,13 +163,26 @@ class InventoryController extends Controller
      */
     private function postTransfer(Request $request, InventoryManager $service)
     {
-        if($service->transferStack(Auth::user(), User::visible()->where('id', $request->get('user_id'))->first(), UserItem::find($request->get('ids')), $request->get('quantities'))) {
-            flash('Item transferred successfully.')->success();
+        if(Auth::user()->isStaff) {
+            /// insta transfer
+            if($service->transferStack(Auth::user(), User::visible()->where('id', $request->get('user_id'))->first(), UserItem::find($request->get('ids')), $request->get('quantities'))) {
+                flash('Item transferred successfully.')->success();
+            }
+            else {
+                foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+            }
+            return redirect()->back();
         }
         else {
-            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+            // queue
+            if($service->queueTransferStack(Auth::user(), User::visible()->where('id', $request->get('user_id'))->first(), UserItem::find($request->get('ids')), $request->get('quantities'), $request->get('reason'))) {
+                flash('Item transfer request created successfully.')->success();
+            }
+            else {
+                foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+            }
+            return redirect()->back();
         }
-        return redirect()->back();
     }
 
     /**

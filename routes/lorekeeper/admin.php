@@ -436,4 +436,13 @@ Route::group(['prefix' => 'designs', 'middleware' => 'power:manage_characters'],
     Route::post('edit/{id}/{action}', 'DesignController@postDesign')->where('action', 'cancel|approve|reject');
     Route::post('vote/{id}/{action}', 'DesignController@postVote')->where('action', 'approve|reject');
 });
+
+# TRANSFER REQUESTS
+Route::group(['prefix' => 'transfer-requests'], function() {
+    Route::get('/', 'TransferRequestController@getTransferRequestIndex');
+    Route::get('/{status}', 'TransferRequestController@getTransferRequestIndex')->where('status', 'pending|approved|rejected');
+    Route::get('edit/{id}', 'TransferRequestController@getTransferRequest');
+    Route::post('edit/{id}/{action}', 'TransferRequestController@postTransferRequest')->where('action', 'approve|reject');
+});
+
 Route::get('{type}/{status}', 'DesignController@getDesignIndex')->where('type', 'myo-approvals|design-approvals')->where('status', 'pending|approved|rejected');

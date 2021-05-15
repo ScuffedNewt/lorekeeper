@@ -316,6 +316,20 @@ return [
         'message' => '<a href="{sender_url}">{sender}</a> has made a reply to your comment. <a href="comment/{comment_url}">See Reply.</a>',
         'url' => ''
     ],
+    
+    // TRANSFER_REQUEST_DENIED
+    270 => [
+        'name' => 'Transfer Request Denied',
+        'message' => 'Your transfer request to {recipient_name} was denied by {staff_name}. (<a href="{url}">View Request</a>)',
+        'url' => 'transfer-requests/view/{transfer_id}'
+    ],
+
+    // TRANSFER_REQUEST_APPROVED
+    271 => [
+        'name' => 'Transfer Request Approved',
+        'message' => 'Your transfer request to {recipient_name} was approved by {staff_name}. (<a href="{url}">View Request</a>)',
+        'url' => 'transfer-requests/view/{transfer_id}'
+    ],
 
     // CHARACTER_ITEM_GRANT
     501 => [
