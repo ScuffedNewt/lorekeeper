@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Models\TransferRequest;
 use App\Models\Item\Item;
 use App\Models\User\UserItem;
+use App\Models\User\UserCurrency;
 
 use App\Services\InventoryManager;
 use App\Services\TransferRequestManager;
@@ -56,14 +57,19 @@ class TransferRequestController extends Controller
         if(!$transfer) abort(404);
 
         $items = json_decode($transfer->items);
-        $userItem = UserItem::find($items->stack_id[0]);
+        if(isset($items->stack_id[0])) {
+            $userThing = UserItem::find($items->stack_id[0]);
+        }
+        elseif(isset($items->currency_id[0])) {
+            $userThing = UserCurrency::where('currency_id', $items->currency_id[0])->where('user_id', $transfer->sender_id)->first();
+        }
 
         $quantity = 0;
         foreach($items->quantity as $q) $quantity += $q;
 
         return view('admin.transfers.transfer', [
             'transfer' => $transfer,
-            'item' => $userItem,
+            'object' => $userThing,
             'quantity' => $quantity
         ]);
     }
@@ -103,14 +109,19 @@ class TransferRequestController extends Controller
         if(!$transfer) abort(404);
 
         $items = json_decode($transfer->items);
-        $userItem = UserItem::find($items->stack_id[0]);
+        if(isset($items->stack_id[0])) {
+            $userThing = UserItem::find($items->stack_id[0]);
+        }
+        elseif(isset($items->currency_id[0])) {
+            $userThing = UserCurrency::find($items->currency_id[0]);
+        }
 
         $quantity = 0;
         foreach($items->quantity as $q) $quantity += $q;
 
         return view('home.transfer', [
             'transfer' => $transfer,
-            'item' => $userItem,
+            'object' => $userThing,
             'quantity' => $quantity,
             'user' => $transfer->user
         ]);

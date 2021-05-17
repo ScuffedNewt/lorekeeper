@@ -48,12 +48,25 @@ class BankController extends Controller
      */
     public function postTransfer(Request $request, CurrencyManager $service)
     {
-        if($service->transferCurrency(Auth::user(), User::visible()->where('id', $request->get('user_id'))->first(), Currency::where('allow_user_to_user', 1)->where('id', $request->get('currency_id'))->first(), $request->get('quantity'))) {
-            flash('Currency transferred successfully.')->success();
+        if(Auth::user()->isStaff) {
+            /// insta transfer
+            if($service->transferCurrency(Auth::user(), User::visible()->where('id', $request->get('user_id'))->first(), Currency::where('allow_user_to_user', 1)->where('id', $request->get('currency_id'))->first(), $request->get('quantity'))) {
+                flash('Currency transferred successfully.')->success();
+            }
+            else {
+                foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+            }
+            return redirect()->back();
         }
         else {
-            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+            // queue
+            if($service->queueTransferCurrency(Auth::user(), User::visible()->where('id', $request->get('user_id'))->first(), Currency::where('allow_user_to_user', 1)->where('id', $request->get('currency_id'))->first(), $request->get('quantity'), $request->get('reason'))) {
+                flash('Currency transfer request created successfully.')->success();
+            }
+            else {
+                foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+            }
+            return redirect()->back();
         }
-        return redirect()->back();
     }
 }

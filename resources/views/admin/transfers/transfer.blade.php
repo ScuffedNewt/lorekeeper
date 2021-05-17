@@ -31,17 +31,31 @@
 
     <div class="row col-12">
         <div class="col-2">
-            <h2>Item</h2>
-            <div class="card mb-3">
-                <div class="card-body">
-                    @if($item->item->imageUrl)
-                        <img src="{{ $item->item->imageUrl }}" data-toggle="tooltip" title="{{ $item->item->name }}">
-                    @else
-                        {!! $item->item->displayName !!}
-                    @endif
-                    x {{ $quantity }}
+            @if($object->AssetType == 'user_items')
+                <h2>Item</h2>
+                <div class="card mb-3">
+                    <div class="card-body">
+                        @if($object->item->imageUrl)
+                            <img src="{{ $object->item->imageUrl }}" data-toggle="tooltip" title="{{ $object->item->name }}">
+                        @else
+                            {!! $object->item->displayName !!}
+                        @endif
+                        x {{ $quantity }}
+                    </div>
                 </div>
-            </div>
+            @else
+            <h2>Currency</h2>
+                <div class="card mb-3">
+                    <div class="card-body">
+                        @if($object->currency->imageUrl)
+                            <img src="{{ $object->currency->imageUrl }}" data-toggle="tooltip" title="{{ $object->currency->name }}">
+                        @else
+                            {!! $object->currency->displayName !!}
+                        @endif
+                        x {{ $quantity }}
+                    </div>
+                </div>
+            @endif
         </div>
         <div class="col-10">
             <h2>Reason for Transfer</h2>
@@ -78,7 +92,7 @@
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <p>This will approve the transfer and distribute the items to the recipient.</p>
+                    <p>This will approve the transfer and distribute the objects to the recipient.</p>
                     <div class="text-right">
                         <a href="#" id="approvalSubmit" class="btn btn-success">Approve</a>
                     </div>

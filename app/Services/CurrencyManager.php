@@ -11,6 +11,7 @@ use App\Models\User\User;
 use App\Models\Currency\Currency;
 use App\Models\User\UserCurrency;
 use App\Models\Character\CharacterCurrency;
+use App\Models\TransferRequest;
 
 class CurrencyManager extends Service
 {
@@ -287,6 +288,52 @@ class CurrencyManager extends Service
             $recipient ? $recipient->id : null, $recipient ? $recipient->logType : null,
             $type, $data, $currency->id, -$quantity)) throw new \Exception("Failed to create log.");
 
+            return $this->commitReturn(true);
+        } catch(\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+        return $this->rollbackReturn(false);
+    }
+
+    /********************************************************************************
+     * 
+     ********************************************************************************/
+    /**
+     * Transfers currency between users.
+     *
+     * @param  \App\Models\User\User          $sender
+     * @param  \App\Models\User\User          $recipient
+     * @param  \App\Models\Currency\Currency  $currency
+     * @param  int                            $quantity
+     * @return  bool
+     */
+    public function queueTransferCurrency($sender, $recipient, $currency, $quantity, $reason)
+    {
+        DB::beginTransaction();
+
+        try {
+            $json = null;
+
+            if(!$recipient) throw new \Exception("Invalid recipient selected.");
+            if($recipient->logType == 'User' && !$recipient->hasAlias) throw new \Exception("Cannot transfer currency to a non-verified member.");
+            if($recipient->logType == 'User' && $recipient->is_banned) throw new \Exception("Cannot transfer currency to a banned member.");
+            if(!$currency) throw new \Exception("Invalid currency selected.");
+            if($quantity <= 0) throw new \Exception("Invalid quantity entered.");
+
+            $json['currency_id'][] = $currency->id;
+            $json['quantity'][] = $quantity;
+
+            $usercurrency = UserCurrency::where('currency_id', $currency->id)->where('user_id', $sender->id)->first();
+            if(!$usercurrency) throw new \Exception('You do not own any of this currency.');
+            DB::table('user_currencies')->where('user_id', $sender->id)->where('currency_id', $currency->id)->update(['quantity' => $usercurrency->quantity - $quantity]);
+            $json = json_encode($json);
+
+            TransferRequest::create([
+                'sender_id' => $sender->id,
+                'recipient_id' => $recipient->id,
+                'items' => $json,
+                'reason' => $reason ? $reason : null,
+            ]);
             return $this->commitReturn(true);
         } catch(\Exception $e) {
             $this->setError('error', $e->getMessage());

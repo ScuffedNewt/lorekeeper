@@ -55,6 +55,12 @@
             </div>
         </div>
     </div>
+    @if(!Auth::user()->isstaff)
+        <div class="form-group">
+            {!! Form::label('reason', 'Reason') !!}
+            {!! Form::text('reason', null, ['class' => 'form-control', 'placeholder' => 'Input Reason for Transfer.']) !!}
+        </div>
+    @endif
     <div class="text-right">
         {!! Form::submit('Transfer', ['class' => 'btn btn-primary']) !!}
     </div>
