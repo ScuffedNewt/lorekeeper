@@ -30,7 +30,7 @@
     </div>
 
     <div class="row col-12">
-        <div class="col-2">
+        <div class="col-6">
             @if($object->AssetType == 'user_items')
                 <h2>Item</h2>
                 <div class="card mb-3">
@@ -57,7 +57,7 @@
                 </div>
             @endif
         </div>
-        <div class="col-10">
+        <div class="col-6">
             <h2>Reason for Transfer</h2>
             <div class="card mb-3"><div class="card-body">{!! nl2br(htmlentities($transfer->reason)) !!}</div></div>
             @if(Auth::check() && $transfer->staff_comments && ($transfer->user_id == Auth::user()->id || Auth::user()->isStaff))
