@@ -25,6 +25,10 @@ use App\Models\Gallery\GalleryCollaborator;
 use App\Models\Gallery\GalleryFavorite;
 use App\Traits\Commenter;
 
+use App\Models\Character\CharacterDesignUpdate;
+use App\Models\Character\CharacterTransfer;
+use App\Models\Trade;
+use App\Models\TransferRequest;
 class User extends Authenticatable implements MustVerifyEmail
 {
     use Notifiable, Commenter;
@@ -565,4 +569,25 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return CharacterBookmark::where('user_id', $this->id)->where('character_id', $character->id)->first();
     }
+
+
+
+    /**
+     * Check if there are any Admin Notifications
+     *
+     * @return int
+     */
+     public function hasAdminNotification($user)
+     {
+       $submissionCount = $user->hasPower('manage_submissions') ? Submission::where('status', 'Pending')->whereNotNull('prompt_id')->count() : 0;
+       $claimCount = $user->hasPower('manage_submissions') ? Submission::where('status', 'Pending')->whereNull('prompt_id')->count() : 0;
+       $designCount = $user->hasPower('manage_characters') ? CharacterDesignUpdate::characters()->where('status', 'Pending')->count() : 0;
+       $myoCount = $user->hasPower('manage_characters') ? CharacterDesignUpdate::myos()->where('status', 'Pending')->count() : 0;
+       $transferCount =  $user->hasPower('manage_characters') ? CharacterTransfer::active()->where('is_approved', 0)->count() : 0;
+       $tradeCount = $user->hasPower('manage_characters') ? Trade::where('status', 'Pending')->count() : 0;
+       $transferCount = $user->hasPower('manage_submissions') ? TransferRequest::where('status', 'Pending')->count() : 0;
+       $total = $submissionCount + $claimCount + $designCount + $myoCount + $transferCount + $tradeCount + $transferCount;
+       return $total;
+     }
+
 }

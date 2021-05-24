@@ -172,6 +172,7 @@
             </div>
         </div>
     @endif
+    @if (Auth::user()->hasPower('manage_submissions'))
     <div class="col-sm-6">
         <div class="card mb-3">
             <div class="card-body">
@@ -189,5 +190,6 @@
             </div>
         </div>
     </div>
+    @endif
 </div>
 @endsection
