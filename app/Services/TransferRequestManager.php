@@ -61,7 +61,6 @@ class TransferRequestManager extends Service
         DB::beginTransaction();
 
         try {
-
             $t = TransferRequest::find($data['id']);
             $t->status = 'Accepted';
             $t->staff_id = $user->id;
@@ -81,7 +80,11 @@ class TransferRequestManager extends Service
                 $service = new InventoryManager;
 
                 foreach($items->stack_id as $key => $item) {
-                    if($service->transferStack($t->user, $t->recipient, UserItem::find($item), $items->quantity[$key])) {
+                    $userItem = UserItem::find($item);
+                    if($service->moveStack($t->user, $t->recipient, 'User Transfer', ['data' => 'Transferred by ' . $t->user->displayname], $userItem, $items->quantity[$key])) {
+                        if($userItemRow->transfer_count < $items->quantity[$key]) throw new \Exception("Cannot return more items than was held. (".$item.")");
+                        $userItem->transfer_count -= $items->quantity[$key];
+                        $userItem->save();
                         flash('Item transferred successfully.')->success();
                     }
                     else {
@@ -90,7 +93,6 @@ class TransferRequestManager extends Service
                 }
             }
             elseif(isset($items->currency_id[0])) {
-
                 $service = new CurrencyManager;
 
                 $quantity = 0;
