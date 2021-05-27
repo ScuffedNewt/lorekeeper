@@ -16,7 +16,7 @@
     <a class="nav-link {{ set_active('admin/transfer-requests/pending*') }} {{ set_active('admin/transfer-requests') }}" href="{{ url('admin/transfer-requests/pending') }}">Pending</a>
   </li>
   <li class="nav-item">
-    <a class="nav-link {{ set_active('admin/transfer-requests/approved*') }}" href="{{ url('admin/transfer-requests/approved') }}">Approved</a>
+    <a class="nav-link {{ set_active('admin/transfer-requests/accepted*') }}" href="{{ url('admin/transfer-requests/accepted') }}">Approved</a>
   </li>
   <li class="nav-item">
     <a class="nav-link {{ set_active('admin/transfer-requests/rejected*') }}" href="{{ url('admin/transfer-requests/rejected') }}">Rejected</a>
@@ -53,7 +53,7 @@
       <div class="col-6 col-md-3">{!! $transfer->recipient->displayName !!}</div>
       <div class="col-6 col-md-3">{!! pretty_date($transfer->created_at) !!}</div>
       <div class="col-3 col-md-1">
-        <span class="btn btn-{{ $transfer->status == 'Pending' ? 'secondary' : ($transfer->status == 'Approved' ? 'success' : 'danger') }} btn-sm py-0 px-1">{{ $transfer->status }}</span>
+        <span class="btn btn-{{ $transfer->status == 'Pending' ? 'secondary' : ($transfer->status == 'Accepted' ? 'success' : 'danger') }} btn-sm py-0 px-1">{{ $transfer->status }}</span>
       </div>
       <div class="col-3 col-md-1"><a href="{{ $transfer->adminUrl }}" class="btn btn-primary btn-sm py-0 px-1">Details</a></div>
     </div>

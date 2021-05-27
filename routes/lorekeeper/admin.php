@@ -440,7 +440,7 @@ Route::group(['prefix' => 'designs', 'middleware' => 'power:manage_characters'],
 # TRANSFER REQUESTS
 Route::group(['prefix' => 'transfer-requests'], function() {
     Route::get('/', 'TransferRequestController@getTransferRequestIndex');
-    Route::get('/{status}', 'TransferRequestController@getTransferRequestIndex')->where('status', 'pending|approved|rejected');
+    Route::get('/{status}', 'TransferRequestController@getTransferRequestIndex')->where('status', 'pending|accepted|rejected');
     Route::get('edit/{id}', 'TransferRequestController@getTransferRequest');
     Route::post('edit/{id}/{action}', 'TransferRequestController@postTransferRequest')->where('action', 'approve|reject');
 });

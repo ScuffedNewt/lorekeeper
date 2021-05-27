@@ -33,7 +33,14 @@ class TransferRequestManager extends Service
             $t->save();
 
             $items = json_decode($t->items);
-            if(isset($items->currency_id[0])) {
+            if(isset($items->stack_id[0])) {
+            foreach($items->stack_id as $key => $item) {
+                $userItem = UserItem::find($item);
+                $userItem->transfer_count -= $items->quantity[$key];
+                $userItem->save();
+                }
+            }
+            elseif(isset($items->currency_id[0])) {
 
                 $usercurrency = UserCurrency::where('currency_id', $items->currency_id[0])->where('user_id', $t->sender_id)->first();
 
