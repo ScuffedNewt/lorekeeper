@@ -82,7 +82,7 @@ class TransferRequestManager extends Service
                 foreach($items->stack_id as $key => $item) {
                     $userItem = UserItem::find($item);
                     if($service->moveStack($t->user, $t->recipient, 'User Transfer', ['data' => 'Transferred by ' . $t->user->displayname], $userItem, $items->quantity[$key])) {
-                        if($userItemRow->transfer_count < $items->quantity[$key]) throw new \Exception("Cannot return more items than was held. (".$item.")");
+                        if($userItem->transfer_count < $items->quantity[$key]) throw new \Exception("Cannot return more items than was held. (".$item.")");
                         $userItem->transfer_count -= $items->quantity[$key];
                         $userItem->save();
                         flash('Item transferred successfully.')->success();
