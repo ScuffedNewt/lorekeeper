@@ -44,7 +44,7 @@ class FixTransferRequests extends Command
     public function handle()
     {
         //
-        $transfers = TransferRequest::where('status', 'Approved')->get();
+        $transfers = TransferRequest::where('status', 'Accepted')->get();
         foreach($transfers as $transfer)
         {
 
