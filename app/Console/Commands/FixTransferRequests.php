@@ -70,7 +70,7 @@ class FixTransferRequests extends Command
                 $quantity = 0;
                 foreach($items->quantity as $q) $quantity += $q;
 
-                $service->creditCurrency($t->user, $t->recipient, 'User Transfer', null, Currency::find($items->currency_id[0]), $quantity));
+                $service->creditCurrency($t->user, $t->recipient, 'User Transfer', null, Currency::find($items->currency_id[0]), $quantity);
             }
         }
     }
