@@ -56,7 +56,7 @@ class FixTransferRequests extends Command
 
             foreach($items->stack_id as $key => $item) {
                 $userItem = UserItem::find($item);
-                $service->moveStack($t->user, $t->recipient, 'User Transfer', ['data' => 'Transferred by ' . $t->user->displayname], $userItem, $items->quantity[$key]);
+                $service->moveStack($transfer->user, $transfer->recipient, 'User Transfer', ['data' => 'Transferred by ' . $transfer->user->displayname], $userItem, $items->quantity[$key]);
 
                 $userItem->transfer_count -= $items->quantity[$key];
                 $userItem->save();
@@ -70,7 +70,7 @@ class FixTransferRequests extends Command
                 $quantity = 0;
                 foreach($items->quantity as $q) $quantity += $q;
 
-                $service->creditCurrency($t->user, $t->recipient, 'User Transfer', null, Currency::find($items->currency_id[0]), $quantity);
+                $service->creditCurrency($transfer->user, $transfer->recipient, 'User Transfer', null, Currency::find($items->currency_id[0]), $quantity);
             }
         }
     }
