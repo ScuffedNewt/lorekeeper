@@ -16,7 +16,7 @@
     <a class="nav-link {{ set_active('admin/transfer-requests/pending*') }} {{ set_active('admin/transfer-requests') }}" href="{{ url('admin/transfer-requests/pending') }}">Pending</a>
   </li>
   <li class="nav-item">
-    <a class="nav-link {{ set_active('admin/transfer-requests/approved*') }}" href="{{ url('admin/transfer-requests/approved') }}">Approved</a>
+    <a class="nav-link {{ set_active('admin/transfer-requests/accepted*') }}" href="{{ url('admin/transfer-requests/accepted') }}">Approved</a>
   </li>
   <li class="nav-item">
     <a class="nav-link {{ set_active('admin/transfer-requests/rejected*') }}" href="{{ url('admin/transfer-requests/rejected') }}">Rejected</a>
