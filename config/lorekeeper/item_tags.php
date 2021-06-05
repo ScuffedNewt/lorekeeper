@@ -24,4 +24,10 @@ return [
         'text_color' => '#ffffff',
         'background_color' => '#1fd1a7'
     ],
+
+    'trait' => [
+        'name' => 'Trait Item',
+        'text_color' => '#ffffff',
+        'background_color' => '#f52d16'
+    ],
 ];
