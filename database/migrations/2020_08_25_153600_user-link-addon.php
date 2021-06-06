@@ -15,10 +15,10 @@ class UserLinkAddon extends Migration
     {
         // Add columns
         Schema::table('user_profiles', function (Blueprint $table) {
-            $table->string('insta', 40)->nullable($value = true);
-            $table->string('house', 60)->nullable($value = true);
-            $table->string('disc', 40)->nullable($value = true);
-            $table->string('arch', 50)->nullable($value = true);
+            $table->string('insta', 40)->nullable()->default(null);
+            $table->string('house', 60)->nullable()->default(null);
+            $table->string('disc', 40)->nullable()->default(null);
+            $table->string('arch', 50)->nullable()->default(null);
         });
     }
 

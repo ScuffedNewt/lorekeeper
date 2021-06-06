@@ -28,18 +28,27 @@
 
    <div class="ulinks" style="padding-top:7px">
 
-   @if($user->profile->disc)
-     <span class="float-left" style="font-size: 1.1rem; padding-left: 10px; opacity: 0.4;" data-toggle="tooltip" title=" {!! $user->profile->disc !!} "><i class="fab fa-discord"></i></span>
-   @endif
-   @if($user->profile->house)
-     <span class="float-left" style="font-size: 1.1rem; padding-left: 10px; opacity: 0.4;" data-toggle="tooltip" title=" {!! $user->profile->house !!}&#64;toyhou.se "><a href="https://toyhou.se/{!! $user->profile->house !!}"><i class="fas fa-home"></i></a></span>
-   @endif
-   @if($user->profile->arch)
-     <span class="float-left" style="font-size: 1.1rem; padding-left: 10px; opacity: 0.4;" data-toggle="tooltip" title=" {!! $user->profile->arch !!}&#64;twitter"><a href="https://archiveofourown.org/users/{!! $user->profile->arch !!}"><i class="fas fa-file-alt"></i></a></span>
-   @endif
-   @if($user->profile->insta)
-     <span class="float-left" style="font-size: 1.1rem; padding-left: 10px; opacity: 0.4;" data-toggle="tooltip" title=" {!! $user->profile->insta !!}&#64;instagram "><a href="https://www.instagram.com/{!! $user->profile->insta !!}"><i class="fab fa-instagram"></i></a></span>
-   @endif
+    @if($user->aliases()->where('site', 'deviantart')->exists())
+        @php $dA = $user->aliases()->where('site', 'deviantart')->first(); @endphp
+        <a class="float px-1" data-toggle="tooltip" title=" {!! $dA->alias !!}&#64;deviantart" href="{!! $dA->Url !!}"><i class="fab fa-deviantart fa-lg"></i></a>
+    @else
+        <a class="float px-1" data-toggle="tooltip" title=" Unverified "><i class="fab fa-deviantart fa-lg text-danger"></i></a>
+    @endif
+    @if($user->aliases()->where('site', 'twitter')->exists())
+        @php $twitter = $user->aliases()->where('site', 'twitter')->first(); @endphp
+        <a class="float px-1" data-toggle="tooltip" title=" {!! $twitter->alias !!}&#64;twitter" href="{!! $twitter->Url !!}"><i class="fab fa-twitter fa-lg"></i></a>
+    @else
+        <a class="float px-1" data-toggle="tooltip" title=" Unverified "><i class="fab fa-deviantart fa-lg text-danger"></i></a>
+    @endif
+    @if($user->profile->house)
+        <a class="float px-1" data-toggle="tooltip" title=" {!! $user->profile->house !!}&#64;toyhou.se" href="https://toyhou.se/{!! $user->profile->house !!}"><i class="fas fa-home fa-lg"></i></a></span>
+    @endif
+    @if($user->profile->insta)
+        <a class="float px-1" data-toggle="tooltip" title=" {!! $user->profile->insta !!}&#64;instagram" href="https://www.instagram.com/{!! $user->profile->insta !!}"><i class="fab fa-instagram fa-lg"></i></a></span>
+    @endif
+    @if($user->profile->arch)
+        <a class="float px-1" data-toggle="tooltip" title=" {!! $user->profile->arch !!}&#64;archive" href="https://archiveofourown.org/users/{!! $user->profile->arch !!}"><i class="fas fa-file-alt fa-lg"></i></a></span>
+    @endif
 
  </div>
  </div>
