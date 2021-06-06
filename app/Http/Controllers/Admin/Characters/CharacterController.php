@@ -17,6 +17,7 @@ use App\Models\Species\Subtype;
 use App\Models\Feature\Feature;
 use App\Models\Character\CharacterTransfer;
 use App\Models\Trade;
+use App\Models\User\UserItem;
 
 use App\Services\CharacterManager;
 use App\Services\CurrencyManager;
@@ -59,7 +60,7 @@ class CharacterController extends Controller
             'userOptions' => User::query()->orderBy('name')->pluck('name', 'id')->toArray(),
             'rarities' => ['0' => 'Select Rarity'] + Rarity::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
             'specieses' => ['0' => 'Select Species'] + Species::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
-            'subtypes' => ['0' => 'Select Subtype'] + Subtype::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
+            'subtypes' => ['0' => 'Pick a Species First'],
             'features' => Feature::orderBy('name')->pluck('name', 'id')->toArray(),
             'isMyo' => false
         ]);
@@ -76,12 +77,26 @@ class CharacterController extends Controller
             'userOptions' => User::query()->orderBy('name')->pluck('name', 'id')->toArray(),
             'rarities' => ['0' => 'Select Rarity'] + Rarity::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
             'specieses' => ['0' => 'Select Species'] + Species::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
-            'subtypes' => ['0' => 'Select Subtype'] + Subtype::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
+            'subtypes' => ['0' => 'Pick a Species First'],
             'features' => Feature::orderBy('name')->pluck('name', 'id')->toArray(),
             'isMyo' => true
         ]);
     }
-    
+
+    /**
+     * Shows the edit image subtype portion of the modal
+     *
+     * @param  Request  $request
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getCreateCharacterMyoSubtype(Request $request) {
+      $species = $request->input('species');
+      return view('admin.masterlist._create_character_subtype', [
+          'subtypes' => ['0' => 'Select Subtype'] + Subtype::where('species_id','=',$species)->orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
+          'isMyo' => $request->input('myo')
+      ]);
+    }
+
     /**
      * Creates a character.
      *
@@ -93,12 +108,12 @@ class CharacterController extends Controller
     {
         $request->validate(Character::$createRules);
         $data = $request->only([
-            'user_id', 'owner_alias', 'character_category_id', 'number', 'slug',
+            'user_id', 'owner_url', 'character_category_id', 'number', 'slug',
             'description', 'is_visible', 'is_giftable', 'is_tradeable', 'is_sellable',
             'sale_value', 'transferrable_at', 'use_cropper',
             'x0', 'x1', 'y0', 'y1',
-            'designer_alias', 'designer_url',
-            'artist_alias', 'artist_url',
+            'designer_id', 'designer_url',
+            'artist_id', 'artist_url',
             'species_id', 'subtype_id', 'rarity_id', 'feature_id', 'feature_data',
             'image', 'thumbnail', 'image_description'
         ]);
@@ -111,7 +126,7 @@ class CharacterController extends Controller
         }
         return redirect()->back()->withInput();
     }
-    
+
     /**
      * Creates an MYO slot.
      *
@@ -123,12 +138,12 @@ class CharacterController extends Controller
     {
         $request->validate(Character::$myoRules);
         $data = $request->only([
-            'user_id', 'owner_alias', 'name',
+            'user_id', 'owner_url', 'name',
             'description', 'is_visible', 'is_giftable', 'is_tradeable', 'is_sellable',
             'sale_value', 'transferrable_at', 'use_cropper',
             'x0', 'x1', 'y0', 'y1',
-            'designer_alias', 'designer_url',
-            'artist_alias', 'artist_url',
+            'designer_id', 'designer_url',
+            'artist_id', 'artist_url',
             'species_id', 'subtype_id', 'rarity_id', 'feature_id', 'feature_data',
             'image', 'thumbnail'
         ]);
@@ -246,7 +261,7 @@ class CharacterController extends Controller
     {
         $this->character = Character::where('slug', $slug)->first();
         if(!$this->character) abort(404);
-        
+
         return view('character.admin._edit_description_modal', [
             'character' => $this->character,
             'isMyo' => false
@@ -263,7 +278,7 @@ class CharacterController extends Controller
     {
         $this->character = Character::where('is_myo_slot', 1)->where('id', $id)->first();
         if(!$this->character) abort(404);
-        
+
         return view('character.admin._edit_description_modal', [
             'character' => $this->character,
             'isMyo' => true
@@ -442,13 +457,13 @@ class CharacterController extends Controller
 
         if ($service->deleteCharacter($this->character, Auth::user())) {
             flash('Character deleted successfully.')->success();
-            return redirect()->to($character->url);
+            return redirect()->to('myos');
         }
         else {
             foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
         }
         return redirect()->back();
-    }    
+    }
 
     /**
      * Transfers a character.
@@ -462,8 +477,8 @@ class CharacterController extends Controller
     {
         $this->character = Character::where('slug', $slug)->first();
         if(!$this->character) abort(404);
-        
-        if($service->adminTransfer($request->only(['recipient_id', 'recipient_alias', 'cooldown', 'reason']), $this->character, Auth::user())) {
+
+        if($service->adminTransfer($request->only(['recipient_id', 'recipient_url', 'cooldown', 'reason']), $this->character, Auth::user())) {
             flash('Character transferred successfully.')->success();
         }
         else {
@@ -471,7 +486,7 @@ class CharacterController extends Controller
         }
         return redirect()->back();
     }
-    
+
     /**
      * Transfers an MYO slot.
      *
@@ -484,8 +499,8 @@ class CharacterController extends Controller
     {
         $this->character = Character::where('is_myo_slot', 1)->where('id', $id)->first();
         if(!$this->character) abort(404);
-        
-        if($service->adminTransfer($request->only(['recipient_id', 'cooldown', 'reason']), $this->character, Auth::user())) {
+
+        if($service->adminTransfer($request->only(['recipient_id', 'recipient_url', 'cooldown', 'reason']), $this->character, Auth::user())) {
             flash('Character transferred successfully.')->success();
         }
         else {
@@ -519,7 +534,7 @@ class CharacterController extends Controller
             'tradeCount' => $openTransfersQueue ? Trade::where('status', 'Pending')->count() : 0
         ]);
     }
-    
+
     /**
      * Shows the character transfer action modal.
      *
@@ -538,7 +553,7 @@ class CharacterController extends Controller
             'cooldown' => Settings::get('transfer_cooldown'),
         ]);
     }
-    
+
     /**
      * Acts on a transfer in the transfer queue.
      *
@@ -552,9 +567,13 @@ class CharacterController extends Controller
         if(!Auth::check()) abort(404);
 
         $action = $request->get('action');
-        
+
         if($service->processTransferQueue($request->only(['action', 'cooldown', 'reason']) + ['transfer_id' => $id], Auth::user())) {
-            flash('Transfer ' . strtolower($action) . 'ed.')->success();
+            if (strtolower($action) == 'approve') {
+                flash('Transfer ' . strtolower($action) . 'd.')->success();
+            } else {
+                flash('Transfer ' . strtolower($action) . 'ed.')->success();
+            }
         }
         else {
             foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
@@ -578,16 +597,34 @@ class CharacterController extends Controller
         else abort(404);
 
         $openTransfersQueue = Settings::get('open_transfers_queue');
-        
+
+        $stacks = array();
+        foreach($trades->get() as $trade) {
+            foreach($trade->data as $side=>$assets) {
+                if(isset($assets['user_items'])) {
+                    $user_items = UserItem::with('item')->find(array_keys($assets['user_items']));
+                    $items = array();
+                    foreach($assets['user_items'] as $id=>$quantity) {
+                        $user_item = $user_items->find($id);
+                        $user_item['quantity'] = $quantity;
+                        array_push($items,$user_item);
+                    }
+                    $items = collect($items)->groupBy('item_id');
+                    $stacks[$trade->id][$side] = $items;
+                }
+            }
+        }
+
         return view('admin.masterlist.character_trades', [
             'trades' => $trades->orderBy('id', 'DESC')->paginate(20),
             'tradesQueue' => Settings::get('open_transfers_queue'),
             'openTransfersQueue' => $openTransfersQueue,
             'transferCount' => $openTransfersQueue ? CharacterTransfer::active()->where('is_approved', 0)->count() : 0,
-            'tradeCount' => $openTransfersQueue ? Trade::where('status', 'Pending')->count() : 0
+            'tradeCount' => $openTransfersQueue ? Trade::where('status', 'Pending')->count() : 0,
+            'stacks' => $stacks
         ]);
     }
-    
+
     /**
      * Shows the character trade action modal.
      *
@@ -606,7 +643,7 @@ class CharacterController extends Controller
             'cooldown' => Settings::get('transfer_cooldown'),
         ]);
     }
-    
+
     /**
      * Acts on a trade in the trade queue.
      *
@@ -631,7 +668,7 @@ class CharacterController extends Controller
         }
         return redirect()->back();
     }
-    
+
 
     /**
      * Shows a list of all existing MYO slots.
