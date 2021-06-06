@@ -16,7 +16,7 @@ class UserProfile extends Model
      * @var array
      */
     protected $fillable = [
-        'text',  'insta', 'disc', 'house' , 'arch' , 'parsed_text'
+        'text',  'insta', 'house' , 'arch' , 'parsed_text'
     ];
 
     /**

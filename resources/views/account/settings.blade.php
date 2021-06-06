@@ -7,43 +7,6 @@
 
 <h1>Settings</h1>
 
-
-<div class="card p-3 mb-2">
-<h3>Links</h3>
-  <p>Add your username to the forms only, please. A link will be created automatically.</p>
-
-{!! Form::open(['url' => 'account/socials']) !!}
-        <div class="form-group row">
-            <label class="col-md-2 col-form-label">Discord</label> <i class="fas fa-question-circle" data-toggle="tooltip" title=" Enter your usename and number code, please! - Example: username#0001 "></i>
-            <div class="col-md-9">
-                {!! Form::text('disc', Auth::user()->profile->disc, ['class' => 'form-control']) !!}
-            </div>
-        </div>
-        <div class="form-group row">
-            <label class="col-md-2 col-form-label">Instagram <i class="fas fa-question-circle" data-toggle="tooltip" title=" Enter your username, please!  "></i></label>
-            <div class="col-md-9">
-                {!! Form::text('insta', Auth::user()->profile->insta, ['class' => 'form-control']) !!}
-            </div>
-        </div>
-        <div class="form-group row">
-            <label class="col-md-2 col-form-label">Archieve Of Your Own (AO3) <i class="fas fa-question-circle" data-toggle="tooltip" title=" Enter your username, please!  "></i></label>
-            <div class="col-md-9">
-                {!! Form::text('arch', Auth::user()->profile->arch, ['class' => 'form-control']) !!}
-            </div>
-        </div>
-        <div class="form-group row">
-            <label class="col-md-2 col-form-label">Toyhou.se <i class="fas fa-question-circle" data-toggle="tooltip" title=" Enter your username, please!  "></i></label>
-            <div class="col-md-9">
-                {!! Form::text('house', Auth::user()->profile->house, ['class' => 'form-control']) !!}
-            </div>
-        </div>
-        <div class="text-right">
-            {!! Form::submit('Edit', ['class' => 'btn btn-primary']) !!}
-        </div>
-
-{!! Form::close() !!}
-</div>
-
 <div class="card p-3 mb-2">
     <h3>Avatar</h3>
     <div class="text-left"><div class="alert alert-warning">Please note a hard refresh may be required to see your updated avatar. Also please note that uploading a .gif will display a 500 error after; the upload should still work, however.</div></div>
@@ -72,6 +35,36 @@
         </div>
     {!! Form::close() !!}
 </div>
+
+<div class="card p-3 mb-2">
+    <h3>Links</h3>
+      <p>Add your username to the forms only, please. A link will be created automatically.</p>
+    
+    {!! Form::open(['url' => 'account/socials']) !!}
+            <div class="form-group row">
+                <label class="col-md-2 col-form-label">Instagram <i class="fas fa-question-circle" data-toggle="tooltip" title=" Enter your username, please!  "></i></label>
+                <div class="col-md-9">
+                    {!! Form::text('insta', Auth::user()->profile->insta, ['class' => 'form-control']) !!}
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-md-2 col-form-label">Archieve Of Your Own <i class="fas fa-question-circle" data-toggle="tooltip" title=" Enter your username, please!  "></i></label>
+                <div class="col-md-9">
+                    {!! Form::text('arch', Auth::user()->profile->arch, ['class' => 'form-control']) !!}
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-md-2 col-form-label">Toyhou.se <i class="fas fa-question-circle" data-toggle="tooltip" title=" Enter your username, please!  "></i></label>
+                <div class="col-md-9">
+                    {!! Form::text('house', Auth::user()->profile->house, ['class' => 'form-control']) !!}
+                </div>
+            </div>
+            <div class="text-right">
+                {!! Form::submit('Edit', ['class' => 'btn btn-primary']) !!}
+            </div>
+    
+    {!! Form::close() !!}
+    </div>
 
 <div class="card p-3 mb-2">
     <h3>Birthday Publicity</h3>
