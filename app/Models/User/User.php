@@ -586,7 +586,7 @@ class User extends Authenticatable implements MustVerifyEmail
        $transferCount =  $user->hasPower('manage_characters') ? CharacterTransfer::active()->where('is_approved', 0)->count() : 0;
        $tradeCount = $user->hasPower('manage_characters') ? Trade::where('status', 'Pending')->count() : 0;
        $transferCount = $user->hasPower('manage_submissions') ? TransferRequest::where('status', 'Pending')->count() : 0;
-       $total = $submissionCount + $claimCount + $designCount + $myoCount + $transferCount + $tradeCount + $transferCount;
+       $total = $submissionCount + $claimCount + $designCount + $myoCount + $transferCount + $tradeCount;
        return $total;
      }
 
