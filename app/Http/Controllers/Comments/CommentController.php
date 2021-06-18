@@ -238,20 +238,42 @@ class CommentController extends Controller implements CommentControllerInterface
         
         if(get_class($comment->commentable) == 'App\Models\Forum') {
             if($request->input('action') != 'none') {
-                $quantity = $request->input('quantity');
-                if(!$quantity || $quantity < 0 ) {
-                    flash('Quantity must be set if an action is selected.')->error();
-                    return redirect()->back();
-                }
                 $action = $request->input('action');
-                
-                $data = [];
-                $data['dice_type'] = $action;
-                for($i = 0; $i < $quantity; $i++)
-                {
-                   $data['dice'][] = mt_rand(1, $action);
+                if($action == 'random') {
+                    $no1 = $request->input('no_1');
+                    $no2 = $request->input('no_2');
+
+                    if(!$no1 || $no1 < 0 || !$no2 || $no2 < 0) {
+                        flash('Quantity must be set if an action is selected.')->error();
+                        return redirect()->back();
+                    }
+                    if($no1 > $no2) {
+                        flash('First integer must be lowest.')->error();
+                        return redirect()->back();
+                    }
+
+                    $data = [];
+                    $result = mt_rand($no1, $no2);
+                    $data['random']['result'] = $result;
+                    $data['random']['lower'] = $no1;
+                    $data['random']['higher'] = $no2;
+                    $data = json_encode($data);
                 }
-                $data = json_encode($data);
+                else {
+                    $quantity = $request->input('quantity');
+                    if(!$quantity || $quantity < 0 ) {
+                        flash('Quantity must be set if an action is selected.')->error();
+                        return redirect()->back();
+                    }
+                    
+                    $data = [];
+                    $data['dice_type'] = $action;
+                    for($i = 0; $i < $quantity; $i++)
+                    {
+                    $data['dice'][] = mt_rand(1, $action);
+                    }
+                    $data = json_encode($data);
+                }
             }
         }
 

@@ -110,18 +110,25 @@
                             </div>
                         </div>
                     </div>
-                    @if(isset($comment->data)) @php $data = json_decode($comment->data, true) @endphp @else @php $data = null @endphp @endif
+                    @if(isset($comment->data)) @php $data = json_decode($comment->data, true); $total = 0;@endphp @else @php $data = null @endphp @endif
                     <div class="p-2 row justify-content-between">
-                        <div class="col-{{ isset($data['dice']) ? 10 : 12 }}">
+                        <div class="col-{{ isset($data) ? 10 : 12 }}">
                             <p>{!! nl2br($markdown->line($comment->comment)) !!}</p>
                         </div>
                         @if(isset($data['dice'])) 
                         <div class="col-2 text-center border-left">
                             <i class="fas fa-dice fa-2x"></i>
                             <p><b>Dice Rolled:</b> <br>{{ $data['dice_type'] }}-Sided Die <br><small class="text-muted">Rolled {{ count($data['dice']) }} @if(count($data['dice']) > 1)  times @else time @endif</small></p>
-                            <p><b>Results:</b> @foreach($data['dice'] as $result) <br> {{$result}} @endforeach
+                            <p><b>Results:</b> <small> @foreach($data['dice'] as $result) @php $total += $result; @endphp<br> {{$result}} @endforeach </small> <br><br><b>Total:</b> <br>{{ $total }} </p>
                         </div>
                         @endif
+                        @if(isset($data['random']))
+                        <div class="col-2 text-center border-left">
+                            <i class="fas fa-dice fa-2x"></i>
+                            <p><b>Rolled Between:</b> <br>{{ $data['random']['lower']}} & {{ $data['random']['higher'] }}</p>
+                            <p><b>Result:</b> {{ $data['random']['result'] }}</p>
+                        </div>
+                        @endif 
                     </div>
 
                     @include('forums._form_modals', ['comment' => $comment])
@@ -148,7 +155,7 @@
                 <div class="collapse" id="action-collapse">
                     <div class="row col-12">
                         <div class="col-6">
-                        <label class="mt-1" for="action">Select Action:</label>
+                        <label class="mt-1 action" for="action">Select Action:</label>
                         <select class="form-control" name="action" id="action">
                             <option value="none">No Action</option>
                             <option value="4">Four-Sided Dice</option>
@@ -158,11 +165,17 @@
                             <option value="12">Twelve-Sided Dice</option>
                             <option value="20">Twenty-Sided Dice</option>
                             <option value="100">Hundred-Sided Dice</option>
+                            <option value="random">Random Interval</option>
                         </select>
                         </div>
-                        <div class="col-6">
+                        <div class="col-6 int hide">
                             <label class="mt-1" for="quantity">Input Number of Rolls:</label>
-                            <input type="text" id="quantity" type="number" min="1" class="form-control" name="quantity" placeholder="Input Integer Quantity">
+                            <input id="quantity" type="number" min="1" class="form-control" name="quantity" placeholder="Input Integer Quantity">
+                        </div>
+                        <div class="col-6 roll hide">
+                            <label class="mt-1" for="no_1">Input Two Numbers to Roll Between:</label>
+                            <input id="no_1" class="mb-1 form-control" type="number" min="1" class="form-control" name="no_1" placeholder="Input Lower Integer">
+                            <input id="no_2" type="number" min="1" class="form-control" name="no_2" placeholder="Input Higher Integer">
                         </div>
                     </div>
                 </div>
@@ -184,4 +197,27 @@
     </div>
 @endif
 
+@endsection
+@section('scripts')
+<script>
+    $( document ).ready(function() {    
+        $('#action').on('change', function(e) {
+            var val = $(this).val();
+            var int = $('.int');
+            var roll = $('.roll');
+            if(val != 'none') {
+            if(val == 'random') {
+                console.log('te');
+                int.addClass('hide');
+                roll.removeClass('hide');
+            }
+            else {
+                console.log('tes');
+                int.removeClass('hide');
+                roll.addClass('hide');
+            }
+            }
+        });
+    });
+</script>
 @endsection
