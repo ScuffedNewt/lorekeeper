@@ -110,8 +110,18 @@
                             </div>
                         </div>
                     </div>
-                    <div class="p-2">
-                        <p>{!! nl2br($markdown->line($comment->comment)) !!}</p>
+                    @if(isset($comment->data)) @php $data = json_decode($comment->data, true) @endphp @else @php $data = null @endphp @endif
+                    <div class="p-2 row justify-content-between">
+                        <div class="col-{{ isset($data['dice']) ? 10 : 12 }}">
+                            <p>{!! nl2br($markdown->line($comment->comment)) !!}</p>
+                        </div>
+                        @if(isset($data['dice'])) 
+                        <div class="col-2 text-center border-left">
+                            <i class="fas fa-dice fa-2x"></i>
+                            <p><b>Dice Rolled:</b> <br>{{ $data['dice_type'] }}-Sided Die <br><small class="text-muted">Rolled {{ count($data['dice']) }} @if(count($data['dice']) > 1)  times @else time @endif</small></p>
+                            <p><b>Results:</b> @foreach($data['dice'] as $result) <br> {{$result}} @endforeach
+                        </div>
+                        @endif
                     </div>
 
                     @include('forums._form_modals', ['comment' => $comment])
@@ -132,6 +142,30 @@
             <div class="form-group mb-0">
                 <label for="message">Enter your message here:</label>
                 <textarea required class="form-control" name="message" rows="3"></textarea>
+                <button class="btn mt-2 btn-outline-primary" type="button" data-toggle="collapse" data-target="#action-collapse" aria-expanded="false" aria-controls="action-collapse">
+                    Action?
+                  </button>
+                <div class="collapse" id="action-collapse">
+                    <div class="row col-12">
+                        <div class="col-6">
+                        <label class="mt-1" for="action">Select Action:</label>
+                        <select class="form-control" name="action" id="action">
+                            <option value="none">No Action</option>
+                            <option value="4">Four-Sided Dice</option>
+                            <option value="6">Six-Sided Dice</option>
+                            <option value="8">Eight-Sided Dice</option>
+                            <option value="10">Ten-Sided Dice</option>
+                            <option value="12">Twelve-Sided Dice</option>
+                            <option value="20">Twenty-Sided Dice</option>
+                            <option value="100">Hundred-Sided Dice</option>
+                        </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="mt-1" for="quantity">Input Number of Rolls:</label>
+                            <input type="text" id="quantity" type="number" min="1" class="form-control" name="quantity" placeholder="Input Integer Quantity">
+                        </div>
+                    </div>
+                </div>
                 <small class="form-text text-muted"><a target="_blank" href="https://help.github.com/articles/basic-writing-and-formatting-syntax">Markdown cheatsheet.</a></small>
             </div>
             <div class="text-center">

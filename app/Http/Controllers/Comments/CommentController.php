@@ -235,6 +235,26 @@ class CommentController extends Controller implements CommentControllerInterface
             'message' => 'required|string'
         ])->validate();
 
+        
+        if(get_class($comment->commentable) == 'App\Models\Forum') {
+            if($request->input('action') != 'none') {
+                $quantity = $request->input('quantity');
+                if(!$quantity || $quantity < 0 ) {
+                    flash('Quantity must be set if an action is selected.')->error();
+                    return redirect()->back();
+                }
+                $action = $request->input('action');
+                
+                $data = [];
+                $data['dice_type'] = $action;
+                for($i = 0; $i < $quantity; $i++)
+                {
+                   $data['dice'][] = mt_rand(1, $action);
+                }
+                $data = json_encode($data);
+            }
+        }
+
         $commentClass = Config::get('comments.model');
         $reply = new $commentClass;
         $reply->commenter()->associate(Auth::user());
@@ -243,6 +263,7 @@ class CommentController extends Controller implements CommentControllerInterface
         $reply->comment = $request->message;
         $reply->type = $comment->type;
         $reply->approved = !Config::get('comments.approval_required');
+        if($reply->commentable_type == 'App\Models\Forum') $reply->data = $data;
         $reply->save();
 
             // url = url('comments/32')
