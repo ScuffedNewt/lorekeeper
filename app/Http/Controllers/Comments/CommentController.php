@@ -237,7 +237,7 @@ class CommentController extends Controller implements CommentControllerInterface
 
         
         if(get_class($comment->commentable) == 'App\Models\Forum') {
-            if($request->input('action') != 'none') {
+            if($request->input('action') && $request->input('action') != 'none') {
                 $action = $request->input('action');
                 if($action == 'random') {
                     $no1 = $request->input('no_1');
@@ -285,7 +285,7 @@ class CommentController extends Controller implements CommentControllerInterface
         $reply->comment = $request->message;
         $reply->type = $comment->type;
         $reply->approved = !Config::get('comments.approval_required');
-        if($reply->commentable_type == 'App\Models\Forum') $reply->data = $data;
+        if($reply->commentable_type == 'App\Models\Forum' && isset($data)) $reply->data = $data;
         $reply->save();
 
             // url = url('comments/32')
