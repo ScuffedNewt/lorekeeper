@@ -583,10 +583,10 @@ class User extends Authenticatable implements MustVerifyEmail
        $claimCount = $user->hasPower('manage_submissions') ? Submission::where('status', 'Pending')->whereNull('prompt_id')->count() : 0;
        $designCount = $user->hasPower('manage_characters') ? CharacterDesignUpdate::characters()->where('status', 'Pending')->count() : 0;
        $myoCount = $user->hasPower('manage_characters') ? CharacterDesignUpdate::myos()->where('status', 'Pending')->count() : 0;
-       $transferCount =  $user->hasPower('manage_characters') ? CharacterTransfer::active()->where('is_approved', 0)->count() : 0;
+       $transferCount = $user->hasPower('manage_characters') ? CharacterTransfer::active()->where('is_approved', 0)->count() : 0;
        $tradeCount = $user->hasPower('manage_characters') ? Trade::where('status', 'Pending')->count() : 0;
-       $transferCount = $user->hasPower('manage_submissions') ? TransferRequest::where('status', 'Pending')->count() : 0;
-       $total = $submissionCount + $claimCount + $designCount + $myoCount + $transferCount + $tradeCount;
+       $transferRequestCount = $user->hasPower('manage_submissions') ? TransferRequest::where('status', 'Pending')->count() : 0;
+       $total = $submissionCount + $claimCount + $designCount + $myoCount + $transferCount + $transferRequestCount + $tradeCount;
        return $total;
      }
 
