@@ -103,7 +103,7 @@
 @include('widgets._loot_select', ['loots' => $prompt->rewards, 'showLootTables' => true, 'showRaffles' => true])
 <hr class="w-70">
 <h3>Skill Rewards</h3>
-<p>Skills are rewarded to 
+<p>Skills are rewarded to focus characters</p>
 <div class="form-group">
     <div id="skillList">
         @foreach($prompt->skills as $skill)

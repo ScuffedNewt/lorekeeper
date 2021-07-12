@@ -14,7 +14,7 @@ return [
     
     'character_skills' => [
         'key' => 'character_skills',
-        'wiki_key' => 'Character_Akills',
+        'wiki_key' => 'Character_Skills',
             'creators' => json_encode([
                 'Newt' => 'https://github.com/ne-wt/',
             ]),
