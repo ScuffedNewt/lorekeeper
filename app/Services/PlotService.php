@@ -75,9 +75,9 @@ class PlotService extends Service
 
         try {
             // Check first if the plot is currently owned or if some other site feature uses it
-            if(DB::table('user_crafting_plots')->where([['plot_id', '=', $plot->id]])->exists()) throw new \Exception("At least one user currently owns this plot. Please remove the plot(s) before deleting it.");
+            if(DB::table('user_garden_plots')->where([['plot_id', '=', $plot->id]])->exists()) throw new \Exception("At least one user currently owns this plot. Please remove the plot(s) before deleting it.");
 
-            DB::table('user_crafting_plots')->where('plot_id', $plot->id)->delete();
+            DB::table('user_garden_plots')->where('plot_id', $plot->id)->delete();
 
             $plot->delete();
 

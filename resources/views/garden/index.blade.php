@@ -65,16 +65,28 @@
                                         <!---- Water times -->
                                         <script>
                                             function waterCount(id, timer) {
-                                                setInterval(function(){ 
-                                                    
-                                                var date = new Date(timer-=1000);
-                                                var text = "Next watering in "+ date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
-                                                $("#"+id+"-water-text").text(text);
+                                            setInterval(function(){ 
+                                                
+                                            var date = new Date(timer);
+                                            var now = new Date();
+                                            // count down time difference between now and date
+                                            var diff = date.getTime() - now.getTime();
+                                            var time = new Date(diff);
+
+                                            var seconds = time.getUTCSeconds();
+                                            if(seconds < 10) seconds = "0" + seconds;
+                                            var minutes = time.getUTCMinutes();
+                                            if(minutes < 10) minutes = "0" + minutes;
+                                            var hours = time.getUTCHours();
+                                            if(hours < 10) hours = "0" + hours;
+
+                                            var text = "Next watering in "+ hours + ":" + minutes + ":" + seconds;
+                                            $("#"+id+"-water-text").text(text);
                                             }, 1000)}
 
                                             var wateringLeft = Date.parse("<?php echo $userPlot->water_at ?>");
                                             var waterTextId = "<?php echo $userPlot->id ?>"
-                                        
+
                                             setInterval(waterCount(waterTextId, wateringLeft), 1000);
                                         </script>
                                         <!------------------>
