@@ -209,7 +209,7 @@
 
         $('.skull-button').on('click', function(e) {
             e.preventDefault();
-            loadModal("{{ url('garden/skull') }}" + '/' + $this.data('value'), 'Destroy Crop?');
+            loadModal("{{ url('garden/skull') }}" + '/' + $(this).val(), 'Destroy Crop?');
         });
 
         function plantSeed(plotID) {
