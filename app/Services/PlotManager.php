@@ -197,7 +197,7 @@ class PlotManager extends Service
             if(!$mod) throw new \Exception("Invalid modifier.");
 
             $invman = new InventoryManager;
-            if(!$invman->debitStack($user, null, 'Added Modifier to Garden', ['data' => 'Modifier used in garden.'], $mod, 1)) throw new \Exception('Could not debit modifier.');
+            if(!$invman->debitStack($user, 'Added Modifier to Garden', ['data' => 'Modifier used in garden.'], $mod, 1)) throw new \Exception('Could not debit modifier.');
 
             $tag = $mod->item->tags()->where('tag', 'fertiliser')->first();
             if(!$tag) throw new \Exception("No data attached to this modifier.");
