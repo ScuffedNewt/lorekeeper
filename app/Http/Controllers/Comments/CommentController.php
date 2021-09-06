@@ -20,6 +20,7 @@ use App\Models\News;
 use App\Models\Gallery\GallerySubmission;
 use App\Models\Report\Report;
 use App\Models\SitePage;
+use App\Models\Character\Character;
 
 use Notifications;
 
@@ -127,6 +128,12 @@ class CommentController extends Controller implements CommentControllerInterface
                 else $recipient = $submission->user;
                 $post = (($type != 'User-User') ? 'your gallery submission\'s staff comments' : 'your gallery submission');
                 $link = (($type != 'User-User') ? $submission->queueUrl . '/#comment-' . $comment->getKey() : $submission->url . '/#comment-' . $comment->getKey());
+                break;
+            case 'App\Models\Character\Character':
+                $character = Character::find($comment->commentable_id);
+                $recipient = $character->user;
+                $post = 'your character '. $character->displayName;
+                $link = $character->url . '/#comment-' . $comment->getKey();
                 break;
             }
 

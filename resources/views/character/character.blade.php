@@ -29,7 +29,7 @@
 </div>
 
 {{-- Info --}}
-<div class="card character-bio">
+<div class="card character-bio mb-2">
     <div class="card-header">
         <ul class="nav nav-tabs card-header-tabs">
             <li class="nav-item">
@@ -71,6 +71,11 @@
         @endif
     </div>
 </div>
+
+@comments([
+    'model' => $character,
+    'perPage' => 5
+    ])
 
 @endsection
 

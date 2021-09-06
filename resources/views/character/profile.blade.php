@@ -54,4 +54,9 @@
         </ul>
     </div>
 @endif
+
+@comments([
+    'model' => $character,
+    'perPage' => 5
+    ])
 @endsection
