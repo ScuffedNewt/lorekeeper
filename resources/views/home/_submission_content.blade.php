@@ -42,8 +42,8 @@
 		</div></div>
 @endif
 
-@php $json = json_decode($submission->additional_data, true); @endphp
-@if($json['addons'])
+@php if($submission->additional_data) $json = json_decode($submission->additional_data, true); else $json = null; @endphp
+@if($json && $json['addons'])
     <h2>Requirements | Add-ons</h2>
     @foreach($json['addons'] as $key => $value)
         @php $item = \App\Models\User\UserItem::find($key); @endphp
