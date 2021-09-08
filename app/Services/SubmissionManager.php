@@ -128,6 +128,15 @@ class SubmissionManager extends Service
                     ]) // list of rewards and addons
             ] + ($isClaim ? [] : ['prompt_id' => $prompt->id,]));
 
+            if(isset($data['user_item_id'])) {
+                $json = [];
+                foreach($data['user_item_id'] as $key => $userItemId) {
+                    $json['addons'][$userItemId] = isset($data['user_item_data'][$key]) ? $data['user_item_data'][$key] : null;
+                }
+                $json = json_encode($json);
+                $submission->update(['additional_data' => $json]);
+            }
+
 
             // Retrieve all reward IDs for characters
             $currencyIds = []; $itemIds = []; $tableIds = [];

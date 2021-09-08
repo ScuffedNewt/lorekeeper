@@ -43,6 +43,14 @@
             {!! Form::textarea('comments', null, ['class' => 'form-control']) !!}
         </div>
 
+        <h2>Requirements | Add-on</h2>
+        <p>If there is any item that should be shown to staff, but not consumed, please add it here. The quantity of the item will be shown to staff.</p>
+        <div class="text-right mb-3">
+            <a href="#" class="btn btn-outline-info" id="add-addon">Add Addon</a>
+        </div>
+        <div id="addonList" class="mb-3">
+        </div>
+
         <h2>Rewards</h2>
         @if($isClaim)
             <p>Select the rewards you would like to claim.</p>
@@ -80,6 +88,7 @@
         </div>
     {!! Form::close() !!}
 
+    @include('widgets._prompt_addon')
     @include('widgets._character_select', ['characterCurrencies' => $characterCurrencies, 'showLootTables' => false])
     @if($isClaim)
         @include('widgets._loot_select_row', ['items' => $items, 'currencies' => $currencies, 'showLootTables' => false, 'showRaffles' => true])
@@ -114,6 +123,7 @@
     @else
         @include('js._loot_js', ['showLootTables' => false, 'showRaffles' => false])
     @endif
+    @include('js._addon_js')
     @include('js._character_select_js')
     @include('widgets._inventory_select_js', ['readOnly' => true])
     @include('widgets._bank_select_row', ['owners' => [Auth::user()]])

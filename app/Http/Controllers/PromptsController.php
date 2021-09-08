@@ -108,7 +108,7 @@ class PromptsController extends Controller
      */
     public function getPrompt($id)
     {
-        $prompt = Prompt::find($id);
+        $prompt = Prompt::visible()->find($id);
         if(!$prompt) abort(404);
         return view('prompts.prompt', [
             'prompt' => $prompt,

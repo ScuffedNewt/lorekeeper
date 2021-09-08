@@ -42,6 +42,26 @@
 		</div></div>
 @endif
 
+@php $json = json_decode($submission->additional_data, true); @endphp
+@if($json['addons'])
+    <h2>Requirements | Add-ons</h2>
+    @foreach($json['addons'] as $key => $value)
+        @php $item = \App\Models\User\UserItem::find($key); @endphp
+        <div class="card p-1 mb-1">
+            <div class="row">
+                <div class="col-md-3 text-center">
+                    <img src="{{$item->item->imageUrl}}" class="img-fluid">
+                </div>
+                <div class="col-md-9">
+                    <h5>{!!$item->item->displayName!!}</h5>
+                    <p>Quantity: {{$item->count}}</p>
+                    <p>Description: {!!$value!!}</p>
+                </div>
+            </div>
+        </div>
+    @endforeach
+@endif
+
 <h2>Rewards</h2>
 <table class="table table-sm">
     <thead>
