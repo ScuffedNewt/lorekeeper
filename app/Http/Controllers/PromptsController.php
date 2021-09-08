@@ -102,4 +102,17 @@ class PromptsController extends Controller
             'categories' => ['none' => 'Any Category'] + PromptCategory::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray()
         ]);
     }
+
+    /**
+     * Shows the prompt page.
+     */
+    public function getPrompt($id)
+    {
+        $prompt = Prompt::find($id);
+        if(!$prompt) abort(404);
+        return view('prompts.prompt', [
+            'prompt' => $prompt,
+        ]);
+    }
+
 }

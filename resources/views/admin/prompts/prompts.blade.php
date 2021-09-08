@@ -45,7 +45,7 @@
           {!! $prompt->is_active ? '<i class="text-success fas fa-check"></i>' : '' !!}
         </div>
         <div class="col-5 col-md-3 text-truncate">
-          {{ $prompt->name }}
+          <a href="{{$prompt->idUrl }}">{{ $prompt->name }}</a>
         </div>
         <div class="col-5 col-md-3">
           {{ $prompt->category ? $prompt->category->name : '-' }}

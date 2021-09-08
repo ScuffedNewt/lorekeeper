@@ -189,6 +189,14 @@ class Prompt extends Model
     **********************************************************************************************/
 
     /**
+     * Get the URL to the prompt.
+     */
+    public function getIdUrlAttribute()
+    {
+        return url('/prompts/prompts/'.$this->id);
+    }
+
+    /**
      * Displays the model's name, linked to its encyclopedia page.
      *
      * @return string
