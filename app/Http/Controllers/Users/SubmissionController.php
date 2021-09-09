@@ -219,6 +219,7 @@ class SubmissionController extends Controller
     {
         $closed = !Settings::get('is_claims_open');
         $inventory = UserItem::with('item')->whereNull('deleted_at')->where('count', '>', '0')->where('user_id', Auth::user()->id)->get();
+        $items = $inventory->pluck('item.name', 'id');
         return view('home.create_submission', [
             'closed' => $closed,
             'isClaim' => true,
@@ -227,6 +228,7 @@ class SubmissionController extends Controller
             'characterCurrencies' => Currency::where('is_character_owned', 1)->orderBy('sort_character', 'DESC')->pluck('name', 'id'),
             'categories' => ItemCategory::orderBy('sort', 'DESC')->get(),
             'inventory' => $inventory,
+            'addons' => $items,
             'item_filter' => Item::orderBy('name')->released()->get()->keyBy('id'),
             'items' => Item::orderBy('name')->released()->pluck('name', 'id'),
             'currencies' => Currency::where('is_user_owned', 1)->orderBy('name')->pluck('name', 'id'),
