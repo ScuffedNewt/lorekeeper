@@ -30,6 +30,20 @@ class SeedService extends Service
     {
         return [
             'items' => Item::orderBy('name')->pluck('name', 'id'),
+            'months' => [
+                '1' => 'January',
+                '2' => 'February',
+                '3' => 'March',
+                '4' => 'April',
+                '5' => 'May',
+                '6' => 'June',
+                '7' => 'July',
+                '8' => 'August',
+                '9' => 'September',
+                '10' => 'October',
+                '11' => 'November',
+                '12' => 'December',
+            ]
         ];
     }
 
@@ -42,9 +56,11 @@ class SeedService extends Service
     public function getTagData($tag)
     {
         //fetch data from DB, if there is no data then set to NULL instead
-        $data['waterings'] = isset($tag->data['waterings']) ? $tag->data['waterings'] : null;
+        $data['waterings'] = isset($tag->data['waterings']) ? $tag->data['waterings'] : 1;
         $data['plant_id'] = isset($tag->data['plant_id']) ? $tag->data['plant_id'] : null;
-        $data['quantity'] = isset($tag->data['quantity']) ? $tag->data['quantity'] : 1;    
+        $data['quantity'] = isset($tag->data['quantity']) ? $tag->data['quantity'] : 1;  
+        $data['start_month'] = isset($tag->data['start_month']) ? $tag->data['start_month'] : null;    
+        $data['end_month'] = isset($tag->data['end_month']) ? $tag->data['end_month'] : null;    
 
         return $data;
     }
@@ -61,9 +77,11 @@ class SeedService extends Service
         DB::beginTransaction();
 
         try {
-            $seedData['waterings'] = isset($data['waterings']) ? $data['waterings'] : null; 
+            $seedData['waterings'] = isset($data['waterings']) ? $data['waterings'] : 1; 
             $seedData['plant_id'] = isset($data['plant_id']) ? $data['plant_id'] : null; 
             $seedData['quantity'] = isset($data['quantity']) ? $data['quantity'] : 1;    
+            $seedData['start_month'] = isset($data['start_month']) ? $data['start_month'] : null;    
+            $seedData['end_month'] = isset($data['end_month']) ? $data['end_month'] : null;  
 
             if($seedData['plant_id'] == $tag->item->id) throw new \Exception('Cannot be the same item as the seed.');
 

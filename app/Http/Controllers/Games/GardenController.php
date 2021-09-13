@@ -22,6 +22,15 @@ class GardenController extends Controller
     {
         //getting users seeds items
         $seedId = ItemTag::where('tag', 'seed')->where('is_active', 1); // Removed get()
+        foreach($seedId->get() as $seed)
+        {
+            
+            if($seed->data['start_month'] > Carbon::now()->month || $seed->data['end_month'] < Carbon::now()->month) {
+                // remove seed from array
+                $seedId->where('id', '!=', $seed->id);
+            }
+        }
+        
         $checkSeeds = Auth::user()->items()->whereIn('item_id', $seedId->pluck('item_id'))->where('count', '>', 0)->get()->groupBy(['item_id', 'id']);
 
         //getting users modifer items
