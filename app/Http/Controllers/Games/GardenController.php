@@ -125,7 +125,7 @@ class GardenController extends Controller
         $data = $request->input('plotID');
         $service = new PlotManager;
         if($service->water(Auth::user(), $data)) {
-            if($plot->plot->type == 'seed')
+            if($plot->plot->plot_type == 'Seed')
             flash('Watered successfully!')->success();
             else 
             flash('Fed successfully!')->success();
@@ -245,7 +245,7 @@ class GardenController extends Controller
     {
         $plot = UserGardenPlot::find($id);
         if(!$plot) abort(404);
-        if($plot->type == 'seed') {
+        if($plot->plot_type == 'seed') {
             return view('garden._skull_modal', [
                 'plot' => $plot
             ]);
@@ -264,7 +264,7 @@ class GardenController extends Controller
     {
         if($service->clear(Auth::user(), $id)) {
             $plot = UserGardenPlot::find($id);
-            if($plot->plot->type == 'seed') {
+            if($plot->plot->plot_type == 'Seed') {
                 flash('Crop destroyed successfully!')->success();
             }
             else {

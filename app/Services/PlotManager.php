@@ -166,7 +166,7 @@ class PlotManager extends Service
             $plot = UserGardenPlot::find($data);
             if(!$plot) throw new \Exception("Invalid plot.");
 
-            if(!$plot->plot->type == 'seed') {
+            if(!$plot->plot->plot_type == 'Seed') {
                 $item = UserItem::find($plot->item_id);
                 if(!$item) throw new \Exception("Invalid item.");
 
@@ -280,11 +280,11 @@ class PlotManager extends Service
         try {
             $plot = UserGardenPlot::find($data['plotID']);
             if(!$plot) throw new \Exception("Invalid plot.");
-            
-            if($plot->plot->type == 'coop')
+            if($plot->plot->plot_type == 'Coop')
             $animal = UserItem::where('item_id', $data['coopID'])->where('count', '>', 0)->first();
             else 
             $animal = UserItem::where('item_id', $data['barnID'])->where('count', '>', 0)->first();
+
             if(!$animal) throw new \Exception("Invalid Animal.");
             $animal->garden_count++;
             $animal->save();
@@ -312,7 +312,7 @@ class PlotManager extends Service
             $plot = UserGardenPlot::find($id);
             if(!$plot) throw new \Exception("Invalid plot.");
 
-            if($plot->plot->type == 'coop') {
+            if($plot->plot->plot_type == 'coop') {
                 $type = 'coop';
             }
             else {
