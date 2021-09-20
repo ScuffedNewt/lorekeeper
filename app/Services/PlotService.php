@@ -25,6 +25,11 @@ class PlotService extends Service
                 $data['currency_id'] = null;
                 $data['plot_cost'] = null;
             } 
+            elseif(!isset($data['currency_id'])) {
+                $data['currency_id'] = null;
+                $data['plot_cost'] = null;
+                $data['free'] = 1;
+            }
 
             $plot = GardenPlot::create($data);
 
@@ -53,7 +58,12 @@ class PlotService extends Service
                 $data['currency_id'] = null;
                 $data['plot_cost'] = null;
             } 
-
+            elseif(!isset($data['currency_id'])) {
+                $data['currency_id'] = null;
+                $data['plot_cost'] = null;
+                $data['free'] = 1;
+            }
+            
             $plot->update($data);
 
             return $this->commitReturn($plot);
