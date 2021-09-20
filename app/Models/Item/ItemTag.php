@@ -151,4 +151,20 @@ class ItemTag extends Model
     {
         return $this->service->getTagData($this);
     }
+
+    /**
+     * Get stage of seed if tag is a seed.
+     */
+    public function stageImage($stage = 0)
+    {
+        if($this->tag != 'seed') return null;
+        // decrement stage until it reaches 0, if it does not return a file path return null
+        while($stage > 0)
+        {
+            $file = 'images/data/stages/'.$this->id.'-'.$stage.'-image.png';
+            if($file) return $file;
+            $stage--;
+        }
+        return 'images/data/seeds/seed.png';
+    }
 }
