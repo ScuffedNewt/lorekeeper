@@ -264,8 +264,8 @@ class PlotManager extends Service
      * 
      ***************************************************************************************************************/
 
-     public function place($user, $data)
-     {
+    public function place($user, $data)
+    {
         DB::beginTransaction();
 
         try {
@@ -274,6 +274,8 @@ class PlotManager extends Service
             
             $animal = UserItem::where('item_id', $data['coopID'])->where('count', '>', 0)->first();
             if(!$animal) throw new \Exception("Invalid Animal.");
+            $animal->garden_count++;
+            $animal->save();
 
             $plot->item_id = $animal->item->id;
             $plot->started_at = Carbon::now();
@@ -287,5 +289,40 @@ class PlotManager extends Service
             $this->setError('error', $e->getMessage());
         }
         return $this->rollbackReturn(false);
-     }
+    }
+
+    public function animalClaim($user, $id)
+    {
+        DB::beginTransaction();
+
+        try { 
+
+            $plot = UserGardenPlot::find($id);
+            if(!$plot) throw new \Exception("Invalid plot.");
+
+            if($plot->plot->type == 'coop') {
+                $type = 'coop';
+            }
+            else {
+                $type = 'barn';
+            }
+            if(!$rewards = fillUserAssets(parseAssetData($stack->item->tag('box')->data), $user, $user, 'Box Rewards', [
+                'data' => 'Received rewards from opening '.$stack->item->name
+            ])) throw new \Exception("Failed to credit items.");
+            
+
+            $plot->modifiers = null;
+            $plot->started_at = null;
+            $plot->water_at = null;
+            $plot->waterings = null;
+            $plot->is_dead = 0;
+            $plot->time = null;
+            $plot->save();
+
+            return $this->commitReturn(true);
+        } catch(\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+        return $this->rollbackReturn(false);
+    }
 }

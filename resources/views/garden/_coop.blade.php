@@ -17,9 +17,17 @@
                         @endphp
                         @if($userPlot->started_at != null)
                             <!----If there is a plant growing --->
-                            @if($userPlot->water_at > $now && $userPlot->waterings < $userPlot->item->tags->where('tag', 'coop')->first()->data['waterings'])
+                            @if($userPlot->water_at > $now && $userPlot->waterings < $userPlot->item->tags->where('tag', 'coop')->first()->data['feedings'])
                                 <img class="img-fluid image-zoom my-auto mx-auto pt-2" src="{{ $userPlot->item->imageUrl }}" data-toggle="tooltip" title="{{ $userPlot->waterings }} {{ $userPlot->waterings == 1 ? 'feeding' : 'feedings' }} done!" style="width: 10em; height: 10em;">
                                 <span class="text-muted"> Housing {!! $userPlot->item->name !!}</span>
+                                <div class="progress mx-4">
+                                    @php if($userPlot->waterings != 0) { 
+                                        $style = ($userPlot->waterings / $userPlot->item->tags->where('tag', 'coop')->first()->data['feedings']) * 100;
+                                        } 
+                                        else $style = 0; 
+                                    @endphp
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar" aria-valuenow="{{ $userPlot->waterings }}" aria-valuemin="0" aria-valuemax="{{ $userPlot->item->tags->where('tag', 'coop')->first()->data['feedings'] }}" style="width: {{$style}}%">{{ $userPlot->waterings ?? 0 }} / {{ $userPlot->item->tags->where('tag', 'coop')->first()->data['feedings']}}</div>
+                                </div>
                                 <div id="{{ $userPlot->id }}-water-text" class="text-white">Next feeding {{ $userPlot->water_at }}</div>
                                 <p class="text-white">Started {!! pretty_date($userPlot->started_at)!!}</p>
                                 <!---- Water times -->
@@ -55,17 +63,20 @@
                                 </button>
                             @else
                                 <!--- if we can water, check if the plant is complete or if it's ready to be watered again -->
-                                @if($userPlot->waterings >= $userPlot->item->tags->where('tag', 'seed')->first()->data['waterings'])
+                                @if($userPlot->waterings >= $userPlot->item->tags->where('tag', 'coop')->first()->data['feedings'])
                                     <i class="fas fa-seedling text-white mt-1"></i>
-                                    <img class="img-fluid image-zoom my-auto mx-auto pt-2" src="{{ asset('images/data/seeds/seed.png') }}" data-toggle="tooltip" title="{{ $userPlot->waterings }} {{ $userPlot->waterings == 1 ? 'watering' : 'waterings' }} done!" style="width: 10em; height: 10em;">
+                                    <img class="img-fluid image-zoom my-auto mx-auto pt-2" src="{{ $userPlot->item->imageUrl }}" data-toggle="tooltip" title="{{ $userPlot->waterings }} {{ $userPlot->waterings == 1 ? 'feeding' : 'feedings' }} done!" style="width: 10em; height: 10em;">
+                                    <div class="progress mx-4 mb-2">
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar" aria-valuenow="1" aria-valuemin="0" aria-valuemax="1" style="width: 100%">{{ $userPlot->waterings ?? 0 }} / {{ $userPlot->item->tags->where('tag', 'coop')->first()->data['feedings']}}</div>
+                                    </div>
                                     {!! Form::open(['url' => 'garden/claim/' . $userPlot->id]) !!}
-                                    {!! Form::submit('Claim!', ['class' => 'btn btn-sm btn-primary']) !!}
+                                    {!! Form::submit('Claim!', ['class' => 'btn btn-sm btn-primary mb-1']) !!}
                                     {!! Form::close() !!}
                                 <!---->
                                 @else
-                                    <button type="button" class="btn btn-primary" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="waterPlot({{ $userPlot->id }})">
-                                        <img class="img-fluid image-zoom my-auto mx-auto pt-2" src="{{ asset('images/data/seeds/seed.png') }}" data-toggle="tooltip" title="{{ $userPlot->waterings }} {{ $userPlot->waterings == 1 ? 'watering' : 'waterings' }} done!" style="width: 9em; height: 9em;">
-                                        <br> Water <i class="fas fa-water"></i>
+                                    <button type="button" class="btn btn-warning text-white" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="waterPlot({{ $userPlot->id }})">
+                                        <img class="img-fluid image-zoom my-auto mx-auto pt-2" src="{{ $userPlot->item->imageUrl }}" data-toggle="tooltip" title="{{ $userPlot->waterings }} {{ $userPlot->waterings == 1 ? 'feeding' : 'feedings' }} done!" style="width: 9em; height: 9em;">
+                                        <br> Feed <i class="fas fa-carrot"></i>
                                         <p class="text-white">Started {!! pretty_date($userPlot->started_at)!!}</p>
                                     </button>
                                 @endif

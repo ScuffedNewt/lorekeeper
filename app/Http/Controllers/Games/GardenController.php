@@ -125,7 +125,10 @@ class GardenController extends Controller
         $data = $request->input('plotID');
         $service = new PlotManager;
         if($service->water(Auth::user(), $data)) {
+            if($plot->plot->type == 'seed')
             flash('Watered successfully!')->success();
+            else 
+            flash('Fed successfully!')->success();
             $response = array(
                 'status' => 'success',
                 'msg' => $request->message,
@@ -144,17 +147,37 @@ class GardenController extends Controller
     {
         $data = $request->input(['plotID', 'type']);
         $service = new PlotManager;
-        if($service->clear(Auth::user(), $data)) {
+        switch($data['type']) {
+            case 'seed':
+                if($service->claim(Auth::user(), $data)) {
             
-            flash('Cleared successfully!')->success();
-            $response = array(
-                'status' => 'success',
-                'msg' => $request->message,
-            );
-            return response()->json($response); 
-        }
-        else {
-            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+                    flash('Planted successfully!')->success();
+                    $response = array(
+                        'status' => 'success',
+                        'msg' => $request->message,
+                    );
+                    return response()->json($response); 
+                }
+                else {
+                    foreach($service->errors()->getMessages()['error'] as $error) 
+                    flash($error)->error();
+                }
+            break;
+            case 'coop': case'barn':
+                if($service->animalClaim(Auth::user(), $data)) {
+            
+                    flash('Placed successfully!')->success();
+                    $response = array(
+                        'status' => 'success',
+                        'msg' => $request->message,
+                    );
+                    return response()->json($response); 
+                }
+                else {
+                    foreach($service->errors()->getMessages()['error'] as $error) 
+                    flash($error)->error();
+                }
+            break;
         }
     }
 
