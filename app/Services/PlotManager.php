@@ -249,6 +249,7 @@ class PlotManager extends Service
             $plot->waterings = null;
             $plot->is_dead = 0;
             $plot->time = null;
+            $plot->item_id = null;
             $plot->save();
 
             return $this->commitReturn(true);
