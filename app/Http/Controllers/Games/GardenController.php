@@ -24,8 +24,7 @@ class GardenController extends Controller
         $seedId = ItemTag::where('tag', 'seed')->where('is_active', 1); // Removed get()
         foreach($seedId->get() as $seed)
         {
-            
-            if($seed->data['start_month'] > Carbon::now()->month || $seed->data['end_month'] < Carbon::now()->month) {
+            if($seed->data['start_month'] && $seed->data['end_month'] && ($seed->data['start_month'] > Carbon::now()->month || $seed->data['end_month'] < Carbon::now()->month)) {
                 // remove seed from array
                 $seedId->where('id', '!=', $seed->id);
             }
