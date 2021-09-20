@@ -33,6 +33,11 @@
     {!! Form::label('currency_id') !!}
     {!! Form::select('currency_id', $currencies, null, ['class' => 'form-control']) !!}
 </div>
+<hr>
+<div class="form-group">
+    {!! Form::label('plot_type', 'Plot Type') !!} {!!add_help('Determines what produce the plot can hold.') !!}
+    {!! Form::select('plot_type', ['Seed' => 'Seed', 'Coop' => 'Coop', 'Barn' => 'Barn'], $plot->plot_type, ['class' => 'form-control']) !!}
+</div>
 
 <div class="text-right">
     {!! Form::submit($plot->id ? 'Edit' : 'Create', ['class' => 'btn btn-primary']) !!}

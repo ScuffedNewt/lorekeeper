@@ -23,24 +23,31 @@ class GardenController extends Controller
         //getting users seeds items
         $seedId = ItemTag::where('tag', 'seed')->where('is_active', 1); // Removed get()
         foreach($seedId->get() as $seed)
-        {
-            
-            if($seed->data['start_month'] > Carbon::now()->month || $seed->data['end_month'] < Carbon::now()->month) {
+        {   
+            if($seed->data['start_month'] && $seed->data['end_month'] && ($seed->data['start_month'] > Carbon::now()->month || $seed->data['end_month'] < Carbon::now()->month)) {
                 // remove seed from array
                 $seedId->where('id', '!=', $seed->id);
             }
         }
-        
         $checkSeeds = Auth::user()->items()->whereIn('item_id', $seedId->pluck('item_id'))->where('count', '>', 0)->get()->groupBy(['item_id', 'id']);
+
+        // coops & barns
+        $coopId = ItemTag::where('tag', 'coop')->where('is_active', 1); 
+        $barnId = ItemTag::where('tag', 'barn')->where('is_active', 1); 
+
+        $checkCoops = Auth::user()->items()->whereIn('item_id', $coopId->pluck('item_id'))->where('count', '>', 0)->get()->groupBy(['item_id', 'id']);
+        $checkBarns = Auth::user()->items()->whereIn('item_id', $barnId->pluck('item_id'))->where('count', '>', 0)->get()->groupBy(['item_id', 'id']);
+        //
 
         //getting users modifer items
         $ModifiersId = ItemTag::where('tag', 'fertiliser')->where('is_active', 1); // Removed get()
         $checkModifiers = Auth::user()->items()->whereIn('item_id', $ModifiersId->pluck('item_id'))->where('count', '>', 0)->get()->groupBy(['item_id', 'id']);
 
         $this->checkPlots(Auth::user());
-
         return view('garden.index', [
             'userSeeds' => $checkSeeds,
+            'userCoops' => $checkCoops,
+            'userBarns' => $checkBarns,
             'userModifiers' => $checkModifiers,
             'plots' => GardenPlot::all(),
         ]);
@@ -51,21 +58,41 @@ class GardenController extends Controller
      */
     public function postPlantSeed(Request $request)
     {
-        $data = $request->only(['seedID', 'plotID']);
+        $data = $request->only(['seedID', 'coopID', 'barnID', 'plotID', 'type']);
         $service = new PlotManager;
-        if($service->plant(Auth::user(), $data)) {
+        switch($data['type']) {
+            case 'seed':
+                if($service->plant(Auth::user(), $data)) {
             
-            flash('Planted successfully!')->success();
-            $response = array(
-                'status' => 'success',
-                'msg' => $request->message,
-            );
-            return response()->json($response); 
+                    flash('Planted successfully!')->success();
+                    $response = array(
+                        'status' => 'success',
+                        'msg' => $request->message,
+                    );
+                    return response()->json($response); 
+                }
+                else {
+                    foreach($service->errors()->getMessages()['error'] as $error) 
+                    flash($error)->error();
+                }
+            break;
+            case 'coop': case'barn':
+                if($service->place(Auth::user(), $data)) {
+            
+                    flash('Placed successfully!')->success();
+                    $response = array(
+                        'status' => 'success',
+                        'msg' => $request->message,
+                    );
+                    return response()->json($response); 
+                }
+                else {
+                    foreach($service->errors()->getMessages()['error'] as $error) 
+                    flash($error)->error();
+                }
+            break;
         }
-        else {
-            foreach($service->errors()->getMessages()['error'] as $error) 
-            flash($error)->error();
-        }
+        
     }
 
     /**
@@ -115,7 +142,7 @@ class GardenController extends Controller
      */
     public function postClearPlot(Request $request)
     {
-        $data = $request->input(['plotID']);
+        $data = $request->input(['plotID', 'type']);
         $service = new PlotManager;
         if($service->clear(Auth::user(), $data)) {
             
@@ -195,10 +222,16 @@ class GardenController extends Controller
     {
         $plot = UserGardenPlot::find($id);
         if(!$plot) abort(404);
-
-        return view('garden._skull_modal', [
-            'plot' => $plot
-        ]);
+        if($plot->type == 'seed') {
+            return view('garden._skull_modal', [
+                'plot' => $plot
+            ]);
+        }
+        else {
+            return view('garden._clear_barn_coop', [
+                'plot' => $plot
+            ]);
+        }
     }
 
     /**

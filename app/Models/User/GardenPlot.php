@@ -14,7 +14,7 @@ class GardenPlot extends Model
      * @var array
      */
     protected $fillable = [
-        'currency_id', 'free', 'plot_cost'
+        'currency_id', 'free', 'plot_cost', 'plot_type'
     ];
 
     /**

@@ -61,7 +61,7 @@ class PlotController extends Controller
      */
     public function postCreateEditPlot(Request $request, PlotService $service, $id = null)
     {
-        $data = $request->only(['free', 'currency_id', 'plot_cost']);
+        $data = $request->only(['free', 'currency_id', 'plot_cost', 'plot_type']);
         if($id && $service->updatePlot(GardenPlot::find($id), $data, Auth::user())) {
             flash('Plot updated successfully.')->success();
         }

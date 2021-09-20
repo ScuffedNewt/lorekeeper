@@ -257,4 +257,35 @@ class PlotManager extends Service
         }
         return $this->rollbackReturn(false);
     }
+
+    /***************************************************************************************************************
+     * 
+     * COOP | BARN RELATED
+     * 
+     ***************************************************************************************************************/
+
+     public function place($user, $data)
+     {
+        DB::beginTransaction();
+
+        try {
+            $plot = UserGardenPlot::find($data['plotID']);
+            if(!$plot) throw new \Exception("Invalid plot.");
+            
+            $animal = UserItem::where('item_id', $data['coopID'])->where('count', '>', 0)->first();
+            if(!$animal) throw new \Exception("Invalid Animal.");
+
+            $plot->item_id = $animal->item->id;
+            $plot->started_at = Carbon::now();
+            $plot->time = 24; // default 24 hours
+            $plot->waterings = 0; // the user can water immediately, but we must set a base line to increment
+            $plot->water_at = Carbon::now()->addHours($plot->time);
+            $plot->save();
+
+            return $this->commitReturn(true);
+        } catch(\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+        return $this->rollbackReturn(false);
+     }
 }
