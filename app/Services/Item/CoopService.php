@@ -50,7 +50,7 @@ class CoopService extends Service
     {
         //fetch data from DB, if there is no data then set to NULL instead
         $rewards = [];
-        if($tag->data['rewards']) {
+        if(isset($tag->data['rewards'])) {
             $assets = parseAssetData($tag->data['rewards']);
             foreach($assets as $type => $a)
             {

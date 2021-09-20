@@ -88,7 +88,7 @@ class UserItem extends Model
      */
     public function getAvailableQuantityAttribute()
     {
-        return ($this->count - $this->trade_count - $this->update_count- $this->submission_count);
+        return ($this->count - $this->trade_count - $this->update_count- $this->submission_count - $this->garden_count);
     }
 
     /**

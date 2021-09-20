@@ -118,7 +118,7 @@ class GardenController extends Controller
     }
 
     /**
-     * Water plot
+     * Water plot | feed animal
      */
     public function postWaterPlot(Request $request)
     {
@@ -141,7 +141,7 @@ class GardenController extends Controller
     }
 
     /**
-     * 
+     * when the feeding | waterings have met the requirements and the user gets their reward
      */
     public function postClearPlot(Request $request)
     {
@@ -263,7 +263,13 @@ class GardenController extends Controller
     public function destroyCrop($id, PlotManager $service)
     {
         if($service->clear(Auth::user(), $id)) {
-            flash('Crop destroyed successfully!')->success();
+            $plot = UserGardenPlot::find($id);
+            if($plot->plot->type == 'seed') {
+                flash('Crop destroyed successfully!')->success();
+            }
+            else {
+                flash('Removed successfully!')->success();
+            }
         }
         else {
             foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();

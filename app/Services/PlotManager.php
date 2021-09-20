@@ -166,10 +166,18 @@ class PlotManager extends Service
             $plot = UserGardenPlot::find($data);
             if(!$plot) throw new \Exception("Invalid plot.");
 
+            if(!$plot->plot->type == 'seed') {
+                $item = UserItem::find($plot->item_id);
+                if(!$item) throw new \Exception("Invalid item.");
+
+                $item->garden_count--;
+                $item->save();
+            }
+            $plot->item_id = null;
             $plot->modifiers = null;
             $plot->started_at = null;
             $plot->water_at = null;
-            $plot->waterings = null;
+            $plot->waterings = 0;
             $plot->is_dead = 0;
             $plot->time = null;
             $plot->save();

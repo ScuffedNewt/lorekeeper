@@ -63,6 +63,8 @@
                                         foreach($holdLocations['update'] as $update=>$quantity) array_push($held, (Auth::user()->hasPower('manage_characters') ? '<a href="'.App\Models\Character\CharacterDesignUpdate::find($update)->url.'">Design Update #'.App\Models\Character\CharacterDesignUpdate::find($update)->id.'</a>' : 'Design Update #'.App\Models\Character\CharacterDesignUpdate::find($update)->id).' ('.$quantity.')');
                                     if(isset($holdLocations['submission']))
                                         foreach($holdLocations['submission'] as $submission=>$quantity) array_push($held, (Auth::user()->hasPower('manage_submissions') ? '<a href="'.App\Models\Submission\Submission::find($submission)->viewUrl.'">Submission #'.App\Models\Submission\Submission::find($submission)->id.'</a>' : 'Submission #'.App\Models\Submission\Submission::find($submission)->id).' ('.$quantity.')');
+                                    if(isset($item->garden_count) && $item->garden_count > 0)
+                                        array_push($held, 'Garden ('.$item->garden_count.')');
                                     $heldString = implode(', ',$held);
                                 ?>
                                 <li>

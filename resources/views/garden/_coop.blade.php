@@ -15,7 +15,7 @@
                             $userPlot = Auth::user()->gardenplots->where('plot_id', $plot->id)->first();
                             $now = Carbon\Carbon::now();
                         @endphp
-                        @if($userPlot->started_at != null)
+                        @if($userPlot->started_at != null && isset($userPlot->item->tags->where('tag', 'coop')->first()->data['feedings']))
                             <!----If there is a plant growing --->
                             @if($userPlot->water_at > $now && $userPlot->waterings < $userPlot->item->tags->where('tag', 'coop')->first()->data['feedings'])
                                 <img class="img-fluid image-zoom my-auto mx-auto pt-2" src="{{ $userPlot->item->imageUrl }}" data-toggle="tooltip" title="{{ $userPlot->waterings }} {{ $userPlot->waterings == 1 ? 'feeding' : 'feedings' }} done!" style="width: 10em; height: 10em;">
@@ -81,6 +81,8 @@
                                     </button>
                                 @endif
                             @endif
+                        @elseif($userPlot->started_at != null)
+                        <p class="text-white">There is currently no data for this plot. Please wait for the owner to add data.</p>
                         @else
                         <!----If there is NO plant growing --->
                         <i class="fas fa-seedling text-white m-1"></i>

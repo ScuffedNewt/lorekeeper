@@ -9,6 +9,9 @@ use App\Services\InventoryManager;
 use App\Services\CharacterManager;
 
 use App\Models\Item\Item;
+use App\Models\Currency\Currency;
+use App\Models\Loot\LootTable;
+use App\Models\Raffle\Raffle;
 
 class BarnService extends Service
 {
@@ -29,21 +32,11 @@ class BarnService extends Service
     public function getEditData()
     {
         return [
+            'characterCurrencies' => Currency::where('is_character_owned', 1)->orderBy('sort_character', 'DESC')->pluck('name', 'id'),
             'items' => Item::orderBy('name')->pluck('name', 'id'),
-            'months' => [
-                '1' => 'January',
-                '2' => 'February',
-                '3' => 'March',
-                '4' => 'April',
-                '5' => 'May',
-                '6' => 'June',
-                '7' => 'July',
-                '8' => 'August',
-                '9' => 'September',
-                '10' => 'October',
-                '11' => 'November',
-                '12' => 'December',
-            ]
+            'currencies' => Currency::where('is_user_owned', 1)->orderBy('name')->pluck('name', 'id'),
+            'tables' => LootTable::orderBy('name')->pluck('name', 'id'),
+            'raffles' => Raffle::where('rolled_at', null)->where('is_active', 1)->orderBy('name')->pluck('name', 'id'),
         ];
     }
 
@@ -56,12 +49,24 @@ class BarnService extends Service
     public function getTagData($tag)
     {
         //fetch data from DB, if there is no data then set to NULL instead
-        $data['waterings'] = isset($tag->data['waterings']) ? $tag->data['waterings'] : 1;
-        $data['plant_id'] = isset($tag->data['plant_id']) ? $tag->data['plant_id'] : null;
-        $data['quantity'] = isset($tag->data['quantity']) ? $tag->data['quantity'] : 1;  
-        $data['start_month'] = isset($tag->data['start_month']) ? $tag->data['start_month'] : null;    
-        $data['end_month'] = isset($tag->data['end_month']) ? $tag->data['end_month'] : null;    
-
+        $rewards = [];
+        if(isset($tag->data['rewards'])) {
+            $assets = parseAssetData($tag->data['rewards']);
+            foreach($assets as $type => $a)
+            {
+                $class = getAssetModelString($type, false);
+                foreach($a as $id => $asset)
+                {
+                    $rewards[] = (object)[
+                        'rewardable_type' => $class,
+                        'rewardable_id' => $id,
+                        'quantity' => $asset['quantity']
+                    ];
+                }
+            }
+        }
+        $data['feedings'] = isset($tag->data['feedings']) ? $tag->data['feedings'] : 1; 
+        $data['rewards'] = $rewards;
         return $data;
     }
 
@@ -77,14 +82,39 @@ class BarnService extends Service
         DB::beginTransaction();
 
         try {
-            $barnData['waterings'] = isset($data['waterings']) ? $data['waterings'] : 1; 
-            $barnData['plant_id'] = isset($data['plant_id']) ? $data['plant_id'] : null; 
-            $barnData['quantity'] = isset($data['quantity']) ? $data['quantity'] : 1;    
-            $barnData['start_month'] = isset($data['start_month']) ? $data['start_month'] : null;    
-            $barnData['end_month'] = isset($data['end_month']) ? $data['end_month'] : null;  
+            $barnData['feedings'] = isset($data['feedings']) ? $data['feedings'] : 1; 
+            if(!isset($data['rewardable_type'])) {
+                $tag->update(['data' => json_encode($barnData)]);
+                return true;
+            }
+            else {
+            
+                // The data will be stored as an asset table, json_encode()d. 
+                // First build the asset table, then prepare it for storage.
+                $assets = createAssetsArray();
+                foreach($data['rewardable_type'] as $key => $r) {
+                    switch ($r)
+                    {
+                        case 'Item':
+                            $type = 'App\Models\Item\Item';
+                            break;
+                        case 'Currency':
+                            $type = 'App\Models\Currency\Currency';
+                            break;
+                        case 'LootTable':
+                            $type = 'App\Models\Loot\LootTable';
+                            break;
+                        case 'Raffle':
+                            $type = 'App\Models\Raffle\Raffle';
+                            break;
+                    }
+                    $asset = $type::find($data['rewardable_id'][$key]);
+                    addAsset($assets, $asset, $data['quantity'][$key]);
+                }
+                $assets = getDataReadyAssets($assets);
 
-            if($barnData['plant_id'] == $tag->item->id) throw new \Exception('Cannot be the same item as the barn animal.');
-
+                $barnData['rewards'] = $assets;
+            }
             $tag->update(['data' => json_encode($barnData)]);
 
             return $this->commitReturn(true);
