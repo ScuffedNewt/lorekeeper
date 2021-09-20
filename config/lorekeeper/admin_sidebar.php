@@ -104,7 +104,7 @@ return [
                 'url' => 'admin/masterlist/create-character'
             ],
             [
-                'name' => 'Create MYO Plot',
+                'name' => 'Create MYO Slot',
                 'url' => 'admin/masterlist/create-myo'
             ],
             [
