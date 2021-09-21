@@ -76,7 +76,7 @@ class GardenController extends Controller
                     flash($error)->error();
                 }
             break;
-            case 'coop': case'barn':
+            case 'coop': case 'barn':
                 if($service->place(Auth::user(), $data)) {
             
                     flash('Placed successfully!')->success();

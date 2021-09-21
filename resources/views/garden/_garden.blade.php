@@ -273,7 +273,8 @@
             method: 'post',
             data:{
                 _token: '{{ csrf_token() }}',
-                plotID:plotID
+                plotID:plotID,
+                type:'seed'
                 },
             dataType: 'json',
             success: function(data) {
