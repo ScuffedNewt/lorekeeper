@@ -298,11 +298,14 @@ class PlotManager extends Service
             $plot = UserGardenPlot::find($data['plotID']);
             if(!$plot) throw new \Exception("Invalid plot.");
             if($plot->plot->plot_type == 'Coop')
-            $animal = UserItem::where('item_id', $data['coopID'])->where('count', '>', 0)->where('user_id', $user->id)->first();
+            $animals = UserItem::where('item_id', $data['coopID'])->where('count', '>', 0)->where('user_id', $user->id)->get();
             else 
-            $animal = UserItem::where('item_id', $data['barnID'])->where('count', '>', 0)->where('user_id', $user->id)->first();
+            $animals = UserItem::where('item_id', $data['barnID'])->where('count', '>', 0)->where('user_id', $user->id)->get();
 
-            if($animal->garden_count >= $animal->count) throw new \Exception("You don't have enough of this item.");
+            $check = 0;
+            $animal = null;
+            foreach($animals as $a) {if($a->garden_count < $a->count) {$check = 1; $animal = $a;}}
+            if($check == 0) throw new \Exception("You don't have enough of this item.");
 
             if(!$animal) throw new \Exception("Invalid Animal.");
             $animal->garden_count++;
