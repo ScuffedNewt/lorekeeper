@@ -303,7 +303,6 @@ class PlotManager extends Service
             $animal = UserItem::where('item_id', $data['barnID'])->where('count', '>', 0)->where('user_id', $user->id)->first();
 
             if($animal->garden_count >= $animal->count) throw new \Exception("You don't have enough of this item.");
-            if(UserGardenPlot::where('item_id', $animal->id)->where('user_id', $user->id)->exists()) throw new \Exception("You already have this item placed.");
 
             if(!$animal) throw new \Exception("Invalid Animal.");
             $animal->garden_count++;
