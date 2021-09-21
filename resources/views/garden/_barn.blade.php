@@ -58,7 +58,7 @@
                                     setInterval(waterCount(waterTextId, wateringLeft), 1000);
                                 </script>
                                 <!------------------>
-                                <button type="button" class="skull-button" value="{{ $userPlot->id }}">
+                                <button type="button" class="skull-button-barn" value="{{ $userPlot->id }}">
                                     <i class="fas fa-skull-crossbones"></i>
                                 </button>
                             @else
@@ -149,7 +149,7 @@
         }
     });
 
-    $('.skull-button').on('click', function(e) {
+    $('.skull-button-barn').on('click', function(e) {
         e.preventDefault();
         loadModal("{{ url('garden/skull') }}" + '/' + $(this).val(), 'Remove Animal?');
     });

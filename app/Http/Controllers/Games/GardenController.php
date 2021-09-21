@@ -245,7 +245,7 @@ class GardenController extends Controller
     {
         $plot = UserGardenPlot::find($id);
         if(!$plot) abort(404);
-        if($plot->plot->plot_type == 'seed') {
+        if($plot->plot->plot_type == 'Seed') {
             return view('garden._skull_modal', [
                 'plot' => $plot
             ]);
