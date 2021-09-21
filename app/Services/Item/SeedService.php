@@ -80,6 +80,7 @@ class SeedService extends Service
             if(isset($data['stage_number'])) $data['stage_number'] = array_filter($data['stage_number']);
             if(isset($data['stage_image'])) $data['stage_image'] = array_filter($data['stage_image']);
             $stages = [];
+            ///
             if(isset($data['stage_number']) && !empty($data['stage_number'])) {
                 // if old stages exist
                 if(isset($tag->data['stages']) && !empty($tag->data['stages']) && $tag->data['stages'] != '[]') {
@@ -92,7 +93,7 @@ class SeedService extends Service
                         }
                         else {
                             //remove from array
-                            unset($data['stage_number'][$stage]);
+                            $data['stage_image'][$stage-1] = 'holder';
                         }
                     }
                 }
@@ -103,11 +104,12 @@ class SeedService extends Service
                         if(isset($data['stage_image'][$key]) && !isset($stages[$stage])) {
                             $stages[] =  $stage;  
 
-                            $this->handleImage($data['stage_image'][$key], public_path('images/data/stages'), $tag->id.'-'.$stage.'-image.png');
+                            if($data['stage_image'][$key] != 'holder') $this->handleImage($data['stage_image'][$key], public_path('images/data/stages'), $tag->id.'-'.$stage.'-image.png');
                         }
                     }
                 }
             }
+            /////
             else {
                 if(isset($tag->data['stages']) && !empty($tag->data['stages']) && $tag->data['stages'] != '[]') {
                     foreach($tag->data['stages'] as $stage) {
