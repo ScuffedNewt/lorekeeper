@@ -125,6 +125,7 @@ class GardenController extends Controller
         $data = $request->input('plotID');
         $service = new PlotManager;
         if($service->water(Auth::user(), $data)) {
+            $plot = UserGardenPlot::find($data);
             if($plot->plot->plot_type == 'Seed')
             flash('Watered successfully!')->success();
             else 
