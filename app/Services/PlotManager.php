@@ -98,7 +98,7 @@ class PlotManager extends Service
             $plot = UserGardenPlot::find($data['plotID']);
             if(!$plot) throw new \Exception("Invalid plot.");
 
-            $seed = UserItem::where('item_id', $data['seedID'])->where('count', '>', 0)->first();
+            $seed = UserItem::where('item_id', $data['seedID'])->where('count', '>', 0)->where('user_id', $user->id)->first();
             if(!$seed) throw new \Exception("Invalid seed.");
             
             $invman = new InventoryManager;
