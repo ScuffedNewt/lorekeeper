@@ -77,7 +77,7 @@ class SeedService extends Service
         DB::beginTransaction();
 
         try {
-            $data['stage_number'] = array_filter($data['stage_number']);
+            if(isset($data['stage_number'])) $data['stage_number'] = array_filter($data['stage_number']);
             if(isset($data['stage_image'])) $data['stage_image'] = array_filter($data['stage_image']);
             $stages = [];
             if(isset($data['stage_number']) && !empty($data['stage_number'])) {
@@ -97,18 +97,22 @@ class SeedService extends Service
                     }
                 }
                 // if not
-                foreach($data['stage_number'] as $key => $stage)
-                {
-                    if(isset($data['stage_image'][$key]) && !isset($stages[$stage])) {
-                        $stages[] =  $stage;  
+                if(isset($data['stage_number'])) {
+                    foreach($data['stage_number'] as $key => $stage)
+                    {
+                        if(isset($data['stage_image'][$key]) && !isset($stages[$stage])) {
+                            $stages[] =  $stage;  
 
-                        $this->handleImage($data['stage_image'][$key], public_path('images/data/stages'), $tag->id.'-'.$stage.'-image.png');
+                            $this->handleImage($data['stage_image'][$key], public_path('images/data/stages'), $tag->id.'-'.$stage.'-image.png');
+                        }
                     }
                 }
             }
             else {
-                foreach($tag->data['stages'] as $stage) {
-                    $this->deleteImage(public_path('images/data/stages'), $tag->id.'-'.$stage.'-image.png');
+                if(isset($tag->data['stages']) && !empty($tag->data['stages']) && $tag->data['stages'] != '[]') {
+                    foreach($tag->data['stages'] as $stage) {
+                        $this->deleteImage(public_path('images/data/stages'), $tag->id.'-'.$stage.'-image.png');
+                    }
                 }
             }
 

@@ -267,6 +267,23 @@ class PlotManager extends Service
         return $this->rollbackReturn(false);
     }
 
+    private function getRewardsString($rewards)
+    {
+        $results = "You have received: ";
+        $result_elements = [];
+        foreach($rewards as $assetType)
+        {
+            if(isset($assetType))
+            {
+                foreach($assetType as $asset)
+                {
+                    array_push($result_elements, $asset['asset']->name.(class_basename($asset['asset']) == 'Raffle' ? ' (Raffle Ticket)' : '')." x".$asset['quantity']);
+                }
+            }
+        }
+        return $results.implode(', ', $result_elements);
+    }
+
     /***************************************************************************************************************
      * 
      * COOP | BARN RELATED
@@ -330,6 +347,8 @@ class PlotManager extends Service
             $plot->is_dead = 0;
             $plot->time = null;
             $plot->save();
+
+            flash($this->getRewardsString($rewards))->success();
 
             return $this->commitReturn(true);
         } catch(\Exception $e) {
