@@ -202,6 +202,10 @@
     });
 
     function plantSeed(plotID) {
+        // disable plant class
+        $(".seed-button-plant").each( function(){
+            $(this).addClass('hide');
+        });
         if(selectedSeed == null){
             alert("Please select a seed!");
         }
@@ -251,6 +255,10 @@
     }
 
     function waterPlot(plotID) {
+        // disable water class
+        $(".water-click-button").each( function(){
+            $(this).addClass('hide');
+        });
         $.ajax({
             url: "{{ url('garden/water') }}",
             method: 'post',

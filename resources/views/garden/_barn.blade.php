@@ -75,7 +75,7 @@
                                     {!! Form::close() !!}
                                 <!---->
                                 @else
-                                    <button type="button" class="btn btn-warning text-white" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="waterPlot({{ $userPlot->id }})">
+                                    <button type="button" class="water-plant-button btn btn-warning text-white" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="feedBarn({{ $userPlot->id }})">
                                         <img class="img-fluid image-zoom my-auto mx-auto pt-2" src="{{ $userPlot->item->imageUrl }}" data-toggle="tooltip" title="{{ $userPlot->waterings }} {{ $userPlot->waterings == 1 ? 'feeding' : 'feedings' }} done!" style="width: 9em; height: 9em;">
                                         <br> Feed <i class="fas fa-carrot"></i>
                                         <p class="text-white">Started {!! pretty_date($userPlot->started_at)!!}</p>
@@ -180,7 +180,10 @@
         }
     }
 
-    function waterPlot(plotID) {
+    function feedBarn(plotID) {
+        $(".water-click-button").each( function(){
+            $(this).addClass('hide');
+        });
         $.ajax({
             url: "{{ url('garden/water') }}",
             method: 'post',
