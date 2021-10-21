@@ -158,12 +158,11 @@ class ItemTag extends Model
     public function stageImage($stage = 0)
     {
         if($this->tag != 'seed') return null;
-        // decrement stage until it reaches 0, if it does not return a file path return null
-        while($stage > 0)
-        {
-            $file = 'images/data/stages/'.$this->id.'-'.$stage.'-image.png';
-            if($file) return $file;
-            $stage--;
+        while($stage > 0) {
+            foreach($this->data['stages'] as $st) {
+                if($st == $stage) return 'images/data/stages/' . $this->id . '-' . $st . '-image.png';
+            }
+            $stage-=1;
         }
         return 'images/data/seeds/seed.png';
     }
