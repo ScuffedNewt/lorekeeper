@@ -323,11 +323,13 @@ class GearService extends Service
             {
                 foreach($data['stats'] as $key=>$stat)
                 {
-                    GearStat::create([
-                        'gear_id' => $id,
-                        'stat_id' => $key,
-                        'count' => $stat,
-                    ]);
+                    if($stat != null && $stat > 0) {
+                        GearStat::create([
+                            'gear_id' => $id,
+                            'stat_id' => $key,
+                            'count' => $stat,
+                        ]);
+                    }
                 }
             }
             return $this->commitReturn(true);
