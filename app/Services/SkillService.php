@@ -293,7 +293,7 @@ class SkillService extends Service
 
         try {
             // Check first if the skill is currently owned or if some other site feature uses it
-            if(DB::table('character_skills')->where([['skill_id', '=', $skill->id], ['count', '>', 0]])->exists()) throw new \Exception("At least one character currently owns this skill. Please remove the skill(s) before deleting it.");
+            if(DB::table('character_skills')->where([['skill_id', '=', $skill->id]])->exists()) throw new \Exception("At least one character currently owns this skill. Please remove the skill(s) before deleting it.");
 
             DB::table('character_skills')->where('skill_id', $skill->id)->delete();
             if($skill->has_image) $this->deleteImage($skill->imagePath, $skill->imageFileName);

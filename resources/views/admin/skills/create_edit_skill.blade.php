@@ -46,7 +46,7 @@
     <div class="col-md">
         <div class="form-group">
             {!! Form::label('Parent (Optional)') !!} {!! add_help('Related skill that transforms into this skill.') !!}
-            {!! Form::select('parent_id', $skills, $skill->parent_id, ['class' => 'form-control']) !!}
+            {!! Form::select('parent_id', $skills, $skill->parent_id, ['class' => 'form-control mb-1']) !!}
             <p>A parent locks this skill and all prompts associated with this skill until the parent level is reached. It is also in the same tree as the skill.</p>
         </div>
     </div>
@@ -60,7 +60,7 @@
 
 <div class="form-group">
     {!! Form::label('Prerequisite (Optional)') !!} {!! add_help('Unrelated skill required to have before the character can learn this skill.') !!}
-    {!! Form::select('prerequisite_id', $skills, $skill->prerequisite_id, ['class' => 'form-control']) !!}
+    {!! Form::select('prerequisite_id', $skills, $skill->prerequisite_id, ['class' => 'form-control mb-1']) !!}
     <p>A prerequisite is required to have at least level 1 in to enter any prompts with this skill reward.</p>
 </div>
 
