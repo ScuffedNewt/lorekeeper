@@ -1,5 +1,5 @@
 <ul>
-    <li class="sidebar-header"><a href="{{ $user->url }}" class="card-link">{{ $user->name }}</a></li>
+    <li class="sidebar-header"><a href="{{ $user->url }}" class="card-link">{{ Illuminate\Support\Str::limit($user->name, 10, $end='...') }}</a></li>
     <li class="sidebar-section">
         <div class="sidebar-section-header">Gallery</div>
         <div class="sidebar-item"><a href="{{ $user->url.'/gallery' }}" class="{{ set_active('user/'.$user->name.'/gallery*') }}">Gallery</a></div>
@@ -8,6 +8,7 @@
     </li>
     <li class="sidebar-section">
         <div class="sidebar-section-header">User</div>
+        <div class="sidebar-item"><a href="{{ $user->url.'/aliases' }}" class="{{ set_active('user/'.$user->name.'/aliases*') }}">Aliases</a></div>
         <div class="sidebar-item"><a href="{{ $user->url.'/characters' }}" class="{{ set_active('user/'.$user->name.'/characters*') }}">Characters</a></div>
         @if(isset($sublists) && $sublists->count() > 0)
                 @foreach($sublists as $sublist)
@@ -26,8 +27,8 @@
         <div class="sidebar-item"><a href="{{ $user->url.'/submissions' }}" class="{{ set_active($user->url.'/submissions*') }}">Submissions</a></div>
         <div class="sidebar-item"><a href="{{ $user->url.'/recipe-logs' }}" class="{{ set_active($user->url.'/recipe-logs*') }}">Recipe Logs</a></div>
     </li>
-    
-    @if(Auth::check() && Auth::user()->hasPower('edit_user_info') && Auth::user()->canEditRank($user->rank))
+
+    @if(Auth::check() && Auth::user()->hasPower('edit_user_info'))
         <li class="sidebar-section">
             <div class="sidebar-section-header">Admin</div>
             <div class="sidebar-item"><a href="{{ $user->adminUrl }}">Edit User</a></div>

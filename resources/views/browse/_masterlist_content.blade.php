@@ -38,6 +38,19 @@
                     {!! Form::label('designer', 'Designer: ') !!}
                     {!! Form::select('designer', $userOptions, Request::get('designer'), ['class'=> 'form-control mr-2 userselectize', 'style' => 'width: 250px', 'placeholder' => 'Select a User']) !!}
                 </div>
+                <hr />
+                <div class="masterlist-search-field">
+                    {!! Form::label('owner_url', 'Owner URL / Username: ') !!} {!! add_help ('Example: https://deviantart.com/username OR username') !!}
+                    {!! Form::text('owner_url', Request::get('owner_url'), ['class'=> 'form-control mr-2', 'style' => 'width: 250px', 'placeholder' => 'Type a Username']) !!}
+                </div>
+                <div class="masterlist-search-field">
+                    {!! Form::label('artist_url', 'Artist URL / Username: ') !!} {!! add_help ('Example: https://deviantart.com/username OR username') !!}
+                    {!! Form::text('artist_url', Request::get('artist_url'), ['class'=> 'form-control mr-2', 'style' => 'width: 250px', 'placeholder' => 'Type a Username']) !!}
+                </div>
+                <div class="masterlist-search-field">
+                    {!! Form::label('designer_url', 'Designer URL / Username: ') !!} {!! add_help ('Example: https://deviantart.com/username OR username') !!}
+                    {!! Form::text('designer_url', Request::get('designer_url'), ['class'=> 'form-control mr-2', 'style' => 'width: 250px', 'placeholder' => 'Type a Username']) !!}
+                </div>
                 <hr/>
                 <div class="masterlist-search-field">
                     {!! Form::label('sale_value_min', 'Resale Minimum ($): ') !!}
@@ -130,7 +143,7 @@
             @foreach($chunk as $character)
             <div class="col-md-3 col-6 text-center">
                 <div>
-                    <a href="{{ $character->url }}"><img src="{{ $character->image->thumbnailUrl }}" class="img-thumbnail" /></a>
+                    <a href="{{ $character->url }}"><img src="{{ $character->image->thumbnailUrl }}" class="img-thumbnail" alt="Thumbnail for {{ $character->fullName }}"/></a>
                 </div>
                 <div class="mt-1">
                     <a href="{{ $character->url }}" class="h5 mb-0">@if(!$character->is_visible) <i class="fas fa-eye-slash"></i> @endif {{ $character->fullName }}</a>
