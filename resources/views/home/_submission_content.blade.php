@@ -55,14 +55,22 @@
     <tbody>
         @foreach($submission->data['loot_tables'] as $id => $type)
         @php $loot = \App\Models\Loot\LootTable::find($id); @endphp
+        @if($submission->data['loot_tables'][$id] == [])
+            <tr>
+                <td>{!! $loot->displayName !!}</td>
+                <td>None</td>
+                <td>N/A</td>
+            </tr>
+        @else
             @foreach($type as $key => $asset)
-                <tr>
-                    @php $model = getAssetModelString($key); $reward = $model::find($asset['asset']) @endphp
-                    <td>{!! $loot->displayName !!}</td>
-                    <td>{!! $reward ? $reward->displayName : 'Deleted Asset' !!}</td>
-                    <td>{{ $asset['quantity'] }}</td>
-                </tr>
+            <tr>
+                @php $model = getAssetModelString($key); if($asset) $reward = $model::find($asset['asset']); @endphp
+                <td>{!! $loot->displayName !!}</td>
+                <td>{!! $reward ? $reward->displayName : 'Deleted Asset' !!}</td>
+                <td>{{ $asset['quantity'] }}</td>
+            </tr>
             @endforeach
+        @endif
         @endforeach
     </tbody>
 </table>
