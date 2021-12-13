@@ -394,7 +394,7 @@ class SubmissionManager extends Service
 
             // Get the updated set of rewards
             $rewards = $this->processRewards($data, false, true);
-
+            $loots = $rewards['loot_tables'];
             // Logging data
             $promptLogType = $submission->prompt_id ? 'Prompt Rewards' : 'Claim Rewards';
             $promptData = [
@@ -402,7 +402,7 @@ class SubmissionManager extends Service
             ];
 
             // Distribute user rewards
-            if(!$rewards = fillUserAssets($rewards, $user, $submission->user, $promptLogType, $promptData)) throw new \Exception("Failed to distribute rewards to user.");
+            if(!$rewards = fillUserAssets($rewards, $user, $submission->user, $promptLogType, $promptData, True)) throw new \Exception("Failed to distribute rewards to user.");
 
             // Retrieve all reward IDs for characters
             $currencyIds = []; $itemIds = []; $tableIds = [];
@@ -472,7 +472,8 @@ class SubmissionManager extends Service
                 'status' => 'Approved',
                 'data' => json_encode([
                     'user' => $addonData,
-                    'rewards' => getDataReadyAssets($rewards)
+                    'rewards' => getDataReadyAssets($rewards['assets']),
+                    'loot_tables' => isset($rewards['loot']) ? $rewards['loot'] : []
                     ]) // list of rewards
             ]);
 

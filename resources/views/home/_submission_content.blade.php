@@ -42,6 +42,32 @@
 		</div></div>
 @endif
 
+@if(isset($submission->data['loot_tables']))
+<h2>Loot Tables Rolled</h2>
+<table class="table table-sm">
+    <thead>
+        <tr>
+            <th width="30%">Loot Table</th>
+            <th width="40%">Reward</th>
+            <th width="30%">Amount</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach($submission->data['loot_tables'] as $id => $type)
+        @php $loot = \App\Models\Loot\LootTable::find($id); @endphp
+            @foreach($type as $key => $asset)
+                <tr>
+                    @php $model = getAssetModelString($key); $reward = $model::find($asset['asset']) @endphp
+                    <td>{!! $loot->displayName !!}</td>
+                    <td>{!! $reward ? $reward->displayName : 'Deleted Asset' !!}</td>
+                    <td>{{ $asset['quantity'] }}</td>
+                </tr>
+            @endforeach
+        @endforeach
+    </tbody>
+</table>
+@endif
+
 <h2>Rewards</h2>
 <table class="table table-sm">
     <thead>
