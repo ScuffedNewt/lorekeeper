@@ -54,7 +54,9 @@ return [
     'maintenance_access' => [
         'name' => 'Has Maintenance Access',
         'description' => 'Allow rank to browse the site normally during maintenance mode.'
-    ]
-
-
+    ],
+    'manage_faq' => [
+        'name' => 'Manage FAQ',
+        'description' => 'Allow rank to create/edit FAQ entries.'
+    ],
 ];

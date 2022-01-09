@@ -123,6 +123,27 @@
         </div>
     </div>
     @endif
+    @if (Auth::user()->hasPower('manage_faq'))
+      <div class="col-sm-6">
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">FAQ Questions @if($faqCount)<span class="badge badge-primary">{{ $faqCount }}</span>@endif</h5>
+                <p class="card-text">
+                    @if($faqCount)
+                        @if($faqCount)
+                            {{ $faqCount }} question{{ $faqCount == 1 ? '' : 's' }} awaiting answers.
+                        @endif
+                    @else
+                        The FAQ question queue is clear. Hooray!
+                    @endif
+                </p>
+                <div class="text-right">
+                    <a href="{{ url('admin/faq/pending') }}" class="card-link">View Queue <span class="fas fa-caret-right ml-1"></span></a>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
     @if(!Auth::user()->hasPower('manage_submissions') && !Auth::user()->hasPower('manage_characters') && !Auth::user()->hasPower('manage_reports'))
       <div class="card p-4 col-12">
         <h5 class="card-title">You do not have a rank that allows you to access any queues.</h5>

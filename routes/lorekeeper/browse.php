@@ -124,6 +124,10 @@ Route::group(['prefix' => 'shops'], function() {
     Route::get('{id}/{stockId}', 'ShopController@getShopStock')->where(['id' => '[0-9]+', 'stockId' => '[0-9]+']);
 });
 
+Route::group(['prefix' => 'faq'], function() {
+    Route::get('/', 'FaqController@getIndex');
+});
+
 /**************************************************************************************************
     Site Pages
 **************************************************************************************************/

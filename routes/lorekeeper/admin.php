@@ -438,3 +438,10 @@ Route::group(['prefix' => 'designs', 'middleware' => 'power:manage_characters'],
     Route::post('vote/{id}/{action}', 'DesignController@postVote')->where('action', 'approve|reject');
 });
 Route::get('{type}/{status}', 'DesignController@getDesignIndex')->where('type', 'myo-approvals|design-approvals')->where('status', 'pending|approved|rejected');
+
+# FAQ
+Route::group(['prefix' => 'faq', 'middleware' => 'power:manage_faq'], function() {
+    Route::get('/', 'FaqController@getFaqIndex');
+    Route::get('edit/{id?}', 'FaqController@getFaq');
+    Route::post('edit/{id?}', 'FaqController@postFaq');
+});
