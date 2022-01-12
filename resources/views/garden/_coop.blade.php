@@ -3,12 +3,12 @@
 <div class="container" id="content">
     <!--------------------------------------------->
     <div class="d-flex justify-content-between bg-light" style="font-size: 100% !important; overflow-y: auto;">
-        <div class="col card pb-2" style=" max-height:55em;">
+        <div class="col card pb-2">
             <h5 class="mt-1">Coop Nests</h5>
             <div class="row justify-content-center">
-            @foreach($plots->chunk(3) as $chunk)
+            @foreach($plots->sortByDesc('free')->chunk(3) as $chunk)
                 @foreach($chunk as $plot)
-                <div class="card text-center m-1 col-lg-3 col-md-4" style="min-width: 14em; min-height: 14em; background-color: rgb(100, 60, 41); justify-content: center; margin:0; padding:0;">
+                <div class="card text-center m-1 col-lg-3 col-md-4" style="min-width: 14em; min-height: 14em; background-image: url({{ asset('images/farm/coop_bg.png')}}); justify-content: center; margin:0; padding:0;">
                     <!---- if user owns plot --->
                         @if(Auth::user()->gardenplots->contains('plot_id', $plot->id))
                         @php
@@ -19,7 +19,7 @@
                             <!----If there is a plant growing --->
                             @if($userPlot->water_at > $now && $userPlot->waterings < $userPlot->item->tags->where('tag', 'coop')->first()->data['feedings'])
                                 <img class="img-fluid image-zoom my-auto mx-auto pt-2" src="{{ $userPlot->item->imageUrl }}" data-toggle="tooltip" title="{{ $userPlot->waterings }} {{ $userPlot->waterings == 1 ? 'feeding' : 'feedings' }} done!" style="width: 10em; height: 10em;">
-                                <span class="text-muted"> Housing {!! $userPlot->item->name !!}</span>
+                                <span> Housing {!! $userPlot->item->name !!}</span>
                                 <div class="progress mx-4">
                                     @php if($userPlot->waterings != 0) { 
                                         $style = ($userPlot->waterings / $userPlot->item->tags->where('tag', 'coop')->first()->data['feedings']) * 100;
@@ -36,8 +36,7 @@
                                     setInterval(function(){ 
                                         
                                     var date = new Date(timer);
-                                    var test = new Date();
-                                    var now = new Date(test.getTime());
+                                    var now = new Date();
                                     // count down time difference between now and date
                                     var diff = date.getTime() - now.getTime();
                                     var time = new Date(diff);
@@ -70,7 +69,7 @@
                                     <div class="progress mx-4 mb-2">
                                         <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar" aria-valuenow="1" aria-valuemin="0" aria-valuemax="1" style="width: 100%">{{ $userPlot->waterings ?? 0 }} / {{ $userPlot->item->tags->where('tag', 'coop')->first()->data['feedings']}}</div>
                                     </div>
-                                    {!! Form::open(['url' => 'garden/claim/' . $userPlot->id]) !!}
+                                    {!! Form::open(['url' => 'farm/claim/' . $userPlot->id]) !!}
                                     {!! Form::submit('Claim!', ['class' => 'btn btn-sm btn-primary mb-1']) !!}
                                     {!! Form::close() !!}
                                 <!---->
@@ -96,7 +95,7 @@
                         @else
                             <div class="p-5 container text-white">
                                 This plot {{ $plot->free ? 'is free!' : 'costs ' . $plot->plot_cost . ' ' . $plot->currency->name }}
-                                {!! Form::open(['url' => 'garden/plots/purchase/' . $plot->id]) !!}
+                                {!! Form::open(['url' => 'farm/plots/purchase/' . $plot->id]) !!}
                                 {!! Form::submit('Purchase plot?', ['class' => 'btn btn-sm btn-primary mt-3']) !!}
                                 {!! Form::close() !!}
                             </div>
@@ -108,7 +107,7 @@
         
         </div>
         <!-------------------- SEEDS -------------------------->
-        <div class="text-center card" style="overflow-y: scroll; overflow-x: hidden; flex 0 0 7em; min-width: 11em; max-width: 11em; max-height:51em;">
+        <div class="text-center card" style="overflow-y: scroll; overflow-x: hidden; flex 0 0 7em; min-width: 11em; max-width: 11em;">
             <h5 class="text-left">Coop Store</h5> 
             <div class=" p-2 btn-group-vertical btn-group-toggle" id="coopSelector" data-toggle="buttons">
                 <label type="button" class="btn  my-1 btn-block seed-button" type="radio" autocomplete="off" >
@@ -122,7 +121,7 @@
                             <label type="button" class="btn  my-1 btn-block seed-button" type="radio" autocomplete="off">
                                 <input type="radio" name="options" autocomplete="off" value="{{$stack->first()->id}}" >
                                     <img class="img-fluid image-zoom"  src="{{ $stack->first()->imageUrl }}" style="width: 100%">
-                                <div class="text-small text-white text-center  text-wrap" style="font-size:1rem;"> {!!$stack->first()->name !!} <br>Quantity: <br> x{{ $stack->sum('pivot.count') }}</div>
+                                <div class="text-small text-white text-center  text-wrap" style="font-size:1rem;"> {!!$stack->first()->name !!} <br>Quantity: <br> x{{ $stack->sum('pivot.count') - $stack->sum('pivot.garden_count') }}</div>
                             </label>
                         @endforeach
                     @endforeach
@@ -152,7 +151,7 @@
 
     $('.skull-button-coop').on('click', function(e) {
         e.preventDefault();
-        loadModal("{{ url('garden/skull') }}" + '/' + $(this).val(), 'Remove Animal?');
+        loadModal("{{ url('farm/skull') }}" + '/' + $(this).val(), 'Remove Animal?');
     });
 
     function placeCoop(plotID) {
@@ -161,7 +160,7 @@
         }
         else {
             $.ajax({
-            url: "{{ url('garden/plant') }}",
+            url: "{{ url('farm/plant') }}",
             method: 'post',
             data:{
                 _token: '{{ csrf_token() }}',
@@ -185,7 +184,7 @@
             $(this).addClass('hide');
         });
         $.ajax({
-            url: "{{ url('garden/water') }}",
+            url: "{{ url('farm/water') }}",
             method: 'post',
             data:{
                 _token: '{{ csrf_token() }}',
@@ -204,7 +203,7 @@
 
     function clearPlot(plotID) {
         $.ajax({
-            url: "{{ url('garden/clear') }}",
+            url: "{{ url('farm/clear') }}",
             method: 'post',
             data:{
                 _token: '{{ csrf_token() }}',

@@ -24,7 +24,7 @@ class GardenController extends Controller
         $seedId = ItemTag::where('tag', 'seed')->where('is_active', 1); // Removed get()
         foreach($seedId->get() as $seed)
         {   
-            if($seed->data['start_month'] && $seed->data['end_month'] && ($seed->data['start_month'] > Carbon::now()->month || $seed->data['end_month'] < Carbon::now()->month)) {
+            if(isset($seed->data['start_month']) && isset($seed->data['end_month']) && ($seed->data['start_month'] > Carbon::now()->month || $seed->data['end_month'] < Carbon::now()->month)) {
                 // remove seed from array
                 $seedId->where('id', '!=', $seed->id);
             }
@@ -54,7 +54,7 @@ class GardenController extends Controller
     }
 
     /**
-     * Plant seed
+     * Plant seed | Place coop / barn animal
      */
     public function postPlantSeed(Request $request)
     {
@@ -144,35 +144,26 @@ class GardenController extends Controller
     /**
      * when the feeding | waterings have met the requirements and the user gets their reward
      */
-    public function postClearPlot(Request $request)
+    public function postClaim(PlotManager $service, $id)
     {
-        $data = $request->input(['plotID', 'type']);
-        $service = new PlotManager;
-        switch($data['type']) {
-            case 'seed':
-                if($service->claim(Auth::user(), $data)) {
-            
-                    flash('Planted successfully!')->success();
-                    $response = array(
-                        'status' => 'success',
-                        'msg' => $request->message,
-                    );
-                    return response()->json($response); 
+        $plot = UserGardenPlot::find($id);
+        if(!$plot) {
+            flash('Invalid plot!')->error();
+            return redirect()->back();
+        }
+        switch($plot->plot->plot_type) {
+            case 'Seed':
+                if($service->claim(Auth::user(), $plot)) {
+                    flash('Claimed successfully!')->success();
                 }
                 else {
                     foreach($service->errors()->getMessages()['error'] as $error) 
                     flash($error)->error();
                 }
             break;
-            case 'coop': case'barn':
-                if($service->animalClaim(Auth::user(), $data)) {
-            
-                    flash('Placed successfully!')->success();
-                    $response = array(
-                        'status' => 'success',
-                        'msg' => $request->message,
-                    );
-                    return response()->json($response); 
+            case 'Coop': case 'Barn':
+                if($service->animalClaim(Auth::user(), $plot)) {
+                    flash('Claimed successfully!')->success();
                 }
                 else {
                     foreach($service->errors()->getMessages()['error'] as $error) 
@@ -180,14 +171,15 @@ class GardenController extends Controller
                 }
             break;
         }
+        return redirect()->back();
     }
 
     /**
      * Claim thing
      */
-    public function postClaim($id, PlotManager $service)
+    public function postClearPlot($id, PlotManager $service)
     {
-        if($service->claim(Auth::user(), $id)) {
+        if($service->clear(Auth::user(), $id)) {
             flash('Claimed successfully!')->success();
         }
         else {

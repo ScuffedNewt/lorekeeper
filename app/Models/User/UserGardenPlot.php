@@ -52,7 +52,7 @@ class UserGardenPlot extends Model
      */
     public function plot() 
     {
-        return $this->belongsTo('App\Models\User\GardenPlot');
+        return $this->belongsTo('App\Models\User\GardenPlot', 'plot_id');
     }
 
     /**

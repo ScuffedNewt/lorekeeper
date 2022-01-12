@@ -233,15 +233,11 @@ class PlotManager extends Service
     /**
      * OwO
      */
-    public function claim($user, $id)
+    public function claim($user, $plot)
     {
         DB::beginTransaction();
 
         try { 
-
-            $plot = UserGardenPlot::find($id);
-            if(!$plot) throw new \Exception("Invalid plot.");
-
             $tag = $plot->item->tags()->where('tag', 'seed')->first();
             $item = Item::find($tag['data']['plant_id']);
 
@@ -260,11 +256,22 @@ class PlotManager extends Service
             $plot->item_id = null;
             $plot->save();
 
+            flash($this->getRewardsString($rewards))->success();
+
             return $this->commitReturn(true);
         } catch(\Exception $e) {
             $this->setError('error', $e->getMessage());
         }
         return $this->rollbackReturn(false);
+    }
+
+    private function processRewards($data, $quantity, $isStaff = false)
+    {
+        $assets = createAssetsArray(false);
+
+        addAsset($assets, $data, $quantity);
+                    
+        return $assets;
     }
 
     private function getRewardsString($rewards)
@@ -325,25 +332,30 @@ class PlotManager extends Service
         return $this->rollbackReturn(false);
     }
 
-    public function animalClaim($user, $id)
+    public function animalClaim($user, $plot)
     {
         DB::beginTransaction();
 
         try { 
-
-            $plot = UserGardenPlot::find($id);
-            if(!$plot) throw new \Exception("Invalid plot.");
-
-            if($plot->plot->plot_type == 'coop') {
+            if($plot->plot->plot_type == 'Coop') {
                 $type = 'coop';
             }
             else {
                 $type = 'barn';
             }
-            if(!$rewards = fillUserAssets(parseAssetData($stack->item->tag('box')->data), $user, $user, 'Box Rewards', [
-                'data' => 'Received rewards from opening '.$stack->item->name
+            $assets = parseAssetData($plot->item->tags->where('tag', $type)->first()->data['rewards']);
+            if(!$rewards = fillUserAssets($assets, $user, $user, 'Box Rewards', [
+                'data' => 'Received rewards from the '.$type
             ])) throw new \Exception("Failed to credit items.");
+
+            $animals = UserItem::where('item_id', $plot->item_id)->where('count', '>', 0)->where('user_id', $user->id)->get();
             
+            $animal = null;
+            foreach($animals as $a) {if($a->garden_count > 0) {$animal = $a;}}
+
+            if(!$animal) throw new \Exception("Invalid Animal.");
+            $animal->garden_count--;
+            $animal->save();
 
             $plot->modifiers = null;
             $plot->started_at = null;
