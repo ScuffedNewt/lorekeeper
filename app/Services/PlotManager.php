@@ -134,18 +134,28 @@ class PlotManager extends Service
     /**
      * 
      */
-    public function water($user, $data)
+    public function water($user, $data, $all = false)
     {
         DB::beginTransaction();
 
         try { 
-            
+            if(!$all) {
             $plot = UserGardenPlot::find($data);
             if(!$plot) throw new \Exception("Invalid plot.");
 
             $plot->waterings += 1;
             $plot->water_at = Carbon::now()->addHours($plot->time);
             $plot->save();
+            }
+            else {
+                $plots = UserGardenPlot::where('user_id', $user->id)->where('water_at', '<', Carbon::now())->get();
+                foreach($plots as $plot)
+                {
+                    $plot->waterings += 1;
+                    $plot->water_at = Carbon::now()->addHours($plot->time);
+                    $plot->save();
+                }
+            }
 
             return $this->commitReturn(true);
         } catch(\Exception $e) {
@@ -332,7 +342,7 @@ class PlotManager extends Service
         return $this->rollbackReturn(false);
     }
 
-    public function animalClaim($user, $plot)
+    public function animalClaim($user, $plot, $remove = false)
     {
         DB::beginTransaction();
 
@@ -348,6 +358,7 @@ class PlotManager extends Service
                 'data' => 'Received rewards from the '.$type
             ])) throw new \Exception("Failed to credit items.");
 
+            if($remove) {
             $animals = UserItem::where('item_id', $plot->item_id)->where('count', '>', 0)->where('user_id', $user->id)->get();
             
             $animal = null;
@@ -356,6 +367,10 @@ class PlotManager extends Service
             if(!$animal) throw new \Exception("Invalid Animal.");
             $animal->garden_count--;
             $animal->save();
+
+            $plot->item_id = null;
+            $plot->save();
+            }
 
             $plot->modifiers = null;
             $plot->started_at = null;

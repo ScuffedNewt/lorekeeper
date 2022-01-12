@@ -124,7 +124,7 @@ class GardenController extends Controller
     {
         $data = $request->input('plotID');
         $service = new PlotManager;
-        if($service->water(Auth::user(), $data)) {
+        if($service->water(Auth::user(), $data, false)) {
             $plot = UserGardenPlot::find($data);
             if($plot->plot->plot_type == 'Seed')
             flash('Watered successfully!')->success();
@@ -214,6 +214,7 @@ class GardenController extends Controller
     public function checkPlots($user)
     {
         $check = 0;
+        dd(UserGardenPlot::where('user_id', $user->id)->whereRelation('plot', 'plot_type', 'Seed')->get());
         foreach($user->gardenplots as $plot)
         {
             $water = Carbon::parse($plot->water_at)->addHours($plot->time);
