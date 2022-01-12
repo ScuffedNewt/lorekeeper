@@ -28,7 +28,7 @@
                                     @endphp
                                     <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar" aria-valuenow="{{ $userPlot->waterings }}" aria-valuemin="0" aria-valuemax="{{ $userPlot->item->tags->where('tag', 'coop')->first()->data['feedings'] }}" style="width: {{$style}}%">{{ $userPlot->waterings ?? 0 }} / {{ $userPlot->item->tags->where('tag', 'coop')->first()->data['feedings']}}</div>
                                 </div>
-                                <div id="{{ $userPlot->id }}-water-text" class="text-white">Next feeding {{ $userPlot->water_at }}</div>
+                                <div id="{{ $userPlot->id }}-water-text" class="text-white">Next feeding {{ $userPlot->water_at->format('H:i:s') }}</div>
                                 <p class="text-white">Started {!! pretty_date($userPlot->started_at)!!}</p>
                                 <!---- Water times -->
                                 <script>
@@ -55,7 +55,7 @@
                                     var wateringLeft = Date.parse("<?php echo $userPlot->water_at ?>");
                                     var waterTextId = "<?php echo $userPlot->id ?>"
 
-                                    setInterval(waterCount(waterTextId, wateringLeft), 1000);
+                                    if(!isSafari) setInterval(waterCount(waterTextId, wateringLeft), 1000);
                                 </script>
                                 <!------------------>
                                 <button type="button" class="skull-button-coop" value="{{ $userPlot->id }}">

@@ -42,7 +42,7 @@
                                 @if($userPlot->water_at > $now && $userPlot->waterings < $userPlot->item->tags->where('tag', 'seed')->first()->data['waterings'])
                                     <img class="img-fluid image-zoom my-auto mx-auto pt-2" src="{{ asset($userPlot->item->tags->where('tag', 'seed')->first()->stageImage($userPlot->waterings)) }}" data-toggle="tooltip" title="{{ $userPlot->waterings }} {{ $userPlot->waterings == 1 ? 'watering' : 'waterings' }} done!" style="width: 10em; height: 10em;">
                                     <span class="text-muted"> Growing {!! $userPlot->item->name !!} seeds</span>
-                                    <div id="{{ $userPlot->id }}-water-text" class ="text-white">Next watering {{ $userPlot->water_at }}</div>
+                                    <div id="{{ $userPlot->id }}-water-text" class ="text-white">Next watering {{ $userPlot->water_at->format('H:i:s') }}</div>
                                     <p class="text-white">Started {!! pretty_date($userPlot->started_at)!!}</p>
                                     <!---- Water times -->
                                     <script>
@@ -69,7 +69,7 @@
                                         var wateringLeft = Date.parse("<?php echo $userPlot->water_at ?>");
                                         var waterTextId = "<?php echo $userPlot->id ?>"
 
-                                        setInterval(waterCount(waterTextId, wateringLeft), 1000);
+                                        if(!isSafari) setInterval(waterCount(waterTextId, wateringLeft), 1000);
                                     </script>
                                     <!------------------>
                                     <button type="button" class="skull-button-garden" value="{{ $userPlot->id }}">

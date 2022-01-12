@@ -23,6 +23,9 @@
             </li>
         </ul>
     </div>
+    <script>
+        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    </script>
     <div class="card-body tab-content">
         <div class="tab-pane fade show active" id="farm">
             @include('garden._garden', ['userSeeds' => $userSeeds, 'userModifiers' => $userModifiers, 'plots' => $plots->where('plot_type', 'Seed')])
