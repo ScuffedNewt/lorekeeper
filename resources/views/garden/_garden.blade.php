@@ -29,7 +29,7 @@
             <div class="row justify-content-center">
             @foreach($plots->sortByDesc('free')->chunk(3) as $chunk)
                 @foreach($chunk as $plot)
-                <div class="card text-center m-1 col-lg-3 col-md-4" style="min-width: 14em; min-height: 14em; background-image: url({{ asset('images/farm/crops_bg.png')}}); justify-content: center; margin:0; padding:0;">
+                <div class="card text-center m-1 col-lg-3 col-md-4" style="min-width: 14em; min-height: 14em; background-image: url({{ asset('images/garden/crops_bg.png')}}); justify-content: center; margin:0; padding:0;">
                     <!---- if user owns plot --->
                         @if(Auth::user()->gardenplots->contains('plot_id', $plot->id))
                         @php
@@ -80,7 +80,7 @@
                                     @if($userPlot->waterings >= $userPlot->item->tags->where('tag', 'seed')->first()->data['waterings'])
                                         <i class="fas fa-seedling text-white mt-1"></i>
                                         <img class="img-fluid image-zoom my-auto mx-auto pt-2" src="{{ asset('images/data/seeds/seed.png') }}" data-toggle="tooltip" title="{{ $userPlot->waterings }} {{ $userPlot->waterings == 1 ? 'watering' : 'waterings' }} done!" style="width: 10em; height: 10em;">
-                                        {!! Form::open(['url' => 'farm/claim/' . $userPlot->id]) !!}
+                                        {!! Form::open(['url' => 'garden/claim/' . $userPlot->id]) !!}
                                         {!! Form::submit('Claim!', ['class' => 'btn btn-sm btn-primary']) !!}
                                         {!! Form::close() !!}
                                     <!---->
@@ -112,7 +112,7 @@
                         @else
                             <div class="p-5 container text-white">
                                 This plot {{ $plot->isFree ? 'is free!' : 'costs ' . $plot->plot_cost . ' ' . $plot->currency->name }}
-                                {!! Form::open(['url' => 'farm/plots/purchase/' . $plot->id]) !!}
+                                {!! Form::open(['url' => 'garden/plots/purchase/' . $plot->id]) !!}
                                 {!! Form::submit('Purchase plot?', ['class' => 'btn btn-sm btn-primary mt-3']) !!}
                                 {!! Form::close() !!}
                             </div>
@@ -188,7 +188,7 @@
 
     $('.skull-button-garden').on('click', function(e) {
         e.preventDefault();
-        loadModal("{{ url('farm/skull') }}" + '/' + $(this).val(), 'Destroy Crop?');
+        loadModal("{{ url('garden/skull') }}" + '/' + $(this).val(), 'Destroy Crop?');
     });
 
     function plantSeed(plotID) {
@@ -201,7 +201,7 @@
         }
         else {
             $.ajax({
-            url: "{{ url('farm/plant') }}",
+            url: "{{ url('garden/plant') }}",
             method: 'post',
             data:{
                 _token: '{{ csrf_token() }}',
@@ -226,7 +226,7 @@
         }
         else {
             $.ajax({
-            url: "{{ url('farm/mod') }}",
+            url: "{{ url('garden/mod') }}",
             method: 'post',
             data:{
                 _token: '{{ csrf_token() }}',
@@ -250,7 +250,7 @@
             $(this).addClass('hide');
         });
         $.ajax({
-            url: "{{ url('farm/water') }}",
+            url: "{{ url('garden/water') }}",
             method: 'post',
             data:{
                 _token: '{{ csrf_token() }}',
@@ -268,7 +268,7 @@
 
     function clearPlot(plotID) {
         $.ajax({
-            url: "{{ url('farm/clear') }}",
+            url: "{{ url('garden/clear') }}",
             method: 'post',
             data:{
                 _token: '{{ csrf_token() }}',
