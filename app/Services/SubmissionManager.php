@@ -34,6 +34,16 @@ class SubmissionManager extends Service
     */
 
     /**
+     * Helper function to remove all empty/zero/falsey values.
+     *
+     * @param  array $value
+     * @return array
+     */
+    private function innerNull($value){
+        return array_values(array_filter($value));
+    }
+
+    /**
      * Creates a new submission.
      *
      * @param  array                  $data
@@ -74,14 +84,14 @@ class SubmissionManager extends Service
             // Attach items. Technically, the user doesn't lose ownership of the item - we're just adding an additional holding field.
             // We're also not going to add logs as this might add unnecessary fluff to the logs and the items still belong to the user.
             if(isset($data['stack_id'])) {
-                foreach($data['stack_id'] as $key=>$stackId) {
+                foreach($data['stack_id'] as $stackId) {
                     $stack = UserItem::with('item')->find($stackId);
                     if(!$stack || $stack->user_id != $user->id) throw new \Exception("Invalid item selected.");
-                    if(!isset($data['stack_quantity'][$key])) $data['stack_quantity'][$key] = $stack->count;
-                    $stack->submission_count += $data['stack_quantity'][$key];
+                    if(!isset($data['stack_quantity'][$stackId])) throw new \Exception("Invalid quantity selected.");
+                    $stack->submission_count += $data['stack_quantity'][$stackId];
                     $stack->save();
 
-                    addAsset($userAssets, $stack, $data['stack_quantity'][$key]);
+                    addAsset($userAssets, $stack, $data['stack_quantity'][$stackId]);
                 }
             }
 
@@ -98,6 +108,7 @@ class SubmissionManager extends Service
                     foreach($currencyIds as $key=>$currencyId) {
                         $currency = Currency::find($currencyId);
                         if(!$currency) throw new \Exception("Invalid currency selected.");
+                        if($data['currency_quantity'][$holderKey][$key] < 0) throw new \Exception('Cannot attach a negative amount of currency.');
                         if(!$currencyManager->debitCurrency($holder, null, null, null, $currency, $data['currency_quantity'][$holderKey][$key])) throw new \Exception("Invalid currency/quantity selected.");
 
                         addAsset($userAssets, $currency, $data['currency_quantity'][$holderKey][$key]);
@@ -177,10 +188,6 @@ class SubmissionManager extends Service
             $this->setError('error', $e->getMessage());
         }
         return $this->rollbackReturn(false);
-    }
-
-    private function innerNull($value){
-        return array_values(array_filter($value));
     }
 
     /**
@@ -318,6 +325,8 @@ class SubmissionManager extends Service
                 'submission_id' => $submission->id,
             ]);
 
+            if(!logAdminAction($user, 'Submission Rejected', 'Rejected submission <a href="'.$submission->viewurl.'">#'.$submission->id.'</a>')) throw new \Exception("Failed to log admin action.");
+
             return $this->commitReturn($submission);
         } catch(\Exception $e) {
             $this->setError('error', $e->getMessage());
@@ -375,7 +384,7 @@ class SubmissionManager extends Service
             {
                 foreach($addonData['currencies'] as $currencyId=>$quantity) {
                     $currency = Currency::find($currencyId);
-                    if(!$currencyManager->createLog($user->id, 'User', null, null,
+                    if(!$currencyManager->createLog($submission->user_id, 'User', null, null,
                     $submission->prompt_id ? 'Prompt Approved' : 'Claim Approved', 'Used in ' . ($submission->prompt_id ? 'prompt' : 'claim') . ' (<a href="'.$submission->viewUrl.'">#'.$submission->id.'</a>)', $currencyId, $quantity))
                         throw new \Exception("Failed to create currency log.");
                 }
@@ -480,6 +489,8 @@ class SubmissionManager extends Service
                 'staff_name' => $user->name,
                 'submission_id' => $submission->id,
             ]);
+
+            if(!logAdminAction($user, 'Submission Approved', 'Approved submission <a href="'.$submission->viewurl.'">#'.$submission->id.'</a>')) throw new \Exception("Failed to log admin action.");
 
             return $this->commitReturn($submission);
         } catch(\Exception $e) {

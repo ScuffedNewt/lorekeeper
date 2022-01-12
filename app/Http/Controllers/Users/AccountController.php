@@ -7,12 +7,14 @@ use File;
 use Image;
 
 use App\Models\User\User;
+use App\Models\User\UserAlias;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Notification;
 
 use App\Services\UserService;
+use App\Services\LinkService;
 
 use App\Http\Controllers\Controller;
 
@@ -36,7 +38,7 @@ class AccountController extends Controller
     {
         if(Auth::user()->is_banned)
             return view('account.banned');
-        else 
+        else
             return redirect()->to('/');
     }
 
@@ -49,7 +51,7 @@ class AccountController extends Controller
     {
         return view('account.settings');
     }
-    
+
     /**
      * Edits the user's profile.
      *
@@ -82,7 +84,7 @@ class AccountController extends Controller
         }
         return redirect()->back();
     }
-    
+
     /**
      * Changes the user's password.
      *
@@ -104,7 +106,7 @@ class AccountController extends Controller
         }
         return redirect()->back();
     }
-    
+
     /**
      * Changes the user's email address and sends a verification email.
      *
@@ -119,6 +121,24 @@ class AccountController extends Controller
         ]);
         if($service->updateEmail($request->only(['email']), Auth::user())) {
             flash('Email updated successfully. A verification email has been sent to your new email address.')->success();
+        }
+        else {
+            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+        }
+        return redirect()->back();
+    }
+
+    /**
+     * Changes user birthday setting
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  App\Services\UserService  $service
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function postBirthday(Request $request, UserService $service)
+    {
+        if($service->updateDOB($request->input('birthday_setting'), Auth::user())) {
+            flash('Setting updated successfully.')->success();
         }
         else {
             foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
@@ -142,7 +162,7 @@ class AccountController extends Controller
             'notifications' => $notifications
         ]);
     }
-    
+
     /**
      * Deletes a notification and returns a response.
      *
@@ -162,9 +182,98 @@ class AccountController extends Controller
      */
     public function postClearNotifications($type = null)
     {
-        if(isset($type) && $type) Auth::user()->notifications()->where('notification_type_id', $type)->delete();
+        if(isset($type))
+            Auth::user()->notifications()->where('notification_type_id', $type)->delete();
         else Auth::user()->notifications()->delete();
         flash('Notifications cleared successfully.')->success();
+        return redirect()->back();
+    }
+
+    /**
+     * Shows the account links page.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getAliases()
+    {
+        return view('account.aliases');
+    }
+
+    /**
+     * Shows the make primary alias modal.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getMakePrimary($id)
+    {
+        return view('account._make_primary_modal', ['alias' => UserAlias::where('id', $id)->where('user_id', Auth::user()->id)->first()]);
+    }
+
+    /**
+     * Makes an alias the user's primary alias.
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function postMakePrimary(LinkService $service, $id)
+    {
+        if($service->makePrimary($id, Auth::user())) {
+            flash('Your primary alias has been changed successfully.')->success();
+        }
+        else {
+            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+        }
+        return redirect()->back();
+    }
+
+    /**
+     * Shows the hide alias modal.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getHideAlias($id)
+    {
+        return view('account._hide_alias_modal', ['alias' => UserAlias::where('id', $id)->where('user_id', Auth::user()->id)->first()]);
+    }
+
+    /**
+     * Hides or unhides the selected alias from public view.
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function postHideAlias(LinkService $service, $id)
+    {
+        if($service->hideAlias($id, Auth::user())) {
+            flash('Your alias\'s visibility setting has been changed successfully.')->success();
+        }
+        else {
+            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+        }
+        return redirect()->back();
+    }
+
+    /**
+     * Shows the remove alias modal.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getRemoveAlias($id)
+    {
+        return view('account._remove_alias_modal', ['alias' => UserAlias::where('id', $id)->where('user_id', Auth::user()->id)->first()]);
+    }
+
+    /**
+     * Removes the selected alias from the user's account.
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function postRemoveAlias(LinkService $service, $id)
+    {
+        if($service->removeAlias($id, Auth::user())) {
+            flash('Your alias has been removed successfully.')->success();
+        }
+        else {
+            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+        }
         return redirect()->back();
     }
 }
