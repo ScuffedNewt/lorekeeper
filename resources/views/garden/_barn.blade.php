@@ -136,7 +136,6 @@
     
     $("#barnSelector input:radio").change(function() {
         selectedBarn = $(this).val();
-        console.log(selectedBarn);
         if(selectedBarn == null || selectedBarn == 0) {
             $(".seed-button-plant").each( function(){
             $(this).addClass('hide');

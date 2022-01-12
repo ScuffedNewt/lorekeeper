@@ -136,7 +136,6 @@
     
     $("#coopSelector input:radio").change(function() {
         selectedCoop = $(this).val();
-        console.log(selectedCoop);
         if(selectedCoop == null || selectedCoop == 0) {
             $(".seed-button-plant").each( function(){
             $(this).addClass('hide');
