@@ -266,22 +266,13 @@ class PlotManager extends Service
             $plot->item_id = null;
             $plot->save();
 
-            flash($this->getRewardsString($rewards))->success();
+            flash('You have received: ' . $item->displayName .'!')->success();
 
             return $this->commitReturn(true);
         } catch(\Exception $e) {
             $this->setError('error', $e->getMessage());
         }
         return $this->rollbackReturn(false);
-    }
-
-    private function processRewards($data, $quantity, $isStaff = false)
-    {
-        $assets = createAssetsArray(false);
-
-        addAsset($assets, $data, $quantity);
-                    
-        return $assets;
     }
 
     private function getRewardsString($rewards)
@@ -359,25 +350,25 @@ class PlotManager extends Service
             ])) throw new \Exception("Failed to credit items.");
 
             if($remove) {
-            $animals = UserItem::where('item_id', $plot->item_id)->where('count', '>', 0)->where('user_id', $user->id)->get();
-            
-            $animal = null;
-            foreach($animals as $a) {if($a->garden_count > 0) {$animal = $a;}}
+                $animals = UserItem::where('item_id', $plot->item_id)->where('count', '>', 0)->where('user_id', $user->id)->get();
+                
+                $animal = null;
+                foreach($animals as $a) {if($a->garden_count > 0) {$animal = $a;}}
 
-            if(!$animal) throw new \Exception("Invalid Animal.");
-            $animal->garden_count--;
-            $animal->save();
+                if(!$animal) throw new \Exception("Invalid Animal.");
+                $animal->garden_count--;
+                $animal->save();
 
-            $plot->item_id = null;
-            $plot->save();
+                $plot->item_id = null;
+                $plot->save();
             }
 
             $plot->modifiers = null;
-            $plot->started_at = null;
-            $plot->water_at = null;
-            $plot->waterings = null;
+            $plot->started_at = $remove ? null : carbon::now();
+            $plot->water_at = $remove ? null : carbon::now()->addHours(24);
+            $plot->waterings = 0;
             $plot->is_dead = 0;
-            $plot->time = null;
+            $plot->time = $remove ? null : 24;
             $plot->save();
 
             flash($this->getRewardsString($rewards))->success();

@@ -75,6 +75,7 @@ class GardenController extends Controller
                     foreach($service->errors()->getMessages()['error'] as $error) 
                     flash($error)->error();
                 }
+                return redirect()->to('garden#coop');
             break;
             case 'coop': case 'barn':
                 if($service->place(Auth::user(), $data)) {
@@ -90,9 +91,9 @@ class GardenController extends Controller
                     foreach($service->errors()->getMessages()['error'] as $error) 
                     flash($error)->error();
                 }
+                return redirect()->to(($data['type'] == 'coop' ? 'garden#coop' : 'garden#barn'));
             break;
         }
-        
     }
 
     /**
@@ -160,18 +161,19 @@ class GardenController extends Controller
                     foreach($service->errors()->getMessages()['error'] as $error) 
                     flash($error)->error();
                 }
+                return redirect()->to('garden');
             break;
             case 'Coop': case 'Barn':
-                if($service->animalClaim(Auth::user(), $plot)) {
+                if($service->animalClaim(Auth::user(), $plot, false)) {
                     flash('Claimed successfully!')->success();
                 }
                 else {
                     foreach($service->errors()->getMessages()['error'] as $error) 
                     flash($error)->error();
                 }
+                return redirect()->to(($plot->plot->plot_type == 'Coop' ? 'garden#coop' : 'garden#barn'));
             break;
         }
-        return redirect()->back();
     }
 
     /**
@@ -214,8 +216,7 @@ class GardenController extends Controller
     public function checkPlots($user)
     {
         $check = 0;
-        dd(UserGardenPlot::where('user_id', $user->id)->whereRelation('plot', 'plot_type', 'Seed')->get());
-        foreach($user->gardenplots as $plot)
+        foreach(UserGardenPlot::where('user_id', $user->id)->whereRelation('plot', 'plot_type', 'Seed')->get() as $plot)
         {
             $water = Carbon::parse($plot->water_at)->addHours($plot->time);
             if($water < Carbon::now())
