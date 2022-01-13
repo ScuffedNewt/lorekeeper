@@ -5,6 +5,7 @@ namespace App\Models\User;
 use App\Models\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+use Carbon\Carbon;
 class UserGardenPlot extends Model
 {
 
@@ -61,5 +62,37 @@ class UserGardenPlot extends Model
     public function item() 
     {
         return $this->belongsTo('App\Models\Item\Item');
+    }
+
+    /**********************************************************************************************
+    
+        ATTRIBUTES
+
+    **********************************************************************************************/
+
+    /**
+     * Gets whether the plot can currently be watered / fed.
+     */
+    public function getWateringTimeAttribute()
+    {
+        return $this->water_at > Carbon::now() && $this->waterings < $this->item->tags->where('tag', strtolower($this->plot->plot_type))
+        ->first()->data[($this->plot->plot_type == 'Seed' ? 'waterings' : 'feedings')];
+    }
+
+    /**
+     * Gives the display message for the item currently held in the plot
+     */
+    public function getDisplayHoldingAttribute()
+    {
+        switch($this->plot->plot_type)
+        {
+            case 'Coop':
+            case 'Barn':
+                return 'Currently Housing '. $this->item->name;
+                break;
+            case 'Seed':
+                return 'Growing ' . $this->item->name . ' seeds';
+                break;
+        }
     }
 }

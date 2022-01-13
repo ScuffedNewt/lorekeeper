@@ -24,8 +24,9 @@
     </div>
     <!--------------------------------------------->
     <div class="d-flex justify-content-between bg-light" style="font-size: 100% !important; overflow-y: auto;" style="max-height:55em;">
-        <div class="col card pb-2">
+        <div class="col card pb-2 border-0">
             <h5 class="mt-1">Plots</h5>
+            @include('garden._clear_all', ['type' => 'Seed'])
             <div class="row justify-content-center">
             @foreach($plots->sortByDesc('free')->chunk(3) as $chunk)
                 @foreach($chunk as $plot)
@@ -41,34 +42,13 @@
                                 <!----If there is a plant growing --->
                                 @if($userPlot->water_at > $now && $userPlot->waterings < $userPlot->item->tags->where('tag', 'seed')->first()->data['waterings'])
                                     <img class="img-fluid image-zoom my-auto mx-auto pt-2" src="{{ asset($userPlot->item->tags->where('tag', 'seed')->first()->stageImage($userPlot->waterings)) }}" data-toggle="tooltip" title="{{ $userPlot->waterings }} {{ $userPlot->waterings == 1 ? 'watering' : 'waterings' }} done!" style="width: 10em; height: 10em;">
-                                    <span class="text-muted"> Growing {!! $userPlot->item->name !!} seeds</span>
+                                    <div class="text-muted mt-4"> Growing {!! $userPlot->item->name !!} seeds</div>
                                     <div id="{{ $userPlot->id }}-water-text" class ="text-white">Next watering {{ $userPlot->water_at->format('H:i:s') }}</div>
                                     <p class="text-white">Started {!! pretty_date($userPlot->started_at)!!}</p>
                                     <!---- Water times -->
                                     <script>
-                                        function waterCount(id, timer) {
-                                        setInterval(function(){ 
-                                            
-                                        var date = new Date(timer);
-                                        var now = new Date();
-                                        // count down time difference between now and date
-                                        var diff = date.getTime() - now.getTime();
-                                        var time = new Date(diff);
-
-                                        var seconds = time.getUTCSeconds();
-                                        if(seconds < 10) seconds = "0" + seconds;
-                                        var minutes = time.getUTCMinutes();
-                                        if(minutes < 10) minutes = "0" + minutes;
-                                        var hours = time.getUTCHours();
-                                        if(hours < 10) hours = "0" + hours;
-
-                                        var text = "Next watering in "+ hours + ":" + minutes + ":" + seconds;
-                                        $("#"+id+"-water-text").text(text);
-                                        }, 1000)}
-
                                         var wateringLeft = Date.parse("<?php echo $userPlot->water_at ?>");
                                         var waterTextId = "<?php echo $userPlot->id ?>"
-
                                         if(!isSafari) setInterval(waterCount(waterTextId, wateringLeft), 1000);
                                     </script>
                                     <!------------------>

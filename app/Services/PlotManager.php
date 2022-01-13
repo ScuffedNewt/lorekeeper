@@ -80,6 +80,18 @@ class PlotManager extends Service
         return $this->rollbackReturn(false);
     }
 
+    /**
+     * Collects all of a certain type
+     */
+    public function collectAll($user, $type)
+    {
+        $plots = UserGardenPlot::where('user_id', $user->id)->whereRelation('plot', 'plot_type', $type)->get();
+        $count = 0;
+        foreach($plots as $plot) {
+            if($this->collectPlot($user, $plot)) $count++;
+        }
+    }
+
     /***************************************************************************************************************
      * 
      * GARDENING RELATED
@@ -167,22 +179,19 @@ class PlotManager extends Service
     /**
      * 
      */
-    public function clear($user, $data)
+    public function clear($user, $plot)
     {
         DB::beginTransaction();
 
         try { 
-
-            $plot = UserGardenPlot::find($data);
-            if(!$plot) throw new \Exception("Invalid plot.");
-
             if($plot->plot->plot_type != 'Seed') {
-                $item = UserItem::where('item_id', $plot->item_id)->where('user_id', $user->id)->where('garden_count', '>', 0)->first();
+                $item = UserItem::where('item_id', $plot->item_id)->where('user_id', $user->id)->where('count', '>', 0)->where('garden_count', '>', 0)->first();
                 if(!$item) throw new \Exception("Invalid item.");
 
                 $item->garden_count--;
                 $item->save();
             }
+
             $plot->item_id = null;
             $plot->modifiers = null;
             $plot->started_at = null;

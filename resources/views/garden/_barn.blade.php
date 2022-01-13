@@ -5,6 +5,7 @@
     <div class="d-flex justify-content-between bg-light" style="font-size: 100% !important; overflow-y: auto;">
         <div class="col card pb-2">
             <h5 class="mt-1">Barn Stables</h5>
+            @include('garden._clear_all', ['type' => 'Barn'])
             <div class="row justify-content-center">
             @foreach($plots->sortByDesc('free')->chunk(3) as $chunk)
                 @foreach($chunk as $plot)
@@ -19,7 +20,7 @@
                             <!----If there is a plant growing --->
                             @if($userPlot->water_at > $now && $userPlot->waterings < $userPlot->item->tags->where('tag', 'barn')->first()->data['feedings'])
                                 <img class="img-fluid image-zoom my-auto mx-auto pt-2" src="{{ $userPlot->item->imageUrl }}" data-toggle="tooltip" title="{{ $userPlot->waterings }} {{ $userPlot->waterings == 1 ? 'feeding' : 'feedings' }} done!" style="width: 10em; height: 10em;">
-                                <span class="text-muted"> Housing {!! $userPlot->item->name !!}</span>
+                                <div class="text-muted mt-4"> Housing {!! $userPlot->item->name !!}</div>
                                 <div class="progress mx-4">
                                     @php if($userPlot->waterings != 0) { 
                                         $style = ($userPlot->waterings / $userPlot->item->tags->where('tag', 'barn')->first()->data['feedings']) * 100;
@@ -32,29 +33,8 @@
                                 <p class="text-white">Started {!! pretty_date($userPlot->started_at)!!}</p>
                                 <!---- Water times -->
                                 <script>
-                                    function waterCount(id, timer) {
-                                    setInterval(function(){ 
-                                    
-                                    var date = new Date(timer);
-                                    var now = new Date();
-                                    // count down time difference between now and date
-                                    var diff = date.getTime() - now.getTime();
-                                    var time = new Date(diff);
-
-                                    var seconds = time.getUTCSeconds();
-                                    if(seconds < 10) seconds = "0" + seconds;
-                                    var minutes = time.getUTCMinutes();
-                                    if(minutes < 10) minutes = "0" + minutes;
-                                    var hours = time.getUTCHours();
-                                    if(hours < 10) hours = "0" + hours;
-
-                                    var text = "Next feeding in "+ hours + ":" + minutes + ":" + seconds;
-                                    $("#"+id+"-water-text").text(text);
-                                    }, 1000)}
-
                                     var wateringLeft = Date.parse("<?php echo $userPlot->water_at ?>");
                                     var waterTextId = "<?php echo $userPlot->id ?>"
-
                                     if(!isSafari) setInterval(waterCount(waterTextId, wateringLeft), 1000);
                                 </script>
                                 <!------------------>

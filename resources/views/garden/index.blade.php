@@ -15,27 +15,55 @@
             <li class="nav-item">
                 <a class="nav-link active" id="farmTab" data-toggle="tab" href="#farm" role="tab">Farm</a>
             </li>
+            @if(count($plots->where('plot_type', 'Coop')) > 0)
             <li class="nav-item">
                 <a class="nav-link" id="coopTab" data-toggle="tab" href="#coop" role="tab">Coop</a>
             </li>
+            @endif
+            @if(count($plots->where('plot_type', 'Barn')) > 0)
             <li class="nav-item">
                 <a class="nav-link" id="barnTab" data-toggle="tab" href="#barn" role="tab">Barn</a>
             </li>
+            @endif
         </ul>
     </div>
     <script>
         const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+        function waterCount(id, timer) {
+            setInterval(function(){ 
+                
+            var date = new Date(timer);
+            var now = new Date();
+            // count down time difference between now and date
+            var diff = date.getTime() - now.getTime();
+            var time = new Date(diff);
+
+            var seconds = time.getUTCSeconds();
+            if(seconds < 10) seconds = "0" + seconds;
+            var minutes = time.getUTCMinutes();
+            if(minutes < 10) minutes = "0" + minutes;
+            var hours = time.getUTCHours();
+            if(hours < 10) hours = "0" + hours;
+
+            var text = "Next watering in "+ hours + ":" + minutes + ":" + seconds;
+            $("#"+id+"-water-text").text(text);
+            }, 1000);
+        }
     </script>
     <div class="card-body tab-content">
         <div class="tab-pane fade show active" id="farm">
-            @include('garden._garden', ['userSeeds' => $userSeeds, 'userModifiers' => $userModifiers, 'plots' => $plots->where('plot_type', 'Seed')])
+            @include('garden._panel', ['userItems' => $userSeeds, 'userModifiers' => $userModifiers, 'plots' => $plots->where('plot_type', 'Seed')])
         </div>
+        @if(count($plots->where('plot_type', 'Coop')) > 0)
         <div class="tab-pane fade" id="coop">
-            @include('garden._coop', ['userCoops' => $userCoops, 'userModifiers' => $userModifiers, 'plots' => $plots->where('plot_type', 'Coop')])
+            @include('garden._panel', ['userItems' => $userCoops, 'plots' => $plots->where('plot_type', 'Coop')])
         </div>
+        @endif
+        @if(count($plots->where('plot_type', 'Barn')) > 0)
         <div class="tab-pane fade" id="barn">
-            @include('garden._barn', ['userBarns' => $userBarns, 'userModifiers' => $userModifiers, 'plots' => $plots->where('plot_type', 'Barn')])
+            @include('garden._panel', ['userItems' => $userBarns, 'plots' => $plots->where('plot_type', 'Barn')])
         </div>
+        @endif
     </div>
 </div>
 

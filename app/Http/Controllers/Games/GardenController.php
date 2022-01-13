@@ -177,12 +177,12 @@ class GardenController extends Controller
     }
 
     /**
-     * Claim thing
+     * Collect all in one go of a certain type of plot
      */
-    public function postClearPlot($id, PlotManager $service)
+    public function postClearPlot(PlotManager $service, $type)
     {
-        if($service->clear(Auth::user(), $id)) {
-            flash('Claimed successfully!')->success();
+        if($count = $service->collectAll(Auth::user(), $type)) {
+            flash('Collected '. $count .' successfully!')->success();
         }
         else {
             foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
@@ -257,8 +257,9 @@ class GardenController extends Controller
      */
     public function destroyCrop($id, PlotManager $service)
     {
-        if($service->clear(Auth::user(), $id)) {
-            $plot = UserGardenPlot::find($id);
+        $plot = UserGardenPlot::find($id);
+        if(!$plot) abort(404);
+        if($service->clear(Auth::user(), $plot)) {
             if($plot->plot->plot_type == 'Seed') {
                 flash('Crop destroyed successfully!')->success();
             }

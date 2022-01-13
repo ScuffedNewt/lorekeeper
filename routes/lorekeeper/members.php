@@ -214,4 +214,5 @@ Route::group(['prefix' => 'garden', 'namespace' => 'Games'],  function(){
     Route::post('/clear', 'GardenController@postClearPlot');
     Route::post('/plots/purchase/{id}', 'GardenController@postPurchasePlot');
     Route::post('/claim/{id}', 'GardenController@postClaim');
+    Route::post('/collect/{type}', 'GardenController@postCollectAll');
 });
