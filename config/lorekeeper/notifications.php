@@ -317,6 +317,20 @@ return [
         'url' => ''
     ],
 
+    // FRIEND_REQUEST
+    241 => [
+        'name' => 'Friend Request',
+        'message' => '<a href="{initiator_url}">{initiator_name}</a> has sent you a friend request. (<a href="{url}">View Friend Requests</a>)',
+        'url' => 'friends'
+    ],
+
+    // FRIEND_REQUEST_ACCEPTED
+    242 => [
+        'name' => 'Friend Request Accepted',
+        'message' => '<a href="{recipient_url}">{recipient_name}</a> has accepted your friend request. (<a href="{url}">View Friends</a>)',
+        'url' => 'friends'
+    ],
+
     // CHARACTER_ITEM_GRANT
     501 => [
         'name' => 'Character Item Grant',

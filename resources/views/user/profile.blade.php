@@ -13,10 +13,27 @@
 <h1>
     <img src="/images/avatars/{{ $user->avatar }}" style="width:125px; height:125px; float:left; border-radius:50%; margin-right:25px;" alt="{{ $user->name }}" >
     {!! $user->displayName !!}
-    <a href="{{ url('reports/new?url=') . $user->url }}"><i class="fas fa-exclamation-triangle fa-xs" data-toggle="tooltip" title="Click here to report this user." style="opacity: 50%; font-size:0.5em;"></i></a>
-
     @if($user->settings->is_fto)
         <span class="badge badge-success float-right" data-toggle="tooltip" title="This user has not owned any characters from this world before.">FTO</span>
+    @endif
+    @if(Auth::check() && (Auth::user()->id != $user->id))
+        <a href="{{ url('reports/new?url=') . $user->url }}"><i class="fas fa-exclamation-triangle fa-xs" data-toggle="tooltip" title="Click here to report this user." style="opacity: 50%; font-size:0.5em;"></i></a>
+        <div class="float-right col-auto row">
+            @if(Auth::check() && !$user->checkFriend(Auth::user()))
+                {!! Form::open(['url' => 'friends/request/'.$user->id]) !!}
+                    {!! Form::submit('Add Friend', ['class' => 'btn btn-primary btn-sm mx-2', 'data-toggle' => 'tooltip', 'title' => 'Click here to send a friend request.']) !!}
+                {!! Form::close() !!}
+            @endif
+            @if(Auth::check() && !Auth::user()->checkBlocked($user))
+                {!! Form::open(['url' => 'block/'.$user->id]) !!}
+                    {!! Form::submit('Block', ['class' => 'btn btn-danger btn-sm mr-2', 'data-toggle' => 'tooltip', 'title' => 'Click here to block this user.']) !!}
+                {!! Form::close() !!}
+            @else
+                {!! Form::open(['url' => 'block/'.$user->id]) !!}
+                    {!! Form::submit('Unblock', ['class' => 'btn btn-warning btn-sm mr-2', 'data-toggle' => 'tooltip', 'title' => 'Click here to unblock this user.']) !!}
+                {!! Form::close() !!}
+            @endif
+        </div>
     @endif
 </h1>
 <div class="mb-4">

@@ -189,6 +189,23 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany('App\Models\Character\CharacterBookmark')->where('user_id', $this->id);
     }
 
+    /**
+     * Get all of the user's blocked users.
+     */
+    public function blocked()
+    {
+        return $this->hasMany('App\Models\User\UserBlock', 'user_id');
+    }
+
+    // /**
+    //  * Get all of the user's friends.
+    //  */
+    // public function friends()
+    // {
+    //     return $this->hasMany('App\Models\User\UserFriend', 'initiator_id')->where('initiator_id', $this->id)->orWhere('recipient_id', $this->id);
+    // }
+
+
     /**********************************************************************************************
 
         SCOPES
@@ -565,4 +582,36 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return CharacterBookmark::where('user_id', $this->id)->where('character_id', $character->id)->first();
     }
+
+    /***************************************************
+     * FRIEND AND BLOCKED RELATED METHODS
+     ***************************************************/
+
+     /**
+      * Checks if the argument user visiting the page is blocked by the page owner.
+      */
+      public function checkBlocked($user)
+      {
+          if($this->blocked->contains($user->id)) return true;
+          else return false;
+      }
+  
+      /**
+       * Checks if the argument user is already friends with the page owner.
+       */
+      public function checkFriend($user)
+      {
+        $main = $this;
+        $query = Userfriend::where('recipient_approval', 'Accepted');
+        $query->where(function($query) use ($user, $main) {
+            $query->where([
+                ['initiator_id', $main->id],
+                ['recipient_id', $user->id]
+            ])->orWhere([
+                ['initiator_id', $user->id],
+                ['recipient_id', $main->id]
+            ]);
+        });
+        return $query->first();
+      }
 }

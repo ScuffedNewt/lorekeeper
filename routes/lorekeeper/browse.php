@@ -51,6 +51,7 @@ Route::group(['prefix' => 'user', 'namespace' => 'Users'], function() {
 
     Route::get('{name}', 'UserController@getUser');
     Route::get('{name}/aliases', 'UserController@getUserAliases');
+    Route::get('{name}/friends', 'UserController@getUserFriends');
     Route::get('{name}/characters', 'UserController@getUserCharacters');
     Route::get('{name}/sublist/{key}', 'UserController@getUserSublist');
     Route::get('{name}/myos', 'UserController@getUserMyoSlots');

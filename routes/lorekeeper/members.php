@@ -198,3 +198,15 @@ Route::group(['prefix' => 'comments', 'namespace' => 'Comments'], function() {
     Route::post('/{comment}', 'CommentController@reply')->name('comments.reply');
     Route::post('/{id}/feature', 'CommentController@feature')->name('comments.feature');
 });
+
+/**************************************************************************************************
+    Friend Requests & Blocking
+**************************************************************************************************/
+Route::group(['prefix' => 'friends', 'namespace' => 'Users'], function() {
+    Route::get('/', 'FriendController@getIndex');
+    Route::post('request/{id}', 'FriendController@sendFriendRequest');
+});
+
+Route::group(['prefix' => 'block', 'namespace' => 'Users'], function() {
+    Route::post('block/{id}', 'BlockController@blockUser');
+});

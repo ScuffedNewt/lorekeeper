@@ -9,6 +9,7 @@
     <li class="sidebar-section">
         <div class="sidebar-section-header">User</div>
         <div class="sidebar-item"><a href="{{ $user->url.'/aliases' }}" class="{{ set_active('user/'.$user->name.'/aliases*') }}">Aliases</a></div>
+        <div class="sidebar-item"><a href="{{ $user->url.'/friends' }}" class="{{ set_active('user/'.$user->name.'/friends*') }}">Friends</a></div>
         <div class="sidebar-item"><a href="{{ $user->url.'/characters' }}" class="{{ set_active('user/'.$user->name.'/characters*') }}">Characters</a></div>
         @if(isset($sublists) && $sublists->count() > 0)
                 @foreach($sublists as $sublist)

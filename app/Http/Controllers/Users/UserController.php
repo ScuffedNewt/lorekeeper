@@ -92,6 +92,22 @@ class UserController extends Controller
     }
 
     /**
+     * Shows a user's friends.
+     *
+     * @param  string  $name
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getUserFriends($name)
+    {
+        $friends = $this->user->friends();
+        
+        return view('user.friend_index', [
+            'user' => $this->user,
+            'friends' => $friends,
+        ]);
+    }
+
+    /**
      * Shows a user's characters.
      *
      * @param  string  $name

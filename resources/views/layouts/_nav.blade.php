@@ -31,6 +31,9 @@
                         </a>
 
                         <div class="dropdown-menu" aria-labelledby="inventoryDropdown">
+                            <a class="dropdown-item" href="{{ url('friends') }}">
+                                My Friends
+                            </a>
                             <a class="dropdown-item" href="{{ url('characters') }}">
                                 My Characters
                             </a>
