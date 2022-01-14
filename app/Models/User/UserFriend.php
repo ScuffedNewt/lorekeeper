@@ -60,8 +60,8 @@ class UserFriend extends Model
     {
         if($this->recipient_id == $id)
         {
-            return $this->initiator->displayName;
+            return '<img src="/images/avatars/'. $this->initiator->avatar .'" style="width:2em; height:2em; float:left; border-radius:50%; margin-right:25px;">' . $this->initiator->displayName;
         }
-        return $this->recipient->displayName;
+        return '<img src="/images/avatars/'. $this->recipient->avatar .'" style="width:2em; height:2em; float:left; border-radius:50%; margin-right:25px;">' . $this->recipient->displayName;
     }
 }

@@ -1,30 +1,36 @@
 <div class="card mb-3">
     <div class="card-header h3">Friends</div>
-    <div class="table-responsive">
-        @if($friends->count())
-        <table class="table table-sm mb-0">
-            <thead>
-                <th></th>
-                <th></th>
-            </thead>
-            <tbody>
-                @foreach($friends as $friend)
-                    <tr>
-                        <td class="text-center">{!! $friend->displayName($user->id) !!}</td>
-                    </tr>
-                    <tr>
-                        <td class="text-center">
-                            {!! Form::open(['url' => 'friends/remove/'.$friend->id]) !!}
-                            {!! Form::submit('Remove Friend', ['class' => 'btn btn-danger btn-sm mx-2', 'data-toggle' => 'tooltip', 'title' => 'Click here to remove this friend. They will not be notified.']) !!}
-                            {!! Form::close() !!}
-                        </td>
-                    </tr>
+    <div class="card-body">
+    @if($friends->count())
+        <div class="mb-4 logs-table">
+            <div class="logs-table-header">
+                <div class="row">
+                    <div class="col-12 col-md-12"><div class="logs-table-cell">Name</div></div>
+                </div>
+            </div>    
+            <div class="logs-table-body">
+                @foreach($friends as $request)
+                    <div class="logs-table-row">
+                        <div class="row flex-wrap">
+                            <div class="col-12 col-md-10">
+                                <div class="logs-table-cell">
+                                    {!! $request->displayName($user->id) !!}
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-2 row">
+                                <div class="logs-table-cell">
+                                    {!! Form::open(['url' => 'friends/remove/'.$request->id]) !!}
+                                        {!! Form::submit('Remove Friend', ['class' => 'btn btn-danger btn-sm', 'data-toggle' => 'tooltip', 'title' => 'Click here to remove this friend. They will not be notified.']) !!}
+                                    {!! Form::close() !!}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 @endforeach
-            </tbody>
-        </table>
-        @else
-        <div class="card-body">
-            <p class="text-center">No friends (yet!).</p>
-        @endif
+            </div>
+        </div>
+    @else
+        <p class="text-center">No friends (yet!)</p>
+    @endif
     </div>
 </div>
