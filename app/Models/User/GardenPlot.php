@@ -101,4 +101,11 @@ class GardenPlot extends Model
                 return 'Seeds';
         }
     }
+
+    public function getIsFreeAttribute()
+    {
+        if($this->free) return True;
+        if(!$this->currency_id) return True;
+        return False;
+    }
 }
