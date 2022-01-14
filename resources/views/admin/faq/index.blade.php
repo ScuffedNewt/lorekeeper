@@ -3,15 +3,16 @@
 @section('admin-title') Questions @endsection
 
 @section('admin-content')
-{!! breadcrumbs(['Admin Panel' => 'admin', 'Questions' => 'admin/data/questions']) !!}
+{!! breadcrumbs(['Admin Panel' => 'admin', 'Questions' => 'admin/faq']) !!}
 
 <h1>Questions</h1>
 
 <p>This is a list of questions in the FAQ. Specific details about questions can be added (e.g tags and categories).</p>
 
 <div class="text-right mb-3">
-    <a class="btn btn-primary" href="{{ url('admin/data/question-categories') }}"><i class="fas fa-folder"></i> FAQ Categories</a>
-    <a class="btn btn-primary" href="{{ url('admin/data/questions/create') }}"><i class="fas fa-plus"></i> Create New Question</a>
+    <a class="btn btn-primary" href="{{ url('admin/faq/question-categories') }}"><i class="fas fa-folder"></i> FAQ Categories</a>
+    <a class="btn btn-primary" href="{{ url('admin/faq/question-tags') }}"><i class="fas fa-tag"></i> FAQ Tags</a>
+    <a class="btn btn-primary" href="{{ url('admin/faq/question/create') }}"><i class="fas fa-plus"></i> Create New Question</a>
 </div>
 
 <div>
