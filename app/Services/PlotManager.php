@@ -321,6 +321,7 @@ class PlotManager extends Service
             if(!$plot) throw new \Exception("Invalid plot.");
             $animals = UserItem::where('item_id', $data['animalID'])->where('count', '>', 0)->where('user_id', $user->id)->get();
             if(!$animals) throw new \Exception("Invalid animal.");
+            if(!$animals->first()->item->tags()->where('tag', $data['type'])->exists()) throw new \Exception("Invalid animal.");
             
             $check = 0;
             $animal = null;

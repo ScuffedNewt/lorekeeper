@@ -29,7 +29,8 @@
     </div>
     <script>
         let selectedItem;
-        let selectedAnimal;
+        let selectedBarn;
+        let selectedCoop;
         let selectedModifier;
         const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
         function waterCount(id, timer, type = 'seed') {

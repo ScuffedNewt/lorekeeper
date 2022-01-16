@@ -125,7 +125,7 @@
                                     Apply Modifier!
                                 </button>
                             @else
-                                <button type="button" class="animal-button-plant btn btn-success hide" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="placeAnimal({{ $userPlot->id }})">
+                                <button type="button" class="{{strtolower($plot->plot_type)}}-button-plant btn btn-success hide" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="placeAnimal({{ $userPlot->id }}, '{{ strtolower($userPlot->plot->plot_type)}}')">
                                     Place Animal!
                                 </button>
                             @endif
@@ -149,7 +149,7 @@
         <!-------------------- SEEDS | ANIMALS -------------------------->
         <div class="text-center card" style="overflow-y: scroll; overflow-x: hidden; flex 0 0 7em; min-width: 11em; max-width:11em;">
             <h5 class="text-left">{{ $plots->first()->plotItems}}</h5> 
-            <div class=" p-2 btn-group-vertical btn-group-toggle" id="{{ $plot->plot_type == 'Seed' ? 'itemSelector' : 'animalSelector' }}" data-toggle="buttons">
+            <div class=" p-2 btn-group-vertical btn-group-toggle" id="{{ $plot->plot_type == 'Seed' ? 'itemSelector' : strtolower($plots->first()->plot_type).'Selector' }}" data-toggle="buttons">
                 <label type="button" class="btn  my-1 btn-block {{ $plot->plot_type == 'Seed' ? 'seed' : 'animal' }}-button" type="radio" autocomplete="off" >
                     <input type="radio" name="options" autocomplete="off" value="0" >
                         <i class="fas fa-times fa-5x text-white"></i>
@@ -159,7 +159,7 @@
                     @foreach($item->chunk(4) as $chunk)
                         @foreach($chunk as $stack)
                         @if($stack->sum('pivot.count') - $stack->sum('pivot.garden_count') > 0)
-                            <label type="button" class="btn my-1 btn-block {{ $plot->plot_type == 'Seed' ? 'seed' : 'animal' }}-button" type="radio" autocomplete="off">
+                            <label type="button" class="btn my-1 btn-block {{ $plots->first()->plot_type == 'Seed' ? 'seed' : 'animal' }}-button" type="radio" autocomplete="off">
                                 <input type="radio" name="options" autocomplete="off" value="{{$stack->first()->id}}" >
                                     <img class="img-fluid image-zoom"  src="{{ $stack->first()->imageUrl }}" style="width: 50%">
                                 <div class="text-small text-white text-center mt-2 text-wrap" style="font-size:1rem;"> {!!$stack->first()->name !!} <br>Quantity: <br> x{{ $stack->sum('pivot.count') - $stack->sum('pivot.garden_count')}}</div>
@@ -196,15 +196,29 @@
         }
     });
 
-    $("#animalSelector input:radio").change(function() {
-        selectedAnimal = $(this).val();
-        if(selectedAnimal == null || selectedAnimal == 0) {
-            $(".animal-button-plant").each( function(){
+    $("#barnSelector input:radio").change(function() {
+        selectedBarn = $(this).val();
+        if(selectedBarn == null || selectedBarn == 0) {
+            $(".barn-button-plant").each( function(){
             $(this).addClass('hide');
             });
         }
         else {
-            $(".animal-button-plant").each( function() {
+            $(".barn-button-plant").each( function() {
+                $(this).removeClass('hide');
+            });
+        }
+    });
+
+    $("#coopSelector input:radio").change(function() {
+        selectedCoop = $(this).val();
+        if(selectedCoop == null || selectedCoop == 0) {
+            $(".coop-button-plant").each( function(){
+            $(this).addClass('hide');
+            });
+        }
+        else {
+            $(".coop-button-plant").each( function() {
                 $(this).removeClass('hide');
             });
         }
@@ -252,7 +266,7 @@
                 _token: '{{ csrf_token() }}',
                 plotID:plotID,
                 seedID:selectedItem,
-                type:'seed',
+                type:'seed'
                 },
             dataType: 'json',
             success: function(data) {
@@ -265,29 +279,30 @@
         }
     }
 
-    function placeAnimal(plotID) {
-        if(selectedAnimal == null){
+    function placeAnimal(plotID, plotType) {
+        if(plotType == 'coop' && selectedCoop == null){
             alert("Please select an animal!");
         }
-        else {
+        if(plotType == 'barn' && selectedBarn == null){
+            alert("Please select an animal!");
+        }
             $.ajax({
             url: "{{ url('garden/plant') }}",
             method: 'post',
             data:{
                 _token: '{{ csrf_token() }}',
                 plotID:plotID,
-                animalID:selectedAnimal,
-                type:'animal'
+                animalID: (plotType == 'coop' ? selectedCoop : selectedBarn),
+                type:plotType
                 },
             dataType: 'json',
             success: function(data) {
                 refreshThePage();
             },
             error: function(error) {
-                //refreshThePage();
+                console.log(error);
             }
         });
-        }
     }
 
     function addModifier(plotID) {

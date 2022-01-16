@@ -77,7 +77,7 @@ class GardenController extends Controller
                 }
                 return redirect()->to('garden#coop');
             break;
-            case 'animal':
+            case 'coop': case 'barn':
                 if($service->place(Auth::user(), $data)) {
             
                     flash('Placed successfully!')->success();
