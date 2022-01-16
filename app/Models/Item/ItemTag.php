@@ -158,7 +158,7 @@ class ItemTag extends Model
     public function stageImage($stage = 0)
     {
         if($this->tag != 'seed') return null;
-        while($stage > 0) {
+        while($stage > 0 && isset($this->data['stages'])) {
             foreach($this->data['stages'] as $st) {
                 if($st == $stage) return 'images/data/stages/' . $this->id . '-' . $st . '-image.png';
             }

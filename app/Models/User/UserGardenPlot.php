@@ -15,7 +15,7 @@ class UserGardenPlot extends Model
      * @var array
      */
     protected $fillable = [
-        'plot_id', 'user_id', 'item_id', 'started_at', 'end_at', 'water_at'
+        'plot_id', 'user_id', 'item_id', 'started_at', 'water_at'
     ];
 
     /**
@@ -25,7 +25,7 @@ class UserGardenPlot extends Model
      */
     public $timestamps = false;
 
-    protected $dates = ['started_at', 'end_at', 'water_at'];
+    protected $dates = ['started_at', 'water_at'];
 
     /**
      * The table associated with the model.
@@ -76,6 +76,15 @@ class UserGardenPlot extends Model
     public function getWateringTimeAttribute()
     {
         return $this->water_at > Carbon::now() && $this->waterings < $this->item->tags->where('tag', strtolower($this->plot->plot_type))
+        ->first()->data[($this->plot->plot_type == 'Seed' ? 'waterings' : 'feedings')];
+    }
+
+    /**
+     * returns whether or not the plot is ready to be claimed
+     */
+    public function getReadyToClaimAttribute()
+    {
+        return !$this->wateringTime && $this->waterings >= $this->item->tags->where('tag', strtolower($this->plot->plot_type))
         ->first()->data[($this->plot->plot_type == 'Seed' ? 'waterings' : 'feedings')];
     }
 

@@ -85,11 +85,16 @@ class PlotManager extends Service
      */
     public function collectAll($user, $type)
     {
-        $plots = UserGardenPlot::where('user_id', $user->id)->whereRelation('plot', 'plot_type', $type)->get();
+        $plots = UserGardenPlot::where('user_id', $user->id)->whereRelation('plot', 'plot_type', $type)->where('item_id', '!=', null)->get();
         $count = 0;
         foreach($plots as $plot) {
-            if($this->collectPlot($user, $plot)) $count++;
+            if($plot->readyToClaim) {
+                if($type == 'Seed') { $this->claim($user, $plot); }
+                else { $this->animalClaim($user, $plot); }
+                $count++;
+            }
         }
+        return $count;
     }
 
     /***************************************************************************************************************
@@ -314,11 +319,9 @@ class PlotManager extends Service
         try {
             $plot = UserGardenPlot::find($data['plotID']);
             if(!$plot) throw new \Exception("Invalid plot.");
-            if($plot->plot->plot_type == 'Coop')
-            $animals = UserItem::where('item_id', $data['coopID'])->where('count', '>', 0)->where('user_id', $user->id)->get();
-            else 
-            $animals = UserItem::where('item_id', $data['barnID'])->where('count', '>', 0)->where('user_id', $user->id)->get();
-
+            $animals = UserItem::where('item_id', $data['animalID'])->where('count', '>', 0)->where('user_id', $user->id)->get();
+            if(!$animals) throw new \Exception("Invalid animal.");
+            
             $check = 0;
             $animal = null;
             foreach($animals as $a) {if($a->garden_count < $a->count) {$check = 1; $animal = $a;}}
@@ -354,7 +357,7 @@ class PlotManager extends Service
                 $type = 'barn';
             }
             $assets = parseAssetData($plot->item->tags->where('tag', $type)->first()->data['rewards']);
-            if(!$rewards = fillUserAssets($assets, $user, $user, 'Box Rewards', [
+            if(!$rewards = fillUserAssets($assets, $user, $user, 'Garden Harvest', [
                 'data' => 'Received rewards from the '.$type
             ])) throw new \Exception("Failed to credit items.");
 

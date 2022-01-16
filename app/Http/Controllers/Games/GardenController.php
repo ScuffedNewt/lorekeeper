@@ -58,7 +58,7 @@ class GardenController extends Controller
      */
     public function postPlantSeed(Request $request)
     {
-        $data = $request->only(['seedID', 'coopID', 'barnID', 'plotID', 'type']);
+        $data = $request->only(['seedID', 'animalID', 'plotID', 'type']);
         $service = new PlotManager;
         switch($data['type']) {
             case 'seed':
@@ -77,7 +77,7 @@ class GardenController extends Controller
                 }
                 return redirect()->to('garden#coop');
             break;
-            case 'coop': case 'barn':
+            case 'animal':
                 if($service->place(Auth::user(), $data)) {
             
                     flash('Placed successfully!')->success();
@@ -179,13 +179,13 @@ class GardenController extends Controller
     /**
      * Collect all in one go of a certain type of plot
      */
-    public function postClearPlot(PlotManager $service, $type)
+    public function postCollectAll(PlotManager $service, $type)
     {
         if($count = $service->collectAll(Auth::user(), $type)) {
             flash('Collected '. $count .' successfully!')->success();
         }
         else {
-            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+            flash('Nothing to collect!')->warning();
         }
         return redirect()->back();
     }
@@ -207,7 +207,7 @@ class GardenController extends Controller
         else {
             foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
         }
-        return redirect()->back();
+        return redirect()->to('garden/#' . strtolower($plot->plot_type));
     }
 
     /**
@@ -270,6 +270,6 @@ class GardenController extends Controller
         else {
             foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
         }
-        return redirect()->back();
+        return redirect()->to('garden/#' . strtolower($plot->plot->plot_type));
     }
 }

@@ -28,8 +28,11 @@
         </ul>
     </div>
     <script>
+        let selectedItem;
+        let selectedAnimal;
+        let selectedModifier;
         const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-        function waterCount(id, timer) {
+        function waterCount(id, timer, type = 'seed') {
             setInterval(function(){ 
                 
             var date = new Date(timer);
@@ -45,13 +48,13 @@
             var hours = time.getUTCHours();
             if(hours < 10) hours = "0" + hours;
 
-            var text = "Next watering in "+ hours + ":" + minutes + ":" + seconds;
+            var text = "Next " + (type != 'seed' ? 'feeding' : 'watering') + " in "+ hours + ":" + minutes + ":" + seconds;
             $("#"+id+"-water-text").text(text);
             }, 1000);
         }
     </script>
     <div class="card-body tab-content">
-        <div class="tab-pane fade show active" id="farm">
+        <div class="tab-pane fade show active" id="Seed">
             @include('garden._panel', ['userItems' => $userSeeds, 'userModifiers' => $userModifiers, 'plots' => $plots->where('plot_type', 'Seed')])
         </div>
         @if(count($plots->where('plot_type', 'Coop')) > 0)
