@@ -1,7 +1,7 @@
 :root{
   --modifier-button-color: hsl(50, 100%, 50%);
   --seed-button-color: hsl(75, 50%, 50%);
-
+  --animal-button-color: hsl(19, 73%, 45%);
 }
 
 .btn:active {
@@ -54,26 +54,28 @@
   background-color: var(--seed-button-color) !important;
 }
 
-.seed-button:hover {
-  background-color: var(--seed-button-color) !important;
+.animal-button {
+  filter: grayscale(40%);
+  background-color: var(--animal-button-color) !important;
+}
+
+.animal-button,.seed-button:hover {
   filter: saturate(120%)
 }
 
-.seed-button:active {
-  background-color: var(--seed-button-color) !important;
+.animal-button,.seed-button:active {
   filter: saturate(150%)
 }
 
-.seed-button:not(:disabled):not(.disabled).active {
-  background-color: var(--seed-button-color) !important;
+.animal-button,.seed-button:not(:disabled):not(.disabled).active {
   filter: saturate(130%)
 }
 
-.seed-button:active img {
+.animal-button,.seed-button:active img {
   filter: grayscale(0%);
 }
 
-.seed-button:not(:disabled):not(.disabled).active img {
+.animal-button,.seed-button:not(:disabled):not(.disabled).active img {
   filter: grayscale(0%);
 }
 

@@ -54,7 +54,7 @@
         }
     </script>
     <div class="card-body tab-content">
-        <div class="tab-pane fade show active" id="Seed">
+        <div class="tab-pane fade show active" id="farm">
             @include('garden._panel', ['userItems' => $userSeeds, 'userModifiers' => $userModifiers, 'plots' => $plots->where('plot_type', 'Seed')])
         </div>
         @if(count($plots->where('plot_type', 'Coop')) > 0)

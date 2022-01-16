@@ -159,13 +159,13 @@
                     @foreach($item->chunk(4) as $chunk)
                         @foreach($chunk as $stack)
                         @if($stack->sum('pivot.count') - $stack->sum('pivot.garden_count') > 0)
-                            <label type="button" class="btn my-1 btn-block seed-button" type="radio" autocomplete="off">
+                            <label type="button" class="btn my-1 btn-block {{ $plot->plot_type == 'Seed' ? 'seed' : 'animal' }}-button" type="radio" autocomplete="off">
                                 <input type="radio" name="options" autocomplete="off" value="{{$stack->first()->id}}" >
                                     <img class="img-fluid image-zoom"  src="{{ $stack->first()->imageUrl }}" style="width: 50%">
                                 <div class="text-small text-white text-center mt-2 text-wrap" style="font-size:1rem;"> {!!$stack->first()->name !!} <br>Quantity: <br> x{{ $stack->sum('pivot.count') - $stack->sum('pivot.garden_count')}}</div>
                             </label>
                         @else
-                            <div class="btn my-1 btn-block seed-button disabled">
+                            <div class="btn my-1 btn-block {{ $plot->plot_type == 'Seed' ? 'seed' : 'animal' }}-button disabled">
                                 <img class="img-fluid image-zoom"  src="{{ $stack->first()->imageUrl }}" style="width: 50%">
                                 <div class="text-small text-white text-center mt-2 text-wrap" style="font-size:1rem;"> {!!$stack->first()->name !!} <br>Quantity: <br> x{{ $stack->sum('pivot.count') - $stack->sum('pivot.garden_count')}}</div>
                             </div>
