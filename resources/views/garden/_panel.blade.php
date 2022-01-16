@@ -68,7 +68,7 @@
                                     <script>
                                         var wateringLeft = Date.parse("<?php echo $userPlot->water_at ?>");
                                         var waterTextId = "<?php echo $userPlot->id ?>"
-                                        if(!isSafari) setInterval(waterCount(waterTextId, wateringLeft, 'animal'), 1000);
+                                        if(!isSafari) setInterval(waterCount(waterTextId, wateringLeft, "<?php echo $plot->plot_type == 'Seed' ? 'seed' : 'animal' ?>"), 1000);
                                     </script>
                                     <!------------------>
                                     <button type="button" class="skull-button-garden" value="{{ $userPlot->id }}" type="{{ $plot->plot_type }}">

@@ -31,7 +31,7 @@ class PlotManager extends Service
 
             if(!$plot) throw new \Exception('Not a valid plot.');
             
-            if($plot->free)
+            if($plot->isFree)
             {
                 if(!$this->createPlot($user, $plot)) throw new \Exception('Error creating plot for user.');
             }
