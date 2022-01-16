@@ -300,7 +300,7 @@
                 refreshThePage();
             },
             error: function(error) {
-                console.log(error);
+                refreshThePage();
             }
         });
     }

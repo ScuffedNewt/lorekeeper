@@ -74,6 +74,11 @@ class GardenController extends Controller
                 else {
                     foreach($service->errors()->getMessages()['error'] as $error) 
                     flash($error)->error();
+                    $response = array(
+                        'status' => 'error',
+                        'msg' => $request->message,
+                    );
+                    return response()->json($response); 
                 }
                 return redirect()->to('garden#coop');
             break;
@@ -90,6 +95,11 @@ class GardenController extends Controller
                 else {
                     foreach($service->errors()->getMessages()['error'] as $error) 
                     flash($error)->error();
+                    $response = array(
+                        'status' => 'error',
+                        'msg' => $request->message,
+                    );
+                    return response()->json($response); 
                 }
                 return redirect()->to(($data['type'] == 'coop' ? 'garden#coop' : 'garden#barn'));
             break;
@@ -115,6 +125,11 @@ class GardenController extends Controller
         else {
             foreach($service->errors()->getMessages()['error'] as $error) 
             flash($error)->error();
+            $response = array(
+                'status' => 'error',
+                'msg' => $request->message,
+            );
+            return response()->json($response); 
         }
     }
 
