@@ -78,7 +78,7 @@ class GardenPlot extends Model
                 return 'images/garden/croop_bg.png';
             case 'Barn':
                 return 'images/garden/barn_bg.png';
-            case 'Garden':
+            case 'Seed':
                 return 'images/garden/crops_bg.png';
             default:
                 return 'images/garden/crops_bg.png';
@@ -95,7 +95,7 @@ class GardenPlot extends Model
                 return 'Coop Store';
             case 'Barn':
                 return 'Barn Pastures';
-            case 'Garden':
+            case 'Seed':
                 return 'Seeds';
             default:
                 return 'Seeds';

@@ -32,7 +32,7 @@
             <div class="row justify-content-center">
             @foreach($plots->sortByDesc('free')->chunk(3) as $chunk)
                 @foreach($chunk as $plot)
-                <div class="card text-center m-1 col-lg-3 col-md-4" style="min-width: 14em; min-height: 14em; background-color: brown; background-image: url({{ asset($plot->image)}}); justify-content: center; margin:0; padding:0;">
+                <div class="card text-center m-1 col-lg-3 col-md-4" style="min-width: 14em; min-height: 14em; background-color: brown; background-image: url({{ asset($plot->backgroundImage)}}); justify-content: center; margin:0; padding:0;">
                     <!---- if user owns plot --->
                         @if(Auth::user()->gardenplots->contains('plot_id', $plot->id))
                         @php
