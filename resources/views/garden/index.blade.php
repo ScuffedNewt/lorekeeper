@@ -8,6 +8,11 @@
 </head>
 <h1>Gardens</h1>
 <p>The gardens are a rich place full of life. In it, several species of plants and animals can be found...</p>
+<noscript>
+    <div class="alert alert-danger">
+        <strong>Warning!</strong> You need to enable JavaScript to use this minigame.
+    </div>
+</noscript>
 <!-- Nav tabs -->
 <div class="character-bio">
     <div class="card-header">
