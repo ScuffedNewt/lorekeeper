@@ -38,9 +38,18 @@
                         @php
                             $userPlot = Auth::user()->gardenplots->where('plot_id', $plot->id)->first();
                         @endphp
+                        <!--- If plant is dead show dead thing --->
+                        @if($userPlot->is_dead)
+                            <button type="button" class="btn btn-dark" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="clearPlot({{ $userPlot->id }})">
+                                <img class="img-fluid my-auto mx-auto pt-2" src="{{ asset('images/data/seeds/dead.png') }}" style="width: 7em; height:7em;">
+                                <div class="text-danger pt-2">Your plant has died.
+                                <br> Click to clear.</div>
+                            </button>
+                    <!--- if not dead show not dead thing --->
+                        @else
                             @if($userPlot->started_at != null)
-                                <!----If there is a plant growing / animal placed --->
-                                @if($userPlot->wateringTime)
+                                <!----If there is a plant growing / animal placed, and it is not time to water / feed --->
+                                @if($userPlot->notWateringTime)
                                     @if($plot->plot_type == 'Seed')
                                         <img class="img-fluid image-zoom my-auto mx-auto pt-2" src="{{ asset($userPlot->item->tags->where('tag', 'seed')->first()->stageImage($userPlot->waterings)) }}" 
                                         data-toggle="tooltip" title="{{ $userPlot->waterings }} {{ $userPlot->waterings == 1 ? 'watering' : 'waterings' }} done!" style="width: 10em; height: 10em;">
@@ -130,7 +139,7 @@
                                 </button>
                             @endif
                             @endif
-
+                        @endif    
                     <!---- if not owned plot --->
                         @else
                             <div class="p-5 container text-white">

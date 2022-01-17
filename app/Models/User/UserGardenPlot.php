@@ -73,7 +73,7 @@ class UserGardenPlot extends Model
     /**
      * Gets whether the plot can currently be watered / fed.
      */
-    public function getWateringTimeAttribute()
+    public function getNotWateringTimeAttribute()
     {
         return $this->water_at > Carbon::now() && $this->waterings < $this->item->tags->where('tag', strtolower($this->plot->plot_type))
         ->first()->data[($this->plot->plot_type == 'Seed' ? 'waterings' : 'feedings')];
@@ -84,7 +84,7 @@ class UserGardenPlot extends Model
      */
     public function getReadyToClaimAttribute()
     {
-        return !$this->wateringTime && $this->waterings >= $this->item->tags->where('tag', strtolower($this->plot->plot_type))
+        return !$this->notWateringTime && $this->waterings >= $this->item->tags->where('tag', strtolower($this->plot->plot_type))
         ->first()->data[($this->plot->plot_type == 'Seed' ? 'waterings' : 'feedings')];
     }
 

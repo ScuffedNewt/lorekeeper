@@ -189,6 +189,7 @@ class PlotManager extends Service
         DB::beginTransaction();
 
         try { 
+            if(!$plot) throw new \Exception("Invalid plot.");
             if($plot->plot->plot_type != 'Seed') {
                 $item = UserItem::where('item_id', $plot->item_id)->where('user_id', $user->id)->where('count', '>', 0)->where('garden_count', '>', 0)->first();
                 if(!$item) throw new \Exception("Invalid item.");

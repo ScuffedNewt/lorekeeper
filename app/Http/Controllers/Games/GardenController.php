@@ -140,21 +140,31 @@ class GardenController extends Controller
     {
         $data = $request->input('plotID');
         $service = new PlotManager;
-        if($service->water(Auth::user(), $data, false)) {
-            $plot = UserGardenPlot::find($data);
-            if($plot->plot->plot_type == 'Seed')
-            flash('Watered successfully!')->success();
-            else 
-            flash('Fed successfully!')->success();
-            $response = array(
-                'status' => 'success',
-                'msg' => $request->message,
-            );
-            return response()->json($response); 
-        }
+        $plot = UserGardenPlot::find($data);
+        if(!$plot->notWateringTime)
+            if($service->water(Auth::user(), $data, false)) {
+                $plot = UserGardenPlot::find($data);
+                if($plot->plot->plot_type == 'Seed')
+                flash('Watered successfully!')->success();
+                else 
+                flash('Fed successfully!')->success();
+                $response = array(
+                    'status' => 'success',
+                    'msg' => $request->message,
+                );
+                return response()->json($response); 
+            }
+            else {
+                foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+            }
         else {
-            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+            flash('Not ready to water!')->error();
         }
+        $response = array(
+            'status' => 'error',
+            'msg' => $request->message,
+        );
+        return response()->json($response);
     }
 
     /**
@@ -167,28 +177,34 @@ class GardenController extends Controller
             flash('Invalid plot!')->error();
             return redirect()->back();
         }
-        switch($plot->plot->plot_type) {
-            case 'Seed':
-                if($service->claim(Auth::user(), $plot)) {
-                    flash('Claimed successfully!')->success();
-                }
-                else {
-                    foreach($service->errors()->getMessages()['error'] as $error) 
-                    flash($error)->error();
-                }
-                return redirect()->to('garden');
-            break;
-            case 'Coop': case 'Barn':
-                if($service->animalClaim(Auth::user(), $plot, false)) {
-                    flash('Claimed successfully!')->success();
-                }
-                else {
-                    foreach($service->errors()->getMessages()['error'] as $error) 
-                    flash($error)->error();
-                }
-                return redirect()->to(($plot->plot->plot_type == 'Coop' ? 'garden#coop' : 'garden#barn'));
-            break;
+        if($plot->readyToClaim) {
+            switch($plot->plot->plot_type) {
+                case 'Seed':
+                    if($service->claim(Auth::user(), $plot)) {
+                        flash('Claimed successfully!')->success();
+                    }
+                    else {
+                        foreach($service->errors()->getMessages()['error'] as $error) 
+                        flash($error)->error();
+                    }
+                    return redirect()->to('garden');
+                break;
+                case 'Coop': case 'Barn':
+                    if($service->animalClaim(Auth::user(), $plot, false)) {
+                        flash('Claimed successfully!')->success();
+                    }
+                    else {
+                        foreach($service->errors()->getMessages()['error'] as $error) 
+                        flash($error)->error();
+                    }
+                    return redirect()->to(($plot->plot->plot_type == 'Coop' ? 'garden#coop' : 'garden#barn'));
+                break;
+            }
         }
+        else {
+            flash('Not ready to claim!')->error();
+        }
+        return redirect()->to(($plot->plot->plot_type == 'Seed' ? 'garden#farm' : 'garden#'.strtolower($plot->plot->plot_type)));
     }
 
     /**
@@ -286,5 +302,27 @@ class GardenController extends Controller
             foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
         }
         return redirect()->to('garden/#' . strtolower($plot->plot->plot_type));
+    }
+
+    /**
+     * Post clear plot
+     */
+    public function postClearPlot(Request $request)
+    {
+        $data = $request->input(['plotID']);
+        $service = new PlotManager;
+        $plot = UserGardenPlot::find($data);
+        if($service->clear(Auth::user(), $plot)) {
+            
+            flash('Cleared successfully!')->success();
+            $response = array(
+                'status' => 'success',
+                'msg' => $request->message,
+            );
+            return response()->json($response); 
+        }
+        else {
+            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+        }
     }
 }
