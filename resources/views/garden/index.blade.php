@@ -37,13 +37,13 @@
         let selectedBarn;
         let selectedCoop;
         let selectedModifier;
+        let now = new Date("<?php echo date('Y-m-d H:i:s'); ?>");
         const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
         function waterCount(id, timer, type = 'seed') {
             setInterval(function(){ 
-                
+
             var date = new Date(timer);
-            var test = new Date();
-            var now = new Date(test.getTime());
+            getServerTime();
             // count down time difference between now and date
             var diff = date.getTime() - now.getTime();
             var time = new Date(diff);
@@ -92,5 +92,18 @@ $(window).on("popstate", function() {
     var anchor = location.hash || $("a[data-toggle='tab']").first().attr("href");
     $("a[href='" + anchor + "']").tab("show");
 });
+
+function getServerTime()
+{
+    // ajax get call to get the time
+    $.ajax({
+        url: '{{ url("time") }}',
+        type: 'GET',
+        success: function(data) {
+            // update the time
+            now = new Date(data);
+        }
+    });
+}
 </script>
 @endsection
