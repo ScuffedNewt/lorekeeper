@@ -42,7 +42,8 @@
             setInterval(function(){ 
                 
             var date = new Date(timer);
-            var now = new Date();
+            var test = new Date();
+            var now = new Date(test.getTime());
             // count down time difference between now and date
             var diff = date.getTime() - now.getTime();
             var time = new Date(diff);
