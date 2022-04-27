@@ -226,7 +226,7 @@ class PlotManager extends Service
             $plot = UserGardenPlot::find($data['plotID']);
             if(!$plot) throw new \Exception("Invalid plot.");
 
-            $mod = UserItem::where('item_id', $data['modID'])->where('count', '>', 0)->first();
+            $mod = UserItem::where('item_id', $data['modID'])->where('user_id', $user->id)->where('count', '>', 0)->first();
             if(!$mod) throw new \Exception("Invalid modifier.");
 
             $invman = new InventoryManager;
