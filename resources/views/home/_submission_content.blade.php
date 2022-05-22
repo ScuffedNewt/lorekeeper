@@ -62,6 +62,7 @@
     </tbody>
 </table>
 <hr>
+@if($submission->prompt_id)
 <h2>Skills</h2>
 <table class="table table-sm">
     <thead>
@@ -79,7 +80,7 @@
         @endforeach
     </tbody>
 </table>
-
+@endif
 <h2>Characters</h2>
 @foreach($submission->characters as $character)
     <div class="submission-character-row mb-2">
