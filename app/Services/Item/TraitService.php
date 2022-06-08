@@ -46,6 +46,9 @@ class TraitService extends Service
     public function getTagData($tag)
     {
         //fetch data from DB, if there is no data then set to NULL instead
+        $tagData['trait'] = isset($tag->data['trait']) ? $tag->data['trait'] : null;
+        $tagData['require_trait'] = isset($tag->data['require_trait']) ? $tag->data['require_trait'] : null;
+        $tagData['replace_trait'] = isset($tag->data['replace_trait']) ? $tag->data['replace_trait'] : null;
         $tagData['feature'] = isset($tag->data['feature']) ? $tag->data['feature'] : [];
         $tagData['feature_type'] = isset($tag->data['feature_type']) ? $tag->data['feature_type'] : [];
 
@@ -73,7 +76,9 @@ class TraitService extends Service
         $tagData['feature'] = array_unique($tagData['feature']);
         $tagData['feature_type'] = array_unique($tagData['feature_type']);
 
-        $tagData['is_visible'] = isset($data['is_visible']);
+        $tagData['trait'] = isset($data['trait']) ? $data['trait'] : null;
+        $tagData['require_trait'] = isset($data['require_trait']) ? $data['require_trait'] : null;
+        $tagData['replace_trait'] = isset($data['replace_trait']) ? $data['replace_trait'] : null;
 
         DB::beginTransaction();
 
@@ -106,6 +111,7 @@ class TraitService extends Service
             }
 
             $character = Character::find($data['character_id']);
+            $tag = $stacks->first()->item->tag($data['tag']);
 
             foreach($stacks as $key=>$stack) {
                 // We don't want to let anyone who isn't the owner use the item
@@ -115,6 +121,19 @@ class TraitService extends Service
                     
                     for($q=0; $q<$data['quantities'][$key]; $q++) {
                         $old['features'] = (new CharacterManager)->generateFeatureList($character->image);
+                        // check if the item requires a trait
+                        if(isset($tag->data['require_trait'])) {
+                            // check if the character has the trait
+                            if(!$character->image->features()->where('feature_id', $tag->data['trait'])->exists()) {
+                                throw new \Exception("This item requires a trait that the character does not have.");
+                            }
+                            // check if we replace the trait
+                            if(isset($tag->data['replace_trait'])) {
+                                // delete the trait
+                                $trait = CharacterFeature::where('feature_id', $tag->data['trait'])->where('character_image_id', $character->image->id)->first();
+                                $trait->delete();
+                            }
+                        }
                         // add the feature to the character
                         $feature = CharacterFeature::create(['character_image_id' => $character->image->id, 'feature_id' => $data['feature_id']]);
                         // create log

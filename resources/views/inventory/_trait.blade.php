@@ -1,6 +1,16 @@
 <li class="list-group-item">
     <a class="card-title h5 collapse-title"  data-toggle="collapse" href="#traitAddForm"> Add Trait To Character</a>
     <div id="traitAddForm" class="collapse">
+        @if($tag->getData()['require_trait'])
+            <p class="text-danger">
+                This item requires a trait to be applied to the character.
+                <br />{!! \App\Models\Feature\Feature::where('id', $tag->getData()['trait'])->first()->displayname !!}
+                @if($tag->getData()['replace_trait'])
+                   <br />This item will replace the current trait on the character.
+                @endif
+            </p>
+        @endif
+        {!! Form::hidden('trait', $tag->getData()['trait']) !!}
         {!! Form::hidden('tag', $tag->tag) !!}
 
         <div class="form-group">

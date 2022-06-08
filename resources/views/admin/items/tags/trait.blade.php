@@ -29,9 +29,31 @@
     <a href="#" class="remove-category btn btn-danger">Remove</a>
 </div>
 
+<hr>
+<div class="form-group">
+    {!! Form::label('require_trait', 'Require Trait?') !!} {!! add_help('If set to true, the item will need the specified trait to exist on the character.') !!}
+    {!! Form::checkbox('require_trait', 1, $tag->getData()['require_trait'], ['class' => 'form-check-input', 'data-toggle' => 'toggle', 'id' => 'requireTrait']) !!}
+</div>
+<div class="form-group trait-require-group {{ $tag->getData()['require_trait'] ? '' : 'hide'}}">
+    <hr class="w-50">
+    {!! Form::label('trait', 'Trait') !!}
+    {!! Form::select('trait', $tag->getEditData()['features'], $tag->getData()['trait'], ['class' => 'form-control mb-2 selectize']) !!}
+    {!! Form::label('replace_trait', 'Replace Trait?') !!} {!! add_help('If set to true, the item will \'consume\' a currently applied trait.') !!}
+    {!! Form::checkbox('replace_trait', 1, $tag->getData()['replace_trait'], ['class' => 'form-check-input', 'data-toggle' => 'toggle']) !!}
+</div>
+
 @section('scripts')
 <script>
-    $( document ).ready(function() {  
+    $( document ).ready(function() {
+        $('#requireTrait').on('change', function(e) {
+            e.preventDefault();
+            // check if on or off
+            if($(this).is(':checked')) {
+                $('.trait-require-group').removeClass('hide');
+            } else {
+                $('.trait-require-group').addClass('hide');
+            }
+        });
         $('#add-category').on('click', function(e) {
             e.preventDefault();
             addCategoryRow();
