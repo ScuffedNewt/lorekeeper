@@ -2,28 +2,31 @@
     <a href="#" class="btn btn-primary mb-3" id="add-feature">Add Trait</a>
 </div>
 
+<p>Any traits added will be available to the user to select.</p>
 <div id="featureList" class="form-group">
-    @foreach($tag->getData()['features'] as $feature)
+    @foreach($tag->getData()['feature'] as $feature)
+        {!! Form::select('feature[]', $tag->getEditData()['features'], $feature, ['class' => 'form-control mr-2 selectize']) !!}
+        <a href="#" class="remove-feature btn btn-danger mb-2">Remove</a>
     @endforeach
+    <hr>
 </div>
 
 <div class="feature-row hide mb-2">
-{!! Form::select('feature[]',  $tag->getEditData()['features'], null, ['class' => 'form-control mr-2 feature-select selectsize']) !!}
-{!! Form::number('quantity[]', 1, ['class' => 'form-control mr-2', 'min' => 1]) !!}
-<a href="#" class="remove-feature btn btn-danger">Remove</a>
+    {!! Form::select('feature[]', $tag->getEditData()['features'], null, ['class' => 'form-control mr-2 feature-select', 'placeholder' => 'Select a Trait']) !!}
+    <a href="#" class="remove-feature btn btn-danger">Remove</a>
 </div>
 
 <div class="text-right">
     <a href="#" class="btn btn-primary mb-3" id="add-category">Add Trait Category</a>
 </div>
 
+<p>Any traits within the selected categories added will be available to the user to select.</p>
 <div id="categoryList" class="form-group">
 </div>
 
 <div class="category-row hide mb-2">
-{!! Form::select('feature_type[]',  $tag->getEditData()['categories'], null, ['class' => 'form-control mr-2 category-select selectsize']) !!}
-{!! Form::number('type_quantity[]', 1, ['class' => 'form-control mr-2', 'min' => 1]) !!}
-<a href="#" class="remove-category btn btn-danger">Remove</a>
+    {!! Form::select('feature_type[]',  $tag->getEditData()['categories'], null, ['class' => 'form-control mr-2 category-select selectize', 'placeholder' => 'Select a Category']) !!}
+    <a href="#" class="remove-category btn btn-danger">Remove</a>
 </div>
 
 @section('scripts')

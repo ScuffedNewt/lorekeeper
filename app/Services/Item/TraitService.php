@@ -9,6 +9,7 @@ use App\Services\InventoryManager;
 use App\Services\CharacterManager;
 
 use App\Models\Character\Character;
+use App\Models\Character\CharacterFeature;
 use App\Models\Feature\Feature;
 use App\Models\Feature\FeatureCategory;
 
@@ -45,10 +46,13 @@ class TraitService extends Service
     public function getTagData($tag)
     {
         //fetch data from DB, if there is no data then set to NULL instead
-        $tagData['features'] = isset($tag->data['features']) ? $tag->data['features'] : null;
-        $tagData['quantity'] = isset($tag->data['quantity']) ? $tag->data['quantity'] : null;
-        $tagData['feature_type'] = isset($tag->data['feature_type']) ? $tag->data['feature_type'] : null;
-        $tagData['type_quantity'] = isset($tag->data['type_quantity']) ? $tag->data['type_quantity'] : null;
+        $tagData['feature'] = isset($tag->data['feature']) ? $tag->data['feature'] : [];
+        $tagData['feature_type'] = isset($tag->data['feature_type']) ? $tag->data['feature_type'] : [];
+
+        // get all features with the id from 'feature' or that has the category id from 'feature_type'
+        $tagData['features'] = Feature::whereIn('id', $tagData['feature'])
+            ->orWhere('feature_category_id', $tagData['feature_type'])
+        ->orderBy('name', 'ASC')->get()->pluck('name', 'id')->toArray();
 
         return $tagData;
     }
@@ -62,18 +66,13 @@ class TraitService extends Service
      */
     public function updateData($tag, $data)
     {
-        //put inputs into an array to transfer to the DB
-        $tagData['name'] = isset($data['name']) ? $data['name'] : null;
-        $tagData['species_id'] = isset($data['species_id']) && $data['species_id'] ? $data['species_id'] : null;
-        $tagData['subtype_id'] = isset($data['subtype_id']) && $data['subtype_id'] ? $data['subtype_id'] : null;
-        $tagData['rarity_id'] = isset($data['rarity_id']) && $data['rarity_id'] ? $data['rarity_id'] : null;
-        $tagData['description'] = isset($data['description']) && $data['description'] ? $data['description'] : null;
-        $tagData['parsed_description'] = parse($tagData['description']);
-        $tagData['sale_value'] = isset($data['sale_value']) ? $data['sale_value'] : 0;
-        //if the switch was toggled, set true, if null, set false
-        $tagData['is_sellable'] = isset($data['is_sellable']);
-        $tagData['is_tradeable'] = isset($data['is_tradeable']);
-        $tagData['is_giftable'] = isset($data['is_giftable']);
+        // remove any null or duplicate values
+        $tagData['feature'] = array_filter($data['feature']);
+        $tagData['feature_type'] = array_filter($data['feature_type']);
+
+        $tagData['feature'] = array_unique($tagData['feature']);
+        $tagData['feature_type'] = array_unique($tagData['feature_type']);
+
         $tagData['is_visible'] = isset($data['is_visible']);
 
         DB::beginTransaction();
@@ -102,56 +101,30 @@ class TraitService extends Service
         DB::beginTransaction();
 
         try {
+            if(!isset($data['feature_id']) || !isset($data['character_id'])) {
+                throw new \Exception('Not all parameters set.');
+            }
+
+            $character = Character::find($data['character_id']);
+
             foreach($stacks as $key=>$stack) {
-                // We don't want to let anyone who isn't the owner of the trait to use it,
-                // so do some validation...
+                // We don't want to let anyone who isn't the owner use the item
                 if($stack->user_id != $user->id) throw new \Exception("This item does not belong to you.");
 
-                // Next, try to delete the tag item. If successful, we can start distributing rewards.
-                if((new InventoryManager)->debitStack($stack->user, 'Trait Used', ['data' => ''], $stack, $data['quantities'][$key])) {
-
+                if((new InventoryManager)->debitStack($stack->user, 'Trait Applied', ['data' => 'Trait applied to '.$character->displayName], $stack, $data['quantities'][$key])) {
+                    
                     for($q=0; $q<$data['quantities'][$key]; $q++) {
-                        //fill an array with the DB contents
-                        $tagData = $stack->item->tag('trait')->data;
-                        //set user who is opening the item
-                        $tagData['user_id'] = $user->id;
-                        //other vital data that is default
-                        $tagData['name'] = isset($tagData['name']) ? $tagData['name'] : "Trait";
-                        $tagData['transferrable_at'] = null;
-                        $tagData['is_myo_trait'] = 1;
-                        //this uses your default MYO trait image from the CharacterManager
-                        //see wiki page for documentation on adding a default image switch
-                        $tagData['use_cropper'] = 0;
-                        $tagData['x0'] = null;
-                        $tagData['x1'] = null;
-                        $tagData['y0'] = null;
-                        $tagData['y1'] = null;
-                        $tagData['image'] = null;
-                        $tagData['thumbnail'] = null;
-                        $tagData['artist_id'][0] = null;
-                        $tagData['artist_url'][0] = null;
-                        $tagData['designer_id'][0] = null;
-                        $tagData['designer_url'][0] = null;
-                        $tagData['feature_id'][0] = null;
-                        $tagData['feature_data'][0] = null;
+                        $old['features'] = (new CharacterManager)->generateFeatureList($character->image);
+                        // add the feature to the character
+                        $feature = CharacterFeature::create(['character_image_id' => $character->image->id, 'feature_id' => $data['feature_id']]);
+                        // create log
+                        $new['features'] = (new CharacterManager)->generateFeatureList($character->image);
 
-                        //DB has 'true' and 'false' as strings, so need to set them to true/null
-                        if( $stack->item->tag('trait')->data['is_sellable'] == "true") { $tagData['is_sellable'] = true; } else $tagData['is_sellable'] = null;
-                        if( $stack->item->tag('trait')->data['is_tradeable'] == "true") { $tagData['is_tradeable'] = true; } else $tagData['is_tradeable'] = null;
-                        if( $stack->item->tag('trait')->data['is_giftable'] == "true") { $tagData['is_giftable'] = true; } else $tagData['is_giftable'] = null;
-                        if( $stack->item->tag('trait')->data['is_visible'] == "true") { $tagData['is_visible'] = true; } else $tagData['is_visible'] = null;
-
-                        // Distribute user rewards
-                        $charService = new CharacterManager;
-                        if ($tag = $charService->createCharacter($tagData, $user, true)) {
-                            flash('<a href="' . $tag->url . '">MYO trait</a> created successfully.')->success();
-                        }
-                        else {
-                            throw new \Exception("Failed to use trait.");
-                        }
+                        (new CharacterManager)->createLog($user->id, null, null, null, $character->id, 'Trait Added With '.$stack->item->displayName, '#'.$character->image->id, 'character', true, $old, $new);
                     }
                 }
             }
+            
             return $this->commitReturn(true);
         } catch(\Exception $e) {
             $this->setError('error', $e->getMessage());

@@ -732,7 +732,7 @@ class CharacterManager extends Service
      * @param  \App\Models\Character\CharacterImage  $image
      * @return  string
      */
-    private function generateFeatureList($image)
+    public function generateFeatureList($image)
     {
         $result = '';
         foreach($image->features as $feature)
