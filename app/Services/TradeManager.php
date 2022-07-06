@@ -438,7 +438,7 @@ class TradeManager extends Service
             // First return any item stacks attached to the trade
 
             if (isset($tradeData[$type]['user_items'])) {
-                foreach ($tradeData[$type]['user_items'] as $userItemId=>$quantity) {
+                foreach ($tradeData[$type]['user_items'] as $userItemId=>(int)$quantity) {
                     $userItemRow = UserItem::find($userItemId);
                     if (!$userItemRow) {
                         throw new \Exception('Cannot return an invalid item. ('.$userItemId.')');
@@ -455,7 +455,7 @@ class TradeManager extends Service
             // This is stored in the data attribute
             $currencyManager = new CurrencyManager;
             if (isset($tradeData[$type]['currencies'])) {
-                foreach ($tradeData[$type]['currencies'] as $currencyId=>$quantity) {
+                foreach ($tradeData[$type]['currencies'] as $currencyId=>(int)$quantity) {
                     $currencyManager->creditCurrency(null, $user, null, null, $currencyId, $quantity);
                 }
             }
@@ -481,10 +481,10 @@ class TradeManager extends Service
                     if (!$stack->item->allow_transfer || isset($stack->data['disallow_transfer'])) {
                         throw new \Exception('One or more of the selected items cannot be transferred.');
                     }
-                    $stack->trade_count += $data['stack_quantity'][$stackId];
+                    $stack->trade_count += (int)$data['stack_quantity'][$stackId];
                     $stack->save();
 
-                    addAsset($userAssets, $stack, $data['stack_quantity'][$stackId]);
+                    addAsset($userAssets, $stack, (int)$data['stack_quantity'][$stackId]);
                     $assetCount++;
                 }
             }
@@ -499,7 +499,7 @@ class TradeManager extends Service
                 }
                 //dd([$data['currency_id'], $data['currency_quantity']]);
                 $data['currency_id'] = $data['currency_id']['user-'.$user->id];
-                $data['currency_quantity'] = $data['currency_quantity']['user-'.$user->id];
+                $data['currency_quantity'] = (int)$data['currency_quantity']['user-'.$user->id];
                 foreach ($data['currency_id'] as $key=>$currencyId) {
                     $currency = Currency::where('allow_user_to_user', 1)->where('id', $currencyId)->first();
                     if (!$currency) {
@@ -575,7 +575,7 @@ class TradeManager extends Service
             // Return all added items/currency/characters
             foreach (['sender', 'recipient'] as $type) {
                 if (isset($tradeData[$type]['user_items'])) {
-                    foreach ($tradeData[$type]['user_items'] as $userItemId => $quantity) {
+                    foreach ($tradeData[$type]['user_items'] as $userItemId => (int)$quantity) {
                         $userItemRow = UserItem::find($userItemId);
                         if (!$userItemRow) {
                             throw new \Exception('Cannot return an invalid item. ('.$userItemId.')');
@@ -593,7 +593,7 @@ class TradeManager extends Service
             $currencyManager = new CurrencyManager;
             foreach (['sender', 'recipient'] as $type) {
                 if (isset($tradeData[$type]['currencies'])) {
-                    foreach ($tradeData[$type]['currencies'] as $currencyId => $quantity) {
+                    foreach ($tradeData[$type]['currencies'] as $currencyId => (int)$quantity) {
                         $currency = Currency::find($currencyId);
                         if (!$currency) {
                             throw new \Exception('Cannot return an invalid currency. ('.$currencyId.')');
@@ -640,7 +640,7 @@ class TradeManager extends Service
 
             if ($senderStacks) {
                 foreach ($senderStacks as $stack) {
-                    $quantity = $trade->data['sender']['user_items'][$stack->id];
+                    $quantity = (int)$trade->data['sender']['user_items'][$stack->id];
                     $inventoryManager->moveStack($trade->sender, $trade->recipient, 'Trade', ['data' => 'Received in trade [<a href="'.$trade->url.'">#'.$trade->id.'</a>]'], $stack, $quantity);
                     $userItemRow = UserItem::find($stack->id);
                     if (!$userItemRow) {
@@ -655,7 +655,7 @@ class TradeManager extends Service
             }
             if ($recipientStacks) {
                 foreach ($recipientStacks as $stack) {
-                    $quantity = $trade->data['recipient']['user_items'][$stack->id];
+                    $quantity = (int)$trade->data['recipient']['user_items'][$stack->id];
                     $inventoryManager->moveStack($trade->recipient, $trade->sender, 'Trade', ['data' => 'Received in trade [<a href="'.$trade->url.'">#'.$trade->id.'</a>]'], $stack, $quantity);
                     $userItemRow = UserItem::find($stack->id);
                     if (!$userItemRow) {
@@ -693,7 +693,7 @@ class TradeManager extends Service
             foreach (['sender', 'recipient'] as $type) {
                 $recipientType = ($type == 'sender') ? 'recipient' : 'sender';
                 if (isset($tradeData[$type]['currencies'])) {
-                    foreach ($tradeData[$type]['currencies'] as $currencyId => $quantity) {
+                    foreach ($tradeData[$type]['currencies'] as $currencyId => (int)$quantity) {
                         $currency = Currency::find($currencyId);
                         if (!$currency) {
                             throw new \Exception('Cannot credit an invalid currency. ('.$currencyId.')');
