@@ -46,7 +46,7 @@
             First, after you are done editing your offer, confirm your offer to indicate to your partner that you have finished. Next, after both parties have confirmed, you will receive the option to confirm the entire trade. <i>Please make sure that your partner has attached everything that you are expecting to receive!</i>
         </p> 
         <p>
-            After both parties have confirmed the entire trade, @if(Settings::get('open_transfers_queue')) if the trade contains a character, it will enter the transfer approval queue. Otherwise, @endif the transfers will be processed immediately.
+            After both parties have confirmed the entire trade, @if(Settings::get('open_transfers_queue')) if the trade contains a character, it will enter the transfer approval queue. Otherwise, @endif the transfers will be processed by a moderator.
         </p>
     </div>
 @elseif($trade->status == 'Pending')
