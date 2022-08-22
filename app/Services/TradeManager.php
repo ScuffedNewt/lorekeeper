@@ -347,21 +347,21 @@ class TradeManager extends Service
             else $trade->is_recipient_trade_confirmed = 1;
 
             if($trade->is_sender_trade_confirmed && $trade->is_recipient_trade_confirmed) {
-                if(!(Settings::get('open_transfers_queue') && (isset($trade->data['sender']['characters']) || isset($trade->data['recipient']['characters'])))) {
-                    // Distribute the trade attachments
-                    $this->creditAttachments($trade);
+                // if(!(Settings::get('open_transfers_queue') && (isset($trade->data['sender']['characters']) || isset($trade->data['recipient']['characters'])))) {
+                //     // Distribute the trade attachments
+                //     $this->creditAttachments($trade);
     
-                    $trade->status = 'Completed';
+                //     $trade->status = 'Completed';
 
-                    // Notify both users
-                    Notifications::create('TRADE_COMPLETED', $trade->sender, [
-                        'trade_id' => $trade->id
-                    ]);
-                    Notifications::create('TRADE_COMPLETED', $trade->recipient, [
-                        'trade_id' => $trade->id
-                    ]);
-                }
-                else {
+                //     // Notify both users
+                //     Notifications::create('TRADE_COMPLETED', $trade->sender, [
+                //         'trade_id' => $trade->id
+                //     ]);
+                //     Notifications::create('TRADE_COMPLETED', $trade->recipient, [
+                //         'trade_id' => $trade->id
+                //     ]);
+                // }
+                // else {
                     // Put the trade into the queue
                     $trade->status = 'Pending';
                     
@@ -372,7 +372,7 @@ class TradeManager extends Service
                     Notifications::create('TRADE_CONFIRMED', $trade->recipient, [
                         'trade_id' => $trade->id
                     ]);
-                }
+                // }
             }
             else {
                     
