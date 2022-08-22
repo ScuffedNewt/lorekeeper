@@ -2,7 +2,7 @@
     <div class="m-1">
         <div class="row">
             <div class="col-md-6 text-center align-self-center">
-                <a href="{{ $character->character->url }}"><img src="{{ $loop->count == 1 ? $character->image->imageUrl : $character->image->thumbnailUrl }}" class="mw-100 img-thumbnail" /></a>
+                <a href="{{ $character->character->url }}"><img src="{{ $loop->count == 1 ? $character->image->imageUrl : $character->image->thumbnailUrl }}" class="mw-100 img-thumbnail" alt="{{ $character->fullName }}" /></a>
             </div>
             <div class="col-md text-center">
                 <div class="mt-2">
@@ -73,8 +73,8 @@
                         @if(isset($character->data['end_point']))
                             {{ $character->data['end_point'] }}
                         @endif
-                        {{ isset($character->link) && isset($character->data['end_point']) ? ' ・ ' : '' }}
-                        @if(isset($character->link))
+                        {{ (isset($character->link) && ((!isset($character->sales->comments_open_at) || Auth::check() && Auth::user()->hasPower('edit_pages')) || $character->sales->comments_open_at < Carbon\Carbon::now())) && isset($character->data['end_point']) ? ' ・ ' : '' }}
+                        @if(isset($character->link) && ((!isset($character->sales->comments_open_at) || Auth::check() && Auth::user()->hasPower('edit_pages')) || $character->sales->comments_open_at < Carbon\Carbon::now()))
                             <a href="{{ $character->link }}">{{ $character->typeLink }}</a>
                         @endif
                     </h6>
