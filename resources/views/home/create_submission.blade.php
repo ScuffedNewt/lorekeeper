@@ -42,7 +42,7 @@
         </div>
         <div class="form-group">
             {!! Form::label('comments', 'Comments (Optional)') !!} {!! add_help('Enter a comment for your ' . ($isClaim ? 'claim' : 'submission') . ' (no HTML). This will be viewed by the mods when reviewing your ' . ($isClaim ? 'claim' : 'submission') . '.') !!}
-            {!! Form::textarea('comments', null, ['class' => 'form-control']) !!}
+            {!! Form::textarea('comments', null, ['class' => 'form-control', 'id' => 'form']) !!}
         </div>
 
         <h2>Rewards</h2>
@@ -137,6 +137,15 @@
                     $prompt.selectize();
                     $prompt.on('change', function(e) {
                         $rewards.load('{{ url('submissions/new/prompt') }}/' + $(this).val());
+                        // set text area 'form' to contain prompt form
+                        $.ajax({
+                            url: '{{ url('submissions/new/prompt/form') }}/' + $(this).val(),
+                            type: 'GET',
+                            success: function(data) {
+                                $('#form').val(data);
+                                console.log(data);
+                            }
+                        });
                     });
                 @endif
 

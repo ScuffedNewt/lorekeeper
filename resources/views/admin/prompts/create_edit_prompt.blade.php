@@ -50,8 +50,13 @@
     </div>
 
     <div class="form-group">
-        {!! Form::label('Summary (Optional)') !!} {!! add_help('This is a short blurb that shows up on the consolidated prompts page. HTML cannot be used here.') !!}
+        {!! Form::label('Summary (Optional)') !!} {!! add_help('This is a short blurb that shows up on the consolidated prompts page. HTML cannot be used here. This will automatically bold.') !!}
         {!! Form::text('summary', $prompt->summary, ['class' => 'form-control', 'maxLength' => 250]) !!}
+    </div>
+
+    <div class="form-group">
+        {!! Form::label('Form (Optional)') !!} {!! add_help('This form will automatically propogate on any submissions to this prompt, in order for the user to fill it out.') !!}
+        {!! Form::textarea('form_field', $prompt->form_field, ['class' => 'form-control', 'rows' => 5]) !!}
     </div>
 
     <div class="form-group">

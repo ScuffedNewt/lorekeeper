@@ -145,6 +145,7 @@ Route::group(['prefix' => 'submissions', 'namespace' => 'Users'], function () {
     Route::get('new', 'SubmissionController@getNewSubmission');
     Route::get('new/character/{slug}', 'SubmissionController@getCharacterInfo');
     Route::get('new/prompt/{id}', 'SubmissionController@getPromptInfo');
+    Route::get('new/prompt/form/{id}', 'SubmissionController@getPromptField');
     Route::post('new', 'SubmissionController@postNewSubmission');
 });
 

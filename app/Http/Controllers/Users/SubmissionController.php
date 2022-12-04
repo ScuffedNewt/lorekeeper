@@ -139,6 +139,22 @@ class SubmissionController extends Controller {
     }
 
     /**
+     * Returns the prompts form field if it exists.
+     * 
+     * @param  int $id
+     * 
+     * @return string HTML
+     */
+    public function getPromptField($id) {
+        $prompt = Prompt::active()->where('id', $id)->first();
+        if (!$prompt) {
+            return response(404);
+        }
+
+        return $prompt->form_field ? $prompt->form_field : '';
+    }
+
+    /**
      * Creates a new submission.
      *
      * @param App\Services\SubmissionManager $service
