@@ -140,9 +140,9 @@ class SubmissionController extends Controller {
 
     /**
      * Returns the prompts form field if it exists.
-     * 
-     * @param  int $id
-     * 
+     *
+     * @param int $id
+     *
      * @return string HTML
      */
     public function getPromptField($id) {
