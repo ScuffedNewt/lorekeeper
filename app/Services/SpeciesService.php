@@ -318,6 +318,10 @@ class SpeciesService extends Service {
             $data['parsed_description'] = parse($data['description']);
         }
 
+        if (isset($data['rarity_id']) && $data['rarity_id'] == 'none') {
+            $data['rarity_id'] = null;
+        }
+
         if (!isset($data['is_visible'])) {
             $data['is_visible'] = 0;
         }
