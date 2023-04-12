@@ -11,7 +11,7 @@ class Subtype extends Model {
      * @var array
      */
     protected $fillable = [
-        'species_id', 'name', 'sort', 'has_image', 'description', 'parsed_description', 'is_visible',
+        'species_id', 'name', 'sort', 'has_image', 'description', 'parsed_description', 'is_visible', 'rarity_id',
     ];
 
     /**
@@ -66,6 +66,13 @@ class Subtype extends Model {
         return $this->belongsTo('App\Models\Species\Species', 'species_id');
     }
 
+    /**
+     * Get the rarity of the subtype.
+     */
+    public function rarity() {
+        return $this->belongsTo('App\Models\Rarity', 'rarity_id');
+    }
+
 /**********************************************************************************************
 
         SCOPES
@@ -109,6 +116,9 @@ class Subtype extends Model {
      * @return string
      */
     public function getDisplayNameAttribute() {
+        if ($this->rarity_id) {
+            return '<a href="'.$this->url.'" class="display-subtype">'.$this->name.'</a> ('.$this->rarity->displayName.')';
+        }
         return '<a href="'.$this->url.'" class="display-subtype">'.$this->name.'</a>';
     }
 

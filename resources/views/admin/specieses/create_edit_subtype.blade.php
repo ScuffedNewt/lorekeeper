@@ -28,6 +28,11 @@
     </div>
 
     <div class="form-group">
+        {!! Form::label('Rarity (Optional)') !!}
+        {!! Form::select('rarity_id', $rarities, $subtype->rarity_id, ['class' => 'form-control']) !!}
+    </div>
+
+    <div class="form-group">
         {!! Form::label('World Page Image (Optional)') !!} {!! add_help('This image is used only on the world information pages.') !!}
         <div>{!! Form::file('image') !!}</div>
         <div class="text-muted">Recommended size: 200px x 200px</div>
