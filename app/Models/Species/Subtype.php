@@ -119,6 +119,7 @@ class Subtype extends Model {
         if ($this->rarity_id) {
             return '<a href="'.$this->url.'" class="display-subtype">'.$this->name.'</a> ('.$this->rarity->displayName.')';
         }
+
         return '<a href="'.$this->url.'" class="display-subtype">'.$this->name.'</a>';
     }
 

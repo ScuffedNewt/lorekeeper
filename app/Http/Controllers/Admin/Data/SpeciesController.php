@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Admin\Data;
 
 use App\Http\Controllers\Controller;
 use App\Models\Character\Sublist;
+use App\Models\Rarity;
 use App\Models\Species\Species;
 use App\Models\Species\Subtype;
-use App\Models\Rarity;
 use App\Services\SpeciesService;
 use Auth;
 use Illuminate\Http\Request;
@@ -163,8 +163,8 @@ class SpeciesController extends Controller {
      */
     public function getCreateSubtype() {
         return view('admin.specieses.create_edit_subtype', [
-            'subtype'   => new Subtype,
-            'specieses' => Species::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
+            'subtype'    => new Subtype,
+            'specieses'  => Species::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
             'rarities'   => ['none' => 'None'] + Rarity::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
         ]);
     }
@@ -183,8 +183,8 @@ class SpeciesController extends Controller {
         }
 
         return view('admin.specieses.create_edit_subtype', [
-            'subtype'   => $subtype,
-            'specieses' => Species::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
+            'subtype'    => $subtype,
+            'specieses'  => Species::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
             'rarities'   => ['none' => 'None'] + Rarity::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
         ]);
     }
@@ -200,7 +200,7 @@ class SpeciesController extends Controller {
     public function postCreateEditSubtype(Request $request, SpeciesService $service, $id = null) {
         $id ? $request->validate(Subtype::$updateRules) : $request->validate(Subtype::$createRules);
         $data = $request->only([
-            'species_id', 'name', 'description', 'image', 'remove_image', 'is_visible', 'rarity_id'
+            'species_id', 'name', 'description', 'image', 'remove_image', 'is_visible', 'rarity_id',
         ]);
         if ($id && $service->updateSubtype(Subtype::find($id), $data, Auth::user())) {
             flash('Subtype updated successfully.')->success();
