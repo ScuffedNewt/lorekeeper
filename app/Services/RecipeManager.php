@@ -86,7 +86,7 @@ class RecipeManager extends Service
                 });
 
                 // Check for sufficient ingredients
-                $plucked = $this->pluckIngredients($user, $recipe);
+                $plucked = $this->pluckIngredients($user, $recipe, $stacks);
                 if(!$plucked) throw new \Exception('Insufficient ingredients selected.');
 
                 // Debit the ingredients
@@ -95,6 +95,9 @@ class RecipeManager extends Service
                     $stack = UserItem::find($id);
                     if(!$service->debitStack($user, 'Crafting', ['data' => 'Used in '.$recipe->name.' Recipe'], $stack, $quantity)) throw new \Exception('Items could not be removed.');
                 }
+            } else {
+                $items = $recipe->ingredients->where('ingredient_type', 'Item');
+                if (count($items) > 0) throw new \Exception('Insufficient ingredients selected.');
             }
 
             // Debit the currency
@@ -140,29 +143,50 @@ class RecipeManager extends Service
     * @param  \App\Models\Recipe\Recipe                    $recipe
     * @return array|null
     */
-    public function pluckIngredients($user, $recipe)
+    public function pluckIngredients($user, $recipe, $selectedStacks = null)
     {
         $user_items = UserItem::with('item')->whereNull('deleted_at')->where('count', '>', '0')->where('user_id', $user->id)->get();
         $plucked = [];
         // foreach ingredient, search for a qualifying item, and select items up to the quantity, if insufficient continue onto the next entry
         foreach($recipe->ingredients->sortBy('ingredient_type') as $ingredient)
         {
-            switch($ingredient->ingredient_type)
-            {
-                case 'Item':
-                    $stacks = $user_items->where('item.id', $ingredient->data[0]);
-                    break;
-                case 'MultiItem':
-                    $stacks = $user_items->whereIn('item.id', $ingredient->data);
-                    break;
-                case 'Category':
-                    $stacks = $user_items->where('item.item_category_id', $ingredient->data[0]);
-                    break;
-                case 'MultiCategory':
-                    $stacks = $user_items->whereIn('item.item_category_id', $ingredient->data);
-                    break;
-                case 'Currency':
-                    continue 2;
+            if($selectedStacks) {
+                switch($ingredient->ingredient_type)
+                {
+                    case 'Item':
+                        $stacks = $selectedStacks->where('item.id', $ingredient->data[0]);
+                        break;
+                    case 'MultiItem':
+                        $stacks = $selectedStacks->whereIn('item.id', $ingredient->data);
+                        break;
+                    case 'Category':
+                        $stacks = $selectedStacks->where('item.item_category_id', $ingredient->data[0]);
+                        break;
+                    case 'MultiCategory':
+                        $stacks = $selectedStacks->whereIn('item.item_category_id', $ingredient->data);
+                        break;
+                    case 'Currency':
+                        continue 2;
+                }
+            }
+            else {
+                switch($ingredient->ingredient_type)
+                {
+                    case 'Item':
+                        $stacks = $user_items->where('item.id', $ingredient->data[0]);
+                        break;
+                    case 'MultiItem':
+                        $stacks = $user_items->whereIn('item.id', $ingredient->data);
+                        break;
+                    case 'Category':
+                        $stacks = $user_items->where('item.item_category_id', $ingredient->data[0]);
+                        break;
+                    case 'MultiCategory':
+                        $stacks = $user_items->whereIn('item.item_category_id', $ingredient->data);
+                        break;
+                    case 'Currency':
+                        continue 2;
+                }
             }
 
             $quantity_left = $ingredient->quantity;
