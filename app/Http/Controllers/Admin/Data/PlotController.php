@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 
 use Auth;
 
-use App\Models\User\GardenPlot;
+use App\Models\GardenPlot;
 use App\Models\Loot\LootTable;
 use App\Models\Raffle\Raffle;
 use App\Models\Currency\Currency;
@@ -31,7 +31,7 @@ class PlotController extends Controller
     {
         return view('admin.plots.create_edit_plot', [
             'plot' => new GardenPlot,
-            'currencies' => Currency::where('is_user_owned', 1)->orderBy('sort_user', 'DESC')->pluck('name', 'id'),
+            'currencies' => ['none' => 'None'] + Currency::where('is_user_owned', 1)->orderBy('sort_user', 'DESC')->pluck('name', 'id')->toArray(),
         ]);
     }
 
@@ -47,7 +47,7 @@ class PlotController extends Controller
         if(!$plot) abort(404);
         return view('admin.plots.create_edit_plot', [
             'plot' => $plot,
-            'currencies' => Currency::where('is_user_owned', 1)->orderBy('sort_user', 'DESC')->pluck('name', 'id'),
+            'currencies' => ['none' => 'None'] + Currency::where('is_user_owned', 1)->orderBy('sort_user', 'DESC')->pluck('name', 'id')->toArray(),
         ]);
     }
 

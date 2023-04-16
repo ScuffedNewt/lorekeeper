@@ -15,7 +15,7 @@ class UserGardenPlot extends Model
      * @var array
      */
     protected $fillable = [
-        'plot_id', 'user_id', 'item_id', 'started_at', 'water_at'
+        'plot_id', 'user_id', 'item_id', 'started_at', 'water_at', 'is_dead'
     ];
 
     /**
@@ -53,7 +53,7 @@ class UserGardenPlot extends Model
      */
     public function plot() 
     {
-        return $this->belongsTo('App\Models\User\GardenPlot', 'plot_id');
+        return $this->belongsTo('App\Models\GardenPlot', 'plot_id');
     }
 
     /**

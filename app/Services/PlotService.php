@@ -5,7 +5,7 @@ use App\Services\Service;
 use DB;
 use Config;
 
-use App\Models\User\GardenPlot;
+use App\Models\GardenPlot;
 
 class PlotService extends Service
 {   
@@ -25,7 +25,7 @@ class PlotService extends Service
                 $data['currency_id'] = null;
                 $data['plot_cost'] = null;
             } 
-            elseif(!isset($data['currency_id'])) {
+            elseif(!isset($data['currency_id']) || $data['currency_id'] == 'none') {
                 $data['currency_id'] = null;
                 $data['plot_cost'] = null;
                 $data['free'] = 1;
@@ -58,7 +58,7 @@ class PlotService extends Service
                 $data['currency_id'] = null;
                 $data['plot_cost'] = null;
             } 
-            elseif(!isset($data['currency_id'])) {
+            elseif(!isset($data['currency_id']) || $data['currency_id'] == 'none') {
                 $data['currency_id'] = null;
                 $data['plot_cost'] = null;
                 $data['free'] = 1;

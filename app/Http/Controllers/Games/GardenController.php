@@ -6,7 +6,7 @@ use Illuminate\Routing\Controller;
 use Auth;
 use Carbon\Carbon; 
 
-use App\Models\User\GardenPlot;
+use App\Models\GardenPlot;
 use App\Models\User\UserGardenPlot;
 use App\Models\Item\Item;
 use App\Models\Item\ItemTag;
@@ -249,6 +249,7 @@ class GardenController extends Controller
         $check = 0;
         foreach(UserGardenPlot::where('user_id', $user->id)->whereRelation('plot', 'plot_type', 'Seed')->get() as $plot)
         {
+            if ($plot->water_at == null || $plot->item_id) continue;
             $water = Carbon::parse($plot->water_at)->addHours($plot->time);
             if($water < Carbon::now())
             {

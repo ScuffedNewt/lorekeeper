@@ -14,6 +14,9 @@
     </div>
 </noscript>
 <!-- Nav tabs -->
+@if(!count($plots))
+    <div class="alert alert-danger">There are currently no plots.</div>
+@else
 <div class="character-bio">
     <div class="card-header">
         <ul class="nav nav-tabs card-header-tabs">
@@ -76,6 +79,7 @@
         @endif
     </div>
 </div>
+@endif
 
 @endsection
 @section('scripts')

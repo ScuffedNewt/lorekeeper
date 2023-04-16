@@ -7,7 +7,7 @@ use Log;
 use Config;
 use Carbon\Carbon;
 
-use App\Models\User\GardenPlot;
+use App\Models\GardenPlot;
 use App\Models\Currency\Currency;
 use App\Models\User\UserGardenPlot;
 use App\Services\CurrencyManager;
