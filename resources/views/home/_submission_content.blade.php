@@ -62,13 +62,15 @@
                 <td>N/A</td>
             </tr>
         @else
-            @foreach($type as $key => $asset)
-            <tr>
-                @php $model = getAssetModelString($key); if($asset) $reward = $model::find($asset['asset']); @endphp
-                <td>{!! $loot->displayName !!}</td>
-                <td>{!! $reward ? $reward->displayName : 'Deleted Asset' !!}</td>
-                <td>{{ $asset['quantity'] }}</td>
-            </tr>
+            @foreach($type as $key => $assets)
+                @foreach($assets as $asset)
+                <tr>
+                    @php $model = getAssetModelString($key); if($asset) $reward = $model::find($asset['asset']); @endphp
+                    <td>{!! $loot->displayName !!}</td>
+                    <td>{!! $reward ? $reward->displayName : 'Deleted Asset' !!}</td>
+                    <td>{{ $asset['quantity'] }}</td>
+                </tr>
+                @endforeach
             @endforeach
         @endif
         @endforeach

@@ -238,13 +238,19 @@ function fillUserAssets($assets, $sender, $recipient, $logType, $data, $isSubmis
         foreach($assets['loot_tables'] as $table)
         {
             if($isSubmission) {
-                $loot[$table['asset']->id] = [];
+                if (!isset($loot[$table['asset']->id]))
+                    $loot[$table['asset']->id] = [];
                 $reward =  $table['asset']->roll($table['quantity']);
                 foreach($reward as $key => $item) {
                     if($item) {
-                        $loot[$table['asset']->id][$key] = [];
-                        foreach($item as $asset)
-                            $loot[$table['asset']->id][$key] += ['asset' => $asset['asset']->id,'quantity' => $asset['quantity']];
+                        if (!isset($loot[$table['asset']->id][$key]))
+                            $loot[$table['asset']->id][$key] = [];
+                        foreach($item as $asset) {
+                            if (isset($loot[$table['asset']->id][$key]['asset'][$asset['asset']->id]))
+                                $loot[$table['asset']->id][$key]['asset'][$asset['asset']->id]['quantity'] += $asset['quantity'];
+                            else
+                                $loot[$table['asset']->id][$key][] = ['asset' => $asset['asset']->id,'quantity' => $asset['quantity']];
+                        }
                     }
                 }
                 $assets = mergeAssetsArrays($assets, $reward);    
