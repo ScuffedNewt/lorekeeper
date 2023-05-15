@@ -61,6 +61,13 @@ body {
     display: none !important;
 }
 
+.grecaptcha-badge { visibility: hidden !important; }
+
+.parsed-text img {
+    max-width: 100% !important;
+    height: auto !important;
+}
+
 /**************************************************************************************************
     
     Layout
@@ -180,6 +187,11 @@ main > .row {
 @media (max-width: 767px) {
 	.site-mobile-header {
 		top: 54px !important;
+    }
+    
+    .timestamp {
+		margin-left: 1rem!important;
+		margin-right: 1rem!important;
 	}
 }
 
@@ -257,11 +269,6 @@ main > .row {
     
 	.site-footer .navbar .navbar-nav {
 		flex-wrap: wrap; justify-content: center;
-	}
-	
-	.timestamp {
-		margin-left: 1rem!important;
-		margin-right: 1rem!important;
 	}
 }
 
@@ -365,6 +372,10 @@ main > .row {
     cursor: not-allowed;
 }
 
+.pagination {
+    flex-wrap: wrap;
+}
+
 .spoiler {
     border: 1px solid rgba(0,0,0,0.1);
     border-radius: 5px;
@@ -390,6 +401,10 @@ main > .row {
     overflow-wrap: break-word;
     word-break: break-word;
 }
+.small-icon {
+    height: 2rem;
+    padding-right: .5rem;
+}
 
 /* NOTIFICATIONS *********************************************************************************/
 
@@ -401,6 +416,11 @@ main > .row {
 
 .world-entry-image {
     text-align: center;
+}
+
+.world-entry img {
+    max-width: 100%;
+    height: auto;
 }
 
 .world-entry-image img {
@@ -446,6 +466,37 @@ tr.outflow {
     background-color: #fffafa;
 }
 
+/* These are not truly tables, but divs styled to look like tables */
+.logs-table .logs-table-header {
+    border-top: 1px solid #dee2e6;
+    border-bottom: 2px solid #dee2e6;
+    font-weight: bold;
+    padding: 0px;
+    flex-wrap: wrap;
+}
+.logs-table .logs-table-header .logs-table-cell,
+.logs-table .logs-table-body .logs-table-cell {
+    padding: .3rem;
+}
+.logs-table .logs-table-body > .logs-table-row:first-of-type {
+    border-top-width: 0;
+}
+.logs-table .logs-table-body > .logs-table-row,
+.logs-table-row .logs-table-row {
+    border-top: 1px solid #dee2e6;
+}
+.logs-table .logs-table-body .logs-table-cell .inflow,
+.logs-table .logs-table-body .logs-table-cell .outflow {
+    width: 33px;
+    line-height: 33px;
+    text-align: center;
+    position: relative;
+    top: -.3rem;
+    margin-bottom: -.6rem;
+    vertical-align: middle;
+    color: #fff;
+}
+
 
 /* PROFILE ***************************************************************************************/
 
@@ -476,6 +527,10 @@ tr.outflow {
 .inventory-stack-name:hover, .inventory-character-name:hover {
     color: inherit;
     text-decoration: none;
+}
+tr.accountbound {
+    background-color: rgba(0,0,0,0.05);
+    border-radius: .25rem;
 }
 
 /* CHARACTERS ************************************************************************************/
@@ -545,6 +600,9 @@ tr.outflow {
     background-color: rgba(0,0,0,0.05);
     border-radius: .25rem;
 }
+.user-items .category-selected.select-item-row {
+    background-color: rgba(0,0,0,0.05);
+}
 
 /* SHOPS *****************************************************************************************/
 .shops-row img {
@@ -583,4 +641,38 @@ tr.outflow {
 
 .bookmark-table .img-thumbnail {
     width: 100px;
+}
+
+/* BOOTSTRAP TABLES *************************************************************************************/
+.ubt-bottom {
+  border-bottom:1px solid #dee2e6;
+}
+
+.ubt-top {
+  border-top:1px solid #dee2e6;
+}
+
+.ubt-texthide {
+  width:100%;
+  max-width: 250px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* COMMENTS *************************************************************************************/
+.comment_replies {
+        padding-left: 3rem;
+        border-left-width: 2px!important;
+    }
+    
+.comment>p>img {
+        max-width: 100%;
+        height: auto;
+    }
+
+@media only screen and (max-width: 600px) {
+    .comment_replies { padding-left:1rem;}
 }

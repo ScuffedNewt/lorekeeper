@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
+use Config;
+use Log;
+use Carbon\Carbon;
 use App\Services\EmbedService;
 
 class EmbedController extends Controller
@@ -26,34 +29,52 @@ class EmbedController extends Controller
      */
     public function getEmbed(Request $request, EmbedService $service)
     {
-        $url = $request->url;
+        // get url from request
+        $url = $request->input('url');
         // Remove any queries
-        $url= preg_split('/[?#]/', $url)[0];
-        // TODO: Move the patterns elsewhere?
-        $accepted_patterns = [
-            "/https:\/\/sta.sh\/.*/",
-            "/https:\/\/.*.deviantart.com\/art\/.*/",
-            "/https:\/\/.*.deviantart.com\/.*\/art\/.*/",
-            "/http:\/\/fav.me\/.*/"
-        ];
+        $url = preg_split('/[?#]/', $url)[0];
         // Check if its a URL at all
         if(!filter_var($url, FILTER_VALIDATE_URL)) {
-            return([
+            return [
                 'error' => "Not an URL"
-            ]);
+            ];
         }
+
         // Check if its from an accepted domain
-        foreach($accepted_patterns as $pattern) {
+        foreach(Config::get('lorekeeper.embed.urls') as $pattern) {
             if(preg_match($pattern, $url)) {
                 $response = $service->getEmbed($url);
-                return([
-                    'image_url' => $response['url'],
-                    'thumbnail_url' => $response['thumbnail_url']
-                ]);
+                if (isset($response['url'])) {
+                    // download the image
+                    $ch = curl_init($response['url']);
+                    // make directory if it doesn't exist
+                    if (!file_exists(public_path('images/embeds'))) {
+                        mkdir(public_path('images/embeds'), 0777, true);
+                    }
+                    $filename = Carbon::now()->timestamp . '.png';
+                    $fp = fopen(public_path('images/embeds/'.$filename), 'wb');
+                    curl_setopt($ch, CURLOPT_FILE, $fp);
+                    curl_setopt($ch, CURLOPT_HEADER, 0);
+                    curl_exec($ch);
+                    curl_close($ch);
+                    fclose($fp);
+
+                    return [
+                        'success' => 'true',
+                        'url' => url('images/embeds/'.$filename),
+                        'name' => $filename,
+                    ];
+                }
+                else {
+                    return [
+                        'error' => "No image found",
+                        'data' => json_encode($response),
+                    ];
+                }
             }
         }
-        return([
+        return [
             'error' => "Not an accepted URL"
-        ]);        
+        ];        
     }
 }

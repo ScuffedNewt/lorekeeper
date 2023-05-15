@@ -23,6 +23,9 @@ class EmbedService extends Service
      */
     public function beforeConstruct() {
         $this->embed = new Embed();
+        $this->embed->setSettings([
+            'instagram:token' => env('INSTAGRAM_TOKEN', null),
+        ]);
     }
 
     /**
