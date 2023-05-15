@@ -25,7 +25,7 @@ class Kernel extends ConsoleKernel {
             ->everyMinute();
         $schedule->exec('rm public/images/avatars/*.tmp')
             ->daily();
-        $schedule->exec('rm public/embeds/*.png')
+        $schedule->exec('rm public/images/embeds/*.png')
             ->hourly();
         $schedule->command('update-extension-tracker')
             ->daily();
