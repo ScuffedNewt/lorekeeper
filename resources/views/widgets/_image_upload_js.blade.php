@@ -197,8 +197,7 @@
 
         // EMBED /////////////////////////////////////////////////////////////////////////////////////
 
-        function updateEmbedCropper(url)
-        {
+        function updateEmbedCropper(url) {
             $cropper.attr('src', url);
             c = new Croppie($cropper[0], {
                 viewport: {

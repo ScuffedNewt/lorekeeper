@@ -128,32 +128,32 @@
         <h3>Image Upload</h3>
 
         <div class="row">
-        <div class="col-md-6">
-        <div class="form-group" id="image">
-            {!! Form::label('Image') !!}
-            @if ($isMyo)
-                {!! add_help('This is a cover image for the MYO slot. If left blank, a default image will be used.') !!}
-            @else
-                {!! add_help('This is the full masterlist image. Note that the image is not protected in any way, so take precautions to avoid art/design theft.') !!}
-            @endif
-            <div>{!! Form::file('image', ['id' => 'mainImage']) !!}</div>
-        </div>
-        </div>
-        <div class="col-md-6">
-            {{-- form for url --}}
-            <p>
-                If you would like to use an image from a URL, enter the URL below. The image will be automatically embedded and used.
-            </p>
-            <p class="hide image-url-text">
-            </p>
-
-            <div class="form-group">
-                {!! Form::label('Image URL') !!}
-                {!! Form::text('image_url', null, ['class' => 'form-control image-url']) !!}
-                {{-- hidden form --}}
-                {!! Form::hidden('image_name', null, ['class' => 'form-control image-name']) !!}
+            <div class="col-md-6">
+                <div class="form-group" id="image">
+                    {!! Form::label('Image') !!}
+                    @if ($isMyo)
+                        {!! add_help('This is a cover image for the MYO slot. If left blank, a default image will be used.') !!}
+                    @else
+                        {!! add_help('This is the full masterlist image. Note that the image is not protected in any way, so take precautions to avoid art/design theft.') !!}
+                    @endif
+                    <div>{!! Form::file('image', ['id' => 'mainImage']) !!}</div>
+                </div>
             </div>
-        </div>
+            <div class="col-md-6">
+                {{-- form for url --}}
+                <p>
+                    If you would like to use an image from a URL, enter the URL below. The image will be automatically embedded and used.
+                </p>
+                <p class="hide image-url-text">
+                </p>
+
+                <div class="form-group">
+                    {!! Form::label('Image URL') !!}
+                    {!! Form::text('image_url', null, ['class' => 'form-control image-url']) !!}
+                    {{-- hidden form --}}
+                    {!! Form::hidden('image_name', null, ['class' => 'form-control image-name']) !!}
+                </div>
+            </div>
         </div>
         @if (Config::get('lorekeeper.settings.masterlist_image_automation') === 1)
             <div class="form-group">
