@@ -1889,13 +1889,13 @@ class CharacterManager extends Service {
                     $data['default_image'] = true;
                     unset($data['use_cropper']);
                 }
-            }
-            else {
-                if(!isset($data['image']) && isset($data['image_name'])) {
+            } else {
+                if (!isset($data['image']) && isset($data['image_name'])) {
                     $data['image'] = public_path('images/embeds/'.$data['image_name']);
                     $data['extension'] = 'png';
+                } elseif (!isset($data['image'])) {
+                    throw new \Exception('No image provided.');
                 }
-                else if(!isset($data['image'])) throw new \Exception('No image provided.');
             }
             $imageData = Arr::only($data, [
                 'species_id', 'subtype_id', 'rarity_id', 'use_cropper',
@@ -1985,7 +1985,7 @@ class CharacterManager extends Service {
             if (!$isMyo) {
                 $this->processImage($image);
                 // delete embed image
-                if(($data['image_name'])) {
+                if (($data['image_name'])) {
                     $this->deleteImage(public_path('images/embeds'), $data['image_name']);
                 }
             }

@@ -1,12 +1,11 @@
-<?php namespace App\Services;
+<?php
 
-use DB;
-use App\Services\Service;
+namespace App\Services;
+
 use Embed\Embed;
 use Illuminate\Support\Facades\Cache;
 
-class EmbedService extends Service
-{
+class EmbedService extends Service {
     /*
     |--------------------------------------------------------------------------
     | Embed Service
@@ -29,15 +28,15 @@ class EmbedService extends Service
     }
 
     /**
-     * Get the oEmbed response using the given url
-     * 
-     * @param  string $url
-     * @return 
+     * Get the oEmbed response using the given url.
+     *
+     * @param string $url
      */
     public function getEmbed($url) {
-        $response = Cache::remember($url, 60*60*24*7, function() use($url) {
+        $response = Cache::remember($url, 60 * 60 * 24 * 7, function () use ($url) {
             return $this->embed->get($url)->getOEmbed()->all();
         });
+
         return $response;
     }
 }
