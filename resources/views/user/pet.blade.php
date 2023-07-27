@@ -24,7 +24,7 @@
                         ?>
                         <div class="col-sm-3 col-6 text-center inventory-item" data-id="{{ $pet->pivot->id }}" data-name="{{ $user->name }}'s {{ $pet->name }}">
                             <div class="mb-1">
-                                <a href="#" class="inventory-stack"><img src="{{ $pet->VariantImage($pet->pivot->variant_id) }}" class="img-fluid" style="width:50%;"/></a>
+                                <a href="#" class="inventory-stack">@if($pet->pivot->has_image)<img src="{{  url('images/data/user-pets/'.$pet->pivot->id.'-image.png')  }}">@else<img src="{{ $pet->VariantImage($pet->pivot->variant_id) }}" />@endif</a>
                             </div>
                             <div>
                                 <a href="#" class="inventory-stack inventory-stack-name">{{ $pet->name }}</a>
@@ -32,6 +32,11 @@
                             <div>
                                 <span class="text-light badge badge-dark" style="font-size:95%;">{{ $stackName }}</span>
                             </div>
+                            @if($pet->pivot->has_image) 
+                                <div>
+                                    <a href="{{ url('pets/custom/pet/'.$pet->pivot->id) }}"><i class="fas fa-brush mr-2"  data-toggle="tooltip" title="This pet has custom art."></i></a>
+                                </div> 
+                            @endif
                         </div>
                     @endforeach
                 </div>

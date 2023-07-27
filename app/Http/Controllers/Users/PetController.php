@@ -70,7 +70,8 @@ class PetController extends Controller
             'user' => Auth::user(),
             'userOptions' => ['' => 'Select User'] + User::visible()->where('id', '!=', $stack ? $stack->user_id : 0)->orderBy('name')->get()->pluck('verified_name', 'id')->toArray(),
             'readOnly' => $readOnly,
-            'splices' => $splices
+            'splices' => $splices,
+            'userOptions2' => ['' => 'Select User'] + User::visible()->orderBy('name')->get()->pluck('verified_name', 'id')->toArray(), //custom pets--fetch all possible users instead of ones used for transfers
         ]);
     }
     
@@ -196,5 +197,59 @@ class PetController extends Controller
         return view('widgets._pet_select', [
             'user' => Auth::user(),
         ]);
+    }
+
+    
+    /**
+     * Unique image
+     */
+    public function postImage($id, Request $request, PetManager $service)
+    {
+        $pet = UserPet::find($id);
+        $data = $request->only(['image', 'remove_image', 'artist_id', 'artist_url','remove_credit']);
+
+        if(!Auth::user()->isStaff) abort(404);
+
+        if($service->image($pet, $data)) {
+            flash('Pet image updated successfully.')->success();
+        }
+        else {
+            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+        }
+        return redirect()->back();
+    }
+
+    /**
+     * Shows a custom pet's info page.
+     *
+     * @param  string  $slug
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getCustomInfoPage($id)
+    {
+        $pet = UserPet::findOrFail($id);
+        $user = $pet->user; 
+        return view('user.pet_custom', [
+            'pet' => $pet,
+            'user' => $user,
+            'userOptions' => ['0' => 'Select User'] + User::visible()->orderBy('name')->get()->pluck('verified_name', 'id')->toArray(),
+        ]);
+    }
+
+    /**
+     * Unique image
+     */
+    public function postDesc($id, Request $request, PetManager $service)
+    {
+        $pet = UserPet::find($id);
+        $data = $request->only(['description']);
+
+        if($service->desc($pet, $data)) {
+            flash('Pet description updated successfully.')->success();
+        }
+        else {
+            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+        }
+        return redirect()->back();
     }
 }

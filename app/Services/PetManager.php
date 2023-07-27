@@ -384,4 +384,83 @@ class PetManager extends Service
             ]
         );
     }
+
+/**
+     * Image -> gives unique image
+     */
+    public function image($pet, $data)
+    {
+        DB::beginTransaction();
+
+        try {  
+                $pet->has_image = 1;
+                $pet->save();
+
+                $image = null;
+                if(isset($data['remove_image']))
+                {
+                    if($pet && $pet->has_image && $data['remove_image'])
+                    {
+                        $data['has_image'] = 0;
+                        $this->deleteImage($pet->imagePath, $pet->imageFileName);
+                    }
+                    unset($data['remove_image']);
+                    $pet->has_image = 0;
+                    $pet->save();
+                }
+
+                if(isset($data['image']) && $data['image']) {
+                    $data['has_image'] = 1;
+                    $image = $data['image'];
+                    unset($data['image']);
+                }
+                else $data['has_image'] = 0;
+
+                if(isset($data['artist_id']) && $data['artist_id']) {
+                    $pet->artist_id =  $data['artist_id'];
+                    $pet->save();
+                }
+                else $data['artist_id'] = null;
+
+                if(isset($data['artist_url']) && $data['artist_url']) {
+                    $pet->artist_url =  $data['artist_url'];
+                    $pet->save();
+                }
+                else $data['artist_url'] = null;
+
+                if(isset($data['remove_credit']))
+                {
+                    unset($data['remove_credit']);
+                    $pet->artist_url =  null;
+                    $pet->artist_id =  null;
+                    $pet->save();
+                }
+
+                if ($pet) $this->handleImage($image, $pet->imagePath, $pet->imageFileName);
+
+            return $this->commitReturn(true);
+        } catch(\Exception $e) { 
+            $this->setError('error', $e->getMessage());
+        }
+        return $this->rollbackReturn(false);
+    }
+
+    /**
+     * change pet's description
+     */
+    public function desc($pet, $data)
+    {
+        DB::beginTransaction();
+
+        try {  
+            
+                $pet->description = parse($data['description']);
+                $pet->save();
+
+            return $this->commitReturn(true);
+        } catch(\Exception $e) { 
+            $this->setError('error', $e->getMessage());
+        }
+        return $this->rollbackReturn(false);
+    }
 }

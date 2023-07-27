@@ -2,7 +2,7 @@
     <div class="text-center">Invalid pet selected.</div>
 @else
     <div class="text-center">
-        <div class="mb-1"><a href="{{ $stack->pet->url }}"><img src="{{ $stack->pet->variantimage($stack->variant_id) }}" class="img-fluid" style="width:50%;"/></a></div>
+        <div class="mb-1"><a href="{{ $stack->pet->url }}">@if($stack->has_image)<img src="{{  $stack->imageUrl }}">@else<img src="{{ $stack->pet->variantimage($stack->variant_id) }}" />@endif</a></div>
         <div class="mb-1"><a href="{{ $stack->pet->url }}">{{ $stack->pet->name }}</a></div>
     </div>
     
@@ -104,6 +104,48 @@
                         {!! Form::close() !!}
                     </li>
                 @endif
+                @if($user->hasPower('edit_inventories'))
+                    <li class="list-group-item">
+                        <a class="card-title h5 collapse-title"  data-toggle="collapse" href="#imageForm">[ADMIN] Change Image</a>
+                        {!! Form::open(['url' => 'pets/image/'.$stack->id, 'id' => 'imageForm', 'class' => 'collapse', 'files' => true]) !!}
+                            <div class="form-group">
+                            {!! Form::label('Image') !!}
+                            <div>{!! Form::file('image') !!}</div>
+                            <div class="text-muted">Recommended size: 100px x 100px</div>
+                            @if($stack->has_image)
+                                <div class="form-check">
+                                    {!! Form::checkbox('remove_image', 1, false, ['class' => 'form-check-input']) !!}
+                                    {!! Form::label('remove_image', 'Remove current image', ['class' => 'form-check-label']) !!}
+                                </div>
+                            @endif
+                        </div>
+                        <div class="col-md">
+                        {!! Form::label('Pet Artist (Optional)') !!} {!! add_help('Provide the artist\'s username if they are on site or, failing that, a link.') !!}
+                        <div class="row">
+                            <div class="col-md">
+                                <div class="form-group">
+                                    {!! Form::select('artist_id', $userOptions2, $stack->artist_id ? $stack->artist_id : null, ['class'=> 'form-control mr-2 selectize']) !!}
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <div class="form-group">
+                                    {!! Form::text('artist_url', $stack->artist_url ? $stack->artist_url : '', ['class' => 'form-control mr-2', 'placeholder' => 'Artist URL']) !!}
+                                </div>
+                            </div>
+                        </div>
+                        @if($stack->has_image)
+                                <div class="form-check">
+                                    {!! Form::checkbox('remove_credit', 1, false, ['class' => 'form-check-input']) !!}
+                                    {!! Form::label('remove_credit', 'Remove current credits', ['class' => 'form-check-label']) !!}
+                                </div>
+                            @endif
+                    </div>
+                        <div class="text-right">
+                            {!! Form::submit('Submit', ['class' => 'btn btn-primary']) !!}
+                        </div>
+                        {!! Form::close() !!}
+                    </li>
+                @endif
                 @if($stack->isTransferrable || $user->hasPower('edit_inventories'))
                     @if(!$stack->chara_id)
                     <li class="list-group-item">
@@ -143,4 +185,7 @@
             </ul>
         </div>
     @endif
+    <li class="list-group-item">
+        <a class="card-title h5" href="{{ url('pets/custom/pet/'.$stack->id) }}">View Page</a>
+    </li>
 @endif

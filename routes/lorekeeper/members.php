@@ -60,9 +60,15 @@ Route::group(['prefix' => 'pets', 'namespace' => 'Users'], function() {
     Route::post('attach/{id}', 'PetController@postAttach');
     Route::post('detach/{id}', 'PetController@postDetach');
     Route::post('variant/{id}', 'PetController@postVariant');
+    Route::post('image/{id}', 'PetController@postImage');
+    Route::post('desc/{id}', 'PetController@postDesc');
 
     Route::get('selector', 'PetController@getSelector');
 });
+
+//custom pet pages
+Route::get('pets/custom/pet/{id}', 'Users\PetController@getCustomInfoPage');
+Route::post('pets/custom/pet/edit/{id}', 'Users\PetController@postEditPetProfile');
 
 Route::group(['prefix' => 'characters', 'namespace' => 'Users'], function() {
     Route::get('/', 'CharacterController@getIndex');
