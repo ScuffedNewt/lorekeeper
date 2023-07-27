@@ -24,4 +24,16 @@ return [
         'text_color' => '#ffffff',
         'background_color' => '#1fd1a7'
     ],
+
+    'splice' => [
+        'name' => 'Splice',
+        'text_color' => '#ffffff',
+        'background_color' => '#a69bc6'
+    ],
+
+    'coupon' => [
+        'name' => 'Coupon',
+        'text_color' => '#ffffff',
+        'background_color' => '#ff5ca8'
+    ],
 ];

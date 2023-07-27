@@ -13,7 +13,7 @@ class Shop extends Model
      * @var array
      */
     protected $fillable = [
-        'name', 'sort', 'has_image', 'description', 'parsed_description', 'is_active'
+        'name', 'sort', 'has_image', 'description', 'parsed_description', 'is_active', 'is_staff', 'use_coupons', 'is_restricted', 'is_fto', 'allowed_coupons', 'is_timed_shop', 'start_at', 'end_at'
     ];
 
     /**
@@ -22,7 +22,7 @@ class Shop extends Model
      * @var string
      */
     protected $table = 'shops';
-    
+
     /**
      * Validation rules for creation.
      *
@@ -33,7 +33,7 @@ class Shop extends Model
         'description' => 'nullable',
         'image' => 'mimes:png',
     ];
-    
+
     /**
      * Validation rules for updating.
      *
@@ -46,7 +46,7 @@ class Shop extends Model
     ];
 
     /**********************************************************************************************
-    
+
         RELATIONS
 
     **********************************************************************************************/
@@ -54,25 +54,36 @@ class Shop extends Model
     /**
      * Get the shop stock.
      */
-    public function stock() 
+    public function stock()
     {
         return $this->hasMany('App\Models\Shop\ShopStock');
     }
-    
+
     /**
      * Get the shop stock as items for display purposes.
      */
-    public function displayStock()
+    public function displayStock($model=null, $type=null)
     {
-        return $this->belongsToMany('App\Models\Item\Item', 'shop_stock')->withPivot('item_id', 'currency_id', 'cost', 'use_user_bank', 'use_character_bank', 'is_limited_stock', 'quantity', 'purchase_limit', 'id');
+        if (!$model || !$type) {
+            return $this->belongsToMany('App\Models\Item\Item', 'shop_stock')->where('stock_type', 'Item')->withPivot('item_id', 'currency_id', 'cost', 'use_user_bank', 'use_character_bank', 'is_limited_stock', 'quantity', 'purchase_limit', 'id');
+        }
+        return $this->belongsToMany($model, 'shop_stock', 'shop_id', 'item_id')->where('stock_type', $type)->withPivot('item_id', 'currency_id', 'cost', 'use_user_bank', 'use_character_bank', 'is_limited_stock', 'quantity', 'purchase_limit', 'id');
+    }
+
+    /**
+     * Get the required items / assets to enter the shop.
+     */
+    public function limits()
+    {
+        return $this->hasMany('App\Models\Shop\ShopLimit', 'shop_id');
     }
 
     /**********************************************************************************************
-    
+
         ACCESSORS
 
     **********************************************************************************************/
-    
+
     /**
      * Displays the shop's name, linked to its purchase page.
      *
@@ -112,7 +123,7 @@ class Shop extends Model
     {
         return public_path($this->imageDirectory);
     }
-    
+
     /**
      * Gets the URL of the model's image.
      *
@@ -132,5 +143,22 @@ class Shop extends Model
     public function getUrlAttribute()
     {
         return url('shops/'.$this->id);
+    }
+
+    /**********************************************************************************************
+
+        OTHER FUNCTIONS
+
+    **********************************************************************************************/
+
+    /**
+     * Gets all the coupons useable in the shop
+     */
+    public function getAllAllowedCouponsAttribute()
+    {
+        if(!$this->use_coupons || !$this->allowed_coupons) return;
+        // Get the coupons from the id in allowed_coupons
+        $coupons = \App\Models\Item\Item::whereIn('id', json_decode($this->allowed_coupons, 1))->get();
+        return $coupons;
     }
 }

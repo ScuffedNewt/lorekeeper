@@ -1,6 +1,6 @@
 <?php
 return [
-    
+
     // FORMAT EXAMPLE.
     //
     // 'extension_tracker' => [
@@ -11,6 +11,15 @@ return [
     //     ]),
     //     'version' => '1.0.0',
     // ],
-    
+
+    'shop_features' => [
+        'key' => 'shop_features',
+        'wiki_key' => 'Shop_Features',
+        'creators' => json_encode([
+            'Newt' => 'https://github.com/ne-wt/',
+        ]),
+        'version' => '1.0.4',
+    ],
+
 
 ];

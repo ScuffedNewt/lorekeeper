@@ -32,7 +32,6 @@
 @if(View::exists('admin.items.tags.'.$tag->tag.'_post'))
     @include('admin.items.tags.'.$tag->tag.'_post', ['item' => $item, 'tag' => $tag])
 @endif
-
 @endsection
 
 @section('scripts')

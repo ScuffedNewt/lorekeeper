@@ -27,6 +27,12 @@ use App\Models\Character\CharacterImage;
 use App\Models\Character\Character;
 use App\Models\Character\Sublist;
 
+use App\Models\User\UserPet;
+use App\Models\Pet\Pet;
+use App\Models\Pet\PetCategory;
+use App\Models\Pet\PetLog;
+
+
 use App\Http\Controllers\Controller;
 
 class UserController extends Controller
@@ -69,8 +75,10 @@ class UserController extends Controller
         return view('user.profile', [
             'user' => $this->user,
             'items' => $this->user->items()->where('count', '>', 0)->orderBy('user_items.updated_at', 'DESC')->take(4)->get(),
+            'pets' => $this->user->pets()->orderBy('user_pets.updated_at', 'DESC')->take(5)->get(),
             'sublists' => Sublist::orderBy('sort', 'DESC')->get(),
             'characters' => $characters,
+            'pets' => $this->user->pets()->orderBy('user_pets.updated_at', 'DESC')->take(5)->get(),
         ]);
     }
 
@@ -209,6 +217,26 @@ class UserController extends Controller
     }
 
     /**
+     * Shows a user's pets.
+     *
+     * @param  string  $name
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getUserPets($name)
+    {
+        $categories = PetCategory::orderBy('sort', 'DESC')->get();
+        $pets = count($categories) ? $this->user->pets()->orderByRaw('FIELD(pet_category_id,'.implode(',', $categories->pluck('id')->toArray()).')')->orderBy('name')->orderBy('updated_at')->get()->groupBy('pet_category_id') : $this->user->pets()->orderBy('name')->orderBy('updated_at')->get()->groupBy('pet_category_id');
+        return view('user.pet', [
+            'user' => $this->user,
+            'categories' => $categories->keyBy('id'),
+            'pets' => $pets,
+            'userOptions' => User::where('id', '!=', $this->user->id)->orderBy('name')->pluck('name', 'id')->toArray(),
+            'user' => $this->user,
+            'logs' => $this->user->getPetLogs()
+        ]);
+    }
+
+    /**
      * Shows a user's profile.
      *
      * @param  string  $name
@@ -256,6 +284,21 @@ class UserController extends Controller
             'user' => $this->user,
             'logs' => $this->user->getItemLogs(0),
             'sublists' => Sublist::orderBy('sort', 'DESC')->get()
+        ]);
+    }
+
+     /**
+     * Shows a user's pet logs.
+     *
+     * @param  string  $name
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getUserPetLogs($name)
+    {
+        $user = $this->user;
+        return view('user.pet_logs', [
+            'user' => $this->user,
+            'logs' => $this->user->getPetLogs(0)
         ]);
     }
 
