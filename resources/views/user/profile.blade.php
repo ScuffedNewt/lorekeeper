@@ -95,7 +95,7 @@
                 <div class="row">
                     @foreach($pets as $pet)
                         <div class="col profile-inventory-item">
-                            @if($pet->pivot->has_image)<img src="{{  url('images/data/user-pets/'.$pet->pivot->id.'-image.png')  }}">@else<img src="{{ $pet->VariantImage($pet->pivot->variant_id) }}" />@endif                        
+                            @if($pet->pivot->has_image)<img src="{{  url('images/data/user-pets/'.$pet->pivot->id.'-image.png')  }}" data-toggle="tooltip" title="Custom {{ $pet->name }}" alt="Custom {{ $pet->name }}">@else<img src="{{ $pet->VariantImage($pet->pivot->variant_id) }}" data-toggle="tooltip" title="{{ $pet->name }}" alt="{{ $pet->name }}" />@endif
                         </div>
                     @endforeach
                 </div>
