@@ -199,7 +199,6 @@ class PetController extends Controller
         ]);
     }
 
-    
     /**
      * Unique image
      */
@@ -252,4 +251,5 @@ class PetController extends Controller
         }
         return redirect()->back();
     }
+
 }

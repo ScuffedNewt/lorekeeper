@@ -171,7 +171,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function pets()
     {
-        return $this->belongsToMany('App\Models\Pet\Pet', 'user_pets')->withPivot('data', 'updated_at', 'id', 'variant_id', 'has_image')->whereNull('user_pets.deleted_at');
+        return $this->belongsToMany('App\Models\Pet\Pet', 'user_pets')->withPivot('data', 'updated_at', 'id', 'variant_id')->whereNull('user_pets.deleted_at');
     }
 
 
