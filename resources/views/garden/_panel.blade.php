@@ -1,7 +1,6 @@
-
 <!--------------------------------------------->
 <div class="container" id="content">
-    @if($plots->first()->plot_type == 'seed')
+    @if ($plots->first()->plot_type == 'seed')
         @include('garden.seed._modifiers', ['userModifiers' => $userModifiers])
     @endif
     <!--------------------------------------------->
@@ -10,17 +9,19 @@
             <h5 class="mt-1">{!! $plots->first()->paneltitle !!}</h5>
             @include('garden._clear_all', ['type' => $plots->first()->plot_type])
             <div class="row justify-content-center">
-                @foreach($plots->sortByDesc('free')->chunk(3) as $chunk)
-                    @foreach($chunk as $plot)
-                    <div class="card text-center m-1 col-lg-3 col-md-4 justify-content-center m-0 p-0"
-                        style="min-width: 14em; min-height: 14em; background-color: rgb(88, 54, 54); background-image: url({{ asset($plot->backgroundImage)}});">
-                        <!---- if user owns plot --->
-                            @if(Auth::user()->gardenplots->contains('plot_id', $plot->id))
+                @foreach ($plots->sortByDesc('free')->chunk(3) as $chunk)
+                    @foreach ($chunk as $plot)
+                        <div class="card text-center m-1 col-lg-3 col-md-4 justify-content-center m-0 p-0" style="min-width: 14em; min-height: 14em; background-color: rgb(88, 54, 54); background-image: url({{ asset($plot->backgroundImage) }});">
+                            <!---- if user owns plot --->
+                            @if (Auth::user()->gardenplots->contains('plot_id', $plot->id))
                                 @php
-                                    $userPlot = Auth::user()->gardenplots()->where('plot_id', $plot->id)->first();
+                                    $userPlot = Auth::user()
+                                        ->gardenplots()
+                                        ->where('plot_id', $plot->id)
+                                        ->first();
                                 @endphp
                                 <!--- If plant is dead show dead thing --->
-                                @if($userPlot->is_dead)
+                                @if ($userPlot->is_dead)
                                     <div class="btn btn-dark" style="width: 100%; height: 100%;">
                                         {!! Form::open(['url' => 'garden/clear/' . $plot->id]) !!}
                                         <img class="img-fluid my-auto mx-auto pt-2" src="{{ asset('images/garden/dead_seed.png') }}" style="width: 7em; height:7em;">
@@ -30,9 +31,9 @@
                                         {!! Form::close() !!}
                                     </div>
                                 @else
-                                    @if($userPlot->started_at)
+                                    @if ($userPlot->started_at)
                                         <!----If there is a plant growing / animal placed, and it is not time to water / feed --->
-                                        @if($userPlot->actionReady)
+                                        @if ($userPlot->actionReady)
                                             @include('garden._action', ['plot' => $plot, 'userPlot' => $userPlot])
                                         @else
                                             @include('garden._wait', ['plot' => $plot, 'userPlot' => $userPlot])
@@ -40,10 +41,10 @@
                                     @else
                                         <!----If there is NO plant growing --->
                                         <i class="fas fa-seedling text-white m-1"></i>
-                                        @if($plot->plot_type == 'seed')
-                                            @if($userPlot->modifiers != null)
+                                        @if ($plot->plot_type == 'seed')
+                                            @if ($userPlot->modifiers != null)
                                                 @php $mods = json_decode($userPlot->modifiers, true); @endphp
-                                                @if($mods['fertiliser'])
+                                                @if ($mods['fertiliser'])
                                                     <p class="text-white"><i class="fas fa-star"></i> Fertiliser Quality: {{ $mods['fertiliser']['quality'] }}</p>
                                                 @endif
                                             @endif
@@ -54,13 +55,14 @@
                                                 Apply Modifier!
                                             </button>
                                         @else
-                                            <button type="button" class="{{$plot->plot_type}}-button-plant btn btn-success hide" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="placeAnimal({{ $userPlot->id }}, '{{ $userPlot->plot->plot_type}}')">
+                                            <button type="button" class="{{ $plot->plot_type }}-button-plant btn btn-success hide" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button"
+                                                onclick="placeAnimal({{ $userPlot->id }}, '{{ $userPlot->plot->plot_type }}')">
                                                 Place Animal!
                                             </button>
                                         @endif
                                     @endif
                                 @endif
-                            <!---- if not owned plot --->
+                                <!---- if not owned plot --->
                             @else
                                 <div class="p-5 container text-white">
                                     This plot {!! $plot->isFree ? 'is free!' : 'costs ' . $plot->currency->display($plot->plot_cost) !!}
@@ -82,16 +84,15 @@
 <script>
     $("#seedSelector input:radio").change(function() {
         selectedSeed = $(this).val();
-        if(selectedSeed == null || selectedSeed == 0) {
-            $(".seed-button-plant").each( function(){
+        if (selectedSeed == null || selectedSeed == 0) {
+            $(".seed-button-plant").each(function() {
                 $(this).addClass('hide');
             })
-        }
-        else {
-            $(".seed-button-plant").each( function() {
+        } else {
+            $(".seed-button-plant").each(function() {
                 $(this).removeClass('hide');
             })
-            $(".mod-button-plant").each( function(){
+            $(".mod-button-plant").each(function() {
                 $(this).addClass('hide');
             })
         }
@@ -99,13 +100,12 @@
 
     $("#barnSelector input:radio").change(function() {
         selectedBarn = $(this).val();
-        if(selectedBarn == null || selectedBarn == 0) {
-            $(".barn-button-plant").each( function(){
-            $(this).addClass('hide');
+        if (selectedBarn == null || selectedBarn == 0) {
+            $(".barn-button-plant").each(function() {
+                $(this).addClass('hide');
             });
-        }
-        else {
-            $(".barn-button-plant").each( function() {
+        } else {
+            $(".barn-button-plant").each(function() {
                 $(this).removeClass('hide');
             });
         }
@@ -113,13 +113,12 @@
 
     $("#coopSelector input:radio").change(function() {
         selectedCoop = $(this).val();
-        if(selectedCoop == null || selectedCoop == 0) {
-            $(".coop-button-plant").each( function(){
-            $(this).addClass('hide');
+        if (selectedCoop == null || selectedCoop == 0) {
+            $(".coop-button-plant").each(function() {
+                $(this).addClass('hide');
             });
-        }
-        else {
-            $(".coop-button-plant").each( function() {
+        } else {
+            $(".coop-button-plant").each(function() {
                 $(this).removeClass('hide');
             });
         }
@@ -127,18 +126,17 @@
 
 
     $("#modifierSelector input:radio").change(function() {
-        if('<?php echo $plots->first()->plot_type; ?>' == 'seed') {
+        if ('<?php echo $plots->first()->plot_type; ?>' == 'seed') {
             selectedModifier = $(this).val();
-            if(selectedModifier == null || selectedModifier ==  0){
-                $(".mod-button-plant").each( function(){
+            if (selectedModifier == null || selectedModifier == 0) {
+                $(".mod-button-plant").each(function() {
                     $(this).addClass('hide');
                 })
-            }
-            else {
-                $(".seed-button-plant").each( function() {
+            } else {
+                $(".seed-button-plant").each(function() {
                     $(this).addClass('hide');
                 })
-                $(".mod-button-plant").each( function(){
+                $(".mod-button-plant").each(function() {
                     $(this).removeClass('hide');
                 })
             }
@@ -153,22 +151,21 @@
 
     function plantSeed(plot_id) {
         // disable plant class
-        $(".seed-button-plant").each( function(){
+        $(".seed-button-plant").each(function() {
             $(this).addClass('hide');
         });
-        if(selectedSeed == null){
+        if (selectedSeed == null) {
             alert("Please select a seed to add!");
-        }
-        else {
+        } else {
             $.ajax({
                 url: "{{ url('garden/plant') }}",
                 method: 'post',
-                data:{
+                data: {
                     _token: '{{ csrf_token() }}',
-                    plot_id:plot_id,
-                    item_id:selectedSeed,
-                    type:'seed'
-                    },
+                    plot_id: plot_id,
+                    item_id: selectedSeed,
+                    type: 'seed'
+                },
                 dataType: 'json',
                 success: function(data) {
                     refreshThePage();
@@ -182,21 +179,21 @@
     }
 
     function placeAnimal(plot_id, plot_type) {
-        if(plot_type == 'coop' && selectedCoop == null){
+        if (plot_type == 'coop' && selectedCoop == null) {
             alert("Please select an animal!");
         }
-        if(plot_type == 'barn' && selectedBarn == null){
+        if (plot_type == 'barn' && selectedBarn == null) {
             alert("Please select an animal!");
         }
         $.ajax({
             url: "{{ url('garden/plant') }}",
             method: 'post',
-            data:{
+            data: {
                 _token: '{{ csrf_token() }}',
-                plot_id:plot_id,
+                plot_id: plot_id,
                 item_id: (plot_type == 'coop' ? selectedCoop : selectedBarn),
-                type:plot_type
-                },
+                type: plot_type
+            },
             dataType: 'json',
             success: function(data) {
                 refreshThePage();
@@ -208,18 +205,17 @@
     }
 
     function addModifier(plot_id) {
-        if(selectedModifier == null){
+        if (selectedModifier == null) {
             alert("Please select a modifier!");
-        }
-        else {
+        } else {
             $.ajax({
                 url: "{{ url('garden/modify') }}",
                 method: 'post',
-                data:{
+                data: {
                     _token: '{{ csrf_token() }}',
-                    plot_id:plot_id,
-                    mod_id:selectedModifier
-                    },
+                    plot_id: plot_id,
+                    mod_id: selectedModifier
+                },
                 dataType: 'json',
                 success: function(data) {
                     refreshThePage();
@@ -231,7 +227,7 @@
         }
     }
 
-    function refreshThePage(){
+    function refreshThePage() {
         location.reload();
     }
 </script>

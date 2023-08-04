@@ -1,5 +1,5 @@
-@if($plot)
-    {!! Form::open(['url' => 'garden/destroy/'.$plot->id]) !!}
+@if ($plot)
+    {!! Form::open(['url' => 'garden/destroy/' . $plot->id]) !!}
 
     <p>You are about to remove <strong>{{ $plot->item->name }}</strong> from plot #{{ $plot->plot_id }}. Your feedings will be reset and any pending rewards void.</p>
     <p>Are you sure you want to remove <strong>{{ $plot->item->name }}</strong>?</p>
@@ -9,6 +9,6 @@
     </div>
 
     {!! Form::close() !!}
-@else 
+@else
     Invalid plot selected.
 @endif
