@@ -1,5 +1,5 @@
-@if($plot)
-    {!! Form::open(['url' => 'garden/destroy/'.$plot->id]) !!}
+@if ($plot)
+    {!! Form::open(['url' => 'garden/destroy/' . $plot->id]) !!}
 
     <p>You are about to destroy the crop <strong>{{ $plot->item->name }}</strong> in plot #{{ $plot->plot_id }}. This is not reversible.</p>
     <p>Are you sure you want to delete <strong>{{ $plot->item->name }}</strong>?</p>
@@ -9,6 +9,6 @@
     </div>
 
     {!! Form::close() !!}
-@else 
+@else
     Invalid plot selected.
 @endif

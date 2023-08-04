@@ -45,31 +45,31 @@
             @endif
             <div class="col-md-6 col-md">
                 <div class="row">
-                    @php $months = [
-                        '1' => 'January',
-                        '2' => 'February',
-                        '3' => 'March',
-                        '4' => 'April',
-                        '5' => 'May',
-                        '6' => 'June',
-                        '7' => 'July',
-                        '8' => 'August',
-                        '9' => 'September',
-                        '10' => 'October',
-                        '11' => 'November',
-                        '12' => 'December',
-                    ];
+                    @php$months = [
+                            '1' => 'January',
+                            '2' => 'February',
+                            '3' => 'March',
+                            '4' => 'April',
+                            '5' => 'May',
+                            '6' => 'June',
+                            '7' => 'July',
+                            '8' => 'August',
+                            '9' => 'September',
+                            '10' => 'October',
+                            '11' => 'November',
+                            '12' => 'December',
+                        ];
                     @endphp
-                    @foreach($item->tags as $tag)
-                        @if($tag->is_active)
-                        <div class="col">
-                            {!! $tag->displayTag !!}
-                            @if($tag->tag == 'seed')
-                                @if($tag->data['start_month'] && $tag->data['end_month'])
-                                <small><span class="text-muted">Available to plant during ({!! $months[$tag->data['start_month']] !!} - {!! $months[$tag->data['end_month']] !!})</span></small>
+                    @foreach ($item->tags as $tag)
+                        @if ($tag->is_active)
+                            <div class="col">
+                                {!! $tag->displayTag !!}
+                                @if ($tag->tag == 'seed')
+                                    @if ($tag->data['start_month'] && $tag->data['end_month'])
+                                        <small><span class="text-muted">Available to plant during ({!! $months[$tag->data['start_month']] !!} - {!! $months[$tag->data['end_month']] !!})</span></small>
+                                    @endif
                                 @endif
-                            @endif
-                        </div>
+                            </div>
                         @endif
                     @endforeach
                 </div>
