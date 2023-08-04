@@ -33,7 +33,7 @@ class UpdateGarden extends Command {
     public function handle() {
         // get all existing plots and update the type to be lowercase
         $plots = \App\Models\GardenPlot::all()->each(function($plot) {
-            $plot->type = strtolower($plot->type);
+            $plot->plot_type = strtolower($plot->plot_type);
             $plot->save();
         });
         // run migrate
