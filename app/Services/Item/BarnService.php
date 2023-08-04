@@ -65,7 +65,7 @@ class BarnService extends Service
                 }
             }
         }
-        $data['feedings'] = isset($tag->data['feedings']) ? $tag->data['feedings'] : 1; 
+        $data['actions'] = isset($tag->data['actions']) ? $tag->data['actions'] : 1;
         $data['rewards'] = $rewards;
         return $data;
     }
@@ -73,7 +73,7 @@ class BarnService extends Service
     /**
      * Processes the data attribute of the tag and returns it in the preferred format.
      *
-     * @param  string  $tag
+     * @param  $tag
      * @param  array   $data
      * @return bool
      */
@@ -82,14 +82,9 @@ class BarnService extends Service
         DB::beginTransaction();
 
         try {
-            $barnData['feedings'] = isset($data['feedings']) ? $data['feedings'] : 1; 
-            if(!isset($data['rewardable_type'])) {
-                $tag->update(['data' => json_encode($barnData)]);
-                return true;
-            }
-            else {
-            
-                // The data will be stored as an asset table, json_encode()d. 
+            $barnData['actions'] = isset($data['actions']) ? $data['actions'] : 1;
+            if(isset($data['rewardable_type'])) {
+                // The data will be stored as an asset table, json_encode()d.
                 // First build the asset table, then prepare it for storage.
                 $assets = createAssetsArray();
                 foreach($data['rewardable_type'] as $key => $r) {
@@ -118,10 +113,9 @@ class BarnService extends Service
             $tag->update(['data' => json_encode($barnData)]);
 
             return $this->commitReturn(true);
-        } catch(\Exception $e) { 
+        } catch(\Exception $e) {
             $this->setError('error', $e->getMessage());
         }
         return $this->rollbackReturn(false);
     }
 }
-  

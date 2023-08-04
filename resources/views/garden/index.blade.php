@@ -13,6 +13,7 @@
         <strong>Warning!</strong> You need to enable JavaScript to use this minigame.
     </div>
 </noscript>
+
 <!-- Nav tabs -->
 @if(!count($plots))
     <div class="alert alert-danger">There are currently no plots.</div>
@@ -23,15 +24,15 @@
             <li class="nav-item">
                 <a class="nav-link active" id="farmTab" data-toggle="tab" href="#farm" role="tab">Farm</a>
             </li>
-            @if(count($plots->where('plot_type', 'Coop')) > 0)
-            <li class="nav-item">
-                <a class="nav-link" id="coopTab" data-toggle="tab" href="#coop" role="tab">Coop</a>
-            </li>
+            @if(count($plots->where('plot_type', 'coop')) > 0)
+                <li class="nav-item">
+                    <a class="nav-link" id="coopTab" data-toggle="tab" href="#coop" role="tab">Coop</a>
+                </li>
             @endif
-            @if(count($plots->where('plot_type', 'Barn')) > 0)
-            <li class="nav-item">
-                <a class="nav-link" id="barnTab" data-toggle="tab" href="#barn" role="tab">Barn</a>
-            </li>
+            @if(count($plots->where('plot_type', 'barn')) > 0)
+                <li class="nav-item">
+                    <a class="nav-link" id="barnTab" data-toggle="tab" href="#barn" role="tab">Barn</a>
+                </li>
             @endif
         </ul>
     </div>
@@ -43,7 +44,7 @@
         let now = new Date("<?php echo date('Y-m-d H:i:s'); ?>");
         const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
         function waterCount(id, timer, type = 'seed') {
-            setInterval(function(){ 
+            setInterval(function(){
 
             var date = new Date(timer);
             getServerTime();
@@ -65,17 +66,19 @@
     </script>
     <div class="card-body tab-content">
         <div class="tab-pane fade show active" id="farm">
-            @include('garden._panel', ['userItems' => $userSeeds, 'userModifiers' => $userModifiers, 'plots' => $plots->where('plot_type', 'Seed')])
+            <p>Quality on seeds refer to the minimum fertiliser level needed to successfully plant the seed.</p>
+            <p>Don't forget to water your plants!</p>
+            @include('garden._panel', ['userItems' => $userSeeds, 'userModifiers' => $userModifiers, 'plots' => $plots->where('plot_type', 'seed')])
         </div>
-        @if(count($plots->where('plot_type', 'Coop')) > 0)
-        <div class="tab-pane fade" id="coop">
-            @include('garden._panel', ['userItems' => $userCoops, 'plots' => $plots->where('plot_type', 'Coop')])
-        </div>
+        @if(count($plots->where('plot_type', 'coop')) > 0)
+            <div class="tab-pane fade" id="coop">
+                @include('garden._panel', ['userItems' => $userCoops, 'plots' => $plots->where('plot_type', 'coop')])
+            </div>
         @endif
-        @if(count($plots->where('plot_type', 'Barn')) > 0)
-        <div class="tab-pane fade" id="barn">
-            @include('garden._panel', ['userItems' => $userBarns, 'plots' => $plots->where('plot_type', 'Barn')])
-        </div>
+        @if(count($plots->where('plot_type', 'barn')) > 0)
+            <div class="tab-pane fade" id="barn">
+                @include('garden._panel', ['userItems' => $userBarns, 'plots' => $plots->where('plot_type', 'barn')])
+            </div>
         @endif
     </div>
 </div>
@@ -84,30 +87,34 @@
 @endsection
 @section('scripts')
 <script>
-$(document).ready(function() {
-    if (location.hash) {
-        $("a[href='" + location.hash + "']").tab("show");
-    }
-    $(document.body).on("click", "a[data-toggle='tab']", function(event) {
-        location.hash = this.getAttribute("href");
-    });
-});
-$(window).on("popstate", function() {
-    var anchor = location.hash || $("a[data-toggle='tab']").first().attr("href");
-    $("a[href='" + anchor + "']").tab("show");
-});
-
-function getServerTime()
-{
-    // ajax get call to get the time
-    $.ajax({
-        url: '{{ url("time") }}',
-        type: 'GET',
-        success: function(data) {
-            // update the time
-            now = new Date(data);
+    $(document).ready(function() {
+        // vvv
+        if (location.hash) {
+            $("a[href='" + location.hash + "']").tab("show");
         }
+        $(document.body).on("click", "a[data-toggle='tab']", function(event) {
+            location.hash = this.getAttribute("href");
+        });
     });
-}
+    // stay tabbed in on selected pane
+    $(window).on("popstate", function() {
+        var anchor = location.hash || $("a[data-toggle='tab']").first().attr("href");
+        $("a[href='" + anchor + "']").tab("show");
+    });
+
+    function getServerTime()
+    {
+        // ajax get call to get the time
+        // check if window is focused otherwise don't update
+        if (!document.hasFocus()) return;
+        $.ajax({
+            url: '{{ url("time") }}',
+            type: 'GET',
+            success: function(data) {
+                // update the time
+                now = new Date(data);
+            }
+        });
+    }
 </script>
 @endsection

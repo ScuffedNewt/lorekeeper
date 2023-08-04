@@ -8,7 +8,7 @@ use Config;
 use App\Models\GardenPlot;
 
 class PlotService extends Service
-{   
+{
     /**
      * Creates a new plot.
      *
@@ -24,7 +24,7 @@ class PlotService extends Service
             if(isset($data['free'])) {
                 $data['currency_id'] = null;
                 $data['plot_cost'] = null;
-            } 
+            }
             elseif(!isset($data['currency_id']) || $data['currency_id'] == 'none') {
                 $data['currency_id'] = null;
                 $data['plot_cost'] = null;
@@ -57,13 +57,16 @@ class PlotService extends Service
             if(isset($data['free'])) {
                 $data['currency_id'] = null;
                 $data['plot_cost'] = null;
-            } 
-            elseif(!isset($data['currency_id']) || $data['currency_id'] == 'none') {
+            }
+            elseif(!isset($data['currency_id']) || $data['currency_id'] == 0 || $data['currency_id'] == 'none') {
                 $data['currency_id'] = null;
                 $data['plot_cost'] = null;
                 $data['free'] = 1;
             }
-            
+            // check if any users currently own this plot
+            if($data['plot_type'] != $plot->plot_type &&
+            DB::table('user_garden_plots')->where([['plot_id', '=', $plot->id]])->exists()) throw new \Exception("At least one user currently owns this plot. Changing the type could cause errors. Please remove the plot(s) before editing it.");
+
             $plot->update($data);
 
             return $this->commitReturn($plot);

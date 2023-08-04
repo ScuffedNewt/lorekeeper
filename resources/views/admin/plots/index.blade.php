@@ -24,7 +24,7 @@
       <div class="d-flex row flex-wrap col-12 mt-1 pt-2 px-0 ubt-top">
         <div class="col-4 col-md-4"> {{ $plot->id }} </div>
         <div class="col-3 col-md-4"> {{ $plot->plot_cost ? $plot->plot_cost .' '. $plot->currency->name : 'Free' }} </div>
-        <div class="col-2 col-md-2"> {{ $plot->plot_type }} </div>
+        <div class="col-2 col-md-2"> {{ ucfirst($plot->plot_type) }}</div>
         <div class="col-3 col-md-1 text-right">
           <a href="{{ url('admin/data/plots/edit/'.$plot->id) }}"  class="btn btn-primary py-0 px-2">Edit</a>
         </div>

@@ -149,15 +149,19 @@ class ItemTag extends Model {
     /**
      * Get stage of seed if tag is a seed.
      */
-    public function stageImage($stage = 0)
+    public function stageImage($stage = 0, $plot = null)
     {
-        if($this->tag != 'seed') return null;
+        if($this->tag != 'seed') {
+            if ($plot) return $plot->item->imageUrl;
+            return 'images/garden/seed.png';
+        }
         while($stage > 0 && isset($this->data['stages'])) {
-            foreach($this->data['stages'] as $st) {
-                if($st == $stage) return 'images/data/stages/' . $this->id . '-' . $st . '-image.png';
+            // check if stage is in data
+            if (in_array($stage, $this->data['stages'])) {
+                return 'images/data/seed-stages/' . $this->id . '-' . $stage . '-image.png';
             }
             $stage-=1;
         }
-        return 'images/data/seeds/seed.png';
+        return 'images/garden/seed.png';
     }
 }

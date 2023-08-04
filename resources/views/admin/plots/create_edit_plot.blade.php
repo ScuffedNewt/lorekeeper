@@ -22,21 +22,22 @@
     </div>
 </div>
 
-<div class="form-group">
-    <p> Leave empty if the plot is going to be free </p>
-    {!! Form::label('plot_cost') !!}
-    {!! Form::number('plot_cost', $plot->plot_cost, ['class' => 'form-control']) !!}
+<p>Leave empty if the plot is going to be free </p>
+<div class="row">
+    <div class="col-md-6">
+        {!! Form::label('plot_cost') !!}
+        {!! Form::number('plot_cost', $plot->plot_cost ?? 0, ['class' => 'form-control']) !!}
+    </div>
+    <div class="col-md-6">
+        {!! Form::label('currency_id') !!}
+        {!! Form::select('currency_id', $currencies, $plot->currency_id, ['class' => 'form-control']) !!}
+    </div>
 </div>
 
-<div class="form-group">
-    <p> Leave empty if the plot is going to be free </p>
-    {!! Form::label('currency_id') !!}
-    {!! Form::select('currency_id', $currencies, null, ['class' => 'form-control']) !!}
-</div>
 <hr>
 <div class="form-group">
     {!! Form::label('plot_type', 'Plot Type') !!} {!!add_help('Determines what produce the plot can hold.') !!}
-    {!! Form::select('plot_type', ['Seed' => 'Seed', 'Coop' => 'Coop', 'Barn' => 'Barn'], $plot->plot_type, ['class' => 'form-control']) !!}
+    {!! Form::select('plot_type', ['seed' => 'Seed', 'coop' => 'Coop', 'barn' => 'Barn'], $plot->plot_type, ['class' => 'form-control']) !!}
 </div>
 
 <div class="text-right">

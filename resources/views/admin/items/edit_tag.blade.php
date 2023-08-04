@@ -18,7 +18,7 @@
     @if (View::exists('admin.items.tags.' . $tag->tag . '_pre'))
         @include('admin.items.tags.' . $tag->tag . '_pre', ['item' => $item, 'tag' => $tag])
     @endif
-    {!! Form::open(['url' => 'admin/data/items/tag/' . $item->id . '/' . $tag->tag]) !!}
+    {!! Form::open(['url' => 'admin/data/items/tag/' . $item->id . '/' . $tag->tag, 'files' => true]) !!}
 
     @if (View::exists('admin.items.tags.' . $tag->tag))
         @include('admin.items.tags.' . $tag->tag, ['item' => $item, 'tag' => $tag])

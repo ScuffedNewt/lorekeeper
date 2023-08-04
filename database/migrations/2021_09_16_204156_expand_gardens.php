@@ -15,7 +15,7 @@ class ExpandGardens extends Migration
     {
         //
         Schema::table('garden_plots', function (Blueprint $table) {
-            $table->string('plot_type')->default('Seed');
+            $table->string('plot_type')->default('seed');
         });
 
         Schema::table('user_items', function (Blueprint $table) {

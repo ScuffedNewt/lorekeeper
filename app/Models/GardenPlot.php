@@ -32,7 +32,7 @@ class GardenPlot extends Model
     protected $table = 'garden_plots';
 
     /**********************************************************************************************
-    
+
         RELATIONS
 
     **********************************************************************************************/
@@ -40,13 +40,13 @@ class GardenPlot extends Model
     /**
      * Get the user who owns the stack.
      */
-    public function currency() 
+    public function currency()
     {
         return $this->belongsTo('App\Models\Currency\Currency');
     }
 
     /**********************************************************************************************
-    
+
         ATTRIBUTES
 
     **********************************************************************************************/
@@ -56,16 +56,7 @@ class GardenPlot extends Model
      */
     public function getPanelTitleAttribute()
     {
-        switch($this->plot_type) {
-            case 'Coop':
-                return 'Coop Nests';
-            case 'Barn':
-                return 'Barn Stables';
-            case 'Garden':
-                return 'Plots';
-            default:
-                return 'Plots';
-        }
+        return config('lorekeeper.garden.plots.' . $this->plot_type . '.plot_title');
     }
 
     /**
@@ -74,11 +65,11 @@ class GardenPlot extends Model
     public function getBackgroundImageAttribute()
     {
         switch($this->plot_type) {
-            case 'Coop':
-                return 'images/garden/croop_bg.png';
-            case 'Barn':
+            case 'coop':
+                return 'images/garden/coop_bg.png';
+            case 'barn':
                 return 'images/garden/barn_bg.png';
-            case 'Seed':
+            case 'seed':
                 return 'images/garden/crops_bg.png';
             default:
                 return 'images/garden/crops_bg.png';

@@ -24,7 +24,7 @@ class FertiliserService extends Service
     public function getEditData()
     {
         return [
-            
+
         ];
     }
 
@@ -38,6 +38,8 @@ class FertiliserService extends Service
     {
         //fetch data from DB, if there is no data then set to NULL instead
         $data['quality'] = isset($tag->data['quality']) ? $tag->data['quality'] : null;
+        $data['time_reduced'] = isset($tag->data['time_reduced']) ? $tag->data['time_reduced'] : null;
+        $data['formula'] = isset($tag->data['formula']) ? $tag->data['formula'] : null;
 
         return $data;
     }
@@ -54,15 +56,16 @@ class FertiliserService extends Service
         DB::beginTransaction();
 
         try {
-            $fertData['quality'] = isset($data['quality']) ? $data['quality'] : null; 
+            $fertData['quality'] = isset($data['quality']) ? $data['quality'] : null;
+            $fertData['time_reduced'] = isset($data['time_reduced']) ? $data['time_reduced'] : null;
+            $fertData['formula'] = isset($data['formula']) ? $data['formula'] : null;
 
             $tag->update(['data' => json_encode($fertData)]);
 
             return $this->commitReturn(true);
-        } catch(\Exception $e) { 
+        } catch(\Exception $e) {
             $this->setError('error', $e->getMessage());
         }
         return $this->rollbackReturn(false);
     }
 }
-  

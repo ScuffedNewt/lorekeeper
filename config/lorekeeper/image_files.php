@@ -62,4 +62,29 @@ return [
         'description' => 'Thumbnail used for gallery submissions with a set content warning. PNG format, size of masterlist thumbnails.',
         'filename'    => 'content_warning.png',
     ],
+    'garden_seed' => [
+        'name'        => 'Garden Seed Image',
+        'description' => 'Image used for the base garden seed. Recommend a pile of dirt or a seedling. PNG format, no size restriction',
+        'filename'    => 'garden/seed.png',
+    ],
+    'garden_dead_seed' => [
+        'name'        => 'Garden Dead Seed Image',
+        'description' => 'Image used for the dead garden seed. Recommend a wilted plant or a dead plant. PNG format, no size restriction',
+        'filename'    => 'garden/dead_seed.png',
+    ],
+    'garden_crop_bg' => [
+        'name'        => 'Garden Farm Background Image',
+        'description' => 'Image used for the background of the farm. Recommend a farm or a field. PNG format, no size restriction',
+        'filename'    => 'garden/crops_bg.png',
+    ],
+    'garden_barn_bg' => [
+        'name'        => 'Garden Barn Background Image',
+        'description' => 'Image used for the background of the barn. Recommend a barn or a stable. PNG format, no size restriction',
+        'filename'    => 'garden/barn_bg.png',
+    ],
+    'garden_coop_bg' => [
+        'name'        => 'Garden Coop Background Image',
+        'description' => 'Image used for the background of the coop. Recommend a coop or a nest. PNG format, no size restriction',
+        'filename'    => 'garden/coop_bg.png',
+    ],
 ];

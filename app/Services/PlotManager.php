@@ -15,7 +15,7 @@ use App\Services\CurrencyManager;
 use App\Models\Item\Item;
 use App\Models\User\UserItem;
 class PlotManager extends Service
-{   
+{
     /**
      * purchases a plot for a user
      *
@@ -30,7 +30,7 @@ class PlotManager extends Service
         try {
 
             if(!$plot) throw new \Exception('Not a valid plot.');
-            
+
             if($plot->isFree)
             {
                 if(!$this->createPlot($user, $plot)) throw new \Exception('Error creating plot for user.');
@@ -44,11 +44,8 @@ class PlotManager extends Service
                 $quantity = $plot->plot_cost;
 
                 if($quantity <= 0) throw new \Exception('Quantity cannot be 0 or less.');
-
                 if(!$service->debitCurrency($user, null, 'Bought Garden Plot', 'Bought Crafing Plot #' . $plot->id .' for ' . $plot->plot_cost . ' ' . $currency->name, $currency, $quantity)) throw new \Exception('Not enough currency to buy this.');
-
                 if(!$this->createPlot($user, $plot)) throw new \Exception('Error creating plot for user.');
-
             }
 
             return $this->commitReturn($plot);
@@ -59,7 +56,7 @@ class PlotManager extends Service
     }
 
     /**
-     * 
+     * creates a plot for a user
      */
     public function createPlot($user, $plot)
     {
@@ -89,8 +86,7 @@ class PlotManager extends Service
         $count = 0;
         foreach($plots as $plot) {
             if($plot->readyToClaim) {
-                if($type == 'Seed') { $this->claim($user, $plot); }
-                else { $this->animalClaim($user, $plot); }
+                $this->claim($user, $plot);
                 $count++;
             }
         }
@@ -98,48 +94,88 @@ class PlotManager extends Service
     }
 
     /***************************************************************************************************************
-     * 
+     *
      * GARDENING RELATED
-     * 
+     *
      ***************************************************************************************************************/
 
     /**
-     * 
+     * plants a seed
      */
-    public function plant($user, $data)
+    public function place($user, $data)
     {
         DB::beginTransaction();
 
-        try {   
+        try {
 
-            $plot = UserGardenPlot::find($data['plotID']);
+            $plot = UserGardenPlot::findOrFail($data['plot_id']);
             if(!$plot) throw new \Exception("Invalid plot.");
 
-            $seed = UserItem::where('item_id', $data['seedID'])->where('count', '>', 0)->where('user_id', $user->id)->first();
-            if(!$seed) throw new \Exception("Invalid seed.");
-            
-            $invman = new InventoryManager;
-            if(!$invman->debitStack($user, 'Seed Planted', ['data' => 'Seed planted in garden.'], $seed, 1)) throw new \Exception('Could not debit seed.');
+            if (config('lorekeeper.garden.'.$plot->plot->plot_type.'.type') == 'item') {
+                $plot_obj = UserItem::where('item_id', $data['item_id'])->where('count', '>', 0)->where('user_id', $user->id)->first();
+                if (!$plot_obj) throw new \Exception("Invalid item.");
+            }
 
-            $plot->item_id = $seed->item->id;
-            $plot->started_at = Carbon::now();
-            // this is where we set the plot time between each waterings
-            // because this is a function we can add things later
-            if($plot->modifiers)
-            {
-                $mods = json_decode($plot->modifiers, true);
-                if($mods['fertiliser'])
-                {
-                    $time = 24 - $mods['fertiliser'];
-                }
+            // check if we are consuming the item
+            if (config('lorekeeper.garden.'.$plot->plot->plot_type.'.is_consumed')) {
+                // we can use assets to debit the item just by setting the quantity to one,
+                // for now we will use the inventory manager to do this since no other logic is needed
+
+                // only seeds are debitted right now but lets be nice to future me! and future you!
+                $type = config('lorekeeper.garden.'.$plot->plot->plot_type.'.place_word') . ($plot->plot->plot_type == 'seed' ? 'ed' : 'd');
+                if(!(new InventoryManager)->debitStack($user, 'Garden', ['data' => $type.' in the Garden'], $plot_obj, 1)) throw new \Exception('Could not debit item.');
             }
             else {
-                $time = 24;
+                // if not consuming it we're upping the garden count to make it unavailable for other plots
+                // find the stack where count is greater than 0 and garden count is less than count
+                $plot_obj = UserItem::where('item_id', $data['item_id'])->where('count', '>', 0)->where('garden_count', '<=', 'count')->where('user_id', $user->id)->first();
+                Log::info(['plot_obj', json_encode($plot_obj)]);
+                if (!$plot_obj) throw new \Exception("You don't have enough of this item.");
+                $plot_obj->garden_count++;
+                $plot_obj->save();
             }
-            $plot->time = $time; // default 24 hours
-            $plot->waterings = 0; // the user can water immediately, but we must set a base line to increment
-            $plot->water_at = Carbon::now()->addHours($plot->time);
-            $plot->save();
+
+            // check if plant needs a certain quality of modifier
+            if ($plot->plot->plot_type == 'seed' && isset($plot_obj->item->tags->where('tag', 'seed')->first()->data['quality'])) {
+                $quality = $plot_obj->item->tags->where('tag', 'seed')->first()->data['quality'];
+                $mods = json_decode($plot->modifiers, true);
+                if(!$mods) throw new \Exception("No fertiliser attached to this plot.");
+                if($mods['fertiliser']['quality'] < $quality) throw new \Exception("You need a higher quality fertiliser to plant this seed.");
+                // check if we need to reduce the time
+                if($mods['fertiliser']['quality'] > $quality) {
+                    if ($mods['fertiliser']['time_reduced']) {
+                        if ($mods['fertiliser']['formula'] == 0) {
+                            $time = $mods['fertiliser']['time_reduced'];
+                        }
+                        else {
+                            $time = ($mods['fertiliser']['time_reduced'] / $quality) * $mods['fertiliser']['time_reduced'];
+                        }
+                    }
+                }
+            }
+
+            // check if the obj needs to be placed in a certain month (seed only rn)
+            if (config('lorekeeper.garden.'.$plot->plot->plot_type.'.has_seasons')) {
+                // check current month against start and end months
+                $start_month = $plot_obj->item->tags->where('tag', 'seed')->first()->data['start_month'] ?
+                    Carbon::create()->day(1)->month($plot_obj->item->tags->where('tag', 'seed')->first()->data['start_month']) : null;
+                $end_month = $plot_obj->item->tags->where('tag', 'seed')->first()->data['end_month'] ?
+                    Carbon::create()->month($plot_obj->item->tags->where('tag', 'seed')->first()->data['end_month'])->endOfMonth() : null;
+                // check if current month is between start and end
+                if ($start_month && $end_month) {
+                    if (!Carbon::now()->between($start_month, $end_month)) throw new \Exception("This seed can only be planted between " . $start_month->format('F d') . " and " . $end_month->format('F d') . ".");
+                }
+            }
+
+
+            $plot->update([
+                'item_id' => $plot_obj->item->id, // this will need to be dynamic for other types of objs
+                'started_at' => Carbon::now(),
+                'water_at' => Carbon::now()->addHours(config('lorekeeper.garden.'.$plot->plot->plot_type.'.action_cooldown') - ($time ?? 0)),
+                'waterings' => 0,
+                'is_dead' => 0,
+                'time' => config('lorekeeper.garden.'.$plot->plot->plot_type.'.action_cooldown') - ($time ?? 0), // set time for easier calc later
+            ]);
 
             return $this->commitReturn(true);
         } catch(\Exception $e) {
@@ -149,29 +185,38 @@ class PlotManager extends Service
     }
 
     /**
-     * 
+     * performs an action on a plot, agnostic of the type of plot
      */
-    public function water($user, $data, $all = false)
+    public function action($user, $plot, $all = false)
     {
         DB::beginTransaction();
 
-        try { 
-            if(!$all) {
-            $plot = UserGardenPlot::find($data);
+        try {
             if(!$plot) throw new \Exception("Invalid plot.");
-
-            $plot->waterings += 1;
-            $plot->water_at = Carbon::now()->addHours($plot->time);
-            $plot->save();
+            // all is a flag to water all plots of a certain type
+            if(!$all) {
+                // check that we are not exceeding the max waterings
+                if($plot->waterings >= $plot->actionsRequired) throw new \Exception("You have cared for this plot enough!");
+                $plot->waterings += 1;
+                $plot->water_at = Carbon::now()->addHours($plot->time);
+                $plot->save();
             }
             else {
-                $plots = UserGardenPlot::where('user_id', $user->id)->where('water_at', '<', Carbon::now())->get();
+                // $plot in this case is str
+                $plots = UserGardenPlot::where('user_id', $user->id)->whereRelation('plot', 'plot_type', $plot)
+                ->get()->filter(function($plot) {
+                    return $plot->actionReady;
+                });
+                $count = 0;
                 foreach($plots as $plot)
                 {
+                    if($plot->waterings >= $plot->actionsRequired) continue;
                     $plot->waterings += 1;
                     $plot->water_at = Carbon::now()->addHours($plot->time);
                     $plot->save();
+                    $count++;
                 }
+                flash($count .' plots affected.')->success();
             }
 
             return $this->commitReturn(true);
@@ -182,15 +227,15 @@ class PlotManager extends Service
     }
 
     /**
-     * 
+     * clears a plot, agnostic of the type of plot, generally only used for seeds
      */
     public function clear($user, $plot)
     {
         DB::beginTransaction();
 
-        try { 
+        try {
             if(!$plot) throw new \Exception("Invalid plot.");
-            if($plot->plot->plot_type != 'Seed') {
+            if (!config('lorekeeper.garden.'.strtolower($plot->plot->plot_type).'.is_consumed') && config('lorekeeper.garden.'.strtolower($plot->plot->plot_type).'.type') == 'item') {
                 $item = UserItem::where('item_id', $plot->item_id)->where('user_id', $user->id)->where('count', '>', 0)->where('garden_count', '>', 0)->first();
                 if(!$item) throw new \Exception("Invalid item.");
 
@@ -198,14 +243,15 @@ class PlotManager extends Service
                 $item->save();
             }
 
-            $plot->item_id = null;
-            $plot->modifiers = null;
-            $plot->started_at = null;
-            $plot->water_at = null;
-            $plot->waterings = 0;
-            $plot->is_dead = 0;
-            $plot->time = null;
-            $plot->save();
+            $plot->update([
+                'item_id' => null,
+                'modifiers' => null,
+                'started_at' => null,
+                'water_at' => null,
+                'waterings' => 0,
+                'is_dead' => 0,
+                'time' => null,
+            ]);
 
             return $this->commitReturn(true);
         } catch(\Exception $e) {
@@ -217,33 +263,34 @@ class PlotManager extends Service
     /**
      * Adds modifiers to the plot
      */
-    public function mod($user, $data)
+    public function modify($user, $data)
     {
         DB::beginTransaction();
 
-        try { 
+        try {
 
-            $plot = UserGardenPlot::find($data['plotID']);
-            if(!$plot) throw new \Exception("Invalid plot.");
-
-            $mod = UserItem::where('item_id', $data['modID'])->where('user_id', $user->id)->where('count', '>', 0)->first();
+            $plot = UserGardenPlot::findOrFail($data['plot_id']);
+            $mod = UserItem::where('item_id', $data['mod_id'])->where('user_id', $user->id)->where('count', '>', 0)->first();
             if(!$mod) throw new \Exception("Invalid modifier.");
 
             $invman = new InventoryManager;
-            if(!$invman->debitStack($user, 'Added Modifier to Garden', ['data' => 'Modifier used in garden.'], $mod, 1)) throw new \Exception('Could not debit modifier.');
+            if(!$invman->debitStack($user, 'Added Modifier to Garden', ['data' => 'Modifier used in the Garden'], $mod, 1)) throw new \Exception('Could not debit modifier.');
 
             $tag = $mod->item->tags()->where('tag', 'fertiliser')->first();
             if(!$tag) throw new \Exception("No data attached to this modifier.");
 
             $current = json_decode($plot->modifiers, true);
-            if($current == null) {
-                $current = [];
-                $current['fertiliser'] = null;
+            if(!$current) {
+                $current['fertiliser'] = [
+                    'quality' => $tag->data['quality'],
+                    'time_reduced' => isset($tag->data['time_reduced']) ? $tag->data['time_reduced'] : 0,
+                    'formula' => isset($tag->data['formula']) ? $tag->data['formula'] : null,
+                ];
+                if($current['fertiliser']['quality'] > config('lorekeeper.garden.seed.max_quality')) throw new \Exception("You have reached the maximum quality for this plot.");
             }
             else {
-                if($current['fertiliser'] == 5) throw new \Exception('Max quality reached!');
+                throw new \Exception("You have already used a modifier on this plot.");
             }
-            $current['fertiliser'] += $tag['data']['quality'];
 
             $plot->modifiers = json_encode($current);
             $plot->save();
@@ -256,32 +303,53 @@ class PlotManager extends Service
     }
 
     /**
-     * OwO
+     * claim a plot, agnostic of the type of plot
      */
-    public function claim($user, $plot)
+    public function claim($user, $plot, $remove = false)
     {
         DB::beginTransaction();
 
-        try { 
-            $tag = $plot->item->tags()->where('tag', 'seed')->first();
-            $item = Item::find($tag['data']['plant_id']);
+        try {
+            // first get all the rewards to be given to the user
+            $assets = parseAssetData($plot->item->tags->where('tag', $plot->plot->plot_type)->first()->data['rewards']);
+            if(!$rewards = fillUserAssets($assets, $user, $user, 'Garden Harvest', [
+                'data' => 'Received rewards from '. strtolower(config('lorekeeper.garden.'.$plot->plot->plot_type.'.finish_word')) . 'ing ' .$plot->plot->plot_type
+            ])) throw new \Exception("Failed to credit items.");
 
-            if($tag['data']['quantity']) $quantity = mt_rand(1, $tag['data']['quantity']);
-            else $quantity = 1;
+            // check for if we remove and return the object in the plot
+            if (!config('lorekeeper.garden.'.$plot->plot->plot_type.'.is_consumed') && $remove) {
+                if (config('lorekeeper.garden.'.$plot->plot->plot_type.'.type' == 'item')) {
+                    $item = UserItem::where('item_id', $plot->item_id)->where('user_id', $user->id)->where('count', '>', 0)->where('garden_count', '>', 0)->first();
+                    if(!$item) throw new \Exception("Invalid item.");
 
-            $invman = new InventoryManager;
-            if(!$invman->creditItem($user, $user, 'Garden Harvest', ['data' => 'Crop from garden'], $item, $quantity)) throw new \Exception('Could not credit plant.');
+                    $item->garden_count--;
+                    $item->save();
+                }
+            }
 
-            $plot->modifiers = null;
-            $plot->started_at = null;
-            $plot->water_at = null;
-            $plot->waterings = null;
-            $plot->is_dead = 0;
-            $plot->time = null;
-            $plot->item_id = null;
-            $plot->save();
+            // check if user is going to get the bonus reward
+            if (isset($plot->item->tags->where('tag', $plot->plot->plot_type)->first()->getData()['potential_rewards'])) {
+                $bonus = $plot->item->tags->where('tag', $plot->plot->plot_type)->first()->getData()['bonus_chance'];
+                if ($bonus - rand(0, 100) > 0) {
+                    $assets = parseAssetData($plot->item->tags->where('tag', $plot->plot->plot_type)->first()->data['potential_rewards']);
+                    if(!$bonus = fillUserAssets($assets, $user, $user, 'Bonus Harvest', [
+                        'data' => 'Received bonus rewards from '. strtolower(config('lorekeeper.garden.'.$plot->plot->plot_type.'.finish_word')) . 'ing ' .$plot->plot->plot_type
+                    ])) throw new \Exception("Failed to credit items.");
+                }
+                flash('Score! You got some extra goodies.<br>'. $this->getRewardsString($bonus))->success();
+            }
 
-            flash('You have received: ' . $item->displayName .'!')->success();
+            $plot->update([
+                'item_id' => (!$remove && config('lorekeeper.garden.'.$plot->plot->plot_type.'.is_consumed')) ? null : $plot->item_id,
+                'modifiers' => null,
+                'started_at' => (!$remove && config('lorekeeper.garden.'.$plot->plot->plot_type.'.is_consumed')) ? null : Carbon::now(),
+                'water_at' => (!$remove && config('lorekeeper.garden.'.$plot->plot->plot_type.'.is_consumed')) ? null : Carbon::now()->addHours(config('lorekeeper.garden.'.$plot->plot->plot_type.'.action_cooldown')),
+                'waterings' => 0,
+                'is_dead' => 0,
+                'time' => (!$remove && config('lorekeeper.garden.'.$plot->plot->plot_type.'.is_consumed')) ? null : config('lorekeeper.garden.'.$plot->plot->plot_type.'.action_cooldown'),
+            ]);
+
+            flash($this->getRewardsString($rewards))->success();
 
             return $this->commitReturn(true);
         } catch(\Exception $e) {
@@ -290,6 +358,9 @@ class PlotManager extends Service
         return $this->rollbackReturn(false);
     }
 
+    /**
+     * returns reward string
+     */
     private function getRewardsString($rewards)
     {
         $results = "You have received: ";
@@ -305,92 +376,5 @@ class PlotManager extends Service
             }
         }
         return $results.implode(', ', $result_elements);
-    }
-
-    /***************************************************************************************************************
-     * 
-     * COOP | BARN RELATED
-     * 
-     ***************************************************************************************************************/
-
-    public function place($user, $data)
-    {
-        DB::beginTransaction();
-
-        try {
-            $plot = UserGardenPlot::find($data['plotID']);
-            if(!$plot) throw new \Exception("Invalid plot.");
-            $animals = UserItem::where('item_id', $data['animalID'])->where('count', '>', 0)->where('user_id', $user->id)->get();
-            if(!$animals) throw new \Exception("Invalid animal.");
-            if(!$animals->first()->item->tags()->where('tag', $data['type'])->exists()) throw new \Exception("Invalid animal.");
-            
-            $check = 0;
-            $animal = null;
-            foreach($animals as $a) {if($a->garden_count < $a->count) {$check = 1; $animal = $a;}}
-            if($check == 0) throw new \Exception("You don't have enough of this item.");
-
-            if(!$animal) throw new \Exception("Invalid Animal.");
-            $animal->garden_count++;
-            $animal->save();
-
-            $plot->item_id = $animal->item->id;
-            $plot->started_at = Carbon::now();
-            $plot->time = 24; // default 24 hours
-            $plot->waterings = 0; // the user can water immediately, but we must set a base line to increment
-            $plot->water_at = Carbon::now()->addHours($plot->time);
-            $plot->save();
-
-            return $this->commitReturn(true);
-        } catch(\Exception $e) {
-            $this->setError('error', $e->getMessage());
-        }
-        return $this->rollbackReturn(false);
-    }
-
-    public function animalClaim($user, $plot, $remove = false)
-    {
-        DB::beginTransaction();
-
-        try { 
-            if($plot->plot->plot_type == 'Coop') {
-                $type = 'coop';
-            }
-            else {
-                $type = 'barn';
-            }
-            $assets = parseAssetData($plot->item->tags->where('tag', $type)->first()->data['rewards']);
-            if(!$rewards = fillUserAssets($assets, $user, $user, 'Garden Harvest', [
-                'data' => 'Received rewards from the '.$type
-            ])) throw new \Exception("Failed to credit items.");
-
-            if($remove) {
-                $animals = UserItem::where('item_id', $plot->item_id)->where('count', '>', 0)->where('user_id', $user->id)->get();
-                
-                $animal = null;
-                foreach($animals as $a) {if($a->garden_count > 0) {$animal = $a;}}
-
-                if(!$animal) throw new \Exception("Invalid Animal.");
-                $animal->garden_count--;
-                $animal->save();
-
-                $plot->item_id = null;
-                $plot->save();
-            }
-
-            $plot->modifiers = null;
-            $plot->started_at = $remove ? null : carbon::now();
-            $plot->water_at = $remove ? null : carbon::now()->addHours(24);
-            $plot->waterings = 0;
-            $plot->is_dead = 0;
-            $plot->time = $remove ? null : 24;
-            $plot->save();
-
-            flash($this->getRewardsString($rewards))->success();
-
-            return $this->commitReturn(true);
-        } catch(\Exception $e) {
-            $this->setError('error', $e->getMessage());
-        }
-        return $this->rollbackReturn(false);
     }
 }

@@ -38,15 +38,16 @@ class ResetGardenAnimals extends Command
     public function handle()
     {
         // This only deals with animals that are in the garden. We dont have to consider seeds.
-        $plots = \App\Models\GardenPlot::where('plot_type', '!=', 'Seed')->pluck('id');
+        $plots = \App\Models\GardenPlot::where('plot_type', '!=', 'seed')->pluck('id');
         $userPlots = \App\Models\User\UserGardenPlot::whereIn('plot_id', $plots)->where('item_id', '!=', null)->get();
         $animalIds = [];
         foreach ($userPlots as $plot) {
             $animalIds[] = $plot->item_id;
 
-            if($plot->readyToClaim) {
+            if($plot->finishReady) {
                 $service = new \App\Services\PlotManager;
-                $service->animalClaim($plot->user, $plot);
+                // dont set remove since we hard set those below
+                $service->claim($plot->user, $plot);
             }
 
             $plot->item_id = null;
