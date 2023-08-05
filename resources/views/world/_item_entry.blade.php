@@ -46,20 +46,20 @@
             <div class="col-md-6 col-md">
                 <div class="row">
                     @php$months = [
-                                                    '1' => 'January',
-                                                    '2' => 'February',
-                                                    '3' => 'March',
-                                                    '4' => 'April',
-                                                    '5' => 'May',
-                                                    '6' => 'June',
-                                                    '7' => 'July',
-                                                    '8' => 'August',
-                                                    '9' => 'September',
-                                                    '10' => 'October',
-                                                    '11' => 'November',
-                                                    '12' => 'December',
-                                                ];
-                                        @endphp ?>
+                                                                            '1' => 'January',
+                                                                            '2' => 'February',
+                                                                            '3' => 'March',
+                                                                            '4' => 'April',
+                                                                            '5' => 'May',
+                                                                            '6' => 'June',
+                                                                            '7' => 'July',
+                                                                            '8' => 'August',
+                                                                            '9' => 'September',
+                                                                            '10' => 'October',
+                                                                            '11' => 'November',
+                                                                            '12' => 'December',
+                                                                        ];
+                                                            @endphp ?> ?>
                     @foreach ($item->tags as $tag)
                         @if ($tag->is_active)
                             <div class="col">
