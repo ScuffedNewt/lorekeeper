@@ -134,7 +134,7 @@ class UserItem extends Model {
      */
     private function getHeldString($tradeCount, $updateCount, $submissionCount, $gardenCount)
     {
-        if(!$tradeCount && !$updateCount && !$submissionCount) return null;
+        if(!$tradeCount && !$updateCount && !$submissionCount && !$gardenCount) return null;
         $held = [];
         if($tradeCount) array_push($held, $tradeCount.' held in Trades');
         if($updateCount) array_push($held, $updateCount.' held in Design Updates');
