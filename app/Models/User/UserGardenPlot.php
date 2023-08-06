@@ -78,6 +78,7 @@ class UserGardenPlot extends Model
         if (config('lorekeeper.garden.'.$this->plot->plot_type.'.type') == 'item') {
             return $this->item->tags->where('tag', $this->plot->plot_type)->first()->data['actions'];
         }
+        return 0;
     }
 
     /**
