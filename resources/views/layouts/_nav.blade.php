@@ -37,6 +37,9 @@
                             <a class="dropdown-item" href="{{ url('characters/myos') }}">
                                 My MYO Slots
                             </a>
+                            <a class="dropdown-item" href="{{ url('characters/pairings') }}">
+                                Pairings
+                            </a>
                             <a class="dropdown-item" href="{{ url('inventory') }}">
                                 Inventory
                             </a>

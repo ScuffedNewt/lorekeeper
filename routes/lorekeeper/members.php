@@ -60,6 +60,12 @@ Route::group(['prefix' => 'characters', 'namespace' => 'Users'], function() {
     Route::post('transfer/act/{id}', 'CharacterController@postHandleTransfer');
 
     Route::get('myos', 'CharacterController@getMyos');
+
+    Route::get('pairings', 'PairingController@getPairings');
+    Route::post('pairings', 'PairingController@createPairings');
+    Route::post('pairings/approve', 'PairingController@approvePairing');
+    Route::post('pairings/reject', 'PairingController@rejectPairing');
+    Route::post('pairings/myo', 'PairingController@createMyo');
 });
 
 Route::group(['prefix' => 'bank', 'namespace' => 'Users'], function() {
