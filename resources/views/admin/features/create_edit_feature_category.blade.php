@@ -37,6 +37,21 @@
     {!! Form::textarea('description', $category->description, ['class' => 'form-control wysiwyg']) !!}
 </div>
 
+<div class="row w-100 p-2">
+    <div class="col form-group">
+        {!! Form::label('Minimum inherited traits (Optional)') !!} {!! add_help('For pairings, how many traits of this category the offspring must have at minimum.') !!}
+        {!! Form::number('min_inheritable', $category->min_inheritable, ['class' => 'form-control']) !!}
+
+    </div>
+    <div class="col form-group">
+        {!! Form::label('Maximum inherited traits (Optional)') !!} {!! add_help('For pairings, how many traits of this category the offspring can have at maximum.') !!}
+        {!! Form::number('max_inheritable', $category->max_inheritable, ['class' => 'form-control']) !!}
+    </div>
+</div>
+
+
+
+
 <div class="text-right">
     {!! Form::submit($category->id ? 'Edit' : 'Create', ['class' => 'btn btn-primary']) !!}
 </div>

@@ -103,6 +103,12 @@ class AddSiteSettings extends Command
 
         $this->addSiteSetting('group_currency', 1, 'ID of the group currency to award from gallery submissions (if enabled).');
 
+        $this->addSiteSetting('pairing_trait_inheritance', 100, 'Number between 0-100. Percentage chance to inherit traits from both parents upon generating offspring. Set 100 for always. Set 0 for never.');
+        $this->addSiteSetting('pairing_sex_restrictions', 0, '0: Any character can be paired. 1: Only male/female characters can be paired.');
+        $this->addSiteSetting('pairing_male_percentage', 0, '0: Disabled, do not roll sex. 1-100: Chance to generate a male offspring. Must total 100 with the pairing_female_percentage setting.');
+        $this->addSiteSetting('pairing_female_percentage', 0, '0: Disabled, do not roll sex. 1-100: Chance to generate a male offspring. Must total 100 with the pairing_male_percentage setting.');
+        $this->addSiteSetting('pairing_cooldown', 0, '0: Disabled. Number of days to wait between pairing a character.');
+
         $this->line("\nSite settings up to date!");
 
     }

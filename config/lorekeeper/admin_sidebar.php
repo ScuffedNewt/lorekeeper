@@ -187,6 +187,15 @@ return [
             ],
         ]
     ],
+    'Pairings' => [
+        'power' => 'edit_data',
+        'links' => [
+            [
+                'name' => 'Pairing Settings',
+                'url' => 'admin/pairing/settings'
+            ],
+        ]
+    ],
     'Settings' => [
         'power' => 'edit_site_settings',
         'links' => [

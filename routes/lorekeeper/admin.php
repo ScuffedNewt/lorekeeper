@@ -437,3 +437,9 @@ Route::group(['prefix' => 'designs', 'middleware' => 'power:manage_characters'],
     Route::post('vote/{id}/{action}', 'DesignController@postVote')->where('action', 'approve|reject');
 });
 Route::get('{type}/{status}', 'DesignController@getDesignIndex')->where('type', 'myo-approvals|design-approvals')->where('status', 'pending|approved|rejected');
+
+# PAIRINGS
+Route::group(['prefix' => 'pairings', 'middleware' => 'power:manage_raffles'], function() {
+
+
+});

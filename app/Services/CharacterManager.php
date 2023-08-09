@@ -245,8 +245,9 @@ class CharacterManager extends Service
                 }
             }
             $imageData = Arr::only($data, [
-                'species_id', 'subtype_id', 'rarity_id', 'use_cropper',
+                'species_id', 'subtype_id', 'rarity_id', 'use_cropper', 
                 'x0', 'x1', 'y0', 'y1',
+                'sex'
             ]);
             $imageData['use_cropper'] = isset($data['use_cropper']) ;
             $imageData['description'] = isset($data['image_description']) ? $data['image_description'] : null;
@@ -687,6 +688,7 @@ class CharacterManager extends Service
             $old['species'] = $image->species_id ? $image->species->displayName : null;
             $old['subtype'] = $image->subtype_id ? $image->subtype->displayName : null;
             $old['rarity'] = $image->rarity_id ? $image->rarity->displayName : null;
+            $old['sex'] = $image->sex ? $image->sex : null;
 
             // Clear old features
             $image->features()->delete();
@@ -702,6 +704,7 @@ class CharacterManager extends Service
             $image->species_id = $data['species_id'];
             $image->subtype_id = $data['subtype_id'] ?: null;
             $image->rarity_id = $data['rarity_id'];
+            $image->sex = $data['sex'];
             $image->save();
 
             $new = [];
@@ -709,6 +712,7 @@ class CharacterManager extends Service
             $new['species'] = $image->species_id ? $image->species->displayName : null;
             $new['subtype'] = $image->subtype_id ? $image->subtype->displayName : null;
             $new['rarity'] = $image->rarity_id ? $image->rarity->displayName : null;
+            $new['sex'] = $image->sex ? $image->sex : null;
 
             // Character also keeps track of these features
             $image->character->rarity_id = $image->rarity_id;

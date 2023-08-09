@@ -22,6 +22,9 @@
                         <a class="fas fa-arrows-alt-v handle mr-3" href="#"></a>
                         {!! $rarity->displayName !!}
                     </td>
+                    <td>
+                        Inherit Chance: {!! $rarity->inherit_chance !!}%
+                    </td>
                     <td class="text-right">
                         <a href="{{ url('admin/data/rarities/edit/'.$rarity->id) }}" class="btn btn-primary">Edit</a>
                     </td>

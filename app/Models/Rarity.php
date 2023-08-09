@@ -13,7 +13,8 @@ class Rarity extends Model
      * @var array
      */
     protected $fillable = [
-        'name', 'sort', 'color', 'has_image', 'description', 'parsed_description'
+        'name', 'sort', 'color', 'has_image', 'description', 'parsed_description',
+        'inherit_chance'
     ];
 
     /**
@@ -33,6 +34,7 @@ class Rarity extends Model
         'color' => 'nullable|regex:/^#?[0-9a-fA-F]{6}$/i',
         'description' => 'nullable',
         'image' => 'mimes:png',
+        'inherit_chance' => 'nullable|numeric|min:1|max:100'
     ];
     
     /**
@@ -45,6 +47,7 @@ class Rarity extends Model
         'color' => 'nullable|regex:/^#?[0-9a-fA-F]{6}$/i',
         'description' => 'nullable',
         'image' => 'mimes:png',
+        'inherit_chance' => 'nullable|numeric|min:1|max:100'
     ];
 
     /**********************************************************************************************

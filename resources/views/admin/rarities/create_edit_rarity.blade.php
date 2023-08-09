@@ -47,6 +47,11 @@
     {!! Form::textarea('description', $rarity->description, ['class' => 'form-control wysiwyg']) !!}
 </div>
 
+<div class="col form-group">
+    {!! Form::label('Chance to inherit (Optional)') !!} {!! add_help('For pairings, how likely this rarity is to be passed on in percent. Must be a number between 1-100.') !!}
+    {!! Form::number('inherit_chance', $rarity->inherit_chance, ['class' => 'form-control']) !!}
+</div>
+
 <div class="text-right">
     {!! Form::submit($rarity->id ? 'Edit' : 'Create', ['class' => 'btn btn-primary']) !!}
 </div>

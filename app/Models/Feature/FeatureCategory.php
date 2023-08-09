@@ -13,7 +13,8 @@ class FeatureCategory extends Model
      * @var array
      */
     protected $fillable = [
-        'name', 'sort', 'has_image', 'description', 'parsed_description'
+        'name', 'sort', 'has_image', 'description', 'parsed_description',
+        'max_inheritable', 'min_inheritable'
     ];
 
     /**
