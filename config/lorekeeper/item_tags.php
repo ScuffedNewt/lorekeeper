@@ -30,4 +30,10 @@ return [
         'text_color' => 'antiquewhite',
         'background_color' => '#ff5050'
     ],
+
+    'boost' => [
+        'name' => 'Boost',
+        'text_color' => 'antiquewhite',
+        'background_color' => '#cc33ff'
+    ],
 ];

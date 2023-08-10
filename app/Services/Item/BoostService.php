@@ -12,15 +12,16 @@ use App\Models\Currency\Currency;
 use App\Models\Loot\LootTable;
 use App\Models\Raffle\Raffle;
 use App\Models\Species\Species;
+use App\Models\Rarity;
 
-class PairingService extends Service
+class BoostService extends Service
 {
     /*
     |--------------------------------------------------------------------------
-    | Pairing Service
+    | Boost Service
     |--------------------------------------------------------------------------
     |
-    | Handles the editing and usage of Pairing type items.
+    | Handles the editing and usage of Boost type items.
     |
     */
 
@@ -31,10 +32,14 @@ class PairingService extends Service
      */
     public function getEditData()
     {
-        return [
-            'features' => Feature::orderBy('name')->pluck('name', 'id'),
-            'specieses' => Species::orderBy('name')->pluck('name', 'id'),
 
+        return [
+            'settings' => [
+                'pairing_trait_inheritance' => 'pairing_trait_inheritance',
+                'pairing_male_percentage' => 'pairing_male_percentage',
+                'pairing_female_percentage' => 'pairing_female_percentage',
+             ],
+             'rarities' => Rarity::orderBy('sort')->pluck('name', 'id'),
         ];
     }
 
@@ -59,29 +64,21 @@ class PairingService extends Service
     public function updateData($tag, $data)
     {
         //put inputs into an array to transfer to the DB
-        if(!isset($data['feature_id']) && !isset($data['species_id'])) throw new \Exception("A trait or species must be set.");
-        if(isset($data['feature_id']) && isset($data['species_id'])) throw new \Exception("You can only set either trait or species.");
-        if(!isset($data['pairing_type'])) throw new \Exception("A pairing type must be set.");
-        if($data['min'] == 0 || $data['max'] == 0) throw new \Exception("Min/Max cannot be 0.");
-        if($data['min'] > $data['max']) throw new \Exception("Min must be smaller than max.");
+        if(isset($data['setting']) && isset($data['rarity_id'])) throw new \Exception("You can only set either setting or rarity.");
+        if($data['setting_chance'] == 0 || $data['rarity_chance'] == 0) throw new \Exception("Percentages cannot be 0.");
+        if($data['setting_chance'] > 100 || $data['rarity_chance'] > 100) throw new \Exception("Percentages cannot be greater than 100.");
 
-        $specieses = isset($data['legal_species_id']) ? array_filter($data['legal_species_id']) : [];
-        $features = isset($data['legal_feature_id']) ? array_filter($data['legal_feature_id']) : [];
+        if(isset($data['setting'])) $boostData['setting'] = $data['setting'];
+        if(isset($data['setting'])) $boostData['setting_chance'] = $data['setting_chance'];
 
-        if(isset($data['feature_id'])) $pairingData['feature_id'] = $data['feature_id'];
-        if(isset($data['species_id'])) $pairingData['species_id'] = $data['species_id'];
-        $pairingData['pairing_type'] = $data['pairing_type'];
-        $pairingData['min'] = $data['min'];
-        $pairingData['max'] = $data['max'];
-
-        if(count($specieses) > 0) $pairingData['legal_species_id'] = $specieses;
-        if(count($features) > 0) $pairingData['legal_feature_id'] = $features;
+        if(isset($data['rarity_id'])) $boostData['rarity_id'] = $data['rarity_id'];
+        if(isset($data['rarity_id'])) $boostData['rarity_chance'] = $data['rarity_chance'];
 
         DB::beginTransaction();
         
         try {
             //get pairingData array and put it into the 'data' column of the DB for this tag
-            $tag->update(['data' => json_encode($pairingData)]);
+            $tag->update(['data' => json_encode($boostData)]);
         
             return $this->commitReturn(true);
         } catch(\Exception $e) {
