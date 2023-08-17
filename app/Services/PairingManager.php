@@ -65,6 +65,29 @@ class PairingManager extends Service
 
             if(!isset($tag)) throw new \Exception("Item is missing the required pairing tag.");
 
+            //check sex if set to do so. If one char has no sex it always works.
+            if(Settings::get('pairing_sex_restrictions') == 1){
+                if(isset($character_1->image->sex) && isset($character_2->image->sex)){
+                    if($character_1->image->sex == $character_2->image->sex)  throw new \Exception("Pairings can only be created between a male and female character.");
+                }
+            }
+
+            //check cooldown if set to do so. 
+            $cooldownDays = Settings::get('pairing_cooldown');
+            if( $cooldownDays != 0){
+                $pairingsCharacter1 = Pairing::where(function($query) use ($character_1){
+                    $query->where('character_1_id', $character_1->id)
+                    ->orWhere('character_2_id', $character_1->id);
+                })->where( 'created_at', '>', Carbon::now()->subDays($cooldownDays))->get();
+                if(!$pairingsCharacter1->isEmpty()) throw new \Exception("Character 1 cannot be paired right now due to the pairing cooldown of ".$cooldownDays."days!");
+                
+                $pairingsCharacter2 = Pairing::where(function($query)use ($character_2){
+                    $query->where('character_1_id', $character_2->id)
+                    ->orWhere('character_2_id', $character_2->id);
+                })->where( 'created_at', '>', Carbon::now()->subDays($cooldownDays))->get();
+                if(!$pairingsCharacter2->isEmpty()) throw new \Exception("Character 2 cannot be paired right now due to the pairing cooldown of ".$cooldownDays."days!");
+            }
+
             $specieses = (isset($tag->getData()["species_ids"])) ? $tag->getData()["species_ids"] : null;
             $pairing_type = $tag->getData()["pairing_type"];
 
