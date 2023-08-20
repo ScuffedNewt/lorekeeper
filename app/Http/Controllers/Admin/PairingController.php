@@ -3,62 +3,76 @@
 use Auth;
 use DB;
 use Exception;
+use Settings;
 
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use App\Models\Raffle\RaffleGroup;
-use App\Models\Raffle\Raffle;
-use App\Models\Raffle\RaffleTicket;
 
 use App\Models\User\User;
-use App\Services\RaffleService;
-use App\Services\RaffleManager;
-
+use App\Models\Character\Character;
+use App\Models\Item\Item;
+use App\Models\Item\ItemTag;
+use App\Models\Character\Sublist;
 use App\Http\Controllers\Controller;
+
+use App\Models\Pairing\Pairing;
+use App\Services\PairingManager;
+
 
 class PairingController extends Controller
 {
     /**
-     * Shows the pairing settings.
+     * Shows the pairing roller.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function getPairingSettings(Request $request)
+    public function getRoller(Request $request)
     {
-        $raffles = Raffle::query();
-        if ($request->get('is_active')) $raffles->where('is_active', $request->get('is_active'));
-        else $raffles->where('is_active', '!=', 2);
-        $raffles = $raffles->orderBy('group_id')->orderBy('order');
 
-        return view('admin.raffle.index', [
-            'raffles' => $raffles->get(),
-            'groups' => RaffleGroup::whereIn('id', $raffles->pluck('group_id')->toArray())->get()->keyBy('id')
+        $itemIds = ItemTag::where('tag', 'pairing')->pluck('item_id');
+        $items = Item::whereIn('id', $itemIds)->orderBy('name')->pluck('name', 'id');
+
+        return view('admin.pairings.roller', [
+            'items' => $items,
         ]);
     }
 
     /**
-     * Creates or edits pairing settings.
+     * Does a test roll.
      *
      * @param  \Illuminate\Http\Request    $request
      * @param  App\Services\RaffleService  $service
      * @param  int|null                    $id
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function postPairingSettings(Request $request, RaffleService $service, $id = null)
+    public function postRoll(Request $request, PairingManager $service)
     {
-        $data = $request->only(['name', 'is_active', 'winner_count', 'group_id', 'order']);
-        $raffle = null;
-        if (!$id) $raffle = $service->createRaffle($data);
-        else if ($id) $raffle = $service->updateRaffle($data, Raffle::find($id));
-        if ($raffle) {
-            flash('Raffle ' . ($id ? 'updated' : 'created') . ' successfully!')->success();
-            return redirect()->back();
-        }
-        else {
-            flash('Couldn\'t create raffle.')->error();
-            return redirect()->back()->withInput();  
-        }
+        $character_1_code =  $request->character_1_code;
+        $character_2_code =  $request->character_2_code;
+        $item_id = $request->item_id;
+
+        $itemIds = ItemTag::where('tag', 'pairing')->pluck('item_id');
+        $items = Item::whereIn('id', $itemIds)->orderBy('name')->pluck('name', 'id');
+
+        //validations just to be sure, these are the same as in the pairingmanager
+        if($service->validatePairingBasics($character_1_code, $character_2_code, $item_id)){
+            $user = Auth::user();
+            $testMyos = $service->rollTestMyos($character_1_code, $character_2_code,$item_id, $user);
+    
+            if (isset($testMyos)) {
+                return view('admin.pairings.roller', [
+                    'items' => $items,
+                    'testMyos' => $testMyos,
+                    'slug1' => $character_1_code,
+                    'slug2' => $character_2_code,
+                ]);
+            }
+        } else {
+            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+        }  
+        return redirect()->back();
+   
     }
 
 }

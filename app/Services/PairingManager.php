@@ -19,6 +19,7 @@ use App\Models\Species\Species;
 use App\Models\Species\Subtype;
 use App\Models\Rarity;
 use App\Models\Feature\Feature;
+use App\Models\Feature\FeatureCategory;
 use App\Models\Character\CharacterTransformation as Transformation;
 use App\Models\Character\Character;
 use App\Models\Character\CharacterFeature;
@@ -48,29 +49,13 @@ class PairingManager extends Service
         DB::beginTransaction();
 
         try {
-            
+            //check that pairing item is set
             if(!isset($item_id))  throw new \Exception("Pairing item not set.");
             //check that user owns this item
             if(!$user->items()->where('item_id', $item_id)->exists()) throw new \Exception("You do not own the needed pairing item.");
-            // check 2 character codes are set and they are not the same character
-            if(!isset($character_1_code) || !isset($character_2_code)) throw new \Exception("Please enter two character codes.");
-            if($character_1_code == $character_2_code) throw new \Exception("Pairings must be between two different characters.");
 
             $character_1 = Character::where('slug', $character_1_code)->first();
             $character_2 = Character::where('slug', $character_2_code)->first();
-            $species_1_id = $character_1->image->species->id;
-            $species_2_id = $character_2->image->species->id;
-            $item = Item::where('id', $item_id)->first();
-            $tag = $item->tag('pairing');
-
-            if(!isset($tag)) throw new \Exception("Item is missing the required pairing tag.");
-
-            //check sex if set to do so. If one char has no sex it always works.
-            if(Settings::get('pairing_sex_restrictions') == 1){
-                if(isset($character_1->image->sex) && isset($character_2->image->sex)){
-                    if($character_1->image->sex == $character_2->image->sex)  throw new \Exception("Pairings can only be created between a male and female character.");
-                }
-            }
 
             //check cooldown if set to do so. 
             $cooldownDays = Settings::get('pairing_cooldown');
@@ -88,8 +73,63 @@ class PairingManager extends Service
                 if(!$pairingsCharacter2->isEmpty()) throw new \Exception("Character 2 cannot be paired right now due to the pairing cooldown of ".$cooldownDays."days!");
             }
 
+            //do further checks
+            if($this->validatePairingBasics($character_1_code, $character_2_code, $item_id)){
+                //create pairing
+                $pairingData = [];
+                $pairingData['user_id'] = $user->id;
+                $pairingData['character_1_id'] = $character_1->id;
+                $pairingData['character_2_id'] = $character_2->id;
+                $pairingData['item_id'] = $item_id;
+
+                //set approved if both chars are owned by the user
+                if($character_1->user_id == $user->id) $pairingData["character_1_approved"] = 1;
+                if($character_2->user_id == $user->id) $pairingData["character_2_approved"] = 1;
+                if($character_1->user_id == $user->id && $character_2->user_id == $user->id) $pairingData['status'] = 'READY';
+
+                $pairing = Pairing::create($pairingData);
+                if(!$pairing) throw new \Exception("Error happened while trying to create pairing.");
+
+                //remove pairing item
+                if((new InventoryManager)->debitStack($user, 'Pairing Created', ['data' => ''], UserItem::where('item_id', $item_id)->first(), 1)){
+                    return $this->commitReturn($pairing);
+                } else {
+                    throw new \Exception("Error happened while trying to remove the item.");
+                }
+            } else {
+                return $this->rollbackReturn(false);
+            }  
+
+        } catch(\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+        return $this->rollbackReturn(false);
+    }
+
+    public function validatePairingBasics($character_1_code, $character_2_code, $item_id){
+        try {
+
+            
+            if(!isset($character_1_code) || !isset($character_2_code)) throw new \Exception("Please enter two character codes.");
+            if($character_1_code == $character_2_code) throw new \Exception("Pairings must be between two different characters.");
+
+            $character_1 = Character::where('slug', $character_1_code)->first();
+            $character_2 = Character::where('slug', $character_2_code)->first();
+            $species_1_id = $character_1->image->species->id;
+            $species_2_id = $character_2->image->species->id;
+            $item = Item::where('id', $item_id)->first();
+            $tag = $item->tag('pairing');
             $specieses = (isset($tag->getData()["species_ids"])) ? $tag->getData()["species_ids"] : null;
             $pairing_type = $tag->getData()["pairing_type"];
+
+            if(!isset($tag)) throw new \Exception("Item is missing the required pairing tag.");
+
+            //check sex if set to do so. If one char has no sex it always works.
+            if(Settings::get('pairing_sex_restrictions') == 1){
+                if(isset($character_1->image->sex) && isset($character_2->image->sex)){
+                    if($character_1->image->sex == $character_2->image->sex)  throw new \Exception("Pairings can only be created between a male and female character.");
+                }
+            }
 
             //check if the pairing type matches the character input
             //pairing type 0 = species, 1 = subtype
@@ -108,36 +148,12 @@ class PairingManager extends Service
             // if no species is set all are valid
             // otherwise we need at least 1 valid species that can receive the traits...
             if(count($valid_species_ids) <= 0) throw new \Exception("This item cannot create a pairing from the specieses of the chosen characters.");
- 
-            //create pairing
-            $pairingData = [];
-            $pairingData['user_id'] = $user->id;
-            $pairingData['character_1_id'] = $character_1->id;
-            $pairingData['character_2_id'] = $character_2->id;
-            $pairingData['item_id'] = $item_id;
-
-            //set approved if both chars are owned by the user
-            if($character_1->user_id == $user->id) $pairingData["character_1_approved"] = 1;
-            if($character_2->user_id == $user->id) $pairingData["character_2_approved"] = 1;
-            if($character_1->user_id == $user->id && $character_2->user_id == $user->id) $pairingData['status'] = 'READY';
-
-
-            $pairing = Pairing::create($pairingData);
-
-            if(!$pairing) throw new \Exception("Error happened while trying to create pairing.");
-
-
-            //remove pairing item
-            if((new InventoryManager)->debitStack($user, 'Pairing Created', ['data' => ''], UserItem::where('item_id', $item_id)->first(), 1)){
-                return $this->commitReturn($pairing);
-            } else {
-                throw new \Exception("Error happened while trying to remove the item.");
-            }
+            return true;
 
         } catch(\Exception $e) {
             $this->setError('error', $e->getMessage());
         }
-        return $this->rollbackReturn(false);
+        return false;
     }
 
     /**
@@ -212,13 +228,12 @@ class PairingManager extends Service
         return $this->rollbackReturn(false);
     }
 
-
     /**
      * Create MYO
      *
      * @return \App\Models\Pairing\Pairing|bool
      */
-    public function createMyo($pairing_id, $user)
+    public function createMyos($pairing_id, $user)
     {
         DB::beginTransaction();
 
@@ -233,87 +248,172 @@ class PairingManager extends Service
             $species_1_id = $character_1->image->species->id;
             $species_2_id = $character_2->image->species->id;
             $tag = $item->tag('pairing');
-            
             if(!isset($tag)) throw new \Exception("Item is missing the required pairing tag.");
-            $feature = Feature::where('id',  $tag->getData()["feature_id"])->first();
-            $specieses = (isset($tag->getData()["species_ids"])) ? $tag->getData()["species_ids"] : null;
+            $myoAmount = random_int($tag->getData()["min"], $tag->getData()["max"]);
             $pairing_type = $tag->getData()["pairing_type"];
 
-            $species_id = $this->getSpeciesId($specieses, $species_1_id, $species_2_id);
-            $subtype_id = $this->getSubtypeId($species_id, $species_1_id, $species_2_id, $character_1, $character_2);
-            $feature_pool = $this->getFeaturePool($character_1, $character_2, $species_id);
-        
-            
-            $chosen_features = $this->getChosenFeatures($feature, $character_1, $character_2, $feature_pool);
-            $feature_data = $this->getFeatureData($species_id, $subtype_id, $species_1_id, $species_2_id, $character_1, $character_2, $feature_pool, $chosen_features);
+            //loop over for each myo
+            for($i = 0; $i < $myoAmount; $i++){
+                $sex = $this->getSex();
+                $species_id = $this->getSpeciesId($tag, $pairing_type, $species_1_id, $species_2_id);
+                $subtype_id = $this->getSubtypeId($species_id, $species_1_id, $species_2_id, $character_1, $character_2);
 
-            $rarity_id = $this->getRarityId($feature, $character_1, $character_2, $feature_pool, $chosen_features);
+                $feature_pool = $this->getFeaturePool($tag, $character_1, $character_2, $species_id);
 
-            //create MYO
-            $myo = $this->saveMyo($user, $species_id , $subtype_id, $rarity_id, array_unique($chosen_features), $feature_data);
-            if(!$myo) throw new \Exception("Could not create MYO slot.");
+                $chosen_features = $this->getChosenFeatures($tag, $character_1, $character_2, $feature_pool);
+                $feature_data = $this->getFeatureData($tag, $species_id, $subtype_id, $species_1_id, $species_2_id, $character_1, $character_2, $feature_pool, $chosen_features);
+                $rarity_id = $this->getRarityId($character_1, $character_2, $feature_pool, $chosen_features);
+
+                //create MYO
+                $myo = $this->saveMyo($user, $sex, $species_id , $subtype_id, $rarity_id, array_unique($chosen_features), $feature_data);
+
+                if(!$myo) throw new \Exception("Could not create MYO slot.");
+            }
 
             //update status
             $pairing->status = 'USED';
             $pairing->save();
 
             if(!$pairing) throw new \Exception("Error happened while trying to create a MYO from the pairing.");
-
-            return $this->commitReturn($pairing);
+            $this->commitReturn($pairing);
+            return $myoAmount;
         } catch(\Exception $e) {
             $this->setError('error', $e->getMessage());
         }
         return $this->rollbackReturn(false);
     }
 
+    /**
+     * Rolls Test MYOs without saving them.
+     *
+     * @return \App\Models\Pairing\Pairing|bool
+     */
+    public function rollTestMyos($character_1_code, $character_2_code, $item_id, $user)
+    {
 
-    private function getFeaturePool($character_1, $character_2, $species_id){
-        $all_feature_ids = array_merge($character_1->image->features()->pluck("feature_id")->toArray(), $character_2->image->features()->pluck("feature_id")->toArray());
+            $item = Item::where('id', $item_id)->first();
+            $character_1 = Character::where('slug', $character_1_code)->first();
+            $character_2 = Character::where('slug', $character_2_code)->first();
+            $species_1_id = $character_1->image->species->id;
+            $species_2_id = $character_2->image->species->id;
+            $tag = $item->tag('pairing');
+            if(!isset($tag)) throw new \Exception("Item is missing the required pairing tag.");
+            $myoAmount = random_int($tag->getData()["min"], $tag->getData()["max"]);
+            $pairing_type = $tag->getData()["pairing_type"];
+
+            $testMyos = [];
+
+            //loop over for each myo
+            for($i = 0; $i < $myoAmount; $i++){
+                $sex = $this->getSex();
+                $species_id = $this->getSpeciesId($tag, $pairing_type, $species_1_id, $species_2_id);
+                $subtype_id = $this->getSubtypeId($species_id, $species_1_id, $species_2_id, $character_1, $character_2);
+
+                $feature_pool = $this->getFeaturePool($tag, $character_1, $character_2, $species_id);
+
+                $chosen_features = $this->getChosenFeatures($tag, $character_1, $character_2, $feature_pool);
+                $feature_data = $this->getFeatureData($tag, $species_id, $subtype_id, $species_1_id, $species_2_id, $character_1, $character_2, $feature_pool, $chosen_features);
+                $rarity_id = $this->getRarityId($character_1, $character_2, $feature_pool, $chosen_features);
+
+                $testMyos[] = [
+                    'user' => $user,
+                    'sex' => $sex,
+                    'species' => Species::where('id', $species_id)->first()->name,
+                    'subtype' => Subtype::where('id', $subtype_id)->first()?->name,
+                    'rarity' => Rarity::where('id', $rarity_id)->first()->name,
+                    'features' => Feature::whereIn('id', array_unique($chosen_features))->orderBy('id', 'ASC')->pluck('name'),
+                    'feature_data' => $feature_data
+                ];
+            }
+
+            return $testMyos;
+
+    }
+
+
+    private function getSex(){
+        $malePercentage = Settings::get('pairing_male_percentage');
+        $femalePercentage = Settings::get('pairing_female_percentage');
+
+        if($malePercentage == 0 && $femalePercentage == 0){
+            return null;
+        } else {
+            if($malePercentage + $femalePercentage == 100){
+                return (random_int(0,100) <= $femalePercentage) ? 'Female' : 'Male';
+            } else {
+                throw new \Exception("Male and female chance is not set to a total of 100. Please contact a mod/admin."); 
+            }
+        }
+    }
+
+    private function getFeaturePool($tag, $character_1, $character_2, $species_id){
+        $inheritFromBothParentsChance = Settings::get('pairing_trait_inheritance');
+        
+        if(random_int(0,100) <= $inheritFromBothParentsChance){
+            //inherit traits from both parents
+            $all_feature_ids = array_merge($character_1->image->features()->pluck("feature_id")->toArray(), $character_2->image->features()->pluck("feature_id")->toArray());
+
+        } else {
+            //randomly pick 1 parent to inherit traits from
+            $all_feature_ids = array_rand([$character_1->image->features()->pluck("feature_id")->toArray(), $character_2->image->features()->pluck("feature_id")->toArray()]);
+        }
+
 
         // get all features from the parents, but make sure to remove all features granted by other pairing items
         $pairing_tags = ItemTag::where('tag', 'pairing')->get();
         $pairing_feature_ids = [];
-        foreach($pairing_tags as $tag) {
-            $pairing_feature_ids[] = $tag->getData()["feature_id"];
+        foreach($pairing_tags as $pairingTag) {
+            if(isset($pairingTag->getData()["feature_id"])) $pairing_feature_ids[] = $pairingTag->getData()["feature_id"];
         }
-        $features = Feature::where("species_id", $species_id)->orWhere("species_id", null)->get();
-        $features_filtered=$features->whereIn("id", $all_feature_ids)->whereNotIn("id", $pairing_feature_ids);
+
+        // if species from tag is used, allow all features regardless of species
+        if(isset($tag->getData()['species_id'])){
+            $features = Feature::get();
+        } else {
+            $features = Feature::where("species_id", $species_id)->orWhere("species_id", null)->get();
+        }
+
+        // if legal features were set, only include those.
+        $legal_feature_ids = (isset($tag->getData()["legal_feature_id"])) ? $tag->getData()["legal_feature_id"] : null;
+        if($legal_feature_ids){
+            $features_filtered=$features->whereIn("id", $all_feature_ids)->whereIn("id", $legal_feature_ids)->whereNotIn("id", $pairing_feature_ids);
+        } else {
+            $features_filtered=$features->whereIn("id", $all_feature_ids)->whereNotIn("id", $pairing_feature_ids);
+        }
 
         return $features_filtered;
     }
 
 
-    private function getFeatureData($species_id, $subtype_id,  $species_1_id, $species_2_id, $character_1, $character_2, $feature_pool, $chosen_features){
+    private function getFeatureData($tag, $species_id, $subtype_id,  $species_1_id, $species_2_id, $character_1, $character_2, $feature_pool, $chosen_features){
+        $pairing_feature_data = null;
         if($species_1_id == $species_2_id){
             //parents with the same species - subtype is 50:50 between parents
             if($character_1->image->subtype_id != $subtype_id) $pairing_feature_data = $character_1->image->subtype->name;
             if($character_2->image->subtype_id != $subtype_id) $pairing_feature_data = $character_2->image->subtype->name;
-
-            //if same subtype do not add hybrid trait...
-            if($character_1->image->subtype_id == $character_2->image->subtype_id){
-                $feature_data = [];
-            } else{
-                $feature_data = [$pairing_feature_data];
-            }
         } else {
             //subtype is the type of the parent whose species was chosen
             if($character_1->image->species->id == $species_id){
                 $pairing_feature_data = $character_2->image->species->name;
             } 
-            if($character_2->image->species->id == $species_id){
+            elseif($character_2->image->species->id == $species_id){
                 $pairing_feature_data = $character_1->image->species->name;
+            } else {
+                //if a species was chosen in the item tag, set feature data to nothing.
+                $pairing_feature_data = null;
             }
-            $feature_data = [$pairing_feature_data];
-
         }
 
+        $feature_data = [];
         //add all chosen features data as empty
-        foreach($feature_pool as $feature) {
-            if(in_array($feature->id, $chosen_features)){
+        foreach($chosen_features as $featureId){
+            if(isset($tag->getData()["feature_id"]) && $featureId == $tag->getData()["feature_id"]){
+                // set subtype/species of other parent if a trait was set for it.
+                $feature_data[] = $pairing_feature_data;
+            } else {
                 $feature_data[] = null;
-            } 
+            }
         }
-
         return $feature_data;
     }
 
@@ -328,22 +428,19 @@ class PairingManager extends Service
             if($character_1->image->species->id == $species_id){
                 $subtype_id = $character_1->image->subtype_id;
             } 
-            if($character_2->image->species->id == $species_id){
+            elseif($character_2->image->species->id == $species_id){
                 $subtype_id = $character_2->image->subtype_id;
+            } else {
+                //in case a species was set for inheritance, we set subtype as null/open for choice.
+                $subtype_id = null;
             }
         }
         return $subtype_id;
     }
 
 
-    private function getRarityId($feature, $character_1, $character_2, $feature_pool, $chosen_features){
-        // if same subtype do not start with the pairing rarity
-        if($character_1->image->subtype_id == $character_2->image->subtype_id){
-            $rarity_sorts = [];
-        } else{
-            $rarity_sorts = [$feature->rarity->sort];
-        }
-
+    private function getRarityId($character_1, $character_2, $feature_pool, $chosen_features){
+        $rarity_sorts = [];
         //add all chosen features to rarity ids
         foreach($feature_pool as $feature) {
             if(in_array($feature->id, $chosen_features)){
@@ -358,26 +455,49 @@ class PairingManager extends Service
     }
 
     
-    private function getChosenFeatures($feature, $character_1, $character_2, $feature_pool){
-        // if same subtype do not start with the pairing feature
-        if($character_1->image->subtype_id == $character_2->image->subtype_id){
-            $chosen_features = [];
-        } else{
-            $chosen_features = [$feature->id];
+    private function getChosenFeatures($tag, $character_1, $character_2, $feature_pool){
+        $feature = (isset($tag->getData()["feature_id"])) ? Feature::where('id',  $tag->getData()["feature_id"])->first() : null;
+
+        //sort features by category
+        $featuresByCategory = $feature_pool->groupBy('feature_category_id');
+        $chosenFeatureIds = [];
+        foreach($featuresByCategory as $categoryId=>$features){
+            $features = $features->shuffle();
+            $category = FeatureCategory::where('id', $categoryId)->first();
+            $featuresCalculated = 0;
+            $featuresChosen = 0;
+            $i = 0;
+            //loop over features until min amount is chosen but never more than max amount
+            while(($featuresCalculated < count($features) && $featuresChosen < $category->max_inheritable) || ($featuresChosen < $category->min_inheritable)){
+                $feature = $features[$i];
+                $doesGetThisFeature = (random_int(0,100) <= $feature->rarity->inherit_chance) ? true : false;
+                if($doesGetThisFeature) {
+                    $chosenFeatureIds[] = $feature->id;
+                    $featuresChosen += 1;
+                }
+                $featuresCalculated += 1;
+                $i = ($i === count($features) - 1) ? 0 : $i++;
+            }
         }
 
-        // 0-3 features will be picked at random
-        $feature_number = rand(0,3);
-        $feature_ids = $feature_pool->pluck('id')->toArray();
-
-        // shuffle and pick
-        shuffle($feature_ids);
-        return array_merge($chosen_features, array_slice($feature_ids, 0, $feature_number));
+        //finally add the feature that the item tag applies, if present
+        if(isset($tag->getData()["feature_id"])){
+            $pairingFeature = Feature::where("id", $tag->getData()["feature_id"])->first();
+            $chosenFeatureIds[] = $pairingFeature->id;
+        }
+        sort($chosenFeatureIds);
+        return $chosenFeatureIds;
 
     }
 
 
-    private function getSpeciesId($specieses, $species_1_id, $species_2_id){
+    private function getSpeciesId($tag, $pairing_type, $species_1_id, $species_2_id){
+        // if a species was set for the item, it should be the item...
+        
+        //pairing type 0 = species, 1 = subtype
+        if(isset($tag->getData()['species_id'])) return $tag->getData()['species_id'];
+       
+        $specieses = (isset($tag->getData()["legal_species_id"])) ? $tag->getData()["legal_species_id"] : null;
         $valid_species_ids = [];
         if($specieses == null) {
             $valid_species_ids = [$species_1_id, $species_2_id];
@@ -390,7 +510,7 @@ class PairingManager extends Service
         return $valid_species_ids[$species_id_index];
     }
 
-    private function saveMyo($user, $species_id, $subtype_id, $rarity_id, $feature_ids, $feature_data){
+    private function saveMyo($user, $sex, $species_id, $subtype_id, $rarity_id, $feature_ids, $feature_data){
         //set user who the slot belongs to
         $characterData['user_id'] = $user->id;
         //other vital data that is default
@@ -421,6 +541,7 @@ class PairingManager extends Service
         $characterData['sale_value'] = 0;
 
         //species info
+        $characterData['sex'] = $sex;
         $characterData['species_id'] = $species_id;
         $characterData['subtype_id'] = isset($subtype_id) && $subtype_id ? $subtype_id : null;
 
@@ -432,11 +553,5 @@ class PairingManager extends Service
         $charService = new CharacterManager;
         $character = $charService->createCharacter($characterData, $user, true);
         return $character;
-        /**if ($character = $charService->createCharacter($characterData, $user, true)) {
-            flash('<a href="' . $character->url . '">MYO slot</a> created successfully.')->success();
-        }
-        else {
-            throw new \Exception("Failed to create the slot.");
-        }*/
     }
 }

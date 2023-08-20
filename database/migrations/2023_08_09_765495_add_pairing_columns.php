@@ -20,14 +20,14 @@ class AddPairingColumns extends Migration
 
         Schema::table('feature_categories', function (Blueprint $table) {
             //
-            $table->integer('max_inheritable')->nullable()->default(null);
-            $table->integer('min_inheritable')->nullable()->default(null);
+            $table->integer('max_inheritable')->default(5);
+            $table->integer('min_inheritable')->default(0);
 
         });
 
         Schema::table('rarities', function (Blueprint $table) {
             //
-            $table->integer('inherit_chance')->nullable()->default(50);
+            $table->integer('inherit_chance')->default(50);
         });
 
     }

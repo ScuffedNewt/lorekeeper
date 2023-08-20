@@ -191,8 +191,8 @@ return [
         'power' => 'edit_data',
         'links' => [
             [
-                'name' => 'Pairing Settings',
-                'url' => 'admin/pairing/settings'
+                'name' => 'Pairing Roller',
+                'url' => 'admin/pairings/roller'
             ],
         ]
     ],

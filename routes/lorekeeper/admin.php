@@ -440,6 +440,8 @@ Route::get('{type}/{status}', 'DesignController@getDesignIndex')->where('type', 
 
 # PAIRINGS
 Route::group(['prefix' => 'pairings', 'middleware' => 'power:manage_raffles'], function() {
+    Route::get('roller', 'PairingController@getRoller');
+    Route::post('roller', 'PairingController@postRoll');
 
 
 });

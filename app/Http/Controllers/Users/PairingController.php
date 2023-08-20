@@ -114,8 +114,9 @@ class PairingController extends Controller
      */
     public function createMyo(Request $request, PairingManager $service)
     {
-        if ($service->createMyo($request->pairing_id, Auth::user())) {
-            flash('Myo has been created!')->success();
+        $myosCreated = $service->createMyos($request->pairing_id, Auth::user());
+        if (is_numeric($myosCreated)) {
+            flash('Congrats!! '.$myosCreated.' Pairing MYO Slots have been created!')->success();
             return redirect()->back();
         }
         else {
