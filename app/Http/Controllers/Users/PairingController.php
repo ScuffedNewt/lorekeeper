@@ -11,6 +11,9 @@ use Settings;
 use App\Models\User\User;
 use App\Models\Character\Character;
 use App\Models\Item\Item;
+use App\Models\Item\ItemCategory;
+use App\Models\User\UserItem;
+
 use App\Models\Character\Sublist;
 use App\Http\Controllers\Controller;
 
@@ -36,21 +39,26 @@ class PairingController extends Controller
 
         $closed = Pairing::where('user_id', $user->id)->whereIn('status', ['REJECTED', 'USED'])->get();
 
-        $all_items = $user->items()->where('count', ">", 0)->get();
-        $pairing_item_ids = [];
-        foreach($all_items as $item){
-            if($item->tags()->where('tag', 'pairing')->exists()) $pairing_item_ids[] = $item->id;
+        $userItems = $user->items()->where('count', ">", 0)->get();
+        $pairingItemIds = [];
+        foreach($userItems as $item){
+            if($item->tags()->where('tag', 'pairing')->exists()) $pairingItemIds[] = $item->id;
         }
 
-        $items = Item::whereIn('id', $pairing_item_ids)->orderBy('name')->pluck('name', 'id');
+        $boostItemIds = [];
+        foreach($userItems as $item){
+            if($item->tags()->where('tag', 'boost')->exists()) $boostItemIds[] = $item->id;
+        }
 
         return view('home.pairings', [
             'pairings' => $pairings,
             'approvals' => $approvals,
             'closed' => $closed,
-            'items' => $items,
             'sublists' => Sublist::orderBy('sort', 'DESC')->get(),
-
+            'item_filter' => Item::orderBy('name')->released()->get()->keyBy('id'),
+            'inventory' => UserItem::with('item')->whereIn('item_id', $boostItemIds)->orWhereIn('item_id', $pairingItemIds)->get(),
+            'categories' => ItemCategory::orderBy('sort', 'DESC')->get(),
+            'page' => 'pairing',
         ]);
     }
 
@@ -63,7 +71,7 @@ class PairingController extends Controller
     {
         $pairings = Pairing::where('user_id', Auth::user()->id)->get();
 
-        if ($service->createPairing($request->character_1_code, $request->character_2_code,$request->item_id, Auth::user())) {
+        if ($service->createPairing($request->character_1_code, $request->character_2_code, $request->stack_id, $request->stack_quantity, Auth::user())) {
             flash('Pairing created!')->success();
             return redirect()->back();
         }

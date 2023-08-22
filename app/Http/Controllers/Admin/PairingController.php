@@ -9,9 +9,13 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 use App\Models\User\User;
+use App\Models\User\UserItem;
+
 use App\Models\Character\Character;
 use App\Models\Item\Item;
 use App\Models\Item\ItemTag;
+use App\Models\Item\ItemCategory;
+
 use App\Models\Character\Sublist;
 use App\Http\Controllers\Controller;
 
@@ -30,11 +34,11 @@ class PairingController extends Controller
     public function getRoller(Request $request)
     {
 
-        $itemIds = ItemTag::where('tag', 'pairing')->pluck('item_id');
-        $items = Item::whereIn('id', $itemIds)->orderBy('name')->pluck('name', 'id');
-
+        $pairingItemIds = ItemTag::where('tag', 'pairing')->pluck('item_id');
+        $boostItemIds = ItemTag::where('tag', 'boost')->pluck('item_id');
+    
         return view('admin.pairings.roller', [
-            'items' => $items,
+            'inventory' => Item::whereIn('id', $boostItemIds)->orWhereIn('id', $pairingItemIds)->pluck('name', 'id'),
         ]);
     }
 
@@ -48,29 +52,30 @@ class PairingController extends Controller
      */
     public function postRoll(Request $request, PairingManager $service)
     {
+
+        $pairingItemIds = ItemTag::where('tag', 'pairing')->pluck('item_id');
+        $boostItemIds = ItemTag::where('tag', 'boost')->pluck('item_id');
+
         $character_1_code =  $request->character_1_code;
         $character_2_code =  $request->character_2_code;
-        $item_id = $request->item_id;
+        $item_ids = $request->item_id;
 
-        $itemIds = ItemTag::where('tag', 'pairing')->pluck('item_id');
-        $items = Item::whereIn('id', $itemIds)->orderBy('name')->pluck('name', 'id');
-
-        //validations just to be sure, these are the same as in the pairingmanager
-        if($service->validatePairingBasics($character_1_code, $character_2_code, $item_id)){
-            $user = Auth::user();
-            $testMyos = $service->rollTestMyos($character_1_code, $character_2_code,$item_id, $user);
+        $user = Auth::user();
+        $testMyos = $service->rollTestMyos($character_1_code, $character_2_code,$item_ids, $user);
     
-            if (isset($testMyos)) {
-                return view('admin.pairings.roller', [
-                    'items' => $items,
-                    'testMyos' => $testMyos,
-                    'slug1' => $character_1_code,
-                    'slug2' => $character_2_code,
-                ]);
-            }
+        if (isset($testMyos)) {
+            return view('admin.pairings.roller', [
+                'items' => $item_ids,
+                'inventory' => Item::whereIn('id', $boostItemIds)->orWhereIn('id', $pairingItemIds)->pluck('name', 'id'),
+                'testMyos' => $testMyos,
+                'slug1' => $character_1_code,
+                'slug2' => $character_2_code,
+                'item_ids' => array_filter($item_ids)
+            ]);
         } else {
             foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
-        }  
+        }
+      
         return redirect()->back();
    
     }

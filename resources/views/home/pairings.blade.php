@@ -9,7 +9,6 @@
     My Pairings
 </h1>
 
-<h3>Create</h3>
 <p>Create a new pairing of characters. This will show up on other users pairing pages if you enter a character that does not belong to you.</p>
 <div id="characters" class="mb-3">
         @if(isset($pairing_character_1))
@@ -21,10 +20,11 @@
 
 </div>
 
-@if(count($items) > 0)
 {!! Form::open(['url' => url()->current(), 'id' => 'pairingForm']) !!}
-{!! Form::label('Pairing Item') !!}
-{!! Form::select('item_id', $items, $item->item_id ?? null, ['class' => 'form-control selectize']) !!}
+
+
+<h2>Characters </h2>
+
 <div id="characterComponents" class="row justify-content-center">
         <div class="submission-character m-3 card col-md" id="character_1">
             <div class="card-body">
@@ -67,15 +67,25 @@
             </div>
         </div>
 </div>
+
+<h2>Pairing Items </h2>
+<p>
+    Decide which pairing item and boosts to use. These items will be removed from your inventory but refunded if your pairing is rejected.
+    For a successful pairing, you need to attach at least one valid Pairing Item. You can optionally attach Boost Items.
+</p>
+<div id="addons" class="mb-3">
+        @include('widgets._inventory_select', ['user' => Auth::user(), 'inventory' => $inventory, 'categories' => $categories, 'selected' => [], 'page' => $page])
+</div>
+
 <div class="text-right">
     <a href="#" class="btn btn-secondary" id="pairingSubmit">Submit</a>
 </div>
-{!! Form::close() !!}
-@else
-<p class="p-2 text-danger border">It seems you do not currently own any items used for creating pairings.</p>
-@endif 
 
-<h3>Open</h3>
+{!! Form::close() !!}
+
+
+<hr>
+<h1>Open</h1>
 
 <p>This is a list of Pairings you created that may still await approval or are ready to be turned into a MYO slot!</p>
 @foreach($pairings as $pair)
@@ -113,6 +123,10 @@
                 {!! Form::close() !!}
                 @else
                 <a href="#" class="btn btn-secondary disabled" id="pairingMyo">Create MYO</a>
+                {!! Form::open(['url' => '/characters/pairings/reject', 'id' => 'rejectForm']) !!}
+                    {{ Form::hidden('pairing_id', $pair->id) }}
+                    {!! Form::submit('Reject', ['class' => 'btn btn-danger']) !!}
+                    {!! Form::close() !!}
                 @endif
             </div>
         </div>
@@ -121,7 +135,7 @@
 <hr>
 @endforeach
 
-<h3>Approvals</h3>
+<h1>Approvals</h1>
 
 <p>This is a list of Pairings your characters were requested to be part of. You can approve or decline them here.</p>
 @foreach($approvals as $pair)
@@ -173,7 +187,7 @@
 @endforeach
 
 
-<h3>Closed</h3>
+<h1>Closed</h1>
 
 <p>Pairings that have been turned into a MYO slot or were rejected.</p>
 @foreach($closed as $pair)
@@ -210,6 +224,7 @@
 
 @section('scripts')
 @parent
+@include('widgets._inventory_select_js', ['readOnly' => true])
 
     <script>
 

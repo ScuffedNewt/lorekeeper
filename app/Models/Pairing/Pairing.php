@@ -17,7 +17,7 @@ class Pairing extends Model
      * @var array
      */
     protected $fillable = [
-        'user_id', 'item_id', 'character_1_id', 'character_2_id', 'character_1_approved', 'character_2_approved', 'status'
+        'user_id', 'item_id', 'character_1_id', 'character_2_id', 'character_1_approved', 'character_2_approved', 'status', 'data'
     ];
 
     /**
@@ -142,5 +142,15 @@ class Pairing extends Model
     public function getAssetTypeAttribute()
     {
         return 'pairings';
+    }
+
+    /**
+     * Get the data attribute as an associative array.
+     *
+     * @return array
+     */
+    public function getDataAttribute()
+    {
+        return json_decode($this->attributes['data'], true);
     }
 }

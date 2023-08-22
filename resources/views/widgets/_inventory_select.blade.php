@@ -69,6 +69,7 @@
                                             @endif
                                         </td>
                                     @elseif(in_array($itemRow->id, array_keys($selected)))
+
                                         <td class="col-2">{!! Form::selectRange(
                                             'stack_quantity['.$itemRow->id.']',
                                             1,
@@ -78,6 +79,7 @@
                                             /
                                             {{ $itemRow->getAvailableContextQuantity($selected[$itemRow->id]) }}
                                             @if($page == 'trade')
+                                            
                                                 @if($itemRow->getOthers($selected[$itemRow->id], 0)) {{ $itemRow->getOthers($selected[$itemRow->id], 0) }} @endif
                                             @elseif($page == 'update')
                                                 @if($itemRow->getOthers(0, $selected[$itemRow->id])) {{ $itemRow->getOthers(0, $selected[$itemRow->id]) }} @endif

@@ -24,8 +24,6 @@
 </div>
 
 {!! Form::open(['url' => url()->current(), 'id' => 'pairingForm']) !!}
-{!! Form::label('Pairing Item') !!}
-{!! Form::select('item_id', $items, $item->item_id ?? null, ['class' => 'form-control selectize']) !!}
 <div id="characterComponents" class="row justify-content-center">
     <div class="submission-character m-3 card col-md" id="character_1">
         <div class="card-body">
@@ -70,6 +68,40 @@
         </div>
     </div>
 </div>
+
+<h2>Pairing Items </h2>
+<p>
+    Decide which pairing item and boosts to use. These items will be removed from your inventory but refunded if your pairing is rejected.
+    For a successful pairing, you need to attach at least one valid Pairing Item. You can optionally attach Boost Items.
+</p>
+<div class="text-right mb-3">
+    <a href="#" class="btn btn-outline-info" id="addItem">Add Items</a>
+</div>
+
+
+<table class="table table-sm" id="traitTable">
+    <tbody id="itemTableBody">
+        <tr class="loot-row hide">
+            <td class="loot-row-select">
+                {!! Form::select('item_id[]', $inventory, null, ['class' => 'form-control item-select', 'placeholder'
+                => 'Select Item']) !!}
+            </td>
+            <td class="text-right"><a href="#" class="btn btn-danger remove-trait-button">Remove</a></td>
+        </tr>
+        @if(isset($item_ids) && count($item_ids) > 0)
+        @foreach($item_ids as $id)
+        <tr class="loot-row">
+            <td class="loot-row-select">
+                {!! Form::select('item_id[]', $inventory, $id, ['class' => 'form-control item-select',
+                'placeholder' => 'Select Item']) !!}
+            </td>
+            <td class="text-right"><a href="#" class="btn btn-danger remove-trait-button">Remove</a></td>
+        </tr>
+        @endforeach
+        @endif
+    </tbody>
+</table>
+
 <div class="text-right">
     <a href="#" class="btn btn-secondary" id="pairingSubmit">Roll!</a>
 </div>
@@ -115,9 +147,9 @@
             </div>
             
             <div>
-                @if($test['features']->count())
+                @if(count($test['features']) > 0)
                 @foreach($test['features'] as $feature)
-                <div> <strong>{!! $feature!!}:</strong> ({{ $test['feature_data'][$loop->index] }})</div>
+                <div> <strong>{!! $feature->name !!}:</strong> ({{ $feature->rarity->name }}) ({{ $test['feature_data'][$loop->index] }})</div>
                 @endforeach
                 @else
                 <div>No traits listed.</div>
@@ -165,6 +197,30 @@ $(document).ready(function() {
         node.find('.remove-character').on('click', function(e) {
             e.preventDefault();
             $(this).parent().parent().parent().remove();
+        });
+    }
+
+
+    var $traitTable = $('#itemTableBody');
+    var $traitRow = $('#itemTableBody').find('.hide');
+
+    $('#itemTableBody .selectize').selectize();
+    attachRemoveListener($('#itemTableBody .remove-trait-button'));
+
+    $('#addItem').on('click', function(e) {
+        e.preventDefault();
+        var $clone = $traitRow.clone();
+        $clone.removeClass('hide');
+
+        $traitTable.append($clone);
+        attachRemoveListener($clone.find('.remove-trait-button'));
+    });
+
+
+    function attachRemoveListener(node) {
+        node.on('click', function(e) {
+            e.preventDefault();
+            $(this).parent().parent().remove();
         });
     }
 });
