@@ -9,7 +9,23 @@
     My Pairings
 </h1>
 
-<p>Create a new pairing of characters. This will show up on other users pairing pages if you enter a character that does not belong to you.</p>
+<ul class="nav nav-tabs mb-3">
+    <li class="nav-item">
+        <a class="nav-link {{ !Request::get('type') || Request::get('type') == 'new' ? 'active' : '' }}" href="{{ url('characters/pairings') }}">New</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ Request::get('type') == 'open' ? 'active' : '' }}" href="{{ url('characters/pairings') . '?type=open' }}">Open</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ Request::get('type') == 'approval' ? 'active' : '' }}" href="{{ url('characters/pairings') . '?type=approval' }}">Approval</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ Request::get('type') == 'closed' ? 'active' : '' }}" href="{{ url('characters/pairings') . '?type=closed' }}">Closed</a>
+    </li>
+</ul>
+
+@if(!isset($pairings))
+<p>Create a new pairing of characters. If you pair your character with one that belongs to another person, it is highly recommended you ask them first, as their approval will be needed.</p>
 <div id="characters" class="mb-3">
         @if(isset($pairing_character_1))
         @include('widgets._character_select_entry', ['character' => $pairing_character_1])
@@ -17,7 +33,6 @@
         @if(isset($pairing_character_2))
         @include('widgets._character_select_entry', ['character' => $pairing_character_2])
         @endif
-
 </div>
 
 {!! Form::open(['url' => url()->current(), 'id' => 'pairingForm']) !!}
@@ -83,11 +98,8 @@
 
 {!! Form::close() !!}
 
+@else
 
-<hr>
-<h1>Open</h1>
-
-<p>This is a list of Pairings you created that may still await approval or are ready to be turned into a MYO slot!</p>
 @foreach($pairings as $pair)
 <div class="row">
     <div class="col-sm text-center mb-2">
@@ -116,57 +128,22 @@
             <h4>{{ $pair->status }}</h4>
             </div>
             <div class="col m-auto">
-                @if($pair->status == 'READY')
-                {!! Form::open(['url' => '/characters/pairings/myo', 'id' => 'myoForm']) !!}
-                {{ Form::hidden('pairing_id', $pair->id) }}
-                {!! Form::submit('Create MYO', ['class' => 'btn btn-secondary']) !!}
-                {!! Form::close() !!}
-                @else
-                <a href="#" class="btn btn-secondary disabled" id="pairingMyo">Create MYO</a>
-                {!! Form::open(['url' => '/characters/pairings/reject', 'id' => 'rejectForm']) !!}
-                    {{ Form::hidden('pairing_id', $pair->id) }}
-                    {!! Form::submit('Reject', ['class' => 'btn btn-danger']) !!}
-                    {!! Form::close() !!}
-                @endif
-            </div>
-        </div>
-    </div>
-</div>
-<hr>
-@endforeach
-
-<h1>Approvals</h1>
-
-<p>This is a list of Pairings your characters were requested to be part of. You can approve or decline them here.</p>
-@foreach($approvals as $pair)
-<div class="row">
-    <div class="col-sm text-center mb-2">
-        <div class="row">
-            <div class="col-5">
-                <div>
-                    <a href="{{ $pair->character_1->url }}"><img class="w-25" src="{{ $pair->character_1->image->thumbnailUrl }}" class="img-thumbnail" /></a>
-                </div>
-                <p>{{ $pair->character_1->slug }}</p>
-            </div>
-            <div class="col-1 text-center p-4">
-            <h2> + </h2>
-            </div>
-            <div class="col-5">
-                <div>
-                    <a href="{{ $pair->character_2->url }}"><img class="w-25" src="{{ $pair->character_2->image->thumbnailUrl }}" class="img-thumbnail" /></a>
-                </div>
-                <p>{{ $pair->character_2->slug }}</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="row p-4">
-            <div class="col m-auto">
-            Status:
-            <h4>{{ $pair->status }}</h4>
-            </div>
-            <div class="col m-auto">
                 <div class="row">
+                @if(Request::get('type') == 'open')
+                    @if($pair->status == 'READY')
+                    {!! Form::open(['url' => '/characters/pairings/myo', 'id' => 'myoForm']) !!}
+                    {{ Form::hidden('pairing_id', $pair->id) }}
+                    {!! Form::submit('Create MYO', ['class' => 'btn btn-secondary']) !!}
+                    {!! Form::close() !!}
+                    @else
+                    <a href="#" class="btn btn-secondary disabled" id="pairingMyo">Create MYO</a>
+                    {!! Form::open(['url' => '/characters/pairings/reject', 'id' => 'rejectForm']) !!}
+                        {{ Form::hidden('pairing_id', $pair->id) }}
+                        {!! Form::submit('Reject', ['class' => 'btn btn-danger']) !!}
+                        {!! Form::close() !!}
+                    @endif
+                @endif
+                @if(Request::get('type') == 'approval')
                     {!! Form::open(['url' => '/characters/pairings/approve', 'id' => 'approveForm']) !!}
                     {{ Form::hidden('pairing_id', $pair->id) }}
                     {!! Form::submit('Approve', ['class' => 'btn btn-success']) !!}
@@ -176,49 +153,16 @@
                     {{ Form::hidden('pairing_id', $pair->id) }}
                     {!! Form::submit('Reject', ['class' => 'btn btn-danger']) !!}
                     {!! Form::close() !!}
+                @endif
+
                 </div>
-
-
             </div>
         </div>
     </div>
 </div>
 <hr>
 @endforeach
-
-
-<h1>Closed</h1>
-
-<p>Pairings that have been turned into a MYO slot or were rejected.</p>
-@foreach($closed as $pair)
-<div class="row">
-    <div class="col-sm text-center">
-        <div class="row">
-            <div class="col-5">
-                <div>
-                    <a href="{{ $pair->character_1->url }}">{{ $pair->character_1->slug }}</a>
-                </div>
-            </div>
-            <div class="col-1 text-center">
-            <h5> + </h5>
-            </div>
-            <div class="col-5">
-                <div>
-                    <a href="{{ $pair->character_2->url }}">{{ $pair->character_2->slug }}</a>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="row">
-            <div class="col">
-            <h5>{{ $pair->status }}</h5>
-            </div>
-        </div>
-    </div>
-</div>
-<hr>
-@endforeach
+@endif
 
 @endsection
 

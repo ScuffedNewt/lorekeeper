@@ -439,6 +439,8 @@ class PairingManager extends Service
     private function getSex($boosts){
         $maleBoostPercentage = null;
         $femaleBoostPercentage = null;
+        $malePercentage = Settings::get('pairing_male_percentage');
+        $femalePercentage = Settings::get('pairing_female_percentage');
 
         foreach($boosts as $boost){
             if($boost->tag('boost') != null && isset($boost->tag('boost')->getData()['setting'])){
@@ -447,6 +449,9 @@ class PairingManager extends Service
             }
         }
         
+        //sex is disabled in site settings
+        if($malePercentage == 0 && $femalePercentage == 0) return null;
+
         //prioritize boosts
         if(isset($maleBoostPercentage)){
             return (random_int(0,100) <= $maleBoostPercentage) ? 'Male' : 'Female';
@@ -456,18 +461,12 @@ class PairingManager extends Service
         }
 
         //otherwise use settings
-        $malePercentage = Settings::get('pairing_male_percentage');
-        $femalePercentage = Settings::get('pairing_female_percentage');
-
-        if($malePercentage == 0 && $femalePercentage == 0){
-            return null;
+        if($malePercentage + $femalePercentage == 100){
+            return (random_int(0,100) <= $femalePercentage) ? 'Female' : 'Male';
         } else {
-            if($malePercentage + $femalePercentage == 100){
-                return (random_int(0,100) <= $femalePercentage) ? 'Female' : 'Male';
-            } else {
-                throw new \Exception("Male and female chance is not set to a total of 100. Please contact a mod/admin."); 
-            }
+            throw new \Exception("Male and female chance is not set to a total of 100. Please contact a mod/admin."); 
         }
+        
     }
 
     private function getFeaturePool($tag, $character_1, $character_2, $species_id, $boosts){

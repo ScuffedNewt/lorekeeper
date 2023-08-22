@@ -71,8 +71,7 @@
 
 <h2>Pairing Items </h2>
 <p>
-    Decide which pairing item and boosts to use. These items will be removed from your inventory but refunded if your pairing is rejected.
-    For a successful pairing, you need to attach at least one valid Pairing Item. You can optionally attach Boost Items.
+    Decide which pairing item and boosts to use. For a successful pairing, you need to attach at least one valid Pairing Item. You can optionally attach Boost Items.
 </p>
 <div class="text-right mb-3">
     <a href="#" class="btn btn-outline-info" id="addItem">Add Items</a>

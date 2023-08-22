@@ -27,17 +27,25 @@ class PairingController extends Controller
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function getPairings()
+    public function getPairings(Request $request)
     {
         $user = Auth::user();
-        $pairings = Pairing::where('user_id', $user->id)->whereNotIn('status', ['REJECTED', 'USED'])->orderBy('id', 'DESC')->get();
-        $approvals = Pairing::where(function ($query) {
-            $user = Auth::user();
-            $character_ids = $user->characters()->pluck('id')->toArray();
-            $query->whereIn('character_1_id', $character_ids)->orWhereIn('character_2_id', $character_ids);
-        })->where('user_id','!=',$user->id)->whereIn('status', ['OPEN'])->get();
 
-        $closed = Pairing::where('user_id', $user->id)->whereIn('status', ['REJECTED', 'USED'])->get();
+        $type = $request->get('type');
+        if(!$type) $type = 'new';
+
+        $pairings = null;
+        if($type == 'open') $pairings = Pairing::where('user_id', $user->id)->whereNotIn('status', ['REJECTED', 'USED'])->orderBy('id', 'DESC')->get();
+
+        if($type == 'approval'){
+            $pairings = Pairing::where(function ($query) {
+                $user = Auth::user();
+                $character_ids = $user->characters()->pluck('id')->toArray();
+                $query->whereIn('character_1_id', $character_ids)->orWhereIn('character_2_id', $character_ids);
+            })->where('user_id','!=',$user->id)->whereIn('status', ['OPEN'])->get();
+        }
+
+        if($type == 'closed') $pairings = Pairing::where('user_id', $user->id)->whereIn('status', ['REJECTED', 'USED'])->get();
 
         $userItems = $user->items()->where('count', ">", 0)->get();
         $pairingItemIds = [];
@@ -52,10 +60,8 @@ class PairingController extends Controller
 
         return view('home.pairings', [
             'pairings' => $pairings,
-            'approvals' => $approvals,
-            'closed' => $closed,
             'sublists' => Sublist::orderBy('sort', 'DESC')->get(),
-            'item_filter' => Item::orderBy('name')->released()->get()->keyBy('id'),
+            'item_filter' => Item::whereIn('id', $boostItemIds)->orWhereIn('id', $pairingItemIds)->orderBy('name')->released()->get()->keyBy('id'),
             'inventory' => UserItem::with('item')->whereIn('item_id', $boostItemIds)->orWhereIn('item_id', $pairingItemIds)->get(),
             'categories' => ItemCategory::orderBy('sort', 'DESC')->get(),
             'page' => 'pairing',
