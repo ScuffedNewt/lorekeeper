@@ -17,7 +17,7 @@ class Pairing extends Model
      * @var array
      */
     protected $fillable = [
-        'user_id', 'item_id', 'character_1_id', 'character_2_id', 'character_1_approved', 'character_2_approved', 'status', 'data'
+        'user_id', 'character_1_id', 'character_2_id', 'character_1_approved', 'character_2_approved', 'status', 'data'
     ];
 
     /**

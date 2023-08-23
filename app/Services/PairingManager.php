@@ -643,9 +643,9 @@ class PairingManager extends Service
         // sort boosts by rarityid for easier access
         foreach($boosts as $boost){
             if($boost->tag('boost') != null){
-                $tag = $boost->tag('boost');
-                if(isset($tag->getData()['rarity_id'])){
-                    $boostedChanceByRarity[$tag->getData()['rarity_id']] = $tag->getData()['rarity_chance'];
+                $boostTag = $boost->tag('boost');
+                if(isset($boostTag->getData()['rarity_id'])){
+                    $boostedChanceByRarity[$boostTag->getData()['rarity_id']] = $boostTag->getData()['rarity_chance'];
                 }
             }
         }
