@@ -139,6 +139,28 @@ class PairingManager extends Service
 
                 $pairing = Pairing::create($pairingData);
                 if(!$pairing) throw new \Exception("Error happened while trying to create pairing.");
+
+                //notify other users if approval is needed
+                if($character_1->user_id != $user->id) {
+                    $otherUser1 = User::find($character_1->user_id);
+                    Notifications::create('PAIRING_NEW_APPROVAL', $otherUser1, [
+                        'character_1_url' => $character_1->url,
+                        'character_1_slug' => $character_1->slug,
+                        'character_2_url' => $character_2->url,
+                        'character_2_slug' => $character_2->slug                    
+                    ]);
+                }
+                //only send one notif if the 2 chars belong to the same person
+                if($character_1->user_id != $character_2->user_id && $character_2->user_id != $user->id) {
+                    $otherUser2 = User::find($character_2->user_id);
+                    Notifications::create('PAIRING_NEW_APPROVAL', $otherUser2, [
+                        'character_1_url' => $character_1->url,
+                        'character_1_slug' => $character_1->slug,
+                        'character_2_url' => $character_2->url,
+                        'character_2_slug' => $character_2->slug
+                    ]);
+                }
+
                 return $this->commitReturn($pairing);
             } else {
                 return $this->rollbackReturn(false);
@@ -159,6 +181,10 @@ class PairingManager extends Service
 
             $character_1 = Character::where('slug', $character_1_code)->first();
             $character_2 = Character::where('slug', $character_2_code)->first();
+
+            if(!isset($character_1) || !isset($character_2_code)) throw new \Exception("Invalid Character set.");
+            if(!isset($character_2) || !isset($character_2_code)) throw new \Exception("Invalid Character set.");
+
             $species_1_id = $character_1->image->species->id;
             $species_2_id = $character_2->image->species->id;
             $item = Item::where('id', $item_id)->first();
@@ -214,6 +240,7 @@ class PairingManager extends Service
             if(!isset($pairing_id)) throw new \Exception("Pairing Id must be set.");
 
             $pairing = Pairing::where('id', $pairing_id)->first();
+            $pairingUser = User::find($pairing->user_id);
             $character_1 = Character::where('id', $pairing->character_1_id)->first();
             $character_2 = Character::where('id', $pairing->character_2_id)->first();
 
@@ -245,10 +272,18 @@ class PairingManager extends Service
 
                 foreach($stacks as $stackId=>$quantity) {
                     $stack = UserItem::find($stackId);
-                    $user = User::find($pairing->user_id);
-                    if(!$inventoryManager->debitStack($user, 'Pairing approved', ['data' => 'Item used in a pairing.'], $stack, $quantity)) throw new \Exception("Failed to create log for item stack.");
+                    if(!$inventoryManager->debitStack($pairingUser, 'Pairing approved', ['data' => 'Item used in a pairing.'], $stack, $quantity)) throw new \Exception("Failed to create log for item stack.");
                 }
             }
+
+            // Notify the user
+            Notifications::create('PAIRING_APPROVED', $pairingUser, [
+                'character_1_url' => $character_1->url,
+                'character_1_slug' => $character_1->slug,
+                'character_2_url' => $character_2->url,
+                'character_2_slug' => $character_2->slug            
+            ]);
+
             return $this->commitReturn($pairing);
         } catch(\Exception $e) {
             $this->setError('error', $e->getMessage());
@@ -270,6 +305,7 @@ class PairingManager extends Service
             if(!isset($pairing_id)) throw new \Exception("Pairing Id must be set.");
 
             $pairing = Pairing::where('id', $pairing_id)->first();
+            $pairingUser = User::find($pairing->user_id);
             $character_1 = Character::where('id', $pairing->character_1_id)->first();
             $character_2 = Character::where('id', $pairing->character_2_id)->first();
 
@@ -298,6 +334,14 @@ class PairingManager extends Service
                 }
             }
 
+            // Notify the user
+            Notifications::create('PAIRING_REJECTED', $pairingUser, [
+                'character_1_url' => $character_1->url,
+                'character_1_slug' => $character_1->slug,
+                'character_2_url' => $character_2->url,
+                'character_2_slug' => $character_2->slug
+            ]);
+
             return $this->commitReturn($pairing);
         } catch(\Exception $e) {
             $this->setError('error', $e->getMessage());
@@ -319,6 +363,8 @@ class PairingManager extends Service
             if(!isset($pairing_id)) throw new \Exception("Pairing Id must be set.");
 
             $pairing = Pairing::where('id', $pairing_id)->first();
+            if(!$pairing->status == 'READY') throw new \Exception("Pairing is not approved yet.");
+
             $item = null;
             $boosts = [];
 
@@ -620,7 +666,8 @@ class PairingManager extends Service
                 //calc inheritance chance
                 $doesGetThisFeature = (random_int(0,100) <= $inheritChance) ? true : false;
                 //never set pairing feature, we set it once at the end. We explicitly exclude it in case its part of a unfortunate category.
-                if(isset($tag->getData()["feature_id"]) && $feature->id == $tag->getData()["feature_id"]) $doesGetThisFeature = false;
+                if(isset($tag->getData()["feature_id"]) && $feature->id == (int)$tag->getData()["feature_id"]) $doesGetThisFeature = false;
+                    
                 if($doesGetThisFeature) {
                     $chosenFeatures[$feature->id] = $feature;
                     $featuresChosen += 1;
@@ -629,9 +676,8 @@ class PairingManager extends Service
                 $i = ($i === count($features) - 1) ? 0 : $i++;
             }
         }
-
         //set pairing feature
-        if(isset($tag->getData()["feature_id"])){
+        if(isset($tag->getData()["feature_id"]) && $character_1->image->subtype_id != $character_2->image->subtype_id){
             $pairingFeature = Feature::where("id", $tag->getData()["feature_id"])->first();
             $chosenFeatures[$pairingFeature->id] = $pairingFeature;
         }

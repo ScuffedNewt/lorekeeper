@@ -35,17 +35,17 @@ class PairingController extends Controller
         if(!$type) $type = 'new';
 
         $pairings = null;
-        if($type == 'open') $pairings = Pairing::where('user_id', $user->id)->whereNotIn('status', ['REJECTED', 'USED'])->orderBy('id', 'DESC')->get();
+        if($type == 'open') $pairings = Pairing::where('user_id', $user->id)->whereNotIn('status', ['REJECTED', 'USED'])->orderBy('id', 'DESC')->get()->paginate(10)->appends($request->query());
 
         if($type == 'approval'){
             $pairings = Pairing::where(function ($query) {
                 $user = Auth::user();
                 $character_ids = $user->characters()->pluck('id')->toArray();
                 $query->whereIn('character_1_id', $character_ids)->orWhereIn('character_2_id', $character_ids);
-            })->where('user_id','!=',$user->id)->whereIn('status', ['OPEN'])->get();
+            })->where('user_id','!=',$user->id)->whereIn('status', ['OPEN'])->orderBy('id', 'DESC')->get()->paginate(10)->appends($request->query());
         }
 
-        if($type == 'closed') $pairings = Pairing::where('user_id', $user->id)->whereIn('status', ['REJECTED', 'USED'])->get();
+        if($type == 'closed') $pairings = Pairing::where('user_id', $user->id)->whereIn('status', ['REJECTED', 'USED'])->orderBy('id', 'DESC')->get()->paginate(10)->appends($request->query());
 
         $userItems = $user->items()->where('count', ">", 0)->get();
         $pairingItemIds = [];

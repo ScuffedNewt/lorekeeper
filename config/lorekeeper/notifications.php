@@ -407,4 +407,26 @@ return [
         'message' => '<a href="{sender_url}">{sender}</a> has added you as a participant on a gallery submission. (<a href="{url}">View Submission</a>)',
         'url' => 'gallery/view/{submission_id}'
     ],
+
+    // PAIRING_APPROVED
+    1300 => [
+        'name' => 'Pairing was Approved',
+        'message' => 'Your Pairing of <a href="{character_1_url}">{character_1_slug}</a> and <a href="{character_2_url}">{character_2_slug}</a> has been approved! (<a href="{url}">View Pairings</a>)',
+        'url' => '/characters/pairings?type=open'
+    ],
+
+    // PAIRING_REJECTED   
+    1301 => [
+        'name' => 'Pairing was Rejected',
+        'message' => 'Your Pairing of <a href="{character_1_url}">{character_1_slug}</a> and <a href="{character_2_url}">{character_2_slug}</a> has been rejected. (<a href="{url}">View Pairings</a>)',
+        'url' => '/characters/pairings?type=closed'
+    ],
+
+    // PAIRING_NEW_APPROVAL 
+    1302 => [
+        'name' => 'New Pairings to Approve',
+        'message' => 'A new Pairing of <a href="{character_1_url}">{character_1_slug}</a> and <a href="{character_2_url}">{character_2_slug}</a> is awaiting your approval! (<a href="{url}">View Pairings</a>)',
+        'url' => '/characters/pairings?type=approval'
+    ],
+
 ];

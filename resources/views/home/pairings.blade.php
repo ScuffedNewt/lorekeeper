@@ -99,73 +99,77 @@
 {!! Form::close() !!}
 
 @else
+{!! $pairings->render() !!}
+<div class="table-responsive">
+<table class="table">
+    <thead>
+    <tr>
+      <th scope="col">Character 1</th>
+      <th scope="col">Character 2</th>
+      <th scope="col">Status</th>
+      @if(Request::get('type') != 'closed')<th scope="col">Actions</th>@endif
+      <th scope="col">Created</th>
+    </tr>
+  </thead>
+  <tbody>
+  @foreach($pairings as $pair)
 
-@foreach($pairings as $pair)
-<div class="row">
-    <div class="col-sm text-center mb-2">
+    <tr>
+      <td>
         <div class="row">
-            <div class="col-5">
-                <div>
-                    <a href="{{ $pair->character_1->url }}"><img class="w-25" src="{{ $pair->character_1->image->thumbnailUrl }}" class="img-thumbnail" /></a>
-                </div>
-                <p>{{ $pair->character_1->slug }}</p>
-            </div>
-            <div class="col-1 text-center p-4">
-            <h2> + </h2>
-            </div>
-            <div class="col-5">
-                <div>
-                    <a href="{{ $pair->character_2->url }}"><img class="w-25" src="{{ $pair->character_2->image->thumbnailUrl }}" class="img-thumbnail" /></a>
-                </div>
-                <p>{{ $pair->character_2->slug }}</p>
-            </div>
+            <div class="col-lg-4"><a href="{{ $pair->character_1->url }}"><img class="w-100" src="{{ $pair->character_1->image->thumbnailUrl }}" style="max-width:100px;"/></a></div>
+            <div class="col-lg-6">{{ $pair->character_1->slug }}</div>
         </div>
-    </div>
-    <div class="col-md-4">
-        <div class="row p-4">
-            <div class="col m-auto">
-            Status:
-            <h4>{{ $pair->status }}</h4>
-            </div>
-            <div class="col m-auto">
-                <div class="row">
-                @if(Request::get('type') == 'open')
-                    @if($pair->status == 'READY')
-                    {!! Form::open(['url' => '/characters/pairings/myo', 'id' => 'myoForm']) !!}
+      </td>
+      <td>
+        <div class="row">
+            <div class="col-lg-4"><a href="{{ $pair->character_2->url }}"><img class="w-100" src="{{ $pair->character_2->image->thumbnailUrl }}" style="max-width:100px;"/></a></div>
+            <div class="col-lg-6">{{ $pair->character_2->slug }}</div>
+        </div>
+      </td>
+      <td>            
+        <span class="btn btn-{{ ($pair->status == 'OPEN' || $pair->status == 'USED' ) ? 'secondary' : ($pair->status == 'READY' ? 'success' : 'danger') }} btn-sm py-0 px-1">{{ $pair->status }}</span>
+      </td>
+      <td>
+      @if(Request::get('type') == 'open')
+            @if($pair->status == 'READY')
+                {!! Form::open(['url' => '/characters/pairings/myo', 'id' => 'myoForm']) !!}
                     {{ Form::hidden('pairing_id', $pair->id) }}
                     {!! Form::submit('Create MYO', ['class' => 'btn btn-secondary']) !!}
-                    {!! Form::close() !!}
-                    @else
-                    <a href="#" class="btn btn-secondary disabled" id="pairingMyo">Create MYO</a>
-                    {!! Form::open(['url' => '/characters/pairings/reject', 'id' => 'rejectForm']) !!}
-                        {{ Form::hidden('pairing_id', $pair->id) }}
-                        {!! Form::submit('Reject', ['class' => 'btn btn-danger']) !!}
-                        {!! Form::close() !!}
-                    @endif
-                @endif
-                @if(Request::get('type') == 'approval')
-                    {!! Form::open(['url' => '/characters/pairings/approve', 'id' => 'approveForm']) !!}
-                    {{ Form::hidden('pairing_id', $pair->id) }}
-                    {!! Form::submit('Approve', ['class' => 'btn btn-success']) !!}
-                    {!! Form::close() !!}
-
-                    {!! Form::open(['url' => '/characters/pairings/reject', 'id' => 'rejectForm']) !!}
+                {!! Form::close() !!}
+            @else
+                <a href="#" class="btn btn-secondary disabled" id="pairingMyo">Create MYO</a>
+                {!! Form::open(['url' => '/characters/pairings/reject', 'id' => 'rejectForm']) !!}
                     {{ Form::hidden('pairing_id', $pair->id) }}
                     {!! Form::submit('Reject', ['class' => 'btn btn-danger']) !!}
-                    {!! Form::close() !!}
-                @endif
+                {!! Form::close() !!}
+             @endif
+        @endif
+        @if(Request::get('type') == 'approval')
+            {!! Form::open(['url' => '/characters/pairings/approve', 'id' => 'approveForm']) !!}
+                {{ Form::hidden('pairing_id', $pair->id) }}
+                {!! Form::submit('Approve', ['class' => 'btn btn-success']) !!}
+            {!! Form::close() !!}
 
-                </div>
-            </div>
-        </div>
-    </div>
+            {!! Form::open(['url' => '/characters/pairings/reject', 'id' => 'rejectForm']) !!}
+                {{ Form::hidden('pairing_id', $pair->id) }}
+                {!! Form::submit('Reject', ['class' => 'btn btn-danger']) !!}
+            {!! Form::close() !!}
+        @endif
+      </td>
+      <td>{!! pretty_date($pair->created_at) !!}</td>
+
+    </tr>
+
+  @endforeach
+
+  </tbody>
+</table>
 </div>
-<hr>
-@endforeach
+{!! $pairings->render() !!}
 @endif
 
 @endsection
-
 @section('scripts')
 @parent
 @include('widgets._inventory_select_js', ['readOnly' => true])
