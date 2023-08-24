@@ -550,19 +550,12 @@ class PairingManager extends Service
             $features = Feature::where("species_id", $species_id)->orWhere("species_id", null)->get();
         }
 
-
         // if legal features were set, only include those.
         $legal_feature_ids = (isset($tag->getData()["legal_feature_id"])) ? $tag->getData()["legal_feature_id"] : null;
         if($legal_feature_ids){
             $features_filtered=$features->whereIn("id", $all_feature_ids)->whereIn("id", $legal_feature_ids)->whereNotIn("id", $pairing_feature_ids);
         } else {
             $features_filtered=$features->whereIn("id", $all_feature_ids)->whereNotIn("id", $pairing_feature_ids);
-        }
-
-        //finally add the feature that the item tag applies, if present
-        if(isset($tag->getData()["feature_id"])){
-            $pairingFeature = Feature::where("id", $tag->getData()["feature_id"])->first();
-            $features_filtered->push($pairingFeature);
         }
 
         return $features_filtered;
@@ -664,10 +657,7 @@ class PairingManager extends Service
                 $feature = $features[$i];
                 $inheritChance = (isset($boostedChanceByRarity[$feature->rarity->id])) ? $boostedChanceByRarity[$feature->rarity->id] : $feature->rarity->inherit_chance;
                 //calc inheritance chance
-                $doesGetThisFeature = (random_int(0,100) <= $inheritChance) ? true : false;
-                //never set pairing feature, we set it once at the end. We explicitly exclude it in case its part of a unfortunate category.
-                if(isset($tag->getData()["feature_id"]) && $feature->id == (int)$tag->getData()["feature_id"]) $doesGetThisFeature = false;
-                    
+                $doesGetThisFeature = (random_int(0,100) <= $inheritChance) ? true : false;                    
                 if($doesGetThisFeature) {
                     $chosenFeatures[$feature->id] = $feature;
                     $featuresChosen += 1;
