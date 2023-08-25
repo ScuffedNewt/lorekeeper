@@ -59,9 +59,7 @@ class PairingService extends Service
     public function updateData($tag, $data)
     {
         //put inputs into an array to transfer to the DB
-        if(!isset($data['feature_id']) && !isset($data['species_id'])) throw new \Exception("A trait or species must be set.");
         if(isset($data['feature_id']) && isset($data['species_id'])) throw new \Exception("You can only set either trait or species.");
-        if(!isset($data['pairing_type'])) throw new \Exception("A pairing type must be set.");
         if($data['min'] == 0 || $data['max'] == 0) throw new \Exception("Min/Max cannot be 0.");
         if($data['min'] > $data['max']) throw new \Exception("Min must be smaller than max.");
 
@@ -70,7 +68,7 @@ class PairingService extends Service
 
         if(isset($data['feature_id'])) $pairingData['feature_id'] = $data['feature_id'];
         if(isset($data['species_id'])) $pairingData['species_id'] = $data['species_id'];
-        $pairingData['pairing_type'] = $data['pairing_type'];
+        if(isset($data['pairing_type'])) $pairingData['pairing_type'] = $data['pairing_type'];
         $pairingData['min'] = $data['min'];
         $pairingData['max'] = $data['max'];
 

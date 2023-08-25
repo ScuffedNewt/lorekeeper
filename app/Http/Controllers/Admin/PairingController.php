@@ -56,21 +56,21 @@ class PairingController extends Controller
         $pairingItemIds = ItemTag::where('tag', 'pairing')->pluck('item_id');
         $boostItemIds = ItemTag::where('tag', 'boost')->pluck('item_id');
 
-        $character_1_code =  $request->character_1_code;
-        $character_2_code =  $request->character_2_code;
-        $item_ids = $request->item_id;
+        $character1Code =  $request->character_1_code;
+        $character2Code =  $request->character_2_code;
+        $itemIds = $request->item_id;
 
         $user = Auth::user();
-        $testMyos = $service->rollTestMyos($character_1_code, $character_2_code,$item_ids, $user);
+        $testMyos = $service->rollTestMyos($character1Code, $character2Code,$itemIds, $user);
     
         if (isset($testMyos)) {
             return view('admin.pairings.roller', [
-                'items' => $item_ids,
+                'items' => $itemIds,
                 'inventory' => Item::whereIn('id', $boostItemIds)->orWhereIn('id', $pairingItemIds)->pluck('name', 'id'),
                 'testMyos' => $testMyos,
-                'slug1' => $character_1_code,
-                'slug2' => $character_2_code,
-                'item_ids' => array_filter($item_ids)
+                'slug1' => $character1Code,
+                'slug2' => $character2Code,
+                'item_ids' => array_filter($itemIds)
             ]);
         } else {
             foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();

@@ -40,8 +40,8 @@ class PairingController extends Controller
         if($type == 'approval'){
             $pairings = Pairing::where(function ($query) {
                 $user = Auth::user();
-                $character_ids = $user->characters()->pluck('id')->toArray();
-                $query->whereIn('character_1_id', $character_ids)->orWhereIn('character_2_id', $character_ids);
+                $characterIds = $user->characters()->pluck('id')->toArray();
+                $query->whereIn('character_1_id', $characterIds)->orWhereIn('character_2_id', $characterIds);
             })->where('user_id','!=',$user->id)->whereIn('status', ['OPEN'])->orderBy('id', 'DESC')->get()->paginate(10)->appends($request->query());
         }
 

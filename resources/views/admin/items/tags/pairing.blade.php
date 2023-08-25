@@ -6,8 +6,8 @@
 <h3>Basics</h3>
 <div class="row">
     <div class="col">
-        {!! Form::label('Pairing Type') !!} {!! add_help('Pairings can either be between different species or between
-        subtypes of the same species.') !!}
+        {!! Form::label('Pairing Type (Optional)') !!} {!! add_help('Pairings can be restricted to either be between different species or between
+        subtypes of the same species. Leave Empty if you want to allow all pairings.') !!}
     </div>
     <div class="col">
         @if(isset($tag->getData()['pairing_type']))
@@ -29,14 +29,13 @@
 </div>
 
 <hr>
-<p>Set either a trait or species that the offspring will inherit. If a trait is set, the species is decided between the
-    parent specieses, and the trait will list the second species.
-    If a species is set, the offspring will always be that species, and no additional trait is attached.
+<p> If a trait is set, this trait will be granted to all offspring and will list the second parent's species/subtype. It will not be set if the parents species + subtype are identical.
+    If a species is set, the offspring will always be that species, but the MYO may have traits of either parent ignoring species restrictions.
+    If neither is set, traits and species are chosen solely from the parent characters.
 </p>
 <div class="row">
     <div class="col">
-        {!! Form::label('Offspring Trait') !!} {!! add_help('Choose a trait that this pairing item will grant the offspring. Eg.
-        Hybrid / Crossbreed.') !!}
+        {!! Form::label('Offspring Trait (Optional)') !!} {!! add_help('Choose a trait that this pairing item will always grant the offspring.') !!}
     </div>
     <div class="col">
         @if(isset($tag->getData()['feature_id']))
@@ -51,8 +50,7 @@
 
 <div class="row">
     <div class="col">
-        {!! Form::label('Offspring Species') !!} {!! add_help('Choose a species that this pairing item will grant the offspring.
-        Eg. Hybrid / Crossbreed.') !!}
+        {!! Form::label('Offspring Species (Optional)') !!} {!! add_help('Choose a species that this pairing item will grant the offspring.') !!}
     </div>
     <div class="col">
         @if(isset($tag->getData()['species_id']))
