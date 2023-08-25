@@ -663,7 +663,7 @@ class PairingManager extends Service
                     $featuresChosen += 1;
                 }
                 $featuresCalculated += 1;
-                $i = ($i === count($features) - 1) ? 0 : $i++;
+                $i = ($i === count($features) - 1) ? 0 : $i += 1;
             }
         }
         //set pairing feature
