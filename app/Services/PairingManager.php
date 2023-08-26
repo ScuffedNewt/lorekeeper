@@ -395,14 +395,14 @@ class PairingManager extends Service
                 $speciesId = $this->getSpeciesId($tag,$species1Id, $species2Id);
                 $subtypeId = $this->getSubtypeId($speciesId, $species1Id, $species2Id, $character1, $character2);
 
-                $featurePool = $this->getFeaturePool($tag, $character1, $character2, $speciesId, $boosts);
+                $featurePool = $this->getFeaturePool($tag, $character1, $character2, $speciesId, $subtypeId, $boosts);
 
                 $chosenFeatures = $this->getChosenFeatures($tag, $character1, $character2, $featurePool, $boosts);
                 $featureData = $this->getFeatureData($tag, $speciesId, $subtypeId, $species1Id, $species2Id, $character1, $character2, $chosenFeatures);
                 $rarityId = $this->getRarityId($character1, $character2, $chosenFeatures);
 
                 //create MYO
-                $myo = $this->saveMyo($user, $sex, $speciesId , $subtypeId, $rarityId, array_unique(array_keys($chosenFeatures)), $featureData);
+                $myo = $this->saveMyo($user, $sex, $speciesId , $subtypeId, $rarityId, array_unique(array_keys($chosenFeatures)), $featureData, $character1->slug, $character2->slug);
 
                 if(!$myo) throw new \Exception("Could not create MYO slot.");
             }
@@ -456,7 +456,7 @@ class PairingManager extends Service
                     $speciesId = $this->getSpeciesId($tag, $species1Id, $species2Id);
                     $subtypeId = $this->getSubtypeId($speciesId, $species1Id, $species2Id, $character1, $character2);
 
-                    $featurePool = $this->getFeaturePool($tag, $character1, $character2, $speciesId,$boosts);
+                    $featurePool = $this->getFeaturePool($tag, $character1, $character2, $speciesId, $subtypeId, $boosts);
 
                     $chosenFeatures = $this->getChosenFeatures($tag, $character1, $character2, $featurePool, $boosts);
 
@@ -516,7 +516,7 @@ class PairingManager extends Service
         
     }
 
-    private function getFeaturePool($tag, $character1, $character2, $speciesId, $boosts){
+    private function getFeaturePool($tag, $character1, $character2, $speciesId, $subtypeId, $boosts){
         $inheritBothBoostPercentage = null;
 
         foreach($boosts as $boost){
@@ -548,7 +548,11 @@ class PairingManager extends Service
         if(isset($tag->getData()['species_id'])){
             $features = Feature::get();
         } else {
-            $features = Feature::where("species_id", $speciesId)->orWhere("species_id", null)->get();
+            //filter features that are valid for the chosen species and subtype
+            $features = Feature::where(function($query) use ($speciesId){
+                $query->where('species_id', $speciesId)
+                ->orWhere('species_id', null);
+            })->where("subtype_id", $subtypeId)->orWhere("subtype_id", null)->get();
         }
 
         // if legal features were set, only include those.
@@ -650,11 +654,16 @@ class PairingManager extends Service
         foreach($featuresByCategory as $categoryId=>$features){
             $features = $features->shuffle();
             $category = FeatureCategory::where('id', $categoryId)->first();
+
+            //if no category is set, make min inheritable 0 and max inheritable 100 (basically, unlimited)
+            $minInheritable = (isset($category)) ? $category->min_inheritable : 0;
+            $maxInheritable = (isset($category)) ? $category->max_inheritable : 100;
+
             $featuresCalculated = 0;
             $featuresChosen = 0;
             $i = 0;
             //loop over features until min amount is chosen but never more than max amount
-            while(($featuresCalculated < count($features) && $featuresChosen < $category->max_inheritable) || ($featuresChosen < $category->min_inheritable)){
+            while(($featuresCalculated < count($features) && $featuresChosen < $maxInheritable) || ($featuresChosen < $minInheritable)){
                 $feature = $features[$i];
                 $inheritChance = (isset($boostedChanceByRarity[$feature->rarity->id])) ? $boostedChanceByRarity[$feature->rarity->id] : $feature->rarity->inherit_chance;
                 //calc inheritance chance
@@ -697,14 +706,14 @@ class PairingManager extends Service
         return $validSpeciesIds[$species_id_index];
     }
 
-    private function saveMyo($user, $sex, $speciesId, $subtypeId, $rarityId, $feature_ids, $featureData){
+    private function saveMyo($user, $sex, $speciesId, $subtypeId, $rarityId, $feature_ids, $featureData, $character1Slug, $character2Slug){
         //set user who the slot belongs to
         $characterData['user_id'] = $user->id;
         //other vital data that is default
         $characterData['name'] = "Pairing Slot";
         $characterData['transferrable_at'] = null;
         $characterData['is_myo_slot'] = 1;
-        $characterData['description'] = "A MYO slot created from a Pairing. All traits listed can be used without needing an extra item.";
+        $characterData['description'] = "A MYO slot created from a Pairing of: ".$character1Slug." and ".$character2Slug.".";
 
         //this uses your default MYO slot image from the CharacterManager
         //see wiki page for documentation on adding a default image switch
