@@ -27,8 +27,7 @@
 <div id="characterComponents" class="row justify-content-center">
     <div class="submission-character m-3 card col-md" id="character_1">
         <div class="card-body">
-            <div class="text-right"><a href="#" class="remove-character text-muted"><i class="fas fa-times"></i></a>
-            </div>
+
             <div class="row">
                 <div class="col-md-4 align-items-stretch d-flex">
                     <div class="d-flex text-center align-items-center">
@@ -48,8 +47,7 @@
     </div>
     <div class="submission-character m-3 card col-md" id="character_2">
         <div class="card-body">
-            <div class="text-right"><a href="#" class="remove-character text-muted"><i class="fas fa-times"></i></a>
-            </div>
+
             <div class="row">
                 <div class="col-md-4 align-items-stretch d-flex">
                     <div class="d-flex text-center align-items-center">
@@ -192,10 +190,6 @@ $(document).ready(function() {
                     $parent.find('.character-image-loaded').removeClass('hide');
                     $parent.find('.character-rewards').removeClass('hide');
                 });
-        });
-        node.find('.remove-character').on('click', function(e) {
-            e.preventDefault();
-            $(this).parent().parent().parent().remove();
         });
     }
 

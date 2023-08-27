@@ -189,10 +189,12 @@ class PairingManager extends Service
             $species2Id = $character2->image->species->id;
             $item = Item::where('id', $item_id)->first();
             $tag = $item->tag('pairing');
+            
+            if(!isset($tag)) throw new \Exception("Item is missing the required pairing tag.");
+
             $specieses = (isset($tag->getData()["legal_species_id"])) ? $tag->getData()["legal_species_id"] : null;
             $pairingType = (isset($tag->getData()["pairing_type"])) ? $tag->getData()["pairing_type"] : null;
 
-            if(!isset($tag)) throw new \Exception("Item is missing the required pairing tag.");
 
             //check sex if set to do so. If one char has no sex it always works.
             if(Settings::get('pairing_sex_restrictions') == 1){
