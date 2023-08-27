@@ -185,16 +185,10 @@ class PairingManager extends Service
             if(!isset($character1) || !isset($character2Code)) throw new \Exception("Invalid Character set.");
             if(!isset($character2) || !isset($character2Code)) throw new \Exception("Invalid Character set.");
 
-            $species1Id = $character1->image->species->id;
-            $species2Id = $character2->image->species->id;
             $item = Item::where('id', $item_id)->first();
             $tag = $item->tag('pairing');
             
             if(!isset($tag)) throw new \Exception("Item is missing the required pairing tag.");
-
-            $specieses = (isset($tag->getData()["legal_species_id"])) ? $tag->getData()["legal_species_id"] : null;
-            $pairingType = (isset($tag->getData()["pairing_type"])) ? $tag->getData()["pairing_type"] : null;
-
 
             //check sex if set to do so. If one char has no sex it always works.
             if(Settings::get('pairing_sex_restrictions') == 1){
@@ -205,24 +199,39 @@ class PairingManager extends Service
 
             //check if the pairing type matches the character input
             //pairing type 0 = species, 1 = subtype
+            $pairingType = (isset($tag->getData()["pairing_type"])) ? $tag->getData()["pairing_type"] : null;
             if(isset($pairingType)){
                 if($pairingType == 1 && $species1Id != $species2Id ) throw new \Exception("A subtype pairing can only be done with characters of the same species.");
                 if($pairingType == 0 && $species1Id == $species2Id ) throw new \Exception("A species pairing can only be done with characters of different species.");
             }
 
 
-            // check if correct item was used for the characters
+            // check if correct species was used for the characters
+            $illegalSpecieses = (isset($tag->getData()["illegal_species_id"])) ? $tag->getData()["illegal_species_id"] : null;
+            $species1Id = $character1->image->species->id;
+            $species2Id = $character2->image->species->id;
             $validSpeciesIds = [];
-            if($specieses == null) {
+            if($illegalSpecieses == null) {
                 $validSpeciesIds = [$species1Id, $species2Id];
             } else {
-                if(in_array($species1Id, $specieses)) $validSpeciesIds[] = $species1Id;
-                if(in_array($species2Id, $specieses)) $validSpeciesIds[] = $species2Id;
+                if(!in_array($species1Id, $illegalSpecieses)) $validSpeciesIds[] = $species1Id;
+                if(!in_array($species2Id, $illegalSpecieses)) $validSpeciesIds[] = $species2Id;
             }
+            if(count($validSpeciesIds) <= 0 && !isset($tag->getData()["default_species_id"])) throw new \Exception("This item cannot create a pairing from the specieses of the chosen characters.");
 
-            // if no species is set all are valid
-            // otherwise we need at least 1 valid species that can receive the traits...
-            if(count($validSpeciesIds) <= 0) throw new \Exception("This item cannot create a pairing from the specieses of the chosen characters.");
+            // check if correct subtypes were used for the characters
+            $illegalSubtypes = (isset($tag->getData()["illegal_subtype_id"])) ? $tag->getData()["illegal_subtype_id"] : null;
+            $sub1Id = $character1->image->subtype?->id;
+            $sub2Id = $character2->image->subtype?->id;
+            $validSubtypeIds = [];
+            if($illegalSubtypes == null) {
+                $validSubtypeIds = [$sub1Id, $sub2Id];
+            } else {
+                if(!in_array($sub1Id, $illegalSubtypes)) $validSubtypeIds[] = $sub1Id;
+                if(!in_array($sub2Id, $illegalSubtypes)) $validSubtypeIds[] = $sub2Id;
+            }
+            if(count($validSubtypeIds) <= 0 && !isset($tag->getData()["default_subtype_id"])) throw new \Exception("This item cannot create a pairing from the subtypes of the chosen characters.");
+
             return true;
 
         } catch(\Exception $e) {
@@ -394,11 +403,9 @@ class PairingManager extends Service
             //loop over for each myo
             for($i = 0; $i < $myoAmount; $i++){
                 $sex = $this->getSex($boosts);
-                $speciesId = $this->getSpeciesId($tag,$species1Id, $species2Id);
-                $subtypeId = $this->getSubtypeId($speciesId, $species1Id, $species2Id, $character1, $character2);
-
+                $speciesId = $this->getSpeciesId($tag, $species1Id, $species2Id);
+                $subtypeId = $this->getSubtypeId($tag, $speciesId, $species1Id, $species2Id, $character1, $character2);
                 $featurePool = $this->getFeaturePool($tag, $character1, $character2, $speciesId, $subtypeId, $boosts);
-
                 $chosenFeatures = $this->getChosenFeatures($tag, $character1, $character2, $featurePool, $boosts);
                 $featureData = $this->getFeatureData($tag, $speciesId, $subtypeId, $species1Id, $species2Id, $character1, $character2, $chosenFeatures);
                 $rarityId = $this->getRarityId($character1, $character2, $chosenFeatures);
@@ -456,15 +463,11 @@ class PairingManager extends Service
                 for($i = 0; $i < $myoAmount; $i++){
                     $sex = $this->getSex($boosts);
                     $speciesId = $this->getSpeciesId($tag, $species1Id, $species2Id);
-                    $subtypeId = $this->getSubtypeId($speciesId, $species1Id, $species2Id, $character1, $character2);
-
+                    $subtypeId = $this->getSubtypeId($tag, $speciesId, $species1Id, $species2Id, $character1, $character2);
                     $featurePool = $this->getFeaturePool($tag, $character1, $character2, $speciesId, $subtypeId, $boosts);
-
                     $chosenFeatures = $this->getChosenFeatures($tag, $character1, $character2, $featurePool, $boosts);
-
                     $featureData = $this->getFeatureData($tag, $speciesId, $subtypeId, $species1Id, $species2Id, $character1, $character2, $chosenFeatures);
                     $rarityId = $this->getRarityId($character1, $character2, $chosenFeatures);
-
                     $testMyos[] = [
                         'user' => $user,
                         'sex' => $sex,
@@ -557,10 +560,10 @@ class PairingManager extends Service
             })->where("subtype_id", $subtypeId)->orWhere("subtype_id", null)->get();
         }
 
-        // if legal features were set, only include those.
-        $legalFeatureIds = (isset($tag->getData()["legal_feature_id"])) ? $tag->getData()["legal_feature_id"] : null;
-        if($legalFeatureIds){
-            $featuresFiltered=$features->whereIn("id", $allFeatureIds)->whereIn("id", $legalFeatureIds)->whereNotIn("id", $pairingFeatureIds);
+        // if illegal features were set, do not include those.
+        $illegalFeatureIds = (isset($tag->getData()["illegal_feature_id"])) ? $tag->getData()["illegal_feature_id"] : null;
+        if($illegalFeatureIds){
+            $featuresFiltered=$features->whereIn("id", $allFeatureIds)->whereNotIn("id", $illegalFeatureIds)->whereNotIn("id", $pairingFeatureIds);
         } else {
             $featuresFiltered=$features->whereIn("id", $allFeatureIds)->whereNotIn("id", $pairingFeatureIds);
         }
@@ -573,8 +576,8 @@ class PairingManager extends Service
         $pairingFeatureData = null;
         if($species1Id == $species2Id){
             //parents with the same species - subtype is 50:50 between parents
-            if($character1->image->subtype_id != $subtypeId) $pairingFeatureData = $character1->image->subtype->name;
-            if($character2->image->subtype_id != $subtypeId) $pairingFeatureData = $character2->image->subtype->name;
+            if($character1->image->subtype_id != $subtypeId) $pairingFeatureData = $character1->image->subtype?->name;
+            if($character2->image->subtype_id != $subtypeId) $pairingFeatureData = $character2->image->subtype?->name;
         } else {
             //subtype is the type of the parent whose species was chosen
             if($character1->image->species->id == $speciesId){
@@ -602,21 +605,42 @@ class PairingManager extends Service
     }
 
 
-    private function getSubtypeId($speciesId, $species1Id, $species2Id, $character1, $character2){
+    private function getSubtypeId($tag, $speciesId, $species1Id, $species2Id, $character1, $character2){
+        $illegalSubtypes = (isset($tag->getData()["illegal_subtype_id"])) ? $tag->getData()["illegal_subtype_id"] : null;
+        $defaultSubtypeId = (isset($tag->getData()["default_subtype_id"])) ? (int)$tag->getData()["default_subtype_id"] : null;
+        $sub1Id = $character1->image->subtype_id;
+        $sub2Id = $character2->image->subtype_id;
+
+        //get only valid subtypes
+        $validSubtypeIds = [];
+        if($illegalSubtypes == null) {
+            $validSubtypeIds = [$sub1Id, $sub2Id];
+        } else {
+            if(!in_array($sub1Id, $illegalSubtypes) && $sub1Id != null) $validSubtypeIds[] = $sub1Id;
+            if(!in_array($sub2Id, $illegalSubtypes) && $sub2Id != null) $validSubtypeIds[] = $sub2Id;
+        }
+
+        //in case a species was set for inheritance, or via default species, set subtype as null/open for choice.
+        if($speciesId != $species1Id && $speciesId != $species2Id) {
+            return null;
+        }
+
         if($species1Id == $species2Id){
             //parents with the same species - subtype is 50:50 between parents
-            $subtypes = [$character1->image->subtype_id, $character2->image->subtype_id];
-            $subtypeId = $subtypes[array_rand($subtypes)];
-        } else {
-            //subtype is the type of the parent whose species was chosen
-            if($character1->image->species->id == $speciesId){
-                $subtypeId = $character1->image->subtype_id;
-            } 
-            elseif($character2->image->species->id == $speciesId){
-                $subtypeId = $character2->image->subtype_id;
+            if(count($validSubtypeIds) > 0){
+                $subtypeId = $validSubtypeIds[array_rand($validSubtypeIds)];
             } else {
-                //in case a species was set for inheritance, we set subtype as null/open for choice.
-                $subtypeId = null;
+                $subtypeId = ($defaultSubtypeId != null) ? $defaultSubtypeId : null;
+            }
+        } else {
+            //different specieses - subtype is the type of the parent whose species was chosen
+            if($species1Id == $speciesId && in_array($sub1Id, $validSubtypeIds)){
+                $subtypeId = $sub1Id;
+            } elseif($species2Id == $speciesId && in_array($sub2Id, $validSubtypeIds)){
+                $subtypeId = $sub2Id;
+            } else {
+                //if default is set go default
+                $subtypeId = $defaultSubtypeId;
             }
         }
         return $subtypeId;
@@ -690,22 +714,29 @@ class PairingManager extends Service
 
 
     private function getSpeciesId($tag, $species1Id, $species2Id){
-        // if a species was set for the item, it should be the item...
-        
-        //pairing type 0 = species, 1 = subtype
+
+        // if a species was set for the item, it should be that one.
         if(isset($tag->getData()['species_id'])) return $tag->getData()['species_id'];
        
-        $specieses = (isset($tag->getData()["legal_species_id"])) ? $tag->getData()["legal_species_id"] : null;
+        $illegalSpecieses = (isset($tag->getData()["illegal_species_id"])) ? $tag->getData()["illegal_species_id"] : null;
+        $defaultSpeciesId = (isset($tag->getData()["default_species_id"])) ? (int)$tag->getData()["default_species_id"] : null;
+
         $validSpeciesIds = [];
-        if($specieses == null) {
+        if($illegalSpecieses == null) {
             $validSpeciesIds = [$species1Id, $species2Id];
         } else {
-            if(in_array($species1Id, $specieses)) $validSpeciesIds[] = $species1Id;
-            if(in_array($species2Id, $specieses)) $validSpeciesIds[] = $species2Id;
+            if(!in_array($species1Id, $illegalSpecieses)) $validSpeciesIds[] = $species1Id;
+            if(!in_array($species2Id, $illegalSpecieses)) $validSpeciesIds[] = $species2Id;
         }
-        // 50:50 chance of either char being chosen for species if there are 2 species valid for this item
-        $species_id_index = array_rand($validSpeciesIds);
-        return $validSpeciesIds[$species_id_index];
+
+        if(count($validSpeciesIds) > 0){
+            // 50:50 chance of either char being chosen for species if there are 2 species valid for this item
+            $species_id_index = array_rand($validSpeciesIds);
+            return $validSpeciesIds[$species_id_index];
+        } else {
+            return $defaultSpeciesId; //should never be null as pairing gets rejected when no default is set and no species is valid
+        }
+
     }
 
     private function saveMyo($user, $sex, $speciesId, $subtypeId, $rarityId, $feature_ids, $featureData, $character1Slug, $character2Slug){

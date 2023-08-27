@@ -194,18 +194,18 @@ $(document).ready(function() {
     }
 
 
-    var $traitTable = $('#itemTableBody');
-    var $traitRow = $('#itemTableBody').find('.hide');
+    var $itemTable = $('#itemTableBody');
+    var $itemRow = $('#itemTableBody').find('.hide');
 
     $('#itemTableBody .selectize').selectize();
     attachRemoveListener($('#itemTableBody .remove-trait-button'));
 
     $('#addItem').on('click', function(e) {
         e.preventDefault();
-        var $clone = $traitRow.clone();
+        var $clone = $itemRow.clone();
         $clone.removeClass('hide');
 
-        $traitTable.append($clone);
+        $itemTable.append($clone);
         attachRemoveListener($clone.find('.remove-trait-button'));
     });
 

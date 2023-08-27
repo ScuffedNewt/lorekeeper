@@ -65,30 +65,44 @@
 
 <hr>
 <h3>Restrictions (Optional)</h3>
-<h5>Species Restrictions</h5>
-<p>Add the species that this item should work on. For a pairing to go through using this item, at least one parent must
-    have a species listed here. Leave it empty to allow all species to work.</p>
+<h5>Species Exclusions</h5>
+<p>Species set here cannot be inherited through a pairing using this item. If both parents are of an excluded species, the pairing cannot be created unless a default species is set.
+    If one parent's species is not excluded, it always rolls that parent's species.
+</p>
 
-<div class="text-right mb-3">
-    <a href="#" class="btn btn-outline-info" id="addSpecies">Add valid Species</a>
+<div class="row">
+    <div class="col">
+        {!! Form::label('Default Species (Optional)') !!} {!! add_help('Choose a species that should be set if both parent species are excluded.') !!}
+    </div>
+    <div class="col">
+        @if(isset($tag->getData()['default_species_id']))
+        {!! Form::select('default_species_id', $specieses, $tag->getData()['default_species_id'], ['class' => 'form-control mr-2
+        feature-select', 'placeholder' => 'Select Default Species']) !!}
+        @else
+        {!! Form::select('default_species_id', $specieses, null, ['class' => 'form-control mr-2 feature-select', 'placeholder' =>
+        'Select Default Species']) !!}
+        @endif
+    </div>
 </div>
 
+<div class="text-right mb-3">
+    <a href="#" class="btn btn-outline-info" id="addSpecies">Add Species</a>
+</div>
 
 <table class="table table-sm" id="speciesTable">
-
     <tbody id="speciesTableBody">
         <tr class="loot-row hide">
             <td class="loot-row-select">
-                {!! Form::select('legal_species_id[]', $specieses, null, ['class' => 'form-control item-select', 'placeholder'
+                {!! Form::select('illegal_species_id[]', $specieses, null, ['class' => 'form-control item-select', 'placeholder'
                 => 'Select Species']) !!}
             </td>
             <td class="text-right"><a href="#" class="btn btn-danger remove-species-button">Remove</a></td>
         </tr>
-        @if(isset($tag->getData()['legal_species_id']) && count($tag->getData()['legal_species_id']) > 0)
-        @foreach($tag->getData()['legal_species_id'] as $legal_species_id)
+        @if(isset($tag->getData()['illegal_species_id']) && count($tag->getData()['illegal_species_id']) > 0)
+        @foreach($tag->getData()['illegal_species_id'] as $illegal_species_id)
         <tr class="loot-row">
             <td class="loot-row-select">
-                {!! Form::select('legal_species_id[]', $specieses, $legal_species_id, ['class' => 'form-control item-select',
+                {!! Form::select('illegal_species_id[]', $specieses, $illegal_species_id, ['class' => 'form-control item-select',
                 'placeholder' => 'Select Species']) !!}
 
             </td>
@@ -100,11 +114,61 @@
     </tbody>
 </table>
 
-<h5>Trait Restrictions</h5>
-<p>Add the traits that this item may grant. Any trait not mentioned here will not be inheritable via this item. If you want all traits to be inheritable, leave this empty.</p>
+<h5>Subtype Exclusions</h5>
+<p>Subtype set here cannot be inherited through a pairing using this item. If both parents have an excluded subtype, the pairing cannot be created unless a default subtype is set.
+If one parent's subtype is not excluded, it always rolls that parent's subtype.
+</p>
+
+<div class="row">
+    <div class="col">
+        {!! Form::label('Default Subtype (Optional)') !!} {!! add_help('Choose a subtype that should be set if both parent subtypes are excluded.') !!}
+    </div>
+    <div class="col">
+        @if(isset($tag->getData()['default_subtype_id']))
+        {!! Form::select('default_subtype_id', $subtypes, $tag->getData()['default_subtype_id'], ['class' => 'form-control mr-2
+        feature-select', 'placeholder' => 'Select Default Subtype']) !!}
+        @else
+        {!! Form::select('default_subtype_id', $subtypes, null, ['class' => 'form-control mr-2 feature-select', 'placeholder' =>
+        'Select Default Subtype']) !!}
+        @endif
+    </div>
+</div>
 
 <div class="text-right mb-3">
-    <a href="#" class="btn btn-outline-info" id="addTrait">Add valid traits</a>
+    <a href="#" class="btn btn-outline-info" id="addSubtype">Add Subtype</a>
+</div>
+
+<table class="table table-sm" id="subtypeTable">
+
+    <tbody id="subtypeTableBody">
+        <tr class="loot-row hide">
+            <td class="loot-row-select">
+                {!! Form::select('illegal_subtype_id[]', $subtypes, null, ['class' => 'form-control item-select', 'placeholder'
+                => 'Select Subtype']) !!}
+            </td>
+            <td class="text-right"><a href="#" class="btn btn-danger remove-subtype-button">Remove</a></td>
+        </tr>
+        @if(isset($tag->getData()['illegal_subtype_id']) && count($tag->getData()['illegal_subtype_id']) > 0)
+        @foreach($tag->getData()['illegal_subtype_id'] as $illegal_subtype_id)
+        <tr class="loot-row">
+            <td class="loot-row-select">
+                {!! Form::select('illegal_subtype_id[]', $subtypes, $illegal_subtype_id, ['class' => 'form-control item-select',
+                'placeholder' => 'Select Subtype']) !!}
+
+            </td>
+            <td class="text-right"><a href="#" class="btn btn-danger remove-subtype-button">Remove</a></td>
+        </tr>
+        @endforeach
+        @endif
+
+    </tbody>
+</table>
+
+<h5>Trait Exclusions</h5>
+<p>Traits set here cannot be inherited through a pairing using this item.</p>
+
+<div class="text-right mb-3">
+    <a href="#" class="btn btn-outline-info" id="addTrait">Add traits</a>
 </div>
 
 
@@ -113,16 +177,16 @@
     <tbody id="traitTableBody">
         <tr class="loot-row hide">
             <td class="loot-row-select">
-                {!! Form::select('legal_feature_id[]', $features, null, ['class' => 'form-control item-select', 'placeholder'
+                {!! Form::select('illegal_feature_id[]', $features, null, ['class' => 'form-control item-select', 'placeholder'
                 => 'Select Trait']) !!}
             </td>
             <td class="text-right"><a href="#" class="btn btn-danger remove-trait-button">Remove</a></td>
         </tr>
-        @if(isset($tag->getData()['legal_feature_id']) && count($tag->getData()['legal_feature_id']) > 0)
-        @foreach($tag->getData()['legal_feature_id'] as $legal_feature_id)
+        @if(isset($tag->getData()['illegal_feature_id']) && count($tag->getData()['illegal_feature_id']) > 0)
+        @foreach($tag->getData()['illegal_feature_id'] as $illegal_feature_id)
         <tr class="loot-row">
             <td class="loot-row-select">
-                {!! Form::select('legal_feature_id[]', $features, $legal_feature_id, ['class' => 'form-control item-select',
+                {!! Form::select('illegal_feature_id[]', $features, $illegal_feature_id, ['class' => 'form-control item-select',
                 'placeholder' => 'Select Trait']) !!}
 
             </td>
@@ -143,6 +207,8 @@ $(document).ready(function() {
     var $speciesRow = $('#speciesTableBody').find('.hide');
     var $traitTable = $('#traitTableBody');
     var $traitRow = $('#traitTableBody').find('.hide');
+    var $subtypeTable = $('#subtypeTableBody');
+    var $subtypeRow = $('#subtypeTableBody').find('.hide');
 
     $('#speciesTableBody .selectize').selectize();
     attachRemoveListener($('#speciesTableBody .remove-species-button'));
@@ -150,6 +216,9 @@ $(document).ready(function() {
     $('#traitTableBody .selectize').selectize();
     attachRemoveListener($('#traitTableBody .remove-trait-button'));
 
+    $('#subtypeTableBody .selectize').selectize();
+    attachRemoveListener($('#subtypeTableBody .remove-subtype-button'));
+    
     $('#addSpecies').on('click', function(e) {
         e.preventDefault();
         var $clone = $speciesRow.clone();
@@ -166,6 +235,15 @@ $(document).ready(function() {
 
         $traitTable.append($clone);
         attachRemoveListener($clone.find('.remove-trait-button'));
+    });
+
+    $('#addSubtype').on('click', function(e) {
+        e.preventDefault();
+        var $clone = $subtypeRow.clone();
+        $clone.removeClass('hide');
+
+        $subtypeTable.append($clone);
+        attachRemoveListener($clone.find('.remove-subtype-button'));
     });
 
 
