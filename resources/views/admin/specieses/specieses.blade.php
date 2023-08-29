@@ -16,6 +16,7 @@
             <tr>
                 <th>Species</th>
                 <th>Sub Masterlist</th>
+                <th>Inherit Chance</th>
                 <th></th>
             </tr>
         </thead>
@@ -28,6 +29,9 @@
                     </td>
                     <td>
                     @if(isset($species->sublist->name)) {{ $species->sublist->name  }} @else -- @endif
+                    </td>
+                    <td>
+                         {!! $species->inherit_chance !!}%
                     </td>
                     <td class="text-right">
                         <a href="{{ url('admin/data/species/edit/'.$species->id) }}" class="btn btn-primary">Edit</a>

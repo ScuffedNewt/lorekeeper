@@ -42,6 +42,11 @@
     {!! Form::textarea('description', $species->description, ['class' => 'form-control wysiwyg']) !!}
 </div>
 
+<div class="col form-group">
+    {!! Form::label('Chance to inherit') !!} {!! add_help('For pairings, how likely this species is to be passed on in percent. Must be a number between 1-100. Defaults to 50.') !!}
+    {!! Form::number('inherit_chance', $species->inherit_chance ?? 50, ['class' => 'form-control']) !!}
+</div>
+
 <div class="text-right">
     {!! Form::submit($species->id ? 'Edit' : 'Create', ['class' => 'btn btn-primary']) !!}
 </div>

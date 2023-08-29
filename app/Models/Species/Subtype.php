@@ -13,7 +13,7 @@ class Subtype extends Model
      * @var array
      */
     protected $fillable = [
-        'species_id', 'name', 'sort', 'has_image', 'description', 'parsed_description'
+        'species_id', 'name', 'sort', 'has_image', 'description', 'parsed_description', 'inherit_chance'
     ];
 
     /**
@@ -34,6 +34,7 @@ class Subtype extends Model
         'name' => 'required|between:3,100',
         'description' => 'nullable',
         'image' => 'mimes:png',
+        'inherit_chance' => 'numeric|min:1|max:100'
     ];
     
     
@@ -47,6 +48,7 @@ class Subtype extends Model
         'name' => 'required|between:3,100',
         'description' => 'nullable',
         'image' => 'mimes:png',
+        'inherit_chance' => 'numeric|min:1|max:100'
     ];
     
     /**

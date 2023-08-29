@@ -48,8 +48,8 @@
 </div>
 
 <div class="col form-group">
-    {!! Form::label('Chance to inherit (Optional)') !!} {!! add_help('For pairings, how likely this rarity is to be passed on in percent. Must be a number between 1-100.') !!}
-    {!! Form::number('inherit_chance', $rarity->inherit_chance, ['class' => 'form-control']) !!}
+    {!! Form::label('Chance to inherit') !!} {!! add_help('For pairings, how likely this rarity is to be passed on in percent. Must be a number between 1-100. Defaults to 50.') !!}
+    {!! Form::number('inherit_chance', $rarity->inherit_chance ?? 50, ['class' => 'form-control']) !!}
 </div>
 
 <div class="text-right">

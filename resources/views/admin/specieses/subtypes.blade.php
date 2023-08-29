@@ -24,6 +24,9 @@
                     <td>
                         {!! $subtype->species->displayName !!}
                     </td>
+                    <td>
+                        Inherit Chance: {!! $subtype->inherit_chance !!}%
+                    </td>
                     <td class="text-right">
                         <a href="{{ url('admin/data/subtypes/edit/'.$subtype->id) }}" class="btn btn-primary">Edit</a>
                     </td>

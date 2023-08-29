@@ -78,7 +78,7 @@ class SpeciesController extends Controller
     {
         $id ? $request->validate(Species::$updateRules) : $request->validate(Species::$createRules);
         $data = $request->only([
-            'name', 'description', 'image', 'remove_image', 'masterlist_sub_id'
+            'name', 'description', 'image', 'remove_image', 'masterlist_sub_id', 'inherit_chance'
         ]);
         if($id && $service->updateSpecies(Species::find($id), $data, Auth::user())) {
             flash('Species updated successfully.')->success();
@@ -197,7 +197,7 @@ class SpeciesController extends Controller
     {
         $id ? $request->validate(Subtype::$updateRules) : $request->validate(Subtype::$createRules);
         $data = $request->only([
-            'species_id', 'name', 'description', 'image', 'remove_image'
+            'species_id', 'name', 'description', 'image', 'remove_image', 'inherit_chance'
         ]);
         if($id && $service->updateSubtype(Subtype::find($id), $data, Auth::user())) {
             flash('Subtype updated successfully.')->success();

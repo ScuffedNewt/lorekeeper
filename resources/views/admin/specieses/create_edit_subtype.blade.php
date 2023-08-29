@@ -42,6 +42,11 @@
     {!! Form::textarea('description', $subtype->description, ['class' => 'form-control wysiwyg']) !!}
 </div>
 
+<div class="col form-group">
+    {!! Form::label('Chance to inherit') !!} {!! add_help('For pairings, how likely this subtype is to be passed on in percent. Must be a number between 1-100. Defaults to 50.') !!}
+    {!! Form::number('inherit_chance', $subtype->inherit_chance ?? 50, ['class' => 'form-control']) !!}
+</div>
+
 <div class="text-right">
     {!! Form::submit($subtype->id ? 'Edit' : 'Create', ['class' => 'btn btn-primary']) !!}
 </div>

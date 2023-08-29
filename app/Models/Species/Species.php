@@ -13,7 +13,7 @@ class Species extends Model
      * @var array
      */
     protected $fillable = [
-        'name', 'sort', 'has_image', 'description', 'parsed_description', 'masterlist_sub_id'
+        'name', 'sort', 'has_image', 'description', 'parsed_description', 'masterlist_sub_id', 'inherit_chance'
     ];
 
     /**
@@ -33,6 +33,7 @@ class Species extends Model
         'name' => 'required|unique:specieses|between:3,100',
         'description' => 'nullable',
         'image' => 'mimes:png',
+        'inherit_chance' => 'numeric|min:1|max:100'
     ];
     
     
@@ -45,6 +46,7 @@ class Species extends Model
         'name' => 'required|between:3,100',
         'description' => 'nullable',
         'image' => 'mimes:png',
+        'inherit_chance' => 'numeric|min:1|max:100'
     ];
 
     /**********************************************************************************************
