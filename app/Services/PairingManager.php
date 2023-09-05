@@ -614,7 +614,7 @@ class PairingManager extends Service
         if($guaranteedSubtype != null && $speciesId == $guaranteedSubtype->species_id) return $guaranteedSubtype->id;
 
 
-        $illegalSubtypes = (isset($tag->getData()["illegal_subtype_id"])) ? (int)$tag->getData()["illegal_subtype_id"] : null;
+        $illegalSubtypes = (isset($tag->getData()["illegal_subtype_id"])) ? $tag->getData()["illegal_subtype_id"] : null;
         $defaultSubtypeId = (isset($tag->getData()["default_subtype_id"])) ? (int)$tag->getData()["default_subtype_id"] : null;
         $sub1 = $character1->image->subtype;
         $sub2 = $character2->image->subtype;

@@ -43,7 +43,7 @@
 </div>
 
 <div class="col form-group">
-    {!! Form::label('Chance to inherit') !!} {!! add_help('For pairings, how likely this species is to be passed on in percent. Must be a number between 1-100. Defaults to 50.') !!}
+    {!! Form::label('Chance to inherit') !!} {!! add_help('For pairings, how likely this species is to be passed on in percent. Must be a number between 1-100. Defaults to 50. Does not guarantee a species is inherited 100% of the time as the chances for both species are added!') !!}
     {!! Form::number('inherit_chance', $species->inherit_chance ?? 50, ['class' => 'form-control']) !!}
 </div>
 
