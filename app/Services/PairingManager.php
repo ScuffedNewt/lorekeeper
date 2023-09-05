@@ -783,7 +783,7 @@ class PairingManager extends Service
         $characterData['is_sellable'] = true;
         $characterData['is_tradeable'] = true;
         $characterData['is_giftable'] = true;
-        $characterData['is_visible'] = false;
+        $characterData['is_visible'] = true;
         $characterData['sale_value'] = 0;
 
         //species info
