@@ -556,7 +556,10 @@ class PairingManager extends Service
             $features = Feature::where(function($query) use ($speciesId){
                 $query->where('species_id', $speciesId)
                 ->orWhere('species_id', null);
-            })->where("subtype_id", $subtypeId)->orWhere("subtype_id", null)->get();
+            })->where(function($query) use ($subtypeId){
+                $query->where('subtype_id', $subtypeId)
+                ->orWhere('subtype_id', null);
+            })->get();
         }
 
         // if illegal features were set, do not include those.
@@ -693,7 +696,6 @@ class PairingManager extends Service
         foreach($featuresByCategory as $categoryId=>$features){
             $features = $features->shuffle();
             $category = FeatureCategory::where('id', $categoryId)->first();
-
             //if no category is set, make min inheritable 0 and max inheritable 100 (basically, unlimited)
             $minInheritable = (isset($category)) ? $category->min_inheritable : 0;
             $maxInheritable = (isset($category)) ? $category->max_inheritable : 100;
@@ -715,6 +717,7 @@ class PairingManager extends Service
                 $i = ($i === count($features) - 1) ? 0 : $i += 1;
             }
         }
+
         //set pairing feature if parents are of different subtypes or species
         if(isset($tag->getData()["feature_id"]) && ($character1->image->subtype_id != $character2->image->subtype_id || $character1->image->species_id != $character2->image->species_id)){
             $pairingFeature = Feature::where("id", $tag->getData()["feature_id"])->first();
