@@ -71,6 +71,7 @@ class PairingService extends Service
         
         if(isset($data['feature_id'])) $pairingData['feature_id'] = $data['feature_id'];
         if(isset($data['species_id'])) $pairingData['species_id'] = $data['species_id'];
+        if(isset($data['subtype_id'])) $pairingData['subtype_id'] = $data['subtype_id'];
         if(isset($data['default_species_id'])) $pairingData['default_species_id'] = $data['default_species_id'];
         if(isset($data['default_subtype_id'])) $pairingData['default_subtype_id'] = $data['default_subtype_id'];
         if(isset($data['pairing_type'])) $pairingData['pairing_type'] = $data['pairing_type'];

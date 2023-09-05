@@ -605,7 +605,13 @@ class PairingManager extends Service
 
 
     private function getSubtypeId($tag, $speciesId, $species1Id, $species2Id, $character1, $character2){
-        $illegalSubtypes = (isset($tag->getData()["illegal_subtype_id"])) ? $tag->getData()["illegal_subtype_id"] : null;
+
+        //if subtype was set it should be returned - unless the chosen species does not match it.
+        $guaranteedSubtype = (isset($tag->getData()["subtype_id"])) ? Subtype::where('id', (int)$tag->getData()["subtype_id"])->first() : null;
+        if($guaranteedSubtype != null && $speciesId == $guaranteedSubtype->species_id) return $guaranteedSubtype->id;
+
+
+        $illegalSubtypes = (isset($tag->getData()["illegal_subtype_id"])) ? (int)$tag->getData()["illegal_subtype_id"] : null;
         $defaultSubtypeId = (isset($tag->getData()["default_subtype_id"])) ? (int)$tag->getData()["default_subtype_id"] : null;
         $sub1 = $character1->image->subtype;
         $sub2 = $character2->image->subtype;

@@ -10,11 +10,7 @@
         subtypes of the same species. Leave Empty if you want to allow all pairings.') !!}
     </div>
     <div class="col">
-        @if(isset($tag->getData()['pairing_type']))
-        {{ Form::select('pairing_type', ['Species', 'Subtype'], $tag->getData()['pairing_type'], ['class' => 'form-control mr-2', 'placeholder' => 'Select Pairing Type']) }}
-        @else
-        {{ Form::select('pairing_type', ['Species', 'Subtype'], null, ['class' => 'form-control mr-2', 'placeholder' => 'Select Pairing Type']) }}
-        @endif
+        {{ Form::select('pairing_type', ['Species', 'Subtype'], $tag->getData()['pairing_type'] ?? null, ['class' => 'form-control mr-2', 'placeholder' => 'Select Pairing Type']) }}
     </div>
 </div>
 <div class="row mt-3">
@@ -30,7 +26,7 @@
 
 <hr>
 <p> If a trait is set, this trait will be granted to all offspring and will list the second parent's species/subtype. It will not be set if the parents species + subtype are identical.
-    If a species is set, the offspring will always be that species, but the MYO may have traits of either parent ignoring species restrictions.
+    If a species is set, the offspring will always be that species, but the MYO may have traits of either parent ignoring species restrictions. If a subtype is set, it will always be passed on if the species matches.
     If neither is set, traits and species are chosen solely from the parent characters.
 </p>
 <div class="row">
@@ -38,13 +34,8 @@
         {!! Form::label('Offspring Trait (Optional)') !!} {!! add_help('Choose a trait that this pairing item will always grant the offspring.') !!}
     </div>
     <div class="col">
-        @if(isset($tag->getData()['feature_id']))
-        {!! Form::select('feature_id', $features, $tag->getData()['feature_id'], ['class' => 'form-control mr-2
+        {!! Form::select('feature_id', $features, $tag->getData()['feature_id'] ?? null, ['class' => 'form-control mr-2
         feature-select', 'placeholder' => 'Select Offspring Trait']) !!}
-        @else
-        {!! Form::select('feature_id', $features, null, ['class' => 'form-control mr-2 feature-select', 'placeholder' =>
-        'Select Offspring Trait']) !!}
-        @endif
     </div>
 </div>
 
@@ -53,13 +44,18 @@
         {!! Form::label('Offspring Species (Optional)') !!} {!! add_help('Choose a species that this pairing item will grant the offspring.') !!}
     </div>
     <div class="col">
-        @if(isset($tag->getData()['species_id']))
-        {!! Form::select('species_id', $specieses, $tag->getData()['species_id'], ['class' => 'form-control mr-2
+        {!! Form::select('species_id', $specieses, $tag->getData()['species_id'] ?? null, ['class' => 'form-control mr-2
         feature-select', 'placeholder' => 'Select Offspring Species']) !!}
-        @else
-        {!! Form::select('species_id', $specieses, null, ['class' => 'form-control mr-2 feature-select', 'placeholder'
-        => 'Select Offspring Species']) !!}
-        @endif
+    </div>
+</div>
+
+<div class="row">
+    <div class="col">
+        {!! Form::label('Offspring Subtype (Optional)') !!} {!! add_help('Choose a subtype that this pairing item will always grant the offspring. Will not work if the species does not match the subtype.') !!}
+    </div>
+    <div class="col">
+        {!! Form::select('subtype_id', $subtypes, $tag->getData()['subtype_id'] ?? null, ['class' => 'form-control mr-2
+        feature-select', 'placeholder' => 'Select Offspring Subtype']) !!}
     </div>
 </div>
 
@@ -75,13 +71,8 @@
         {!! Form::label('Default Species (Optional)') !!} {!! add_help('Choose a species that should be set if both parent species are excluded.') !!}
     </div>
     <div class="col">
-        @if(isset($tag->getData()['default_species_id']))
-        {!! Form::select('default_species_id', $specieses, $tag->getData()['default_species_id'], ['class' => 'form-control mr-2
+        {!! Form::select('default_species_id', $specieses, $tag->getData()['default_species_id'] ?? null, ['class' => 'form-control mr-2
         feature-select', 'placeholder' => 'Select Default Species']) !!}
-        @else
-        {!! Form::select('default_species_id', $specieses, null, ['class' => 'form-control mr-2 feature-select', 'placeholder' =>
-        'Select Default Species']) !!}
-        @endif
     </div>
 </div>
 
@@ -124,13 +115,8 @@ If one parent's subtype is not excluded, it always rolls that parent's subtype.
         {!! Form::label('Default Subtype (Optional)') !!} {!! add_help('Choose a subtype that should be set if both parent subtypes are excluded.') !!}
     </div>
     <div class="col">
-        @if(isset($tag->getData()['default_subtype_id']))
-        {!! Form::select('default_subtype_id', $subtypes, $tag->getData()['default_subtype_id'], ['class' => 'form-control mr-2
+        {!! Form::select('default_subtype_id', $subtypes, $tag->getData()['default_subtype_id'] ?? null, ['class' => 'form-control mr-2
         feature-select', 'placeholder' => 'Select Default Subtype']) !!}
-        @else
-        {!! Form::select('default_subtype_id', $subtypes, null, ['class' => 'form-control mr-2 feature-select', 'placeholder' =>
-        'Select Default Subtype']) !!}
-        @endif
     </div>
 </div>
 
