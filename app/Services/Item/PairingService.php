@@ -65,6 +65,8 @@ class PairingService extends Service
         if($data['min'] == 0 || $data['max'] == 0) throw new \Exception("Min/Max cannot be 0.");
         if($data['min'] > $data['max']) throw new \Exception("Min must be smaller than max.");
 
+        $pairingData = [];
+        
         $specieses = isset($data['illegal_species_id']) ? array_filter($data['illegal_species_id']) : [];
         $features = isset($data['illegal_feature_id']) ? array_filter($data['illegal_feature_id']) : [];
         $subtypes = isset($data['illegal_subtype_id']) ? array_filter($data['illegal_subtype_id']) : [];

@@ -65,8 +65,12 @@ class BoostService extends Service
     {
         //put inputs into an array to transfer to the DB
         if(isset($data['setting']) && isset($data['rarity_id'])) throw new \Exception("You can only set either setting or rarity.");
+        if(!isset($data['setting']) && !isset($data['rarity_id'])) throw new \Exception("Please choose a setting or rarity to boost.");
+
         if($data['setting_chance'] == 0 || $data['rarity_chance'] == 0) throw new \Exception("Percentages cannot be 0.");
         if($data['setting_chance'] > 100 || $data['rarity_chance'] > 100) throw new \Exception("Percentages cannot be greater than 100.");
+
+        $boostData = [];
 
         if(isset($data['setting'])) $boostData['setting'] = $data['setting'];
         if(isset($data['setting'])) $boostData['setting_chance'] = $data['setting_chance'];
