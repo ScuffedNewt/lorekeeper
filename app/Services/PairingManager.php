@@ -403,9 +403,10 @@ class PairingManager extends Service
             //loop over for each myo
             for($i = 0; $i < $myoAmount; $i++){
                 $sex = $this->getSex($boosts);
-                $speciesId = $this->getSpeciesId($tag, $species1, $species2);
+                $inheritFromBoth = $this->getInheritFromBoth($boosts);
+                $speciesId = $this->getSpeciesId($tag, $species1, $species2, $inheritFromBoth);
                 $subtypeId = $this->getSubtypeId($tag, $speciesId, $species1->id, $species2->id, $character1, $character2);
-                $featurePool = $this->getFeaturePool($tag, $character1, $character2, $speciesId, $subtypeId, $boosts);
+                $featurePool = $this->getFeaturePool($tag, $character1, $character2, $speciesId, $subtypeId, $boosts, $inheritFromBoth);
                 $chosenFeatures = $this->getChosenFeatures($tag, $character1, $character2, $featurePool, $boosts);
                 $featureData = $this->getFeatureData($tag, $speciesId, $subtypeId, $species1->id, $species2->id, $character1, $character2, $chosenFeatures);
                 $rarityId = $this->getRarityId($character1, $character2, $chosenFeatures);
@@ -461,9 +462,10 @@ class PairingManager extends Service
                 //loop over for each myo
                 for($i = 0; $i < $myoAmount; $i++){
                     $sex = $this->getSex($boosts);
-                    $speciesId = $this->getSpeciesId($tag, $species1, $species2);
+                    $inheritFromBoth = $this->getInheritFromBoth($boosts);
+                    $speciesId = $this->getSpeciesId($tag, $species1, $species2, $inheritFromBoth);
                     $subtypeId = $this->getSubtypeId($tag, $speciesId, $species1->id, $species2->id, $character1, $character2);
-                    $featurePool = $this->getFeaturePool($tag, $character1, $character2, $speciesId, $subtypeId, $boosts);
+                    $featurePool = $this->getFeaturePool($tag, $character1, $character2, $speciesId, $subtypeId, $boosts, $inheritFromBoth);
                     $chosenFeatures = $this->getChosenFeatures($tag, $character1, $character2, $featurePool, $boosts);
                     $featureData = $this->getFeatureData($tag, $speciesId, $subtypeId, $species1->id, $species2->id, $character1, $character2, $chosenFeatures);
                     $rarityId = $this->getRarityId($character1, $character2, $chosenFeatures);
@@ -520,7 +522,7 @@ class PairingManager extends Service
         
     }
 
-    private function getFeaturePool($tag, $character1, $character2, $speciesId, $subtypeId, $boosts){
+    private function getInheritFromBoth($boosts){
         $inheritBothBoostPercentage = null;
 
         foreach($boosts as $boost){
@@ -530,7 +532,12 @@ class PairingManager extends Service
         }
 
         $inheritFromBothParentsChance = (isset($inheritBothBoostPercentage)) ? $inheritBothBoostPercentage : Settings::get('pairing_trait_inheritance');
-        if(random_int(0,100) <= $inheritFromBothParentsChance){
+        return random_int(0,100) <= $inheritFromBothParentsChance;
+    }
+
+    private function getFeaturePool($tag, $character1, $character2, $speciesId, $subtypeId, $boosts, $inheritFromBoth){
+
+        if($inheritFromBoth){
             //inherit traits from both parents
             $allFeatureIds = array_merge($character1->image->features()->pluck("feature_id")->toArray(), $character2->image->features()->pluck("feature_id")->toArray());
         } else {
@@ -729,10 +736,10 @@ class PairingManager extends Service
     }
 
 
-    private function getSpeciesId($tag, $species1, $species2){
+    private function getSpeciesId($tag, $species1, $species2, $inheritFromBoth){
 
-        // if a species was set for the item, it should be that one.
-        if(isset($tag->getData()['species_id'])) return $tag->getData()['species_id'];
+        // if a species was set for the item, and the result is a crossbreed with traits from both parents, set the crossbreed species.
+        if($inheritFromBoth && isset($tag->getData()['species_id'])) return $tag->getData()['species_id'];
        
         $illegalSpecieses = (isset($tag->getData()["illegal_species_id"])) ? $tag->getData()["illegal_species_id"] : null;
         $defaultSpeciesId = (isset($tag->getData()["default_species_id"])) ? (int)$tag->getData()["default_species_id"] : null;
