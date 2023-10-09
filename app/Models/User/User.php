@@ -7,11 +7,11 @@ use App\Models\Character\CharacterBookmark;
 use App\Models\Character\CharacterImageCreator;
 use App\Models\Currency\Currency;
 use App\Models\Currency\CurrencyLog;
-use App\Models\Shop\UserShopLog;
 use App\Models\Gallery\GalleryCollaborator;
 use App\Models\Item\ItemLog;
 use App\Models\Rank\RankPower;
 use App\Models\Shop\ShopLog;
+use App\Models\Shop\UserShopLog;
 use App\Models\Submission\Submission;
 use App\Traits\Commenter;
 use Auth;
@@ -182,8 +182,7 @@ class User extends Authenticatable implements MustVerifyEmail {
     /**
      * Get the user's shops.
      */
-    public function shops()
-    {
+    public function shops() {
         return $this->belongsTo('App\Models\Shop\UserShop', 'user_id');
     }
 
@@ -551,15 +550,18 @@ class User extends Authenticatable implements MustVerifyEmail {
     /**
      * Get the user's shop purchase logs.
      *
-     * @param  int  $limit
-     * @return \Illuminate\Support\Collection|\Illuminate\Pagination\LengthAwarePaginator
+     * @param int $limit
+     *
+     * @return \Illuminate\Pagination\LengthAwarePaginator|\Illuminate\Support\Collection
      */
-    public function getUserShopLogs($limit = 10)
-    {
+    public function getUserShopLogs($limit = 10) {
         $user = $this;
         $query = UserShopLog::where('user_id', $this->id)->with('shop')->with('item')->with('currency')->orderBy('id', 'DESC');
-        if($limit) return $query->take($limit)->get();
-        else return $query->paginate(30);
+        if ($limit) {
+            return $query->take($limit)->get();
+        } else {
+            return $query->paginate(30);
+        }
     }
 
     /**

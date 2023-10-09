@@ -12,14 +12,13 @@ use App\Models\Gallery\GalleryCharacter;
 use App\Models\Gallery\GallerySubmission;
 use App\Models\Item\Item;
 use App\Models\Item\ItemCategory;
+use App\Models\Shop\UserShop;
 use App\Models\User\User;
 use App\Models\User\UserCurrency;
 use Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\View;
 use Route;
-
-use App\Models\Shop\UserShop;
 
 class UserController extends Controller {
     /*
@@ -351,17 +350,17 @@ class UserController extends Controller {
     /**
      * Shows a user's characters.
      *
-     * @param  string  $name
+     * @param string $name
+     *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function getUserShops($name)
-    {
+    public function getUserShops($name) {
         $shops = UserShop::visible()->where('user_id', $this->user->id);
 
         return view('user.shops', [
-            'user' => $this->user,
-            'shops' => $shops->orderBy('sort', 'DESC')->get(),
-            'sublists' => Sublist::orderBy('sort', 'DESC')->get()
+            'user'     => $this->user,
+            'shops'    => $shops->orderBy('sort', 'DESC')->get(),
+            'sublists' => Sublist::orderBy('sort', 'DESC')->get(),
         ]);
     }
 }

@@ -8,8 +8,8 @@ use App\Models\Character\CharacterDesignUpdate;
 use App\Models\Character\CharacterItem;
 use App\Models\Item\Item;
 use App\Models\Item\ItemCategory;
-use App\Models\Item\UserItemLog;
 use App\Models\Shop\UserShop;
+use App\Models\Shop\UserShopStock;
 use App\Models\Submission\Submission;
 use App\Models\Trade;
 use App\Models\User\User;
@@ -17,8 +17,6 @@ use App\Models\User\UserItem;
 use App\Services\InventoryManager;
 use Auth;
 use Illuminate\Http\Request;
-
-use App\Models\Shop\UserShopStock;
 
 class InventoryController extends Controller {
     /*
@@ -189,7 +187,7 @@ class InventoryController extends Controller {
             $characters = Character::where('user_id', $user->id)->orderBy('slug', 'ASC')->get();
             $characterItems = CharacterItem::whereIn('character_id', $characters->pluck('id')->toArray())->where('item_id', $item->id)->where('count', '>', 0)->get();
 
-             // search the user's shops
+            // search the user's shops
             $shops = UserShop::where('user_id', $user->id)->orderBy('name', 'ASC')->get();
             $shopItems = UserShopStock::whereIn('user_shop_id', $shops->pluck('id')->toArray())->where('item_id', $item->id)->where('quantity', '>', 0)->get();
 
@@ -205,7 +203,7 @@ class InventoryController extends Controller {
             'userItems'      => $item ? $userItems : null,
             'characterItems' => $item ? $characterItems : null,
             'characters'     => $item ? $characters : null,
-            'designUpdates'  => $item ? $designUpdates :null,
+            'designUpdates'  => $item ? $designUpdates : null,
             'trades'         => $item ? $trades : null,
             'submissions'    => $item ? $submissions : null,
             'shopItems'      => $item ? $shopItems : null,
@@ -214,23 +212,23 @@ class InventoryController extends Controller {
     }
 
     /**
-     * transfers item to shop
+     * transfers item to shop.
      *
-     * @param  \Illuminate\Http\Request       $request
-     * @param  App\Services\InventoryManager  $service
+     * @param App\Services\InventoryManager $service
+     *
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function postShop(Request $request, InventoryManager $service)
-    {
-        if($service->sendShop(Auth::user(), UserShop::where('id', $request->get('shop_id'))->first(), UserItem::find($request->get('ids')), $request->get('quantities'))) {
+    public function postShop(Request $request, InventoryManager $service) {
+        if ($service->sendShop(Auth::user(), UserShop::where('id', $request->get('shop_id'))->first(), UserItem::find($request->get('ids')), $request->get('quantities'))) {
             flash('Item transferred successfully.')->success();
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
         }
-        else {
-            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
-        }
+
         return redirect()->back();
     }
-
 
     /**
      * Show the full inventory page.

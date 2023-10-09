@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Character\CharacterItem;
 use App\Models\Item\Item;
+use App\Models\Shop\UserShopStock;
 use App\Models\User\User;
 use App\Models\User\UserItem;
 use Carbon\Carbon;
@@ -11,10 +12,6 @@ use Config;
 use DB;
 use Illuminate\Support\Arr;
 use Notifications;
-
-use App\Models\Item\ItemCategory;
-use App\Models\Currency\Currency;
-use App\Models\Shop\UserShopStock;
 
 class InventoryManager extends Service {
     /*
@@ -662,112 +659,145 @@ class InventoryManager extends Service {
     /**
      * Transfers items between a user and shop.
      *
-     * @param  \App\Models\User\User|\App\Models\Shop\UserShop          $sender
-     * @param  \App\Models\User\User|\App\Models\Shop\UserShop          $recipient
-     * @param  \App\Models\User\UserItem|\App\Models\Shop\UserShopStock  $stacks
-     * @param  int                                                            $quantities
+     * @param \App\Models\Shop\UserShop|\App\Models\User\User          $sender
+     * @param \App\Models\Shop\UserShop|\App\Models\User\User          $recipient
+     * @param \App\Models\Shop\UserShopStock|\App\Models\User\UserItem $stacks
+     * @param int                                                      $quantities
+     *
      * @return bool
      */
-    public function sendShop($sender, $recipient, $stacks, $quantities)
-    {
+    public function sendShop($sender, $recipient, $stacks, $quantities) {
         DB::beginTransaction();
 
         try {
-
-            foreach($stacks as $key=>$stack) {
-
+            foreach ($stacks as $key=>$stack) {
                 $quantity = $quantities[$key];
 
-                if(!$stack) throw new \Exception("Invalid or no stack selected.");
-                if(!$recipient) throw new \Exception("Invalid recipient selected.");
-                if(!$sender) throw new \Exception("Invalid sender selected.");
-
-                if($recipient->logType == 'Shop' && $sender->logType == 'Shop') throw new \Exception("Cannot transfer items between shops.");
-                if(!$stacks) throw new \Exception("Invalid stack selected.");
-                if($sender->logType == 'Shop' && $quantity <= 0 && $stack->count > 0) $quantity = $stack->count;
-                if($quantity <= 0) throw new \Exception("Invalid quantity entered.");
-
-                if(($recipient->logType == 'Shop' && !$sender->hasPower('edit_inventories') && !Auth::user() == $recipient->user) || ($recipient->logType == 'User' && !Auth::user()->hasPower('edit_inventories') && !Auth::user() == $sender->user)) throw new \Exception("Cannot transfer items to/from a shop you don't own.");
-
-                if((!$stack->item->allow_transfer || isset($stack->data['disallow_transfer'])) && !Auth::user()->hasPower('edit_inventories')) throw new \Exception("One of the selected items cannot be transferred.");
-
-                if($stack->item->category){
-                    if($stack->item->category->can_user_sell == 0 && !Auth::user()->hasPower('edit_inventories')) throw new \Exception("This item cannot be sold in user shops.");
+                if (!$stack) {
+                    throw new \Exception('Invalid or no stack selected.');
+                }
+                if (!$recipient) {
+                    throw new \Exception('Invalid recipient selected.');
+                }
+                if (!$sender) {
+                    throw new \Exception('Invalid sender selected.');
                 }
 
-                if($recipient->logType == 'Shop' && $stack->count < $quantity) throw new \Exception("Quantity to transfer exceeds item count.");
+                if ($recipient->logType == 'Shop' && $sender->logType == 'Shop') {
+                    throw new \Exception('Cannot transfer items between shops.');
+                }
+                if (!$stacks) {
+                    throw new \Exception('Invalid stack selected.');
+                }
+                if ($sender->logType == 'Shop' && $quantity <= 0 && $stack->count > 0) {
+                    $quantity = $stack->count;
+                }
+                if ($quantity <= 0) {
+                    throw new \Exception('Invalid quantity entered.');
+                }
 
-                if($recipient->logType == 'User' && $stack->quantity < $quantity) throw new \Exception("Quantity to transfer exceeds item count.");
+                if (($recipient->logType == 'Shop' && !$sender->hasPower('edit_inventories') && !Auth::user() == $recipient->user) || ($recipient->logType == 'User' && !Auth::user()->hasPower('edit_inventories') && !Auth::user() == $sender->user)) {
+                    throw new \Exception("Cannot transfer items to/from a shop you don't own.");
+                }
 
-                if(!$this->shopItem($sender, $recipient, $sender->logType == 'User' ? 'User → Shop Transfer' : 'Shop → User Transfer', $stack->data, $stack->item, $quantity)) throw new \Exception("Could not transfer item to shop.");
+                if ((!$stack->item->allow_transfer || isset($stack->data['disallow_transfer'])) && !Auth::user()->hasPower('edit_inventories')) {
+                    throw new \Exception('One of the selected items cannot be transferred.');
+                }
 
-                if($stack->count){
-                    $stack->count -= $quantity; }
-                    //for shops stock
-                    else{$stack->quantity -= $quantity;
-                        if($stack->quantity == 0) {
-                            $stack->is_visible = 0; //set it to hidden.
-                            // there might be a situation where an item data sticks around and someone accidentally has an item in the shop that isn't ready to be sold and it gets sold :pensive:
-                            //so hiding it until an item of this same id gets added back in will prevent accidents
-                        }
+                if ($stack->item->category) {
+                    if ($stack->item->category->can_user_sell == 0 && !Auth::user()->hasPower('edit_inventories')) {
+                        throw new \Exception('This item cannot be sold in user shops.');
                     }
-                    $stack->save();
+                }
+
+                if ($recipient->logType == 'Shop' && $stack->count < $quantity) {
+                    throw new \Exception('Quantity to transfer exceeds item count.');
+                }
+
+                if ($recipient->logType == 'User' && $stack->quantity < $quantity) {
+                    throw new \Exception('Quantity to transfer exceeds item count.');
+                }
+
+                if (!$this->shopItem($sender, $recipient, $sender->logType == 'User' ? 'User → Shop Transfer' : 'Shop → User Transfer', $stack->data, $stack->item, $quantity)) {
+                    throw new \Exception('Could not transfer item to shop.');
+                }
+
+                if ($stack->count) {
+                    $stack->count -= $quantity;
+                }
+                //for shops stock
+                else {
+                    $stack->quantity -= $quantity;
+                    if ($stack->quantity == 0) {
+                        $stack->is_visible = 0; //set it to hidden.
+                        // there might be a situation where an item data sticks around and someone accidentally has an item in the shop that isn't ready to be sold and it gets sold :pensive:
+                        //so hiding it until an item of this same id gets added back in will prevent accidents
+                    }
+                }
+                $stack->save();
             }
+
             return $this->commitReturn(true);
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             $this->setError('error', $e->getMessage());
         }
+
         return $this->rollbackReturn(false);
     }
 
     /**
      * Credits an item to a user or shop.
      *
-     * @param  \App\Models\User\User|\App\Models\Shop\UserShop  $sender
-     * @param  \App\Models\User\User|\App\Models\Shop\UserShop  $recipient
-     * @param  string                                                 $type
-     * @param  array                                                  $data
-     * @param  \App\Models\Item\Item                                  $item
-     * @param  int                                                    $quantity
+     * @param \App\Models\Shop\UserShop|\App\Models\User\User $sender
+     * @param \App\Models\Shop\UserShop|\App\Models\User\User $recipient
+     * @param string                                          $type
+     * @param array                                           $data
+     * @param \App\Models\Item\Item                           $item
+     * @param int                                             $quantity
+     *
      * @return bool
      */
-    public function shopItem($sender, $recipient, $type, $data, $item, $quantity)
-    {
+    public function shopItem($sender, $recipient, $type, $data, $item, $quantity) {
         DB::beginTransaction();
 
         try {
             $data = ['data' => '', 'notes' => '']; //make back and forth data blank for both transfers because things get. wacky.
             $encoded_data = \json_encode($data);
 
-            if($recipient->logType == 'User') {
+            if ($recipient->logType == 'User') {
                 $recipient_stack = UserItem::where([
                     ['user_id', '=', $recipient->id],
                     ['item_id', '=', $item->id],
-                    ['data', '=', $encoded_data]
+                    ['data', '=', $encoded_data],
                 ])->first();
 
-                if(!$recipient_stack)
+                if (!$recipient_stack) {
                     $recipient_stack = UserItem::create(['user_id' => $recipient->id, 'item_id' => $item->id, 'data' => $encoded_data]);
+                }
                 $recipient_stack->count += $quantity;
                 $recipient_stack->save();
-            }
-            else {
+            } else {
                 $recipient_stack = UserShopStock::where([
                     ['user_shop_id', '=', $recipient->id],
                     ['item_id', '=', $item->id],
-                    ['data', '=', $encoded_data]
+                    ['data', '=', $encoded_data],
                 ])->first();
 
-                if(!$recipient_stack)
+                if (!$recipient_stack) {
                     $recipient_stack = UserShopStock::create(['user_shop_id' => $recipient->id, 'item_id' => $item->id, 'data' => $encoded_data]);
+                }
                 $recipient_stack->quantity += $quantity;
                 $recipient_stack->save();
             }
-            if($type && !$this->createLog($sender ? $sender->id : null, $sender ? $sender->logType : null, $recipient ? $recipient->id : null, $recipient ? $recipient->logType : null, null, $type, $data['data'], $item->id, $quantity)) throw new \Exception("Failed to create log.");
+            if ($type && !$this->createLog($sender ? $sender->id : null, $sender ? $sender->logType : null, $recipient ? $recipient->id : null, $recipient ? $recipient->logType : null, null, $type, $data['data'], $item->id, $quantity)) {
+                throw new \Exception('Failed to create log.');
+            }
+
             return $this->commitReturn(true);
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             $this->setError('error', $e->getMessage());
         }
+
         return $this->rollbackReturn(false);
     }
 
