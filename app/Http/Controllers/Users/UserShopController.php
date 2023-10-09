@@ -256,6 +256,11 @@ class UserShopController extends Controller {
             $items = $items->merge($category_items);
         }
 
+        // sort shop items by name
+        $shopItems = $shopItems->sortBy(function ($item, $key) {
+            return $item->item->name;
+        });
+
         return view('home.user_shops.search_items', [
             'searched_items' => count($items) ? $items : null,
             'items'          => Item::released()->orderBy('name')->pluck('name', 'id'),
