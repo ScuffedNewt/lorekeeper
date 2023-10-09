@@ -10,7 +10,7 @@
     </h1>
     <p>These are user-owned shops that sell items. Not to be confused with official, admin-made shops.</p>
     <div class="text-right mb-3">
-        <a class="btn btn-primary" href="{{ url('user-shops/item-search') }}"><i class="fas fa-search mr-1"></i>Search For an Item</a>
+        <a class="btn btn-primary" href="{{ url('user-shops/item-search') }}"><i class="fas fa-search mr-1"></i>Search by Items</a>
     </div>
 
     <div>
