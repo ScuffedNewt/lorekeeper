@@ -104,9 +104,13 @@
                         </div>
                     </li>
                 @endif
-                @if(!isset($item->category) && $item->allow_transfer || isset($item->category) && $item->category->can_user_sell == 1  && $item->allow_transfer || Auth::user()->hasPower('edit_inventories'))
+                @if ((!isset($item->category) && $item->allow_transfer) || (isset($item->category) && $item->category->can_user_sell == 1 && $item->allow_transfer) || Auth::user()->hasPower('edit_inventories'))
                     <li class="list-group-item">
-                        <a class="card-title h5 collapse-title" data-toggle="collapse" href="#shoptransferForm">@if($stack->first()->user_id != $user->id) [ADMIN] @endif Transfer Item to Shop</a>
+                        <a class="card-title h5 collapse-title" data-toggle="collapse" href="#shoptransferForm">
+                            @if ($stack->first()->user_id != $user->id)
+                                [ADMIN]
+                            @endif Transfer Item to Shop
+                        </a>
                         <div id="shoptransferForm" class="collapse">
                             <p>This will transfer this stack or stacks to the selected user shop.</p>
                             <div class="form-group">

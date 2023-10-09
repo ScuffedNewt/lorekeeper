@@ -120,7 +120,7 @@
                         <a class="dropdown-item" href="{{ url('user-shops/shop-index') }}">
                             User Shops
                         </a>
-                        @if(Auth::check())
+                        @if (Auth::check())
                             <a class="dropdown-item" href="{{ url('user-shops') }}">
                                 My Shops
                             </a>

@@ -1,9 +1,11 @@
 @extends('home.user_shops.layout')
 
-@section('home.user_shops-title') User Shop Search @endsection
+@section('home.user_shops-title')
+    User Shop Search
+@endsection
 
 @section('home.user_shops-content')
-{!! breadcrumbs(['User Shops' => 'user-shops/shop-index', 'Item Search' => 'user-shops/item-search']) !!}
+    {!! breadcrumbs(['User Shops' => 'user-shops/shop-index', 'Item Search' => 'user-shops/item-search']) !!}
 
     <h1>User Shop Item Search</h1>
 
@@ -19,9 +21,8 @@
                 'class' => 'form-control',
                 'placeholder' => 'Select Items',
                 'style' => 'width: 25em; max-width: 100%;',
-                'multiple'
-                ])
-            !!}
+                'multiple',
+            ]) !!}
         </div>
         <div class="form-group ml-3 mb-3">
             {!! Form::select('item_category_id', $categories, Request::get('item_category_id'), ['class' => 'form-control', 'placeholder' => 'Search by Category']) !!}
@@ -32,16 +33,16 @@
     </div>
     {!! Form::close() !!}
 
-    @if($searched_items)
+    @if ($searched_items)
         <h3>Search Results</h3>
         <p><b>Searching for: </b>{!! $searched_items->pluck('name')->implode(', ') !!}</p>
-        @if($category)
+        @if ($category)
             <p>
                 <b>Category: </b>{!! $category->displayName !!}
                 <br><small>Note that items listed also include items from the chosen category.</small>
             </p>
         @endif
-        @if(count($shopItems) && $shopItems->pluck('quantity')->count() > 0)
+        @if (count($shopItems) && $shopItems->pluck('quantity')->count() > 0)
             <div class="row ml-md-2">
                 <div class="d-flex row flex-wrap col-12 pb-1 px-0 ubt-bottom">
                     <div class="col col-md-3 font-weight-bold">Item</div>
@@ -50,7 +51,7 @@
                     <div class="col col-md-2 font-weight-bold">Quantity</div>
                     <div class="col col-md-2 font-weight-bold">Cost</div>
                 </div>
-                @foreach($shopItems as $itemStock)
+                @foreach ($shopItems as $itemStock)
                     @php
                         $shop = $itemStock->shop;
                     @endphp
@@ -68,12 +69,12 @@
         @endif
     @endif
 
-<script>
-    $(document).ready(function() {
-        $('#itemList').selectize({
-            maxItems: 10
+    <script>
+        $(document).ready(function() {
+            $('#itemList').selectize({
+                maxItems: 10
+            });
         });
-    });
-</script>
+    </script>
 
 @endsection
