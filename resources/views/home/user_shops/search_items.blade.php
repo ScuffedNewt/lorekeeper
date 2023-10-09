@@ -44,21 +44,23 @@
         @if(count($shopItems) && $shopItems->pluck('quantity')->count() > 0)
             <div class="row ml-md-2">
                 <div class="d-flex row flex-wrap col-12 pb-1 px-0 ubt-bottom">
-                    <div class="col-12 col-md-3 font-weight-bold">Shop</div>
-                    <div class="col-4 col-md-3 font-weight-bold">Shop Owner</div>
-                    <div class="col-4 col-md-3 font-weight-bold">Quantity</div>
-                    <div class="col-4 col-md-3 font-weight-bold">Cost</div>
+                    <div class="col col-md-3 font-weight-bold">Item</div>
+                    <div class="col col-md-3 font-weight-bold">Shop</div>
+                    <div class="col col-md-2 font-weight-bold">Shop Owner</div>
+                    <div class="col col-md-2 font-weight-bold">Quantity</div>
+                    <div class="col col-md-2 font-weight-bold">Cost</div>
                 </div>
                 @foreach($shopItems as $itemStock)
                     @php
                         $shop = $itemStock->shop;
                     @endphp
                     <div class="d-flex row flex-wrap col-12 mt-1 pt-1 px-0 ubt-top">
-                    <div class="col-12 col-md-3 ">{!! $shop->displayName !!}</div>
-                    <div class="col-4 col-md-3">{!! $shop->user->displayName !!}</div>
-                    <div class="col-4 col-md-3">{!! $itemStock->quantity !!}</div>
-                    <div class="col-4 col-md-3">{!! $itemStock->cost !!} {!! $itemStock->currency->name !!}</div>
-                </div>
+                        <div class="col col-md-3">{!! $itemStock->item->displayName !!}</div>
+                        <div class="col col-md-3">{!! $shop->displayName !!}</div>
+                        <div class="col col-md-2">{!! $shop->user->displayName !!}</div>
+                        <div class="col col-md-2">{!! $itemStock->quantity !!}</div>
+                        <div class="col col-md-2">{!! $itemStock->cost !!} {!! $itemStock->currency->name !!}</div>
+                    </div>
                 @endforeach
             </div>
         @else
