@@ -113,15 +113,18 @@
                         <a class="dropdown-item" href="{{ url('prompts/prompts') }}">
                             Prompts
                         </a>
+                        <div class="dropdown-divider"></div>
                         <a class="dropdown-item" href="{{ url('shops') }}">
                             Shops
                         </a>
-                        <a class="dropdown-item" href="{{ url('usershops') }}">
-                            My Shops
+                        <a class="dropdown-item" href="{{ url('user-shops/shop-index') }}">
+                            User Shops
                         </a>
-                        <a class="dropdown-item" href="{{ url('usershops/shop-index') }}">
-                            All User Shops
-                        </a>
+                        @if(Auth::check())
+                            <a class="dropdown-item" href="{{ url('user-shops') }}">
+                                My Shops
+                            </a>
+                        @endif
                     </div>
                 </li>
                 <li class="nav-item">

@@ -11,11 +11,7 @@ class ItemCategory extends Model {
      * @var array
      */
     protected $fillable = [
-<<<<<<< HEAD
         'name', 'sort', 'has_image', 'description', 'parsed_description', 'is_character_owned', 'character_limit', 'can_name', 'is_visible', 'can_user_sell',
-=======
-        'name', 'sort', 'has_image', 'description', 'parsed_description', 'is_character_owned', 'character_limit', 'can_name', 'is_visible',
->>>>>>> c645eb883e21e8e49769282519774010ecbe30a5
     ];
 
     /**

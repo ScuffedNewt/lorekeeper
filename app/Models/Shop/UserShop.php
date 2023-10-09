@@ -22,7 +22,7 @@ class UserShop extends Model
      * @var string
      */
     protected $table = 'user_shops';
-    
+
     /**
      * Validation rules for creation.
      *
@@ -33,7 +33,7 @@ class UserShop extends Model
         'description' => 'nullable',
         'image' => 'mimes:png',
     ];
-    
+
     /**
      * Validation rules for updating.
      *
@@ -46,7 +46,7 @@ class UserShop extends Model
     ];
 
     /**********************************************************************************************
-    
+
         RELATIONS
 
     **********************************************************************************************/
@@ -54,7 +54,7 @@ class UserShop extends Model
     /**
      * Get the shop stock.
      */
-    public function stock() 
+    public function stock()
     {
         return $this->hasMany('App\Models\Shop\UserShopStock');
     }
@@ -107,11 +107,11 @@ class UserShop extends Model
     }
 
     /**********************************************************************************************
-    
+
         ACCESSORS
 
     **********************************************************************************************/
-    
+
     /**
      * Displays the shop's name, linked to its purchase page.
      *
@@ -151,7 +151,7 @@ class UserShop extends Model
     {
         return public_path($this->imageDirectory);
     }
-    
+
     /**
      * Gets the URL of the model's image.
      *
@@ -170,7 +170,7 @@ class UserShop extends Model
      */
     public function getUrlAttribute()
     {
-        return url('/usershops/shop/'.$this->id);
+        return url('user-shops/shop/'.$this->id);
     }
 
     /**

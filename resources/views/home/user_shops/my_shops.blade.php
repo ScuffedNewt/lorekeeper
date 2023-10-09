@@ -3,20 +3,20 @@
 @section('home.user_shops-title') Shops @endsection
 
 @section('home.user_shops-content')
-{!! breadcrumbs(['My Shops' => 'usershops']) !!}
+{!! breadcrumbs(['My Shops' => 'user-shops']) !!}
 
 <h1>Shops</h1>
 
-<p>Here is a list of your user-owned shops. </p> 
+<p>Here is a list of your user-owned shops. </p>
 <p>The sorting order reflects the order in which the shops will be listed on the shop index.</p>
 @if(Settings::get('user_shop_limit') > 0)
 <p> You may make a maximum of <b>{{Settings::get('user_shop_limit')}}</b> shops.</p>
 @endif
 
-<div class="text-right mb-3"><a class="btn btn-primary" href="{{ url('usershops/create') }}"><i class="fas fa-plus"></i> Create New Shop</a></div>
+<div class="text-right mb-3"><a class="btn btn-primary" href="{{ url('user-shops/create') }}"><i class="fas fa-plus"></i> Create New Shop</a></div>
 @if(!count($shops))
     <p>No item shops found.</p>
-@else 
+@else
     <table class="table table-sm shop-table">
         <tbody id="sortable" class="sortable">
             @foreach($shops as $shop)
@@ -26,10 +26,10 @@
                         {!! $shop->displayName !!}
                     </td>
                     <td>
-                        <a href="{{ url('usershops/sales/'.$shop->id) }}">View sale history...</a>
+                        <a href="{{ url('user-shops/sales/'.$shop->id) }}">View sale history...</a>
                     </td>
                     <td class="text-right">
-                        <a href="{{ url('usershops/edit/'.$shop->id) }}" class="btn btn-primary">Edit</a>
+                        <a href="{{ url('user-shops/edit/'.$shop->id) }}" class="btn btn-primary">Edit</a>
                     </td>
                 </tr>
             @endforeach
@@ -37,7 +37,7 @@
 
     </table>
     <div class="mb-4">
-        {!! Form::open(['url' => 'usershops/sort']) !!}
+        {!! Form::open(['url' => 'user-shops/sort']) !!}
         {!! Form::hidden('sort', '', ['id' => 'sortableOrder']) !!}
         {!! Form::submit('Save Order', ['class' => 'btn btn-primary']) !!}
         {!! Form::close() !!}

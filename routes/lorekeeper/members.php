@@ -90,8 +90,8 @@ Route::group(['prefix' => 'trades', 'namespace' => 'Users'], function () {
     Route::post('{id}/cancel-trade', 'TradeController@postCancelTrade');
 });
 
-Route::group(['prefix' => 'usershops', 'namespace' => 'Users'], function() {
-    Route::get('/', 'UserShopController@getUserIndex'); 
+Route::group(['prefix' => 'user-shops', 'namespace' => 'Users'], function() {
+    Route::get('/', 'UserShopController@getUserIndex');
     Route::get('create', 'UserShopController@getCreateShop');
     Route::get('edit/{id}', 'UserShopController@getEditShop');
     Route::get('delete/{id}', 'UserShopController@getDeleteShop');
@@ -103,7 +103,7 @@ Route::group(['prefix' => 'usershops', 'namespace' => 'Users'], function() {
     Route::get('/stock/edit/{id}', 'UserShopController@getEditShopStock');
     Route::post('/stock/edit/{id}', 'UserShopController@postEditShopStock');
     // delete
-    Route::get('/stock/remove/{id}', 'UserShopController@getRemoveShopStock'); 
+    Route::get('/stock/remove/{id}', 'UserShopController@getRemoveShopStock');
     Route::post('/stock/remove/{id}', 'UserShopController@postRemoveStock');
     // misc
     Route::get('/stock-type', 'UserShopController@getShopStockType');
@@ -113,9 +113,9 @@ Route::group(['prefix' => 'usershops', 'namespace' => 'Users'], function() {
     Route::get('sales/{id}', 'UserShopController@getShopHistory');
 });
 
-Route::group(['prefix' => 'usershops',], function() {
-    Route::get('/shop-index', 'UserShopController@getIndex'); 
-    Route::get('/shop/{id}', 'UserShopController@getShop'); 
+Route::group(['prefix' => 'user-shops',], function() {
+    Route::get('/shop-index', 'UserShopController@getIndex');
+    Route::get('/shop/{id}', 'UserShopController@getShop');
     Route::post('/shop/buy', 'UserShopController@postBuy');
     Route::get('{id}/{stockId}', 'UserShopController@getShopStock')->where(['id' => '[0-9]+', 'stockId' => '[0-9]+']);
 });
