@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Loot\Loot;
 use App\Models\Loot\LootTable;
 use App\Models\Prompt\PromptReward;
+use App\Models\User\UserLootDropProgress;
 use DB;
 use Illuminate\Support\Arr;
 
@@ -100,10 +101,11 @@ class LootService extends Service {
                     }
                 }
             }
+            if (!isset($data['rolls']) || $data['rolls'] <= 0) $data['rolls'] = null;
 
-            $table->update(Arr::only($data, ['name', 'display_name']));
+            $table->update(Arr::only($data, ['name', 'display_name', 'rolls']));
 
-            $this->populateLootTable($table, Arr::only($data, ['rewardable_type', 'rewardable_id', 'quantity', 'weight', 'criteria', 'rarity']));
+            $this->populateLootTable($table, Arr::only($data, ['rewardable_type', 'rewardable_id', 'quantity', 'weight', 'criteria', 'rarity', 'guaranteed_loot_ids']));
 
             return $this->commitReturn($table);
         } catch (\Exception $e) {
@@ -132,6 +134,12 @@ class LootService extends Service {
             }
 
             $table->loot()->delete();
+            // delete all user progress for this table, if they exist
+            if (UserLootDropProgress::where('loot_table_id', $table->id)->exists()) {
+                UserLootDropProgress::where('loot_table_id', $table->id)->get()->each(function ($progress) {
+                    $progress->delete();
+                });
+            }
             $table->delete();
 
             return $this->commitReturn(true);
@@ -160,6 +168,18 @@ class LootService extends Service {
                 ];
             }
 
+            // check if the loot id is in the guaranteed loot ids,
+            // and that table has a rolls value > 0
+            if (isset($data['guaranteed_loot_ids']) && in_array($data['rewardable_id'][$key], $data['guaranteed_loot_ids']) && $table->rolls > 0) {
+                // check if this loot is the smallest weight of this id in the array
+                $isSmallestWeight = true;
+                foreach ($data['weight'] as $weight) {
+                    if ($weight < $data['weight'][$key]) {
+                        $isSmallestWeight = false;
+                    }
+                }
+            }
+
             Loot::create([
                 'loot_table_id'   => $table->id,
                 'rewardable_type' => $type,
@@ -167,6 +187,8 @@ class LootService extends Service {
                 'quantity'        => $data['quantity'][$key],
                 'weight'          => $data['weight'][$key],
                 'data'            => isset($lootData) ? json_encode($lootData) : null,
+                'is_guaranteed'   => isset($data['guaranteed_loot_ids']) && in_array($data['rewardable_id'][$key],
+                                     $data['guaranteed_loot_ids']) && $table->rolls > 0 && $isSmallestWeight ?? false,
             ]);
         }
     }

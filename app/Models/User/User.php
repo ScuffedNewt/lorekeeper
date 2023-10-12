@@ -185,6 +185,13 @@ class User extends Authenticatable implements MustVerifyEmail {
         return $this->hasMany('App\Models\CommentLike');
     }
 
+    /**
+     * Get the user's loot drop progresses
+     */
+    public function lootDropProgresses() {
+        return $this->hasMany('App\Models\User\UserLootDropProgress');
+    }
+
     /**********************************************************************************************
 
         SCOPES

@@ -96,11 +96,51 @@
         </tbody>
     </table>
 
+    @if ($table->id)
+        <h3>Guaranteed (Pity) Rewards</h3>
+        <p>Guaranteed rewards are rewards that will be given if the loot table is rolled a certain number of times without giving any of the specified rewards.
+        <br>This is useful for preventing unlucky streaks, and can be used to guarantee a reward after a certain number of rolls.</p>
+        <p><b>Please note that if you have multiple of the same loot as a reward in the loot table (example: different quantities of currencies)
+            the pity reward will always be given to the loot with the lowest weight.</b></p>
+
+        <div class="form-group">
+            {{-- number of rolls --}}
+            {!! Form::label('rolls', 'Number of Rolls') !!}
+            {!! Form::text('rolls', $table->rolls ?? 1, ['class' => 'form-control', 'min' => 0]) !!}
+        </div>
+        <div class="form-group" id="guaranteedDrops">
+            <div class="row">
+                <div class="col-sm-4">
+                    <label><h5>Rewards</h5></label>
+                </div>
+                <div class="col-sm-8">
+                    <div class="text-right mb-3">
+                        <a href="#" class="btn btn-info" id="addGuaranteed">Add Guaranteed Reward</a>
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-2">
+                @foreach($table->loot->where('is_guaranteed', 1) as $guaranteed)
+                    <div class="col-sm-12">
+                        {!! Form::select('guaranteed_loot_ids[]', $table->getLoot(), $guaranteed->rewardable_id, ['class' => 'form-control selectize', 'placeholder' => 'Select Loot']) !!}
+                    </div>
+                @endforeach
+            </div>
+        </div>
+
+    @endif
+
     <div class="text-right">
         {!! Form::submit($table->id ? 'Edit' : 'Create', ['class' => 'btn btn-primary']) !!}
     </div>
 
     {!! Form::close() !!}
+
+    <div id="guaranteedRowData" class="hide">
+        <div class="col-sm-12">
+            {!! Form::select('guaranteed_loot_ids[]', $table->getLoot(), null, ['class' => 'form-control selectize', 'placeholder' => 'Select Loot']) !!}
+        </div>
+    </div>
 
     <div id="lootRowData" class="hide">
         <table class="table table-sm">
@@ -143,6 +183,7 @@
         <p>If you have made any modifications to the loot table contents above, be sure to save it (click the Edit button) before testing.</p>
         <p>Please note that due to the nature of probability, as long as there is a chance, there will always be the possibility of rolling improbably good or bad results. <i>This is not indicative of the code being buggy or poor game balance.</i> Be
             cautious when adjusting values based on a small sample size, including but not limited to test rolls and a small amount of user reports.</p>
+        <p><b>Guaranteed rewards will not be given when testing, as it is user specific.</b></p>
         <div class="form-group">
             {!! Form::label('quantity', 'Number of Rolls') !!}
             {!! Form::text('quantity', 1, ['class' => 'form-control', 'id' => 'rollQuantity']) !!}
@@ -158,6 +199,18 @@
     @parent
     <script>
         $(document).ready(function() {
+            // GUARANTEED DROPS //////////////////////////////////////////
+            var $guaranteedDrops = $('#guaranteedDrops');
+            var $guaranteedRow = $('#guaranteedRowData').find('.col-sm-12');
+
+            $('#addGuaranteed').on('click', function(e) {
+                e.preventDefault();
+                var $clone = $guaranteedRow.clone();
+                $guaranteedDrops.append($clone);
+                $clone.find('.selectize').selectize();
+            });
+            //////////////////////////////////////////////////////////////
+
             var $lootTable = $('#lootTableBody');
             var $lootRow = $('#lootRow').find('.loot-row');
             var $itemSelect = $('#lootRowData').find('.item-select');

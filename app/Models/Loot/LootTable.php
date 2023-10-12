@@ -13,7 +13,7 @@ class LootTable extends Model {
      * @var array
      */
     protected $fillable = [
-        'name', 'display_name',
+        'name', 'display_name', 'rolls',
     ];
 
     /**
@@ -53,6 +53,13 @@ class LootTable extends Model {
      */
     public function loot() {
         return $this->hasMany('App\Models\Loot\Loot', 'loot_table_id');
+    }
+
+    /**
+     * Get the guaranteed loot data for this loot table.
+     */
+    public function guaranteedLoot() {
+        return $this->hasMany('App\Models\Loot\LootTableGuaranteedDrop', 'loot_table_id');
     }
 
     /**********************************************************************************************
@@ -110,8 +117,47 @@ class LootTable extends Model {
      *
      * @return \Illuminate\Support\Collection
      */
-    public function roll($quantity = 1) {
+    public function roll($quantity = 1, $user = null) {
         $rewards = createAssetsArray();
+
+        // check if there is a user (for pity drops)
+        if ($user && $this->rolls > 0) {
+            // check if user has a progress entry for this loot table
+            $progress = $user->lootDropProgresses()->where('loot_table_id', $this->id)->first();
+            if (!$progress) {
+                // create a new progress entry
+                $progress = $user->lootDropProgresses()->create([
+                    'loot_table_id' => $this->id,
+                    'rolls' => 1,
+                ]);
+            }
+            // check if user has rolled enough times to get a guaranteed drop
+            if ($progress->rolls >= $this->rolls - 1) { // -1 so that the amount of times rolled exactly matches the amount of rolls needed for a guaranteed drop
+                // roll on guaranteed drops
+                $guaranteed = $this->loot->where('is_guaranteed', true);
+                foreach ($guaranteed as $g) {
+                    // If this is chained to another loot table, roll on that table
+                    if ($g->rewardable_type == 'LootTable') {
+                        $rewards = mergeAssetsArrays($rewards, $g->reward->roll($g->quantity));
+                    } elseif ($g->rewardable_type == 'ItemCategory' || $g->rewardable_type == 'ItemCategoryRarity') {
+                        $rewards = mergeAssetsArrays($rewards, $this->rollCategory($g->rewardable_id, $g->quantity, ($g->data['criteria'] ?? null), ($g->data['rarity'] ?? null)));
+                    } elseif ($g->rewardable_type == 'ItemRarity') {
+                        $rewards = mergeAssetsArrays($rewards, $this->rollRarityItem($g->quantity, $g->data['criteria'], $g->data['rarity']));
+                    } else {
+                        addAsset($rewards, $g->reward, $g->quantity);
+                    }
+                }
+                // reset user's progress
+                $progress->rolls = 0;
+                $progress->save();
+                // return rewards
+                return $rewards;
+            }
+            else {
+                $progress->rolls++;
+                $progress->save();
+            }
+        }
 
         $loot = $this->loot;
         $totalWeight = 0;
@@ -229,5 +275,17 @@ class LootTable extends Model {
         }
 
         return $rewards;
+    }
+
+    /**
+     * Returns loot as a paired rewardable name and id
+     */
+    public function getLoot()
+    {
+        $loots = [];
+        foreach ($this->loot as $loot) {
+            $loots[$loot->rewardable_id] = $loot->reward->name;
+        }
+        return $loots;
     }
 }

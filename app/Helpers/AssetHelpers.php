@@ -270,7 +270,7 @@ function fillUserAssets($assets, $sender, $recipient, $logType, $data) {
     // Roll on any loot tables
     if (isset($assets['loot_tables'])) {
         foreach ($assets['loot_tables'] as $table) {
-            $assets = mergeAssetsArrays($assets, $table['asset']->roll($table['quantity']));
+            $assets = mergeAssetsArrays($assets, $table['asset']->roll($table['quantity'], $recipient ?? null));
         }
         unset($assets['loot_tables']);
     }

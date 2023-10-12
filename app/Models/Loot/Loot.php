@@ -12,7 +12,7 @@ class Loot extends Model {
      */
     protected $fillable = [
         'loot_table_id', 'rewardable_type', 'rewardable_id',
-        'quantity', 'weight', 'data',
+        'quantity', 'weight', 'data', 'is_guaranteed',
     ];
 
     /**
