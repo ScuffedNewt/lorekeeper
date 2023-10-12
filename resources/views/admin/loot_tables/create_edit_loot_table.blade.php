@@ -99,9 +99,10 @@
     @if ($table->id)
         <h3>Guaranteed (Pity) Rewards</h3>
         <p>Guaranteed rewards are rewards that will be given if the loot table is rolled a certain number of times without giving any of the specified rewards.
-        <br>This is useful for preventing unlucky streaks, and can be used to guarantee a reward after a certain number of rolls.</p>
+            <br>This is useful for preventing unlucky streaks, and can be used to guarantee a reward after a certain number of rolls.
+        </p>
         <p><b>Please note that if you have multiple of the same loot as a reward in the loot table (example: different quantities of currencies)
-            the pity reward will always be given to the loot with the lowest weight.</b></p>
+                the pity reward will always be given to the loot with the lowest weight.</b></p>
 
         <div class="form-group">
             {{-- number of rolls --}}
@@ -111,7 +112,9 @@
         <div class="form-group" id="guaranteedDrops">
             <div class="row">
                 <div class="col-sm-4">
-                    <label><h5>Rewards</h5></label>
+                    <label>
+                        <h5>Rewards</h5>
+                    </label>
                 </div>
                 <div class="col-sm-8">
                     <div class="text-right mb-3">
@@ -120,14 +123,13 @@
                 </div>
             </div>
             <div class="row mb-2">
-                @foreach($table->loot->where('is_guaranteed', 1) as $guaranteed)
+                @foreach ($table->loot->where('is_guaranteed', 1) as $guaranteed)
                     <div class="col-sm-12">
                         {!! Form::select('guaranteed_loot_ids[]', $table->getLoot(), $guaranteed->rewardable_id, ['class' => 'form-control selectize', 'placeholder' => 'Select Loot']) !!}
                     </div>
                 @endforeach
             </div>
         </div>
-
     @endif
 
     <div class="text-right">
