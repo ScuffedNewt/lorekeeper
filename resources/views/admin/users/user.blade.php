@@ -137,21 +137,21 @@
         <table class="table">
             <thead>
                 <tr>
-                <th scope="col">IP</th>
-                <th scope="col">Stored At</th>
-                <th scope="col">Last Used At</th>
-                <th scope="col">Shared With</th>
+                    <th scope="col">IP</th>
+                    <th scope="col">Stored At</th>
+                    <th scope="col">Last Used At</th>
+                    <th scope="col">Shared With</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach($user->ips as $ip)
+                @foreach ($user->ips as $ip)
                     <tr>
                         <td>{{ $ip->ip }}</td>
                         <td>{!! format_date($ip->created_at) !!}</td>
                         <td>{!! pretty_date($ip->updated_at) !!}</td>
                         <td>
-                            @if($matching->where('ip', $ip->ip)->count())
-                                @foreach($matching->where('ip', $ip->ip) as $match)
+                            @if ($matching->where('ip', $ip->ip)->count())
+                                @foreach ($matching->where('ip', $ip->ip) as $match)
                                     <a href="{{ $match->user->url }}">{{ $match->user->name }}</a>
                                 @endforeach
                             @else
