@@ -19,10 +19,7 @@ class CheckIp
     {
         if(!$request->user()) {
             if(UserIp::where('ip', $request->ip())->exists()) {
-                $ips = UserIp::where('ip', $request->ip())->get();
-                foreach($ips as $ip) {
-                    if($ip->user->is_banned) return redirect('/ip-block');
-                }
+                if (UserIp::where('ip', $request->ip())->where('is_user_banned', 1)->exists()) return redirect('/ip-block');
             }
         }
         else {
@@ -30,7 +27,7 @@ class CheckIp
                 return redirect('/banned');
             }
         }
-    
+
         return $next($request);
     }
 }

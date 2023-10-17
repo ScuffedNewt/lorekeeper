@@ -1,6 +1,8 @@
 @extends('layouts.app')
 
-@section('title') IP Blocked @endsection
+@section('title')
+    IP Blocked
+@endsection
 
 @section('content')
 
