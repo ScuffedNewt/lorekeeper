@@ -385,11 +385,11 @@ class InventoryController extends Controller {
     }
 
     /**
-     * Displays the user's sticker book.
+     * Displays the user's record book.
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function getStickerBook() {
+    public function getRecordBook() {
         $user = Auth::user();
         $categories = ItemCategory::visible(Auth::check() ? Auth::user() : null)->orderBy('sort', 'DESC')->get();
         $items = count($categories) ?
@@ -403,7 +403,7 @@ class InventoryController extends Controller {
                 ->get()
                 ->groupBy('item_category_id');
 
-        return view('home.sticker_book', [
+        return view('home.record_book', [
             'user'       => $user,
             'categories' => $categories->keyBy('id'),
             'items'      => $items,

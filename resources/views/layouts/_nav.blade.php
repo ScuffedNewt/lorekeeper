@@ -43,8 +43,8 @@
                             <a class="dropdown-item" href="{{ url('bank') }}">
                                 Bank
                             </a>
-                            <a class="dropdown-item" href="{{ url('sticker-book') }}">
-                                Sticker Book
+                            <a class="dropdown-item" href="{{ url('record-book') }}">
+                                Record Book
                             </a>
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="{{ url('comments/liked') }}">

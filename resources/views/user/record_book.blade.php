@@ -1,13 +1,13 @@
 @extends('user.layout')
 
 @section('profile-title')
-    Sticker Book
+    Record Book
 @endsection
 
 @section('profile-content')
-    {!! breadcrumbs(['Sticker Book' => 'sticker-book']) !!}
+    {!! breadcrumbs(['Record Book' => 'record-book']) !!}
     <h1>
-        {!! $user->displayName !!}'s Sticker Book
+        {!! $user->displayName !!}'s Record Book
     </h1>
 
     <style>

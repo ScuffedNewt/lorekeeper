@@ -6,7 +6,7 @@
         <div class="sidebar-item"><a href="{{ url('characters/myos') }}" class="{{ set_active('characters/myos') }}">My MYO Slots</a></div>
         <div class="sidebar-item"><a href="{{ url('inventory') }}" class="{{ set_active('inventory*') }}">Inventory</a></div>
         <div class="sidebar-item"><a href="{{ url('bank') }}" class="{{ set_active('bank*') }}">Bank</a></div>
-        <div class="sidebar-item"><a href="{{ url('sticker-book') }}" class="{{ set_active('sticker-book*') }}">Sticker Book</a></div>
+        <div class="sidebar-item"><a href="{{ url('record-book') }}" class="{{ set_active('record-book*') }}">Record Book</a></div>
     </li>
     <li class="sidebar-section">
         <div class="sidebar-section-header">Activity</div>

@@ -347,9 +347,9 @@ class UserController extends Controller {
     }
 
     /**
-     * Shows a user's sticker collection.
+     * Shows a user's record collection.
      */
-    public function getUserStickerBook(Request $request, $name) {
+    public function getUserRecordBook(Request $request, $name) {
         $user = $this->user;
         $categories = ItemCategory::visible(Auth::check() ? Auth::user() : null)->orderBy('sort', 'DESC')->get();
         $items = count($categories) ?
@@ -363,7 +363,7 @@ class UserController extends Controller {
                 ->get()
                 ->groupBy('item_category_id');
 
-        return view('user.sticker_book', [
+        return view('user.record_book', [
             'user'       => $user,
             'categories' => $categories->keyBy('id'),
             'items'      => $items,

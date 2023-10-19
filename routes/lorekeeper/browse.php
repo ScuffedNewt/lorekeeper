@@ -62,7 +62,7 @@ Route::group(['prefix' => 'user', 'namespace' => 'Users'], function () {
     Route::get('{name}/item-logs', 'UserController@getUserItemLogs');
     Route::get('{name}/ownership', 'UserController@getUserOwnershipLogs');
     Route::get('{name}/submissions', 'UserController@getUserSubmissions');
-    Route::get('{name}/sticker-book', 'UserController@getUserStickerBook');
+    Route::get('{name}/record-book', 'UserController@getUserRecordBook');
 });
 
 /**************************************************************************************************

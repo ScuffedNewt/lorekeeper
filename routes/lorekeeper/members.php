@@ -208,6 +208,6 @@ Route::group(['prefix' => 'comments', 'namespace' => 'Comments'], function () {
     Route::get('/liked', 'CommentController@getLikedComments');
 });
 
-Route::group(['prefix' => 'sticker-book', 'namespace' => 'Users'], function () {
-    Route::get('/', 'InventoryController@getStickerBook');
+Route::group(['prefix' => 'record-book', 'namespace' => 'Users'], function () {
+    Route::get('/', 'InventoryController@getRecordBook');
 });
