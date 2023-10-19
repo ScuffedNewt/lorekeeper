@@ -383,4 +383,30 @@ class InventoryController extends Controller {
 
         return redirect()->back();
     }
+
+    /**
+     * Displays the user's sticker book.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getStickerBook() {
+        $user = Auth::user();
+        $categories = ItemCategory::visible(Auth::check() ? Auth::user() : null)->orderBy('sort', 'DESC')->get();
+        $items = count($categories) ?
+                Item::released()
+                ->orderByRaw('FIELD(item_category_id,'.implode(',', $categories->pluck('id')->toArray()).')')
+                ->orderBy('name')
+                ->get()
+                ->groupBy('item_category_id') :
+                Item::released()
+                ->orderBy('name')
+                ->get()
+                ->groupBy('item_category_id');
+
+        return view('home.sticker_book', [
+            'user'       => $user,
+            'categories' => $categories->keyBy('id'),
+            'items'      => $items,
+        ]);
+    }
 }

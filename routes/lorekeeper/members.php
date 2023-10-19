@@ -207,3 +207,7 @@ Route::group(['prefix' => 'comments', 'namespace' => 'Comments'], function () {
     Route::post('/{id}/like/{action}', 'CommentController@like')->name('comments.like');
     Route::get('/liked', 'CommentController@getLikedComments');
 });
+
+Route::group(['prefix' => 'sticker-book', 'namespace' => 'Users'], function () {
+    Route::get('/', 'InventoryController@getStickerBook');
+});

@@ -345,4 +345,28 @@ class UserController extends Controller {
             'favorites'  => $this->user->characters->count() ? GallerySubmission::whereIn('id', $userFavorites)->whereIn('id', GalleryCharacter::whereIn('character_id', $userCharacters)->pluck('gallery_submission_id')->toArray())->visible(Auth::check() ? Auth::user() : null)->accepted()->orderBy('created_at', 'DESC')->paginate(20)->appends($request->query()) : null,
         ]);
     }
+
+    /**
+     * Shows a user's sticker collection.
+     */
+    public function getUserStickerBook(Request $request, $name) {
+        $user = $this->user;
+        $categories = ItemCategory::visible(Auth::check() ? Auth::user() : null)->orderBy('sort', 'DESC')->get();
+        $items = count($categories) ?
+                Item::released()
+                ->orderByRaw('FIELD(item_category_id,'.implode(',', $categories->pluck('id')->toArray()).')')
+                ->orderBy('name')
+                ->get()
+                ->groupBy('item_category_id') :
+                Item::released()
+                ->orderBy('name')
+                ->get()
+                ->groupBy('item_category_id');
+
+        return view('user.sticker_book', [
+            'user'       => $user,
+            'categories' => $categories->keyBy('id'),
+            'items'      => $items,
+        ]);
+    }
 }
