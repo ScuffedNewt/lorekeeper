@@ -128,7 +128,7 @@ class LootTable extends Model {
                 // create a new progress entry
                 $progress = $user->lootDropProgresses()->create([
                     'loot_table_id' => $this->id,
-                    'rolls' => 1,
+                    'rolls' => 0,
                 ]);
             }
             // check if user has rolled enough times to get a guaranteed drop
@@ -148,14 +148,13 @@ class LootTable extends Model {
                     }
                 }
                 // reset user's progress
-                $progress->rolls = 0;
-                $progress->save();
+                $user->lootDropProgresses()->where('loot_table_id', $this->id)->update(['rolls' => 0]);
                 // return rewards
                 return $rewards;
             }
             else {
-                $progress->rolls++;
-                $progress->save();
+                // increment rolls
+                $user->lootDropProgresses()->where('loot_table_id', $this->id)->increment('rolls');
             }
         }
 
