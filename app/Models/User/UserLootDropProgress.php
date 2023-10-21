@@ -11,7 +11,7 @@ class UserLootDropProgress extends Model {
      * @var array
      */
     protected $fillable = [
-        'user_id', 'loot_table_id', 'rolls'
+        'user_id', 'loot_table_id', 'rolls',
     ];
 
     /**

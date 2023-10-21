@@ -101,7 +101,9 @@ class LootService extends Service {
                     }
                 }
             }
-            if (!isset($data['rolls']) || $data['rolls'] <= 0) $data['rolls'] = null;
+            if (!isset($data['rolls']) || $data['rolls'] <= 0) {
+                $data['rolls'] = null;
+            }
 
             $table->update(Arr::only($data, ['name', 'display_name', 'rolls']));
 
@@ -187,8 +189,10 @@ class LootService extends Service {
                 'quantity'        => $data['quantity'][$key],
                 'weight'          => $data['weight'][$key],
                 'data'            => isset($lootData) ? json_encode($lootData) : null,
-                'is_guaranteed'   => isset($data['guaranteed_loot_ids']) && in_array($data['rewardable_id'][$key],
-                                     $data['guaranteed_loot_ids']) && $table->rolls > 0 && $isSmallestWeight ?? false,
+                'is_guaranteed'   => isset($data['guaranteed_loot_ids']) && in_array(
+                    $data['rewardable_id'][$key],
+                    $data['guaranteed_loot_ids']
+                ) && $table->rolls > 0 && $isSmallestWeight ?? false,
             ]);
         }
     }

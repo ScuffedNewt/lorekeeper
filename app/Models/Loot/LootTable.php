@@ -113,7 +113,8 @@ class LootTable extends Model {
     /**
      * Rolls on the loot table and consolidates the rewards.
      *
-     * @param int $quantity
+     * @param int        $quantity
+     * @param mixed|null $user
      *
      * @return \Illuminate\Support\Collection
      */
@@ -128,7 +129,7 @@ class LootTable extends Model {
                 // create a new progress entry
                 $progress = $user->lootDropProgresses()->create([
                     'loot_table_id' => $this->id,
-                    'rolls' => 0,
+                    'rolls'         => 0,
                 ]);
             }
             // check if user has rolled enough times to get a guaranteed drop
@@ -149,10 +150,10 @@ class LootTable extends Model {
                 }
                 // reset user's progress
                 $user->lootDropProgresses()->where('loot_table_id', $this->id)->update(['rolls' => 0]);
+
                 // return rewards
                 return $rewards;
-            }
-            else {
+            } else {
                 // increment rolls
                 $user->lootDropProgresses()->where('loot_table_id', $this->id)->increment('rolls');
             }
@@ -277,14 +278,14 @@ class LootTable extends Model {
     }
 
     /**
-     * Returns loot as a paired rewardable name and id
+     * Returns loot as a paired rewardable name and id.
      */
-    public function getLoot()
-    {
+    public function getLoot() {
         $loots = [];
         foreach ($this->loot as $loot) {
             $loots[$loot->rewardable_id] = $loot->reward->name;
         }
+
         return $loots;
     }
 }
