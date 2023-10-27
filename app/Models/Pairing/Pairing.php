@@ -2,22 +2,19 @@
 
 namespace App\Models\Pairing;
 
-use Config;
-use DB;
-use Carbon\Carbon;
-use App\Models\Model;
 use App\Models\Character\Character;
-use App\Models\User\User;
+use App\Models\Model;
+use App\Models\User\UserItem;
+use Carbon\Carbon;
 
-class Pairing extends Model
-{
+class Pairing extends Model {
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'user_id', 'character_1_id', 'character_2_id', 'character_1_approved', 'character_2_approved', 'status', 'data'
+        'user_id', 'character_1_id', 'character_2_id', 'character_1_approved', 'character_2_approved', 'status', 'data',
     ];
 
     /**
@@ -25,7 +22,14 @@ class Pairing extends Model
      *
      * @var string
      */
-    protected $table = 'pairing';
+    protected $table = 'pairings';
+
+    /**
+     * Whether the model contains timestamps to be saved and updated.
+     *
+     * @var string
+     */
+    public $timestamps = true;
 
     /**
      * Dates on the model to convert to Carbon instances.
@@ -40,11 +44,11 @@ class Pairing extends Model
      * @var array
      */
     public static $createRules = [
-        'user_id' => 'required',
+        'user_id'        => 'required',
         'character_1_id' => 'required',
         'character_2_id' => 'required',
-        'item_id' => 'required',
-        'status' => 'required'
+        'item_id'        => 'required',
+        'status'         => 'required',
     ];
 
     /**
@@ -53,7 +57,7 @@ class Pairing extends Model
      * @var array
      */
     public static $updateRules = [
-        'user_id' => 'required',
+        'user_id'        => 'required',
         'character_1_id' => 'required',
         'character_2_id' => 'required',
     ];
@@ -63,22 +67,27 @@ class Pairing extends Model
         RELATIONS
 
     **********************************************************************************************/
+
+    /**
+     * Get the user who owns the pairing.
+     */
+    public function user() {
+        return $this->belongsTo('App\Models\User\User');
+    }
+
     /**
      * Get the character 1 associated with the pairing.
      */
-    public function character_1()
-    {
+    public function character_1() {
         return $this->belongsTo('App\Models\Character\Character', 'character_1_id');
     }
 
     /**
      * Get the character 2 associated with the pairing.
      */
-    public function character_2()
-    {
+    public function character_2() {
         return $this->belongsTo('App\Models\Character\Character', 'character_2_id');
     }
-
 
     /**********************************************************************************************
 
@@ -89,22 +98,22 @@ class Pairing extends Model
     /**
      * Scope a query to sort features by newest first.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeSortNewest($query)
-    {
+    public function scopeSortNewest($query) {
         return $query->orderBy('id', 'DESC');
     }
 
     /**
      * Scope a query to sort features oldest first.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeSortOldest($query)
-    {
+    public function scopeSortOldest($query) {
         return $query->orderBy('id');
     }
 
@@ -119,29 +128,8 @@ class Pairing extends Model
      *
      * @return string
      */
-    public function getDisplayNameAttribute()
-    {
+    public function getDisplayNameAttribute() {
         return '<a href="'.$this->url.'" class="display-prompt">'.$this->name.'</a>';
-    }
-
-    /**
-     * Gets the URL of the model's encyclopedia page.
-     *
-     * @return string
-     */
-    public function getUrlAttribute()
-    {
-        return url('pairings/pairings?name='.$this->name);
-    }
-
-    /**
-     * Gets the pairings's asset type for asset management.
-     *
-     * @return string
-     */
-    public function getAssetTypeAttribute()
-    {
-        return 'pairings';
     }
 
     /**
@@ -149,8 +137,20 @@ class Pairing extends Model
      *
      * @return array
      */
-    public function getDataAttribute()
-    {
+    public function getDataAttribute() {
         return json_decode($this->attributes['data'], true);
+    }
+
+    /**
+     * Displays all the items attached to the pairing
+     *
+     * @return string
+     */
+    public function getDisplayItemsAttribute() {
+        $items = [];
+        foreach ($this->data['user']['user_items'] as $id=>$q) {
+            $items[] = UserItem::find($id)->item->display_name.' x'.$q;
+        }
+        return implode(', ', $items);
     }
 }

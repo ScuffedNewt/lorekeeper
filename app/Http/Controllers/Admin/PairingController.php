@@ -1,83 +1,59 @@
-<?php namespace App\Http\Controllers\Admin;
+<?php
 
-use Auth;
-use DB;
-use Exception;
-use Settings;
+namespace App\Http\Controllers\Admin;
 
-use Carbon\Carbon;
-use Illuminate\Http\Request;
-
-use App\Models\User\User;
-use App\Models\User\UserItem;
-
+use App\Http\Controllers\Controller;
 use App\Models\Character\Character;
 use App\Models\Item\Item;
 use App\Models\Item\ItemTag;
-use App\Models\Item\ItemCategory;
-
-use App\Models\Character\Sublist;
-use App\Http\Controllers\Controller;
-
 use App\Models\Pairing\Pairing;
 use App\Services\PairingManager;
+use Auth;
+use Illuminate\Http\Request;
 
-
-class PairingController extends Controller
-{
+class PairingController extends Controller {
     /**
      * Shows the pairing roller.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function getRoller(Request $request)
-    {
-
+    public function getRoller() {
+        $characters = Character::visible()->myo(0)->orderBy('number', 'DESC')->get()->pluck('fullName', 'slug')->toArray();
         $pairingItemIds = ItemTag::where('tag', 'pairing')->pluck('item_id');
         $boostItemIds = ItemTag::where('tag', 'boost')->pluck('item_id');
-    
+
         return view('admin.pairings.roller', [
-            'inventory' => Item::whereIn('id', $boostItemIds)->orWhereIn('id', $pairingItemIds)->pluck('name', 'id'),
+            'characters' => $characters,
+            'boost_items'   => Item::whereIn('id', $boostItemIds)->pluck('name', 'id'),
+            'pairing_items'  => Item::whereIn('id', $pairingItemIds)->pluck('name', 'id'),
         ]);
     }
 
     /**
      * Does a test roll.
      *
-     * @param  \Illuminate\Http\Request    $request
-     * @param  App\Services\RaffleService  $service
-     * @param  int|null                    $id
+     * @param App\Services\RaffleService $service
+     *
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function postRoll(Request $request, PairingManager $service)
-    {
-
+    public function postRoll(Request $request, PairingManager $service) {
+        $characters = Character::visible()->myo(0)->orderBy('number', 'DESC')->get()->pluck('fullName', 'slug')->toArray();
         $pairingItemIds = ItemTag::where('tag', 'pairing')->pluck('item_id');
         $boostItemIds = ItemTag::where('tag', 'boost')->pluck('item_id');
 
-        $character1Code =  $request->character_1_code;
-        $character2Code =  $request->character_2_code;
-        $itemIds = $request->item_id;
-
-        $user = Auth::user();
-        $testMyos = $service->rollTestMyos($character1Code, $character2Code,$itemIds, $user);
-    
-        if (isset($testMyos)) {
-            return view('admin.pairings.roller', [
-                'items' => $itemIds,
-                'inventory' => Item::whereIn('id', $boostItemIds)->orWhereIn('id', $pairingItemIds)->pluck('name', 'id'),
-                'testMyos' => $testMyos,
-                'slug1' => $character1Code,
-                'slug2' => $character2Code,
-                'item_ids' => array_filter($itemIds)
-            ]);
+        $data = $request->only(['character_codes', 'pairing_item_id', 'boost_item_ids']);
+        if (!$testMyos = $service->rollTestMyos($data, Auth::user())) {
+            return "<div class='alert alert-danger'>".$service->errors()->getMessages()['error'][0]."</div>";
         } else {
-            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+            return view('admin.pairings._roller_myos', [
+                'boost_items'        => Item::whereIn('id', $boostItemIds)->pluck('name', 'id'),
+                'pairing_items'      => Item::whereIn('id', $pairingItemIds)->pluck('name', 'id'),
+                'testMyos'           => $testMyos,
+                'pairing_characters' => $data['character_codes'],
+                'characters'         => $characters,
+                'pairing_item_id'    => $data['pairing_item_id'],
+                'boost_item_ids'     => $data['boost_item_ids'],
+            ]);
         }
-      
-        return redirect()->back();
-   
     }
-
 }

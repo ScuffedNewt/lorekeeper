@@ -2,69 +2,64 @@
 
 namespace App\Http\Controllers\Users;
 
-use Illuminate\Http\Request;
-
-use DB;
-use Auth;
-use Route;
-use Settings;
-use App\Models\User\User;
-use App\Models\Character\Character;
+use App\Http\Controllers\Controller;
+use App\Models\Character\Sublist;
 use App\Models\Item\Item;
 use App\Models\Item\ItemCategory;
-use App\Models\User\UserItem;
-
-use App\Models\Character\Sublist;
-use App\Http\Controllers\Controller;
-
 use App\Models\Pairing\Pairing;
+use App\Models\User\User;
+use App\Models\Character\Character;
+use App\Models\User\UserItem;
 use App\Services\PairingManager;
+use Auth;
+use Illuminate\Support\Arr;
+use Illuminate\Http\Request;
 
-class PairingController extends Controller
-{
-   /**
+class PairingController extends Controller {
+
+    /**
      * Shows the user's Pairings.
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function getPairings(Request $request)
-    {
+    public function getPairings(Request $request) {
         $user = Auth::user();
 
         $type = $request->get('type');
-        if(!$type) $type = 'new';
+        if (!$type) {
+            $type = 'new';
+        }
 
         $pairings = null;
-        if($type == 'open') $pairings = Pairing::where('user_id', $user->id)->whereNotIn('status', ['REJECTED', 'USED'])->orderBy('id', 'DESC')->get()->paginate(10)->appends($request->query());
 
-        if($type == 'approval'){
-            $pairings = Pairing::where(function ($query) {
-                $user = Auth::user();
-                $characterIds = $user->characters()->pluck('id')->toArray();
-                $query->whereIn('character_1_id', $characterIds)->orWhereIn('character_2_id', $characterIds);
-            })->where('user_id','!=',$user->id)->whereIn('status', ['OPEN'])->orderBy('id', 'DESC')->get()->paginate(10)->appends($request->query());
+        if ($type == 'approval') {
+            $pairings = Pairing::where(function ($query) use ($user) {
+                $character_ids = $user->characters()->pluck('id')->toArray();
+                $query->whereIn('character_1_id', $character_ids)->orWhereIn('character_2_id', $character_ids);
+            })->whereIn('status', ['PENDING'])->orderBy('id', 'DESC')->get()->paginate(10)->appends($request->query());
         }
 
-        if($type == 'closed') $pairings = Pairing::where('user_id', $user->id)->whereIn('status', ['REJECTED', 'USED'])->orderBy('id', 'DESC')->get()->paginate(10)->appends($request->query());
-
-        $userItems = $user->items()->where('count', ">", 0)->get();
-        $pairingItemIds = [];
-        foreach($userItems as $item){
-            if($item->tags()->where('tag', 'pairing')->exists()) $pairingItemIds[] = $item->id;
+        if ($type == 'pending') {
+            $pairings = Pairing::where('user_id', $user->id)->whereIn('status', ['APPROVED'])->orderBy('id', 'DESC')->get()->paginate(10)->appends($request->query());
         }
 
-        $boostItemIds = [];
-        foreach($userItems as $item){
-            if($item->tags()->where('tag', 'boost')->exists()) $boostItemIds[] = $item->id;
+        if ($type == 'closed') {
+            $pairings = Pairing::where('user_id', $user->id)->whereIn('status', ['REJECTED', 'COMPLETE', 'CANCELLED'])->orderBy('id', 'DESC')->get()->paginate(10)->appends($request->query());
         }
+
+        $user_items = $user->items()->where('count', '>', 0)->get()->pluck('id')->toArray();
+        $user_pairing_items = UserItem::whereIn('item_id', $user_items)->whereIn('item_id', Item::whereRelation('tags', 'tag', 'pairing')->pluck('id')->toArray())->get();
+        $user_boost_items = UserItem::whereIn('item_id', $user_items)->whereIn('item_id', Item::whereRelation('tags', 'tag', 'boost')->pluck('id')->toArray())->get();
 
         return view('home.pairings', [
-            'pairings' => $pairings,
-            'sublists' => Sublist::orderBy('sort', 'DESC')->get(),
-            'item_filter' => Item::whereIn('id', $boostItemIds)->orWhereIn('id', $pairingItemIds)->orderBy('name')->released()->get()->keyBy('id'),
-            'inventory' => UserItem::with('item')->whereIn('item_id', $boostItemIds)->orWhereIn('item_id', $pairingItemIds)->get(),
-            'categories' => ItemCategory::orderBy('sort', 'DESC')->get(),
-            'page' => 'pairing',
+            'characters'    => Character::visible()->myo(0)->orderBy('number', 'DESC')->get()->pluck('fullName', 'slug')->toArray(),
+            'pairings'      => $pairings,
+            'user_pairing_items' => $user_pairing_items,
+            'user_boost_items'   => $user_boost_items,
+            'categories'    => ItemCategory::orderBy('sort', 'DESC')->get(),
+            'page'          => 'pairing',
+            'pairing_item_filter'   => Item::whereRelation('tags', 'tag', 'pairing')->orderBy('name')->get()->keyBy('id'),
+            'boost_item_filter'     => Item::whereRelation('tags', 'tag', 'boost')->orderBy('name')->get()->keyBy('id'),
         ]);
     }
 
@@ -73,51 +68,64 @@ class PairingController extends Controller
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function createPairings(Request $request, PairingManager $service)
-    {
-        $pairings = Pairing::where('user_id', Auth::user()->id)->get();
-
-        if ($service->createPairing($request->character_1_code, $request->character_2_code, $request->stack_id, $request->stack_quantity, Auth::user())) {
-            flash('Pairing created!')->success();
-            return redirect()->back();
+    public function createPairings(Request $request, PairingManager $service) {
+        $data = $request->only(['character_codes', 'stack_id', 'stack_quantity']);
+        if (!$service->createPairing($data, Auth::user())) {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
+        } else {
+            flash('Pairing created successfully!')->success();
         }
-        else {
-            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+        return redirect()->back();
+    }
+
+        /**
+     * Approves a pairing request.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function cancelPairing(PairingManager $service, $id) {
+        if (!$service->cancelPairing(Pairing::findOrFail($id), Auth::user())) {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
+        } else {
+            flash('Pairing cancelled successfully!')->success();
         }
         return redirect()->back();
     }
 
     /**
-     * Approves a pairing.
+     * Approves a pairing request.
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function approvePairing(Request $request, PairingManager $service)
-    {
-        if ($service->approvePairing($request->pairing_id, Auth::user())) {
-            flash('Pairing approved!')->success();
-            return redirect()->back();
-        }
-        else {
-            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+    public function approvePairing(PairingManager $service, $id) {
+        if (!$service->approvePairing(Pairing::findOrFail($id))) {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
+        } else {
+            flash('Pairing approved successfully!')->success();
         }
         return redirect()->back();
     }
 
     /**
-     * Rejects a pairing.
+     * Rejects a pairing request.
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function rejectPairing(Request $request, PairingManager $service)
-    {
-        if ($service->rejectPairing($request->pairing_id, Auth::user())) {
-            flash('Pairing Rejected!')->success();
-            return redirect()->back();
+    public function rejectPairing(PairingManager $service, $id) {
+        if (!$service->rejectPairing(Pairing::findOrFail($id), Auth::user())) {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
+        } else {
+            flash('Pairing rejected successfully!')->success();
         }
-        else {
-            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
-        }
+
         return redirect()->back();
     }
 
@@ -126,17 +134,15 @@ class PairingController extends Controller
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function createMyo(Request $request, PairingManager $service)
-    {
-        $myosCreated = $service->createMyos($request->pairing_id, Auth::user());
-        if (is_numeric($myosCreated)) {
-            flash('Congrats!! '.$myosCreated.' Pairing MYO Slots have been created!')->success();
-            return redirect()->back();
+    public function createMyos(PairingManager $service, $id) {
+        if (!$myos = $service->createMyos(Pairing::findOrFail($id), Auth::user())) {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
+        } else {
+            flash('Congrats! '.$myos.' Pairing MYO Slots have been created!')->success();
         }
-        else {
-            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
-        }
+
         return redirect()->back();
     }
-
 }
