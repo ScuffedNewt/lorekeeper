@@ -142,7 +142,7 @@ class Pairing extends Model {
     }
 
     /**
-     * Displays all the items attached to the pairing
+     * Displays all the items attached to the pairing.
      *
      * @return string
      */
@@ -151,6 +151,7 @@ class Pairing extends Model {
         foreach ($this->data['user']['user_items'] as $id=>$q) {
             $items[] = UserItem::find($id)->item->display_name.' x'.$q;
         }
+
         return implode(', ', $items);
     }
 }

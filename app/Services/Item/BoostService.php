@@ -45,7 +45,7 @@ class BoostService extends Service {
      * Processes the data attribute of the tag and returns it in the preferred format.
      *
      * @param mixed $tag
-     * @param array  $data
+     * @param array $data
      *
      * @return bool
      */
@@ -53,7 +53,6 @@ class BoostService extends Service {
         DB::beginTransaction();
 
         try {
-
             //put inputs into an array to transfer to the DB
             if (isset($data['setting']) && isset($data['rarity_id'])) {
                 throw new \Exception('You can only set either setting or rarity.');
@@ -62,8 +61,12 @@ class BoostService extends Service {
                 throw new \Exception('Please choose a setting or rarity to boost.');
             }
 
-            if (!isset($data['setting_chance'])) $data['setting_chance'] = 0;
-            if (!isset($data['rarity_chance'])) $data['rarity_chance'] = 0;
+            if (!isset($data['setting_chance'])) {
+                $data['setting_chance'] = 0;
+            }
+            if (!isset($data['rarity_chance'])) {
+                $data['rarity_chance'] = 0;
+            }
 
             if ($data['setting_chance'] < 1 || $data['rarity_chance'] < 1) {
                 throw new \Exception('Percentages cannot be less than or equal to 0.');

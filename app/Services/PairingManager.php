@@ -4,9 +4,7 @@ namespace App\Services;
 
 use App\Models\Character\Character;
 use App\Models\Feature\Feature;
-use App\Models\Feature\FeatureCategory;
 use App\Models\Item\Item;
-use App\Models\Item\ItemTag;
 use App\Models\Notification;
 use App\Models\Pairing\Pairing;
 use App\Models\Rarity;
@@ -15,9 +13,8 @@ use App\Models\Species\Subtype;
 use App\Models\User\User;
 use App\Models\User\UserItem;
 use Carbon\Carbon;
-use DB;
 use Config;
-use Log;
+use DB;
 use Illuminate\Support\Arr;
 use Notifications;
 use Settings;
@@ -41,11 +38,8 @@ class PairingManager extends Service {
     /**
      * Creates a new pairing.
      *
-     * @param mixed $character1Code
-     * @param mixed $character2Code
-     * @param mixed $stackId
-     * @param mixed $stackQuantity
      * @param mixed $user
+     * @param mixed $data
      *
      * @return \App\Models\Pairing\Pairing|bool
      */
@@ -159,7 +153,8 @@ class PairingManager extends Service {
      * Validates that all information is correct for a pairing.
      *
      * @param array $character_codes
-     * @param Item $pairing_item
+     * @param Item  $pairing_item
+     *
      * @return bool
      */
     public function validatePairingBasics($character_codes, $pairing_item) {
@@ -230,9 +225,9 @@ class PairingManager extends Service {
     }
 
     /**
-     * Cancels a pairing
+     * Cancels a pairing.
      *
-     *
+     * @param mixed $pairing
      */
     public function cancelPairing($pairing) {
         DB::beginTransaction();
@@ -279,6 +274,7 @@ class PairingManager extends Service {
                     'character_2_slug' => $pairing->character_2->slug,
                 ]);
             }
+
             return $this->commitReturn(true);
         } catch (\Exception $e) {
             $this->setError('error', $e->getMessage());
@@ -291,6 +287,7 @@ class PairingManager extends Service {
      * Approve a pairing.
      *
      * @param mixed $pairing
+     *
      * @return \App\Models\Pairing\Pairing|bool
      */
     public function approvePairing($pairing) {
@@ -326,8 +323,8 @@ class PairingManager extends Service {
     /**
      * Reject a pairing.
      *
-     * @param mixed $pairing_id
      * @param mixed $user
+     * @param mixed $pairing
      *
      * @return \App\Models\Pairing\Pairing|bool
      */
@@ -335,7 +332,6 @@ class PairingManager extends Service {
         DB::beginTransaction();
 
         try {
-
             if (!$pairing) {
                 throw new \Exception('Error happened while trying to reject pairing.');
             }
@@ -360,7 +356,7 @@ class PairingManager extends Service {
             }
 
             // Notify the user
-            if ($pairing->user->id != $user->id ) {
+            if ($pairing->user->id != $user->id) {
                 Notifications::create('PAIRING_REJECTED', $pairing->user, [
                     'character_1_url'  => $pairing->character_1->url,
                     'character_1_slug' => $pairing->character_1->slug,
@@ -380,8 +376,8 @@ class PairingManager extends Service {
     /**
      * Create MYO.
      *
-     * @param mixed $pairing_id
      * @param mixed $user
+     * @param mixed $pairing
      *
      * @return \App\Models\Pairing\Pairing|bool
      */
@@ -389,7 +385,6 @@ class PairingManager extends Service {
         DB::beginTransaction();
 
         try {
-
             if (!$pairing) {
                 throw new \Exception('Error happened while trying to create a MYO from the pairing.');
             }
@@ -422,28 +417,32 @@ class PairingManager extends Service {
             }
             $tag = $pairing_item->tag('pairing');
 
-           // Remove any added items, hold counts, and add logs
-           $inventoryManager = new InventoryManager;
-           if (isset($pairing->data['user']['user_items'])) {
-               $stacks = $pairing->data['user']['user_items'];
-               foreach ($stacks as $id => $quantity) {
-                   $user_item = UserItem::find($id);
-                   if (!$user_item) {
-                       throw new \Exception('Cannot return an invalid item. (#'.$id.')');
-                   }
-                   if ($user_item->pairing_count < $quantity) {
-                       throw new \Exception('Cannot return more items than was held. (#'.$id.')');
-                   }
-                   $user_item->pairing_count -= $quantity;
-                   $user_item->save();
+            // Remove any added items, hold counts, and add logs
+            $inventoryManager = new InventoryManager;
+            if (isset($pairing->data['user']['user_items'])) {
+                $stacks = $pairing->data['user']['user_items'];
+                foreach ($stacks as $id => $quantity) {
+                    $user_item = UserItem::find($id);
+                    if (!$user_item) {
+                        throw new \Exception('Cannot return an invalid item. (#'.$id.')');
+                    }
+                    if ($user_item->pairing_count < $quantity) {
+                        throw new \Exception('Cannot return more items than was held. (#'.$id.')');
+                    }
+                    $user_item->pairing_count -= $quantity;
+                    $user_item->save();
 
-                   if (!$inventoryManager->debitStack($user, 'Used in Pairing',
-                        ['data' => 'Item used in pairing between '. $pairing->character_1->displayName . ' and ' . $pairing->character_2->displayName],
-                        $user_item, $quantity)) {
+                    if (!$inventoryManager->debitStack(
+                        $user,
+                        'Used in Pairing',
+                        ['data' => 'Item used in pairing between '.$pairing->character_1->displayName.' and '.$pairing->character_2->displayName],
+                        $user_item,
+                        $quantity
+                    )) {
                         throw new \Exception('Failed to create log for item stack.');
-                   }
-               }
-           }
+                    }
+                }
+            }
 
             $characters = [$pairing->character_1, $pairing->character_2];
             $species = [$pairing->character_1->image->species, $pairing->character_2->image->species];
@@ -551,6 +550,7 @@ class PairingManager extends Service {
                     ];
                 }
             }
+
             return $test_myos;
         } catch (\Exception $e) {
             $this->setError('error', $e->getMessage());
@@ -611,6 +611,7 @@ class PairingManager extends Service {
      * Determines how likely it is that the MYO inherits traits from both parents.
      *
      * @param mixed $boosts
+     *
      * @return bool
      */
     private function getInheritTraitsFromBoth($boosts) {
@@ -630,7 +631,14 @@ class PairingManager extends Service {
     }
 
     /**
-     * Get the pool of features that could appear on this myo
+     * Get the pool of features that could appear on this myo.
+     *
+     * @param mixed $tag
+     * @param mixed $characters
+     * @param mixed $boosts
+     * @param mixed $species_id
+     * @param mixed $subtype_id
+     * @param mixed $inherit_traits_from_both
      *
      * @return \Illuminate\Support\Collection
      */
@@ -665,6 +673,11 @@ class PairingManager extends Service {
 
     /**
      * Determines the features chosen for the MYO.
+     *
+     * @param mixed $tag
+     * @param mixed $characters
+     * @param mixed $feature_pool
+     * @param mixed $boosts
      *
      * @return array
      */
@@ -721,7 +734,14 @@ class PairingManager extends Service {
     }
 
     /**
-     * Gives feature data for traits granted by the tag so that it can be identified from which parent is was inherited
+     * Gives feature data for traits granted by the tag so that it can be identified from which parent is was inherited.
+     *
+     * @param mixed $tag
+     * @param mixed $characters
+     * @param mixed $species
+     * @param mixed $chosen_features
+     * @param mixed $species_id
+     * @param mixed $subtype_id
      *
      * @return array
      */
@@ -762,6 +782,10 @@ class PairingManager extends Service {
     /**
      * Determines the species of the MYO.
      *
+     * @param mixed $tag
+     * @param mixed $species
+     * @param mixed $inherit
+     *
      * @return int
      */
     private function getSpeciesId($tag, $species, $inherit) {
@@ -780,6 +804,7 @@ class PairingManager extends Service {
             if ($inherit_species) {
                 return $species[0]->id;
             }
+
             return $species[1]->id;
         } elseif (count($valid_species_ids) == 1) {
             return $valid_species_ids[0];
@@ -788,9 +813,13 @@ class PairingManager extends Service {
         }
     }
 
-
     /**
-     * Determines the subtype id
+     * Determines the subtype id.
+     *
+     * @param mixed $tag
+     * @param mixed $species
+     * @param mixed $characters
+     * @param mixed $species_id
      *
      * @return int
      */
@@ -807,7 +836,6 @@ class PairingManager extends Service {
             return null;
         }
 
-
         $illegal_subtype_id = $tag->getData()['illegal_subtype_id'] ?? null;
         $default_subtype_id = $tag->getData()['default_subtype_id'] ?? null;
         $valid_subtypes = array_filter([$characters[0]->image->subtype, $characters[1]->image->subtype]);
@@ -817,6 +845,7 @@ class PairingManager extends Service {
             if (count($valid_subtypes) > 1) {
                 //more than one valid subtype go by inherit chance
                 $inherit_chance = $characters[0]->image->subtype?->inherit_chance + $characters[1]->image->subtype?->inherit_chance;
+
                 return (random_int(0, $inherit_chance) <= $characters[0]->image->subtype->inherit_chance) ? $valid_subtypes[0]->id : $valid_subtypes[1]->id;
             } elseif (count($valid_subtypes) == 1) {
                 // check if no subtype or if subtype is valid
@@ -828,12 +857,15 @@ class PairingManager extends Service {
             //different specieses - subtype is the type of the parent whose species was chosen
             return Subtype::whereIn('id', $valid_subtype_ids)->where('species_id', $species_id)->first()->id ?? $default_subtype_id;
         }
+
         // fallback
         return $default_subtype_id;
     }
 
     /**
-     * Gives the character the rarity of the highest trait rarity
+     * Gives the character the rarity of the highest trait rarity.
+     *
+     * @param mixed $chosen_features
      */
     private function getRarityId($chosen_features) {
         $features = Feature::whereIn('id', array_keys($chosen_features))->get();
@@ -847,6 +879,15 @@ class PairingManager extends Service {
 
     /**
      * Creates the myo slot.
+     *
+     * @param mixed $user
+     * @param mixed $sex
+     * @param mixed $species_id
+     * @param mixed $subtype_id
+     * @param mixed $rarity_id
+     * @param mixed $feature_ids
+     * @param mixed $feature_data
+     * @param mixed $characters
      */
     private function saveMyo($user, $sex, $species_id, $subtype_id, $rarity_id, $feature_ids, $feature_data, $characters) {
         DB::beginTransaction();

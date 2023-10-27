@@ -41,7 +41,7 @@ class Notifications {
             DB::commit();
 
             return true;
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             $this->setError('error', $e->getMessage());
         }
         DB::rollback();

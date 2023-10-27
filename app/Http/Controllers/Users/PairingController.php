@@ -3,20 +3,17 @@
 namespace App\Http\Controllers\Users;
 
 use App\Http\Controllers\Controller;
-use App\Models\Character\Sublist;
+use App\Models\Character\Character;
 use App\Models\Item\Item;
 use App\Models\Item\ItemCategory;
 use App\Models\Pairing\Pairing;
 use App\Models\User\User;
-use App\Models\Character\Character;
 use App\Models\User\UserItem;
 use App\Services\PairingManager;
 use Auth;
-use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 
 class PairingController extends Controller {
-
     /**
      * Shows the user's Pairings.
      *
@@ -52,12 +49,12 @@ class PairingController extends Controller {
         $user_boost_items = UserItem::whereIn('item_id', $user_items)->whereIn('item_id', Item::whereRelation('tags', 'tag', 'boost')->pluck('id')->toArray())->get();
 
         return view('home.pairings', [
-            'characters'    => Character::visible()->myo(0)->orderBy('number', 'DESC')->get()->pluck('fullName', 'slug')->toArray(),
-            'pairings'      => $pairings,
-            'user_pairing_items' => $user_pairing_items,
-            'user_boost_items'   => $user_boost_items,
-            'categories'    => ItemCategory::orderBy('sort', 'DESC')->get(),
-            'page'          => 'pairing',
+            'characters'            => Character::visible()->myo(0)->orderBy('number', 'DESC')->get()->pluck('fullName', 'slug')->toArray(),
+            'pairings'              => $pairings,
+            'user_pairing_items'    => $user_pairing_items,
+            'user_boost_items'      => $user_boost_items,
+            'categories'            => ItemCategory::orderBy('sort', 'DESC')->get(),
+            'page'                  => 'pairing',
             'pairing_item_filter'   => Item::whereRelation('tags', 'tag', 'pairing')->orderBy('name')->get()->keyBy('id'),
             'boost_item_filter'     => Item::whereRelation('tags', 'tag', 'boost')->orderBy('name')->get()->keyBy('id'),
         ]);
@@ -77,11 +74,14 @@ class PairingController extends Controller {
         } else {
             flash('Pairing created successfully!')->success();
         }
+
         return redirect()->back();
     }
 
-        /**
+    /**
      * Approves a pairing request.
+     *
+     * @param mixed $id
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
@@ -93,11 +93,14 @@ class PairingController extends Controller {
         } else {
             flash('Pairing cancelled successfully!')->success();
         }
+
         return redirect()->back();
     }
 
     /**
      * Approves a pairing request.
+     *
+     * @param mixed $id
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
@@ -109,11 +112,14 @@ class PairingController extends Controller {
         } else {
             flash('Pairing approved successfully!')->success();
         }
+
         return redirect()->back();
     }
 
     /**
      * Rejects a pairing request.
+     *
+     * @param mixed $id
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
@@ -131,6 +137,8 @@ class PairingController extends Controller {
 
     /**
      * Creates a MYO from the pairing.
+     *
+     * @param mixed $id
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */

@@ -23,8 +23,8 @@ class PairingController extends Controller {
         $boostItemIds = ItemTag::where('tag', 'boost')->pluck('item_id');
 
         return view('admin.pairings.roller', [
-            'characters' => $characters,
-            'boost_items'   => Item::whereIn('id', $boostItemIds)->pluck('name', 'id'),
+            'characters'     => $characters,
+            'boost_items'    => Item::whereIn('id', $boostItemIds)->pluck('name', 'id'),
             'pairing_items'  => Item::whereIn('id', $pairingItemIds)->pluck('name', 'id'),
         ]);
     }
@@ -43,7 +43,7 @@ class PairingController extends Controller {
 
         $data = $request->only(['character_codes', 'pairing_item_id', 'boost_item_ids']);
         if (!$testMyos = $service->rollTestMyos($data, Auth::user())) {
-            return "<div class='alert alert-danger'>".$service->errors()->getMessages()['error'][0]."</div>";
+            return "<div class='alert alert-danger'>".$service->errors()->getMessages()['error'][0].'</div>';
         } else {
             return view('admin.pairings._roller_myos', [
                 'boost_items'        => Item::whereIn('id', $boostItemIds)->pluck('name', 'id'),

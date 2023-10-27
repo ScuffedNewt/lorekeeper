@@ -18,8 +18,9 @@ return [
         'wiki_key' => 'Character_Pairings',
         'creators' => json_encode([
             'Cylunny' => 'https://toyhou.se/Cylunny',
+            'Newt'    => 'https://github.com/ne-wt',
         ]),
-        'version' => '1.0.0',
+        'version' => '1.5.0',
     ],
 
 ];
