@@ -1,6 +1,8 @@
 @extends('home.layout')
 
-@section('home-title') My Pairings @endsection
+@section('home-title')
+    My Pairings
+@endsection
 
 @section('home-content')
     {!! breadcrumbs(['Characters' => 'characters', 'My Pairings' => 'myos']) !!}
@@ -24,7 +26,7 @@
         </li>
     </ul>
 
-    @if(!isset($pairings))
+    @if (!isset($pairings))
         @include('home._create_pairing', [
             'characters' => $characters,
             'user_pairing_items' => $user_pairing_items,
@@ -35,7 +37,7 @@
             'page' => $page,
         ])
     @else
-    {!! $pairings->render() !!}
+        {!! $pairings->render() !!}
         <div class="table-responsive">
             <table class="table">
                 <thead>
@@ -44,26 +46,26 @@
                         <th width="15%">Character 2</th>
                         <th width="25%">Items</th>
                         <th>Status</th>
-                        @if(Request::get('type') != 'closed')
+                        @if (Request::get('type') != 'closed')
                             <th width="20%">Actions</th>
                         @endif
                         <th>Created</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($pairings as $pair)
+                    @foreach ($pairings as $pair)
                         @include('home._pairing_row', ['pair' => $pair])
                     @endforeach
                 </tbody>
             </table>
         </div>
-    {!! $pairings->render() !!}
+        {!! $pairings->render() !!}
     @endif
 
 @endsection
 @section('scripts')
-@parent
-@include('widgets._inventory_select_js', ['readOnly' => true])
+    @parent
+    @include('widgets._inventory_select_js', ['readOnly' => true])
     <script>
         $(document).ready(function() {
             var $char_1 = $('#character_1');
@@ -77,11 +79,11 @@
                     var $parent = $(this).parent().parent().parent().parent();
                     console.log($parent, $(this).val());
                     $parent.find('.character-image-loaded').load('{{ url('submissions/new/character') }}/' + $(this).val(),
-                    function(response, status, xhr) {
-                        $parent.find('.character-image-blank').addClass('hide');
-                        $parent.find('.character-image-loaded').removeClass('hide');
-                        $parent.find('.character-rewards').removeClass('hide');
-                    });
+                        function(response, status, xhr) {
+                            $parent.find('.character-image-blank').addClass('hide');
+                            $parent.find('.character-image-loaded').removeClass('hide');
+                            $parent.find('.character-rewards').removeClass('hide');
+                        });
                 });
             }
         });

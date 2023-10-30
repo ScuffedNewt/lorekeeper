@@ -12,7 +12,7 @@
     <div class="row mt-3">
         <div class="col">
             {!! Form::label('Min Offspring generated') !!} {!! add_help('The minimum amount of slots/offspring to be generated.') !!}
-            {!! Form::number('min', isset($tag->getData()['min'])? $tag->getData()['min'] : 1,  ['class' => 'form-control']) !!}
+            {!! Form::number('min', isset($tag->getData()['min']) ? $tag->getData()['min'] : 1, ['class' => 'form-control']) !!}
         </div>
         <div class="col">
             {!! Form::label('Max Offspring generated') !!} {!! add_help('The maximum amount of slots/offspring to be generated.') !!}
@@ -33,22 +33,31 @@
     <div class="form-group">
         {!! Form::label('Guarenteed Offspring Trait (Optional)') !!}
         <p>Choose a trait that this pairing item will always grant the offspring.</p>
-        {!! Form::select('feature_id', $features, $tag->getData()['feature_id'] ?? null, ['class' => 'form-control mr-2
-        feature-select', 'placeholder' => 'Select Offspring Trait']) !!}
-    </div>
-    
-    <div class="form-group">
-        {!! Form::label('Guarenteed Offspring Species (Optional)') !!}
-        <p>Choose a species that this pairing item will grant the offspring.</p>
-        {!! Form::select('species_id', $specieses, $tag->getData()['species_id'] ?? null, ['class' => 'form-control mr-2
-        feature-select', 'placeholder' => 'Select Offspring Species']) !!}
+        {!! Form::select('feature_id', $features, $tag->getData()['feature_id'] ?? null, [
+            'class' => 'form-control mr-2
+                feature-select',
+            'placeholder' => 'Select Offspring Trait',
+        ]) !!}
     </div>
 
     <div class="form-group">
-        {!! Form::label('Guarenteed Offspring Subtype (Optional)') !!} 
+        {!! Form::label('Guarenteed Offspring Species (Optional)') !!}
+        <p>Choose a species that this pairing item will grant the offspring.</p>
+        {!! Form::select('species_id', $specieses, $tag->getData()['species_id'] ?? null, [
+            'class' => 'form-control mr-2
+                feature-select',
+            'placeholder' => 'Select Offspring Species',
+        ]) !!}
+    </div>
+
+    <div class="form-group">
+        {!! Form::label('Guarenteed Offspring Subtype (Optional)') !!}
         <p>Choose a subtype that this pairing item will always grant the offspring. Will not work if the species does not match the subtype.</p>
-        {!! Form::select('subtype_id', $subtypes, $tag->getData()['subtype_id'] ?? null, ['class' => 'form-control mr-2
-        feature-select', 'placeholder' => 'Select Offspring Subtype']) !!}
+        {!! Form::select('subtype_id', $subtypes, $tag->getData()['subtype_id'] ?? null, [
+            'class' => 'form-control mr-2
+                feature-select',
+            'placeholder' => 'Select Offspring Subtype',
+        ]) !!}
     </div>
 
     <hr>
@@ -61,8 +70,11 @@
 
     <div class="form-group">
         {!! Form::label('Default Species (Optional)') !!} {!! add_help('Choose a species that should be set if both parent species are excluded.') !!}
-        {!! Form::select('default_species_id', $specieses, $tag->getData()['default_species_id'] ?? null, ['class' => 'form-control mr-2
-        feature-select', 'placeholder' => 'Select Default Species']) !!}
+        {!! Form::select('default_species_id', $specieses, $tag->getData()['default_species_id'] ?? null, [
+            'class' => 'form-control mr-2
+                feature-select',
+            'placeholder' => 'Select Default Species',
+        ]) !!}
     </div>
 
     <table class="table table-sm" id="speciesTable">
@@ -73,8 +85,8 @@
                 </td>
                 <td class="text-right border-0"><a href="#" class="btn btn-danger remove-species-button">Remove</a></td>
             </tr>
-            @if(isset($tag->getData()['illegal_species_ids']) && count($tag->getData()['illegal_species_id']) > 0)
-                @foreach($tag->getData()['illegal_species_ids'] as $illegal_species_id)
+            @if (isset($tag->getData()['illegal_species_ids']) && count($tag->getData()['illegal_species_id']) > 0)
+                @foreach ($tag->getData()['illegal_species_ids'] as $illegal_species_id)
                     <tr class="loot-row">
                         <td class="loot-row-select border-0">
                             {!! Form::select('illegal_species_ids[]', $specieses, $illegal_species_id, ['class' => 'form-control item-select', 'placeholder' => 'Select Species']) !!}
@@ -99,29 +111,30 @@
     <div class="form-group">
         {!! Form::label('Default Subtype (Optional)') !!}
         <p>Choose a subtype that should be set if both parent subtypes are excluded.</p>
-        {!! Form::select('default_subtype_ids', $subtypes, $tag->getData()['default_subtype_ids'] ?? null, ['class' => 'form-control mr-2
-        feature-select', 'placeholder' => 'Select Default Subtype']) !!}
+        {!! Form::select('default_subtype_ids', $subtypes, $tag->getData()['default_subtype_ids'] ?? null, [
+            'class' => 'form-control mr-2
+                feature-select',
+            'placeholder' => 'Select Default Subtype',
+        ]) !!}
     </div>
 
     <table class="table table-sm" id="subtypeTable">
         <tbody id="subtypeTableBody">
             <tr class="loot-row hide">
                 <td class="loot-row-select border-0">
-                    {!! Form::select('illegal_subtype_ids[]', $subtypes, null, ['class' => 'form-control item-select', 'placeholder'
-                    => 'Select Subtype']) !!}
+                    {!! Form::select('illegal_subtype_ids[]', $subtypes, null, ['class' => 'form-control item-select', 'placeholder' => 'Select Subtype']) !!}
                 </td>
                 <td class="text-right border-0"><a href="#" class="btn btn-danger remove-subtype-button">Remove</a></td>
             </tr>
-            @if(isset($tag->getData()['illegal_subtype_ids']) && count($tag->getData()['illegal_subtype_id']) > 0)
-                @foreach($tag->getData()['illegal_subtype_ids'] as $illegal_subtype_id)
-                <tr class="loot-row">
-                    <td class="loot-row-select border-0">
-                        {!! Form::select('illegal_subtype_ids[]', $subtypes, $illegal_subtype_id, ['class' => 'form-control item-select',
-                        'placeholder' => 'Select Subtype']) !!}
+            @if (isset($tag->getData()['illegal_subtype_ids']) && count($tag->getData()['illegal_subtype_id']) > 0)
+                @foreach ($tag->getData()['illegal_subtype_ids'] as $illegal_subtype_id)
+                    <tr class="loot-row">
+                        <td class="loot-row-select border-0">
+                            {!! Form::select('illegal_subtype_ids[]', $subtypes, $illegal_subtype_id, ['class' => 'form-control item-select', 'placeholder' => 'Select Subtype']) !!}
 
-                    </td>
-                    <td class="text-right border-0"><a href="#" class="btn btn-danger remove-subtype-button">Remove</a></td>
-                </tr>
+                        </td>
+                        <td class="text-right border-0"><a href="#" class="btn btn-danger remove-subtype-button">Remove</a></td>
+                    </tr>
                 @endforeach
             @endif
         </tbody>
@@ -141,17 +154,15 @@
         <tbody id="traitTableBody">
             <tr class="loot-row hide">
                 <td class="loot-row-select border-0">
-                    {!! Form::select('illegal_feature_ids[]', $features, null, ['class' => 'form-control item-select', 'placeholder'
-                    => 'Select Trait']) !!}
+                    {!! Form::select('illegal_feature_ids[]', $features, null, ['class' => 'form-control item-select', 'placeholder' => 'Select Trait']) !!}
                 </td>
                 <td class="text-right border-0"><a href="#" class="btn btn-danger remove-trait-button">Remove</a></td>
             </tr>
-            @if(isset($tag->getData()['illegal_feature_ids']) && count($tag->getData()['illegal_feature_ids']) > 0)
-                @foreach($tag->getData()['illegal_feature_ids'] as $illegal_feature_id)
+            @if (isset($tag->getData()['illegal_feature_ids']) && count($tag->getData()['illegal_feature_ids']) > 0)
+                @foreach ($tag->getData()['illegal_feature_ids'] as $illegal_feature_id)
                     <tr class="loot-row">
                         <td class="loot-row-select border-0">
-                            {!! Form::select('illegal_feature_ids[]', $features, $illegal_feature_id, ['class' => 'form-control item-select',
-                            'placeholder' => 'Select Trait']) !!}
+                            {!! Form::select('illegal_feature_ids[]', $features, $illegal_feature_id, ['class' => 'form-control item-select', 'placeholder' => 'Select Trait']) !!}
 
                         </td>
                         <td class="text-right border-0"><a href="#" class="btn btn-danger remove-trait-button">Remove</a></td>
@@ -165,60 +176,60 @@
         <a href="#" class="btn btn-outline-info" id="addTrait">Add Excluded Trait</a>
     </div>
 
-@section('scripts')
-@parent
-    <script>
-        $(document).ready(function() {
-            var $speciesTable = $('#speciesTableBody');
-            var $speciesRow = $('#speciesTableBody').find('.hide');
-            var $traitTable = $('#traitTableBody');
-            var $traitRow = $('#traitTableBody').find('.hide');
-            var $subtypeTable = $('#subtypeTableBody');
-            var $subtypeRow = $('#subtypeTableBody').find('.hide');
+    @section('scripts')
+        @parent
+        <script>
+            $(document).ready(function() {
+                var $speciesTable = $('#speciesTableBody');
+                var $speciesRow = $('#speciesTableBody').find('.hide');
+                var $traitTable = $('#traitTableBody');
+                var $traitRow = $('#traitTableBody').find('.hide');
+                var $subtypeTable = $('#subtypeTableBody');
+                var $subtypeRow = $('#subtypeTableBody').find('.hide');
 
-            $('#speciesTableBody .selectize').selectize();
-            attachRemoveListener($('#speciesTableBody .remove-species-button'));
+                $('#speciesTableBody .selectize').selectize();
+                attachRemoveListener($('#speciesTableBody .remove-species-button'));
 
-            $('#traitTableBody .selectize').selectize();
-            attachRemoveListener($('#traitTableBody .remove-trait-button'));
+                $('#traitTableBody .selectize').selectize();
+                attachRemoveListener($('#traitTableBody .remove-trait-button'));
 
-            $('#subtypeTableBody .selectize').selectize();
-            attachRemoveListener($('#subtypeTableBody .remove-subtype-button'));
+                $('#subtypeTableBody .selectize').selectize();
+                attachRemoveListener($('#subtypeTableBody .remove-subtype-button'));
 
-            $('#addSpecies').on('click', function(e) {
-                e.preventDefault();
-                var $clone = $speciesRow.clone();
-                $clone.removeClass('hide');
-
-                $speciesTable.append($clone);
-                attachRemoveListener($clone.find('.remove-species-button'));
-            });
-
-            $('#addTrait').on('click', function(e) {
-                e.preventDefault();
-                var $clone = $traitRow.clone();
-                $clone.removeClass('hide');
-
-                $traitTable.append($clone);
-                attachRemoveListener($clone.find('.remove-trait-button'));
-            });
-
-            $('#addSubtype').on('click', function(e) {
-                e.preventDefault();
-                var $clone = $subtypeRow.clone();
-                $clone.removeClass('hide');
-
-                $subtypeTable.append($clone);
-                attachRemoveListener($clone.find('.remove-subtype-button'));
-            });
-
-
-            function attachRemoveListener(node) {
-                node.on('click', function(e) {
+                $('#addSpecies').on('click', function(e) {
                     e.preventDefault();
-                    $(this).parent().parent().remove();
+                    var $clone = $speciesRow.clone();
+                    $clone.removeClass('hide');
+
+                    $speciesTable.append($clone);
+                    attachRemoveListener($clone.find('.remove-species-button'));
                 });
-            }
-        });
-    </script>
-@endsection
+
+                $('#addTrait').on('click', function(e) {
+                    e.preventDefault();
+                    var $clone = $traitRow.clone();
+                    $clone.removeClass('hide');
+
+                    $traitTable.append($clone);
+                    attachRemoveListener($clone.find('.remove-trait-button'));
+                });
+
+                $('#addSubtype').on('click', function(e) {
+                    e.preventDefault();
+                    var $clone = $subtypeRow.clone();
+                    $clone.removeClass('hide');
+
+                    $subtypeTable.append($clone);
+                    attachRemoveListener($clone.find('.remove-subtype-button'));
+                });
+
+
+                function attachRemoveListener(node) {
+                    node.on('click', function(e) {
+                        e.preventDefault();
+                        $(this).parent().parent().remove();
+                    });
+                }
+            });
+        </script>
+    @endsection

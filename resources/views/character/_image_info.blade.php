@@ -56,9 +56,11 @@
                     </div>
                     <div class="col-lg-8 col-md-6 col-8">{!! $image->rarity_id ? $image->rarity->displayName : 'None' !!}</div>
                 </div>
-                @if($image->sex)
+                @if ($image->sex)
                     <div class="row">
-                        <div class="col-lg-4 col-md-6 col-4"><h5>Sex</h5></div>
+                        <div class="col-lg-4 col-md-6 col-4">
+                            <h5>Sex</h5>
+                        </div>
                         <div class="col-lg-8 col-md-6 col-8">{!! $image->sex !!}</div>
                     </div>
                 @endif

@@ -29,12 +29,12 @@
         </div>
 
         <div>
-            @if(count($myo['features']) > 0)
-                @foreach($myo['features'] as $feature)
+            @if (count($myo['features']) > 0)
+                @foreach ($myo['features'] as $feature)
                     <div>
                         <strong>{!! $feature->displayName !!}:</strong>
                         ({!! $feature->rarity->displayName !!})
-                        {{ isset($myo['feature_data'][$loop->index]) ? '('.$myo['feature_data'][$loop->index].')' : '' }}
+                        {{ isset($myo['feature_data'][$loop->index]) ? '(' . $myo['feature_data'][$loop->index] . ')' : '' }}
                     </div>
                 @endforeach
             @else
