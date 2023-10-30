@@ -436,7 +436,9 @@ class ItemService extends Service {
 
             $service = $tag->service;
             if (!$service->updateData($tag, $data)) {
-                $this->setErrors($service->errors());
+                foreach ($service->errors()->getMessages()['error'] as $error) {
+                    flash($error)->error();
+                }
             }
 
             // Update the tag's active setting

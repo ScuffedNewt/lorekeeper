@@ -24,10 +24,8 @@ class BoostService extends Service {
      * @return array
      */
     public function getEditData() {
-        $values = Config::get('lorekeeper.character_pairing');
-        unset($values['sex_restriction']);
         return [
-            'settings' => array_keys($values),
+            'settings' => str_replace('_', ' ', array_keys(Config::get('lorekeeper.character_pairing'))),
             'rarities' => Rarity::orderBy('sort')->pluck('name', 'id'),
         ];
     }
@@ -70,15 +68,12 @@ class BoostService extends Service {
                 $data['rarity_chance'] = 0;
             }
 
-            if ($data['setting_chance'] < 1 || $data['rarity_chance'] < 1) {
-                throw new \Exception('Percentages cannot be less than or equal to 0.');
-            }
             if ($data['setting_chance'] > 100 || $data['rarity_chance'] > 100) {
                 throw new \Exception('Percentages cannot be greater than 100.');
             }
 
             $boostData = [];
-            if (isset($data['setting'])) {
+            if (isset($data['setting']) || $data['setting'] == 0) {
                 $boostData['setting'] = $data['setting'];
                 $boostData['setting_chance'] = $data['setting_chance'];
             }

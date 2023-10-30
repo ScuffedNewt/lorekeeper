@@ -32,9 +32,7 @@ class PairingManager extends Service {
     // constructor
     public function __construct() {
         parent::__construct();
-        $values = Config::get('lorekeeper.character_pairing');
-        unset($values['sex_restriction']);
-        $this->keys = array_keys($values);
+        $this->keys = array_keys(Config::get('lorekeeper.character_pairing'));
     }
 
     /**********************************************************************************************

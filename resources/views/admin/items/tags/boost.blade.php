@@ -53,7 +53,7 @@
             }
             if ($(this).val() == 1) {
                 $('#percentage').find('.col').hide();
-                $('#percentage').append('<div class="col info alert alert-info">This setting will remove the need for parents to be of the opposite sex, if set.</div>');
+                $('#percentage').append('<div class="col info alert alert-info mt-2">This setting will remove the need for parents to be of the opposite sex, if set.</div>');
             } else {
                 $('#percentage').find('.col').show();
                 $('#percentage').find('.info').remove();

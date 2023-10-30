@@ -21,7 +21,7 @@
     </td>
     @if (Request::get('type') != 'closed')
         <td>
-            @if (Request::get('type') == 'pending')
+            @if (Request::get('type') == 'waiting')
                 @if ($pair->status == 'APPROVED')
                     {!! Form::open(['url' => 'characters/pairings/complete/' . $pair->id]) !!}
                     {!! Form::submit('Create MYO(s)', ['class' => 'btn btn-primary mb-2']) !!}
