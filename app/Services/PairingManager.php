@@ -16,8 +16,8 @@ use Carbon\Carbon;
 use Config;
 use DB;
 use Illuminate\Support\Arr;
-use Notifications;
 use Log;
+use Notifications;
 
 class PairingManager extends Service {
     /*
@@ -895,6 +895,7 @@ class PairingManager extends Service {
      * Gives the character the rarity of the highest trait rarity.
      *
      * @param mixed $chosen_features
+     * @param mixed $boosts
      */
     private function getRarityId($boosts, $chosen_features) {
         $features = Feature::whereIn('id', array_keys($chosen_features))->get();
