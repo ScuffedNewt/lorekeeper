@@ -800,6 +800,9 @@ class PairingManager extends Service {
                 // set subtype/species of other parent if a trait was set for it.
                 $feature_data[] = $pairing_feature_data;
             }
+            else {
+                $feature_data[] = null;
+            }
         }
 
         return $feature_data;
@@ -977,7 +980,7 @@ class PairingManager extends Service {
             $characterData['species_id'] = $species_id;
             $characterData['subtype_id'] = isset($subtype_id) && $subtype_id ? $subtype_id : null;
 
-            $characterData['feature_id'] = Feature::whereIn('id', array_keys($feature_ids))->get();
+            $characterData['feature_id'] = $feature_ids;
             $characterData['feature_data'] = $feature_data;
             $characterData['rarity_id'] = $rarity_id;
 
