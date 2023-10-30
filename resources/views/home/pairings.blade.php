@@ -17,7 +17,7 @@
             <a class="nav-link {{ Request::get('type') == 'approval' ? 'active' : '' }}" href="{{ url('characters/pairings') . '?type=approval' }}">Approval Required</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link {{ Request::get('type') == 'pending' ? 'active' : '' }}" href="{{ url('characters/pairings') . '?type=pending' }}">Pending</a>
+            <a class="nav-link {{ Request::get('type') == 'waiting' ? 'active' : '' }}" href="{{ url('characters/pairings') . '?type=waiting' }}">Waiting</a>
         </li>
         <li class="nav-item">
             <a class="nav-link {{ Request::get('type') == 'closed' ? 'active' : '' }}" href="{{ url('characters/pairings') . '?type=closed' }}">Closed</a>

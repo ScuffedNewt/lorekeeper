@@ -36,7 +36,7 @@ class PairingController extends Controller {
             })->whereIn('status', ['PENDING'])->orderBy('id', 'DESC')->get()->paginate(10)->appends($request->query());
         }
 
-        if ($type == 'pending') {
+        if ($type == 'waiting') {
             $pairings = Pairing::where('user_id', $user->id)->whereIn('status', ['APPROVED'])->orderBy('id', 'DESC')->get()->paginate(10)->appends($request->query());
         }
 

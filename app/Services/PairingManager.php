@@ -17,7 +17,7 @@ use Config;
 use DB;
 use Illuminate\Support\Arr;
 use Notifications;
-use Settings;
+use Log;
 
 class PairingManager extends Service {
     /*
@@ -28,6 +28,14 @@ class PairingManager extends Service {
     | Handles creation and modification of pairing data.
     |
     */
+
+    // constructor
+    public function __construct() {
+        parent::__construct();
+        $values = Config::get('lorekeeper.character_pairing');
+        unset($values['sex_restriction']);
+        $this->keys = array_keys($values);
+    }
 
     /**********************************************************************************************
 
@@ -54,7 +62,6 @@ class PairingManager extends Service {
 
             $user_items = UserItem::whereIn('id', $data['stack_id'])->where('count', '>', 0)->get();
             $pairing_item = Item::whereRelation('tags', 'tag', 'pairing')->whereIn('id', $user_items->pluck('item_id'))->get();
-            $boost_items = Item::whereRelation('tags', 'tag', 'boost')->whereIn('id', $user_items->pluck('item_id'))->get();
             //check that exactly one valid pairing item is attached
             if ($pairing_item->count() != 1) {
                 throw new \Exception('Pairing item not set correctly. Make sure to pick exactly one pairing item.');
@@ -64,9 +71,9 @@ class PairingManager extends Service {
             $character_2 = Character::where('slug', $data['character_codes'][1])->first();
 
             //check cooldown if set to do so.
-            $cooldownDays = Config::get('lorekeeper.character_pairing.cooldown');
-            if ($cooldownDays != 0) {
-                if (Pairing::whereIn('status', ['IN PROGRESS'])->where('created_at', '>', Carbon::now()->subDays($cooldownDays))
+            $cooldown_days = Config::get('lorekeeper.character_pairing.cooldown');
+            if ($cooldown_days) {
+                if (Pairing::whereIn('status', ['IN PROGRESS'])->where('created_at', '>', Carbon::now()->subDays($cooldown_days))
                     // check if either character is in a pairing
                     ->where(function ($query) use ($character_1, $character_2) {
                         $query->where('character_1_id', $character_1->id)
@@ -85,6 +92,7 @@ class PairingManager extends Service {
             }
 
             // set all assets
+            $seen_items = [];
             if (isset($data['stack_id'])) {
                 $user_assets = createAssetsArray();
 
@@ -93,9 +101,19 @@ class PairingManager extends Service {
                     if (!$stack || $stack->user_id != $user->id) {
                         throw new \Exception('Invalid item selected.');
                     }
-                    if (!isset($data['stack_quantity'][$id])) {
+                    if (!isset($data['stack_quantity'][$id]) || $data['stack_quantity'][$id] > 1) {
                         throw new \Exception('Invalid quantity selected.');
                     }
+                    // make sure the item has either a boost tag or pairing tag
+                    if (!$stack->item->tag('boost') && !$stack->item->tag('pairing')) {
+                        throw new \Exception('Invalid item selected.');
+                    }
+                    // make sure the item is not already in the list
+                    // this is to prevent boost stacking
+                    if (in_array($stack->item->id, $seen_items)) {
+                        throw new \Exception('Invalid item selected.');
+                    }
+                    $seen_items[] = $stack->item->id;
                     $stack->pairing_count += $data['stack_quantity'][$id];
                     $stack->save();
                     addAsset($user_assets, $stack, $data['stack_quantity'][$id]);
@@ -193,13 +211,13 @@ class PairingManager extends Service {
 
             //check if the pairing type matches the character input
             //pairing type 0 = species, 1 = subtype
-            $pairing_type = (isset($tag->getData()['pairing_type'])) ? $tag->getData()['pairing_type'] : null;
+            $pairing_type = $tag->getData()['pairing_type'] ?? null;
             if (isset($pairing_type)) {
                 if ($pairing_type && $species_1->id != $species_2->id) {
                     throw new \Exception('A subtype pairing can only be done with characters of the same species.');
                 }
                 if (!$pairing_type && $species_1->id == $species_2->id) {
-                    throw new \Exception('A species pairing can only be done with characters of different species.');
+                    throw new \Exception('A species pairing can only be done with characters of the same species.');
                 }
             }
 
@@ -458,7 +476,7 @@ class PairingManager extends Service {
                 $feature_pool = $this->getFeaturePool($tag, $characters, $boosts, $species_id, $subtype_id, $inherit_traits_from_both);
                 $chosen_features_ids = $this->getChosenFeatures($tag, $characters, $feature_pool, $boosts);
                 $feature_data = $this->getFeatureData($tag, $characters, $species, $chosen_features_ids, $species_id, $subtype_id);
-                $rarity_id = $this->getRarityId($chosen_features_ids);
+                $rarity_id = $this->getRarityId($boosts, $chosen_features_ids);
 
                 //create MYO
                 $myo = $this->saveMyo(
@@ -510,7 +528,13 @@ class PairingManager extends Service {
                 throw new \Exception('Pairing item not set correctly. Make sure to pick exactly one pairing item.');
             }
 
+            $data['boost_item_ids'] = array_filter($data['boost_item_ids']);
             $boosts = Item::whereRelation('tags', 'tag', 'boost')->whereIn('id', $data['boost_item_ids'])->get();
+            // make sure there are no duplicate boosts (check boost_item_ids)
+            if (count($boosts) != count($data['boost_item_ids'])) {
+                throw new \Exception('Invalid or multiple of the same boost item selected.');
+            }
+
             $test_myos = [];
             if ($this->validatePairingBasics($data['character_codes'], $items->first())) {
                 $character_1 = Character::where('slug', $data['character_codes'][0])->first();
@@ -538,7 +562,7 @@ class PairingManager extends Service {
                     $feature_pool = $this->getFeaturePool($tag, $characters, $boosts, $species_id, $subtype_id, $inherit_traits_from_both);
                     $chosen_features_ids = $this->getChosenFeatures($tag, $characters, $feature_pool, $boosts);
                     $feature_data = $this->getFeatureData($tag, $characters, $species, $chosen_features_ids, $species_id, $subtype_id);
-                    $rarity_id = $this->getRarityId($chosen_features_ids);
+                    $rarity_id = $this->getRarityId($boosts, $chosen_features_ids);
                     $test_myos[] = [
                         'user'         => $user,
                         'sex'          => $sex,
@@ -573,13 +597,12 @@ class PairingManager extends Service {
     private function getSex($boosts) {
         $male_percentage = Config::get('lorekeeper.character_pairing.offspring_male_percentage');
         $female_percentage = Config::get('lorekeeper.character_pairing.offspring_female_percentage');
-
         foreach ($boosts as $boost) {
             if ($boost->tag('boost') && isset($boost->tag('boost')->getData()['setting'])) {
-                if ($boost->tag('boost')->getData()['setting'] == 'pairing_male_percentage') {
+                if ($this->keys[$boost->tag('boost')->getData()['setting']] == 'offspring_male_percentage') {
                     $male_boost = $boost->tag('boost')->getData()['setting_chance'];
                 }
-                if ($boost->tag('boost')->getData()['setting'] == 'pairing_female_percentage') {
+                if ($this->keys[$boost->tag('boost')->getData()['setting']] == 'offspring_female_percentage') {
                     $female_boost = $boost->tag('boost')->getData()['setting_chance'];
                 }
             }
@@ -686,9 +709,14 @@ class PairingManager extends Service {
         // sort boosts by rarityid for easier access
         foreach ($boosts as $boost) {
             if ($boost->tag('boost') != null) {
-                $boostTag = $boost->tag('boost');
-                if (isset($boostTag->getData()['rarity_id'])) {
-                    $boostedChanceByRarity[$boostTag->getData()['rarity_id']] = $boostTag->getData()['rarity_chance'];
+                $boost_tag = $boost->tag('boost');
+                if (isset($boost_tag->getData()['rarity_id'])) {
+                    $boosted_chance_by_rarity[$boost_tag->getData()['rarity_id']] =
+                        (isset($boosted_chance_by_rarity[$boost_tag->getData()['rarity_id']])) ?
+                        // if it is set set the higher one to val
+                        max($boosted_chance_by_rarity[$boost_tag->getData()['rarity_id']], $boost_tag->getData()['rarity_chance']) :
+                        // if it is not set set it to val
+                        $boost_tag->getData()['rarity_chance'];
                 }
             }
         }
@@ -790,7 +818,8 @@ class PairingManager extends Service {
      */
     private function getSpeciesId($tag, $species, $inherit) {
         // if a species was set for the item, and the result is a crossbreed with traits from both parents, set the crossbreed species.
-        if ($inherit && isset($tag->getData()['species_id'])) {
+        // if ($inherit && isset($tag->getData()['species_id'])) {
+        if (isset($tag->getData()['species_id'])) {
             return $tag->getData()['species_id'];
         }
 
@@ -867,12 +896,35 @@ class PairingManager extends Service {
      *
      * @param mixed $chosen_features
      */
-    private function getRarityId($chosen_features) {
+    private function getRarityId($boosts, $chosen_features) {
         $features = Feature::whereIn('id', array_keys($chosen_features))->get();
         $rarity_sorts = $features->pluck('rarity.sort')->toArray();
 
-        //WARNING this assumes the highest rarity has the highest sort number and sort 0 is the lowest
+        // WARNING this assumes the highest rarity has the highest sort number and sort 0 is the lowest
         $rarity_sort = count($rarity_sorts) > 0 ? max($rarity_sorts) : 0;
+
+        // Log::info("rarity sort initial " . $rarity_sort);
+
+        $boosted_rarities = collect();
+        // get rarity boost
+        foreach ($boosts as $boost) {
+            $boost_tag = $boost->tag('boost');
+            if (isset($boost_tag->getData()['rarity_id'])) {
+                // get the rarity chance
+                $chance = mt_rand(0, $boost_tag->getData()['rarity_chance']) <= $boost_tag->getData()['rarity_chance'];
+                if ($chance) {
+                    $boosted_rarities[] = Rarity::find($boost_tag->getData()['rarity_id']);
+                }
+            }
+        }
+
+        // if there are boosted rarities, get the highest one
+        if (count($boosted_rarities)) {
+            $boosted_rarity_sorts = $boosted_rarities->pluck('sort')->toArray();
+            $rarity_sort = max([$rarity_sort, max($boosted_rarity_sorts)]);
+        }
+
+        // Log::info("rarity sort final " . $rarity_sort);
 
         return Rarity::where('sort', $rarity_sort)->first()->id;
     }

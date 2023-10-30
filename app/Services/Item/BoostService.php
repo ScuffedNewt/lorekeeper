@@ -24,8 +24,10 @@ class BoostService extends Service {
      * @return array
      */
     public function getEditData() {
+        $values = Config::get('lorekeeper.character_pairing');
+        unset($values['sex_restriction']);
         return [
-            'settings' => str_replace('_', ' ', array_keys(Config::get('lorekeeper.character_pairing'))),
+            'settings' => array_keys($values),
             'rarities' => Rarity::orderBy('sort')->pluck('name', 'id'),
         ];
     }
