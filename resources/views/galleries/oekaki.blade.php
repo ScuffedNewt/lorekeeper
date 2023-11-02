@@ -8,7 +8,8 @@
     <link rel="stylesheet" href="{{ asset('chickenpaint/chickenpaint.css') }}">
     <style>
         body {
-			-webkit-user-select: none; /* For iOS Safari: Prevent long-press from popping up a selection dialog on body text */
+            -webkit-user-select: none;
+            /* For iOS Safari: Prevent long-press from popping up a selection dialog on body text */
             font-family: sans-serif;
         }
     </style>
@@ -31,49 +32,47 @@
 
     {!! Form::open(['url' => 'oekaki/save', 'files' => true]) !!}
 
-        {!! Form::label('file', 'Load a .chi / .png file') !!}
+    {!! Form::label('file', 'Load a .chi / .png file') !!}
 
-        <div class="row ml-3">
-            <div class="form-group">
-                {!! Form::file('file', ['class' => 'form-control']) !!}
-            </div>
-            <div class="form-group ml-3">
-                {!! Form::submit('Load', ['class' => 'btn btn-primary']) !!}
-            </div>
+    <div class="row ml-3">
+        <div class="form-group">
+            {!! Form::file('file', ['class' => 'form-control']) !!}
         </div>
+        <div class="form-group ml-3">
+            {!! Form::submit('Load', ['class' => 'btn btn-primary']) !!}
+        </div>
+    </div>
 
     {!! Form::close() !!}
 
     <div id="oekaki"></div>
-
 @endsection
 
 @section('scripts')
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        new ChickenPaint({
-            uiElem: document.getElementById("oekaki"),
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            new ChickenPaint({
+                uiElem: document.getElementById("oekaki"),
 
-            @if (Settings::get('oekaki_gallery_id'))
-                // this naming is confusing,
-                // saving = posting to gallery, post = redirect
-                saveUrl: "{{ url('oekaki/publish') }}",
-                postUrl:
-                    @if (Settings::get('oekaki_gallery_auto_approve'))
+                @if (Settings::get('oekaki_gallery_id'))
+                    // this naming is confusing,
+                    // saving = posting to gallery, post = redirect
+                    saveUrl: "{{ url('oekaki/publish') }}",
+                    postUrl: @if (Settings::get('oekaki_gallery_auto_approve'))
                         "{{ url('gallery') }}/".Settings::get('oekaki_gallery_id'),
                     @else
                         "{{ url('gallery/submissions/pending') }}",
                     @endif
-            @endif
-            @if (isset($url))
-                loadImageUrl: "{{ $url }}",
-            @endif
+                @endif
+                @if (isset($url))
+                    loadImageUrl: "{{ $url }}",
+                @endif
 
-            allowMultipleSends: true,
-            allowDownload: true,
-            disableBootstrapAPI: true,
-            fullScreenMode: "auto",
+                allowMultipleSends: true,
+                allowDownload: true,
+                disableBootstrapAPI: true,
+                fullScreenMode: "auto",
+            });
         });
-    });
-</script>
+    </script>
 @endsection
