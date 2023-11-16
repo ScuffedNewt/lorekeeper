@@ -4,15 +4,11 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddGardenSlots extends Migration
-{
+class AddGardenSlots extends Migration {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
-    {
+    public function up() {
         //
         Schema::create('garden_plots', function (Blueprint $table) {
             $table->increments('id');
@@ -42,11 +38,8 @@ class AddGardenSlots extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
-    {
+    public function down() {
         //
         Schema::dropIfExists('user_garden_plots');
         Schema::dropIfExists('garden_plots');

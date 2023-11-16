@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Console\Commands;
+
 use Illuminate\Console\Command;
 
 class UpdateGarden extends Command {
@@ -32,7 +33,7 @@ class UpdateGarden extends Command {
      */
     public function handle() {
         // get all existing plots and update the type to be lowercase
-        $plots = \App\Models\GardenPlot::all()->each(function($plot) {
+        $plots = \App\Models\GardenPlot::all()->each(function ($plot) {
             $plot->plot_type = strtolower($plot->plot_type);
             $plot->save();
         });

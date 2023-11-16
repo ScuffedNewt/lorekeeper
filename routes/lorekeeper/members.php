@@ -210,7 +210,7 @@ Route::group(['prefix' => 'comments', 'namespace' => 'Comments'], function () {
 /**************************************************************************************************
 Garden
 **************************************************************************************************/
-Route::group(['prefix' => 'garden', 'namespace' => 'Games'],  function(){
+Route::group(['prefix' => 'garden', 'namespace' => 'Games'], function () {
     Route::get('/', 'GardenController@getIndex');
     // destroy
     Route::get('skull/{id}', 'GardenController@getSkull');

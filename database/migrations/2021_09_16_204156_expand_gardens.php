@@ -4,15 +4,11 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class ExpandGardens extends Migration
-{
+class ExpandGardens extends Migration {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
-    {
+    public function up() {
         //
         Schema::table('garden_plots', function (Blueprint $table) {
             $table->string('plot_type')->default('seed');
@@ -25,11 +21,8 @@ class ExpandGardens extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
-    {
+    public function down() {
         //
         Schema::table('garden_plots', function (Blueprint $table) {
             $table->dropColumn('plot_type');

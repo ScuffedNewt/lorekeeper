@@ -39,5 +39,5 @@ return [
         'finish_icon'     => 'fas fa-egg',
         'is_die_enabled'  => false, // don't set this to true, it won't work (you monster)
         'plot_title'      => 'Coop Nest',
-    ]
+    ],
 ];

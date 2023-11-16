@@ -238,7 +238,7 @@ Route::group(['prefix' => 'data', 'namespace' => 'Data', 'middleware' => 'power:
     Route::post('prompts/edit/{id?}', 'PromptController@postCreateEditPrompt');
     Route::post('prompts/delete/{id}', 'PromptController@postDeletePrompt');
 
-    # GARDEN PLOTS
+    // GARDEN PLOTS
     Route::get('plots', 'PlotController@getIndex');
     Route::get('plots/create', 'PlotController@getCreatePlot');
     Route::get('plots/edit/{id}', 'PlotController@getEditPlot');

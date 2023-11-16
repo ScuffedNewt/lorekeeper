@@ -186,9 +186,9 @@ return [
             ],
             [
                 'name' => 'Garden Plots',
-                'url' => 'admin/data/plots'
+                'url'  => 'admin/data/plots',
             ],
-        ]
+        ],
     ],
     'Raffles'    => [
         'power' => 'manage_raffles',

@@ -153,8 +153,7 @@ class User extends Authenticatable implements MustVerifyEmail {
     /**
      * Get the user's items.
      */
-    public function items()
-    {
+    public function items() {
         return $this->belongsToMany('App\Models\Item\Item', 'user_items')->withPivot('count', 'data', 'updated_at', 'id', 'garden_count')->whereNull('user_items.deleted_at');
     }
 
@@ -182,8 +181,7 @@ class User extends Authenticatable implements MustVerifyEmail {
     /**
      * Get all of the user's garden plots.
      */
-    public function gardenPlots()
-    {
+    public function gardenPlots() {
         return $this->hasMany('App\Models\User\UserGardenPlot');
     }
 

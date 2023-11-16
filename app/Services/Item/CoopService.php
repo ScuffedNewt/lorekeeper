@@ -1,20 +1,15 @@
-<?php namespace App\Services\Item;
+<?php
 
-use App\Services\Service;
-use Illuminate\Http\Request;
+namespace App\Services\Item;
 
-use DB;
-
-use App\Services\InventoryManager;
-use App\Services\CharacterManager;
-
-use App\Models\Item\Item;
 use App\Models\Currency\Currency;
+use App\Models\Item\Item;
 use App\Models\Loot\LootTable;
 use App\Models\Raffle\Raffle;
+use App\Services\Service;
+use DB;
 
-class CoopService extends Service
-{
+class CoopService extends Service {
     /*
     |--------------------------------------------------------------------------
     | Box Service
@@ -29,67 +24,64 @@ class CoopService extends Service
      *
      * @return array
      */
-    public function getEditData()
-    {
+    public function getEditData() {
         return [
             'characterCurrencies' => Currency::where('is_character_owned', 1)->orderBy('sort_character', 'DESC')->pluck('name', 'id'),
-            'items' => Item::orderBy('name')->pluck('name', 'id'),
-            'currencies' => Currency::where('is_user_owned', 1)->orderBy('name')->pluck('name', 'id'),
-            'tables' => LootTable::orderBy('name')->pluck('name', 'id'),
-            'raffles' => Raffle::where('rolled_at', null)->where('is_active', 1)->orderBy('name')->pluck('name', 'id'),
+            'items'               => Item::orderBy('name')->pluck('name', 'id'),
+            'currencies'          => Currency::where('is_user_owned', 1)->orderBy('name')->pluck('name', 'id'),
+            'tables'              => LootTable::orderBy('name')->pluck('name', 'id'),
+            'raffles'             => Raffle::where('rolled_at', null)->where('is_active', 1)->orderBy('name')->pluck('name', 'id'),
         ];
     }
 
     /**
      * Processes the data attribute of the tag and returns it in the preferred format for edits.
      *
-     * @param  string  $tag
+     * @param string $tag
+     *
      * @return mixed
      */
-    public function getTagData($tag)
-    {
+    public function getTagData($tag) {
         //fetch data from DB, if there is no data then set to NULL instead
         $rewards = [];
-        if(isset($tag->data['rewards'])) {
+        if (isset($tag->data['rewards'])) {
             $assets = parseAssetData($tag->data['rewards']);
-            foreach($assets as $type => $a)
-            {
+            foreach ($assets as $type => $a) {
                 $class = getAssetModelString($type, false);
-                foreach($a as $id => $asset)
-                {
-                    $rewards[] = (object)[
+                foreach ($a as $id => $asset) {
+                    $rewards[] = (object) [
                         'rewardable_type' => $class,
-                        'rewardable_id' => $id,
-                        'quantity' => $asset['quantity']
+                        'rewardable_id'   => $id,
+                        'quantity'        => $asset['quantity'],
                     ];
                 }
             }
         }
-        $data['actions'] = isset($tag->data['actions']) ? $tag->data['actions'] : 1;
+        $data['actions'] = $tag->data['actions'] ?? 1;
         $data['rewards'] = $rewards;
+
         return $data;
     }
 
     /**
      * Processes the data attribute of the tag and returns it in the preferred format.
      *
-     * @param  string  $tag
-     * @param  array   $data
+     * @param string $tag
+     * @param array  $data
+     *
      * @return bool
      */
-    public function updateData($tag, $data)
-    {
+    public function updateData($tag, $data) {
         DB::beginTransaction();
 
         try {
-            $coopData['actions'] = isset($data['actions']) ? $data['actions'] : 1;
-            if(isset($data['rewardable_type'])) {
+            $coopData['actions'] = $data['actions'] ?? 1;
+            if (isset($data['rewardable_type'])) {
                 // The data will be stored as an asset table, json_encode()d.
                 // First build the asset table, then prepare it for storage.
                 $assets = createAssetsArray();
-                foreach($data['rewardable_type'] as $key => $r) {
-                    switch ($r)
-                    {
+                foreach ($data['rewardable_type'] as $key => $r) {
+                    switch ($r) {
                         case 'Item':
                             $type = 'App\Models\Item\Item';
                             break;
@@ -113,9 +105,10 @@ class CoopService extends Service
             $tag->update(['data' => json_encode($coopData)]);
 
             return $this->commitReturn(true);
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             $this->setError('error', $e->getMessage());
         }
+
         return $this->rollbackReturn(false);
     }
 }

@@ -84,9 +84,8 @@ class UserItem extends Model {
      *
      * @return int
      */
-    public function getAvailableQuantityAttribute()
-    {
-        return ($this->count - $this->trade_count - $this->update_count - $this->submission_count - $this->garden_count);
+    public function getAvailableQuantityAttribute() {
+        return $this->count - $this->trade_count - $this->update_count - $this->submission_count - $this->garden_count;
     }
 
     /**
@@ -104,11 +103,11 @@ class UserItem extends Model {
      * @param mixed $tradeCount
      * @param mixed $updateCount
      * @param mixed $submissionCount
+     * @param mixed $gardenCount
      *
      * @return string
      */
-    public function getOthers($tradeCount = 0, $updateCount = 0, $submissionCount = 0, $gardenCount = 0)
-    {
+    public function getOthers($tradeCount = 0, $updateCount = 0, $submissionCount = 0, $gardenCount = 0) {
         return $this->getHeldString($this->trade_count - $tradeCount, $this->update_count - $updateCount, $this->submission_count - $submissionCount, $this->garden_count - $gardenCount);
     }
 
@@ -129,17 +128,28 @@ class UserItem extends Model {
      * @param mixed $tradeCount
      * @param mixed $updateCount
      * @param mixed $submissionCount
+     * @param mixed $gardenCount
      *
      * @return string
      */
-    private function getHeldString($tradeCount, $updateCount, $submissionCount, $gardenCount)
-    {
-        if(!$tradeCount && !$updateCount && !$submissionCount && !$gardenCount) return null;
+    private function getHeldString($tradeCount, $updateCount, $submissionCount, $gardenCount) {
+        if (!$tradeCount && !$updateCount && !$submissionCount && !$gardenCount) {
+            return null;
+        }
         $held = [];
-        if($tradeCount) array_push($held, $tradeCount.' held in Trades');
-        if($updateCount) array_push($held, $updateCount.' held in Design Updates');
-        if($submissionCount) array_push($held, $submissionCount.' held in Submissions');
-        if($gardenCount) array_push($held, $gardenCount.' in the Gardens');
-        return ('('.implode(', ',$held).')');
+        if ($tradeCount) {
+            array_push($held, $tradeCount.' held in Trades');
+        }
+        if ($updateCount) {
+            array_push($held, $updateCount.' held in Design Updates');
+        }
+        if ($submissionCount) {
+            array_push($held, $submissionCount.' held in Submissions');
+        }
+        if ($gardenCount) {
+            array_push($held, $gardenCount.' in the Gardens');
+        }
+
+        return '('.implode(', ', $held).')';
     }
 }
