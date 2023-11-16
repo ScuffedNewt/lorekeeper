@@ -136,11 +136,12 @@ class SeedService extends Service
                         else $stages[] = $stage; // make sure there are no duplicates
                     }
                 }
+                $stages = array_unique(array_merge($stages, $data['stage_number']));
                 // now go thru new stages
-                if(isset($data['stage_number'])) {
-                    foreach($data['stage_number'] as $key => $stage)
+                if(isset($stages) && !empty($stages)) {
+                    foreach($stages as $key => $stage)
                     {
-                        if(isset($data['stage_image'][$key]) && !isset($stages[$stage])) {
+                        if(isset($data['stage_image'][$key])) {
                             $stages[] =  $stage; // make sure there are no duplicates
                             $this->handleImage($data['stage_image'][$key], public_path('images/data/seed-stages'), $tag->id.'-'.$stage.'-image.png');
                         }
