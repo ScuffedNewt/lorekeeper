@@ -3,7 +3,7 @@
 
     <hr>
     <h3>Basics</h3>
-    <p>Pairings can be restricted to either be between the same species or between subtypes of the same species.
+    <p>Pairings can be restricted to either be between the same species, or between the same subtypes of the same species.
         <br><b>Leave empty if you want to allow all pairings.</b>
     </p>
     <div class="form-group">
@@ -24,7 +24,7 @@
     <h3>Offspring Traits (Optional)</h3>
     <p>
         If a trait is set, this trait will be granted to all offspring that are created using this item.
-        <br><b>Other pairing items can still inherit this trait if present in one or more .</b>
+        <br><b>Other pairing items can still inherit this trait if present in one or both parents.</b>
         <br><br>If a species is set, the offspring will always be that species, but the MYO may have traits of either parent ignoring species restrictions.
         <br>If a subtype is set, it will always be passed on if the species matches.
         <br>If neither is set, traits and species are chosen solely from the parent characters.
@@ -85,7 +85,7 @@
                 </td>
                 <td class="text-right border-0"><a href="#" class="btn btn-danger remove-species-button">Remove</a></td>
             </tr>
-            @if (isset($tag->getData()['illegal_species_ids']) && count($tag->getData()['illegal_species_id']) > 0)
+            @if (isset($tag->getData()['illegal_species_ids']) && count($tag->getData()['illegal_species_ids']) > 0)
                 @foreach ($tag->getData()['illegal_species_ids'] as $illegal_species_id)
                     <tr class="loot-row">
                         <td class="loot-row-select border-0">
@@ -126,7 +126,7 @@
                 </td>
                 <td class="text-right border-0"><a href="#" class="btn btn-danger remove-subtype-button">Remove</a></td>
             </tr>
-            @if (isset($tag->getData()['illegal_subtype_ids']) && count($tag->getData()['illegal_subtype_id']) > 0)
+            @if (isset($tag->getData()['illegal_subtype_ids']) && count($tag->getData()['illegal_subtype_ids']) > 0)
                 @foreach ($tag->getData()['illegal_subtype_ids'] as $illegal_subtype_id)
                     <tr class="loot-row">
                         <td class="loot-row-select border-0">

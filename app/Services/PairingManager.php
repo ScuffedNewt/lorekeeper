@@ -211,17 +211,17 @@ class PairingManager extends Service {
             //pairing type 0 = species, 1 = subtype
             $pairing_type = $tag->getData()['pairing_type'] ?? null;
             if (isset($pairing_type)) {
-                if ($pairing_type && $species_1->id != $species_2->id) {
-                    throw new \Exception('A subtype pairing can only be done with characters of the same species.');
+                if ($pairing_type && $character_1->image->subtype_id != $character_2->image->subtype_id) {
+                    throw new \Exception('A subtype pairing can only be done with characters of the same subtype.');
                 }
-                if (!$pairing_type && $species_1->id == $species_2->id) {
+                if (!$pairing_type && $species_1->id != $species_2->id) {
                     throw new \Exception('A species pairing can only be done with characters of the same species.');
                 }
             }
 
             // check if correct species was used for the characters
-            $illegal_species = (isset($tag->getData()['illegal_species_id'])) ? $tag->getData()['illegal_species_id'] : null;
-            $valid_species_ids = array_diff([$species_1->id, $species_2->id], $illegal_species ?? []);
+            $illegal_species_ids = (isset($tag->getData()['illegal_species_ids'])) ? $tag->getData()['illegal_species_ids'] : null;
+            $valid_species_ids = array_unique(array_diff([$species_1->id, $species_2->id], $illegal_species_ids ?? []));
 
             if (count($valid_species_ids) < 1 && !isset($tag->getData()['default_species_id'])) {
                 throw new \Exception('This item cannot create a pairing from the specieses of the chosen characters.');
@@ -564,9 +564,9 @@ class PairingManager extends Service {
                     $test_myos[] = [
                         'user'         => $user,
                         'sex'          => $sex,
-                        'species'      => Species::where('id', $species_id)->first()->displayName,
-                        'subtype'      => Subtype::where('id', $subtype_id)->first()?->displayName,
-                        'rarity'       => Rarity::where('id', $rarity_id)->first()->displayName,
+                        'species'      => Species::find($species_id)->displayName,
+                        'subtype'      => Subtype::find($subtype_id)?->displayName,
+                        'rarity'       => Rarity::find($rarity_id)->displayName,
                         'features'     => $chosen_features_ids,
                         'feature_data' => $feature_data,
                     ];
@@ -749,9 +749,8 @@ class PairingManager extends Service {
             }
         }
 
-        //set pairing feature if parents are of different subtypes or species
-        if (isset($tag->getData()['feature_id']) &&
-            ($characters[0]->image->subtype_id != $characters[1]->image->subtype_id || $characters[0]->image->species_id != $characters[1]->image->species_id)) {
+        // set pairing feature
+        if (isset($tag->getData()['feature_id'])) {
             $pairing_feature = Feature::where('id', $tag->getData()['feature_id'])->first();
             $chosen_features[$pairing_feature->id] = $pairing_feature;
         }
@@ -826,7 +825,7 @@ class PairingManager extends Service {
 
         $illegal_species_ids = $tag->getData()['illegal_species_ids'] ?? null;
         $default_species_id = $tag->getData()['default_species_id'] ?? null;
-        $valid_species_ids = array_diff([$species[0]->id, $species[1]->id], $illegal_species_ids ?? []);
+        $valid_species_ids = array_unique(array_diff([$species[0]->id, $species[1]->id], $illegal_species_ids ?? []));
 
         if (count($valid_species_ids) > 1) {
             // chance of inheriting either species when both are valid
@@ -839,7 +838,10 @@ class PairingManager extends Service {
         } elseif (count($valid_species_ids) == 1) {
             return $valid_species_ids[0];
         } else {
-            return $default_species_id; //should never be null as pairing gets rejected when no default is set and no species is valid
+            if (!$default_species_id) {
+                throw new \Exception('No default species was set for this item.');
+            }
+            return $default_species_id; // should never be null as pairing gets rejected when no default is set and no species is valid
         }
     }
 

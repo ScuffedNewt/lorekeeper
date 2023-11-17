@@ -29,14 +29,13 @@ class PairingService extends Service {
             'features'  => Feature::orderBy('name')->pluck('name', 'id'),
             'specieses' => Species::orderBy('name')->pluck('name', 'id'),
             'subtypes'  => Subtype::orderBy('name')->pluck('name', 'id'),
-
         ];
     }
 
     /**
      * Processes the data attribute of the tag and returns it in the preferred format.
      *
-     * @param string $tag
+     * @param mixed $tag
      *
      * @return mixed
      */
@@ -47,7 +46,7 @@ class PairingService extends Service {
     /**
      * Processes the data attribute of the tag and returns it in the preferred format.
      *
-     * @param string $tag
+     * @param mixed $tag
      * @param array  $data
      *
      * @return bool
@@ -66,9 +65,9 @@ class PairingService extends Service {
 
         $pairingData = [];
 
-        $specieses = isset($data['illegal_species_id']) ? array_filter($data['illegal_species_id']) : [];
-        $features = isset($data['illegal_feature_id']) ? array_filter($data['illegal_feature_id']) : [];
-        $subtypes = isset($data['illegal_subtype_id']) ? array_filter($data['illegal_subtype_id']) : [];
+        $specieses = isset($data['illegal_species_ids']) ? array_filter($data['illegal_species_ids']) : [];
+        $features = isset($data['illegal_feature_ids']) ? array_filter($data['illegal_feature_ids']) : [];
+        $subtypes = isset($data['illegal_subtype_ids']) ? array_filter($data['illegal_subtype_ids']) : [];
 
         if (isset($data['feature_id'])) {
             $pairingData['feature_id'] = $data['feature_id'];
@@ -92,13 +91,13 @@ class PairingService extends Service {
         $pairingData['max'] = $data['max'];
 
         if (count($specieses) > 0) {
-            $pairingData['illegal_species_id'] = $specieses;
+            $pairingData['illegal_species_ids'] = $specieses;
         }
         if (count($features) > 0) {
-            $pairingData['illegal_feature_id'] = $features;
+            $pairingData['illegal_feature_ids'] = $features;
         }
         if (count($subtypes) > 0) {
-            $pairingData['illegal_subtype_id'] = $subtypes;
+            $pairingData['illegal_subtype_ids'] = $subtypes;
         }
 
         DB::beginTransaction();

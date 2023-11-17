@@ -73,7 +73,7 @@ class BoostService extends Service {
             }
 
             $boostData = [];
-            if (isset($data['setting']) || $data['setting'] == 0) {
+            if (isset($data['setting'])) {
                 $boostData['setting'] = $data['setting'];
                 $boostData['setting_chance'] = $data['setting_chance'];
             }

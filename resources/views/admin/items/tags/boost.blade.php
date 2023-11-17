@@ -38,8 +38,8 @@
     </div>
 </div>
 
-@section('scripts')
-    <script>
+<script>
+    $(document).ready(function() {
         $('#settingSelect').on('change', function() {
             if ($(this).val() == '') {
                 $('#rarities').css('opacity', '1');
@@ -71,5 +71,5 @@
                 $('.setting-percent').prop('disabled', true);
             }
         });
-    </script>
-@endsection
+    });
+</script>
