@@ -167,6 +167,12 @@
 
                     {{-- Upload a file --}}
                     {!! Form::open(['url' => 'admin/files/upload', 'id' => 'uploadForm', 'class' => 'file-form', 'files' => true]) !!}
+                    <p>
+                        Files will be converted to the selected format.
+                        WebP is generally recommended as it is lossless and highly efficient, though it is not compatible with most art programs.
+                        <br /><b>If you are uploading non-image files, leave blank.</b>
+                    </p>
+                    {!! Form::select('file_format', ['webp' => 'WebP (Recommended)', 'png' => 'PNG', 'jpg' => 'JPG'], null, ['class' => 'form-control mb-2', 'placeholder' => 'Select Format']) !!}
                     <p>Select a file to upload. (Maximum size {{ min(ini_get('upload_max_filesize'), ini_get('post_max_size')) }}B.)</p>
                     <div id="fileList">
                         <div class="d-flex mb-2">
