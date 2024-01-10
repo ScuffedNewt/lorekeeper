@@ -65,9 +65,9 @@ class PromptService extends Service {
     /**
      * Update a category.
      *
-     * @param \App\Models\Prompt\PromptCategory $category
-     * @param array                             $data
-     * @param \App\Models\User\User             $user
+     * @param PromptCategory        $category
+     * @param array                 $data
+     * @param \App\Models\User\User $user
      *
      * @return \App\Models\Prompt\PromptCategory|bool
      */
@@ -106,7 +106,7 @@ class PromptService extends Service {
     /**
      * Delete a category.
      *
-     * @param \App\Models\Prompt\PromptCategory $category
+     * @param PromptCategory $category
      *
      * @return bool
      */
@@ -218,9 +218,9 @@ class PromptService extends Service {
     /**
      * Updates a prompt.
      *
-     * @param \App\Models\Prompt\Prompt $prompt
-     * @param array                     $data
-     * @param \App\Models\User\User     $user
+     * @param Prompt                $prompt
+     * @param array                 $data
+     * @param \App\Models\User\User $user
      *
      * @return \App\Models\Prompt\Prompt|bool
      */
@@ -275,7 +275,7 @@ class PromptService extends Service {
     /**
      * Deletes a prompt.
      *
-     * @param \App\Models\Prompt\Prompt $prompt
+     * @param Prompt $prompt
      *
      * @return bool
      */
@@ -331,8 +331,8 @@ class PromptService extends Service {
     /**
      * Processes user input for creating/updating a prompt.
      *
-     * @param array                     $data
-     * @param \App\Models\Prompt\Prompt $prompt
+     * @param array  $data
+     * @param Prompt $prompt
      *
      * @return array
      */
@@ -368,8 +368,8 @@ class PromptService extends Service {
     /**
      * Processes user input for creating/updating prompt rewards.
      *
-     * @param array                     $data
-     * @param \App\Models\Prompt\Prompt $prompt
+     * @param array  $data
+     * @param Prompt $prompt
      */
     private function populateRewards($data, $prompt) {
         // Clear the old rewards...

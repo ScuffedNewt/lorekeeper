@@ -348,20 +348,22 @@ class UserController extends Controller {
 
     /**
      * Shows a user's record collection.
+     *
+     * @param mixed $name
      */
     public function getUserRecordBook(Request $request, $name) {
         $user = $this->user;
         $categories = ItemCategory::visible(Auth::check() ? Auth::user() : null)->orderBy('sort', 'DESC')->get();
         $items = count($categories) ?
                 Item::released()->where('is_recorded', 1)
-                ->orderByRaw('FIELD(item_category_id,'.implode(',', $categories->pluck('id')->toArray()).')')
-                ->orderBy('name')
-                ->get()
-                ->groupBy('item_category_id') :
+                    ->orderByRaw('FIELD(item_category_id,'.implode(',', $categories->pluck('id')->toArray()).')')
+                    ->orderBy('name')
+                    ->get()
+                    ->groupBy('item_category_id') :
                 Item::released()->where('is_recorded', 1)
-                ->orderBy('name')
-                ->get()
-                ->groupBy('item_category_id');
+                    ->orderBy('name')
+                    ->get()
+                    ->groupBy('item_category_id');
         // exclude items that have a category that is not recorded
         $items = $items->filter(function ($value, $key) {
             return $value->first()->category ? $value->first()->category->is_recorded : true;
