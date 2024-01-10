@@ -353,15 +353,19 @@ class UserController extends Controller {
         $user = $this->user;
         $categories = ItemCategory::visible(Auth::check() ? Auth::user() : null)->orderBy('sort', 'DESC')->get();
         $items = count($categories) ?
-                Item::released()
+                Item::released()->where('is_recorded', 1)
                 ->orderByRaw('FIELD(item_category_id,'.implode(',', $categories->pluck('id')->toArray()).')')
                 ->orderBy('name')
                 ->get()
                 ->groupBy('item_category_id') :
-                Item::released()
+                Item::released()->where('is_recorded', 1)
                 ->orderBy('name')
                 ->get()
                 ->groupBy('item_category_id');
+        // exclude items that have a category that is not recorded
+        $items = $items->filter(function ($value, $key) {
+            return $value->first()->category ? $value->first()->category->is_recorded : true;
+        });
 
         return view('user.record_book', [
             'user'       => $user,

@@ -93,7 +93,10 @@
                     <div>No items owned.</div>
                 @endif
             </div>
-            <div class="text-right"><a href="{{ $user->url . '/inventory' }}">View all...</a></div>
+            <div class="row mt-2">
+                <div class="col text-left float-left"><a href="{{ $user->url . '/record-book' }}"><i class="fas fa-book" style="opacity: 75%;"></i> Record Book</a></div>
+                <div class="col text-right float-right"><a href="{{ $user->url . '/inventory' }}">View all...</a></div>
+            </div>
         </div>
     </div>
 </div>

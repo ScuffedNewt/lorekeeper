@@ -100,6 +100,10 @@
                 {!! Form::label('is_released', 'Is Released', ['class' => 'form-check-label ml-3']) !!} {!! add_help('If this is off, users will not be able to view information for the item/it will be hidden from view. This is overridden by the item being owned at any point by anyone on the site.') !!}
             </div>
         @endif
+        <div class="col-md form-group">
+            {!! Form::checkbox('is_recorded', 1, $item->id ? $item->is_recorded : 1, ['class' => 'form-check-input', 'data-toggle' => 'toggle']) !!}
+            {!! Form::label('is_recorded', 'Is Recorded in the Record Book', ['class' => 'form-check-label ml-3']) !!} {!! add_help('If this is off, the item will not appear inside the record book on user profile\'s, unless they have already owned this item.') !!}
+        </div>
     </div>
 
     @if (Config::get('lorekeeper.extensions.item_entry_expansion.extra_fields'))

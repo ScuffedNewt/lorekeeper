@@ -12,6 +12,7 @@ class ItemCategory extends Model {
      */
     protected $fillable = [
         'name', 'sort', 'has_image', 'description', 'parsed_description', 'is_character_owned', 'character_limit', 'can_name', 'is_visible',
+        'is_recorded',
     ];
 
     /**

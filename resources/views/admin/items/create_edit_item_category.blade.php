@@ -42,10 +42,15 @@
         {!! Form::label('Description (Optional)') !!}
         {!! Form::textarea('description', $category->description, ['class' => 'form-control wysiwyg']) !!}
     </div>
-
-    <div class="form-group">
-        {!! Form::checkbox('is_visible', 1, $category->id ? $category->is_visible : 1, ['class' => 'form-check-input', 'data-toggle' => 'toggle']) !!}
-        {!! Form::label('is_visible', 'Is Visible', ['class' => 'form-check-label ml-3']) !!} {!! add_help('If turned off, the category will not be visible in the category list or available for selection in search. Permissioned staff will still be able to add items to them, however.') !!}
+    <div class="row">
+        <div class="col form-group">
+            {!! Form::checkbox('is_visible', 1, $category->id ? $category->is_visible : 1, ['class' => 'form-check-input', 'data-toggle' => 'toggle']) !!}
+            {!! Form::label('is_visible', 'Is Visible', ['class' => 'form-check-label ml-3']) !!} {!! add_help('If turned off, the category will not be visible in the category list or available for selection in search. Permissioned staff will still be able to add items to them, however.') !!}
+        </div>
+        <div class="col-md form-group">
+            {!! Form::checkbox('is_recorded', 1, $category->id ? $category->is_recorded : 1, ['class' => 'form-check-input', 'data-toggle' => 'toggle']) !!}
+            {!! Form::label('is_recorded', 'Is Recorded in the Record Book', ['class' => 'form-check-label ml-3']) !!} {!! add_help('If this is off, the item will not appear inside the record book on user profile\'s, unless they have already owned this item.') !!}
+        </div>
     </div>
 
     <div class="card mb-3" id="characterOptions">

@@ -508,6 +508,9 @@ class ItemService extends Service {
         if (!isset($data['is_visible'])) {
             $data['is_visible'] = 0;
         }
+        if (!isset($data['is_recorded'])) {
+            $data['is_recorded'] = 0;
+        }
 
         if (isset($data['remove_image'])) {
             if ($category && $category->has_image && $data['remove_image']) {
@@ -542,6 +545,9 @@ class ItemService extends Service {
             $data['is_released'] = 0;
         } else {
             $data['is_released'] = 1;
+        }
+        if (!isset($data['is_recorded'])) {
+            $data['is_recorded'] = 0;
         }
 
         if (isset($data['remove_image'])) {
