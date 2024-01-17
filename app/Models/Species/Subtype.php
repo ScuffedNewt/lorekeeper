@@ -11,7 +11,7 @@ class Subtype extends Model {
      * @var array
      */
     protected $fillable = [
-        'species_id', 'name', 'sort', 'has_image', 'description', 'parsed_description', 'is_visible', 'inherit_chance',
+        'species_id', 'name', 'sort', 'has_image', 'description', 'parsed_description', 'is_visible', 'inherit_chance', 'hash',
     ];
 
     /**
@@ -21,6 +21,11 @@ class Subtype extends Model {
      */
     protected $table = 'subtypes';
 
+    /**
+     * Accessors to append to the model.
+     *
+     * @var array
+     */
     protected $appends = [
         'name_with_species',
     ];
@@ -60,14 +65,14 @@ class Subtype extends Model {
      * Get the species the subtype belongs to.
      */
     public function species() {
-        return $this->belongsTo('App\Models\Species\Species', 'species_id');
+        return $this->belongsTo(Species::class, 'species_id');
     }
 
     /**********************************************************************************************
 
             SCOPES
 
-        **********************************************************************************************/
+    **********************************************************************************************/
 
     /**
      * Scope a query to show only visible subtypes.
@@ -124,7 +129,7 @@ class Subtype extends Model {
      * @return string
      */
     public function getSubtypeImageFileNameAttribute() {
-        return $this->id.'-image.png';
+        return $this->hash.$this->id.'-image.png';
     }
 
     /**

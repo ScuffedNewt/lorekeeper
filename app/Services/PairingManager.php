@@ -32,7 +32,7 @@ class PairingManager extends Service {
     // constructor
     public function __construct() {
         parent::__construct();
-        $this->keys = array_keys(Config::get('lorekeeper.character_pairing'));
+        $this->keys = array_keys(config('lorekeeper.character_pairing'));
     }
 
     /**********************************************************************************************
@@ -69,7 +69,7 @@ class PairingManager extends Service {
             $character_2 = Character::where('slug', $data['character_codes'][1])->first();
 
             //check cooldown if set to do so.
-            $cooldown_days = Config::get('lorekeeper.character_pairing.cooldown');
+            $cooldown_days = config('lorekeeper.character_pairing.cooldown');
             if ($cooldown_days) {
                 if (Pairing::whereIn('status', ['IN PROGRESS'])->where('created_at', '>', Carbon::now()->subDays($cooldown_days))
                     // check if either character is in a pairing
@@ -196,7 +196,7 @@ class PairingManager extends Service {
             }
 
             //check sex if set to do so. If one char has no sex it always works.
-            if (Config::get('lorekeeper.character_pairing.sex_restriction')) {
+            if (config('lorekeeper.character_pairing.sex_restriction')) {
                 if (isset($character_1->image->sex) && isset($character_2->image->sex)) {
                     if ($character_1->image->sex == $character_2->image->sex) {
                         throw new \Exception('Pairings can only be created between characters of differing sex.');
@@ -593,8 +593,8 @@ class PairingManager extends Service {
      * @return string|null
      */
     private function getSex($boosts) {
-        $male_percentage = Config::get('lorekeeper.character_pairing.offspring_male_percentage');
-        $female_percentage = Config::get('lorekeeper.character_pairing.offspring_female_percentage');
+        $male_percentage = config('lorekeeper.character_pairing.offspring_male_percentage');
+        $female_percentage = config('lorekeeper.character_pairing.offspring_female_percentage');
         foreach ($boosts as $boost) {
             if ($boost->tag('boost') && isset($boost->tag('boost')->getData()['setting'])) {
                 if ($this->keys[$boost->tag('boost')->getData()['setting']] == 'offspring_male_percentage') {
@@ -646,7 +646,7 @@ class PairingManager extends Service {
             }
         }
 
-        $inherit_chance = (isset($inherit_boost)) ? $inherit_boost : Config::get('lorekeeper.character_pairing.trait_inheritance');
+        $inherit_chance = (isset($inherit_boost)) ? $inherit_boost : config('lorekeeper.character_pairing.trait_inheritance');
 
         return random_int(0, 100) <= $inherit_chance;
     }

@@ -25,7 +25,7 @@ class BoostService extends Service {
      */
     public function getEditData() {
         return [
-            'settings' => str_replace('_', ' ', array_keys(Config::get('lorekeeper.character_pairing'))),
+            'settings' => str_replace('_', ' ', array_keys(config('lorekeeper.character_pairing'))),
             'rarities' => Rarity::orderBy('sort')->pluck('name', 'id'),
         ];
     }

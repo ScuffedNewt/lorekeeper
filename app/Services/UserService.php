@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Facades\Notifications;
+use App\Facades\Settings;
 use App\Models\Character\CharacterDesignUpdate;
 use App\Models\Character\CharacterTransfer;
 use App\Models\Gallery\GallerySubmission;
@@ -11,12 +13,12 @@ use App\Models\Trade;
 use App\Models\User\User;
 use App\Models\User\UserUpdateLog;
 use Carbon\Carbon;
-use DB;
-use File;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
-use Image;
-use Notifications;
-use Settings;
+use Illuminate\Support\Facades\Validator;
+use Intervention\Image\Facades\Image;
+use Laravel\Fortify\Contracts\TwoFactorAuthenticationProvider;
 
 class UserService extends Service {
     /*
@@ -42,8 +44,7 @@ class UserService extends Service {
         }
 
         // Make birthday into format we can store
-        $date = $data['dob']['day'].'-'.$data['dob']['month'].'-'.$data['dob']['year'];
-        $formatDate = carbon::parse($date);
+        $formatDate = Carbon::parse($data['dob']);
 
         $user = User::create([
             'name'      => $data['name'],
@@ -63,6 +64,45 @@ class UserService extends Service {
         ]);
 
         return $user;
+    }
+
+    /**
+     * Get a validator for an incoming registration request.
+     *
+     * @param mixed $socialite
+     *
+     * @return \Illuminate\Contracts\Validation\Validator
+     */
+    public function validator(array $data, $socialite = false) {
+        return Validator::make($data, [
+            'name'      => ['required', 'string', 'min:3', 'max:25', 'alpha_dash', 'unique:users'],
+            'email'     => ($socialite ? [] : ['required']) + ['string', 'email', 'max:255', 'unique:users'],
+            'agreement' => ['required', 'accepted'],
+            'password'  => ($socialite ? [] : ['required']) + ['string', 'min:8', 'confirmed'],
+            'dob'       => [
+                'required', function ($attribute, $value, $fail) {
+                    $formatDate = Carbon::createFromFormat('Y-m-d', $value);
+                    $now = Carbon::now();
+                    if ($formatDate->diffInYears($now) < 13) {
+                        $fail('You must be 13 or older to access this site.');
+                    }
+                },
+            ],
+            'code'                 => ['string', function ($attribute, $value, $fail) {
+                if (!Settings::get('is_registration_open')) {
+                    if (!$value) {
+                        $fail('An invitation code is required to register an account.');
+                    }
+                    $invitation = Invitation::where('code', $value)->whereNull('recipient_id')->first();
+                    if (!$invitation) {
+                        $fail('Invalid code entered.');
+                    }
+                }
+            },
+            ],
+        ] + (config('app.env') == 'production' && config('lorekeeper.extensions.use_recaptcha') ? [
+            'g-recaptcha-response' => 'required|recaptchav3:register,0.5',
+        ] : []));
     }
 
     /**
@@ -139,10 +179,18 @@ class UserService extends Service {
      * @param mixed $user
      */
     public function updateBirthday($data, $user) {
-        $user->birthday = $data;
-        $user->save();
+        DB::beginTransaction();
 
-        return true;
+        try {
+            $user->birthday = $data;
+            $user->save();
+
+            return $this->commitReturn(true);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
     }
 
     /**
@@ -151,11 +199,78 @@ class UserService extends Service {
      * @param mixed $data
      * @param mixed $user
      */
-    public function updateDOB($data, $user) {
-        $user->settings->birthday_setting = $data;
-        $user->settings->save();
+    public function updateBirthdayVisibilitySetting($data, $user) {
+        DB::beginTransaction();
 
-        return true;
+        try {
+            $user->settings->birthday_setting = $data;
+            $user->settings->save();
+
+            return $this->commitReturn(true);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
+    }
+
+    /**
+     * Confirms a user's two-factor auth.
+     *
+     * @param string           $code
+     * @param array            $data
+     * @param \App\Models\User $user
+     *
+     * @return bool
+     */
+    public function confirmTwoFactor($code, $data, $user) {
+        DB::beginTransaction();
+
+        try {
+            if (app(TwoFactorAuthenticationProvider::class)->verify(decrypt($data['two_factor_secret']), $code['code'])) {
+                $user->forceFill([
+                    'two_factor_secret'         => $data['two_factor_secret'],
+                    'two_factor_recovery_codes' => $data['two_factor_recovery_codes'],
+                ])->save();
+            } else {
+                throw new \Exception('Provided code was invalid.');
+            }
+
+            return $this->commitReturn(true);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
+    }
+
+    /**
+     * Disables a user's two-factor auth.
+     *
+     * @param string           $code
+     * @param \App\Models\User $user
+     *
+     * @return bool
+     */
+    public function disableTwoFactor($code, $user) {
+        DB::beginTransaction();
+
+        try {
+            if (app(TwoFactorAuthenticationProvider::class)->verify(decrypt($user->two_factor_secret), $code['code'])) {
+                $user->forceFill([
+                    'two_factor_secret'         => null,
+                    'two_factor_recovery_codes' => null,
+                ])->save();
+            } else {
+                throw new \Exception('Provided code was invalid.');
+            }
+
+            return $this->commitReturn(true);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
     }
 
     /**
@@ -175,7 +290,7 @@ class UserService extends Service {
             }
             $filename = $user->id.'.'.$avatar->getClientOriginalExtension();
 
-            if ($user->avatar !== 'default.jpg') {
+            if ($user->avatar != 'default.jpg') {
                 $file = 'images/avatars/'.$user->avatar;
                 //$destinationPath = 'uploads/' . $id . '/';
 
@@ -201,6 +316,67 @@ class UserService extends Service {
             $user->save();
 
             return $this->commitReturn($avatar);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
+    }
+
+    /**
+     * Updates a user's username.
+     *
+     * @param string                $username
+     * @param \App\Models\User\User $user
+     *
+     * @return bool
+     */
+    public function updateUsername($username, $user) {
+        DB::beginTransaction();
+
+        try {
+            if (!config('lorekeeper.settings.allow_username_changes')) {
+                throw new \Exception('Username changes are currently disabled.');
+            }
+            if (!$username) {
+                throw new \Exception('Please enter a username.');
+            }
+            if (strlen($username) < 3 || strlen($username) > 25) {
+                throw new \Exception('Username must be between 3 and 25 characters.');
+            }
+            if (!preg_match('/^[a-zA-Z0-9_]+$/', $username)) {
+                throw new \Exception('Username must only contain letters, numbers, and underscores.');
+            }
+            if ($username == $user->name) {
+                throw new \Exception('Username cannot be the same as your current username.');
+            }
+            if (User::where('name', $username)->where('id', '!=', $user->id)->first()) {
+                throw new \Exception('Username already taken.');
+            }
+            // check if there is a cooldown
+            if (config('lorekeeper.settings.username_change_cooldown')) {
+                // these logs are different to the ones in the admin panel
+                // different type
+                $last_change = UserUpdateLog::where('user_id', $user->id)->where('type', 'Username Change')->orderBy('created_at', 'desc')->first();
+                if ($last_change && $last_change->created_at->diffInDays(Carbon::now()) < config('lorekeeper.settings.username_change_cooldown')) {
+                    throw new \Exception('You must wait '
+                        .config('lorekeeper.settings.username_change_cooldown') - $last_change->created_at->diffInDays(Carbon::now()).
+                    ' days before changing your username again.');
+                }
+            }
+
+            // create log
+            UserUpdateLog::create([
+                'staff_id' => null,
+                'user_id'  => $user->id,
+                'data'     => json_encode(['old_name' => $user->name, 'new_name' => $username]),
+                'type'     => 'Username Change',
+            ]);
+
+            $user->name = $username;
+            $user->save();
+
+            return $this->commitReturn(true);
         } catch (\Exception $e) {
             $this->setError('error', $e->getMessage());
         }

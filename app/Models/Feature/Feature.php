@@ -6,8 +6,7 @@ use App\Models\Model;
 use App\Models\Rarity;
 use App\Models\Species\Species;
 use App\Models\Species\Subtype;
-use Config;
-use DB;
+use Illuminate\Support\Facades\DB;
 
 class Feature extends Model {
     /**
@@ -16,7 +15,7 @@ class Feature extends Model {
      * @var array
      */
     protected $fillable = [
-        'feature_category_id', 'species_id', 'subtype_id', 'rarity_id', 'name', 'has_image', 'description', 'parsed_description', 'is_visible',
+        'feature_category_id', 'species_id', 'subtype_id', 'rarity_id', 'name', 'has_image', 'description', 'parsed_description', 'is_visible', 'hash',
     ];
 
     /**
@@ -65,28 +64,28 @@ class Feature extends Model {
      * Get the rarity of this feature.
      */
     public function rarity() {
-        return $this->belongsTo('App\Models\Rarity');
+        return $this->belongsTo(Rarity::class);
     }
 
     /**
      * Get the species the feature belongs to.
      */
     public function species() {
-        return $this->belongsTo('App\Models\Species\Species');
+        return $this->belongsTo(Species::class);
     }
 
     /**
      * Get the subtype the feature belongs to.
      */
     public function subtype() {
-        return $this->belongsTo('App\Models\Species\Subtype');
+        return $this->belongsTo(Subtype::class);
     }
 
     /**
      * Get the category the feature belongs to.
      */
     public function category() {
-        return $this->belongsTo('App\Models\Feature\FeatureCategory', 'feature_category_id');
+        return $this->belongsTo(FeatureCategory::class, 'feature_category_id');
     }
 
     /**********************************************************************************************
@@ -132,7 +131,20 @@ class Feature extends Model {
     public function scopeSortSpecies($query) {
         $ids = Species::orderBy('sort', 'DESC')->pluck('id')->toArray();
 
-        return count($ids) ? $query->orderByRaw(DB::raw('FIELD(species_id, '.implode(',', $ids).')')) : $query;
+        return count($ids) ? $query->orderBy(DB::raw('FIELD(species_id, '.implode(',', $ids).')')) : $query;
+    }
+
+    /**
+     * Scope a query to sort features in subtype order.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     *
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeSortSubtype($query) {
+        $ids = Subtype::orderBy('sort', 'DESC')->pluck('id')->toArray();
+
+        return count($ids) ? $query->orderBy(DB::raw('FIELD(subtype_id, '.implode(',', $ids).')')) : $query;
     }
 
     /**
@@ -159,7 +171,7 @@ class Feature extends Model {
     public function scopeSortRarity($query, $reverse = false) {
         $ids = Rarity::orderBy('sort', $reverse ? 'ASC' : 'DESC')->pluck('id')->toArray();
 
-        return count($ids) ? $query->orderByRaw(DB::raw('FIELD(rarity_id, '.implode(',', $ids).')')) : $query;
+        return count($ids) ? $query->orderBy(DB::raw('FIELD(rarity_id, '.implode(',', $ids).')')) : $query;
     }
 
     /**
@@ -230,7 +242,7 @@ class Feature extends Model {
      * @return string
      */
     public function getImageFileNameAttribute() {
-        return $this->id.'-image.png';
+        return $this->hash.$this->id.'-image.png';
     }
 
     /**
@@ -298,7 +310,7 @@ class Feature extends Model {
     **********************************************************************************************/
 
     public static function getDropdownItems($withHidden = 0) {
-        if (Config::get('lorekeeper.extensions.organised_traits_dropdown')) {
+        if (config('lorekeeper.extensions.organised_traits_dropdown')) {
             $visibleOnly = 1;
             if ($withHidden) {
                 $visibleOnly = 0;

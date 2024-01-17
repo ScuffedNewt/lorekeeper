@@ -14,6 +14,7 @@
             $clone = $components.find('.sales-character').clone();
             attachListeners($clone);
             $characters.append($clone);
+            $clone.find('.character-code').selectize();
             count++;
         });
 

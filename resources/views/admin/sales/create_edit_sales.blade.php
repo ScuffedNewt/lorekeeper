@@ -74,7 +74,13 @@
 
     <div id="characters" class="mb-3">
         @if ($sales->id)
-            @foreach ($sales->characters as $character)
+            @if (count(
+                    $sales->characters()->whereRelation('character', 'deleted_at', null)->get()) != count($sales->characters))
+                <div class="alert alert-warning">
+                    <strong>Warning!</strong> Some characters have been deleted since they were added to this post. Editing this post will remove those characters permanently from the post.
+                </div>
+            @endif
+            @foreach ($sales->characters()->whereRelation('character', 'deleted_at', null)->get() as $character)
                 @include('admin.sales._character_select_entry', ['character' => $character])
             @endforeach
         @endif
@@ -97,6 +103,7 @@
     @parent
 
     @include('admin.sales._character_select_js')
+    @include('widgets._datetimepicker_js')
 
     <script>
         $(document).ready(function() {
@@ -105,10 +112,6 @@
                 loadModal("{{ url('admin/sales/delete') }}/{{ $sales->id }}", 'Delete Post');
             });
 
-            $(".datepicker").datetimepicker({
-                dateFormat: "yy-mm-dd",
-                timeFormat: 'HH:mm:ss',
-            });
         });
     </script>
 @endsection

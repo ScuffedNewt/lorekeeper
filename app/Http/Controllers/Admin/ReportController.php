@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Report\Report;
 use App\Services\ReportManager;
-use Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ReportController extends Controller {
     /**
@@ -21,6 +21,22 @@ class ReportController extends Controller {
             $reports = Report::assignedToMe(Auth::user());
         } else {
             $reports = Report::where('status', $status ? ucfirst($status) : 'Pending');
+        }
+        $data = $request->only(['sort']);
+        if (isset($data['sort'])) {
+            switch ($data['sort']) {
+                case 'newest':
+                    $reports->sortNewest();
+                    break;
+                case 'oldest':
+                    $reports->sortOldest();
+                    break;
+                case 'bug':
+                    $reports->whereNotNull('error_type');
+                    break;
+            }
+        } else {
+            $reports->sortOldest();
         }
 
         return view('admin.reports.index', [

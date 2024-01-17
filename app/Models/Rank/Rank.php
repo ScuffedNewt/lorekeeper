@@ -44,7 +44,7 @@ class Rank extends Model {
      * Get the powers attached to this rank.
      */
     public function powers() {
-        return $this->hasMany('App\Models\Rank\RankPower');
+        return $this->hasMany(RankPower::class);
     }
 
     /**********************************************************************************************
@@ -134,10 +134,10 @@ class Rank extends Model {
      */
     public function getPowers() {
         if ($this->isAdmin) {
-            return Config::get('lorekeeper.powers');
+            return config('lorekeeper.powers');
         }
         $powers = $this->powers->pluck('power')->toArray();
 
-        return Arr::only(Config::get('lorekeeper.powers'), $powers);
+        return Arr::only(config('lorekeeper.powers'), $powers);
     }
 }

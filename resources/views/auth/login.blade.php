@@ -6,6 +6,12 @@
 
 @section('content')
     @if ($userCount)
+        @if (session('status'))
+            <div class="alert alert-success mb-4">
+                {{ session('status') }}
+            </div>
+        @endif
+
         <div class="row">
             <div class="col-md-6 offset-md-4">
                 <h1>Log In</h1>
@@ -13,6 +19,7 @@
         </div>
         <form method="POST" action="{{ route('login') }}">
             @csrf
+            @honeypot
 
             <div class="form-group row">
                 <label for="email" class="col-md-4 col-form-label text-md-right">{{ __('E-Mail Address') }}</label>

@@ -9,8 +9,8 @@ use App\Models\Rarity;
 use App\Models\Species\Species;
 use App\Models\Species\Subtype;
 use App\Services\FeatureService;
-use Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class FeatureController extends Controller {
     /*
@@ -165,7 +165,7 @@ class FeatureController extends Controller {
      */
     public function getFeatureIndex(Request $request) {
         $query = Feature::query();
-        $data = $request->only(['rarity_id', 'feature_category_id', 'species_id', 'name']);
+        $data = $request->only(['rarity_id', 'feature_category_id', 'species_id', 'subtype_id', 'name']);
         if (isset($data['rarity_id']) && $data['rarity_id'] != 'none') {
             $query->where('rarity_id', $data['rarity_id']);
         }
