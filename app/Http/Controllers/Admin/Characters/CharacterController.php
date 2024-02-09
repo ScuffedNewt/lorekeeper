@@ -15,6 +15,7 @@ use App\Models\Trade;
 use App\Models\User\User;
 use App\Models\User\UserItem;
 use App\Services\CharacterManager;
+use App\Services\NpcManager;
 use App\Services\TradeManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -756,5 +757,31 @@ class CharacterController extends Controller {
         return view('admin.masterlist.myo_index', [
             'slots' => Character::myo(1)->orderBy('id', 'DESC')->paginate(30),
         ]);
+    }
+
+    /**
+     * Updates a character's NPC status.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function postEditNpcStatus(NpcManager $service, Request $request, $slug) {
+        $character = Character::where('slug', $slug)->first();
+        if (!$character) {
+            abort(404);
+        }
+
+        $data = $request->only([
+            'is_npc', 'biography_required_affection', 'biography', 'default_affection',
+        ]);
+
+        if ($service->editCharacterNpcInformation($character, $data)) {
+            flash('Character NPC status updated successfully.')->success();
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
+        }
+
+        return redirect()->back();
     }
 }

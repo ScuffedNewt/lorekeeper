@@ -158,6 +158,9 @@
                     </div>
                     <div class="mt-1">
                         <a href="{{ $character->url }}" class="h5 mb-0">
+                            @if ($character->is_npc)
+                                <i class="fas fa-user-ninja"></i>
+                            @endif
                             @if (!$character->is_visible)
                                 <i class="fas fa-eye-slash"></i>
                             @endif {{ Illuminate\Support\Str::limit($character->fullName, 20, $end = '...') }}

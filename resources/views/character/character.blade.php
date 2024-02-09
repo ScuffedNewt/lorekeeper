@@ -20,6 +20,10 @@
 
     @include('character._header', ['character' => $character])
 
+    @if (Auth::check())
+        @include('character._affection', ['character' => $character, 'user' => Auth::user()])
+    @endif
+
     {{-- Main Image --}}
     <div class="row mb-3">
         <div class="col-md-7">
@@ -73,6 +77,40 @@
                     </div>
                     {!! Form::close() !!}
                     <hr />
+                    @if (!$character->is_myo_slot)
+                        {!! Form::open(['url' => 'admin/character/' . $character->slug . '/npc']) !!}
+
+                        <div class="form-group">
+                            {!! Form::checkbox('is_npc', 1, $character->is_npc, ['class' => 'form-check-input', 'data-toggle' => 'toggle', 'id' => 'npc']) !!}
+                            {!! Form::label('is_npc', 'Is NPC', ['class' => 'form-check-label ml-3']) !!} {!! add_help('Turn this on to mark the character as an NPC. This will modify the character\'s page to present as an NPC.') !!}
+                        </div>
+
+                        @if ($character->is_npc)
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        {!! Form::label('default_affection', 'Default Affection') !!} {!! add_help('The default affection level for this NPC, on a scale of 0-100.') !!}
+                                        {!! Form::number('default_affection', $character->npcInformation?->default_affection ?? 0, ['class' => 'form-control', 'min' => 0, 'max' => 100]) !!}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {!! Form::label('biography_affection_requirement', 'Biography Affection Requirement') !!} {!! add_help('The affection level required to view the biography of this NPC.') !!}
+                                        {!! Form::number('biography_affection_requirement', $character->npcInformation?->biography_affection_requirement ?? 50, ['class' => 'form-control', 'min' => 0, 'max' => 100]) !!}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- biography, wisywg editor --}}
+                            <div class="form-group">
+                                {!! Form::label('biography', 'Biography') !!} {!! add_help('The biography of the NPC. Biographys become available when affection is above 50.') !!}
+                                {!! Form::textarea('biography', $character->npcInformation?->biography, ['class' => 'form-control wysiwyg', 'rows' => 5]) !!}
+                            </div>
+                        @endif
+                        <div class="text-right">
+                            {!! Form::submit('Edit', ['class' => 'btn btn-primary']) !!}
+                        </div>
+                        {!! Form::close() !!}
+                        <hr />
+                    @endif
                     <div class="text-right">
                         <a href="#" class="btn btn-outline-danger btn-sm delete-character" data-slug="{{ $character->slug }}">Delete</a>
                     </div>

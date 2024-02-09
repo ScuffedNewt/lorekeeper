@@ -195,6 +195,13 @@ class User extends Authenticatable implements MustVerifyEmail {
         return $this->hasMany(CommentLike::class);
     }
 
+    /**
+     * Gets all of a user's NPC affection records.
+     */
+    public function npcAffections() {
+        return $this->hasMany(UserNpcAffection::class);
+    }
+
     /**********************************************************************************************
 
         SCOPES
