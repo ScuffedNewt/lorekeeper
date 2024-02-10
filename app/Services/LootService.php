@@ -175,9 +175,12 @@ class LootService extends Service {
             if (isset($data['guaranteed_loot_ids']) && in_array($data['rewardable_id'][$key], $data['guaranteed_loot_ids']) && $table->rolls > 0) {
                 // check if this loot is the smallest weight of this id in the array
                 $isSmallestWeight = true;
-                foreach ($data['weight'] as $weight) {
-                    if ($weight < $data['weight'][$key]) {
+                // only check the matching rewardable_id
+                $matching_ids = array_keys($data['rewardable_id'], $data['rewardable_id'][$key]);
+                foreach ($matching_ids as $matching_id) {
+                    if ($data['weight'][$key] > $data['weight'][$matching_id]) {
                         $isSmallestWeight = false;
+                        break;
                     }
                 }
             }
