@@ -185,8 +185,8 @@ return [
                 'url'  => 'admin/data/items',
             ],
             [
-                'name' => 'Weather',
-                'url' => 'admin/weather/weathers'
+                'name' => 'Seasons',
+                'url' => 'admin/weather/seasons'
             ],
         ]
     ],
