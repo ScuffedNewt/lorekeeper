@@ -5,7 +5,7 @@ namespace App\Models\Weather;
 use Config;
 use App\Models\Model;
 
-class WeatherSeason extends Model
+class Season extends Model
 {
     /**
      * The attributes that are mass assignable.
@@ -14,7 +14,7 @@ class WeatherSeason extends Model
      */
     protected $fillable = [
         'name', 'summary', 'description',
-        'parsed_description', 'is_visible', 'sort', 'has_image', 'cycle_at', 'end_at'
+        'parsed_description', 'is_visible', 'sort', 'has_image', 'start_at', 'end_at'
     ];
 
     /**
@@ -22,7 +22,7 @@ class WeatherSeason extends Model
      *
      * @var string
      */
-    protected $table = 'weather_seasons';
+    protected $table = 'seasons';
 
     /**
      * Validation rules for creation.
@@ -48,14 +48,14 @@ class WeatherSeason extends Model
     **********************************************************************************************/
 
     /**
-     * Get the loot data for this loot table.
+     * Get the weather data for this table.
      */
-    public function loot()
+    public function weather()
     {
-        return $this->hasMany('App\Models\Weather\WeatherTable', 'weather_season_id');
+        return $this->hasMany(SeasonWeather::class, 'season_id');
     }
 
- /**********************************************************************************************
+    /**********************************************************************************************
         SCOPES
     **********************************************************************************************/
 
@@ -150,14 +150,16 @@ class WeatherSeason extends Model
      */
     public function roll($quantity = 1)
     { 
-        $rewards = createAssetsArray();
-
-        $loot = $this->loot;
+        $loot = $this->weather;
         $totalWeight = 0;
         foreach($loot as $l) $totalWeight += $l->weight;
 
+        $results = [];
         for($i = 0; $i < $quantity; $i++)
         {
+            if ($totalWeight == 0) {
+                continue;
+            }
             $roll = mt_rand(0, $totalWeight - 1);
             $result = null;
             $prev = null;
@@ -174,13 +176,9 @@ class WeatherSeason extends Model
                 $prev = $l;
             }
             if(!$result) $result = $prev;
-
-            if($result) {
-                // If this is chained to another loot table, roll on that table
-                addAsset($rewards, $result->reward, $result->quantity);
-            }
+            $results[] = $result;
         }
-        return $rewards;
+        return $results;
     }
     
 

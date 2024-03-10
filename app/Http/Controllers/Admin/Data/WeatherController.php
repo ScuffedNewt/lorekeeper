@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Auth;
 
 use App\Models\Weather\Weather;
-use App\Models\Weather\WeatherSeason;
+use App\Models\Weather\Season;
 use App\Models\Item\Item;
 use App\Models\Currency\Currency;
 use App\Services\WeatherService;
@@ -32,7 +32,7 @@ class WeatherController extends Controller
     public function getIndex()
     {
         return view('admin.weather.seasons', [
-            'seasons' => WeatherSeason::orderBy('name', 'DESC')->get()
+            'seasons' => Season::orderBy('name', 'DESC')->get()
         ]);
     }
 
@@ -44,7 +44,7 @@ class WeatherController extends Controller
     public function getCreateSeason()
     {
         return view('admin.weather.create_edit_season', [
-            'season' => new WeatherSeason,
+            'season' => new Season,
             'weathers' => Weather::orderBy('name')->pluck('name', 'id'),
         ]);
     }
@@ -57,7 +57,7 @@ class WeatherController extends Controller
      */
     public function getEditSeason($id)
     {
-        $season = WeatherSeason::find($id);
+        $season = Season::find($id);
         if(!$season) abort(404);
 
         return view('admin.weather.create_edit_season', [
@@ -76,10 +76,10 @@ class WeatherController extends Controller
      */
     public function postCreateEditSeason(Request $request, WeatherService $service, $id = null)
     { 
-        $id ? $request->validate(WeatherSeason::$updateRules) : $request->validate(WeatherSeason::$createRules);
-        $data = $request->only(['name', 'description', 'image', 'remove_image', 'is_visible', 'summary', 'weather_id', 'weight', 'cycle_at', 'end_at'
+        $id ? $request->validate(Season::$updateRules) : $request->validate(Season::$createRules);
+        $data = $request->only(['name', 'description', 'image', 'remove_image', 'is_visible', 'summary', 'weather_id', 'weight', 'start_at', 'end_at'
         ]);
-        if($id && $service->updateSeason(WeatherSeason::find($id), $data, Auth::user())) {
+        if($id && $service->updateSeason(Season::find($id), $data, Auth::user())) {
             flash('Weather updated successfully.')->success();
         }
         else if (!$id && $season = $service->createSeason($data, Auth::user())) {
@@ -100,7 +100,7 @@ class WeatherController extends Controller
      */
     public function getDeleteSeason($id)
     {
-        $season = WeatherSeason::find($id);
+        $season = Season::find($id);
         return view('admin.weather._delete_season', [
             'season' => $season,
         ]);
@@ -116,7 +116,7 @@ class WeatherController extends Controller
      */
     public function postDeleteSeason(Request $request, WeatherService $service, $id)
     {
-        if($id && $service->deleteSeason(WeatherSeason::find($id))) {
+        if($id && $service->deleteSeason(Season::find($id))) {
             flash('Season deleted successfully.')->success();
         }
         else {
@@ -153,7 +153,7 @@ class WeatherController extends Controller
      */
     public function getRollSeason(Request $request, WeatherService $service, $id)
     { 
-        $table = WeatherSeason::find($id);
+        $table = Season::find($id);
         if(!$table) abort(404);
 
         // Normally we'd merge the result tables, but since we're going to be looking at
@@ -181,9 +181,11 @@ class WeatherController extends Controller
     {
         $query = Weather::query();
         $data = $request->only(['name']);
-        if(isset($data['name']))
-        $query->where('name', 'LIKE', '%'.$data['name'].'%');
-        return view('admin.weather.weathers', [
+
+        if(isset($data['name'])) {
+            $query->where('name', 'LIKE', '%'.$data['name'].'%');
+        }
+        return view('admin.weather.weather', [
             'weathers' =>  $query->paginate(20)->appends($request->query()),
         ]);
     }

@@ -7,9 +7,9 @@ use Config;
 use Settings;
 
 use Illuminate\Support\Arr;
-use App\Models\Weather\WeatherSeason;
+use App\Models\Weather\Season;
 use App\Models\Weather\Weather;
-use App\Models\Weather\WeatherTable;
+use App\Models\Weather\SeasonWeather;
 
 
 class WeatherService extends Service
@@ -27,7 +27,7 @@ class WeatherService extends Service
      * Creates a weather season.
      *
      * @param  array  $data
-     * @return bool|\App\Models\Weather\WeatherSeason
+     * @return bool|\App\Models\Weather\Season
      */
     public function createSeason($data)
     {
@@ -37,9 +37,8 @@ class WeatherService extends Service
 
             $data = $this->populateData($data);
 
-            $season = WeatherSeason::create($data);
+            $season = Season::create($data);
 
-            
             $image = null;
             if(isset($data['image']) && $data['image']) {
                 $data['has_image'] = 1;
@@ -61,9 +60,9 @@ class WeatherService extends Service
     /**
      * Updates a weather season.
      *
-     * @param  \App\Models\Weather\WeatherSeason  $season
+     * @param  \App\Models\Weather\Season  $season
      * @param  array                       $data
-     * @return bool|\App\Models\Weather\WeatherSeason
+     * @return bool|\App\Models\Weather\Season
      */
     public function updateSeason($season, $data)
     {
@@ -96,7 +95,7 @@ class WeatherService extends Service
     /**
      * Handles the creation of weather for a weather season.
      *
-     * @param  \App\Models\Weather\WeatherSeason  $season
+     * @param  \App\Models\Weather\Season  $season
      * @param  array                       $data
      */
     private function populateSeason($season, $data)
@@ -104,20 +103,21 @@ class WeatherService extends Service
         // Clear the old weather...
         $season->loot()->delete();
 
-        foreach ($data['weather_id'] as $key => $type)
-        {
-            WeatherTable::create([
-                'weather_season_id'   => $season->id,
-                'weather_id'   => isset($type) ? $type : 1,
-                'weight'          => $data['weight'][$key],
-            ]);
+        if (isset($data['weather_id']) && $data['weather_id']) {
+            foreach ($data['weather_id'] as $key => $type) {
+                SeasonWeather::create([
+                    'season_id'   => $season->id,
+                    'weather_id'   => isset($type) ? $type : 1,
+                    'weight'          => $data['weight'][$key],
+                ]);
+            }
         }
     }
 
     /**
      * Deletes a weather season.
      *
-     * @param  \App\Models\Weather\WeatherSeason  $season
+     * @param  \App\Models\Weather\Season  $season
      * @return bool
      */
     public function deleteSeason($season)
@@ -220,7 +220,7 @@ class WeatherService extends Service
 
         try {
             // Check first if the weather is currently in use
-            if(WeatherTable::where('weather_id', $weather->id)->exists()) throw new \Exception("A season has this weather as an option. Please remove it from the list first.");
+            if(SeasonWeather::where('weather_id', $weather->id)->exists()) throw new \Exception("A season has this weather as an option. Please remove it from the list first.");
             if(Settings::get('site_weather') == $weather->id) throw new \Exception("The site's weather is currently set to this weather. Change the weather first.");
             
             $weather->delete();
@@ -264,7 +264,7 @@ class WeatherService extends Service
      * Handle season data.
      *
      * @param  array                               $data
-     * @param  \App\Models\Weather\WeatherSeason|null  $season
+     * @param  \App\Models\Weather\Season|null  $season
      * @return array
      */
     private function populateData($data, $season = null)

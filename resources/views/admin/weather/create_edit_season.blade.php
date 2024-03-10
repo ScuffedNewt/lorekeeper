@@ -20,7 +20,7 @@
     {!! Form::text('name', $season->name, ['class' => 'form-control']) !!}
 </div>
 
-@if($season->has_image)
+@if ($season->has_image)
         <img src="{{$season->imageUrl }}" class="img-fluid mr-2 mb-2" style="height: 10em;" />
         <br>
     @endif
@@ -44,8 +44,8 @@
 <div class="row">
     <div class="col-md-6">
         <div class="form-group">
-            {!! Form::label('cycle_at', 'Start Time') !!} {!! add_help('Seasons won\'t rotate in until this time is reached.') !!}
-            {!! Form::text('cycle_at', $season->cycle_at, ['class' => 'form-control datepicker']) !!}
+            {!! Form::label('start_at', 'Start Time') !!} {!! add_help('Seasons won\'t rotate in until this time is reached.') !!}
+            {!! Form::text('start_at', $season->start_at, ['class' => 'form-control datepicker']) !!}
         </div>
     </div>
     <div class="col-md-6">

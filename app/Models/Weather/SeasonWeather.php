@@ -5,7 +5,7 @@ namespace App\Models\Weather;
 use Config;
 use App\Models\Model;
 
-class WeatherTable extends Model
+class SeasonWeather extends Model
 {
     /**
      * The attributes that are mass assignable.
@@ -13,7 +13,7 @@ class WeatherTable extends Model
      * @var array
      */
     protected $fillable = [
-        'weather_season_id', 'weather_id','weight'
+        'season_id', 'weather_id','weight'
     ];
 
     /**
@@ -21,7 +21,7 @@ class WeatherTable extends Model
      *
      * @var string
      */
-    protected $table = 'weather_table';
+    protected $table = 'season_weathers';
 
     /**
      * Validation rules for creation.
@@ -29,7 +29,7 @@ class WeatherTable extends Model
      * @var array
      */
     public static $createRules = [
-        'weather_season_id' => 'required',
+        'season_id' => 'required',
         'weight' => 'required|integer|min:1',
     ];
 
@@ -39,7 +39,7 @@ class WeatherTable extends Model
      * @var array
      */
     public static $updateRules = [
-        'weather_season_id' => 'required',
+        'season_id' => 'required',
         'weight' => 'required|integer|min:1',
     ];
 
@@ -50,11 +50,11 @@ class WeatherTable extends Model
     **********************************************************************************************/
 
     /**
-     * Get the reward attached to the loot entry.
+     * Get the weather attached to the entry.
      */
-    public function reward()
+    public function weather()
     {
-            return $this->belongsTo('App\Models\Weather\Weather', 'weather_id');
+        return $this->belongsTo(Weather::class, 'weather_id');
     }
 
     /**********************************************************************************************
@@ -70,7 +70,7 @@ class WeatherTable extends Model
      */
     public function getDisplayNameAttribute()
     {
-        return '<a href="'.$this->reward->url.'">'.$this->reward->name.'</a>';
+        return '<a href="'.$this->weather->url.'">'.$this->weather->name.'</a>';
     }
 
     /**
@@ -80,8 +80,8 @@ class WeatherTable extends Model
      */
     public function getDropRateAttribute()
     {
-        $totalWeight = WeatherTable::where('weather_season_id', $this->weather_season_id)->sum('weight');
+        $totalWeight = SeasonWeather::where('season_id', $this->season_id)->sum('weight');
         $dropRate = $this->weight / $totalWeight * 100;
-        return number_format((float)$dropRate, 2, '.', '').'%';
+        return number_format((float) $dropRate, 2, '.', '').'%';
     }
 }

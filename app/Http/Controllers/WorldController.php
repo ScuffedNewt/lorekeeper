@@ -15,8 +15,8 @@ use App\Models\Species\Species;
 use App\Models\Species\Subtype;
 use App\Models\User\User;
 use App\Models\Weather\Weather;
-use App\Models\Weather\WeatherSeason;
-use App\Models\Weather\WeatherTable;
+use App\Models\Weather\Season;
+use App\Models\Weather\SeasonWeather;
 use Settings;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -427,7 +427,7 @@ class WorldController extends Controller {
      */
     public function getSeasons(Request $request)
     {
-        $query = WeatherSeason::visible();
+        $query = Season::visible();
         $data = $request->only(['name', 'sort']);
         if(isset($data['name']))
             $query->where('name', 'LIKE', '%'.$data['name'].'%');
@@ -481,7 +481,7 @@ class WorldController extends Controller {
     {
         return view('world.forecast',[
             'weather' => Weather::where('id', Settings::get('site_weather'))->first(),
-            'season' => WeatherSeason::where('id', Settings::get('site_season'))->first()
+            'season' => Season::where('id', Settings::get('site_season'))->first()
         ]);
     }
 }

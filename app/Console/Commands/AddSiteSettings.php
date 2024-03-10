@@ -77,7 +77,7 @@ class AddSiteSettings extends Command {
 
         $this->addSiteSetting('site_weather', 0, 'ID of the weather the site is currently experiencing.');
 
-        $this->addSiteSetting('site_weather_cycle', 0, '0 = Do not cycle, 1 = Daily, 2 = Weekly, 3 = Monthly');
+        $this->addSiteSetting('cycle_site_weather', 1, '0 = Do not cycle, 1 = Daily, 2 = Weekly, 3 = Monthly');
 
         $this->addSiteSetting('is_maintenance_mode', 0, '0: Site is normal, 1: Users without the Has Maintenance Access power will be redirected to the home page.');
 
