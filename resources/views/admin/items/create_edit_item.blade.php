@@ -44,8 +44,17 @@
         @if (config('lorekeeper.extensions.item_entry_expansion.extra_fields'))
             <div class="col-md">
                 <div class="form-group">
-                    {!! Form::label('Item Rarity (Optional)') !!} {!! add_help('This should be a number.') !!}
-                    {!! Form::number('rarity', $item && $item->rarity ? $item->rarity : '', ['class' => 'form-control']) !!}
+                    {!! Form::label('Item Rarity (Optional)') !!}
+                    {!! Form::select('rarity_id', $rarities, $item && $item->rarityId ? $item->rarityId : '', ['class' => 'form-control']) !!}
+                </div>
+            </div>
+        @endif
+        @if (!$item->children->count())
+            <div class="col-md">
+                <div class="alert alert-info">Items that are variants of other items don't appear individually on the encyclopedia.</div>
+                <div class="form-group">
+                    {!! Form::label('Parent Item (Optional)') !!} {!! add_help('If this item is a variant of another item, select the parent item here.') !!}
+                    {!! Form::select('parent_id', $items, $item->parent_id, ['class' => 'form-control', 'placeholder' => 'Select a Parent Item']) !!}
                 </div>
             </div>
         @endif
@@ -175,7 +184,12 @@
         <h3>Preview</h3>
         <div class="card mb-3">
             <div class="card-body">
-                @include('world._item_entry', ['imageUrl' => $item->imageUrl, 'name' => $item->displayName, 'description' => $item->parsed_description, 'searchUrl' => $item->searchUrl])
+                @if ($item->parent_id)
+                    <div class="alert alert-info">This item is a variant of another item. It will not appear on the encyclopedia.</div>
+                    @include('world._item_entry', ['item' => $item->parent, 'imageUrl' => $item->parent->imageUrl, 'name' => $item->parent->displayName, 'description' => $item->parent->parsed_description, 'searchUrl' => $item->parent->searchUrl])
+                @else
+                    @include('world._item_entry', ['imageUrl' => $item->imageUrl, 'name' => $item->displayName, 'description' => $item->parsed_description, 'searchUrl' => $item->searchUrl])
+                @endif
             </div>
         </div>
     @endif

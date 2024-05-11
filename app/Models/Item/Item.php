@@ -6,6 +6,7 @@ use App\Models\Model;
 use App\Models\Prompt\Prompt;
 use App\Models\Shop\Shop;
 use App\Models\User\User;
+use App\Models\Rarity;
 
 class Item extends Model {
     /**
@@ -16,6 +17,7 @@ class Item extends Model {
     protected $fillable = [
         'item_category_id', 'name', 'has_image', 'description', 'parsed_description', 'allow_transfer',
         'data', 'reference_url', 'artist_alias', 'artist_url', 'artist_id', 'is_released', 'hash',
+        'parent_id',
     ];
 
     protected $appends = ['image_url'];
@@ -84,6 +86,27 @@ class Item extends Model {
      */
     public function artist() {
         return $this->belongsTo(User::class, 'artist_id');
+    }
+
+    /**
+     * Gets the item's rarity.
+     */
+    public function rarity() {
+        return $this->belongsTo(Rarity::class, $this->attributes['rarity_id'] ?? null, 'id');
+    }
+
+    /**
+     * Gets the item's parent.
+     */
+    public function parent() {
+        return $this->belongsTo(Item::class, 'parent_id');
+    }
+
+    /**
+     * Get an item's children.
+     */
+    public function children() {
+        return $this->hasMany(Item::class, 'parent_id');
     }
 
     /**********************************************************************************************
@@ -213,7 +236,8 @@ class Item extends Model {
      * @return string
      */
     public function getUrlAttribute() {
-        return url('world/items?name='.$this->name);
+        // return url('world/items?name='.$this->name);
+        return $this->idUrl;
     }
 
     /**
@@ -290,12 +314,12 @@ class Item extends Model {
      *
      * @return string
      */
-    public function getRarityAttribute() {
-        if (!isset($this->data) || !isset($this->data['rarity'])) {
+    public function getRarityIdAttribute() {
+        if (!isset($this->data) || !isset($this->data['rarity_id'])) {
             return null;
         }
 
-        return $this->data['rarity'];
+        return $this->data['rarity_id'];
     }
 
     /**

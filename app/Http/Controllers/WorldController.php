@@ -365,7 +365,7 @@ class WorldController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getItems(Request $request) {
-        $query = Item::with('category');
+        $query = Item::with('category')->whereNull('parent_id');
 
         if (!Auth::check() || !Auth::user()->isStaff) {
             $query->released();

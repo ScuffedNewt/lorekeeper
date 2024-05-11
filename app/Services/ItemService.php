@@ -216,7 +216,7 @@ class ItemService extends Service {
 
             $item->update([
                 'data' => json_encode([
-                    'rarity'  => isset($data['rarity']) && $data['rarity'] ? $data['rarity'] : null,
+                    'rarity_id'  => isset($data['rarity_id']) && $data['rarity_id'] ? $data['rarity_id'] : null,
                     'uses'    => isset($data['uses']) && $data['uses'] ? $data['uses'] : null,
                     'release' => isset($data['release']) && $data['release'] ? $data['release'] : null,
                     'prompts' => isset($data['prompts']) && $data['prompts'] ? $data['prompts'] : null,
@@ -260,6 +260,9 @@ class ItemService extends Service {
             if ((isset($data['item_category_id']) && $data['item_category_id']) && !ItemCategory::where('id', $data['item_category_id'])->exists()) {
                 throw new \Exception('The selected item category is invalid.');
             }
+            if (isset($data['parent_id']) && $item->children->count() > 0) {
+                throw new \Exception('This item has children. Please remove them before changing the parent item.');
+            }
 
             $data = $this->populateData($data, $item);
 
@@ -279,7 +282,7 @@ class ItemService extends Service {
 
             $item->update([
                 'data' => json_encode([
-                    'rarity'  => isset($data['rarity']) && $data['rarity'] ? $data['rarity'] : null,
+                    'rarity_id'  => isset($data['rarity_id']) && $data['rarity_id'] ? $data['rarity_id'] : null,
                     'uses'    => isset($data['uses']) && $data['uses'] ? $data['uses'] : null,
                     'release' => isset($data['release']) && $data['release'] ? $data['release'] : null,
                     'prompts' => isset($data['prompts']) && $data['prompts'] ? $data['prompts'] : null,
