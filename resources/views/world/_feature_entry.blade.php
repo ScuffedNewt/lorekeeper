@@ -7,6 +7,9 @@
         @if($feature->feature_category_id)
             <div><strong>Category:</strong> {!! $feature->category->displayName !!}</div>
         @endif
+         @if($feature->feature_subcategory_id)
+            <div><strong>Subcategory:</strong> {!! $feature->subcategory->displayName !!}</div>
+        @endif
         @if($feature->species_id)
             <div><strong>Species:</strong> {!! $feature->species->displayName !!} @if($feature->subtype_id) ({!! $feature->subtype->displayName !!} subtype) @endif</div>
         @endif

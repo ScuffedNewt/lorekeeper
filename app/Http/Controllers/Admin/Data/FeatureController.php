@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Auth;
 
 use App\Models\Feature\FeatureCategory;
+use App\Models\Feature\FeatureSubcategory;
 use App\Models\Feature\Feature;
 use App\Models\Rarity;
 use App\Models\Species\Species;
@@ -153,6 +154,129 @@ class FeatureController extends Controller
 
     /**********************************************************************************************
     
+        FEATURE SUBCATEGORIES
+
+    **********************************************************************************************/
+
+    /**
+     * Shows the feature subcategory index.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getSubcategoryIndex()
+    {
+        return view('admin.features.feature_subcategories', [
+            'subcategories' => FeatureSubcategory::orderBy('sort', 'DESC')->get()
+        ]);
+    }
+    
+    /**
+     * Shows the create feature subcategory page.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getCreateFeatureSubcategory()
+    {
+        return view('admin.features.create_edit_feature_subcategory', [
+            'subcategory' => new FeatureSubcategory
+        ]);
+    }
+    
+    /**
+     * Shows the edit feature subcategory page.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getEditFeatureSubcategory($id)
+    {
+        $subcategory = FeatureSubcategory::find($id);
+        if(!$subcategory) abort(404);
+        return view('admin.features.create_edit_feature_subcategory', [
+            'subcategory' => $subcategory
+        ]);
+    }
+
+    /**
+     * Creates or edits a feature subcategory.
+     *
+     * @param  \Illuminate\Http\Request     $request
+     * @param  App\Services\FeatureService  $service
+     * @param  int|null                     $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function postCreateEditFeatureSubcategory(Request $request, FeatureService $service, $id = null)
+    {
+        $id ? $request->validate(FeatureSubcategory::$updateRules) : $request->validate(FeatureSubcategory::$createRules);
+        $data = $request->only([
+            'name', 'description', 'image', 'remove_image'
+        ]);
+        if($id && $service->updateFeatureSubcategory(FeatureSubcategory::find($id), $data, Auth::user())) {
+            flash('Subcategory updated successfully.')->success();
+        }
+        else if (!$id && $subcategory = $service->createFeatureSubcategory($data, Auth::user())) {
+            flash('Subcategory created successfully.')->success();
+            return redirect()->to('admin/data/trait-subcategories/edit/'.$subcategory->id);
+        }
+        else {
+            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+        }
+        return redirect()->back();
+    }
+    
+    /**
+     * Gets the feature subcategory deletion modal.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getDeleteFeatureSubcategory($id)
+    {
+        $subcategory = FeatureSubcategory::find($id);
+        return view('admin.features._delete_feature_subcategory', [
+            'subcategory' => $subcategory,
+        ]);
+    }
+
+    /**
+     * Creates or edits a feature subcategory.
+     *
+     * @param  \Illuminate\Http\Request     $request
+     * @param  App\Services\FeatureService  $service
+     * @param  int|null                     $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function postDeleteFeatureSubcategory(Request $request, FeatureService $service, $id)
+    {
+        if($id && $service->deleteFeatureSubcategory(FeatureSubcategory::find($id))) {
+            flash('Subcategory deleted successfully.')->success();
+        }
+        else {
+            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+        }
+        return redirect()->to('admin/data/trait-subcategories');
+    }
+
+    /**
+     * Sorts feature subcategories.
+     *
+     * @param  \Illuminate\Http\Request     $request
+     * @param  App\Services\FeatureService  $service
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function postSortFeatureSubcategory(Request $request, FeatureService $service)
+    {
+        if($service->sortFeatureSubcategory($request->get('sort'))) {
+            flash('Subcategory order updated successfully.')->success();
+        }
+        else {
+            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+        }
+        return redirect()->back();
+    }
+
+    /**********************************************************************************************
+    
         FEATURES
 
     **********************************************************************************************/
@@ -166,11 +290,13 @@ class FeatureController extends Controller
     public function getFeatureIndex(Request $request)
     {
         $query = Feature::query();
-        $data = $request->only(['rarity_id', 'feature_category_id', 'species_id', 'name']);
+        $data = $request->only(['rarity_id', 'feature_category_id', 'species_id', 'name','feature_subcategory_id']);
         if(isset($data['rarity_id']) && $data['rarity_id'] != 'none') 
             $query->where('rarity_id', $data['rarity_id']);
         if(isset($data['feature_category_id']) && $data['feature_category_id'] != 'none') 
             $query->where('feature_category_id', $data['feature_category_id']);
+            if(isset($data['feature_subcategory_id']) && $data['feature_subcategory_id'] != 'none') 
+            $query->where('feature_subcategory_id', $data['feature_subcategory_id']);
         if(isset($data['species_id']) && $data['species_id'] != 'none') 
             $query->where('species_id', $data['species_id']);
         if(isset($data['subtype_id']) && $data['subtype_id'] != 'none') 
@@ -182,7 +308,8 @@ class FeatureController extends Controller
             'rarities' => ['none' => 'Any Rarity'] + Rarity::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
             'specieses' => ['none' => 'Any Species'] + Species::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
             'subtypes' => ['none' => 'Any Subtype'] + Subtype::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
-            'categories' => ['none' => 'Any Category'] + FeatureCategory::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray()
+            'categories' => ['none' => 'Any Category'] + FeatureCategory::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
+            'subcategories' => ['none' => 'Any Subcategory'] + FeatureSubcategory::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray()
         ]);
     }
     
@@ -198,7 +325,8 @@ class FeatureController extends Controller
             'rarities' => ['none' => 'Select a Rarity'] + Rarity::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
             'specieses' => ['none' => 'No restriction'] + Species::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
             'subtypes' => ['none' => 'No subtype'] + Subtype::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
-            'categories' => ['none' => 'No category'] + FeatureCategory::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray()
+            'categories' => ['none' => 'No category'] + FeatureCategory::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
+            'subcategories' => ['none' => 'No subcategory'] + FeatureSubcategory::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray()
         ]);
     }
     
@@ -217,7 +345,8 @@ class FeatureController extends Controller
             'rarities' => ['none' => 'Select a Rarity'] + Rarity::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
             'specieses' => ['none' => 'No restriction'] + Species::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
             'subtypes' => ['none' => 'No subtype'] + Subtype::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
-            'categories' => ['none' => 'No category'] + FeatureCategory::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray()
+            'categories' => ['none' => 'No category'] + FeatureCategory::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
+            'subcategories' => ['none' => 'No subcategory'] + FeatureSubcategory::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray()
         ]);
     }
 
@@ -233,7 +362,7 @@ class FeatureController extends Controller
     {
         $id ? $request->validate(Feature::$updateRules) : $request->validate(Feature::$createRules);
         $data = $request->only([
-            'name', 'species_id', 'subtype_id', 'rarity_id', 'feature_category_id', 'description', 'image', 'remove_image'
+            'name', 'species_id', 'subtype_id', 'rarity_id', 'feature_category_id', 'description', 'image', 'remove_image','feature_subcategory_id'
         ]);
         if($id && $service->updateFeature(Feature::find($id), $data, Auth::user())) {
             flash('Trait updated successfully.')->success();

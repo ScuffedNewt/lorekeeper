@@ -19,6 +19,7 @@ use App\Models\Prompt\Prompt;
 use App\Models\Shop\Shop;
 use App\Models\Shop\ShopStock;
 use App\Models\User\User;
+use App\Models\Feature\FeatureSubcategory;
 
 class WorldController extends Controller
 {
@@ -141,6 +142,22 @@ class WorldController extends Controller
     }
 
     /**
+     * Shows the trait subcategories page.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getFeatureSubcategories(Request $request)
+    {
+        $query = FeatureSubcategory::query();
+        $name = $request->get('name');
+        if($name) $query->where('name', 'LIKE', '%'.$name.'%');
+        return view('world.feature_subcategories', [
+            'subcategories' => $query->orderBy('sort', 'DESC')->paginate(20)->appends($request->query()),
+        ]);
+    }
+
+    /**
      * Shows the traits page.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -149,11 +166,13 @@ class WorldController extends Controller
     public function getFeatures(Request $request)
     {
         $query = Feature::with('category')->with('rarity')->with('species');
-        $data = $request->only(['rarity_id', 'feature_category_id', 'species_id', 'name', 'sort']);
+        $data = $request->only(['rarity_id', 'feature_category_id', 'species_id', 'name', 'sort','feature_subcategory_id']);
         if(isset($data['rarity_id']) && $data['rarity_id'] != 'none')
             $query->where('rarity_id', $data['rarity_id']);
         if(isset($data['feature_category_id']) && $data['feature_category_id'] != 'none')
             $query->where('feature_category_id', $data['feature_category_id']);
+        if(isset($data['feature_subcategory_id']) && $data['feature_subcategory_id'] != 'none')
+            $query->where('feature_subcategory_id', $data['feature_subcategory_id']);
         if(isset($data['species_id']) && $data['species_id'] != 'none')
             $query->where('species_id', $data['species_id']);
         if(isset($data['name']))
@@ -194,7 +213,8 @@ class WorldController extends Controller
             'features' => $query->paginate(20)->appends($request->query()),
             'rarities' => ['none' => 'Any Rarity'] + Rarity::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
             'specieses' => ['none' => 'Any Species'] + Species::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
-            'categories' => ['none' => 'Any Category'] + FeatureCategory::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray()
+            'categories' => ['none' => 'Any Category'] + FeatureCategory::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
+            'subcategories' => ['none' => 'Any Subcategory'] + FeatureSubcategory::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray()
         ]);
     }
 
@@ -207,6 +227,7 @@ class WorldController extends Controller
     public function getSpeciesFeatures($id)
     {
         $categories = FeatureCategory::orderBy('sort', 'DESC')->get();
+        $subcategories = FeatureSubcategory::orderBy('sort', 'DESC')->get();
         $rarities = Rarity::orderBy('sort', 'ASC')->get();
         $species = Species::where('id', $id)->first();
         if(!$species) abort(404);
@@ -230,6 +251,7 @@ class WorldController extends Controller
         return view('world.species_features', [
             'species' => $species,
             'categories' => $categories->keyBy('id'),
+            'subcategories' => $subcategories->keyBy('id'),
             'rarities' => $rarities->keyBy('id'),
             'features' => $features,
         ]);
