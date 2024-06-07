@@ -56,7 +56,6 @@ class LinkService extends Service
             if ($user->has_alias == 0 && isset($user->referred_by)) {
                 // plus 1 because the user currently registering their alias isn't counted yet
                 $referralCount = User::where('referred_by', $user->referred_by)->where('has_alias', 1)->count() + 1;
-                dd(User::where('referred_by', $user->referred_by)->get(), $referralCount);
                 $userReferred = User::find($user->referred_by);
                 $referralConditions = Referral::where('is_active', 1)->get()->filter(function ($query) use ($referralCount) {
                     // On every needs to be modded to see if it's been x referrals since the last time it was rewarded.
