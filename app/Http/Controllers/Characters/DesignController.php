@@ -363,4 +363,51 @@ class DesignController extends Controller {
 
         return redirect()->to('designs');
     }
+
+
+    /**
+     * Shows the design update request cancel confirmation modal.
+     *
+     * @param int $id
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getCancel($id) {
+        $r = CharacterDesignUpdate::find($id);
+        if (!$r || ($r->user_id != Auth::user()->id && !Auth::user()->hasPower('manage_characters'))) {
+            abort(404);
+        }
+
+        return view('character.design._cancel_modal', [
+            'request' => $r,
+        ]);
+    }
+
+    /**
+     * Cancels a design update request.
+     *
+     * @param App\Services\DesignUpdateManager $service
+     * @param int                              $id
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function postCancel(DesignUpdateManager $service, $id) {
+        $r = CharacterDesignUpdate::find($id);
+        if (!$r) {
+            abort(404);
+        }
+        if ($r->user_id != Auth::user()->id) {
+            abort(404);
+        }
+
+        if ($service->cancelRequest(null, $r, Auth::user(), false)) {
+            flash('Request cancelled successfully.')->success();
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
+        }
+
+        return redirect()->to('designs');
+    }
 }
