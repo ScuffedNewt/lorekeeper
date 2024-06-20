@@ -799,6 +799,7 @@ class DesignUpdateManager extends Service {
      * @param array                                       $data
      * @param \App\Models\Character\CharacterDesignUpdate $request
      * @param \App\Models\User\User                       $user
+     * @param mixed                                       $isStaff
      *
      * @return bool
      */

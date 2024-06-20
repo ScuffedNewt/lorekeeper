@@ -364,7 +364,6 @@ class DesignController extends Controller {
         return redirect()->to('designs');
     }
 
-
     /**
      * Shows the design update request cancel confirmation modal.
      *
