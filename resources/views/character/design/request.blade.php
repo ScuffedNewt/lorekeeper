@@ -44,7 +44,7 @@
         <div class="card mb-3">
             <div class="card-body">
                 <a href="#" class="btn btn-outline-secondary {{ Auth::user()->hasPower('manage_characters') ? 'process-button' : 'cancel-button' }} btn-sm float-right" data-action="cancel">Cancel</a>
-                <strong class="text-secondary">Cancelling</strong> the request returns it to its draft status, 
+                <strong class="text-secondary">Cancelling</strong> the request returns it to its draft status,
                 @if (Auth::user()->hasPower('manage_characters'))
                     allowing the user to make further edits.
                 @else
