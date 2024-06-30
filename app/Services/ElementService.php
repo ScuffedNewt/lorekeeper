@@ -94,6 +94,7 @@ class ElementService extends Service {
             $element->update($data);
 
             // create weaknesses and immunities
+            $element->weaknesses()->delete();
             if (isset($data['weakness_id']) && $data['weakness_id']) {
                 foreach ($data['weakness_id'] as $key => $id) {
                     $weakness = ElementWeakness::where('element_id', $element->id)->where('weakness_id', $id)->first();
@@ -106,12 +107,13 @@ class ElementService extends Service {
                         ElementWeakness::create([
                             'element_id'  => $element->id,
                             'weakness_id' => $id,
-                            'multiplier'  => $data['weakness_multiplier'][$key],
+                            'multiplier'  => $data['weakness_multiplier'][$key] ?? 1.1,
                         ]);
                     }
                 }
             }
 
+            $element->immunities()->delete();
             if (isset($data['immunity_id']) && $data['immunity_id']) {
                 foreach ($data['immunity_id'] as $id) {
                     $immunity = ElementImmunity::where('element_id', $element->id)->where('immunity_id', $id)->first();
