@@ -279,7 +279,7 @@
                 @endif
             });
         });
-        
+
         $("#species").change(function() {
             var species = $('#species').val();
             var myo = '<?php echo $isMyo; ?>';
