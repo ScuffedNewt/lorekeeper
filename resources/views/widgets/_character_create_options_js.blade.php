@@ -1,6 +1,5 @@
 <script>
     $(document).ready(function() {
-        $('#userSelect').selectize();
         // Resell options /////////////////////////////////////////////////////////////////////////////
 
         var $resellable = $('#resellable');

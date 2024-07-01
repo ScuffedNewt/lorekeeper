@@ -138,13 +138,27 @@ class CharacterController extends Controller {
             'species_id', 'subtype_id', 'rarity_id', 'feature_id', 'feature_data',
             'image', 'thumbnail',
         ]);
-        if ($character = $service->createCharacter($data, Auth::user(), true)) {
-            flash('MYO slot created successfully.')->success();
-
-            return redirect()->to($character->url);
+        if (count($data['user_id']) > 1) {
+            $user_ids = $data['user_id'];
+            foreach ($user_ids as $id) {
+                $data['user_id'] = $id;
+                if ($character = $service->createCharacter($data, Auth::user(), true)) {
+                    flash('MYO slot for '.$character->user->name.' created successfully.')->success();
+                } else {
+                    foreach ($service->errors()->getMessages()['error'] as $error) {
+                        flash($error)->error();
+                    }
+                }
+            }
         } else {
-            foreach ($service->errors()->getMessages()['error'] as $error) {
-                flash($error)->error();
+            if ($character = $service->createCharacter($data, Auth::user(), true)) {
+                flash('MYO slot created successfully.')->success();
+
+                return redirect()->to($character->url);
+            } else {
+                foreach ($service->errors()->getMessages()['error'] as $error) {
+                    flash($error)->error();
+                }
             }
         }
 

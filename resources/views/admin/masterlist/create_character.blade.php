@@ -33,7 +33,7 @@
             <div class="col-md-6">
                 <div class="form-group">
                     {!! Form::label('Owner') !!}
-                    {!! Form::select('user_id', $userOptions, old('user_id'), ['class' => 'form-control', 'placeholder' => 'Select User', 'id' => 'userSelect']) !!}
+                    {!! Form::select('user_id[]', $userOptions, old('user_id'), ['class' => 'form-control', 'placeholder' => 'Select User', 'id' => 'userSelect', $isMyo ? 'multiple' : '']) !!}
                 </div>
             </div>
             <div class="col-md-6">
@@ -272,6 +272,14 @@
     @endif
 
     <script>
+        $(document).ready(function() {
+            $('#userSelect').selectize({
+                @if ($isMyo)
+                    maxItems: 10,
+                @endif
+            });
+        });
+        
         $("#species").change(function() {
             var species = $('#species').val();
             var myo = '<?php echo $isMyo; ?>';
