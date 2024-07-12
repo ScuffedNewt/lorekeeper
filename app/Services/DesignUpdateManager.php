@@ -13,6 +13,7 @@ use App\Models\Species\Species;
 use App\Models\Species\Subtype;
 use App\Models\User\User;
 use App\Models\User\UserItem;
+use App\Services\TypingManager;
 use Carbon\Carbon;
 use Config;
 use DB;
@@ -332,6 +333,7 @@ class DesignUpdateManager extends Service {
             $request->data = json_encode([
                 'user'      => Arr::only(getDataReadyAssets($userAssets), ['user_items', 'currencies']),
                 'character' => Arr::only(getDataReadyAssets($characterAssets), ['currencies']),
+                'element_ids' => isset($requestData['element_ids']) ? $requestData['element_ids'] : null,
             ]);
             $request->save();
 
@@ -402,6 +404,11 @@ class DesignUpdateManager extends Service {
                 }
 
                 $feature = CharacterFeature::create(['character_image_id' => $request->id, 'feature_id' => $featureId, 'data' => $data['feature_data'][$key], 'character_type' => 'Update']);
+            }
+
+            if (isset($data['element_ids']) && $data['element_ids']) {
+                $data['element_ids'] = array_filter($data['element_ids']);
+                $request->data = array_merge($request->data, ['element_ids' => $data['element_ids']]);
             }
 
             // Update other stats
@@ -570,6 +577,13 @@ class DesignUpdateManager extends Service {
                 'rarity_id'     => $request->rarity_id,
                 'sort'          => 0,
             ]);
+
+            if (isset($request->data['element_ids']) && $request->data['element_ids']) {
+                $typingService = new TypingManager;
+                if (!$typingService->createTyping(get_class($image), $image->id, $request->data['element_ids'], false)) {
+                    throw new \Exception('Failed to create typing.');
+                }
+            }
 
             // Shift the image credits over to the new image
             $request->designers()->update(['character_type' => 'Character', 'character_image_id' => $image->id]);

@@ -80,6 +80,21 @@
                 <a href="#" class="remove-feature btn btn-danger mb-2">×</a>
             </div>
         </div>
+
+        <h2>Elements</h2>
+        <p>Here you can update the elements of the character.</p>
+        @php
+            $type = \App\Models\Element\Typing::where('typing_model', 'App\Models\Character\CharacterImage')
+                    ->where('typing_id',  $request->character->image->id)
+                    ->first();
+            $newType = $type ? clone $type : null;
+            if (isset($request->data['element_ids']) && $request->data['element_ids'] && $type) {
+                $newType->element_ids = json_encode($request->data['element_ids']);
+            }
+        @endphp
+        <p class="alert alert-info">Current Typing: {!! $type ? $type->elementNames : 'None' !!}</p>
+        @include('widgets._add_typing', ['object' => $request, 'type' => $newType ?? null, 'isStaff' => false])
+
         <div class="text-right">
             {!! Form::submit('Save', ['class' => 'btn btn-primary']) !!}
         </div>
@@ -136,6 +151,37 @@
                 </div>
             @endforeach
         </div>
+        @if (isset($request->data['element_ids']) && $request->data['element_ids'])
+            @php
+                $currentType = \App\Models\Element\Typing::where('typing_model', 'App\Models\Character\CharacterImage')
+                        ->where('typing_id',  $request->character->image->id)
+                        ->first();
+                        // make newtype a clone of current type not a reference
+                $newType = $currentType ? clone $currentType : null;
+                if ($currentType) {
+                    $newType->element_ids = json_encode($request->data['element_ids']);
+                }
+            @endphp
+            <h4 class="mt-3">Elements</h4>
+            <div class="row">
+                <div class="row col-md-6 col-sm-12">
+                    <div class="col-lg-4 col-md-6 col-4">
+                        <h5>Current Typing</h5>
+                    </div>
+                    <div class="col-lg-8 col-md-6 col-8 row">
+                        <h5>{!! $currentType?->displayElements !!}</h5>
+                    </div>
+                </div>
+                <div class="row col-md-6 col-sm-12">
+                    <div class="col-lg-4 col-md-6 col-4">
+                        <h5>New Typing</h5>
+                    </div>
+                    <div class="col-lg-8 col-md-6 col-8 row">
+                        <h5>{!! $newType?->displayElements !!}</h5>
+                    </div>
+                </div>
+            </div>
+        @endif
     @endif
 
 @endsection

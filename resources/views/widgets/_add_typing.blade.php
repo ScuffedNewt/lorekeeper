@@ -7,6 +7,7 @@
             ->first();
     }
     $type = $type ?? null;
+    $isStaff = isset($isStaff) ? $isStaff : true;
 @endphp
 
 <div class="card p-4 mb-2 mt-2" id="typing-card">
@@ -25,15 +26,17 @@
                 @foreach (json_decode($type->element_ids) as $id)
                     <div class="form-group">
                         {!! Form::label('Element') !!}
-                        {!! Form::select('element_ids[]', $elements, $id, ['class' => 'form-control selectize', 'placeholder' => 'Select Element']) !!}
+                        {!! Form::select('element_ids[]', $elements, $id, ['class' => 'form-control typing-selectize', 'placeholder' => 'Select Element']) !!}
                     </div>
                 @endforeach
             @endif
         </div>
         <div class="btn btn-secondary" id="add-element">Add Element</div>
-        <div class="btn btn-primary float-right" id="submit-typing">{{ $type ? 'Edit' : 'Create' }} Typing</div>
-        @if ($type)
-            <div class="btn btn-danger float-right mr-2" id="delete-typing">Delete Typing</div>
+        @if ($isStaff)
+            <div class="btn btn-primary float-right" id="submit-typing">{{ $type ? 'Edit' : 'Create' }} Typing</div>
+            @if ($type)
+                <div class="btn btn-danger float-right mr-2" id="delete-typing">Delete Typing</div>
+            @endif
         @endif
     </div>
 </div>
@@ -45,7 +48,7 @@
 
 <script>
     $(document).ready(function() {
-        $('.selectize').selectize();
+        $('.typing-selectize').selectize();
 
         // add element
         $('#add-element').on('click', function(e) {
@@ -61,46 +64,48 @@
         });
 
         // delete typing
-        @if ($type)
+        @if ($type && $isStaff)
             $('#delete-typing').on('click', function(e) {
                 e.preventDefault();
                 loadModal("{{ url('admin/typing/delete/' . $type->id) }}", "Delete Typing");
             });
         @endif
 
-        // ajax on add typing
-        $('#submit-typing').on('click', function(e) {
-            e.preventDefault();
-            var $typing = $('.typing');
-            var $submit = $typing.find('#submit-typing');
-            var $error = $typing.find('.error');
-            var $success = $typing.find('.success');
+        @if ($isStaff)
+            // ajax on add typing
+            $('#submit-typing').on('click', function(e) {
+                e.preventDefault();
+                var $typing = $('.typing');
+                var $submit = $typing.find('#submit-typing');
+                var $error = $typing.find('.error');
+                var $success = $typing.find('.success');
 
-            $submit.addClass('disabled');
-            $error.addClass('d-none');
-            $success.addClass('d-none');
+                $submit.addClass('disabled');
+                $error.addClass('d-none');
+                $success.addClass('d-none');
 
-            $.ajax({
-                url: "{{ url('admin/typing') }}",
-                method: 'POST',
-                data: {
-                    _token: '{{ csrf_token() }}',
-                    type: '{{ $type ? $type->id : null }}',
-                    typing_model: '{{ urlencode(get_class($object)) }}',
-                    typing_id: '{{ $object->id }}',
-                    element_ids: $('#elements').find('select').map(function() {
-                        return $(this).val();
-                    }).get()
-                },
-                success: function(data) {
-                    console.log('success');
-                    location.reload();
-                },
-                error: function(data) {
-                    console.log('error');
-                    location.reload();
-                }
+                $.ajax({
+                    url: "{{ url('admin/typing') }}",
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        type: '{{ $type ? $type->id : null }}',
+                        typing_model: '{{ urlencode(get_class($object)) }}',
+                        typing_id: '{{ $object->id }}',
+                        element_ids: $('#elements').find('select').map(function() {
+                            return $(this).val();
+                        }).get()
+                    },
+                    success: function(data) {
+                        console.log('success');
+                        location.reload();
+                    },
+                    error: function(data) {
+                        console.log('error');
+                        location.reload();
+                    }
+                });
             });
-        });
+        @endif
     });
 </script>
