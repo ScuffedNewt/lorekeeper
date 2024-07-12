@@ -117,7 +117,6 @@ function parse($text, &$pings = null) {
     $config->set('Attr.EnableID', true);
     $config->set('HTML.DefinitionID', 'include');
     $config->set('HTML.DefinitionRev', 2);
-    $config->set('Cache.DefinitionImpl', null); // TODO: remove this later!
     if ($def = $config->maybeGetRawHTMLDefinition()) {
         $def->addElement('include', 'Block', 'Empty', 'Common', ['file*' => 'URI', 'height' => 'Text', 'width' => 'Text']);
         $def->addAttribute('a', 'data-toggle', 'Enum#collapse,tab');
@@ -190,7 +189,7 @@ function parseUsersAndAvatars($text, &$users) {
             $user = App\Models\User\User::where('name', $match)->first();
             if ($user) {
                 $users[] = $user;
-                $text = preg_replace('/\B%'.$match.'/', '<a href="'.$user->url.'"><img src="/images/avatars/'.$user->avatar.'" style="width:70px; height:70px; border-radius:50%; " alt="'.$user->name.'\'s Avatar"></a>'.$user->displayName, $text);
+                $text = preg_replace('/\B%'.$match.'/', '<a href="'.$user->url.'"><img src="'.$user->avatarUrl.'" style="width:70px; height:70px; border-radius:50%; " alt="'.$user->name.'\'s Avatar"></a>'.$user->displayName, $text);
             }
         }
     }
@@ -244,7 +243,7 @@ function parseUserIDsForAvatars($text, &$users) {
             $user = App\Models\User\User::where('id', $match)->first();
             if ($user) {
                 $users[] = $user;
-                $text = preg_replace('/\[userav='.$match.'\]/', '<a href="'.$user->url.'"><img src="/images/avatars/'.$user->avatar.'" style="width:70px; height:70px; border-radius:50%; " alt="'.$user->name.'\'s Avatar"></a>', $text);
+                $text = preg_replace('/\[userav='.$match.'\]/', '<a href="'.$user->url.'"><img src="'.$user->avatarUrl.'" style="width:70px; height:70px; border-radius:50%; " alt="'.$user->name.'\'s Avatar"></a>', $text);
             }
         }
     }
@@ -364,7 +363,7 @@ function checkAlias($url, $failOnError = true) {
         $recipient = null;
         $matches = [];
         // Check to see if url is 1. from a site used for auth
-        foreach (Config::get('lorekeeper.sites') as $key=> $site) {
+        foreach (config('lorekeeper.sites') as $key=> $site) {
             if (isset($site['auth']) && $site['auth']) {
                 preg_match_all($site['regex'], $url, $matches, PREG_SET_ORDER, 0);
                 if ($matches != []) {
@@ -406,7 +405,7 @@ function checkAlias($url, $failOnError = true) {
 function prettyProfileLink($url) {
     $matches = [];
     // Check different sites and return site if a match is made, plus username (retreived from the URL)
-    foreach (Config::get('lorekeeper.sites') as $siteName=> $siteInfo) {
+    foreach (config('lorekeeper.sites') as $siteName=> $siteInfo) {
         if (preg_match_all($siteInfo['regex'], $url, $matches)) {
             $site = $siteName;
             $name = $matches[1][0];
@@ -417,7 +416,7 @@ function prettyProfileLink($url) {
 
     // Return formatted link if possible; failing that, an unformatted link
     if (isset($name) && isset($site) && isset($link)) {
-        return '<a href="https://'.$link.'">'.$name.'@'.(Config::get('lorekeeper.sites.'.$site.'.display_name') != null ? Config::get('lorekeeper.sites.'.$site.'.display_name') : $site).'</a>';
+        return '<a href="https://'.$link.'">'.$name.'@'.(config('lorekeeper.sites.'.$site.'.display_name') != null ? config('lorekeeper.sites.'.$site.'.display_name') : $site).'</a>';
     } else {
         return '<a href="'.$url.'">'.$url.'</a>';
     }
@@ -433,7 +432,7 @@ function prettyProfileLink($url) {
 function prettyProfileName($url) {
     $matches = [];
     // Check different sites and return site if a match is made, plus username (retreived from the URL)
-    foreach (Config::get('lorekeeper.sites') as $siteName=> $siteInfo) {
+    foreach (config('lorekeeper.sites') as $siteName=> $siteInfo) {
         if (preg_match_all($siteInfo['regex'], $url, $matches)) {
             $site = $siteName;
             $name = $matches[1][0];
@@ -443,7 +442,7 @@ function prettyProfileName($url) {
 
     // Return formatted name if possible; failing that, an unformatted url
     if (isset($name) && isset($site)) {
-        return $name.'@'.(Config::get('lorekeeper.sites.'.$site.'.display_name') != null ? Config::get('lorekeeper.sites.'.$site.'.display_name') : $site);
+        return $name.'@'.(config('lorekeeper.sites.'.$site.'.display_name') != null ? config('lorekeeper.sites.'.$site.'.display_name') : $site);
     } else {
         return $url;
     }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Facades\Settings;
 use App\Models\Character\Character;
 use App\Models\Character\CharacterCategory;
 use App\Models\Character\CharacterImage;
@@ -12,9 +13,8 @@ use App\Models\Rarity;
 use App\Models\Species\Species;
 use App\Models\Species\Subtype;
 use App\Models\User\User;
-use Auth;
 use Illuminate\Http\Request;
-use Settings;
+use Illuminate\Support\Facades\Auth;
 
 class BrowseController extends Controller {
     /*
@@ -53,6 +53,12 @@ class BrowseController extends Controller {
                 break;
             case 'alpha-reverse':
                 $query->orderBy('name', 'DESC');
+                break;
+            case 'alias':
+                $query->aliasSort();
+                break;
+            case 'alias-reverse':
+                $query->aliasSort(true);
                 break;
             case 'rank':
                 $query->orderBy('ranks.sort', 'DESC')->orderBy('name');
@@ -276,6 +282,9 @@ class BrowseController extends Controller {
         }
 
         switch ($request->get('sort')) {
+            default:
+                $query->orderBy('characters.number', 'DESC');
+                break;
             case 'number_desc':
                 $query->orderBy('characters.number', 'DESC');
                 break;
@@ -294,8 +303,6 @@ class BrowseController extends Controller {
             case 'sale_value_asc':
                 $query->orderBy('characters.sale_value', 'ASC');
                 break;
-            default:
-                $query->orderBy('characters.number', 'DESC');
         }
 
         if (!Auth::check() || !Auth::user()->hasPower('manage_characters')) {
@@ -412,6 +419,9 @@ class BrowseController extends Controller {
         $query->whereIn('id', $imageQuery->pluck('character_id')->toArray());
 
         switch ($request->get('sort')) {
+            default:
+                $query->orderBy('characters.id', 'DESC');
+                break;
             case 'id_desc':
                 $query->orderBy('characters.id', 'DESC');
                 break;
@@ -585,6 +595,9 @@ class BrowseController extends Controller {
         $query->whereIn('id', $imageQuery->pluck('character_id')->toArray());
 
         switch ($request->get('sort')) {
+            default:
+                $query->orderBy('characters.number', 'DESC');
+                break;
             case 'number_desc':
                 $query->orderBy('characters.number', 'DESC');
                 break;
@@ -603,8 +616,6 @@ class BrowseController extends Controller {
             case 'sale_value_asc':
                 $query->orderBy('characters.sale_value', 'ASC');
                 break;
-            default:
-                $query->orderBy('characters.number', 'DESC');
         }
 
         if (!Auth::check() || !Auth::user()->hasPower('manage_characters')) {
