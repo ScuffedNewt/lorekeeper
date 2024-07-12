@@ -85,8 +85,8 @@
         <p>Here you can update the elements of the character.</p>
         @php
             $type = \App\Models\Element\Typing::where('typing_model', 'App\Models\Character\CharacterImage')
-                    ->where('typing_id',  $request->character->image->id)
-                    ->first();
+                ->where('typing_id', $request->character->image->id)
+                ->first();
             $newType = $type ? clone $type : null;
             if (isset($request->data['element_ids']) && $request->data['element_ids'] && $type) {
                 $newType->element_ids = json_encode($request->data['element_ids']);
@@ -154,9 +154,9 @@
         @if (isset($request->data['element_ids']) && $request->data['element_ids'])
             @php
                 $currentType = \App\Models\Element\Typing::where('typing_model', 'App\Models\Character\CharacterImage')
-                        ->where('typing_id',  $request->character->image->id)
-                        ->first();
-                        // make newtype a clone of current type not a reference
+                    ->where('typing_id', $request->character->image->id)
+                    ->first();
+                // make newtype a clone of current type not a reference
                 $newType = $currentType ? clone $currentType : null;
                 if ($currentType) {
                     $newType->element_ids = json_encode($request->data['element_ids']);
