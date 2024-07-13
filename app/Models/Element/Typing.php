@@ -21,6 +21,16 @@ class Typing extends Model {
      */
     protected $table = 'typings';
 
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'element_ids' => 'array',
+    ];
+
+
     /**********************************************************************************************
 
         RELATIONS
@@ -53,7 +63,7 @@ class Typing extends Model {
      * returns a collection of element objects from the typing.
      */
     public function elements() {
-        return Element::whereIn('id', json_decode($this->element_ids))->get();
+        return Element::whereIn('id', $this->element_ids)->get();
     }
 
     /**

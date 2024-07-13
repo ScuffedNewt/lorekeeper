@@ -407,7 +407,7 @@ class DesignUpdateManager extends Service {
 
             if (isset($data['element_ids']) && $data['element_ids']) {
                 $data['element_ids'] = array_filter($data['element_ids']);
-                $request->data = array_merge($request->data, ['element_ids' => $data['element_ids']]);
+                $request->data = $request->data ? array_merge($request->data, ['element_ids' => $data['element_ids']]) : ['element_ids' => $data['element_ids']];
             }
 
             // Update other stats

@@ -23,7 +23,7 @@
             @if ($type)
                 <h5>Typing for {!! $type->object->displayName !!}</h5>
                 Current Typing: {!! $type->elementNames !!}
-                @foreach (json_decode($type->element_ids) as $id)
+                @foreach ($type->element_ids as $id)
                     <div class="form-group">
                         {!! Form::label('Element') !!}
                         {!! Form::select('element_ids[]', $elements, $id, ['class' => 'form-control typing-selectize', 'placeholder' => 'Select Element']) !!}

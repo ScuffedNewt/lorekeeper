@@ -55,7 +55,7 @@ class TypingManager extends Service {
             $typing = Typing::create([
                 'typing_model' => $typing_model,
                 'typing_id'    => $typing_id,
-                'element_ids'  => json_encode($element_ids),
+                'element_ids'  => $element_ids,
             ]);
 
             // log the action
@@ -100,7 +100,7 @@ class TypingManager extends Service {
 
             // create the typing
             $typing->update([
-                'element_ids'  => json_encode($element_ids),
+                'element_ids'  => $element_ids,
             ]);
 
             // log the action

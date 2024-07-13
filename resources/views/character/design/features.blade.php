@@ -87,9 +87,15 @@
             $type = \App\Models\Element\Typing::where('typing_model', 'App\Models\Character\CharacterImage')
                 ->where('typing_id', $request->character->image->id)
                 ->first();
-            $newType = $type ? clone $type : null;
-            if (isset($request->data['element_ids']) && $request->data['element_ids'] && $type) {
-                $newType->element_ids = json_encode($request->data['element_ids']);
+                // make new typing object with attributes set
+            $newType = $type ? clone $type : new \App\Models\Element\Typing();
+            if (!$type) {
+                $newType->typing_model = 'App\Models\Character\CharacterImage';
+                $newType->typing_id = $request->character->image->id;
+                $newType->element_ids = [];
+            }
+            if (isset($request->data['element_ids']) && $request->data['element_ids']) {
+                $newType->element_ids = $request->data['element_ids'];
             }
         @endphp
         <p class="alert alert-info">Current Typing: {!! $type ? $type->elementNames : 'None' !!}</p>
