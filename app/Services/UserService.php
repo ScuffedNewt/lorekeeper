@@ -327,8 +327,8 @@ class UserService extends Service {
     /**
      * Updates a user's username.
      *
-     * @param string                $username
-     * @param \App\Models\User\User $user
+     * @param string $username
+     * @param User   $user
      *
      * @return bool
      */

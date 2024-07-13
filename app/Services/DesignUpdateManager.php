@@ -14,7 +14,6 @@ use App\Models\Species\Species;
 use App\Models\Species\Subtype;
 use App\Models\User\User;
 use App\Models\User\UserItem;
-use App\Services\TypingManager;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -330,9 +329,9 @@ class DesignUpdateManager extends Service {
 
             $request->has_addons = 1;
             $request->data = json_encode([
-                'user'      => Arr::only(getDataReadyAssets($userAssets), ['user_items', 'currencies']),
-                'character' => Arr::only(getDataReadyAssets($characterAssets), ['currencies']),
-                'element_ids' => isset($requestData['element_ids']) ? $requestData['element_ids'] : null,
+                'user'        => Arr::only(getDataReadyAssets($userAssets), ['user_items', 'currencies']),
+                'character'   => Arr::only(getDataReadyAssets($characterAssets), ['currencies']),
+                'element_ids' => $requestData['element_ids'] ?? null,
             ]);
             $request->save();
 
