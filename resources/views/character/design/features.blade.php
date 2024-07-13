@@ -87,7 +87,7 @@
             $type = \App\Models\Element\Typing::where('typing_model', 'App\Models\Character\CharacterImage')
                 ->where('typing_id', $request->character->image->id)
                 ->first();
-                // make new typing object with attributes set
+            // make new typing object with attributes set
             $newType = $type ? clone $type : new \App\Models\Element\Typing();
             if (!$type) {
                 $newType->typing_model = 'App\Models\Character\CharacterImage';
