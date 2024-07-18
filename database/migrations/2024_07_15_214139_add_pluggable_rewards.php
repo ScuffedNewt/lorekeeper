@@ -17,8 +17,8 @@ class AddPluggableRewards extends Migration
             $table->increments('id');
             $table->integer('object_id');
             $table->string('object_type');
-            $table->integer('reward_id');
-            $table->string('reward_type')->default('Item');
+            $table->integer('rewardable_id');
+            $table->string('rewardable_type')->default('Item');
             $table->integer('quantity')->unsigned();
         });
     }
@@ -30,6 +30,6 @@ class AddPluggableRewards extends Migration
      */
     public function down()
     {
-        //
+        Schema::dropIfExists('object_rewards');
     }
 }

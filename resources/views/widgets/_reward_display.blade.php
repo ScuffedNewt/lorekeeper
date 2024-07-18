@@ -11,7 +11,7 @@
     <tbody>
         @foreach ($object->objectRewards as $reward)
             <tr>
-                <td>{!! $reward->reward->displayName !!} ({{ $reward->reward_type }})</td>
+                <td>{!! $reward->reward->displayName !!}</td>
                 <td>{{ $reward->quantity }}</td>
             </tr>
         @endforeach

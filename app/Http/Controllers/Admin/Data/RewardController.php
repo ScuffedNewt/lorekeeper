@@ -34,7 +34,7 @@ class RewardController extends Controller
         }
 
         $data = $request->only([
-            'reward_id', 'reward_type', 'quantity',
+            'rewardable_type', 'rewardable_id', 'reward_quantity'
         ]);
 
         if ($id && $service->editRewards($object, $data)) {

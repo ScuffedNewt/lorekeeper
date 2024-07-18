@@ -34,14 +34,14 @@ class RewardManager extends Service
 
             $object->objectRewards()->delete();
 
-            if (isset($data['reward_type'])) {
-                foreach ($data['reward_type'] as $key => $type) {
+            if (isset($data['rewardable_type'])) {
+                foreach ($data['rewardable_type'] as $key => $type) {
                     ObjectReward::create([
                         'object_id' => $object->id,
                         'object_type' => class_basename($object),
-                        'reward_type' => $type,
-                        'reward_id' => $data['reward_id'][$key],
-                        'quantity' => $data['quantity'][$key],
+                        'rewardable_type' => $type,
+                        'rewardable_id' => $data['rewardable_id'][$key] ?? null,
+                        'quantity' => $data['reward_quantity'][$key],
                     ]);
                 }
             }
@@ -73,9 +73,15 @@ class RewardManager extends Service
                 throw new \Exception("Invalid user.");
             }
 
+            $rewards = createAssetsArray();
+
+            foreach ($object->objectRewards as $reward) {
+                addAsset($rewards, $reward->reward, $reward->quantity);
+            }
+
             // Distribute user rewards
-            if (!$rewards = fillUserAssets($object->objectRewards, $user, $recipient, $logtype, $logdata)) {
-                throw new \Exception("Failed to distribute rewards to user.");
+            if (!($rewards = fillUserAssets($rewards, null, $recipient, $logtype, $logdata))) {
+                throw new \Exception('Failed to distribute rewards to user.');
             }
             flash('Rewards granted successfully.')->success();
 
@@ -85,4 +91,5 @@ class RewardManager extends Service
         }
         return $this->rollbackReturn(false);
     }
+
 }
