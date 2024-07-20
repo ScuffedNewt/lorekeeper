@@ -54,7 +54,7 @@
         $('#add-element').on('click', function(e) {
             e.preventDefault();
             // make sure there are less than 2 elements
-            if ($('#elements').find('.form-group').length >= 2) {
+            if ($('#elements').find('.form-group').length >= {{ config('lorekeeper.extensions.max_elements') }}) {
                 return;
             }
             var $clone = $('.element-row').clone();
