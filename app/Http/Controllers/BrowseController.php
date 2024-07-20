@@ -7,6 +7,8 @@ use App\Models\Character\Character;
 use App\Models\Character\CharacterCategory;
 use App\Models\Character\CharacterImage;
 use App\Models\Character\Sublist;
+use App\Models\Element\Element;
+use App\Models\Element\Typing;
 use App\Models\Feature\Feature;
 use App\Models\Rank\Rank;
 use App\Models\Rarity;
@@ -15,6 +17,7 @@ use App\Models\Species\Subtype;
 use App\Models\User\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class BrowseController extends Controller {
     /*
@@ -227,6 +230,17 @@ class BrowseController extends Controller {
                 });
             }
         }
+        if ($request->get('element_ids')) {
+            $elementIds = $request->get('element_ids');
+            $imageTypings = Typing::where('typing_model', 'App\Models\Character\CharacterImage')
+                ->where(function($query) use ($elementIds) {
+                    foreach ($elementIds as $elementId) {
+                        $query->where(DB::raw('JSON_CONTAINS(element_ids, \'["' . $elementId . '"]\')'), true);
+                    }
+                })
+                ->get();
+            $imageQuery->whereIn('id', $imageTypings->pluck('typing_id')->toArray());
+        }
         if ($request->get('artist')) {
             $artist = User::find($request->get('artist'));
             $imageQuery->whereHas('artists', function ($query) use ($artist) {
@@ -319,6 +333,7 @@ class BrowseController extends Controller {
             'features'    => Feature::getDropdownItems(),
             'sublists'    => Sublist::orderBy('sort', 'DESC')->get(),
             'userOptions' => User::query()->orderBy('name')->pluck('name', 'id')->toArray(),
+            'elements'    => Element::orderBy('name')->pluck('name', 'id')->toArray(),
         ]);
     }
 
@@ -415,6 +430,17 @@ class BrowseController extends Controller {
                 });
             }
         }
+        if ($request->get('element_ids')) {
+            $elementIds = $request->get('element_ids');
+            $imageTypings = Typing::where('typing_model', 'App\Models\Character\CharacterImage')
+                ->where(function($query) use ($elementIds) {
+                    foreach ($elementIds as $elementId) {
+                        $query->where(DB::raw('JSON_CONTAINS(element_ids, \'["' . $elementId . '"]\')'), true);
+                    }
+                })
+                ->get();
+            $imageQuery->whereIn('id', $imageTypings->pluck('typing_id')->toArray());
+        }
 
         $query->whereIn('id', $imageQuery->pluck('character_id')->toArray());
 
@@ -448,6 +474,7 @@ class BrowseController extends Controller {
             'features'    => Feature::getDropdownItems(),
             'sublists'    => Sublist::orderBy('sort', 'DESC')->get(),
             'userOptions' => User::query()->orderBy('name')->pluck('name', 'id')->toArray(),
+            'elements'    => Element::orderBy('name')->pluck('name', 'id')->toArray(),
         ]);
     }
 
@@ -567,6 +594,17 @@ class BrowseController extends Controller {
                 });
             }
         }
+        if ($request->get('element_ids')) {
+            $elementIds = $request->get('element_ids');
+            $imageTypings = Typing::where('typing_model', 'App\Models\Character\CharacterImage')
+                ->where(function($query) use ($elementIds) {
+                    foreach ($elementIds as $elementId) {
+                        $query->where(DB::raw('JSON_CONTAINS(element_ids, \'["' . $elementId . '"]\')'), true);
+                    }
+                })
+                ->get();
+            $imageQuery->whereIn('id', $imageTypings->pluck('typing_id')->toArray());
+        }
         if ($request->get('artist')) {
             $artist = User::find($request->get('artist'));
             $imageQuery->whereHas('artists', function ($query) use ($artist) {
@@ -642,6 +680,7 @@ class BrowseController extends Controller {
             'sublist'     => $sublist,
             'sublists'    => Sublist::orderBy('sort', 'DESC')->get(),
             'userOptions' => User::query()->orderBy('name')->pluck('name', 'id')->toArray(),
+            'elements'    => Element::orderBy('name')->pluck('name', 'id')->toArray(),
         ]);
     }
 }
