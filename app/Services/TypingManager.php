@@ -35,11 +35,13 @@ class TypingManager extends Service {
         DB::beginTransaction();
 
         try {
-            if (!$element_ids) {
+            // remove null values from the element ids
+            $element_ids = array_values(array_filter($element_ids));
+            if (!$element_ids || !count($element_ids)) {
                 throw new \Exception('No elements provided.');
             }
             // check that there is not more than two element ids
-            if (count($element_ids) > 2) {
+            if (count($element_ids) > config('lorekeeper.extensions.max_elements')) {
                 throw new \Exception('Too many elements provided.');
             }
             // check that there is not duplicate element ids
@@ -82,11 +84,13 @@ class TypingManager extends Service {
         DB::beginTransaction();
 
         try {
-            if (!$element_ids) {
+            // remove null values from the element ids
+            $element_ids = array_values(array_filter($element_ids));
+            if (!$element_ids || !count($element_ids)) {
                 throw new \Exception('No elements provided.');
             }
             // check that there is not more than two element ids
-            if (count($element_ids) > 2) {
+            if (count($element_ids) > config('lorekeeper.extensions.max_elements')) {
                 throw new \Exception('Too many elements provided.');
             }
             // check that there is not duplicate element ids

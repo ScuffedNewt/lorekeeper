@@ -106,4 +106,7 @@ return [
     // Use ReCaptcha to check new user registrations - Mercury
     // Requires site key and secret be set in your .env file!
     'use_recaptcha' => 0,
+
+    // the maximum amount of elements any one object can have - Newt
+    'max_elements' => 2,
 ];
