@@ -85,7 +85,7 @@
                 {!! Form::checkbox('is_giftable', 1, Request::get('is_giftable'), ['class' => 'form-check-input', 'data-toggle' => 'toggle', 'data-on' => 'Can Be Gifted', 'data-off' => 'Any Giftable Status', 'data-width' => '202', 'data-height' => '46']) !!}
             </div>
             <hr />
-            <div class="masterlist-search-field col-12">
+            <div class="form-group">
                 {!! Form::label('Has Elements: ') !!} {!! add_help('This will narrow the search to characters that have ALL of the selected elements at the same time.') !!}
                 {!! Form::select('element_ids[]', $elements, Request::get('element_ids'), ['class' => 'form-control userselectize', 'multiple' => 'multiple']) !!}
             </div>
