@@ -14,7 +14,7 @@
     <h3>Typings</h3>
 
     <p>You can add typings to this object by selecting an element from the dropdown below and clicking "Add Typing".
-        <br><b>You can have a maximum of 2 typings on an object.</b>
+        <br><b>You can have a maximum of {{ config('lorekeeper.extensions.max_elements') }} typings on an object.</b>
     </p>
     {!! isset($info) ? '<p class="alert alert-info">' . $info . '</p>' : '' !!}
 
