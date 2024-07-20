@@ -16,7 +16,13 @@
 <div class="card p-4 mb-3 mt-3" id="limit-card">
     <h3>Limits</h3>
 
-    <p>You can add limits to this object by selecting an limit types from the dropdown below and clicking "Add Limits".</p>
+    <p>
+        You can add requirements to this object by clicking "Add Limit" & selecting a requirement from the dropdown below.
+        <br>
+        Requirements are used to determine if a specific action can be preformed on an object.
+        <b>Note that the checks for requirements are automatic, but their usage needs to be defined in the code.</b>
+        <b>Dynamic limits are created in the admin panel, but execute their logic in the code.</b>
+    </p>
     {!! isset($info) ? '<p class="alert alert-info">' . $info . '</p>' : '' !!}
 
     {!! Form::open(['url' => 'admin/limits']) !!}
