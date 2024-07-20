@@ -17,7 +17,6 @@ use App\Models\Species\Subtype;
 use App\Models\User\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class BrowseController extends Controller {
     /*
@@ -234,6 +233,7 @@ class BrowseController extends Controller {
             $elementIds = $request->get('element_ids');
             $imageTypings = Typing::where('typing_model', 'App\Models\Character\CharacterImage')->get()->filter(function ($typing) use ($elementIds) {
                 $elementIdsArray = $typing->element_ids;
+
                 return collect($elementIds)->every(function ($elementId) use ($elementIdsArray) {
                     return in_array($elementId, $elementIdsArray);
                 });
@@ -433,6 +433,7 @@ class BrowseController extends Controller {
             $elementIds = $request->get('element_ids');
             $imageTypings = Typing::where('typing_model', 'App\Models\Character\CharacterImage')->get()->filter(function ($typing) use ($elementIds) {
                 $elementIdsArray = $typing->element_ids;
+
                 return collect($elementIds)->every(function ($elementId) use ($elementIdsArray) {
                     return in_array($elementId, $elementIdsArray);
                 });
@@ -596,6 +597,7 @@ class BrowseController extends Controller {
             $elementIds = $request->get('element_ids');
             $imageTypings = Typing::where('typing_model', 'App\Models\Character\CharacterImage')->get()->filter(function ($typing) use ($elementIds) {
                 $elementIdsArray = $typing->element_ids;
+
                 return collect($elementIds)->every(function ($elementId) use ($elementIdsArray) {
                     return in_array($elementId, $elementIdsArray);
                 });

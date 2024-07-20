@@ -2,11 +2,10 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\Element\Typing;
+use Illuminate\Console\Command;
 
-class UpdatingTypingsToBeStringArrays extends Command
-{
+class UpdatingTypingsToBeStringArrays extends Command {
     /**
      * The name and signature of the console command.
      *
@@ -24,8 +23,7 @@ class UpdatingTypingsToBeStringArrays extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
-    {
+    public function handle() {
         //
         $typings = Typing::all();
         $bar = $this->output->createProgressBar(count($typings));
