@@ -232,13 +232,12 @@ class BrowseController extends Controller {
         }
         if ($request->get('element_ids')) {
             $elementIds = $request->get('element_ids');
-            $imageTypings = Typing::where('typing_model', 'App\Models\Character\CharacterImage')
-                ->where(function ($query) use ($elementIds) {
-                    foreach ($elementIds as $elementId) {
-                        $query->where(DB::raw('JSON_CONTAINS(element_ids, \'["'.$elementId.'"]\')'), true);
-                    }
-                })
-                ->get();
+            $imageTypings = Typing::where('typing_model', 'App\Models\Character\CharacterImage')->get()->filter(function ($typing) use ($elementIds) {
+                $elementIdsArray = $typing->element_ids;
+                return collect($elementIds)->every(function ($elementId) use ($elementIdsArray) {
+                    return in_array($elementId, $elementIdsArray);
+                });
+            });
             $imageQuery->whereIn('id', $imageTypings->pluck('typing_id')->toArray());
         }
         if ($request->get('artist')) {
@@ -432,13 +431,12 @@ class BrowseController extends Controller {
         }
         if ($request->get('element_ids')) {
             $elementIds = $request->get('element_ids');
-            $imageTypings = Typing::where('typing_model', 'App\Models\Character\CharacterImage')
-                ->where(function ($query) use ($elementIds) {
-                    foreach ($elementIds as $elementId) {
-                        $query->where(DB::raw('JSON_CONTAINS(element_ids, \'["'.$elementId.'"]\')'), true);
-                    }
-                })
-                ->get();
+            $imageTypings = Typing::where('typing_model', 'App\Models\Character\CharacterImage')->get()->filter(function ($typing) use ($elementIds) {
+                $elementIdsArray = $typing->element_ids;
+                return collect($elementIds)->every(function ($elementId) use ($elementIdsArray) {
+                    return in_array($elementId, $elementIdsArray);
+                });
+            });
             $imageQuery->whereIn('id', $imageTypings->pluck('typing_id')->toArray());
         }
 
@@ -596,13 +594,12 @@ class BrowseController extends Controller {
         }
         if ($request->get('element_ids')) {
             $elementIds = $request->get('element_ids');
-            $imageTypings = Typing::where('typing_model', 'App\Models\Character\CharacterImage')
-                ->where(function ($query) use ($elementIds) {
-                    foreach ($elementIds as $elementId) {
-                        $query->where(DB::raw('JSON_CONTAINS(element_ids, \'["'.$elementId.'"]\')'), true);
-                    }
-                })
-                ->get();
+            $imageTypings = Typing::where('typing_model', 'App\Models\Character\CharacterImage')->get()->filter(function ($typing) use ($elementIds) {
+                $elementIdsArray = $typing->element_ids;
+                return collect($elementIds)->every(function ($elementId) use ($elementIdsArray) {
+                    return in_array($elementId, $elementIdsArray);
+                });
+            });
             $imageQuery->whereIn('id', $imageTypings->pluck('typing_id')->toArray());
         }
         if ($request->get('artist')) {
