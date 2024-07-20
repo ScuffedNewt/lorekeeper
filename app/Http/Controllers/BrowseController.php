@@ -233,9 +233,9 @@ class BrowseController extends Controller {
         if ($request->get('element_ids')) {
             $elementIds = $request->get('element_ids');
             $imageTypings = Typing::where('typing_model', 'App\Models\Character\CharacterImage')
-                ->where(function($query) use ($elementIds) {
+                ->where(function ($query) use ($elementIds) {
                     foreach ($elementIds as $elementId) {
-                        $query->where(DB::raw('JSON_CONTAINS(element_ids, \'["' . $elementId . '"]\')'), true);
+                        $query->where(DB::raw('JSON_CONTAINS(element_ids, \'["'.$elementId.'"]\')'), true);
                     }
                 })
                 ->get();
@@ -433,9 +433,9 @@ class BrowseController extends Controller {
         if ($request->get('element_ids')) {
             $elementIds = $request->get('element_ids');
             $imageTypings = Typing::where('typing_model', 'App\Models\Character\CharacterImage')
-                ->where(function($query) use ($elementIds) {
+                ->where(function ($query) use ($elementIds) {
                     foreach ($elementIds as $elementId) {
-                        $query->where(DB::raw('JSON_CONTAINS(element_ids, \'["' . $elementId . '"]\')'), true);
+                        $query->where(DB::raw('JSON_CONTAINS(element_ids, \'["'.$elementId.'"]\')'), true);
                     }
                 })
                 ->get();
@@ -597,9 +597,9 @@ class BrowseController extends Controller {
         if ($request->get('element_ids')) {
             $elementIds = $request->get('element_ids');
             $imageTypings = Typing::where('typing_model', 'App\Models\Character\CharacterImage')
-                ->where(function($query) use ($elementIds) {
+                ->where(function ($query) use ($elementIds) {
                     foreach ($elementIds as $elementId) {
-                        $query->where(DB::raw('JSON_CONTAINS(element_ids, \'["' . $elementId . '"]\')'), true);
+                        $query->where(DB::raw('JSON_CONTAINS(element_ids, \'["'.$elementId.'"]\')'), true);
                     }
                 })
                 ->get();
