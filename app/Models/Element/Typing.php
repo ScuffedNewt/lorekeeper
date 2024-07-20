@@ -59,6 +59,13 @@ class Typing extends Model {
     }
 
     /**
+     * gets the typing of a certain object.
+     */
+    public static function getTyping($object) {
+        return self::where('typing_model', get_class($object))->where('typing_id', $object->id)->first();
+    }
+
+    /**
      * returns a collection of element objects from the typing.
      */
     public function elements() {

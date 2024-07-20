@@ -59,18 +59,12 @@
                 @php
                     // check if there is a type for this object if not passed
                     // for characters first check subtype (since it takes precedence)
-                    $type = \App\Models\Element\Typing::where('typing_model', 'App\Models\Character\CharacterImage')
-                        ->where('typing_id', $image->id)
-                        ->first();
+                    $type = \App\Models\Element\Typing::hasTyping($image) ? \App\Models\Element\Typing::getTyping($image) : null;
                     if (!isset($type) && $image->subtype_id) {
-                        $type = \App\Models\Element\Typing::where('typing_model', 'App\Models\Species\Subtype')
-                            ->where('typing_id', $image->subtype_id)
-                            ->first();
+                        $type = \App\Models\Element\Typing::hasTyping($image->subtype) ? \App\Models\Element\Typing::getTyping($image->subtype) : null;
                     }
                     if (!isset($type)) {
-                        $type = \App\Models\Element\Typing::where('typing_model', 'App\Models\Species\Species')
-                            ->where('typing_id', $image->species_id)
-                            ->first();
+                        $type = \App\Models\Element\Typing::hasTyping($image->species) ? \App\Models\Element\Typing::getTyping($image->species) : null;
                     }
                     $type = $type ?? null;
                 @endphp
