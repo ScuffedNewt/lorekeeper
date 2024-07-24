@@ -8,7 +8,6 @@ use DB;
 use Log;
 
 class LimitService extends Service {
-
     /*
     |--------------------------------------------------------------------------
     | Limit Service
@@ -27,9 +26,10 @@ class LimitService extends Service {
     /**
      * edits an limits on an object.
      *
-     * @param mixed     $limit
      * @param mixed     $data
      * @param bool|true $log
+     * @param mixed     $object_model
+     * @param mixed     $object_id
      */
     public function editLimits($object_model, $object_id, $data, $log = true) {
         DB::beginTransaction();
@@ -47,17 +47,17 @@ class LimitService extends Service {
                     $limit->delete();
                 });
             }
-            flash('Deleted ' . count($limits) . ' old limits.')->success();
+            flash('Deleted '.count($limits).' old limits.')->success();
 
             if (isset($data['limit_type'])) {
-                foreach($data['limit_type'] as $key => $type) {
+                foreach ($data['limit_type'] as $key => $type) {
                     $limit = new Limit([
                         'object_model' => $object_model,
-                        'object_id' => $object_id,
-                        'limit_type' => $data['limit_type'][$key],
-                        'limit_id' => $data['limit_id'][$key],
-                        'quantity' => $data['quantity'][$key],
-                        'debit' => $data['debit'][$key] == 'no' ? 0 : 1,
+                        'object_id'    => $object_id,
+                        'limit_type'   => $data['limit_type'][$key],
+                        'limit_id'     => $data['limit_id'][$key],
+                        'quantity'     => $data['quantity'][$key],
+                        'debit'        => $data['debit'][$key] == 'no' ? 0 : 1,
                     ]);
 
                     if (!$limit->save()) {

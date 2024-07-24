@@ -2,14 +2,12 @@
 
 namespace App\Models\Limit;
 
+use App\Models\Currency\Currency;
+use App\Models\Item\Item;
 use App\Models\Model;
 use App\Models\Prompt\Prompt;
-use App\Models\Item\Item;
-use App\Models\Currency\Currency;
-use App\Models\Limit\DynamicLimit;
 
 class Limit extends Model {
-
     /**
      * The attributes that are mass assignable.
      *

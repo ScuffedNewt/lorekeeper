@@ -2,11 +2,9 @@
 
 namespace App\Models;
 
-use App\Models\Limit\Limit;
 use App\Models\Prompt\Prompt;
 use App\Models\Submission\Submission;
 use App\Services\LimitManager;
-use DB;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
 
 class Model extends EloquentModel {

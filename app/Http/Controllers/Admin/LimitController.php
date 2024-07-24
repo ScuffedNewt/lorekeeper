@@ -3,18 +3,15 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Limit\Limit;
 use App\Services\LimitService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class LimitController extends Controller {
-
     /**
      * Creates or edits an objects limits.
      *
      * @param App\Services\LimitService $service
-     * @param int|null                 $id
      *
      * @return \Illuminate\Http\RedirectResponse
      */

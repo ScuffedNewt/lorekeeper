@@ -4,15 +4,14 @@ namespace App\Models\Limit;
 
 use App\Models\Model;
 
-class DYnamicLimit extends Model {
-
+class DynamicLimit extends Model {
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'name', 'description', 'evaluation'
+        'name', 'description', 'evaluation',
     ];
 
     /**
@@ -30,7 +29,7 @@ class DYnamicLimit extends Model {
 
     /**
      * preforms the evaluation of the dynamic limit in a try / except and returns true or false
-     * if the evaluation is fails
+     * if the evaluation is fails.
      */
     public function evaluate() {
         try {
