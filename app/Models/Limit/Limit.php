@@ -3,6 +3,10 @@
 namespace App\Models\Limit;
 
 use App\Models\Model;
+use App\Models\Prompt\Prompt;
+use App\Models\Item\Item;
+use App\Models\Currency\Currency;
+use App\Models\Limit\DynamicLimit;
 
 class Limit extends Model {
 
@@ -33,6 +37,22 @@ class Limit extends Model {
      */
     public function object() {
         return $this->belongsTo($this->object_model, 'object_id');
+    }
+
+    /**
+     * gets the limit of this ... limit.
+     */
+    public function limit() {
+        switch ($this->limit_type) {
+            case 'prompt':
+                return $this->belongsTo(Prompt::class, 'limit_id');
+            case 'item':
+                return $this->belongsTo(Item::class, 'limit_id');
+            case 'currency':
+                return $this->belongsTo(Currency::class, 'limit_id');
+            case 'dynamic':
+                return $this->belongsTo(DynamicLimit::class, 'limit_id');
+        }
     }
 
     /**********************************************************************************************

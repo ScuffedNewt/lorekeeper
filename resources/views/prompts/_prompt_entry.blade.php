@@ -56,6 +56,7 @@
                     </tbody>
                 </table>
             @endif
+            @include('widgets._limits', ['object' => $prompt])
         </div>
         <div class="text-right">
             @if ($prompt->end_at && $prompt->end_at->isPast())
@@ -65,6 +66,6 @@
             @else
                 <a href="{{ url('submissions/new?prompt_id=' . $prompt->id) }}" class="btn btn-primary">Submit Prompt</a>
             @endunless
+        </div>
     </div>
-</div>
 </div>

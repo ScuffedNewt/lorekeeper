@@ -41,13 +41,13 @@
                         <div class="col-md-4 form-group limit-select">
                             {!! Form::label('limit_id', 'Limit') !!}
                             @if ($limit->limit_type == 'prompt')
-                                {!! Form::select('limit_id[]', $prompts, $limit->limit_id, ['class' => 'form-control limit prompts', 'placeholder' => 'Enter Limit']) !!}
+                                {!! Form::select('limit_id[]', $prompts, $limit->limit_id, ['class' => 'form-control limit prompts', 'placeholder' => 'Select Limit']) !!}
                             @elseif ($limit->limit_type == 'item')
-                                {!! Form::select('limit_id[]', $items, $limit->limit_id, ['class' => 'form-control limit items', 'placeholder' => 'Enter Limit']) !!}
+                                {!! Form::select('limit_id[]', $items, $limit->limit_id, ['class' => 'form-control limit items', 'placeholder' => 'Select Limit']) !!}
                             @elseif ($limit->limit_type == 'currency')
-                                {!! Form::select('limit_id[]', $currencies, $limit->limit_id, ['class' => 'form-control limit currencies', 'placeholder' => 'Enter Limit']) !!}
+                                {!! Form::select('limit_id[]', $currencies, $limit->limit_id, ['class' => 'form-control limit currencies', 'placeholder' => 'Select Limit']) !!}
                             @elseif ($limit->limit_type == 'dynamic')
-                                {!! Form::select('limit_id[]', $dynamics, $limit->limit_id, ['class' => 'form-control limit dynamics', 'placeholder' => 'Enter Limit']) !!}
+                                {!! Form::select('limit_id[]', $dynamics, $limit->limit_id, ['class' => 'form-control limit dynamics', 'placeholder' => 'Select Limit']) !!}
                             @endif
                         </div>
                         <div class="col-md-4 quantity">
@@ -102,10 +102,10 @@
 
 <div id="rows" class="hide">
     {!! Form::label('limit_ids', 'Limit', ['class' => 'limit-label']) !!}
-    {!! Form::select('limit_id[]', $prompts, null, ['class' => 'form-control limit prompts', 'placeholder' => 'Enter Limit']) !!}
-    {!! Form::select('limit_id[]', $items, null, ['class' => 'form-control limit items', 'placeholder' => 'Enter Limit']) !!}
-    {!! Form::select('limit_id[]', $currencies, null, ['class' => 'form-control limit currencies', 'placeholder' => 'Enter Limit']) !!}
-    {!! Form::select('limit_id[]', $dynamics, null, ['class' => 'form-control limit dynamics', 'placeholder' => 'Enter Limit']) !!}
+    {!! Form::select('limit_id[]', $prompts, null, ['class' => 'form-control limit prompts', 'placeholder' => 'Select Limit']) !!}
+    {!! Form::select('limit_id[]', $items, null, ['class' => 'form-control limit items', 'placeholder' => 'Select Limit']) !!}
+    {!! Form::select('limit_id[]', $currencies, null, ['class' => 'form-control limit currencies', 'placeholder' => 'Select Limit']) !!}
+    {!! Form::select('limit_id[]', $dynamics, null, ['class' => 'form-control limit dynamics', 'placeholder' => 'Select Limit']) !!}
 </div>
 
 <script>

@@ -8,6 +8,7 @@ use DB;
 use Log;
 
 class LimitService extends Service {
+
     /*
     |--------------------------------------------------------------------------
     | Limit Service
@@ -66,11 +67,11 @@ class LimitService extends Service {
             }
 
             // log the action
-            if ($log && !$this->logAdminAction(Auth::user(), 'Edited Limits', 'Edited '.$limit->object->displayName.' limits')) {
+            if ($log && !$this->logAdminAction(Auth::user(), 'Edited Limits', 'Edited '.$object->displayName.' limits')) {
                 throw new \Exception('Failed to log admin action.');
             }
 
-            return $this->commitReturn($limit);
+            return $this->commitReturn(true);
         } catch (\Exception $e) {
             $this->setError('error', $e->getMessage());
         }
