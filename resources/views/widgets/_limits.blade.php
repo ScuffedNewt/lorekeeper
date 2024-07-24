@@ -1,4 +1,3 @@
-
 @php
     $limitTypes = collect(config('lorekeeper.limits.limit_types'))->map(function ($value, $key) {
         return $value['name'];
@@ -10,9 +9,7 @@
     <h4 class="my-3">{!! $object->displayName !!}'s Requirements</h4>
 
     <p>
-        You must obtain or complete all of the following in order to access this {{ $object->assetType ?
-            (substr($object->assetType, -1) === 's' ? substr($object->assetType, 0, -1) : $object->assetType)
-        : ''}}.
+        You must obtain or complete all of the following in order to access this {{ $object->assetType ? (substr($object->assetType, -1) === 's' ? substr($object->assetType, 0, -1) : $object->assetType) : '' }}.
     </p>
     <table class="table table-sm">
         <thead>
