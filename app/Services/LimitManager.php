@@ -36,6 +36,7 @@ class LimitManager extends Service {
                 return true;
             }
 
+            $plucked_stacks = [];
             foreach ($limits as $limit) {
                 switch ($limit->limit_type) {
                     case 'prompt':
@@ -50,16 +51,42 @@ class LimitManager extends Service {
                         }
 
                         if ($limit->debit) {
-                            $service = new InventoryManager;
+                            $stacks = $user->items()->where('item_id', $limit->limit_id)->orderBy('count', 'desc')->get();
+
+
                             $count = $limit->quantity;
                             while ($count > 0) {
-                                // $service->debitItem($user-)
-                                $count--;
+                                $stack = $stacks->pop();
+                                $quantity = $stack->count >= $count ? $count : $stack->count;
+                                if (!$service->debitStack($user, 'Limit Checking', ['data' => 'Used in ' . $object->name . '.'], $stack, $quantity)) {
+                                    throw new \Exception('Items could not be removed.');
+                                }
+                                $count -= $quantity;
                             }
                         }
                         break;
                     case 'currency':
+                        if ($user->currency($limit->limit_id) < $limit->quantity) {
+                            throw new \Exception('You do not have enough '.$limit->object->name.' to complete this action.');
+                        }
+                        break;
                 }
+            }
+
+            if (count($plucked_stacks)) {
+                $inventoryManager = new InventoryManager;
+                $type = 'Limit Debit';
+                $data = [
+                    'data' => 'Used in '.$limit->object->displayName ?? $limit->object->name.'\'s limit checks',
+                ];
+
+                foreach ($plucked_stacks as $id=>$quantity) {
+                    $stack = UserItem::find($id);
+                    if (!$inventoryManager->debitStack($user, $type, $data, $stack, $quantity)) {
+                        throw new \Exception('Items could not be removed.');
+                    }
+                }
+
             }
 
             return true;
