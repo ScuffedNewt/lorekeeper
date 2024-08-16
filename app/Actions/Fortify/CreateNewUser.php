@@ -21,11 +21,12 @@ class CreateNewUser implements CreatesNewUsers {
         (new UserService)->validator($input)->validate();
 
         $user = User::create([
-            'name'     => $input['name'],
-            'email'    => $input['email'],
-            'password' => Hash::make($input['password']),
-            'rank_id'  => 2,
-            'birthday' => $input['dob'],
+            'name'        => $input['name'],
+            'email'       => $input['email'],
+            'password'    => Hash::make($input['password']),
+            'rank_id'     => 2,
+            'birthday'    => $input['dob'],
+            'referred_by' => $input['referred_by'] ?? null,
         ]);
         $user->settings()->create([
             'user_id' => $user->id,

@@ -238,6 +238,16 @@ Route::group(['prefix' => 'data', 'namespace' => 'Data', 'middleware' => 'power:
     Route::post('prompts/create', 'PromptController@postCreateEditPrompt');
     Route::post('prompts/edit/{id?}', 'PromptController@postCreateEditPrompt');
     Route::post('prompts/delete/{id}', 'PromptController@postDeletePrompt');
+
+
+    # REFERRALS
+    Route::get('referrals', 'ReferralController@getIndex');
+    Route::get('referrals/create', 'ReferralController@getCreate');
+    Route::get('referrals/edit/{id}', 'ReferralController@getEdit');
+    Route::get('referrals/delete/{id}', 'ReferralController@getDelete');
+    Route::post('referrals/create', 'ReferralController@postCreateEdit');
+    Route::post('referrals/edit/{id?}', 'ReferralController@postCreateEdit');
+    Route::post('referrals/delete/{id}', 'ReferralController@postDelete');
 });
 
 // PAGES

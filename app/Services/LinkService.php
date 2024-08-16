@@ -2,6 +2,10 @@
 
 namespace App\Services;
 
+use App\Facades\Notifications;
+use App\Models\Referral;
+use App\Models\User\User;
+use App\Services\Service;
 use App\Models\User\UserAlias;
 use App\Models\User\UserUpdateLog;
 use Illuminate\Support\Facades\DB;
@@ -73,6 +77,30 @@ class LinkService extends Service {
                 // ID should always exist but just in case.
                 'user_snowflake' => $result->id ?? $result->nickname,
             ]);
+
+            // If this is the users first alias and they were referred, then we want to act on referral data
+            if ($user->has_alias == 0 && isset($user->referred_by)) {
+                // plus 1 because the user currently registering their alias isn't counted yet
+                $referralCount = User::where('referred_by', $user->referred_by)->where('has_alias', 1)->count() + 1;
+                $userReferred = User::find($user->referred_by);
+                $referralConditions = Referral::where('is_active', 1)->get()->filter(function ($query) use ($referralCount) {
+                    // On every needs to be modded to see if it's been x referrals since the last time it was rewarded.
+                    return ($query->on_every && $referralCount % $query->referral_count === 0) || $referralCount == $query->referral_count;
+                });
+                $rewards = '';
+                if (count($referralConditions) > 0) {
+                    foreach ($referralConditions as $referralCondition) {
+                        $rewards = $rewards . getRewardsString(fillUserAssets(parseAssetData($referralCondition->parsedData), null, $userReferred, 'Referral Rewards', [
+                            'data' => 'Received rewards for referral of ' . $user->name
+                        ]));
+                    }
+                }
+
+                Notifications::create('REFERRAL', $userReferred, [
+                    'count' => $referralCount,
+                    'rewards' => $rewards
+                ]);
+            }
 
             // Save that the user has an alias
             $user->has_alias = 1;

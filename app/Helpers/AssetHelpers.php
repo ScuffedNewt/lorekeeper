@@ -409,3 +409,33 @@ function createRewardsString($array) {
 
     return implode(', ', array_slice($string, 0, count($string) - 1)).(count($string) > 2 ? ', and ' : ' and ').end($string);
 }
+
+/**
+ * Encodes an asset array for storage in a data column.
+ */
+function encodeForDataColumn($data) {
+    // The data will be stored as an asset table, json_encode()d. 
+    // First build the asset table, then prepare it for storage.
+    $assets = createAssetsArray();
+    foreach ($data['rewardable_type'] as $key => $r) {
+        switch ($r) {
+            case 'Item':
+                $type = 'App\Models\Item\Item';
+                break;
+            case 'Currency':
+                $type = 'App\Models\Currency\Currency';
+                break;
+            case 'LootTable':
+                $type = 'App\Models\Loot\LootTable';
+                break;
+            case 'Raffle':
+                $type = 'App\Models\Raffle\Raffle';
+                break;
+        }
+        $asset = $type::find($data['rewardable_id'][$key]);
+        addAsset($assets, $asset, $data['quantity'][$key]);
+    }
+    $assets = getDataReadyAssets($assets);
+
+    return json_encode($assets);
+}

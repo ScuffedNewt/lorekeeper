@@ -48,12 +48,13 @@ class UserService extends Service {
         $formatDate = Carbon::parse($data['dob']);
 
         $user = User::create([
-            'name'      => $data['name'],
-            'email'     => $data['email'] ?? null,
-            'rank_id'   => $data['rank_id'],
-            'password'  => isset($data['password']) ? Hash::make($data['password']) : null,
-            'birthday'  => $formatDate,
-            'has_alias' => $data['has_alias'] ?? false,
+            'name'        => $data['name'],
+            'email'       => $data['email'] ?? null,
+            'rank_id'     => $data['rank_id'],
+            'password'    => isset($data['password']) ? Hash::make($data['password']) : null,
+            'birthday'    => $formatDate,
+            'has_alias'   => $data['has_alias'] ?? false,
+            'referred_by' => $data['referred_by'],
             // Verify the email if we're logging them in with their social
             'email_verified_at' => (!isset($data['password']) && !isset($data['email'])) ? now() : null,
         ]);

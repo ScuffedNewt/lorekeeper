@@ -6,22 +6,7 @@
 
 @section('content')
     @if ($userCount)
-        <div class="row">
-            <div class="col-md-6 offset-md-4">
-                <h1>Register</h1>
-            </div>
-        </div>
-
-        @if ($altRegistrations)
-            <h3 class="text-center">Alternate Registrations</h3>
-            @foreach ($altRegistrations as $provider => $site)
-                @if (isset($site['login']) && $site['login'])
-                    <div class="text-center w-75 m-auto pt-2 pb-2">
-                        <a href="{{ url('/login/redirect/' . $provider) }}" class="btn btn-primary text-white w-100"><i class="{{ $site['icon'] }} mr-2"></i> Register With {{ ucfirst($provider) }}</a>
-                    </div>
-                @endif
-            @endforeach
-        @endif
+        <h1 class="text-center">Register</h1>
 
         <h3 class="mt-5 text-center">Regular Registration</h3>
         <form method="POST" action="{{ route('register') }}">
@@ -107,6 +92,13 @@
             </div>
 
             <div class="form-group row">
+                <label for="referred_by" class="col-md-4 col-form-label text-md-right">Referred By</label>
+                <div class="col-md-6">
+                    {!! Form::select('referred_by', $users, old('referred'), ['class' => 'form-control selectize', 'placeholder' => 'Select User']) !!}
+                </div>
+            </div>
+
+            <div class="form-group row">
                 <div class="col-md-6 offset-md-4">
                     <div class="form-check">
                         <label class="form-check-label">
@@ -129,6 +121,18 @@
                 </div>
             </div>
         </form>
+
+        @if ($altRegistrations)
+            <hr class="w-75 my-3">
+            <h3 class="text-center">Alternate Registrations</h3>
+            @foreach ($altRegistrations as $provider => $site)
+                @if (isset($site['login']) && $site['login'])
+                    <div class="text-center w-75 m-auto pt-2 pb-2">
+                        <a href="{{ url('/login/redirect/' . $provider) }}" class="btn btn-primary text-white w-100"><i class="{{ $site['icon'] }} mr-2"></i> Register With {{ ucfirst($provider) }}</a>
+                    </div>
+                @endif
+            @endforeach
+        @endif
     @else
         @include('auth._require_setup')
     @endif

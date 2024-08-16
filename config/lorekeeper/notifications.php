@@ -437,4 +437,11 @@ return [
         'message' => '<a href="{sender_url}">{sender}</a> has added you as a participant on a gallery submission. (<a href="{url}">View Submission</a>)',
         'url'     => 'gallery/view/{submission_id}',
     ],
+
+    // REFERRAL
+    905 => [
+        'name' => 'Referral Rewards',
+        'message' => 'You\'ve received the following rewards for referring {count} user(s): {rewards}',
+        'url' => ''
+    ]
 ];

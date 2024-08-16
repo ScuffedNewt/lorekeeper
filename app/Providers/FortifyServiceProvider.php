@@ -46,6 +46,7 @@ class FortifyServiceProvider extends ServiceProvider {
         });
         Fortify::registerView(fn () => view('auth.register', [
             'userCount'        => User::count(),
+            'users'            => User::orderBy('name')->pluck('name', 'id')->toArray(),
             'altRegistrations' => $altRegistrations,
         ]));
 
