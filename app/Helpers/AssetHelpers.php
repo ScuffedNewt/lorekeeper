@@ -412,9 +412,11 @@ function createRewardsString($array) {
 
 /**
  * Encodes an asset array for storage in a data column.
+ *
+ * @param mixed $data
  */
 function encodeForDataColumn($data) {
-    // The data will be stored as an asset table, json_encode()d. 
+    // The data will be stored as an asset table, json_encode()d.
     // First build the asset table, then prepare it for storage.
     $assets = createAssetsArray();
     foreach ($data['rewardable_type'] as $key => $r) {

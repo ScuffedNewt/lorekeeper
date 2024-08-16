@@ -440,8 +440,8 @@ return [
 
     // REFERRAL
     905 => [
-        'name' => 'Referral Rewards',
+        'name'    => 'Referral Rewards',
         'message' => 'You\'ve received the following rewards for referring {count} user(s): {rewards}',
-        'url' => ''
-    ]
+        'url'     => '',
+    ],
 ];

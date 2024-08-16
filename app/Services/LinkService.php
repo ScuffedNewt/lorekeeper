@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Facades\Notifications;
 use App\Models\Referral;
 use App\Models\User\User;
-use App\Services\Service;
 use App\Models\User\UserAlias;
 use App\Models\User\UserUpdateLog;
 use Illuminate\Support\Facades\DB;
@@ -51,9 +50,9 @@ class LinkService extends Service {
     /**
      * Link the user's social media account name to their account.
      *
-     * @param \App\Models\User\User $user
-     * @param mixed                 $provider
-     * @param mixed                 $result
+     * @param User  $user
+     * @param mixed $provider
+     * @param mixed $result
      */
     public function saveProvider($provider, $result, $user) {
         DB::beginTransaction();
@@ -90,15 +89,15 @@ class LinkService extends Service {
                 $rewards = '';
                 if (count($referralConditions) > 0) {
                     foreach ($referralConditions as $referralCondition) {
-                        $rewards = $rewards . getRewardsString(fillUserAssets(parseAssetData($referralCondition->parsedData), null, $userReferred, 'Referral Rewards', [
-                            'data' => 'Received rewards for referral of ' . $user->name
+                        $rewards = $rewards.getRewardsString(fillUserAssets(parseAssetData($referralCondition->parsedData), null, $userReferred, 'Referral Rewards', [
+                            'data' => 'Received rewards for referral of '.$user->name,
                         ]));
                     }
                 }
 
                 Notifications::create('REFERRAL', $userReferred, [
-                    'count' => $referralCount,
-                    'rewards' => $rewards
+                    'count'   => $referralCount,
+                    'rewards' => $rewards,
                 ]);
             }
 
@@ -119,8 +118,8 @@ class LinkService extends Service {
     /**
      * Makes the selected alias the user's primary alias.
      *
-     * @param \App\Models\User\User $user
-     * @param mixed                 $aliasId
+     * @param User  $user
+     * @param mixed $aliasId
      */
     public function makePrimary($aliasId, $user) {
         DB::beginTransaction();
@@ -156,8 +155,8 @@ class LinkService extends Service {
     /**
      * Hides or unhides the selected alias.
      *
-     * @param \App\Models\User\User $user
-     * @param mixed                 $aliasId
+     * @param User  $user
+     * @param mixed $aliasId
      */
     public function hideAlias($aliasId, $user) {
         DB::beginTransaction();
@@ -191,8 +190,8 @@ class LinkService extends Service {
     /**
      * Removes the selected alias.
      *
-     * @param \App\Models\User\User $user
-     * @param mixed                 $aliasId
+     * @param User  $user
+     * @param mixed $aliasId
      */
     public function removeAlias($aliasId, $user) {
         DB::beginTransaction();

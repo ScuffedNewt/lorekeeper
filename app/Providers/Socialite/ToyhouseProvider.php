@@ -61,8 +61,8 @@ class ToyhouseProvider extends AbstractProvider implements ProviderInterface {
      */
     protected function mapUserToObject(array $user) {
         return (new User)->setRaw($user)->map([
-            'id'   => $user['id'], 'nickname' => $user['username'],
-            'name' => null, 'email' => null, 'avatar' => $user['avatar'],
+            'id'          => $user['id'], 'nickname' => $user['username'],
+            'name'        => null, 'email' => null, 'avatar' => $user['avatar'],
             'referred_by' => null,
         ]);
     }

@@ -239,8 +239,7 @@ Route::group(['prefix' => 'data', 'namespace' => 'Data', 'middleware' => 'power:
     Route::post('prompts/edit/{id?}', 'PromptController@postCreateEditPrompt');
     Route::post('prompts/delete/{id}', 'PromptController@postDeletePrompt');
 
-
-    # REFERRALS
+    // REFERRALS
     Route::get('referrals', 'ReferralController@getIndex');
     Route::get('referrals/create', 'ReferralController@getCreate');
     Route::get('referrals/edit/{id}', 'ReferralController@getEdit');

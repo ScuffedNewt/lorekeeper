@@ -196,8 +196,8 @@ return [
             ],
             [
                 'name' => 'Referrals',
-                'url' => 'admin/data/referrals'
-            ]
+                'url'  => 'admin/data/referrals',
+            ],
         ],
     ],
     'Raffles'    => [
