@@ -1,5 +1,5 @@
-@if($referral)
-    {!! Form::open(['url' => 'admin/data/referrals/delete/'.$referral->id]) !!}
+@if ($referral)
+    {!! Form::open(['url' => 'admin/data/referrals/delete/' . $referral->id]) !!}
 
     <p>You are about to delete the referral <strong>{{ $referral->name }}</strong>. This is not reversible.</p>
     <p>Are you sure you want to delete <strong>{{ $referral->name }}</strong>?</p>
@@ -9,6 +9,6 @@
     </div>
 
     {!! Form::close() !!}
-@else 
+@else
     Invalid referral selected.
 @endif
