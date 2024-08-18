@@ -5,6 +5,7 @@ namespace App\Models\Shop;
 use App\Models\Currency\Currency;
 use App\Models\Item\Item;
 use App\Models\Model;
+use Carbon\Carbon;
 
 class ShopStock extends Model {
     /**
@@ -72,7 +73,7 @@ class ShopStock extends Model {
                 $date = strtotime('January 1st');
                 break;
             case "monthly":
-                $date = strtotime('midnight first day of this month');
+                $date = Carbon::now()->startOfMonth()->timestamp;
                 break;
             case "weekly":
                 $date = strtotime('last sunday');
