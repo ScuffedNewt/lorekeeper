@@ -199,7 +199,7 @@ class SubmissionController extends Controller {
         $count['Month'] = Submission::submitted($id, Auth::user()->id)->where('created_at', '>=', now()->startOfMonth())->count();
         $count['Year'] = Submission::submitted($id, Auth::user()->id)->where('created_at', '>=', now()->startOfYear())->count();
 
-        if($prompt->limit_character) {
+        if ($prompt->limit_character) {
             $limit = $prompt->limit * Character::visible()->where('is_myo_slot', 0)->where('user_id', Auth::user()->id)->count();
         } else {
             $limit = $prompt->limit;
@@ -208,7 +208,7 @@ class SubmissionController extends Controller {
         return view('home._prompt', [
             'prompt' => $prompt,
             'count'  => $count,
-            'limit'  => $limit
+            'limit'  => $limit,
         ]);
     }
 

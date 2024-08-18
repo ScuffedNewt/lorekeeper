@@ -93,7 +93,7 @@ class SubmissionController extends Controller {
             'raffles'             => Raffle::where('rolled_at', null)->where('is_active', 1)->orderBy('name')->pluck('name', 'id'),
             'count'               => $count,
             'prompt'              => $prompt,
-            'limit'               => $limit
+            'limit'               => $limit,
         ] : []));
     }
 

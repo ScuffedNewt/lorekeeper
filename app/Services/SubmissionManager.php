@@ -77,17 +77,17 @@ class SubmissionManager extends Service {
                     //if limit by character is on... multiply by # of chars. otherwise, don't
                     if ($prompt->limit_character) {
                         $limit = $prompt->limit * Character::visible()->where('is_myo_slot', 0)->where('user_id', $user->id)->count();
-                    } else { 
-                        $limit = $prompt->limit; 
+                    } else {
+                        $limit = $prompt->limit;
                     }
 
                     //if limit by time period is on
                     if ($prompt->limit_period) {
                         if ($count[$prompt->limit_period] >= $limit) {
-                            throw new \Exception("You have already submitted to this prompt the maximum number of times.");
+                            throw new \Exception('You have already submitted to this prompt the maximum number of times.');
                         }
-                    } else if ($count['all'] >= $limit) {
-                        throw new \Exception("You have already submitted to this prompt the maximum number of times.");
+                    } elseif ($count['all'] >= $limit) {
+                        throw new \Exception('You have already submitted to this prompt the maximum number of times.');
                     }
                 }
             } else {
