@@ -1,18 +1,14 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-class AddAdminShops extends Migration
-{
+class AddAdminShops extends Migration {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
-    {
+    public function up() {
         //
         schema::table('shops', function (Blueprint $table) {
             $table->boolean('is_staff')->default(0);
@@ -23,11 +19,8 @@ class AddAdminShops extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
-    {
+    public function down() {
         //
         schema::table('shops', function (Blueprint $table) {
             $table->dropColumn('is_staff');

@@ -171,7 +171,7 @@ Route::group(['prefix' => 'data', 'namespace' => 'Data', 'middleware' => 'power:
     Route::post('shops/delete/{id}', 'ShopController@postDeleteShop');
     Route::post('shops/sort', 'ShopController@postSortShop');
     Route::post('shops/restrictions/{id}', 'ShopController@postRestrictShop');
-    # stock
+    // stock
     // create
     Route::get('shops/stock/{id}', 'ShopController@getCreateShopStock');
     Route::post('shops/stock/{id}', 'ShopController@postCreateShopStock');

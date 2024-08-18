@@ -1,41 +1,34 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-class AddFtoShops extends Migration
-{
+class AddFtoShops extends Migration {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
-    {
+    public function up() {
         //
         schema::table('shops', function (Blueprint $table) {
             $table->boolean('is_fto')->default(0);
         });
 
-        Schema::table('shop_stock', function (Blueprint $table){
+        Schema::table('shop_stock', function (Blueprint $table) {
             $table->boolean('is_fto')->default(0);
         });
     }
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
-    {
+    public function down() {
         //
         schema::table('shops', function (Blueprint $table) {
             $table->dropColumn('is_fto');
         });
-        
-        Schema::table('shop_stock', function (Blueprint $table){
+
+        Schema::table('shop_stock', function (Blueprint $table) {
             $table->dropColumn('is_fto');
         });
     }

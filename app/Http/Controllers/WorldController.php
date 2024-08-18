@@ -383,10 +383,13 @@ class WorldController extends Controller {
             'name'        => $item->displayName,
             'description' => $item->parsed_description,
             'categories'  => $categories->keyBy('id'),
-            'shops'       => Shop::where(function($shops) {
-                if(Auth::check() && Auth::user()->isStaff) return $shops;
+            'shops'       => Shop::where(function ($shops) {
+                if (Auth::check() && Auth::user()->isStaff) {
+                    return $shops;
+                }
+
                 return $shops->where('is_staff', 0);
-            })->whereIn('id', ShopStock::where('item_id', $item->id)->pluck('shop_id')->unique()->toArray())->orderBy('sort', 'DESC')->get()
+            })->whereIn('id', ShopStock::where('item_id', $item->id)->pluck('shop_id')->unique()->toArray())->orderBy('sort', 'DESC')->get(),
         ]);
     }
 

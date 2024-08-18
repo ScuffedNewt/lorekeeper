@@ -26,8 +26,8 @@ return [
     ],
 
     'coupon' => [
-        'name' => 'Coupon',
-        'text_color' => '#ffffff',
-        'background_color' => '#ff5ca8'
+        'name'             => 'Coupon',
+        'text_color'       => '#ffffff',
+        'background_color' => '#ff5ca8',
     ],
 ];
