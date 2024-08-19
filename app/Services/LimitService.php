@@ -3,9 +3,9 @@
 namespace App\Services;
 
 use App\Models\Limit\Limit;
-use Auth;
-use DB;
-use Log;
+use App\Models\Limit\DynamicLimit;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class LimitService extends Service {
     /*
@@ -73,6 +73,92 @@ class LimitService extends Service {
             if ($log && !$this->logAdminAction(Auth::user(), 'Edited Limits', 'Edited '.$object->displayName.' limits')) {
                 throw new \Exception('Failed to log admin action.');
             }
+
+            return $this->commitReturn(true);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
+    }
+
+    /**********************************************************************************************
+
+        DYNAMIC LIMITS
+
+    **********************************************************************************************/
+
+        /**
+     * Creates a new limit.
+     *
+     * @param array                 $data
+     * @param \App\Models\User\User $user
+     *
+     * @return bool|Limit
+     */
+    public function createLimit($data, $user) {
+        DB::beginTransaction();
+
+        try {
+            $data['description'] = isset($data['description']) ? parse($data['description']) : null;
+            $data['evaluation'] = str_replace('\\', '\\\\', $data['evaluation']);
+
+            $limit = DynamicLimit::create($data);
+
+            return $this->commitReturn($limit);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
+    }
+
+    /**
+     * Updates a limit.
+     *
+     * @param Limit                $limit
+     * @param array                 $data
+     * @param \App\Models\User\User $user
+     *
+     * @return bool|Limit
+     */
+    public function updateLimit($limit, $data, $user) {
+        DB::beginTransaction();
+
+        try {
+            if (DynamicLimit::where('name', $data['name'])->where('id', '!=', $limit->id)->exists()) {
+                throw new \Exception('The name has already been taken.');
+            }
+
+            $data['description'] = isset($data['description']) ? parse($data['description']) : null;
+            $data['evaluation'] = str_replace('\\', '\\\\', $data['evaluation']);
+
+            $limit->update($data);
+
+            return $this->commitReturn($limit);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
+    }
+
+    /**
+     * Deletes a limit.
+     *
+     * @param Limit $limit
+     *
+     * @return bool
+     */
+    public function deleteLimit($limit) {
+        DB::beginTransaction();
+
+        try {
+
+            if (Limit::where('limit_type', 'dynamic')->where('limit_id', $limit->id)->exists()) {
+                throw new \Exception('This limit is currently in use and cannot be deleted.');
+            }
+            $limit->delete();
 
             return $this->commitReturn(true);
         } catch (\Exception $e) {

@@ -23,6 +23,19 @@ class DynamicLimit extends Model {
 
     /**********************************************************************************************
 
+        ATTRIBUTES
+
+    **********************************************************************************************/
+
+    /**
+     * returns the displayName of the limit.
+     */
+    public function getDisplayNameAttribute() {
+        return $this->name . ' Check';
+    }
+
+    /**********************************************************************************************
+
         OTHER FUNCTIONS
 
     **********************************************************************************************/
@@ -33,7 +46,13 @@ class DynamicLimit extends Model {
      */
     public function evaluate() {
         try {
-            return eval($this->evaluation);
+
+            $eval = preg_replace('/<\?php/', '', $this->evaluation);
+            $eval = preg_replace('/\n/', '', $eval);
+            $eval = preg_replace('/\r/', '', $eval);
+
+            return eval($eval);
+
         } catch (\Throwable $th) {
             return false;
         }

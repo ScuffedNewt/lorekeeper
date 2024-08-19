@@ -37,7 +37,7 @@
         <div class="alert alert-{{ $limits->first()->isUnlocked(Auth::user() ?? null) ? 'info' : 'danger' }} p-0 mt-2">
             <small>
                 (Requires {!! implode(', ', $limits->map(function ($limit) use ($limitTypes) {
-                    return $limit->quantity . ' ' . $limit->limit->displayName;
+                    return $limit->quantity ? ($limit->quantity . ' ') : '' . $limit->limit->displayName;
                 })->toArray()) !!})
             </small>
         </div>

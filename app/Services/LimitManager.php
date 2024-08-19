@@ -85,6 +85,11 @@ class LimitManager extends Service {
                             }
                         }
                         break;
+                    case 'dynamic':
+                        if (!$this->checkDynamicLimit($limit, $user)) {
+                            throw new \Exception('You do not meet the requirements to complete this action.');
+                        }
+                        break;
                 }
             }
 
@@ -111,6 +116,20 @@ class LimitManager extends Service {
             }
 
             return true;
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+    }
+
+    /**
+     * checks a dynamic limit.
+     *
+     * @param mixed $limit
+     * @param mixed $user
+     */
+    private function checkDynamicLimit($limit, $user) {
+        try {
+            return $limit->limit->evaluate();
         } catch (\Exception $e) {
             $this->setError('error', $e->getMessage());
         }

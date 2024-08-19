@@ -61,7 +61,7 @@
                                 {!! Form::select('limit_id[]', $dynamics, $limit->limit_id, ['class' => 'form-control limit dynamics', 'placeholder' => 'Select Limit']) !!}
                             @endif
                         </div>
-                        <div class="col-md-4 quantity">
+                        <div class="col-md-4 quantity {{ $limit->limit_type == 'dynamic' ? 'hide' : '' }}">
                             <div class="form-group">
                                 {!! Form::label('Quantity') !!}
                                 {!! Form::number('quantity[]', $limit->quantity, ['class' => 'form-control', 'placeholder' => 'Enter Quantity', 'min' => 0, 'step' => 1]) !!}
@@ -160,9 +160,14 @@
             // remove hide on debit if type is currency or item, otherwise hide it
             if (val == 'currency' || val == 'item') {
                 $(this).parent().parent().parent().find('.debit').removeClass('hide');
+                $(this).parent().parent().parent().find('.quantity').removeClass('hide');
             } else {
-                console.log($(this).parent().parent().find('.debit'));
                 $(this).parent().parent().parent().find('.debit').addClass('hide');
+                if (val == 'dynamic') {
+                    $(this).parent().parent().parent().find('.quantity').addClass('hide');
+                } else {
+                    $(this).parent().parent().parent().find('.quantity').removeClass('hide');
+                }
             }
         });
 
@@ -187,8 +192,17 @@
                 $cell.append($clone);
 
                 $(this).parent().parent().find('.quantity').removeClass('hide');
-                if (val == 'currency' || val == 'item') $(this).parent().parent().find('.debit').removeClass('hide');
-                else $(this).parent().parent().find('.debit').addClass('hide');
+                if (val == 'currency' || val == 'item') {
+                    $(this).parent().parent().find('.debit').removeClass('hide');
+                    $(this).parent().parent().find('.quantity').removeClass('hide');
+                } else {
+                    $(this).parent().parent().find('.debit').addClass('hide');
+                    if (val == 'dynamic') {
+                        $(this).parent().parent().find('.quantity').addClass('hide');
+                    } else {
+                        $(this).parent().parent().find('.quantity').removeClass('hide');
+                    }
+                }
             });
         }
 
