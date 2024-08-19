@@ -41,9 +41,19 @@ class CycleSeason extends Command
      */
     public function handle()
     { 
-       //change the season
-       $newSeason = Season::whereNotNull('start_at')->where('start_at', '<', Carbon::now())->whereNotNull('end_at')->where('end_at', '>', Carbon::now())->first();
-       
+        $newSeason = Season::where('start_month', '<=', Carbon::now()->month)->orderBy('start_month', 'desc')->first();
+
+        if ($newSeason->id == Settings::get('site_season')) {
+            $this->info('Season already set to ' . $newSeason->name . '.');
+            return;
+        }
+
+        if (!$newSeason | $newSeason->end_month < Carbon::now()->month) {
+            $this->info('No season found.');
+            Settings::set('site_season', null);
+            return;
+        }
+    
         DB::table('site_settings')->where('key', 'site_season')->update(['value' => $newSeason->id]);
         $this->info('Season adjusted successfully.');
     }

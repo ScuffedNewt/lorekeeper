@@ -20,10 +20,6 @@
     {!! Form::text('name', $weather->name, ['class' => 'form-control']) !!}
 </div>
 
-@if($weather->has_image)
-        <img src="{{$weather->imageUrl }}" class="img-fluid mr-2 mb-2" style="height: 10em;" />
-        <br>
-    @endif
 <div class="form-group">
     {!! Form::label('World Page Image (Optional)') !!} {!! add_help('This image is used on the world information pages and side widget.') !!}
     <div>{!! Form::file('image') !!}</div>
@@ -37,11 +33,6 @@
 </div>
 
 <div class="form-group">
-    {!! Form::checkbox('is_visible', 1, $weather->id ? $weather->is_visible : 1, ['class' => 'form-check-input', 'data-toggle' => 'toggle']) !!}
-    {!! Form::label('is_visible', 'Is Active', ['class' => 'form-check-label ml-3']) !!} {!! add_help('Weathers that are not active will be hidden from the weather list. They can still be rolled on in a season table.') !!}
-</div>
-
-<div class="form-group">
     {!! Form::label('Summary (Optional)') !!} {!! add_help('A short blurb that shows up on the weather page and widget. HTML cannot be used here.') !!}
     {!! Form::text('summary', $weather->summary, ['class' => 'form-control', 'maxLength' => 250]) !!}
 </div>
@@ -49,6 +40,11 @@
 <div class="form-group">
     {!! Form::label('Description (Optional)') !!} {!! add_help('This is a full description of the weather that shows up on the full weather page.') !!}
     {!! Form::textarea('description', $weather->description, ['class' => 'form-control wysiwyg']) !!}
+</div>
+
+<div class="form-group">
+    {!! Form::checkbox('is_visible', 1, $weather->id ? $weather->is_visible : 1, ['class' => 'form-check-input', 'data-toggle' => 'toggle']) !!}
+    {!! Form::label('is_visible', 'Is Active', ['class' => 'form-check-label ml-3']) !!} {!! add_help('Weathers that are not active will be hidden from the weather list. They can still be rolled on in a season table.') !!}
 </div>
 
 <div class="text-right">

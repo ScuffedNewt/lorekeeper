@@ -20,10 +20,6 @@
     {!! Form::text('name', $season->name, ['class' => 'form-control']) !!}
 </div>
 
-@if ($season->has_image)
-        <img src="{{$season->imageUrl }}" class="img-fluid mr-2 mb-2" style="height: 10em;" />
-        <br>
-    @endif
 <div class="form-group">
     {!! Form::label('World Page Image (Optional)') !!} {!! add_help('This image is used on the world information pages and side widget.') !!}
     <div>{!! Form::file('image') !!}</div>
@@ -37,26 +33,6 @@
 </div>
 
 <div class="form-group">
-    {!! Form::checkbox('is_visible', 1, $season->id ? $season->is_visible : 1, ['class' => 'form-check-input', 'data-toggle' => 'toggle']) !!}
-    {!! Form::label('is_visible', 'Is Active', ['class' => 'form-check-label ml-3']) !!} {!! add_help('Seasons that are not active will be hidden from the season list. They also cannot be automatically set as the next active season.') !!}
- </div>
-
-<div class="row">
-    <div class="col-md-6">
-        <div class="form-group">
-            {!! Form::label('start_at', 'Start Time') !!} {!! add_help('Seasons won\'t rotate in until this time is reached.') !!}
-            {!! Form::text('start_at', $season->start_at, ['class' => 'form-control datepicker']) !!}
-        </div>
-    </div>
-    <div class="col-md-6">
-        <div class="form-group">
-            {!! Form::label('end_at', 'End Time') !!} {!! add_help('A season won\'t be able to be automatically activated after this window of time ends.') !!}
-            {!! Form::text('end_at', $season->end_at, ['class' => 'form-control datepicker']) !!}
-        </div>
-    </div>
-</div>
-
-<div class="form-group">
     {!! Form::label('Summary (Optional)') !!} {!! add_help('A short blurb that shows up on the season page and widget. HTML cannot be used here.') !!}
     {!! Form::text('summary', $season->summary, ['class' => 'form-control', 'maxLength' => 250]) !!}
 </div>
@@ -65,6 +41,52 @@
     {!! Form::label('Description (Optional)') !!} {!! add_help('This is a full description of the season that shows up on the full season page.') !!}
     {!! Form::textarea('description', $season->description, ['class' => 'form-control wysiwyg']) !!}
 </div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="form-group">
+            {!! Form::label('start_month', 'Start Month') !!} {!! add_help('Seasons won\'t rotate in until this time is reached.') !!}
+            {!! Form::select('start_month', [
+                1 => 'January',
+                2 => 'February',
+                3 => 'March',
+                4 => 'April',
+                5 => 'May',
+                6 => 'June',
+                7 => 'July',
+                8 => 'August',
+                9 => 'September',
+                10 => 'October',
+                11 => 'November',
+                12 => 'December',
+            ], $season->start_month, ['class' => 'form-control', 'placeholder' => 'Select Start Month']) !!}
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            {!! Form::label('end_month', 'End Time') !!} {!! add_help('A season won\'t be able to be automatically activated after this window of time ends.') !!}
+            {!! Form::select('end_month', [
+                1 => 'January',
+                2 => 'February',
+                3 => 'March',
+                4 => 'April',
+                5 => 'May',
+                6 => 'June',
+                7 => 'July',
+                8 => 'August',
+                9 => 'September',
+                10 => 'October',
+                11 => 'November',
+                12 => 'December',
+            ], $season->end_month, ['class' => 'form-control', 'placeholder' => 'Select End Month']) !!}
+        </div>
+    </div>
+</div>
+
+<div class="form-group">
+    {!! Form::checkbox('is_visible', 1, $season->id ? $season->is_visible : 1, ['class' => 'form-check-input', 'data-toggle' => 'toggle']) !!}
+    {!! Form::label('is_visible', 'Is Active', ['class' => 'form-check-label ml-3']) !!} {!! add_help('Seasons that are not active will be hidden from the season list. They also cannot be automatically set as the next active season.') !!}
+ </div>
 
 <h3>Table</h3>
 
@@ -83,7 +105,7 @@
     </thead>
     <tbody id="lootSeasonBody">
         @if($season->id)
-            @foreach($season->loot as $loot)
+            @foreach($season->weather ?? [] as $loot)
                 <tr class="loot-row">
                     <td class="loot-row-select">
                         {!! Form::select('weather_id[]', $weathers, $loot->weather_id, ['class' => 'form-control weather-select selectize', 'placeholder' => 'Select Weather']) !!}

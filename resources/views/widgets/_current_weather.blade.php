@@ -3,7 +3,7 @@
     $season = \App\Models\Weather\Season::where('id', Settings::get('site_season'))->first();
 @endphp
 
-@if ($season || $weather)
+@if (Settings::get('show_weather_on_front_page') && ($season || $weather))
     <div class="card mt-3">
         <div class="card-body text-center">
             @if($season)

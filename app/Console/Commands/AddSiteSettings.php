@@ -89,6 +89,10 @@ class AddSiteSettings extends Command {
 
         $this->addSiteSetting('comment_dislikes_enabled', 0, '0: Dislikes disabled, 1: Dislikes enabled.');
 
+        $this->addSiteSetting('show_weather_on_front_page', 1, '0: Weather & season is not shown on the front page, 1: Weather & season is shown on the front page.');
+
+        $this->addSiteSetting('max_weather_per_object', 1, 'Maximum number of ACTIVE weather an object can have at once.');
+
         $this->line("\nSite settings up to date!");
     }
 

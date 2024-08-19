@@ -7,6 +7,7 @@ use Illuminate\Console\Command;
 use Carbon\Carbon;
 use App\Models\Weather\Season;
 use App\Models\Weather\Weather;
+use App\Models\Weather\ObjectWeather;
 use Illuminate\Support\Facades\DB;
 
 class CycleWeather extends Command
@@ -42,6 +43,60 @@ class CycleWeather extends Command
      */
     public function handle()
     {
+        // weather objects
+        $objectWeathers = ObjectWeather::all();
+        foreach ($objectWeathers as $objectWeather) {
+            $this->info('Cycling weather for ' . $objectWeather->name . '...');
+            $this->info('Reset period: ' . $objectWeather->reset_period);
+            switch ($objectWeather->reset_period) {
+                case 'Hour':
+                    // reset every hour
+                    $objectWeather->changeWeather();
+                    break;
+                case 'Day':
+                    // reset every day at 00:00
+                    $now = Carbon::now();
+                    $hour = $now->hour;
+                    if ($hour != 0) {
+                        break;
+                    }
+                    $objectWeather->changeWeather();
+                    break;
+                case 'Week':
+                    // reset on Monday at 00:00
+                    $now = Carbon::now();
+                    $day = $now->dayOfWeek;
+                    if ($day != 1) {
+                        break;
+                    }
+                    $objectWeather->changeWeather();
+                    break;
+                case 'Month':
+                    // reset on the first of the month at 00:00
+                    $now = Carbon::now();
+                    $day = $now->day;
+                    if ($day != 1) {
+                        break;
+                    }
+                    $objectWeather->changeWeather();
+                    break;
+                case 'Year':
+                    // reset on January 1st at 00:00
+                    $now = Carbon::now();
+                    $day = $now->day;
+                    $month = $now->month;
+                    if ($day != 1 || $month != 1) {
+                        break;
+                    }
+                    $objectWeather->changeWeather();
+                    break;
+                default:
+                    // no reset
+                    break;
+            }
+        }
+
+        // site wide weather
         $currentSeason = Season::where('id', Settings::get('site_season'))->first();
         if (!$currentSeason) {
             $this->info('No season found. Please set a season in the admin panel.');
@@ -55,14 +110,14 @@ class CycleWeather extends Command
         if (!Settings::get('cycle_site_weather')) {
             // no reset setting
             $this->info('Not set to cycle weather currently. Adjust the settings if this is an error.');
-        } else if(Settings::get('cycle_site_weather') == 2) {
+        } else if (Settings::get('cycle_site_weather') == 2) {
             //weekly reset setting
             $now = Carbon::now();
             $day = $now->dayOfWeek;
             if($day != 1) {
                 return;
             }
-        } else if(Settings::get('cycle_site_weather') == 3) {
+        } else if (Settings::get('cycle_site_weather') == 3) {
             // monthly reset
             $now = Carbon::now();
             $day = $now->day;

@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers\Admin\Data;
 
-use Illuminate\Http\Request;
-
-use Auth;
-
+use Illuminate\Support\Facades\Auth;
 use App\Models\Weather\Weather;
 use App\Models\Weather\Season;
 use App\Models\Item\Item;
 use App\Models\Currency\Currency;
 use App\Services\WeatherService;
+use App\Models\Weather\ObjectWeather;
+use Illuminate\Support\Arr;
+use Illuminate\Http\Request;
 
 use App\Http\Controllers\Controller;
 
@@ -77,7 +77,8 @@ class WeatherController extends Controller
     public function postCreateEditSeason(Request $request, WeatherService $service, $id = null)
     { 
         $id ? $request->validate(Season::$updateRules) : $request->validate(Season::$createRules);
-        $data = $request->only(['name', 'description', 'image', 'remove_image', 'is_visible', 'summary', 'weather_id', 'weight', 'start_at', 'end_at'
+        $data = $request->only([
+            'name', 'description', 'image', 'remove_image', 'is_visible', 'summary', 'weather_id', 'weight', 'start_month', 'end_month',
         ]);
         if($id && $service->updateSeason(Season::find($id), $data, Auth::user())) {
             flash('Weather updated successfully.')->success();
@@ -298,4 +299,84 @@ class WeatherController extends Controller
         return redirect()->back();
     }
 
+    /**********************************************************************************************
+
+        WEATHER ON OBJECTS
+
+    **********************************************************************************************/
+
+    /**
+     * Creates or edits an objects weather data.
+     * 
+     * @param  \Illuminate\Http\Request  $request
+     * 
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function postObjectWeather(Request $request, WeatherService $service) {
+        $data = $request->only(['objectWeather', 'object_model', 'object_id', 'weather_ids', 'weight', 'reset_period', 'active']);
+        if (isset($data['objectWeather']) && $data['objectWeather']) {
+            $objectWeather = ObjectWeather::find($data['objectWeather']);
+            if (!$objectWeather) {
+                flash('Invalid object weather.')->error();
+
+                return response()->json([
+                    'error'   => 'Invalid object weather.',
+                ], 400);
+            }
+            if (!$service->editObjectWeather($objectWeather, Arr::only($data, ['weather_ids', 'weight', 'reset_period', 'active']), Auth::user())) {
+                flash('Failed to edit object weather.')->error();
+
+                return response()->json([
+                    'error'   => $service->errors()->getMessages()['error'][0],
+                ], 400);
+            }
+        } elseif (!$newObjectWeather = $service->createObjectWeather(
+            urldecode($data['object_model']), $data['object_id'], Arr::only($data, ['weather_ids', 'weight', 'reset_period', 'active']), Auth::user()
+        )) {
+            flash('Failed to create object weather.')->error();
+
+            return response()->json([
+                'error'   => $service->errors()->getMessages()['error'][0],
+            ], 400);
+        }
+
+        flash('Object weather '.(isset($objectWeather) ? 'edited' : 'created').' successfully.')->success();
+
+        return response()->json([
+            'success' => 'Object weather added successfully.',
+        ]);
+    }
+
+    /**
+     * gets the delete object weather modal.
+     *
+     * @param mixed $id
+     */
+    public function getDeleteObjectWeather($id) {
+        $objectWeather = ObjectWeather::find($id);
+        if (!$objectWeather) {
+            abort(404);
+        }
+
+        return view('admin.weather._delete_object_weather', [
+            'objectWeather' => $objectWeather,
+        ]);
+    }
+
+    /**
+     * deletes an object's weather.
+     *
+     * @param mixed $id
+     */
+    public function postDeleteObjectWeather(Request $request, WeatherService $service, $id) {
+        if ($id && $service->deletObjectWeather(ObjectWeather::find($id), Auth::user())) {
+            flash('Object weather deleted successfully.')->success();
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
+        }
+
+        return redirect()->back();
+    }
 }

@@ -1,6 +1,8 @@
 <div class="row world-entry">
     @if ($prompt->has_image)
-        <div class="col-md-3 world-entry-image"><a href="{{ $prompt->imageUrl }}" data-lightbox="entry" data-title="{{ $prompt->name }}"><img src="{{ $prompt->imageUrl }}" class="world-entry-image" alt="{{ $prompt->name }}" /></a></div>
+        <div class="col-md-3 world-entry-image">
+            <a href="{{ $prompt->imageUrl }}" data-lightbox="entry" data-title="{{ $prompt->name }}"><img src="{{ $prompt->imageUrl }}" class="world-entry-image" alt="{{ $prompt->name }}" /></a>
+        </div>
     @endif
     <div class="{{ $prompt->has_image ? 'col-md-9' : 'col-12' }}">
         <x-admin-edit title="Prompt" :object="$prompt" />
@@ -11,19 +13,28 @@
                 <h2 class="mb-0"><a href="{{ url('prompts/' . $prompt->id) }}">{!! $prompt->name !!}</a></h2>
             @endif
             @if ($prompt->prompt_category_id)
-                <div><strong>Category: </strong>{!! $prompt->category->displayName !!}</div>
+                <div>
+                    <strong>Category: </strong>{!! $prompt->category->displayName !!}
+                </div>
             @endif
             @if ($prompt->start_at && $prompt->start_at->isFuture())
-                <div><strong>Starts: </strong>{!! format_date($prompt->start_at) !!} ({{ $prompt->start_at->diffForHumans() }})</div>
+                <div>
+                    <strong>Starts: </strong>{!! format_date($prompt->start_at) !!} ({{ $prompt->start_at->diffForHumans() }})
+                </div>
             @endif
             @if ($prompt->end_at)
-                <div><strong>Ends: </strong>{!! format_date($prompt->end_at) !!} ({{ $prompt->end_at->diffForHumans() }})</div>
+                <div>
+                    <strong>Ends: </strong>{!! format_date($prompt->end_at) !!} ({{ $prompt->end_at->diffForHumans() }})
+                </div>
             @endif
         </div>
         <div class="world-entry-text">
             <p>{{ $prompt->summary }}</p>
-            <h3 class="mb-3"><a data-toggle="collapse" href="#prompt-{{ $prompt->id }}" @if (isset($isPage)) aria-expanded="true" @endif)>Details <i class="fas fa-angle-down"></i></a></h3>
-            <div class="collapse @if (isset($isPage)) show @endif mb-5" id="prompt-{{ $prompt->id }}">
+            <h3 class="mb-3">
+                <a data-toggle="collapse" href="#prompt-{{ $prompt->id }}" @if (isset($isPage)) aria-expanded="true" @endif>Details <i class="fas fa-angle-down"></i></a>
+            </h3>
+            <div class="collapse @if (isset($isPage)) show @endif" id="prompt-{{ $prompt->id }}">
+                @include('widgets._display_weathers', ['object' => $prompt])
                 @if ($prompt->parsed_description)
                     {!! $prompt->parsed_description !!}
                 @else
@@ -65,6 +76,6 @@
             @else
                 <a href="{{ url('submissions/new?prompt_id=' . $prompt->id) }}" class="btn btn-primary">Submit Prompt</a>
             @endunless
+        </div>
     </div>
-</div>
 </div>

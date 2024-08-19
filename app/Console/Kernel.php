@@ -23,16 +23,16 @@ class Kernel extends ConsoleKernel {
             ->everyMinute();
         $schedule->command('check-sales')
             ->everyMinute();
-        $schedule->command('cycle-weather')
-            ->daily();
-        $schedule->command('cycle-season')
-            ->daily();
         $schedule->exec('rm public/images/avatars/*.tmp')
             ->daily();
         $schedule->command('update-extension-tracker')
             ->daily();
         $schedule->command('update-staff-reward-actions')
             ->daily();
+        $schedule->command('cycle-weather')
+            ->hourly();
+        $schedule->command('cycle-season')
+            ->monthly();
     }
 
     /**

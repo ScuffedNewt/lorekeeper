@@ -14,7 +14,7 @@ class Season extends Model
      */
     protected $fillable = [
         'name', 'summary', 'description',
-        'parsed_description', 'is_visible', 'sort', 'has_image', 'start_at', 'end_at'
+        'parsed_description', 'is_visible', 'sort', 'has_image', 'start_month', 'end_month'
     ];
 
     /**
@@ -44,19 +44,22 @@ class Season extends Model
 
 
     /**********************************************************************************************
+
         RELATIONS
+
     **********************************************************************************************/
 
     /**
      * Get the weather data for this table.
      */
-    public function weather()
-    {
+    public function weather() {
         return $this->hasMany(SeasonWeather::class, 'season_id');
     }
 
     /**********************************************************************************************
+
         SCOPES
+
     **********************************************************************************************/
 
     /**
@@ -110,6 +113,7 @@ class Season extends Model
         ACCESSORS
 
     **********************************************************************************************/
+
     /**
      * Displays the model's name, linked to its encyclopedia page.
      *
@@ -221,5 +225,23 @@ class Season extends Model
     {
         if (!$this->has_image) return null;
         return asset($this->imageDirectory . '/' . $this->imageFileName);
+    }
+
+    /**
+     * Gets the admin edit URL.
+     *
+     * @return string
+     */
+    public function getAdminUrlAttribute() {
+        return url('admin/weather/seasons/edit/'.$this->id);
+    }
+
+    /**
+     * Gets the power required to edit this model.
+     *
+     * @return string
+     */
+    public function getAdminPowerAttribute() {
+        return 'edit_data';
     }
 }

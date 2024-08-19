@@ -2,15 +2,14 @@
 
 use App\Services\Service;
 
-use DB;
-use Config;
-use Settings;
-
-use Illuminate\Support\Arr;
+use App\Facades\Settings;
 use App\Models\Weather\Season;
 use App\Models\Weather\Weather;
 use App\Models\Weather\SeasonWeather;
-
+use App\Models\Weather\ObjectWeather;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class WeatherService extends Service
 {
@@ -22,9 +21,15 @@ class WeatherService extends Service
     | Handles the creation and editing of weather seasons.
     |
     */
+    
+    /**********************************************************************************************
+
+        SEASONS
+
+    **********************************************************************************************/
 
     /**
-     * Creates a weather season.
+     * Creates a season.
      *
      * @param  array  $data
      * @return bool|\App\Models\Weather\Season
@@ -58,7 +63,7 @@ class WeatherService extends Service
     }
 
     /**
-     * Updates a weather season.
+     * Updates a season.
      *
      * @param  \App\Models\Weather\Season  $season
      * @param  array                       $data
@@ -83,7 +88,7 @@ class WeatherService extends Service
 
             if ($image) $this->handleImage($image, $season->imagePath, $season->imageFileName);
 
-            $this->populateSeason($season, Arr::only($data, ['weather_id','weight','rewardable_type']));
+            $this->populateSeason($season, Arr::only($data, ['weather_id', 'weight', 'rewardable_type']));
 
             return $this->commitReturn($season);
         } catch(\Exception $e) {
@@ -93,7 +98,7 @@ class WeatherService extends Service
     }
 
     /**
-     * Handles the creation of weather for a weather season.
+     * Handles the creation of weather for a season.
      *
      * @param  \App\Models\Weather\Season  $season
      * @param  array                       $data
@@ -101,7 +106,7 @@ class WeatherService extends Service
     private function populateSeason($season, $data)
     {
         // Clear the old weather...
-        $season->loot()->delete();
+        $season->weather()->delete();
 
         if (isset($data['weather_id']) && $data['weather_id']) {
             foreach ($data['weather_id'] as $key => $type) {
@@ -115,7 +120,7 @@ class WeatherService extends Service
     }
 
     /**
-     * Deletes a weather season.
+     * Deletes a season.
      *
      * @param  \App\Models\Weather\Season  $season
      * @return bool
@@ -127,7 +132,7 @@ class WeatherService extends Service
         try {
             if(Settings::get('site_season') == $season->id) throw new \Exception("The site's season is currently set to this season. Change the season first.");
             
-            $season->loot()->delete();
+            $season->weather()->delete();
             if($season->has_image) $this->deleteImage($season->imagePath, $season->imageFileName);
             $season->delete();
 
@@ -138,7 +143,11 @@ class WeatherService extends Service
         return $this->rollbackReturn(false);
     }
 
-    // weather
+    /**********************************************************************************************
+
+        WEATHER
+
+    **********************************************************************************************/
 
     /**
      * Creates a weather.
@@ -285,5 +294,137 @@ class WeatherService extends Service
         }
 
         return $data;
+    }
+    
+    /**********************************************************************************************
+
+        OBJECT WEATHER
+
+    **********************************************************************************************/
+
+    /**
+     * Creates a new weather object for an object.
+     *
+     */
+    public function createObjectWeather($object_model, $object_id, $data, $user) {
+        DB::beginTransaction();
+
+        try {
+            // 'weather_ids', 'weight', 'reset_period'
+            if (!isset($data['weather_ids']) || !$data['weather_ids']) {
+                throw new \Exception('No weather provided.');
+            }
+            // check that there is not duplicate element ids
+            if (count($data['weather_ids']) != count(array_unique($data['weather_ids']))) {
+                throw new \Exception('Duplicate weather provided.');
+            }
+            // check that a object weater with this model and id doesn't already exist
+            if (ObjectWeather::where('object_model', $object_model)->where('object_id', $object_id)->exists()) {
+                throw new \Exception('A weather object with this model and id already exists.');
+            }
+
+            // match false with all weather_ids
+            $active_weather = [];
+            $weather_ids = [];
+            foreach ($data['weather_ids'] as $key=>$weather_id) {
+                $weather_ids[$weather_id] = $data['weight'][$key] ?? 1;
+                if ($data['active'][$key]) {
+                    $active_weather[] = $weather_id;
+                }
+            }
+
+            // create the weatherobject
+            $objectWeather = ObjectWeather::create([
+                'object_model'    => $object_model,
+                'object_id'       => $object_id,
+                'weathers'        => $weather_ids,
+                'active_weathers' => $active_weather,
+                'reset_period'    => $data['reset_period'] ?? null,
+            ]);
+
+            // log the action
+            if (!$this->logAdminAction(Auth::user(), 'Created Weather Object', 'Created '.$objectWeather->object->displayName.'\s weather.')) {
+                throw new \Exception('Failed to log admin action.');
+            }
+
+            return $this->commitReturn($objectWeather);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
+    }
+
+    /**
+     * edits an existing weather object on a model.
+     *
+     */
+    public function editObjectWeather($weatherObject, $data, $user) {
+        DB::beginTransaction();
+
+        try {
+            if (!isset($data['weather_ids']) || !$data['weather_ids']) {
+                throw new \Exception('No weather provided.');
+            }
+            // check that there is not duplicate element ids
+            if (count($data['weather_ids']) != count(array_unique($data['weather_ids']))) {
+                throw new \Exception('Duplicate weather provided.');
+            }
+            // check that a weatherobject with this model and id doesn't already exist
+            if (ObjectWeather::where('object_model', $weatherObject->object_model)->where('object_id', $weatherObject->object_id)->where('id', '!=', $weatherObject->id)->exists()) {
+                throw new \Exception('An Object Weather with this model and id already exists.');
+            }
+
+            $active_weather = [];
+            $weather_ids = [];
+            foreach ($data['weather_ids'] as $key=>$weather_id) {
+                $weather_ids[$weather_id] = $data['weight'][$key] ?? 1;
+                if ($data['active'][$key]) {
+                    $active_weather[] = $weather_id;
+                }
+            }
+            
+            // create the weatherobject
+            $weatherObject->update([
+                'weathers'        => $weather_ids,
+                'active_weathers' => $active_weather,
+                'reset_period'    => $data['reset_period'] ?? null,
+            ]);
+
+            // log the action
+            if (!$this->logAdminAction(Auth::user(), 'Edited Weather Object', 'Edited '.$weatherObject->object->displayName.'\s weather.')) {
+                throw new \Exception('Failed to log admin action.');
+            }
+
+            return $this->commitReturn($weatherObject);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
+    }
+
+    /**
+     * deletes a weather object.
+     *
+     * @param mixed $weatherObject
+     */
+    public function deleteObjectWeather($weatherObject) {
+        DB::beginTransaction();
+
+        try {
+            // log the action
+            if (!$this->logAdminAction(Auth::user(), 'Deleted Weather Object', 'Deleted '.$weatherObject->object->displayName.'\'s weather.')) {
+                throw new \Exception('Failed to log admin action.');
+            }
+
+            $weatherObject->delete();
+
+            return $this->commitReturn($weatherObject);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
     }
 }

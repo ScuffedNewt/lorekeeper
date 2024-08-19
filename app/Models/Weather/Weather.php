@@ -44,11 +44,11 @@ class Weather extends Model
 
     /**********************************************************************************************
 
-        RELATIONS
+        SCOPES
 
     **********************************************************************************************/
 
-   /**
+    /**
      * Scope a query to show only visible features.
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $query
@@ -75,7 +75,7 @@ class Weather extends Model
         return '<a href="'.$this->url.'" class="display-weather">'.$this->name.'</a>';
     }
 
-        /**
+    /**
      * Gets the URL of the model's encyclopedia page.
      *
      * @return string
@@ -85,7 +85,7 @@ class Weather extends Model
         return url('world/weathers?name='.$this->name);
     }
 
- /**
+    /**
      * Gets the currency's asset type for asset management.
      *
      * @return string
@@ -134,5 +134,23 @@ class Weather extends Model
     {
         if (!$this->has_image) return null;
         return asset($this->imageDirectory . '/' . $this->imageFileName);
+    }
+
+    /**
+     * Gets the admin edit URL.
+     *
+     * @return string
+     */
+    public function getAdminUrlAttribute() {
+        return url('admin/weather/weathers/edit/'.$this->id);
+    }
+
+    /**
+     * Gets the power required to edit this model.
+     *
+     * @return string
+     */
+    public function getAdminPowerAttribute() {
+        return 'edit_data';
     }
 }
