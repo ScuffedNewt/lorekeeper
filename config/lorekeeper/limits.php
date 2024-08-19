@@ -9,11 +9,11 @@ return [
         ],
         'item' => [
             'name'        => 'Items',
-            'description' => 'Item limits require a user to have a certain number of items in their inventory. Enable debiting to remove items from the user\'s inventory.',
+            'description' => 'Item limits require a user to have a certain number of items in their inventory.',
         ],
         'currency' => [
             'name'        => 'Currency',
-            'description' => 'Currency limits require a user to have a certain amount of currency. Enable debiting to remove currency from the user\'s account.',
+            'description' => 'Currency limits require a user to have a certain amount of currency.',
         ],
         'dynamic' => [
             'name'        => 'Dynamic',

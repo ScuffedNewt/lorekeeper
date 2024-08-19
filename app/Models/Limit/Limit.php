@@ -14,7 +14,7 @@ class Limit extends Model {
      * @var array
      */
     protected $fillable = [
-        'object_model', 'object_id', 'limit_type', 'limit_id', 'quantity', 'debit',
+        'object_model', 'object_id', 'limit_type', 'limit_id', 'quantity', 'debit', 'is_unlocked',
     ];
 
     /**
@@ -75,5 +75,12 @@ class Limit extends Model {
      */
     public static function getLimits($object) {
         return self::where('object_model', get_class($object))->where('object_id', $object->id)->get();
+    }
+
+    /**
+     * Checks if a user has unlocked this
+     */
+    public function isUnlocked($user) {
+        return $this->is_unlocked && $user->unlockedLimits()->where('object_model', $this->object_model)->where('object_id', $this->object_id)->exists();
     }
 }

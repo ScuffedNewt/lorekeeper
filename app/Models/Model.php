@@ -23,6 +23,9 @@ class Model extends EloquentModel {
         static::creating(function ($model) use ($service, $object) {
             switch (get_class($model)) {
                 case Submission::class:
+                    if ($model->status == 'Pending') {
+                        return true;
+                    }
                     $object = Prompt::find($model->prompt_id);
                     break;
             }
@@ -39,6 +42,9 @@ class Model extends EloquentModel {
         static::updating(function ($model) use ($service, $object) {
             switch (get_class($model)) {
                 case Submission::class:
+                    if ($model->status != 'Pending' || $model->staff_comments || $model->staff_id) {
+                        return true;
+                    }
                     $object = Prompt::find($model->prompt_id);
                     break;
             }

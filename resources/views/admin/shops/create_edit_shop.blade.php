@@ -52,6 +52,12 @@
     {!! Form::close() !!}
 
     @if ($shop->id)
+        <hr />
+        
+        @include('widgets._add_limits', ['object' => $shop])
+
+        <hr />
+
         <h3>Shop Stock</h3>
         {!! Form::open(['url' => 'admin/data/shops/stock/' . $shop->id]) !!}
         <div class="text-right mb-3">

@@ -40,6 +40,10 @@
                             If you aren't certain that you are ready, consider saving as a draft instead.
                             Click the Confirm button to complete the {{ $isClaim ? 'claim' : 'submission' }}.
                         </p>
+                        @if (!$isClaim)
+                            <div id="requirementsWarning">
+                            </div>
+                        @endif
                         <div class="text-right">
                             <a href="#" id="confirmSubmit" class="btn btn-primary">Confirm</a>
                         </div>
@@ -95,11 +99,18 @@
                 @if (!$isClaim)
                     var $prompt = $('#prompt');
                     var $rewards = $('#rewards');
+                    var $requirementsWarning = $('#requirementsWarning');
 
                     $prompt.selectize();
                     $prompt.on('change', function(e) {
                         $rewards.load('{{ url('submissions/new/prompt') }}/' + $(this).val());
+                        $requirementsWarning.load('{{ url('submissions/new/prompt') }}/' + $(this).val() + '/requirements');
                     });
+
+                    if ($prompt.val()) {
+                        $rewards.load('{{ url('submissions/new/prompt') }}/' + $prompt.val());
+                        $requirementsWarning.load('{{ url('submissions/new/prompt') }}/' + $prompt.val() + '/requirements');
+                    }
                 @endif
 
                 $confirmButton.on('click', function(e) {
@@ -111,6 +122,11 @@
 
                 $confirmSubmit.on('click', function(e) {
                     e.preventDefault();
+                    let $confirm = $('#requirementsWarning').find('#confirm').length ? $('#requirementsWarning').find('#confirm').is(':checked') : true;
+                    if ("{{ !$isClaim }}" && !$confirm) {
+                        alert('You must confirm that you understand that you will not be able to edit this submission after it has been made.');
+                        return;
+                    }
                     $submissionForm.attr('action', '{{ url()->current() }}');
                     $submissionForm.submit();
                 });

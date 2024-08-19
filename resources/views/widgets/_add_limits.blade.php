@@ -18,10 +18,10 @@
 
     <p>
         You can add requirements to this object by clicking "Add Limit" & selecting a requirement from the dropdown below.
-        <br>
+        <br />
         Requirements are used to determine if a specific action can be preformed on an object.
-        <b>Note that the checks for requirements are automatic, but their usage needs to be defined in the code.</b>
-        <b>Dynamic limits are created in the admin panel, but execute their logic in the code.</b>
+        <br /><b>Note that the checks for requirements are automatic, but their usage needs to be defined in the code.</b>
+        <br /><b>Dynamic limits are created in the admin panel, but execute their logic in the code.</b>
     </p>
     {!! isset($info) ? '<p class="alert alert-info">' . $info . '</p>' : '' !!}
 
@@ -32,6 +32,17 @@
         <div id="limits">
             @if ($limits)
                 <h5>Limits for {!! $limits->first()->object->displayName !!}</h5>
+            @endif
+            <div class="form-group">
+                {!! Form::label('is_unlocked', 'Is Unlocked?') !!}
+                <p>
+                    If this is set to "No", the object will continue to be locked until all requirements are met, every time the user attempts to interact with it.
+                    <br />
+                    If this is set to "Yes", the object will be unlocked for the user to interact with after the requirements are met once. This option is good for one-time unlocks such as shops, locations, certain prompts, etc.
+                </p>
+                {!! Form::select('is_unlocked', ['yes' => 'Yes', 'no' => 'No'], $limits?->first()->is_unlocked ? 'yes' : 'no', ['class' => 'form-control']) !!}
+            </div>
+            @if ($limits)
                 @foreach ($limits as $limit)
                     <div class="row">
                         <div class="col-md-3 form-group">
@@ -56,7 +67,7 @@
                                 {!! Form::number('quantity[]', $limit->quantity, ['class' => 'form-control', 'placeholder' => 'Enter Quantity', 'min' => 0, 'step' => 1]) !!}
                             </div>
                             @if ($limit->limit_type == 'currency' || $limit->limit_type == 'item')
-                                <div class="form-group">
+                                <div class="form-group debit">
                                     {!! Form::label('Debit') !!}
                                     {!! Form::select('debit[]', ['yes' => 'Debit', 'no' => 'Don\'t Debit'], $limit->debit ? 'yes' : 'no', ['class' => 'form-control']) !!}
                                 </div>
@@ -70,7 +81,9 @@
             @endif
         </div>
         <div class="btn btn-secondary" id="add-limit">Add Limit</div>
-        <i class="fas fa-trash text-danger float-right mt-2 mx-2 fa-2x" data-toggle="tooltip" title="To delete limits, simply remove all existing limits and click 'Edit Limits'"></i>
+        @if ($limits)
+            <i class="fas fa-trash text-danger float-right mt-2 mx-2 fa-2x" data-toggle="tooltip" title="To delete limits, simply remove all existing limits and click 'Edit Limits'"></i>
+        @endif
         {!! Form::submit(($limits ? 'Edit' : 'Create') . ' Limits', ['class' => 'btn btn-primary float-right']) !!}
     </div>
     {!! Form::close() !!}
@@ -145,8 +158,12 @@
             // remove hide on quantity
             $(this).parent().parent().find('.quantity').removeClass('hide');
             // remove hide on debit if type is currency or item, otherwise hide it
-            if (val == 'currency' || val == 'item') $(this).parent().parent().find('.debit').removeClass('hide');
-            else $(this).parent().parent().find('.debit').addClass('hide');
+            if (val == 'currency' || val == 'item') {
+                $(this).parent().parent().parent().find('.debit').removeClass('hide');
+            } else {
+                console.log($(this).parent().parent().find('.debit'));
+                $(this).parent().parent().parent().find('.debit').addClass('hide');
+            }
         });
 
         // attach remove listener to all .remove-limit

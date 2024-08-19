@@ -47,7 +47,9 @@ class LimitService extends Service {
                     $limit->delete();
                 });
             }
-            flash('Deleted '.count($limits).' old limits.')->success();
+            if (count($limits) > 0) {
+                flash('Deleted '.count($limits).' old limits.')->success();
+            }
 
             if (isset($data['limit_type'])) {
                 foreach ($data['limit_type'] as $key => $type) {
@@ -58,6 +60,7 @@ class LimitService extends Service {
                         'limit_id'     => $data['limit_id'][$key],
                         'quantity'     => $data['quantity'][$key],
                         'debit'        => $data['debit'][$key] == 'no' ? 0 : 1,
+                        'is_unlocked'  => $data['is_unlocked'] == 'no' ? 0 : 1,
                     ]);
 
                     if (!$limit->save()) {

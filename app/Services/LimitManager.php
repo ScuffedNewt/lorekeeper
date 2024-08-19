@@ -3,8 +3,10 @@
 namespace App\Services;
 
 use App\Models\Limit\Limit;
+use App\Models\User\UserItem;
 use App\Models\Submission\Submission;
-use Auth;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class LimitManager extends Service {
     /*
@@ -36,13 +38,19 @@ class LimitManager extends Service {
                 return true;
             }
 
+            if ($limits->first()->is_unlocked) {
+                if ($user->unlockedLimits()->where('object_model', get_class($object))->where('object_id', $object->id)->exists()) {
+                    return true;
+                }
+            }
+
             $plucked_stacks = [];
             foreach ($limits as $limit) {
                 switch ($limit->limit_type) {
                     case 'prompt':
                         // check at least quantity of prompts has been approved
                         if (Submission::where('user_id', $user->id)->where('status', 'Approved')->where('prompt_id', $limit->limit_id)->count() < $limit->quantity) {
-                            throw new \Exception('You have not completed the prompt '.$limit->object->name.' enough times to complete this action.');
+                            throw new \Exception('You have not completed the prompt '.$limit->limit->displayName.' enough times to complete this action.');
                         }
                         break;
                     case 'item':
@@ -51,23 +59,30 @@ class LimitManager extends Service {
                         }
 
                         if ($limit->debit) {
-                            $stacks = $user->items()->where('item_id', $limit->limit_id)->orderBy('count', 'desc')->get();
-
+                            $stacks = UserItem::where('user_id', $user->id)->where('item_id', $limit->limit_id)->orderBy('count', 'asc')->get(); // asc because pop() removes from the end
 
                             $count = $limit->quantity;
                             while ($count > 0) {
                                 $stack = $stacks->pop();
                                 $quantity = $stack->count >= $count ? $count : $stack->count;
-                                if (!$service->debitStack($user, 'Limit Checking', ['data' => 'Used in ' . $object->name . '.'], $stack, $quantity)) {
-                                    throw new \Exception('Items could not be removed.');
-                                }
                                 $count -= $quantity;
+                                $plucked_stacks[$stack->id] = $quantity;
                             }
                         }
                         break;
                     case 'currency':
-                        if ($user->currency($limit->limit_id) < $limit->quantity) {
-                            throw new \Exception('You do not have enough '.$limit->object->name.' to complete this action.');
+                        if (DB::table('user_currencies')->where('user_id', $user->id)->where('currency_id', $limit->limit_id)->value('quantity') < $limit->quantity) {
+                            throw new \Exception('You do not have enough '.$limit->limit->displayName. ' to complete this action.');
+                        }
+
+                        if ($limit->debit) {
+                            $service = new CurrencyManager;
+                            if(!$service->debitCurrency($user, null, 'Limit Requirements', 'Used in ' . $limit->object->displayName . ' limit requirements.', $limit->limit, $limit->quantity)) {
+                                foreach ($service->errors()->getMessages()['error'] as $error) {
+                                    flash($error)->error();
+                                }
+                                throw new \Exception('Currency could not be removed.');
+                            }
                         }
                         break;
                 }
@@ -75,9 +90,9 @@ class LimitManager extends Service {
 
             if (count($plucked_stacks)) {
                 $inventoryManager = new InventoryManager;
-                $type = 'Limit Debit';
+                $type = 'Limit Requirements';
                 $data = [
-                    'data' => 'Used in '.$limit->object->displayName ?? $limit->object->name.'\'s limit checks',
+                    'data' => 'Used in '.$limit->object->displayName ?? $limit->object->name.'\'s limit requirements.',
                 ];
 
                 foreach ($plucked_stacks as $id=>$quantity) {
@@ -86,7 +101,13 @@ class LimitManager extends Service {
                         throw new \Exception('Items could not be removed.');
                     }
                 }
+            }
 
+            if ($limits->first()->is_unlocked) {
+                $user->unlockedLimits()->create([
+                    'object_model' => get_class($object),
+                    'object_id'    => $object->id,
+                ]);
             }
 
             return true;

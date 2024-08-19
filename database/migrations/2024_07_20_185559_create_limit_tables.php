@@ -26,6 +26,14 @@ return new class extends Migration {
             $table->integer('quantity')->nullable()->default(null);
 
             $table->boolean('debit')->default(0);
+            $table->boolean('is_unlocked')->default(0);
+        });
+
+        Schema::create('user_unlocked_limits', function (Blueprint $table) {
+            $table->id();
+            $table->integer('user_id');
+            $table->string('object_model');
+            $table->integer('object_id');
         });
     }
 
@@ -33,6 +41,7 @@ return new class extends Migration {
      * Reverse the migrations.
      */
     public function down(): void {
+        Schema::dropIfExists('user_unlocked_limits');
         Schema::dropIfExists('dynamic_limits');
         Schema::dropIfExists('limits');
     }

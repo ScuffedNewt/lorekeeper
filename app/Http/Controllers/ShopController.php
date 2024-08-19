@@ -10,6 +10,7 @@ use App\Models\Shop\ShopLog;
 use App\Models\Shop\ShopStock;
 use App\Models\User\UserItem;
 use App\Services\ShopManager;
+use App\Services\LimitManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -46,6 +47,14 @@ class ShopController extends Controller {
         $shop = Shop::where('id', $id)->where('is_active', 1)->first();
         if (!$shop) {
             abort(404);
+        }
+
+        if (count(getLimits($shop))) {
+            $service = new LimitManager;
+            if (!$service->checkLimits($shop)) {
+                flash($service->errors()->getMessages()['error'][0])->error();
+                return redirect()->to('shops');
+            }
         }
 
         $query = $shop->displayStock()->where(function ($query) use ($categories) {
