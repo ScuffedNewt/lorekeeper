@@ -5,7 +5,6 @@
 @endsection
 
 @section('admin-content')
-
     {!! breadcrumbs(['Admin Panel' => 'admin', 'Limits' => 'admin/data/limits', ($limit->id ? 'Edit' : 'Create') . ' Limit' => $limit->id ? 'admin/data/limits/edit/' . $limit->id : 'admin/data/limits/create']) !!}
 
     <h1>{{ $limit->id ? 'Edit' : 'Create' }} Limit

@@ -62,7 +62,7 @@ class LimitController extends Controller {
      * Creates or edits a limit.
      *
      * @param App\Services\LimitService $service
-     * @param int|null                   $id
+     * @param int|null                  $id
      *
      * @return \Illuminate\Http\RedirectResponse
      */
@@ -104,7 +104,7 @@ class LimitController extends Controller {
      * Deletes a limit.
      *
      * @param App\Services\LimitService $service
-     * @param int                        $id
+     * @param int                       $id
      *
      * @return \Illuminate\Http\RedirectResponse
      */
