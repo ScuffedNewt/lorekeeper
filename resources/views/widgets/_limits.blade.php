@@ -16,8 +16,9 @@
             <thead>
                 <tr>
                     <th width="30%">Limit Type</th>
-                    <th width="40%">Limit</th>
-                    <th width="30%">Quantity</th>
+                    <th width="30%">Limit</th>
+                    <th width="20%">Quantity</th>
+                    <th width="20%">Is Debitted?</th>
                 </tr>
             </thead>
             <tbody>
@@ -29,6 +30,9 @@
                         </td>
                         <td>{!! $limit->limit->displayName !!}</td>
                         <td>{{ $limit->quantity }}</td>
+                        <td class="text-{{ $limit->debit ? 'success' : 'danger' }}">
+                            {{ $limit->debit ? 'Yes' : 'No' }}
+                        </td>
                     </tr>
                 @endforeach
             </tbody>

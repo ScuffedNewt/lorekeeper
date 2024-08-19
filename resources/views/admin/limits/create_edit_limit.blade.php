@@ -28,8 +28,10 @@
         {!! Form::textarea('description', $limit->description, ['class' => 'form-control wysiwyg']) !!}
     </div>
 
+    <hr />
+
     <h5>Evalutation</h5>
-    <p>Enter the PHP code that will be evaluated to determine if the limit is met. The code should return a boolean (true / false) value.</p>
+    <p>Enter the PHP code that will be evaluated to determine if the limit is met. The code should return a boolean <code>(true / false)</code> value.</p>
     <p>Laravel facades are accessible. For example, you can use <code>Auth::user()</code> to get the currently authenticated user.</p>
     <div class="mb-3" id="editor" style="height: 500px; width: 100%;"></div>
 
