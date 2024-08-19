@@ -18,7 +18,7 @@
                     <th width="30%">Limit Type</th>
                     <th width="30%">Limit</th>
                     <th width="20%">Quantity</th>
-                    <th width="20%">Is Debitted?</th>
+                    <th width="20%">Is Debited?</th>
                 </tr>
             </thead>
             <tbody>
