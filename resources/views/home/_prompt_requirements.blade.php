@@ -1,9 +1,9 @@
-@if(count(getLimits($prompt)))
+@if (count(getLimits($prompt)))
     <div class="alert alert-warning">
         <strong>Warning:</strong> If you are submitting a prompt, you will not be able to edit the contents after
-            the submission has been made.
-            <br />
-            Submitting to: {!! $prompt->displayName !!}
+        the submission has been made.
+        <br />
+        Submitting to: {!! $prompt->displayName !!}
     </div>
     @include('widgets._limits', ['object' => $prompt])
     <div class="form-group float-right">
