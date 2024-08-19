@@ -1,5 +1,7 @@
 @php
-    $objectWeather = \App\Models\Weather\ObjectWeather::where('object_id', $object->id)->where('object_model', get_class($object))->first();
+    $objectWeather = \App\Models\Weather\ObjectWeather::where('object_id', $object->id)
+        ->where('object_model', get_class($object))
+        ->first();
 @endphp
 
 @if ($objectWeather && count($objectWeather->weathers))

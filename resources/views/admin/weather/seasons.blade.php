@@ -1,6 +1,8 @@
 @extends('admin.layout')
 
-@section('admin-title') Seasons @endsection
+@section('admin-title')
+    Seasons
+@endsection
 
 @section('admin-content')
     {!! breadcrumbs(['Admin Panel' => 'admin', 'Seasons' => 'admin/weather/seasons']) !!}
@@ -25,21 +27,21 @@
                 <div class="col-3 col-md-4 font-weight-bold">Visible?</div>
                 <div class="col-6 col-md-5 font-weight-bold">Current Season?</div>
             </div>
-            @foreach($seasons as $season)
+            @foreach ($seasons as $season)
                 <div class="d-flex row flex-wrap col-12 mt-1 pt-1 px-0 ubt-top">
                     <div class="col-3 col-md-2">{{ $season->name }} (#{{ $season->id }})</div>
                     <div class="col-3 col-md-4">
                         {!! $season->is_visible ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>' !!}
                     </div>
                     <div class="col-3 col-md-5">
-                        @if(Settings::get('site_season') == $season->id)
+                        @if (Settings::get('site_season') == $season->id)
                             <i class="text-success fas fa-check"></i>
                         @else
                             <i class="text-danger fas fa-times"></i>
                         @endif
                     </div>
                     <div class="col-3 col-md-1 text-right">
-                        <a href="{{ url('admin/weather/seasons/edit/'.$season->id) }}" class="btn btn-primary py-0 px-2">Edit</a>
+                        <a href="{{ url('admin/weather/seasons/edit/' . $season->id) }}" class="btn btn-primary py-0 px-2">Edit</a>
                     </div>
                 </div>
             @endforeach

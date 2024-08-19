@@ -24,7 +24,8 @@
             </div>
         </div>
     @else
-        <p>Looks like we don't have any data for the weather at the moment... stay tuned!<p>
+        <p>Looks like we don't have any data for the weather at the moment... stay tuned!
+        <p>
     @endif
     <h4>And the season is currently...</h4>
     @if ($season)

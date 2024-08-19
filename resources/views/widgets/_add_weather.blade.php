@@ -1,7 +1,9 @@
 @php
     $weathers = \App\Models\Weather\Weather::orderBy('name')->pluck('name', 'id');
-    $objectWeather = \App\Models\Weather\ObjectWeather::where('object_id', $object->id)->where('object_model', get_class($object))->first();
-    $resetPeriods = [null => 'None', 'Hour' => 'Hourly', 'Day' => 'Daily', 'Week' => 'Weekly', 'Month' => 'Month', 'Year' => 'Year']
+    $objectWeather = \App\Models\Weather\ObjectWeather::where('object_id', $object->id)
+        ->where('object_model', get_class($object))
+        ->first();
+    $resetPeriods = [null => 'None', 'Hour' => 'Hourly', 'Day' => 'Daily', 'Week' => 'Weekly', 'Month' => 'Month', 'Year' => 'Year'];
 @endphp
 
 <div class="card p-4 mb-2 mt-2" id="weather-card">
@@ -19,7 +21,7 @@
             @if ($objectWeather)
                 <h5>Weather for {!! $objectWeather->object->displayName !!}</h5>
                 Current Weather: {!! $objectWeather->getWeatherMessage() !!}
-                @foreach ($objectWeather->weathers as $id=>$weight)
+                @foreach ($objectWeather->weathers as $id => $weight)
                     <div class="row">
                         <div class="col-md-4 form-group">
                             {!! Form::label('Weather') !!}
