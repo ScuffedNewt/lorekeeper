@@ -2,11 +2,9 @@
 
 namespace App\Models\Weather;
 
-use Config;
 use App\Models\Model;
 
-class Weather extends Model
-{
+class Weather extends Model {
     /**
      * The attributes that are mass assignable.
      *
@@ -51,12 +49,16 @@ class Weather extends Model
     /**
      * Scope a query to show only visible features.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param mixed                                 $withHidden
+     *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeVisible($query, $withHidden = 0)
-    {
-        if($withHidden) return $query;
+    public function scopeVisible($query, $withHidden = 0) {
+        if ($withHidden) {
+            return $query;
+        }
+
         return $query->where('is_visible', 1);
     }
 
@@ -70,8 +72,7 @@ class Weather extends Model
      *
      * @return string
      */
-    public function getDisplayNameAttribute()
-    {
+    public function getDisplayNameAttribute() {
         return '<a href="'.$this->url.'" class="display-weather">'.$this->name.'</a>';
     }
 
@@ -80,8 +81,7 @@ class Weather extends Model
      *
      * @return string
      */
-    public function getUrlAttribute()
-    {
+    public function getUrlAttribute() {
         return url('world/weathers?name='.$this->name);
     }
 
@@ -90,8 +90,7 @@ class Weather extends Model
      *
      * @return string
      */
-    public function getAssetTypeAttribute()
-    {
+    public function getAssetTypeAttribute() {
         return 'weathers';
     }
 
@@ -100,8 +99,7 @@ class Weather extends Model
      *
      * @return string
      */
-    public function getImageDirectoryAttribute()
-    {
+    public function getImageDirectoryAttribute() {
         return 'images/data/weather';
     }
 
@@ -110,9 +108,8 @@ class Weather extends Model
      *
      * @return string
      */
-    public function getImageFileNameAttribute()
-    {
-        return $this->id . '-image.png';
+    public function getImageFileNameAttribute() {
+        return $this->id.'-image.png';
     }
 
     /**
@@ -120,20 +117,21 @@ class Weather extends Model
      *
      * @return string
      */
-    public function getImagePathAttribute()
-    {
+    public function getImagePathAttribute() {
         return public_path($this->imageDirectory);
     }
-    
+
     /**
      * Gets the URL of the model's image.
      *
      * @return string
      */
-    public function getImageUrlAttribute()
-    {
-        if (!$this->has_image) return null;
-        return asset($this->imageDirectory . '/' . $this->imageFileName);
+    public function getImageUrlAttribute() {
+        if (!$this->has_image) {
+            return null;
+        }
+
+        return asset($this->imageDirectory.'/'.$this->imageFileName);
     }
 
     /**

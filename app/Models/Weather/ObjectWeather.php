@@ -2,11 +2,10 @@
 
 namespace App\Models\Weather;
 
-use App\Models\Model;
 use App\Facades\Settings;
+use App\Models\Model;
 
 class ObjectWeather extends Model {
-
     /**
      * The attributes that are mass assignable.
      *
@@ -29,7 +28,7 @@ class ObjectWeather extends Model {
      * @var array
      */
     protected $casts = [
-        'weathers' => 'array',
+        'weathers'        => 'array',
         'active_weathers' => 'array',
     ];
 
@@ -96,7 +95,7 @@ class ObjectWeather extends Model {
         $message = [];
         foreach ($weathers as $weather) {
             if ($this->isWeatherActive($weather->id)) {
-                $message[] = $weather->has_image ? '<img src="' . $weather->imageUrl . '" style="width: 25px; height: 25px" />' . $weather->displayName : $weather->displayName;
+                $message[] = $weather->has_image ? '<img src="'.$weather->imageUrl.'" style="width: 25px; height: 25px" />'.$weather->displayName : $weather->displayName;
             }
         }
 
@@ -105,6 +104,8 @@ class ObjectWeather extends Model {
 
     /**
      * returns if a specific weather is active or not.
+     *
+     * @param mixed $id
      */
     public function isWeatherActive($id) {
         return in_array($id, $this->active_weathers);
@@ -114,7 +115,6 @@ class ObjectWeather extends Model {
      * Changes the current active weather for the object.
      */
     public function changeWeather() {
-
         $totalWeight = 0;
         foreach ($this->weathers as $id=>$weight) {
             $totalWeight += $weight;
@@ -129,17 +129,18 @@ class ObjectWeather extends Model {
             $result = null;
             $prev = null;
             $count = 0;
-            foreach($this->weathers as $id=>$weight) {
+            foreach ($this->weathers as $id=>$weight) {
                 $count += $weight;
 
-                if($roll < $count)
-                {
+                if ($roll < $count) {
                     $result = $id;
                     break;
                 }
                 $prev = $id;
             }
-            if(!$result) $result = $prev;
+            if (!$result) {
+                $result = $prev;
+            }
             $chosen_weather[] = $result;
         }
 

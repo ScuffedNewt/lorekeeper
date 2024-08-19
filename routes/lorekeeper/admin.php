@@ -451,7 +451,7 @@ Route::group(['prefix' => 'designs', 'middleware' => 'power:manage_characters'],
 Route::get('{type}/{status}', 'DesignController@getDesignIndex')->where('type', 'myo-approvals|design-approvals')->where('status', 'pending|approved|rejected');
 
 //WEATHER
-Route::group(['prefix' => 'weather', 'namespace' => 'Data', 'middleware' => 'power:edit_data'], function() {
+Route::group(['prefix' => 'weather', 'namespace' => 'Data', 'middleware' => 'power:edit_data'], function () {
     // SEASONS
     Route::get('seasons', 'WeatherController@getIndex');
     Route::get('seasons/create', 'WeatherController@getCreateSeason');

@@ -3,13 +3,12 @@
 namespace App\Console\Commands;
 
 use App\Facades\Settings;
-use Illuminate\Console\Command;
 use App\Models\Weather\Season;
 use Carbon\Carbon;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
-class CycleSeason extends Command
-{
+class CycleSeason extends Command {
     /**
      * The name and signature of the console command.
      *
@@ -26,11 +25,8 @@ class CycleSeason extends Command
 
     /**
      * Create a new command instance.
-     *
-     * @return void
      */
-    public function __construct()
-    {
+    public function __construct() {
         parent::__construct();
     }
 
@@ -39,21 +35,22 @@ class CycleSeason extends Command
      *
      * @return int
      */
-    public function handle()
-    { 
+    public function handle() {
         $newSeason = Season::where('start_month', '<=', Carbon::now()->month)->orderBy('start_month', 'desc')->first();
 
         if ($newSeason->id == Settings::get('site_season')) {
-            $this->info('Season already set to ' . $newSeason->name . '.');
+            $this->info('Season already set to '.$newSeason->name.'.');
+
             return;
         }
 
         if (!$newSeason | $newSeason->end_month < Carbon::now()->month) {
             $this->info('No season found.');
             Settings::set('site_season', null);
+
             return;
         }
-    
+
         DB::table('site_settings')->where('key', 'site_season')->update(['value' => $newSeason->id]);
         $this->info('Season adjusted successfully.');
     }

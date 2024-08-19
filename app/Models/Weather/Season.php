@@ -2,11 +2,9 @@
 
 namespace App\Models\Weather;
 
-use Config;
 use App\Models\Model;
 
-class Season extends Model
-{
+class Season extends Model {
     /**
      * The attributes that are mass assignable.
      *
@@ -14,7 +12,7 @@ class Season extends Model
      */
     protected $fillable = [
         'name', 'summary', 'description',
-        'parsed_description', 'is_visible', 'sort', 'has_image', 'start_month', 'end_month'
+        'parsed_description', 'is_visible', 'sort', 'has_image', 'start_month', 'end_month',
     ];
 
     /**
@@ -42,7 +40,6 @@ class Season extends Model
         'name' => 'required',
     ];
 
-
     /**********************************************************************************************
 
         RELATIONS
@@ -65,46 +62,50 @@ class Season extends Model
     /**
      * Scope a query to sort items in alphabetical order.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @param  bool                                   $reverse
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param bool                                  $reverse
+     *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeSortAlphabetical($query, $reverse = false)
-    {
+    public function scopeSortAlphabetical($query, $reverse = false) {
         return $query->orderBy('name', $reverse ? 'DESC' : 'ASC');
     }
 
     /**
      * Scope a query to sort items by newest first.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeSortNewest($query)
-    {
+    public function scopeSortNewest($query) {
         return $query->orderBy('id', 'DESC');
     }
 
     /**
      * Scope a query to sort features oldest first.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeSortOldest($query)
-    {
+    public function scopeSortOldest($query) {
         return $query->orderBy('id');
     }
 
-     /**
+    /**
      * Scope a query to show only visible features.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param mixed                                 $withHidden
+     *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeVisible($query, $withHidden = 0)
-    {
-        if($withHidden) return $query;
+    public function scopeVisible($query, $withHidden = 0) {
+        if ($withHidden) {
+            return $query;
+        }
+
         return $query->where('is_visible', 1);
     }
 
@@ -119,48 +120,48 @@ class Season extends Model
      *
      * @return string
      */
-    public function getDisplayNameAttribute()
-    {
+    public function getDisplayNameAttribute() {
         return '<a href="'.$this->url.'" class="display-season">'.$this->name.'</a>';
     }
-
 
     /**
      * Get the data attribute as an associative array.
      *
      * @return array
      */
-    public function getDataAttribute()
-    {
-        if (!$this->attributes['data']) return null;
+    public function getDataAttribute() {
+        if (!$this->attributes['data']) {
+            return null;
+        }
+
         return json_decode($this->attributes['data'], true);
     }
 
-        /**
+    /**
      * Gets the URL of the model's encyclopedia page.
      *
      * @return string
      */
-    public function getUrlAttribute()
-    {
+    public function getUrlAttribute() {
         return url('world/seasons?name='.$this->name);
     }
 
     /**
      * Rolls on the loot table and consolidates the rewards.
      *
-     * @param  int  $quantity
+     * @param int $quantity
+     *
      * @return \Illuminate\Support\Collection
      */
-    public function roll($quantity = 1)
-    { 
+    public function roll($quantity = 1) {
         $loot = $this->weather;
         $totalWeight = 0;
-        foreach($loot as $l) $totalWeight += $l->weight;
+        foreach ($loot as $l) {
+            $totalWeight += $l->weight;
+        }
 
         $results = [];
-        for($i = 0; $i < $quantity; $i++)
-        {
+        for ($i = 0; $i < $quantity; $i++) {
             if ($totalWeight == 0) {
                 continue;
             }
@@ -168,31 +169,30 @@ class Season extends Model
             $result = null;
             $prev = null;
             $count = 0;
-            foreach($loot as $l)
-            {
+            foreach ($loot as $l) {
                 $count += $l->weight;
 
-                if($roll < $count)
-                {
+                if ($roll < $count) {
                     $result = $l;
                     break;
                 }
                 $prev = $l;
             }
-            if(!$result) $result = $prev;
+            if (!$result) {
+                $result = $prev;
+            }
             $results[] = $result;
         }
+
         return $results;
     }
-    
 
     /**
      * Gets the file directory containing the model's image.
      *
      * @return string
      */
-    public function getImageDirectoryAttribute()
-    {
+    public function getImageDirectoryAttribute() {
         return 'images/data/seasons';
     }
 
@@ -201,9 +201,8 @@ class Season extends Model
      *
      * @return string
      */
-    public function getImageFileNameAttribute()
-    {
-        return $this->id . '-image.png';
+    public function getImageFileNameAttribute() {
+        return $this->id.'-image.png';
     }
 
     /**
@@ -211,20 +210,21 @@ class Season extends Model
      *
      * @return string
      */
-    public function getImagePathAttribute()
-    {
+    public function getImagePathAttribute() {
         return public_path($this->imageDirectory);
     }
-    
+
     /**
      * Gets the URL of the model's image.
      *
      * @return string
      */
-    public function getImageUrlAttribute()
-    {
-        if (!$this->has_image) return null;
-        return asset($this->imageDirectory . '/' . $this->imageFileName);
+    public function getImageUrlAttribute() {
+        if (!$this->has_image) {
+            return null;
+        }
+
+        return asset($this->imageDirectory.'/'.$this->imageFileName);
     }
 
     /**

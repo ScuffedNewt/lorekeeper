@@ -196,9 +196,9 @@ return [
             ],
             [
                 'name' => 'Seasons/Weather',
-                'url' => 'admin/weather/seasons'
+                'url'  => 'admin/weather/seasons',
             ],
-        ]
+        ],
     ],
     'Raffles'    => [
         'power' => 'manage_raffles',

@@ -4,17 +4,12 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddSeasonWeathers extends Migration
-{
+class AddSeasonWeathers extends Migration {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
-    {
-
-//types of weather, like sun, cloudy, anything else really
+    public function up() {
+        //types of weather, like sun, cloudy, anything else really
         Schema::create('weather', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->increments('id');
@@ -48,18 +43,15 @@ class AddSeasonWeathers extends Migration
             $table->increments('id');
             $table->integer('season_id')->unsigned();
             $table->integer('weather_id')->unsigned();
-            $table->integer('weight')->unsigned();  
+            $table->integer('weight')->unsigned();
             $table->foreign('season_id')->references('id')->on('seasons');
         });
     }
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
-    {
+    public function down() {
         //
         Schema::dropIfExists('season_weathers');
         Schema::dropIfExists('seasons');

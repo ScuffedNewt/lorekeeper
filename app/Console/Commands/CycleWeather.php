@@ -3,15 +3,14 @@
 namespace App\Console\Commands;
 
 use App\Facades\Settings;
-use Illuminate\Console\Command;
-use Carbon\Carbon;
+use App\Models\Weather\ObjectWeather;
 use App\Models\Weather\Season;
 use App\Models\Weather\Weather;
-use App\Models\Weather\ObjectWeather;
+use Carbon\Carbon;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
-class CycleWeather extends Command
-{
+class CycleWeather extends Command {
     /**
      * The name and signature of the console command.
      *
@@ -28,11 +27,8 @@ class CycleWeather extends Command
 
     /**
      * Create a new command instance.
-     *
-     * @return void
      */
-    public function __construct()
-    {
+    public function __construct() {
         parent::__construct();
     }
 
@@ -41,13 +37,12 @@ class CycleWeather extends Command
      *
      * @return int
      */
-    public function handle()
-    {
+    public function handle() {
         // weather objects
         $objectWeathers = ObjectWeather::all();
         foreach ($objectWeathers as $objectWeather) {
-            $this->info('Cycling weather for ' . $objectWeather->name . '...');
-            $this->info('Reset period: ' . $objectWeather->reset_period);
+            $this->info('Cycling weather for '.$objectWeather->name.'...');
+            $this->info('Reset period: '.$objectWeather->reset_period);
             switch ($objectWeather->reset_period) {
                 case 'Hour':
                     // reset every hour
@@ -100,6 +95,7 @@ class CycleWeather extends Command
         $currentSeason = Season::where('id', Settings::get('site_season'))->first();
         if (!$currentSeason) {
             $this->info('No season found. Please set a season in the admin panel.');
+
             return;
         }
 
@@ -110,14 +106,14 @@ class CycleWeather extends Command
         if (!Settings::get('cycle_site_weather')) {
             // no reset setting
             $this->info('Not set to cycle weather currently. Adjust the settings if this is an error.');
-        } else if (Settings::get('cycle_site_weather') == 2) {
+        } elseif (Settings::get('cycle_site_weather') == 2) {
             //weekly reset setting
             $now = Carbon::now();
             $day = $now->dayOfWeek;
-            if($day != 1) {
+            if ($day != 1) {
                 return;
             }
-        } else if (Settings::get('cycle_site_weather') == 3) {
+        } elseif (Settings::get('cycle_site_weather') == 3) {
             // monthly reset
             $now = Carbon::now();
             $day = $now->day;

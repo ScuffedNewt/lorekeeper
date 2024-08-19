@@ -2,20 +2,16 @@
 
 namespace App\Http\Controllers\Admin\Data;
 
-use Illuminate\Support\Facades\Auth;
-use App\Models\Weather\Weather;
-use App\Models\Weather\Season;
-use App\Models\Item\Item;
-use App\Models\Currency\Currency;
-use App\Services\WeatherService;
-use App\Models\Weather\ObjectWeather;
-use Illuminate\Support\Arr;
-use Illuminate\Http\Request;
-
 use App\Http\Controllers\Controller;
+use App\Models\Weather\ObjectWeather;
+use App\Models\Weather\Season;
+use App\Models\Weather\Weather;
+use App\Services\WeatherService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 
-class WeatherController extends Controller
-{
+class WeatherController extends Controller {
     /*
     |--------------------------------------------------------------------------
     | Admin / Weather Controller
@@ -27,12 +23,10 @@ class WeatherController extends Controller
 
     /**
      * Shows the season index.
-     *
      */
-    public function getIndex()
-    {
+    public function getIndex() {
         return view('admin.weather.seasons', [
-            'seasons' => Season::orderBy('name', 'DESC')->get()
+            'seasons' => Season::orderBy('name', 'DESC')->get(),
         ]);
     }
 
@@ -41,10 +35,9 @@ class WeatherController extends Controller
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function getCreateSeason()
-    {
+    public function getCreateSeason() {
         return view('admin.weather.create_edit_season', [
-            'season' => new Season,
+            'season'   => new Season,
             'weathers' => Weather::orderBy('name')->pluck('name', 'id'),
         ]);
     }
@@ -52,16 +45,18 @@ class WeatherController extends Controller
     /**
      * Shows the edit season page.
      *
-     * @param  int  $id
+     * @param int $id
+     *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function getEditSeason($id)
-    {
+    public function getEditSeason($id) {
         $season = Season::find($id);
-        if(!$season) abort(404);
+        if (!$season) {
+            abort(404);
+        }
 
         return view('admin.weather.create_edit_season', [
-            'season' => $season,
+            'season'   => $season,
             'weathers' => Weather::orderBy('name')->pluck('name', 'id'),
         ]);
     }
@@ -69,39 +64,41 @@ class WeatherController extends Controller
     /**
      * Creates or edits a season.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  App\Services\WeatherService  $service
-     * @param  int|null                  $id
+     * @param App\Services\WeatherService $service
+     * @param int|null                    $id
+     *
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function postCreateEditSeason(Request $request, WeatherService $service, $id = null)
-    { 
+    public function postCreateEditSeason(Request $request, WeatherService $service, $id = null) {
         $id ? $request->validate(Season::$updateRules) : $request->validate(Season::$createRules);
         $data = $request->only([
             'name', 'description', 'image', 'remove_image', 'is_visible', 'summary', 'weather_id', 'weight', 'start_month', 'end_month',
         ]);
-        if($id && $service->updateSeason(Season::find($id), $data, Auth::user())) {
+        if ($id && $service->updateSeason(Season::find($id), $data, Auth::user())) {
             flash('Weather updated successfully.')->success();
-        }
-        else if (!$id && $season = $service->createSeason($data, Auth::user())) {
+        } elseif (!$id && $season = $service->createSeason($data, Auth::user())) {
             flash('Season created successfully.')->success();
+
             return redirect()->to('admin/weather/seasons/edit/'.$season->id);
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
         }
-        else {
-            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
-        }
+
         return redirect()->back();
     }
 
     /**
      * Gets the season deletion modal.
      *
-     * @param  int  $id
+     * @param int $id
+     *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function getDeleteSeason($id)
-    {
+    public function getDeleteSeason($id) {
         $season = Season::find($id);
+
         return view('admin.weather._delete_season', [
             'season' => $season,
         ]);
@@ -110,63 +107,67 @@ class WeatherController extends Controller
     /**
      * Deletes a season.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  App\Services\WeatherService  $service
-     * @param  int                       $id
+     * @param App\Services\WeatherService $service
+     * @param int                         $id
+     *
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function postDeleteSeason(Request $request, WeatherService $service, $id)
-    {
-        if($id && $service->deleteSeason(Season::find($id))) {
+    public function postDeleteSeason(Request $request, WeatherService $service, $id) {
+        if ($id && $service->deleteSeason(Season::find($id))) {
             flash('Season deleted successfully.')->success();
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
         }
-        else {
-            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
-        }
+
         return redirect()->to('admin/weather/seasons');
     }
 
     /**
      * Sorts seasons.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  App\Services\WeatherService  $service
+     * @param App\Services\WeatherService $service
+     *
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function postSortSeason(Request $request, WeatherService $service)
-    {
-        if($service->sortSeason($request->get('sort'))) {
+    public function postSortSeason(Request $request, WeatherService $service) {
+        if ($service->sortSeason($request->get('sort'))) {
             flash('Season order updated successfully.')->success();
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
         }
-        else {
-            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
-        }
+
         return redirect()->back();
     }
 
     /**
      * Gets the loot table test roll modal.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  App\Services\WeatherService  $service
-     * @param  int                       $id
+     * @param App\Services\WeatherService $service
+     * @param int                         $id
+     *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function getRollSeason(Request $request, WeatherService $service, $id)
-    { 
+    public function getRollSeason(Request $request, WeatherService $service, $id) {
         $table = Season::find($id);
-        if(!$table) abort(404);
+        if (!$table) {
+            abort(404);
+        }
 
         // Normally we'd merge the result tables, but since we're going to be looking at
         // the results of each roll individually on this page, we'll keep them separate
         $results = [];
-        for ($i = 0; $i < $request->get('quantity'); $i++)
+        for ($i = 0; $i < $request->get('quantity'); $i++) {
             $results[] = $table->roll();
+        }
 
         return view('admin.weather._roll_season_table', [
-            'table' => $table,
-            'results' => $results,
-            'quantity' => $request->get('quantity')
+            'table'    => $table,
+            'results'  => $results,
+            'quantity' => $request->get('quantity'),
         ]);
     }
 
@@ -175,19 +176,18 @@ class WeatherController extends Controller
     /**
      * Shows the weather index.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function getWeatherIndex(Request $request)
-    {
+    public function getWeatherIndex(Request $request) {
         $query = Weather::query();
         $data = $request->only(['name']);
 
-        if(isset($data['name'])) {
+        if (isset($data['name'])) {
             $query->where('name', 'LIKE', '%'.$data['name'].'%');
         }
+
         return view('admin.weather.weather', [
-            'weathers' =>  $query->paginate(20)->appends($request->query()),
+            'weathers' => $query->paginate(20)->appends($request->query()),
         ]);
     }
 
@@ -196,10 +196,9 @@ class WeatherController extends Controller
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function getCreateWeather()
-    {
+    public function getCreateWeather() {
         return view('admin.weather.create_edit_weather', [
-            'weather' => new Weather,
+            'weather'  => new Weather,
             'weathers' => Weather::orderBy('name')->pluck('name', 'id'),
         ]);
     }
@@ -207,16 +206,18 @@ class WeatherController extends Controller
     /**
      * Shows the edit weather page.
      *
-     * @param  int  $id
+     * @param int $id
+     *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function getEditWeather($id)
-    {
+    public function getEditWeather($id) {
         $weather = Weather::find($id);
-        if(!$weather) abort(404);
+        if (!$weather) {
+            abort(404);
+        }
 
         return view('admin.weather.create_edit_weather', [
-            'weather' => $weather,
+            'weather'  => $weather,
             'weathers' => Weather::orderBy('name')->pluck('name', 'id'),
         ]);
     }
@@ -224,39 +225,41 @@ class WeatherController extends Controller
     /**
      * Creates or edits a weather.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  App\Services\WeatherService  $service
-     * @param  int|null                  $id
+     * @param App\Services\WeatherService $service
+     * @param int|null                    $id
+     *
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function postCreateEditWeather(Request $request, WeatherService $service, $id = null)
-    {
+    public function postCreateEditWeather(Request $request, WeatherService $service, $id = null) {
         $id ? $request->validate(Weather::$updateRules) : $request->validate(Weather::$createRules);
         $data = $request->only([
             'name', 'description', 'image', 'remove_image', 'is_visible', 'summary',
         ]);
-        if($id && $service->updateWeather(Weather::find($id), $data, Auth::user())) {
+        if ($id && $service->updateWeather(Weather::find($id), $data, Auth::user())) {
             flash('Weather updated successfully.')->success();
-        }
-        else if (!$id && $weather = $service->createWeather($data, Auth::user())) {
+        } elseif (!$id && $weather = $service->createWeather($data, Auth::user())) {
             flash('Weather created successfully.')->success();
+
             return redirect()->to('admin/weather/weathers/edit/'.$weather->id);
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
         }
-        else {
-            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
-        }
+
         return redirect()->back();
     }
 
     /**
      * Gets the weather deletion modal.
      *
-     * @param  int  $id
+     * @param int $id
+     *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function getDeleteWeather($id)
-    {
+    public function getDeleteWeather($id) {
         $weather = Weather::find($id);
+
         return view('admin.weather._delete_weather', [
             'weather' => $weather,
         ]);
@@ -265,37 +268,39 @@ class WeatherController extends Controller
     /**
      * Deletes a weather.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  App\Services\WeatherService  $service
-     * @param  int                       $id
+     * @param App\Services\WeatherService $service
+     * @param int                         $id
+     *
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function postDeleteWeather(Request $request, WeatherService $service, $id)
-    {
-        if($id && $service->deleteWeather(Weather::find($id))) {
+    public function postDeleteWeather(Request $request, WeatherService $service, $id) {
+        if ($id && $service->deleteWeather(Weather::find($id))) {
             flash('Weather deleted successfully.')->success();
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
         }
-        else {
-            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
-        }
+
         return redirect()->to('admin/weather/weathers');
     }
 
     /**
      * Sorts weathers.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  App\Services\WeatherService  $service
+     * @param App\Services\WeatherService $service
+     *
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function postSortWeather(Request $request, WeatherService $service)
-    {
-        if($service->sortWeather($request->get('sort'))) {
+    public function postSortWeather(Request $request, WeatherService $service) {
+        if ($service->sortWeather($request->get('sort'))) {
             flash('Weather order updated successfully.')->success();
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
         }
-        else {
-            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
-        }
+
         return redirect()->back();
     }
 
@@ -307,9 +312,7 @@ class WeatherController extends Controller
 
     /**
      * Creates or edits an objects weather data.
-     * 
-     * @param  \Illuminate\Http\Request  $request
-     * 
+     *
      * @return \Illuminate\Http\RedirectResponse
      */
     public function postObjectWeather(Request $request, WeatherService $service) {
@@ -331,7 +334,10 @@ class WeatherController extends Controller
                 ], 400);
             }
         } elseif (!$newObjectWeather = $service->createObjectWeather(
-            urldecode($data['object_model']), $data['object_id'], Arr::only($data, ['weather_ids', 'weight', 'reset_period', 'active']), Auth::user()
+            urldecode($data['object_model']),
+            $data['object_id'],
+            Arr::only($data, ['weather_ids', 'weight', 'reset_period', 'active']),
+            Auth::user()
         )) {
             flash('Failed to create object weather.')->error();
 

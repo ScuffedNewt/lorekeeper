@@ -2,18 +2,16 @@
 
 namespace App\Models\Weather;
 
-use Config;
 use App\Models\Model;
 
-class SeasonWeather extends Model
-{
+class SeasonWeather extends Model {
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'season_id', 'weather_id','weight'
+        'season_id', 'weather_id', 'weight',
     ];
 
     /**
@@ -30,7 +28,7 @@ class SeasonWeather extends Model
      */
     public static $createRules = [
         'season_id' => 'required',
-        'weight' => 'required|integer|min:1',
+        'weight'    => 'required|integer|min:1',
     ];
 
     /**
@@ -40,7 +38,7 @@ class SeasonWeather extends Model
      */
     public static $updateRules = [
         'season_id' => 'required',
-        'weight' => 'required|integer|min:1',
+        'weight'    => 'required|integer|min:1',
     ];
 
     /**********************************************************************************************
@@ -52,8 +50,7 @@ class SeasonWeather extends Model
     /**
      * Get the weather attached to the entry.
      */
-    public function weather()
-    {
+    public function weather() {
         return $this->belongsTo(Weather::class, 'weather_id');
     }
 
@@ -68,8 +65,7 @@ class SeasonWeather extends Model
      *
      * @return string
      */
-    public function getDisplayNameAttribute()
-    {
+    public function getDisplayNameAttribute() {
         return '<a href="'.$this->weather->url.'">'.$this->weather->name.'</a>';
     }
 
@@ -78,10 +74,10 @@ class SeasonWeather extends Model
      *
      * @return string
      */
-    public function getDropRateAttribute()
-    {
-        $totalWeight = SeasonWeather::where('season_id', $this->season_id)->sum('weight');
+    public function getDropRateAttribute() {
+        $totalWeight = self::where('season_id', $this->season_id)->sum('weight');
         $dropRate = $this->weight / $totalWeight * 100;
+
         return number_format((float) $dropRate, 2, '.', '').'%';
     }
 }
