@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\Limit\Limit;
 use App\Models\Limit\DynamicLimit;
+use App\Models\Limit\Limit;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -88,7 +88,7 @@ class LimitService extends Service {
 
     **********************************************************************************************/
 
-        /**
+    /**
      * Creates a new limit.
      *
      * @param array                 $data
@@ -116,7 +116,7 @@ class LimitService extends Service {
     /**
      * Updates a limit.
      *
-     * @param Limit                $limit
+     * @param Limit                 $limit
      * @param array                 $data
      * @param \App\Models\User\User $user
      *
@@ -154,7 +154,6 @@ class LimitService extends Service {
         DB::beginTransaction();
 
         try {
-
             if (Limit::where('limit_type', 'dynamic')->where('limit_id', $limit->id)->exists()) {
                 throw new \Exception('This limit is currently in use and cannot be deleted.');
             }
