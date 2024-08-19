@@ -39,7 +39,7 @@
                 (Requires {!! implode(
                     ', ',
                     $limits->map(function ($limit) use ($limitTypes) {
-                            return ($limit->quantity ? ($limit->quantity . ' ') : '') . $limit->limit->displayName;
+                            return ($limit->quantity ? $limit->quantity . ' ' : '') . $limit->limit->displayName;
                         })->toArray(),
                 ) !!})
             </small>
