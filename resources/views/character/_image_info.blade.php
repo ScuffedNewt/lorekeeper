@@ -64,10 +64,7 @@
                     @if (config('lorekeeper.extensions.traits_by_category'))
                         <div>
                             @php
-                                $traitgroup = $image
-                                    ->features()
-                                    ->get()
-                                    ->groupBy('feature_category_id');
+                                $traitgroup = $image->features()->get()->groupBy('feature_category_id');
                             @endphp
                             @if ($image->features()->count())
                                 @foreach ($traitgroup as $key => $group)
@@ -91,10 +88,7 @@
                         </div>
                     @else
                         <div>
-                            <?php $features = $image
-                                ->features()
-                                ->with('feature.category')
-                                ->get(); ?>
+                            <?php $features = $image->features()->with('feature.category')->get(); ?>
                             @if ($features->count())
                                 @foreach ($features as $feature)
                                     <div>
@@ -173,27 +167,25 @@
             @if (isset($showMention) && $showMention)
                 {{-- Mention This tab --}}
                 <div class="tab-pane fade" id="mention-{{ $image->id }}">
-                    <div class="imagenoteseditingparse">
-                        In the rich text editor:
-                        <div class="alert alert-secondary">
-                            [character={{ $character->slug }}]
-                        </div>
-                        In a comment:
-                        <div class="alert alert-secondary">
-                            [{{ $character->fullName }}]({{ $character->url }})
-                        </div>
+                    In the rich text editor:
+                    <div class="alert alert-secondary">
+                        [character={{ $character->slug }}]
+                    </div>
+                    In a comment:
+                    <div class="alert alert-secondary">
+                        [{{ $character->fullName }}]({{ $character->url }})
                     </div>
                     <hr>
-                    <div class="my-2"><strong>For Thumbnails:</strong></div>
-                    <div class="imagenoteseditingparse">
-                        In the rich text editor:
-                        <div class="alert alert-secondary">
-                            [charthumb={{ $character->slug }}]
-                        </div>
-                        In a comment:
-                        <div class="alert alert-secondary">
-                            [![Thumbnail of {{ $character->fullName }}]({{ $character->image->thumbnailUrl }})]({{ $character->url }})
-                        </div>
+                    <div class="my-2">
+                        <strong>For Thumbnails:</strong>
+                    </div>
+                    In the rich text editor:
+                    <div class="alert alert-secondary">
+                        [charthumb={{ $character->slug }}]
+                    </div>
+                    In a comment:
+                    <div class="alert alert-secondary">
+                        [![Thumbnail of {{ $character->fullName }}]({{ $character->image->thumbnailUrl }})]({{ $character->url }})
                     </div>
                 </div>
             @endif

@@ -341,4 +341,27 @@ return [
     |
     */
     'wysiwyg_comments'                                  => 1,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Allow Gallery Submissions on Prompts
+    |--------------------------------------------------------------------------
+    |
+    | Whether or not to allow gallery submissions on prompts.
+    |
+    */
+    'allow_gallery_submissions_on_prompts'              => 1,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Site Logging Webhook
+    |--------------------------------------------------------------------------
+    |
+    | This is the webhook URL for site actions logging.
+    | This is used to send a webhook to the site administrators alerting them
+    | of any actions that may be considered suspicious or harmful.
+    | This is intended to be a Discord webhook, but can be used with other services with minor modifications.
+    |
+    */
+    'site_logging_webhook'                              => env('SITE_LOGGING_WEBHOOK', null),
 ];

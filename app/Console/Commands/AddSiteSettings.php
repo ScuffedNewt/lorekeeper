@@ -92,6 +92,10 @@ class AddSiteSettings extends Command {
         $this->addSiteSetting('show_weather_on_front_page', 1, '0: Weather & season is not shown on the front page, 1: Weather & season is shown on the front page.');
 
         $this->addSiteSetting('max_weather_per_object', 1, 'Maximum number of ACTIVE weather an object can have at once.');
+        
+        $this->addSiteSetting('can_transfer_currency_directly', 1, 'Whether or not users can directly transfer currency to other users without trading. 0: Users cannot directly transfer currency. 1: Direct currency transfers are allowed.');
+
+        $this->addSiteSetting('can_transfer_items_directly', 1, 'Whether or not users can directly transfer items to other users without trading. 0: Users cannot directly transfer items. 1: Direct item transfers are allowed.');
 
         $this->line("\nSite settings up to date!");
     }

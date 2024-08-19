@@ -78,6 +78,9 @@ Route::group(['prefix' => 'characters', 'namespace' => 'Users'], function () {
 Route::group(['prefix' => 'bank', 'namespace' => 'Users'], function () {
     Route::get('/', 'BankController@getIndex');
     Route::post('transfer', 'BankController@postTransfer');
+    Route::get('convert/{id}', 'BankController@getConvertCurrency');
+    Route::get('convert/{currency_id}/rate/{conversion_id}', 'BankController@getConvertCurrencyRate');
+    Route::post('convert', 'BankController@postConvertCurrency');
 });
 
 Route::group(['prefix' => 'trades', 'namespace' => 'Users'], function () {
@@ -202,6 +205,9 @@ Route::group(['prefix' => 'designs', 'namespace' => 'Characters'], function () {
 
     Route::get('{id}/delete', 'DesignController@getDelete');
     Route::post('{id}/delete', 'DesignController@postDelete');
+
+    Route::get('{id}/cancel', 'DesignController@getCancel');
+    Route::post('{id}/cancel', 'DesignController@postCancel');
 });
 
 /**************************************************************************************************
@@ -218,10 +224,10 @@ Route::group(['prefix' => 'shops'], function () {
 **************************************************************************************************/
 Route::group(['prefix' => 'comments', 'namespace' => 'Comments'], function () {
     Route::post('make/{model}/{id}', 'CommentController@store');
-    Route::delete('/{comment}', 'CommentController@destroy')->name('comments.destroy');
+    Route::delete('{comment}', 'CommentController@destroy')->name('comments.destroy')->where('comment', '[0-9]+');
     Route::post('edit/{comment}', 'CommentController@update')->name('comments.update');
-    Route::post('/{comment}', 'CommentController@reply')->name('comments.reply');
-    Route::post('/{id}/feature', 'CommentController@feature')->name('comments.feature');
-    Route::post('/{id}/like/{action}', 'CommentController@like')->name('comments.like');
-    Route::get('/liked', 'CommentController@getLikedComments');
+    Route::post('{comment}', 'CommentController@reply')->name('comments.reply');
+    Route::post('{id}/feature', 'CommentController@feature')->name('comments.feature');
+    Route::post('{id}/like/{action}', 'CommentController@like')->name('comments.like');
+    Route::get('liked', 'CommentController@getLikedComments');
 });
