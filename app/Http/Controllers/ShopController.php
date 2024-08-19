@@ -85,6 +85,19 @@ class ShopController extends Controller {
      */
     public function getShopStock(ShopManager $service, $id, $stockId) {
         $shop = Shop::where('id', $id)->where('is_active', 1)->first();
+        if (!$shop) {
+            abort(404);
+        }
+
+        if (count(getLimits($shop))) {
+            $service = new LimitManager;
+            if (!$service->checkLimits($shop)) {
+                flash($service->errors()->getMessages()['error'][0])->error();
+
+                return redirect()->to('shops');
+            }
+        }
+
         $stock = ShopStock::with('item')->where('id', $stockId)->where('shop_id', $id)->first();
 
         $user = Auth::user();
@@ -96,10 +109,6 @@ class ShopController extends Controller {
             $userPurchaseCount = $service->checkUserPurchases($stock, Auth::user());
             $purchaseLimitReached = $service->checkPurchaseLimitReached($stock, Auth::user());
             $userOwned = UserItem::where('user_id', $user->id)->where('item_id', $stock->item->id)->where('count', '>', 0)->get();
-        }
-
-        if (!$shop) {
-            abort(404);
         }
 
         return view('shops._stock_modal', [
