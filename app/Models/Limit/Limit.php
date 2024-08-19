@@ -78,7 +78,9 @@ class Limit extends Model {
     }
 
     /**
-     * Checks if a user has unlocked this
+     * Checks if a user has unlocked this.
+     *
+     * @param mixed $user
      */
     public function isUnlocked($user) {
         return $this->is_unlocked && $user->unlockedLimits()->where('object_model', $this->object_model)->where('object_id', $this->object_id)->exists();

@@ -9,8 +9,8 @@ use App\Models\Shop\Shop;
 use App\Models\Shop\ShopLog;
 use App\Models\Shop\ShopStock;
 use App\Models\User\UserItem;
-use App\Services\ShopManager;
 use App\Services\LimitManager;
+use App\Services\ShopManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -53,6 +53,7 @@ class ShopController extends Controller {
             $service = new LimitManager;
             if (!$service->checkLimits($shop)) {
                 flash($service->errors()->getMessages()['error'][0])->error();
+
                 return redirect()->to('shops');
             }
         }

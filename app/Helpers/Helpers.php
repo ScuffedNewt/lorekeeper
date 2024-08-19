@@ -451,9 +451,9 @@ function prettyProfileName($url) {
 
 /**
  * Returns the given objects limits, if any.
- * 
+ *
  * @param mixed $object
- * 
+ *
  * @return bool
  */
 function getLimits($object) {

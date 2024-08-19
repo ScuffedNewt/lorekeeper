@@ -53,7 +53,7 @@
 
     @if ($shop->id)
         <hr />
-        
+
         @include('widgets._add_limits', ['object' => $shop])
 
         <hr />

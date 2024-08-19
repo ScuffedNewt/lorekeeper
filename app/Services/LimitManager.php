@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\Models\Limit\Limit;
-use App\Models\User\UserItem;
 use App\Models\Submission\Submission;
+use App\Models\User\UserItem;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -72,12 +72,12 @@ class LimitManager extends Service {
                         break;
                     case 'currency':
                         if (DB::table('user_currencies')->where('user_id', $user->id)->where('currency_id', $limit->limit_id)->value('quantity') < $limit->quantity) {
-                            throw new \Exception('You do not have enough '.$limit->limit->displayName. ' to complete this action.');
+                            throw new \Exception('You do not have enough '.$limit->limit->displayName.' to complete this action.');
                         }
 
                         if ($limit->debit) {
                             $service = new CurrencyManager;
-                            if(!$service->debitCurrency($user, null, 'Limit Requirements', 'Used in ' . $limit->object->displayName . ' limit requirements.', $limit->limit, $limit->quantity)) {
+                            if (!$service->debitCurrency($user, null, 'Limit Requirements', 'Used in '.$limit->object->displayName.' limit requirements.', $limit->limit, $limit->quantity)) {
                                 foreach ($service->errors()->getMessages()['error'] as $error) {
                                     flash($error)->error();
                                 }
