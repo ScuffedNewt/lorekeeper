@@ -133,8 +133,12 @@
         @endif
     </div>
 
+    @php
+        $ips = $user->ips()->paginate(10);
+    @endphp
     <div class="card p-3 mb-2">
         <h3>Logged IPs</h3>
+        {!! $ips->render() !!}
         <table class="table">
             <thead>
                 <tr>
@@ -145,23 +149,18 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($user->ips as $ip)
+                @foreach ($ips as $ip)
                     <tr>
                         <td>{{ $ip->ip }}</td>
-                        <td>{!! format_date($ip->created_at) !!}</td>
-                        <td>{!! pretty_date($ip->updated_at) !!}</td>
+                        <td>{!! $ip->created_at ? format_date($ip->created_at) : 'Unknown' !!}</td>
+                        <td>{!! $ip->updated_at ? format_date($ip->updated_at) : 'Unknown' !!}</td>
                         <td>
-                            @if ($matching->where('ip', $ip->ip)->count())
-                                @foreach ($matching->where('ip', $ip->ip) as $match)
-                                    <a href="{{ $match->user->url }}">{{ $match->user->name }}</a>
-                                @endforeach
-                            @else
-                                None
-                            @endif
+                            {!! $ip->usersString ?? 'None' !!}
                         </td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
+        {!! $ips->render() !!}
     </div>
 @endsection

@@ -31,16 +31,43 @@ class UserIp extends Model
     public $timestamps = true;
 
     /**********************************************************************************************
-    
+
         RELATIONS
 
     **********************************************************************************************/
-    
+
     /**
      * Get the user this set of settings belongs to.
      */
-    public function user() 
+    public function user()
     {
-        return $this->belongsTo('App\Models\User\User');
+        return $this->belongsTo(User::Class);
+    }
+
+    /**********************************************************************************************
+
+        ATTRIBUTES
+
+    **********************************************************************************************/
+
+    /**
+     * Gets ALL users that have used this IP.
+     */
+    public function getUsersAttribute() {
+        return User::whereIn('id', UserIp::where('ip', $this->ip)->pluck('user_id'))->get();
+    }
+
+    /**
+     * Returns all users in an imploded, formatted string.
+     *
+     * @return string
+     */
+    public function getUsersStringAttribute() {
+        $users = $this->users;
+        $userList = [];
+        foreach ($users as $user) {
+            $userList[] = $user->displayName;
+        }
+        return implode(', ', $userList);
     }
 }

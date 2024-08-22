@@ -12,6 +12,7 @@ use App\Services\UserService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller {
     /**
@@ -75,15 +76,12 @@ class UserController extends Controller {
      */
     public function getUser($name) {
         $user = User::where('name', $name)->first();
-        $matching = UserIp::whereIn('ip', $user->ips->pluck('ip'))->where('user_id', '!=', $user->id)->get();
-
         if (!$user) {
             abort(404);
         }
 
         return view('admin.users.user', [
             'user'     => $user,
-            'matching' => $matching,
             'ranks'    => Rank::orderBy('ranks.sort')->pluck('name', 'id')->toArray(),
         ]);
     }
@@ -370,6 +368,14 @@ class UserController extends Controller {
         ]);
     }
 
+    /**
+     * Deactivate a user.
+     *
+     * @param Request $request
+     * @param UserService $service
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function postDeactivate(Request $request, UserService $service, $name) {
         $user = User::where('name', $name)->with('settings')->first();
         $wasDeactivated = $user->is_deactivated;
@@ -407,6 +413,15 @@ class UserController extends Controller {
         ]);
     }
 
+    /**
+     * Reactivate a user.
+     *
+     * @param Request $request
+     * @param UserService $service
+     * @param string $name
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function postReactivate(Request $request, UserService $service, $name) {
         $user = User::where('name', $name)->first();
 
@@ -423,5 +438,51 @@ class UserController extends Controller {
         }
 
         return redirect()->back();
+    }
+
+    /**
+     * Shows the IP list.
+     *
+     * @param Request $request
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getUserIpList(Request $request) {
+        $query = UserIp::query();
+
+        if ($request->get('ip')) {
+            $query->where('ip', 'LIKE', '%'.$request->get('ip').'%');
+        }
+        if ($request->get('user_id')) {
+            $query->where('user_id', $request->get('user_id'));
+        }
+        if ($request->get('sort')) {
+            switch ($request->get('sort')) {
+                case 'newest':
+                    $query->orderBy('updated_at', 'DESC');
+                    break;
+                case 'oldest':
+                    $query->orderBy('updated_at', 'ASC');
+                    break;
+                case 'most_users':
+                    $query->select('ip', DB::raw('COUNT(ip) as count'))->groupBy('ip')->orderBy('count', 'DESC');
+                    break;
+                case 'closely_updated':
+                    $query->whereExists(function ($query) {
+                        $query->select(DB::raw(1))
+                              ->from('user_ips as u2')
+                              ->whereRaw('user_ips.ip = u2.ip')
+                              ->whereRaw('ABS(TIMESTAMPDIFF(MINUTE, user_ips.updated_at, u2.updated_at)) <= 60')
+                              ->whereColumn('user_ips.id', '<>', 'u2.id');
+                    });
+                    break;
+            }
+        }
+
+        $query->select('ip', DB::raw('MAX(updated_at)'))->groupBy('ip')->orderBy(DB::raw('MAX(updated_at)'), 'DESC');
+        return view('admin.users.user_ips', [
+            'ips' => $query->paginate(30)->appends($request->query()),
+            'users' => User::orderBy('name')->pluck('name', 'id')->toArray(),
+        ]);
     }
 }

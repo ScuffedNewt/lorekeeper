@@ -40,6 +40,9 @@ Route::group(['prefix' => 'users', 'namespace' => 'Users'], function () {
         Route::post('{name}/deactivate', 'UserController@postDeactivate');
         Route::get('{name}/reactivate-confirm', 'UserController@getReactivateConfirmation');
         Route::post('{name}/reactivate', 'UserController@postReactivate');
+
+        // USER IPS
+        Route::get('ips', 'UserController@getUserIpList');
     });
 
     // RANKS

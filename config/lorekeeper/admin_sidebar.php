@@ -29,6 +29,10 @@ return [
                 'name' => 'Staff Reward Settings',
                 'url'  => 'admin/staff-reward-settings',
             ],
+            [
+                'name' => 'User Ips',
+                'url'  => 'admin/users/ips',
+            ]
         ],
     ],
     'Reports'    => [
