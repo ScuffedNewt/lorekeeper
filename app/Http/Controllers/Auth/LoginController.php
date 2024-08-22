@@ -6,9 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User\User;
 use App\Models\User\UserAlias;
 use App\Services\LinkService;
-use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
 
@@ -24,8 +22,6 @@ class LoginController extends Controller {
     |
     */
 
-    use AuthenticatesUsers;
-
     /**
      * Where to redirect users after login.
      *
@@ -38,19 +34,6 @@ class LoginController extends Controller {
      */
     public function __construct() {
         $this->middleware('guest')->except('logout');
-    }
-
-    /**
-     * Show the application's login form.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function showLoginForm() {
-        $altLogins = array_filter(Config::get('lorekeeper.sites'), function ($item) {
-            return isset($item['login']) && $item['login'] === 1 && $item['display_name'] != 'tumblr';
-        });
-
-        return view('auth.login', ['userCount' => User::count(), 'altLogins' => $altLogins]);
     }
 
     /**
@@ -78,7 +61,7 @@ class LoginController extends Controller {
         // admin suggested the easy fix (to use stateless)
         $socialite = $provider == 'toyhouse' ? Socialite::driver($provider)->stateless() : Socialite::driver($provider);
         // Needs to match for the user call to work
-        $socialite->redirectUrl(str_replace('auth', 'login', url(Config::get('services.'.$provider.'.redirect'))));
+        $socialite->redirectUrl(str_replace('auth', 'login', url(config('services.'.$provider.'.redirect'))));
         $result = $socialite->user();
 
         $user = UserAlias::where('user_snowflake', $result->id)->first();

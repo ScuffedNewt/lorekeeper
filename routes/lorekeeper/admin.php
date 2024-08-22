@@ -186,6 +186,7 @@ Route::group(['prefix' => 'data', 'namespace' => 'Data', 'middleware' => 'power:
     Route::get('traits/create', 'FeatureController@getCreateFeature');
     Route::get('traits/edit/{id}', 'FeatureController@getEditFeature');
     Route::get('traits/delete/{id}', 'FeatureController@getDeleteFeature');
+    Route::get('traits/check-subtype', 'FeatureController@getCreateEditFeatureSubtype');
     Route::post('traits/create', 'FeatureController@postCreateEditFeature');
     Route::post('traits/edit/{id?}', 'FeatureController@postCreateEditFeature');
     Route::post('traits/delete/{id}', 'FeatureController@postDeleteFeature');
@@ -251,7 +252,7 @@ Route::group(['prefix' => 'pages', 'middleware' => 'power:edit_pages'], function
 });
 
 // NEWS
-Route::group(['prefix' => 'news', 'middleware' => 'power:edit_pages'], function () {
+Route::group(['prefix' => 'news', 'middleware' => 'power:manage_news'], function () {
     Route::get('/', 'NewsController@getIndex');
     Route::get('create', 'NewsController@getCreateNews');
     Route::get('edit/{id}', 'NewsController@getEditNews');
@@ -262,7 +263,7 @@ Route::group(['prefix' => 'news', 'middleware' => 'power:edit_pages'], function 
 });
 
 // SALES
-Route::group(['prefix' => 'sales', 'middleware' => 'power:edit_pages'], function () {
+Route::group(['prefix' => 'sales', 'middleware' => 'power:manage_sales'], function () {
     Route::get('/', 'SalesController@getIndex');
     Route::get('create', 'SalesController@getCreateSales');
     Route::get('edit/{id}', 'SalesController@getEditSales');
@@ -406,7 +407,7 @@ Route::group(['prefix' => 'submissions', 'middleware' => 'power:manage_submissio
     Route::get('/', 'SubmissionController@getSubmissionIndex');
     Route::get('/{status}', 'SubmissionController@getSubmissionIndex')->where('status', 'pending|approved|rejected');
     Route::get('edit/{id}', 'SubmissionController@getSubmission');
-    Route::post('edit/{id}/{action}', 'SubmissionController@postSubmission')->where('action', 'approve|reject');
+    Route::post('edit/{id}/{action}', 'SubmissionController@postSubmission')->where('action', 'approve|reject|cancel');
 });
 
 // CLAIMS
@@ -414,7 +415,7 @@ Route::group(['prefix' => 'claims', 'middleware' => 'power:manage_submissions'],
     Route::get('/', 'SubmissionController@getClaimIndex');
     Route::get('/{status}', 'SubmissionController@getClaimIndex')->where('status', 'pending|approved|rejected');
     Route::get('edit/{id}', 'SubmissionController@getClaim');
-    Route::post('edit/{id}/{action}', 'SubmissionController@postSubmission')->where('action', 'approve|reject');
+    Route::post('edit/{id}/{action}', 'SubmissionController@postSubmission')->where('action', 'approve|reject|cancel');
 });
 
 // SUBMISSIONS

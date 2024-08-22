@@ -122,7 +122,7 @@
         </div>
         <div class="form-group">
             {!! Form::label('On Transfer Cooldown Until (Optional)') !!}
-            {!! Form::text('transferrable_at', old('transferrable_at'), ['class' => 'form-control', 'id' => 'datepicker']) !!}
+            {!! Form::text('transferrable_at', old('transferrable_at'), ['class' => 'form-control datepicker']) !!}
         </div>
 
         <h3>Image Upload</h3>
@@ -136,7 +136,7 @@
             @endif
             <div>{!! Form::file('image', ['id' => 'mainImage']) !!}</div>
         </div>
-        @if (Config::get('lorekeeper.settings.masterlist_image_automation') === 1)
+        @if (config('lorekeeper.settings.masterlist_image_automation') === 1)
             <div class="form-group">
                 {!! Form::checkbox('use_cropper', 1, 1, ['class' => 'form-check-input', 'data-toggle' => 'toggle', 'id' => 'useCropper']) !!}
                 {!! Form::label('use_cropper', 'Use Thumbnail Automation', ['class' => 'form-check-label ml-3']) !!} {!! add_help('A thumbnail is required for the upload (used for the masterlist). You can use the Thumbnail Automation, or upload a custom thumbnail.') !!}
@@ -170,7 +170,7 @@
             <div class="card-body">
                 {!! Form::label('Thumbnail Image') !!} {!! add_help('This image is shown on the masterlist page.') !!}
                 <div>{!! Form::file('thumbnail') !!}</div>
-                <div class="text-muted">Recommended size: {{ Config::get('lorekeeper.settings.masterlist_thumbnails.width') }}px x {{ Config::get('lorekeeper.settings.masterlist_thumbnails.height') }}px</div>
+                <div class="text-muted">Recommended size: {{ config('lorekeeper.settings.masterlist_thumbnails.width') }}px x {{ config('lorekeeper.settings.masterlist_thumbnails.height') }}px</div>
             </div>
         </div>
         <p class="alert alert-info">
@@ -266,6 +266,7 @@
     @parent
     @include('widgets._character_create_options_js')
     @include('widgets._image_upload_js')
+    @include('widgets._datetimepicker_js')
     @if (!$isMyo)
         @include('widgets._character_code_js')
     @endif
