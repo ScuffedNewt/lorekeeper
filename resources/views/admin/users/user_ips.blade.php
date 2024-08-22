@@ -29,7 +29,7 @@
                     'closely_updated' => 'Closely Updated',
                 ],
                 Request::get('sort') ?: 'category',
-                ['class' => 'form-control']
+                ['class' => 'form-control'],
             ) !!}
         </div>
         <div class="form-group mb-3">
