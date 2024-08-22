@@ -32,7 +32,7 @@ return [
             [
                 'name' => 'User Ips',
                 'url'  => 'admin/users/ips',
-            ]
+            ],
         ],
     ],
     'Reports'    => [

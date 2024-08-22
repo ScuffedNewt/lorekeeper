@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Users;
 use App\Http\Controllers\Controller;
 use App\Models\Notification;
 use App\Models\User\User;
-use App\Models\User\UserIp;
 use App\Models\User\UserAlias;
 use App\Services\LinkService;
 use App\Services\UserService;

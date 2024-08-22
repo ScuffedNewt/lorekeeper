@@ -371,8 +371,7 @@ class UserController extends Controller {
     /**
      * Deactivate a user.
      *
-     * @param Request $request
-     * @param UserService $service
+     * @param mixed $name
      *
      * @return \Illuminate\Http\RedirectResponse
      */
@@ -416,8 +415,6 @@ class UserController extends Controller {
     /**
      * Reactivate a user.
      *
-     * @param Request $request
-     * @param UserService $service
      * @param string $name
      *
      * @return \Illuminate\Http\RedirectResponse
@@ -442,8 +439,6 @@ class UserController extends Controller {
 
     /**
      * Shows the IP list.
-     *
-     * @param Request $request
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
@@ -470,18 +465,19 @@ class UserController extends Controller {
                 case 'closely_updated':
                     $query->whereExists(function ($query) {
                         $query->select(DB::raw(1))
-                              ->from('user_ips as u2')
-                              ->whereRaw('user_ips.ip = u2.ip')
-                              ->whereRaw('ABS(TIMESTAMPDIFF(MINUTE, user_ips.updated_at, u2.updated_at)) <= 60')
-                              ->whereColumn('user_ips.id', '<>', 'u2.id');
+                            ->from('user_ips as u2')
+                            ->whereRaw('user_ips.ip = u2.ip')
+                            ->whereRaw('ABS(TIMESTAMPDIFF(MINUTE, user_ips.updated_at, u2.updated_at)) <= 60')
+                            ->whereColumn('user_ips.id', '<>', 'u2.id');
                     });
                     break;
             }
         }
 
         $query->select('ip', DB::raw('MAX(updated_at)'))->groupBy('ip')->orderBy(DB::raw('MAX(updated_at)'), 'DESC');
+
         return view('admin.users.user_ips', [
-            'ips' => $query->paginate(30)->appends($request->query()),
+            'ips'   => $query->paginate(30)->appends($request->query()),
             'users' => User::orderBy('name')->pluck('name', 'id')->toArray(),
         ]);
     }

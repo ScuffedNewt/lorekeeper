@@ -4,9 +4,7 @@ namespace App\Models\User;
 
 use App\Models\Model;
 
-class UserIp extends Model
-{
-
+class UserIp extends Model {
     /**
      * The attributes that are mass assignable.
      *
@@ -39,9 +37,8 @@ class UserIp extends Model
     /**
      * Get the user this set of settings belongs to.
      */
-    public function user()
-    {
-        return $this->belongsTo(User::Class);
+    public function user() {
+        return $this->belongsTo(User::class);
     }
 
     /**********************************************************************************************
@@ -54,7 +51,7 @@ class UserIp extends Model
      * Gets ALL users that have used this IP.
      */
     public function getUsersAttribute() {
-        return User::whereIn('id', UserIp::where('ip', $this->ip)->pluck('user_id'))->get();
+        return User::whereIn('id', self::where('ip', $this->ip)->pluck('user_id'))->get();
     }
 
     /**
@@ -68,6 +65,7 @@ class UserIp extends Model
         foreach ($users as $user) {
             $userList[] = $user->displayName;
         }
+
         return implode(', ', $userList);
     }
 }

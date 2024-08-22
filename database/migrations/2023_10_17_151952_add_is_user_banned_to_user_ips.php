@@ -4,15 +4,11 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddIsUserBannedToUserIps extends Migration
-{
+class AddIsUserBannedToUserIps extends Migration {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
-    {
+    public function up() {
         Schema::table('user_ips', function (Blueprint $table) {
             //
             $table->boolean('is_user_banned')->default(false);
@@ -21,14 +17,11 @@ class AddIsUserBannedToUserIps extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
-    {
+    public function down() {
         Schema::table('user_ips', function (Blueprint $table) {
             //
             $table->dropColumn('is_user_banned');
         });
     }
-};
+}

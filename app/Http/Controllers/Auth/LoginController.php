@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\User\User;
 use App\Models\User\UserAlias;
 use App\Services\LinkService;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
 
 class LoginController extends Controller {
@@ -74,8 +74,7 @@ class LoginController extends Controller {
         return redirect($this->redirectTo);
     }
 
-    protected function authenticated(Request $request)
-    {
+    protected function authenticated(Request $request) {
         storeIp($request->ip(), Auth::user()->id);
     }
 }
