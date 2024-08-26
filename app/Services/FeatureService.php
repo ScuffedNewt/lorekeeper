@@ -424,15 +424,13 @@ class FeatureService extends Service {
      *
      * @param Feature $feature
      * @param array   $data
-     *
-     * @return void
      */
     private function updateAlternativeFeatureRarities($feature, $data) {
         $altRarityData = [];
         foreach ($data['species_id'] as $key => $value) {
             $altRarityData[$value][] = [
                 'subtype_id' => $data['subtype_id'][$key],
-                'rarity_id'  => $data['rarity_id'][$key]
+                'rarity_id'  => $data['rarity_id'][$key],
             ];
         }
 

@@ -363,7 +363,7 @@ class Feature extends Model {
             foreach ($valuesArray as $values) {
                 $altRarities[] = [
                     'species' => Species::find($species_id),
-                    'rarity' => Rarity::find($values['rarity_id']),
+                    'rarity'  => Rarity::find($values['rarity_id']),
                     'subtype' => Subtype::find($values['subtype_id']),
                 ];
             }
@@ -374,6 +374,9 @@ class Feature extends Model {
 
     /**
      * Gets the display name of the feature when on a character's page.
+     *
+     * @param mixed|null $species_id
+     * @param mixed|null $subtype_id
      */
     public function displayName($species_id = null, $subtype_id = null) {
         if ($this->alternative_rarities) {
