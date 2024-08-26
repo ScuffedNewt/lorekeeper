@@ -75,7 +75,7 @@
                                             <strong>Miscellaneous:</strong>
                                         @endif
                                         @foreach ($group as $feature)
-                                            <div class="ml-md-2">{!! $feature->feature->displayName !!} @if ($feature->data)
+                                            <div class="ml-md-2">{!! $feature->feature->displayName($image->species_id, $image->subtype_id) !!} @if ($feature->data)
                                                     ({{ $feature->data }})
                                                 @endif
                                             </div>
@@ -94,7 +94,7 @@
                                     <div>
                                         @if ($feature->feature->feature_category_id)
                                             <strong>{!! $feature->feature->category->displayName !!}:</strong>
-                                            @endif {!! $feature->feature->displayName !!} @if ($feature->data)
+                                            @endif {!! $feature->feature->displayName($image->species_id, $image->subtype_id) !!} @if ($feature->data)
                                                 ({{ $feature->data }})
                                             @endif
                                     </div>

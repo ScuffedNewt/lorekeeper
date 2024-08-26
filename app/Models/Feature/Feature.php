@@ -16,6 +16,7 @@ class Feature extends Model {
      */
     protected $fillable = [
         'feature_category_id', 'species_id', 'subtype_id', 'rarity_id', 'name', 'has_image', 'description', 'parsed_description', 'is_visible', 'hash',
+        'alternative_rarities',
     ];
 
     /**
@@ -24,6 +25,16 @@ class Feature extends Model {
      * @var string
      */
     protected $table = 'features';
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'alternative_rarities' => 'array',
+    ];
+
     /**
      * Validation rules for creation.
      *
@@ -215,6 +226,13 @@ class Feature extends Model {
     }
 
     /**
+     * Get's the display name without the rarity.
+     */
+    public function getDisplayNameWithoutRarityAttribute() {
+        return '<a href="'.$this->url.'" class="display-trait">'.$this->name.'</a>';
+    }
+
+    /**
      * Gets the file directory containing the model's image.
      *
      * @return string
@@ -269,7 +287,7 @@ class Feature extends Model {
      * @return string
      */
     public function getSearchUrlAttribute() {
-        return url('masterlist?feature_ids[]='.$this->id);
+        return url('masterlist?feature_id[]='.$this->id);
     }
 
     /**
@@ -330,5 +348,49 @@ class Feature extends Model {
         } else {
             return self::where('is_visible', '>=', $visibleOnly)->orderBy('name')->pluck('name', 'id')->toArray();
         }
+    }
+
+    /**
+     * Displays alternative rarities for a feature.
+     */
+    public function displayAlternativeRarities() {
+        if (!$this->alternative_rarities) {
+            return null;
+        }
+
+        $altRarities = [];
+        foreach ($this->alternative_rarities as $species_id => $valuesArray) {
+            foreach ($valuesArray as $values) {
+                $altRarities[] = [
+                    'species' => Species::find($species_id),
+                    'rarity' => Rarity::find($values['rarity_id']),
+                    'subtype' => Subtype::find($values['subtype_id']),
+                ];
+            }
+        }
+
+        return $altRarities;
+    }
+
+    /**
+     * Gets the display name of the feature when on a character's page.
+     */
+    public function displayName($species_id = null, $subtype_id = null) {
+        if ($this->alternative_rarities) {
+            foreach ($this->alternative_rarities as $species => $valuesArray) {
+                if ($species == $species_id) {
+                    foreach ($valuesArray as $values) {
+                        if ($values['subtype_id'] == $subtype_id || (!$values['subtype_id'] && !$subtype_id)) {
+                            return $this->getDisplayNameWithoutRarityAttribute().' ('.Rarity::find($values['rarity_id'])->displayName
+                                .'<i class="fas fa-info-circle ml-1" data-toggle="tooltip" title="This trait is different for this species'.
+                                    ($values['subtype_id'] ? ' and subtype.' : '.').'
+                                ."></i>)';
+                        }
+                    }
+                }
+            }
+        }
+
+        return $this->getDisplayNameAttribute();
     }
 }

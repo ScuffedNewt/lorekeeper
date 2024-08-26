@@ -313,6 +313,10 @@ class FeatureService extends Service {
                 $this->handleImage($image, $feature->imagePath, $feature->imageFileName);
             }
 
+            if (isset($data['alternative_rarities'])) {
+                $this->updateAlternativeFeatureRarities($feature, $data['alternative_rarities']);
+            }
+
             return $this->commitReturn($feature);
         } catch (\Exception $e) {
             $this->setError('error', $e->getMessage());
@@ -413,5 +417,25 @@ class FeatureService extends Service {
         }
 
         return $data;
+    }
+
+    /**
+     * Updates the alternative feature rarities.
+     *
+     * @param Feature $feature
+     * @param array   $data
+     *
+     * @return void
+     */
+    private function updateAlternativeFeatureRarities($feature, $data) {
+        $altRarityData = [];
+        foreach ($data['species_id'] as $key => $value) {
+            $altRarityData[$value][] = [
+                'subtype_id' => $data['subtype_id'][$key],
+                'rarity_id'  => $data['rarity_id'][$key]
+            ];
+        }
+
+        $feature->update(['alternative_rarities' => $altRarityData]);
     }
 }

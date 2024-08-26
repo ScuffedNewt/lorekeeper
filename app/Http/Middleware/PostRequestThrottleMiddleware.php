@@ -16,7 +16,10 @@ class PostRequestThrottleMiddleware {
      * @param \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response) $next
      */
     public function handle(Request $request, Closure $next): Response {
-        if ($request->isMethod('get')) {
+        $allowedRoutes = [
+            'admin/*',
+        ];
+        if ($request->isMethod('get') || $request->is(...$allowedRoutes)) {
             return $next($request);
         }
 

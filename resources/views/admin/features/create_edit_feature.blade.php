@@ -54,6 +54,37 @@
             {!! Form::select('subtype_id', $subtypes, $feature->subtype_id, ['class' => 'form-control', 'id' => 'subtype']) !!}
         </div>
     </div>
+
+    @if ($feature->id)
+        <hr />
+        <h4>Alternative Rarities</h4>
+        <p>If you want a trait to have different rarities depending on species / subtype set them here.</p>
+        <div class="text-right">
+            <div class="btn btn-primary" id="addAlternativeRarity">Add Alternative Rarity</div>
+        </div>
+        <div id="alternativeRarities">
+            @foreach ($feature->alternative_rarities ?? [] as $species_id=>$valuesArray)
+                @foreach ($valuesArray as $values)
+                    <div class="row">
+                        <div class="col-md-4 form-group">
+                            {!! Form::label('Species') !!}
+                            {!! Form::select('alternative_rarities[species_id][]', $specieses, $species_id, ['class' => 'form-control selectize species']) !!}
+                        </div>
+                        <div class="col-md-4 form-group subtype">
+                            {!! Form::label('Subtype (Optional)') !!}
+                            {!! Form::select('alternative_rarities[subtype_id][]', $subtypes, (!isset($values['subtype_id']) || !$values['subtype_id']) ? 'none' : $values['subtype_id'], ['class' => 'form-control', 'placeholder' => 'Select Subtype']) !!}
+                        </div>
+                        <div class="col-md-4 form-group">
+                            {!! Form::label('Rarity') !!}
+                            {!! Form::select('alternative_rarities[rarity_id][]', $rarities, $values['rarity_id'], ['class' => 'form-control selectize']) !!}
+                        </div>
+                    </div>
+                @endforeach
+            @endforeach
+        </div>
+        <hr />
+    @endif
+
     <div class="form-group">
         {!! Form::label('Description (Optional)') !!}
         {!! Form::textarea('description', $feature->description, ['class' => 'form-control wysiwyg']) !!}
@@ -78,6 +109,23 @@
             </div>
         </div>
     @endif
+
+    <div class="hide alt-rarity-row">
+        <div class="row">
+            <div class="col-md-4 form-group">
+                {!! Form::label('Species') !!}
+                {!! Form::select('alternative_rarities[species_id][]', $specieses, null, ['class' => 'form-control selectize species']) !!}
+            </div>
+            <div class="col-md-4 form-group subtype">
+                {!! Form::label('Subtype (Optional)') !!}
+                {!! Form::select('alternative_rarities[subtype_id][]', [], null, ['class' => 'form-control', 'placeholder' => 'Select Subtype']) !!}
+            </div>
+            <div class="col-md-4 form-group">
+                {!! Form::label('Rarity') !!}
+                {!! Form::select('alternative_rarities[rarity_id][]', $rarities, null, ['class' => 'form-control selectize']) !!}
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('scripts')
@@ -89,11 +137,40 @@
                 loadModal("{{ url('admin/data/traits/delete') }}/{{ $feature->id }}", 'Delete Trait');
             });
             refreshSubtype();
+
+            $('#addAlternativeRarity').on('click', function() {
+                var row = $('.alt-rarity-row').clone();
+                row.removeClass('hide').removeClass('alt-rarity-row');
+                row.find('.selectize').selectize();
+                row.find('.species').on('change', function() {
+                    changeSubtype(this);
+                });
+                $('#alternativeRarities').append(row);
+            });
         });
 
         $("#species").change(function() {
             refreshSubtype();
         });
+
+        function changeSubtype(node) {
+            var species = node.value;
+            var row = $(node).closest('.row');
+            var subtype = row.find('.subtype');
+            $.ajax({
+                type: "GET",
+                url: "{{ url('admin/data/traits/check-subtype') }}?species=" + species,
+                dataType: "text"
+            }).done(function(res) {
+                subtype.html(res);
+                subtype.find('select').attr('name', 'alternative_rarities[subtype_id][]');
+                $('[data-toggle="tooltip"]').tooltip({
+                    html: true
+                });
+            }).fail(function(jqXHR, textStatus, errorThrown) {
+                alert("AJAX call failed: " + textStatus + ", " + errorThrown);
+            });
+        }
 
         function refreshSubtype() {
             var species = $('#species').val();
@@ -104,6 +181,9 @@
                 dataType: "text"
             }).done(function(res) {
                 $("#subtypes").html(res);
+                $('[data-toggle="tooltip"]').tooltip({
+                    html: true
+                });
             }).fail(function(jqXHR, textStatus, errorThrown) {
                 alert("AJAX call failed: " + textStatus + ", " + errorThrown);
             });
