@@ -40,7 +40,7 @@
                         <div class="col-md-3">
                             @if ($data['subtype'])
                                 <div>
-                                    <strong>{!! $data['subtype']->displayName  !!} ({!! $data['species']->displayName !!} Subtype):</strong> {!! $data['rarity']->displayName !!}
+                                    <strong>{!! $data['subtype']->displayName !!} ({!! $data['species']->displayName !!} Subtype):</strong> {!! $data['rarity']->displayName !!}
                                 </div>
                             @else
                                 <div>

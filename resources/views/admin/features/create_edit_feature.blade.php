@@ -63,7 +63,7 @@
             <div class="btn btn-primary" id="addAlternativeRarity">Add Alternative Rarity</div>
         </div>
         <div id="alternativeRarities">
-            @foreach ($feature->alternative_rarities ?? [] as $species_id=>$valuesArray)
+            @foreach ($feature->alternative_rarities ?? [] as $species_id => $valuesArray)
                 @foreach ($valuesArray as $values)
                     <div class="row">
                         <div class="col-md-4 form-group">
@@ -72,7 +72,7 @@
                         </div>
                         <div class="col-md-4 form-group subtype">
                             {!! Form::label('Subtype (Optional)') !!}
-                            {!! Form::select('alternative_rarities[subtype_id][]', $subtypes, (!isset($values['subtype_id']) || !$values['subtype_id']) ? 'none' : $values['subtype_id'], ['class' => 'form-control', 'placeholder' => 'Select Subtype']) !!}
+                            {!! Form::select('alternative_rarities[subtype_id][]', $subtypes, !isset($values['subtype_id']) || !$values['subtype_id'] ? 'none' : $values['subtype_id'], ['class' => 'form-control', 'placeholder' => 'Select Subtype']) !!}
                         </div>
                         <div class="col-md-4 form-group">
                             {!! Form::label('Rarity') !!}
