@@ -11,6 +11,7 @@ use App\Models\Character\CharacterCurrency;
 use App\Models\Character\CharacterDesignUpdate;
 use App\Models\Character\CharacterFeature;
 use App\Models\Character\CharacterImage;
+use App\Models\Character\CharacterImageSubtype;
 use App\Models\Character\CharacterTransfer;
 use App\Models\Sales\SalesCharacter;
 use App\Models\Species\Subtype;
@@ -71,11 +72,11 @@ class CharacterManager extends Service {
     /**
      * Creates a new character or MYO slot.
      *
-     * @param array                 $data
-     * @param \App\Models\User\User $user
-     * @param bool                  $isMyo
+     * @param array $data
+     * @param User  $user
+     * @param bool  $isMyo
      *
-     * @return \App\Models\Character\Character|bool
+     * @return bool|Character
      */
     public function createCharacter($data, $user, $isMyo = false) {
         DB::beginTransaction();
@@ -96,16 +97,23 @@ class CharacterManager extends Service {
                     throw new \Exception('Characters require a rarity.');
                 }
             }
-            if (isset($data['subtype_id']) && $data['subtype_id']) {
-                $subtype = Subtype::find($data['subtype_id']);
+            if (isset($data['subtype_ids']) && $data['subtype_ids']) {
+                if (count($data['subtype_ids']) > config('lorekeeper.extensions.multiple_subtype_limit')) {
+                    throw new \Exception('Too many subtypes selected.');
+                }
+
                 if (!(isset($data['species_id']) && $data['species_id'])) {
                     throw new \Exception('Species must be selected to select a subtype.');
                 }
-                if (!$subtype || $subtype->species_id != $data['species_id']) {
-                    throw new \Exception('Selected subtype invalid or does not match species.');
+
+                foreach ($data['subtype_ids'] as $subtypeId) {
+                    $subtype = Subtype::find($subtypeId);
+                    if (!$subtype || $subtype->species_id != $data['species_id']) {
+                        throw new \Exception('Selected subtype invalid or does not match species.');
+                    }
                 }
             } else {
-                $data['subtype_id'] = null;
+                $data['subtype_ids'] = null;
             }
 
             // Get owner info
@@ -183,7 +191,7 @@ class CharacterManager extends Service {
     /**
      * Trims and optionally resizes and watermarks an image.
      *
-     * @param \App\Models\Character\CharacterImage $characterImage
+     * @param CharacterImage $characterImage
      */
     public function processImage($characterImage) {
         $imageProperties = getimagesize($characterImage->imagePath.'/'.$characterImage->imageFileName);
@@ -327,9 +335,9 @@ class CharacterManager extends Service {
     /**
      * Crops a thumbnail for the given image.
      *
-     * @param array                                $points
-     * @param \App\Models\Character\CharacterImage $characterImage
-     * @param mixed                                $isMyo
+     * @param array          $points
+     * @param CharacterImage $characterImage
+     * @param mixed          $isMyo
      */
     public function cropThumbnail($points, $characterImage, $isMyo = false) {
         $imageProperties = getimagesize($characterImage->imagePath.'/'.$characterImage->imageFileName);
@@ -529,11 +537,11 @@ class CharacterManager extends Service {
     /**
      * Creates a character image.
      *
-     * @param array                           $data
-     * @param \App\Models\Character\Character $character
-     * @param \App\Models\User\User           $user
+     * @param array     $data
+     * @param Character $character
+     * @param User      $user
      *
-     * @return \App\Models\Character\Character|bool
+     * @return bool|Character
      */
     public function createImage($data, $character, $user) {
         DB::beginTransaction();
@@ -547,16 +555,21 @@ class CharacterManager extends Service {
                     throw new \Exception('Characters require a rarity.');
                 }
             }
-            if (isset($data['subtype_id']) && $data['subtype_id']) {
-                $subtype = Subtype::find($data['subtype_id']);
+            if (isset($data['subtype_ids']) && $data['subtype_ids']) {
+                if (count($data['subtype_ids']) > config('lorekeeper.extensions.multiple_subtype_limit')) {
+                    throw new \Exception('Too many subtypes selected.');
+                }
                 if (!(isset($data['species_id']) && $data['species_id'])) {
                     throw new \Exception('Species must be selected to select a subtype.');
                 }
-                if (!$subtype || $subtype->species_id != $data['species_id']) {
-                    throw new \Exception('Selected subtype invalid or does not match species.');
+                foreach ($data['subtype_ids'] as $subtypeId) {
+                    $subtype = Subtype::find($subtypeId);
+                    if (!$subtype || $subtype->species_id != $data['species_id']) {
+                        throw new \Exception('Selected subtype invalid or does not match species.');
+                    }
                 }
             } else {
-                $data['subtype_id'] = null;
+                $data['subtype_ids'] = null;
             }
 
             $data['is_visible'] = 1;
@@ -604,9 +617,9 @@ class CharacterManager extends Service {
     /**
      * Updates a character image.
      *
-     * @param array                                $data
-     * @param \App\Models\Character\CharacterImage $image
-     * @param \App\Models\User\User                $user
+     * @param array          $data
+     * @param CharacterImage $image
+     * @param User           $user
      *
      * @return bool
      */
@@ -615,13 +628,22 @@ class CharacterManager extends Service {
 
         try {
             // Check that the subtype matches
-            if (isset($data['subtype_id']) && $data['subtype_id']) {
-                $subtype = Subtype::find($data['subtype_id']);
+            if (isset($data['subtype_ids']) && $data['subtype_ids']) {
+                if (count($data['subtype_ids']) > config('lorekeeper.extensions.multiple_subtype_limit')) {
+                    throw new \Exception('Too many subtypes selected.');
+                }
+
                 if (!(isset($data['species_id']) && $data['species_id'])) {
                     throw new \Exception('Species must be selected to select a subtype.');
                 }
-                if (!$subtype || $subtype->species_id != $data['species_id']) {
-                    throw new \Exception('Selected subtype invalid or does not match species.');
+
+                $species_id = $data['species_id'] != $image->species_id ? $data['species_id'] : $image->species_id;
+
+                foreach ($data['subtype_ids'] as $subtypeId) {
+                    $subtype = Subtype::find($subtypeId);
+                    if (!$subtype || $subtype->species_id != $species_id) {
+                        throw new \Exception('Selected subtype invalid or does not match species.');
+                    }
                 }
             }
 
@@ -633,7 +655,7 @@ class CharacterManager extends Service {
             $old = [];
             $old['features'] = $this->generateFeatureList($image);
             $old['species'] = $image->species_id ? $image->species->displayName : null;
-            $old['subtype'] = $image->subtype_id ? $image->subtype->displayName : null;
+            $old['subtypes'] = count($image->subtypes) ? $image->displaySubtypes() : null;
             $old['rarity'] = $image->rarity_id ? $image->rarity->displayName : null;
 
             // Clear old features
@@ -648,14 +670,26 @@ class CharacterManager extends Service {
 
             // Update other stats
             $image->species_id = $data['species_id'];
-            $image->subtype_id = $data['subtype_id'] ?: null;
+            // SUBTYPES
+            $image->subtypes()->delete();
+            if (isset($data['subtype_ids']) && $data['subtype_ids']) {
+                if (count($data['subtype_ids']) > config('lorekeeper.extensions.multiple_subtype_limit')) {
+                    throw new \Exception('Too many subtypes selected.');
+                }
+                foreach ($data['subtype_ids'] as $subtypeId) {
+                    CharacterImageSubtype::create([
+                        'character_image_id' => $image->id,
+                        'subtype_id'         => $subtypeId,
+                    ]);
+                }
+            }
             $image->rarity_id = $data['rarity_id'];
             $image->save();
 
             $new = [];
             $new['features'] = $this->generateFeatureList($image);
             $new['species'] = $image->species_id ? $image->species->displayName : null;
-            $new['subtype'] = $image->subtype_id ? $image->subtype->displayName : null;
+            $new['subtypes'] = count($image->subtypes) ? $image->displaySubtypes() : null;
             $new['rarity'] = $image->rarity_id ? $image->rarity->displayName : null;
 
             // Character also keeps track of these features
@@ -677,9 +711,9 @@ class CharacterManager extends Service {
     /**
      * Updates image data.
      *
-     * @param array                                $data
-     * @param \App\Models\Character\CharacterImage $image
-     * @param \App\Models\User\User                $user
+     * @param array          $data
+     * @param CharacterImage $image
+     * @param User           $user
      *
      * @return bool
      */
@@ -713,9 +747,9 @@ class CharacterManager extends Service {
     /**
      * Updates image credits.
      *
-     * @param array                                $data
-     * @param \App\Models\Character\CharacterImage $image
-     * @param \App\Models\User\User                $user
+     * @param array          $data
+     * @param CharacterImage $image
+     * @param User           $user
      *
      * @return bool
      */
@@ -805,9 +839,9 @@ class CharacterManager extends Service {
     /**
      * Reuploads an image.
      *
-     * @param array                                $data
-     * @param \App\Models\Character\CharacterImage $image
-     * @param \App\Models\User\User                $user
+     * @param array          $data
+     * @param CharacterImage $image
+     * @param User           $user
      *
      * @return bool
      */
@@ -873,9 +907,9 @@ class CharacterManager extends Service {
     /**
      * Deletes an image.
      *
-     * @param \App\Models\Character\CharacterImage $image
-     * @param \App\Models\User\User                $user
-     * @param bool                                 $forceDelete
+     * @param CharacterImage $image
+     * @param User           $user
+     * @param bool           $forceDelete
      *
      * @return bool
      */
@@ -923,9 +957,9 @@ class CharacterManager extends Service {
     /**
      * Updates image settings.
      *
-     * @param array                                $data
-     * @param \App\Models\Character\CharacterImage $image
-     * @param \App\Models\User\User                $user
+     * @param array          $data
+     * @param CharacterImage $image
+     * @param User           $user
      *
      * @return bool
      */
@@ -960,8 +994,8 @@ class CharacterManager extends Service {
     /**
      * Updates a character's active image.
      *
-     * @param \App\Models\Character\CharacterImage $image
-     * @param \App\Models\User\User                $user
+     * @param CharacterImage $image
+     * @param User           $user
      *
      * @return bool
      */
@@ -998,9 +1032,9 @@ class CharacterManager extends Service {
     /**
      * Sorts a character's images.
      *
-     * @param array                 $data
-     * @param \App\Models\User\User $user
-     * @param mixed                 $character
+     * @param array $data
+     * @param User  $user
+     * @param mixed $character
      *
      * @return bool
      */
@@ -1046,8 +1080,8 @@ class CharacterManager extends Service {
     /**
      * Sorts a user's characters.
      *
-     * @param array                 $data
-     * @param \App\Models\User\User $user
+     * @param array $data
+     * @param User  $user
      *
      * @return bool
      */
@@ -1080,9 +1114,9 @@ class CharacterManager extends Service {
     /**
      * Updates a character's stats.
      *
-     * @param array                 $data
-     * @param \App\Models\User\User $user
-     * @param mixed                 $character
+     * @param array $data
+     * @param User  $user
+     * @param mixed $character
      *
      * @return bool
      */
@@ -1183,9 +1217,9 @@ class CharacterManager extends Service {
     /**
      * Updates a character's description.
      *
-     * @param array                           $data
-     * @param \App\Models\Character\Character $character
-     * @param \App\Models\User\User           $user
+     * @param array     $data
+     * @param Character $character
+     * @param User      $user
      *
      * @return bool
      */
@@ -1219,9 +1253,9 @@ class CharacterManager extends Service {
     /**
      * Updates a character's settings.
      *
-     * @param array                 $data
-     * @param \App\Models\User\User $user
-     * @param mixed                 $character
+     * @param array $data
+     * @param User  $user
+     * @param mixed $character
      *
      * @return bool
      */
@@ -1253,10 +1287,10 @@ class CharacterManager extends Service {
     /**
      * Updates a character's profile.
      *
-     * @param array                           $data
-     * @param \App\Models\Character\Character $character
-     * @param \App\Models\User\User           $user
-     * @param bool                            $isAdmin
+     * @param array     $data
+     * @param Character $character
+     * @param User      $user
+     * @param bool      $isAdmin
      *
      * @return bool
      */
@@ -1340,8 +1374,8 @@ class CharacterManager extends Service {
     /**
      * Deletes a character.
      *
-     * @param \App\Models\Character\Character $character
-     * @param \App\Models\User\User           $user
+     * @param Character $character
+     * @param User      $user
      *
      * @return bool
      */
@@ -1392,9 +1426,9 @@ class CharacterManager extends Service {
     /**
      * Creates a character transfer.
      *
-     * @param array                           $data
-     * @param \App\Models\Character\Character $character
-     * @param \App\Models\User\User           $user
+     * @param array     $data
+     * @param Character $character
+     * @param User      $user
      *
      * @return bool
      */
@@ -1468,9 +1502,9 @@ class CharacterManager extends Service {
     /**
      * Forces an admin transfer of a character.
      *
-     * @param array                           $data
-     * @param \App\Models\Character\Character $character
-     * @param \App\Models\User\User           $user
+     * @param array     $data
+     * @param Character $character
+     * @param User      $user
      *
      * @return bool
      */
@@ -1550,8 +1584,8 @@ class CharacterManager extends Service {
     /**
      * Processes a character transfer.
      *
-     * @param array                 $data
-     * @param \App\Models\User\User $user
+     * @param array $data
+     * @param User  $user
      *
      * @return bool
      */
@@ -1618,8 +1652,8 @@ class CharacterManager extends Service {
     /**
      * Cancels a character transfer.
      *
-     * @param array                 $data
-     * @param \App\Models\User\User $user
+     * @param array $data
+     * @param User  $user
      *
      * @return bool
      */
@@ -1654,8 +1688,8 @@ class CharacterManager extends Service {
     /**
      * Processes a character transfer in the approvals queue.
      *
-     * @param array                 $data
-     * @param \App\Models\User\User $user
+     * @param array $data
+     * @param User  $user
      *
      * @return bool
      */
@@ -1750,11 +1784,11 @@ class CharacterManager extends Service {
     /**
      * Moves a character from one user to another.
      *
-     * @param \App\Models\Character\Character $character
-     * @param \App\Models\User\User           $recipient
-     * @param string                          $data
-     * @param int                             $cooldown
-     * @param string                          $logType
+     * @param Character $character
+     * @param User      $recipient
+     * @param string    $data
+     * @param int       $cooldown
+     * @param string    $logType
      */
     public function moveCharacter($character, $recipient, $data, $cooldown = -1, $logType = null) {
         $sender = $character->user;
@@ -1838,7 +1872,7 @@ class CharacterManager extends Service {
      * @param array $data
      * @param bool  $isMyo
      *
-     * @return \App\Models\Character\Character|bool
+     * @return bool|Character
      */
     private function handleCharacter($data, $isMyo = false) {
         try {
@@ -1847,7 +1881,7 @@ class CharacterManager extends Service {
                 $data['number'] = null;
                 $data['slug'] = null;
                 $data['species_id'] = isset($data['species_id']) && $data['species_id'] ? $data['species_id'] : null;
-                $data['subtype_id'] = isset($data['subtype_id']) && $data['subtype_id'] ? $data['subtype_id'] : null;
+                $data['subtype_ids'] = isset($data['subtype_ids']) && $data['subtype_ids'] ? $data['subtype_ids'] : null;
                 $data['rarity_id'] = isset($data['rarity_id']) && $data['rarity_id'] ? $data['rarity_id'] : null;
             }
 
@@ -1892,15 +1926,15 @@ class CharacterManager extends Service {
      * @param bool  $isMyo
      * @param mixed $character
      *
-     * @return \App\Models\Character\Character           $character
-     * @return \App\Models\Character\CharacterImage|bool
+     * @return Character           $character
+     * @return bool|CharacterImage
      */
     private function handleCharacterImage($data, $character, $isMyo = false) {
         try {
             if ($isMyo) {
-                $data['species_id'] = (isset($data['species_id']) && $data['species_id']) ? $data['species_id'] : null;
-                $data['subtype_id'] = isset($data['subtype_id']) && $data['subtype_id'] ? $data['subtype_id'] : null;
-                $data['rarity_id'] = (isset($data['rarity_id']) && $data['rarity_id']) ? $data['rarity_id'] : null;
+                $data['species_id'] = isset($data['species_id']) && $data['species_id'] ? $data['species_id'] : null;
+                $data['subtype_ids'] = isset($data['subtype_ids']) && $data['subtype_ids'] ? $data['subtype_ids'] : null;
+                $data['rarity_id'] = isset($data['rarity_id']) && $data['rarity_id'] ? $data['rarity_id'] : null;
 
                 // Use default images for MYO slots without an image provided
                 if (!isset($data['image'])) {
@@ -1913,7 +1947,7 @@ class CharacterManager extends Service {
                 }
             }
             $imageData = Arr::only($data, [
-                'species_id', 'subtype_id', 'rarity_id', 'use_cropper',
+                'species_id', 'subtype_ids', 'rarity_id', 'use_cropper',
                 'x0', 'x1', 'y0', 'y1',
             ]);
             $imageData['use_cropper'] = isset($data['use_cropper']);
@@ -1929,6 +1963,16 @@ class CharacterManager extends Service {
             $imageData['character_id'] = $character->id;
 
             $image = CharacterImage::create($imageData);
+
+            // create subtype relations
+            if (isset($data['subtype_ids']) && $data['subtype_ids']) {
+                foreach ($data['subtype_ids'] as $subtypeId) {
+                    CharacterImageSubtype::create([
+                        'character_image_id' => $image->id,
+                        'subtype_id'         => $subtypeId,
+                    ]);
+                }
+            }
 
             // Check if entered url(s) have aliases associated with any on-site users
             $designers = array_filter($data['designer_url']); // filter null values
@@ -2020,7 +2064,7 @@ class CharacterManager extends Service {
     /**
      * Generates a list of features for displaying.
      *
-     * @param \App\Models\Character\CharacterImage $image
+     * @param CharacterImage $image
      *
      * @return string
      */
@@ -2036,7 +2080,7 @@ class CharacterManager extends Service {
     /**
      * Generates a list of image credits for displaying.
      *
-     * @param \App\Models\Character\CharacterImage $image
+     * @param CharacterImage $image
      *
      * @return string
      */

@@ -18,7 +18,7 @@ class CharacterImage extends Model {
      * @var array
      */
     protected $fillable = [
-        'character_id', 'user_id', 'species_id', 'subtype_id', 'rarity_id', 'url',
+        'character_id', 'user_id', 'species_id', 'rarity_id', 'url',
         'extension', 'use_cropper', 'hash', 'fullsize_hash', 'fullsize_extension', 'sort',
         'x0', 'x1', 'y0', 'y1',
         'description', 'parsed_description',
@@ -94,8 +94,8 @@ class CharacterImage extends Model {
     /**
      * Get the subtype of the character image.
      */
-    public function subtype() {
-        return $this->belongsTo(Subtype::class, 'subtype_id');
+    public function subtypes() {
+        return $this->hasMany(CharacterImageSubtype::class, 'character_image_id');
     }
 
     /**
@@ -209,7 +209,8 @@ class CharacterImage extends Model {
      * @return string
      */
     public function getFullsizeFileNameAttribute() {
-        return $this->id.'_'.$this->hash.'_'.$this->fullsize_hash.'_full.'.$this->fullsize_extension;
+        // Backwards compatibility pre v3
+        return $this->id.'_'.$this->hash.'_'.$this->fullsize_hash.'_full.'.($this->fullsize_extension ?? $this->extension);
     }
 
     /**
@@ -224,7 +225,7 @@ class CharacterImage extends Model {
     /**
      * Gets the file name of the model's fullsize image.
      *
-     * @param  user
+     * @param  User
      * @param mixed|null $user
      *
      * @return string
@@ -262,5 +263,26 @@ class CharacterImage extends Model {
      */
     public function getThumbnailUrlAttribute() {
         return asset($this->imageDirectory.'/'.$this->thumbnailFileName);
+    }
+
+    /**********************************************************************************************
+
+        OTHER FUNCTIONS
+
+    **********************************************************************************************/
+
+    /**
+     * Displays the image's subtypes as an imploded string.
+     */
+    public function displaySubtypes() {
+        if (!count($this->subtypes)) {
+            return 'None';
+        }
+        $subtypes = [];
+        foreach ($this->subtypes as $subtype) {
+            $subtypes[] = $subtype->subtype->displayName;
+        }
+
+        return implode(', ', $subtypes);
     }
 }

@@ -11,7 +11,7 @@
 
 Route::get('/', 'HomeController@getIndex');
 
-Route::get('logs', 'HomeController@getLogs');
+Route::get('admin-logs', 'HomeController@getLogs');
 Route::group(['middleware' => 'admin'], function () {
     Route::get('staff-reward-settings', 'HomeController@getStaffRewardSettings');
     Route::post('staff-reward-settings/{key}', 'HomeController@postEditStaffRewardSetting');
@@ -74,6 +74,13 @@ Route::group(['prefix' => 'files', 'middleware' => 'power:edit_site_settings'], 
     Route::post('folder/create', 'FileController@postCreateFolder');
     Route::post('folder/delete', 'FileController@postDeleteFolder');
     Route::post('folder/rename', 'FileController@postRenameFolder');
+});
+
+// LOG VIEWER
+Route::group(['prefix' => 'logs', 'middleware' => 'power:edit_site_settings'], function () {
+    Route::get('/', 'LogController@getIndex');
+    Route::get('/{name}', 'LogController@getLog');
+    Route::post('/delete', 'LogController@postDeleteLog');
 });
 
 // SITE IMAGES
@@ -198,6 +205,7 @@ Route::group(['prefix' => 'data', 'namespace' => 'Data', 'middleware' => 'power:
     Route::get('traits/create', 'FeatureController@getCreateFeature');
     Route::get('traits/edit/{id}', 'FeatureController@getEditFeature');
     Route::get('traits/delete/{id}', 'FeatureController@getDeleteFeature');
+    Route::get('traits/check-subtype', 'FeatureController@getCreateEditFeatureSubtype');
     Route::post('traits/create', 'FeatureController@postCreateEditFeature');
     Route::post('traits/edit/{id?}', 'FeatureController@postCreateEditFeature');
     Route::post('traits/delete/{id}', 'FeatureController@postDeleteFeature');

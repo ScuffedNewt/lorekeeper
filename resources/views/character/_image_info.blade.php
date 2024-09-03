@@ -42,12 +42,14 @@
                     </div>
                     <div class="col-lg-8 col-md-6 col-8">{!! $image->species_id ? $image->species->displayName : 'None' !!}</div>
                 </div>
-                @if ($image->subtype_id)
+                @if (count($image->subtypes))
                     <div class="row">
                         <div class="col-lg-4 col-md-6 col-4">
-                            <h5>Subtype</h5>
+                            <h5>Subtype{{ count($image->subtypes) > 1 ? 's' : '' }}</h5>
                         </div>
-                        <div class="col-lg-8 col-md-6 col-8">{!! $image->subtype_id ? $image->subtype->displayName : 'None' !!}</div>
+                        <div class="col-lg-8 col-md-6 col-8">
+                            {!! $image->displaySubtypes() !!}
+                        </div>
                     </div>
                 @endif
                 <div class="row">
@@ -64,10 +66,7 @@
                     @if (config('lorekeeper.extensions.traits_by_category'))
                         <div>
                             @php
-                                $traitgroup = $image
-                                    ->features()
-                                    ->get()
-                                    ->groupBy('feature_category_id');
+                                $traitgroup = $image->features()->get()->groupBy('feature_category_id');
                             @endphp
                             @if ($image->features()->count())
                                 @foreach ($traitgroup as $key => $group)
@@ -91,10 +90,7 @@
                         </div>
                     @else
                         <div>
-                            <?php $features = $image
-                                ->features()
-                                ->with('feature.category')
-                                ->get(); ?>
+                            <?php $features = $image->features()->with('feature.category')->get(); ?>
                             @if ($features->count())
                                 @foreach ($features as $feature)
                                     <div>
@@ -173,27 +169,25 @@
             @if (isset($showMention) && $showMention)
                 {{-- Mention This tab --}}
                 <div class="tab-pane fade" id="mention-{{ $image->id }}">
-                    <div class="imagenoteseditingparse">
-                        In the rich text editor:
-                        <div class="alert alert-secondary">
-                            [character={{ $character->slug }}]
-                        </div>
-                        In a comment:
-                        <div class="alert alert-secondary">
-                            [{{ $character->fullName }}]({{ $character->url }})
-                        </div>
+                    In the rich text editor:
+                    <div class="alert alert-secondary">
+                        [character={{ $character->slug }}]
+                    </div>
+                    In a comment:
+                    <div class="alert alert-secondary">
+                        [{{ $character->fullName }}]({{ $character->url }})
                     </div>
                     <hr>
-                    <div class="my-2"><strong>For Thumbnails:</strong></div>
-                    <div class="imagenoteseditingparse">
-                        In the rich text editor:
-                        <div class="alert alert-secondary">
-                            [charthumb={{ $character->slug }}]
-                        </div>
-                        In a comment:
-                        <div class="alert alert-secondary">
-                            [![Thumbnail of {{ $character->fullName }}]({{ $character->image->thumbnailUrl }})]({{ $character->url }})
-                        </div>
+                    <div class="my-2">
+                        <strong>For Thumbnails:</strong>
+                    </div>
+                    In the rich text editor:
+                    <div class="alert alert-secondary">
+                        [charthumb={{ $character->slug }}]
+                    </div>
+                    In a comment:
+                    <div class="alert alert-secondary">
+                        [![Thumbnail of {{ $character->fullName }}]({{ $character->image->thumbnailUrl }})]({{ $character->url }})
                     </div>
                 </div>
             @endif

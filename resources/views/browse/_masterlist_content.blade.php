@@ -16,13 +16,20 @@
     <div class="card bg-light mb-3 collapse" id="advancedSearch">
         <div class="card-body masterlist-advanced-search">
             @if (!$isMyo)
-                <div class="masterlist-search-field">
-                    {!! Form::label('character_category_id', 'Category: ') !!}
-                    {!! Form::select('character_category_id', $categories, Request::get('character_category_id'), ['class' => 'form-control', 'style' => 'width: 250px']) !!}
-                </div>
-                <div class="masterlist-search-field">
-                    {!! Form::label('subtype_id', 'Species Subtype: ') !!}
-                    {!! Form::select('subtype_id', $subtypes, Request::get('subtype_id'), ['class' => 'form-control', 'style' => 'width: 250px']) !!}
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            {!! Form::label('character_category_id', 'Category: ') !!}
+                            {!! Form::select('character_category_id', $categories, Request::get('character_category_id'), ['class' => 'form-control']) !!}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            {!! Form::label('subtype_ids[]', 'Species Subtype: ') !!}
+                            {!! add_help('Search for characters that have <strong>' . (config('lorekeeper.extensions.exclusionary_search') ? 'all' : 'any') . '</strong> of the selected subtypes.') !!}
+                            {!! Form::select('subtype_ids[]', $subtypes, Request::get('subtype_ids'), ['class' => 'form-control userselectize', 'multiple']) !!}
+                        </div>
+                    </div>
                 </div>
                 <hr />
             @endif
@@ -54,11 +61,11 @@
             <hr />
             <div class="masterlist-search-field">
                 {!! Form::label('sale_value_min', 'Resale Minimum ($): ') !!}
-                {!! Form::text('sale_value_min', Request::get('sale_value_min'), ['class' => 'form-control', 'style' => 'width: 250px']) !!}
+                {!! Form::text('sale_value_min', Request::get('sale_value_min'), ['class' => 'form-control mr-2', 'style' => 'width: 250px']) !!}
             </div>
             <div class="masterlist-search-field">
                 {!! Form::label('sale_value_max', 'Resale Maximum ($): ') !!}
-                {!! Form::text('sale_value_max', Request::get('sale_value_max'), ['class' => 'form-control', 'style' => 'width: 250px']) !!}
+                {!! Form::text('sale_value_max', Request::get('sale_value_max'), ['class' => 'form-control mr-2', 'style' => 'width: 250px']) !!}
             </div>
             @if (!$isMyo)
                 <div class="masterlist-search-field">
@@ -85,56 +92,37 @@
                 {!! Form::checkbox('is_giftable', 1, Request::get('is_giftable'), ['class' => 'form-check-input', 'data-toggle' => 'toggle', 'data-on' => 'Can Be Gifted', 'data-off' => 'Any Giftable Status', 'data-width' => '202', 'data-height' => '46']) !!}
             </div>
             <hr />
-            <a href="#" class="float-right btn btn-sm btn-outline-primary add-feature-button">Add Trait</a>
-            {!! Form::label('Has Traits: ') !!} {!! add_help('This will narrow the search to characters that have ALL of the selected traits at the same time.') !!}
-            <div id="featureBody" class="row w-100">
-                @if (Request::get('feature_id'))
-                    @foreach (Request::get('feature_id') as $featureId)
-                        <div class="feature-block col-md-4 col-sm-6 mt-3 p-1">
-                            <div class="card">
-                                <div class="card-body d-flex">
-                                    {!! Form::select('feature_id[]', $features, $featureId, ['class' => 'form-control feature-select selectize', 'placeholder' => 'Select Trait']) !!}
-                                    <a href="#" class="btn feature-remove ml-2"><i class="fas fa-times"></i></a>
-                                </div>
-                            </div>
-                        </div>
-                    @endforeach
-                @endif
+            <div class="form-group">
+                {!! Form::label('Has Traits: ') !!} {!! add_help('This will narrow the search to characters that have ALL of the selected traits at the same time.') !!}
+                {!! Form::select('feature_ids[]', $features, Request::get('feature_ids'), ['class' => 'form-control feature-select userselectize', 'placeholder' => 'Select Traits', 'multiple']) !!}
             </div>
             <hr />
-            <div class="masterlist-search-field">
-                {!! Form::checkbox('search_images', 1, Request::get('search_images'), ['class' => 'form-check-input mr-3', 'data-toggle' => 'toggle']) !!}
-                <span class="ml-2">Include all character images in search {!! add_help(
+            <div class="form-group">
+                {!! Form::checkbox('search_images', 1, Request::get('search_images'), ['class' => 'form-check-input', 'data-toggle' => 'toggle']) !!}
+                {!! Form::label('search_images', 'Include all character images in search', ['class' => 'form-check-label ml-3']) !!} {!! add_help(
                     'Each character can have multiple images for each updated version of the character, which captures the traits on that character at that point in time. By default the search will only search on the most up-to-date image, but this option will retrieve characters that match the criteria on older images - you may get results that are outdated.',
-                ) !!}</span>
+                ) !!}
             </div>
-
         </div>
 
     </div>
     <div class="form-inline justify-content-end mb-3">
         <div class="form-group mr-3">
             {!! Form::label('sort', 'Sort: ', ['class' => 'mr-2']) !!}
-            {!! Form::select(
-                'sort',
-                ['number_desc' => 'Number Descending', 'number_asc' => 'Number Ascending', 'id_desc' => 'Newest First', 'id_asc' => 'Oldest First', 'sale_value_desc' => 'Highest Sale Value', 'sale_value_asc' => 'Lowest Sale Value'],
-                Request::get('sort'),
-                ['class' => 'form-control'],
-            ) !!}
+            @if (!$isMyo)
+                {!! Form::select(
+                    'sort',
+                    ['number_desc' => 'Number Descending', 'number_asc' => 'Number Ascending', 'id_desc' => 'Newest First', 'id_asc' => 'Oldest First', 'sale_value_desc' => 'Highest Sale Value', 'sale_value_asc' => 'Lowest Sale Value'],
+                    Request::get('sort'),
+                    ['class' => 'form-control'],
+                ) !!}
+            @else
+                {!! Form::select('sort', ['id_desc' => 'Newest First', 'id_asc' => 'Oldest First', 'sale_value_desc' => 'Highest Sale Value', 'sale_value_asc' => 'Lowest Sale Value'], Request::get('sort'), ['class' => 'form-control']) !!}
+            @endif
         </div>
         {!! Form::submit('Search', ['class' => 'btn btn-primary']) !!}
     </div>
     {!! Form::close() !!}
-</div>
-<div class="hide" id="featureContent">
-    <div class="feature-block col-md-4 col-sm-6 mt-3 p-1">
-        <div class="card">
-            <div class="card-body d-flex">
-                {!! Form::select('feature_id[]', $features, null, ['class' => 'form-control feature-select selectize', 'placeholder' => 'Select Trait']) !!}
-                <a href="#" class="btn feature-remove ml-2"><i class="fas fa-times"></i></a>
-            </div>
-        </div>
-    </div>
 </div>
 <div class="text-right mb-3">
     <div class="btn-group">

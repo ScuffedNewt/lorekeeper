@@ -1,7 +1,7 @@
 @extends('admin.layout')
 
 @section('admin-title')
-    Traits
+    {{ $feature->id ? 'Edit' : 'Create' }} Trait
 @endsection
 
 @section('admin-content')
@@ -18,17 +18,13 @@
     <h3>Basic Information</h3>
 
     <div class="row">
-        <div class="col-md-6">
-            <div class="form-group">
-                {!! Form::label('Name') !!}
-                {!! Form::text('name', $feature->name, ['class' => 'form-control']) !!}
-            </div>
+        <div class="col-md-6 form-group">
+            {!! Form::label('Name') !!}
+            {!! Form::text('name', $feature->name, ['class' => 'form-control']) !!}
         </div>
-        <div class="col-md-6">
-            <div class="form-group">
-                {!! Form::label('Rarity') !!}
-                {!! Form::select('rarity_id', $rarities, $feature->rarity_id, ['class' => 'form-control']) !!}
-            </div>
+        <div class="col-md-6 form-group">
+            {!! Form::label('Rarity') !!}
+            {!! Form::select('rarity_id', $rarities, $feature->rarity_id, ['class' => 'form-control']) !!}
         </div>
     </div>
 
@@ -45,23 +41,17 @@
     </div>
 
     <div class="row">
-        <div class="col-md-4">
-            <div class="form-group">
-                {!! Form::label('Trait Category (Optional)') !!}
-                {!! Form::select('feature_category_id', $categories, $feature->feature_category_id, ['class' => 'form-control']) !!}
-            </div>
+        <div class="col-md-4 form-group">
+            {!! Form::label('Trait Category (Optional)') !!}
+            {!! Form::select('feature_category_id', $categories, $feature->feature_category_id, ['class' => 'form-control']) !!}
         </div>
-        <div class="col-md-4">
-            <div class="form-group">
-                {!! Form::label('Species Restriction (Optional)') !!}
-                {!! Form::select('species_id', $specieses, $feature->species_id, ['class' => 'form-control']) !!}
-            </div>
+        <div class="col-md-4 form-group">
+            {!! Form::label('Species Restriction (Optional)') !!}
+            {!! Form::select('species_id', $specieses, $feature->species_id, ['class' => 'form-control', 'id' => 'species']) !!}
         </div>
-        <div class="col-md-4">
-            <div class="form-group">
-                {!! Form::label('Subtype (Optional)') !!} {!! add_help('This is cosmetic and does not limit choice of traits in selections.') !!}
-                {!! Form::select('subtype_id', $subtypes, $feature->subtype_id, ['class' => 'form-control']) !!}
-            </div>
+        <div class="col-md-4 form-group" id="subtypes">
+            {!! Form::label('Subtype (Optional)') !!} {!! add_help('This is cosmetic and does not limit choice of traits in selections.') !!}
+            {!! Form::select('subtype_id', $subtypes, $feature->subtype_id, ['class' => 'form-control', 'id' => 'subtype']) !!}
         </div>
     </div>
     <div class="form-group">
@@ -98,6 +88,25 @@
                 e.preventDefault();
                 loadModal("{{ url('admin/data/traits/delete') }}/{{ $feature->id }}", 'Delete Trait');
             });
+            refreshSubtype();
         });
+
+        $("#species").change(function() {
+            refreshSubtype();
+        });
+
+        function refreshSubtype() {
+            var species = $('#species').val();
+            var subtype_id = {{ $feature->subtype_id ?: 'null' }};
+            $.ajax({
+                type: "GET",
+                url: "{{ url('admin/data/traits/check-subtype') }}?species=" + species + "&subtype_id=" + subtype_id,
+                dataType: "text"
+            }).done(function(res) {
+                $("#subtypes").html(res);
+            }).fail(function(jqXHR, textStatus, errorThrown) {
+                alert("AJAX call failed: " + textStatus + ", " + errorThrown);
+            });
+        };
     </script>
 @endsection
