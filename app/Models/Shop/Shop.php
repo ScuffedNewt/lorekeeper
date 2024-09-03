@@ -2,8 +2,8 @@
 
 namespace App\Models\Shop;
 
+use App\Models\Item\Item;
 use App\Models\Model;
-use \App\Models\Item\Item;
 
 class Shop extends Model {
     /**

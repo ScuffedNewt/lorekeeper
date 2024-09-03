@@ -2,13 +2,12 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Schema;
 use App\Models\Limit\Limit;
 use DB;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Schema;
 
-class ConvertShopLimits extends Command
-{
+class ConvertShopLimits extends Command {
     /**
      * The name and signature of the console command.
      *
@@ -29,6 +28,7 @@ class ConvertShopLimits extends Command
     public function handle() {
         if (!Schema::hasTable('shop_limits')) {
             $this->info('No shop limits to convert.');
+
             return;
         }
 
@@ -38,10 +38,10 @@ class ConvertShopLimits extends Command
         foreach ($shopLimits as $shopLimit) {
             Limit::create([
                 'object_model' => 'App\Models\Shop\Shop',
-                'object_id' => $shopLimit->shop_id,
-                'limit_type' => 'item',
-                'limit_id' => $shopLimit->item_id,
-                'quantity' => 1,
+                'object_id'    => $shopLimit->shop_id,
+                'limit_type'   => 'item',
+                'limit_id'     => $shopLimit->item_id,
+                'quantity'     => 1,
             ]);
 
             $bar->advance();

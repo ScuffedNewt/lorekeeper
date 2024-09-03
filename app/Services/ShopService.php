@@ -164,7 +164,7 @@ class ShopService extends Service {
      * @param \App\Models\User\User $user
      * @param mixed                 $stock
      *
-     * @return \App\Models\Shop\Shop|bool
+     * @return bool|Shop
      */
     public function editShopStock($stock, $data, $user) {
         DB::beginTransaction();

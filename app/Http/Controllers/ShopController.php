@@ -167,7 +167,7 @@ class ShopController extends Controller {
                     return in_array($itemId, json_decode($shop->allowed_coupons, 1));
                 });
             }
-            $check = UserItem::with('item')->whereIn('item_id', $itemIds)->where('user_id', auth::user()->id)->where('count', '>', 0)->get()->pluck('item.name', 'id');
+            $check = UserItem::with('item')->whereIn('item_id', $itemIds)->where('user_id', Auth::user()->id)->where('count', '>', 0)->get()->pluck('item.name', 'id');
         } else {
             $check = null;
         }

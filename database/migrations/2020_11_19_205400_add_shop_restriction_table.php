@@ -10,7 +10,7 @@ class AddShopRestrictionTable extends Migration {
      */
     public function up() {
         //
-        schema::create('shop_limits', function (Blueprint $table) {
+        Schema::create('shop_limits', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('shop_id');
             $table->integer('item_id');
@@ -22,6 +22,6 @@ class AddShopRestrictionTable extends Migration {
      */
     public function down() {
         //
-        schema::dropIfExists('shop_limits');
+        Schema::dropIfExists('shop_limits');
     }
 }

@@ -10,7 +10,7 @@ class AddFtoShops extends Migration {
      */
     public function up() {
         //
-        schema::table('shops', function (Blueprint $table) {
+        Schema::table('shops', function (Blueprint $table) {
             $table->boolean('is_fto')->default(0);
         });
 
@@ -24,7 +24,7 @@ class AddFtoShops extends Migration {
      */
     public function down() {
         //
-        schema::table('shops', function (Blueprint $table) {
+        Schema::table('shops', function (Blueprint $table) {
             $table->dropColumn('is_fto');
         });
 
