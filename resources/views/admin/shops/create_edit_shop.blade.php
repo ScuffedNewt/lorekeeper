@@ -77,13 +77,13 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         {!! Form::label('start_at', 'Start Time') !!} {!! add_help('The shop will cycle in at this date.') !!}
-                        {!! Form::text('start_at', $shop->start_at, ['class' => 'form-control', 'id' => 'datepicker2']) !!}
+                        {!! Form::text('start_at', $shop->start_at, ['class' => 'form-control datepicker']) !!}
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         {!! Form::label('end_at', 'End Time') !!} {!! add_help('The shop will cycle out at this date.') !!}
-                        {!! Form::text('end_at', $shop->end_at, ['class' => 'form-control', 'id' => 'datepicker3']) !!}
+                        {!! Form::text('end_at', $shop->end_at, ['class' => 'form-control datepicker']) !!}
                     </div>
                 </div>
             </div>
@@ -160,6 +160,7 @@
                     </div>
                 @endforeach
             </div>
+        </div>
     @endif
 
     <div class="feature-row mb-2 hide">
@@ -180,16 +181,6 @@
             } else {
                 $('.shop-timed-quantity').addClass('hide');
             }
-        });
-
-        $("#datepicker2").datetimepicker({
-            dateFormat: "yy-mm-dd",
-            timeFormat: 'HH:mm:ss',
-        });
-
-        $("#datepicker3").datetimepicker({
-            dateFormat: "yy-mm-dd",
-            timeFormat: 'HH:mm:ss',
         });
 
         // edit stock function

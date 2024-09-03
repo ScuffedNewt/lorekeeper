@@ -169,6 +169,7 @@ class ShopManager extends Service {
 
             if (!fillUserAssets($assets, null, $user, 'Shop Purchase', [
                 'data'  => $shopLog->itemData,
+                'disallow_transfer' => $shopStock->disallow_transfer,
                 'notes' => 'Purchased '.format_date($shopLog->created_at),
             ])) {
                 throw new \Exception('Failed to purchase item.');

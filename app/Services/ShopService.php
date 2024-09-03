@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\Shop\Shop;
-use App\Models\Shop\ShopLimit;
 use Illuminate\Support\Facades\DB;
 
 class ShopService extends Service {
@@ -144,6 +143,7 @@ class ShopService extends Service {
                 'restock_quantity'         => isset($data['restock']) && isset($data['quantity']) ? $data['quantity'] : 1,
                 'restock_interval'         => $data['restock_interval'] ?? 2,
                 'range'                    => $data['range'] ?? 0,
+                'disallow_transfer'        => $data['disallow_transfer'] ?? 0,
                 'is_timed_stock'           => isset($data['is_timed_stock']),
                 'start_at'                 => $data['start_at'],
                 'end_at'                   => $data['end_at'],
