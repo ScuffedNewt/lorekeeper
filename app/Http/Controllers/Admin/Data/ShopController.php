@@ -196,9 +196,9 @@ class ShopController extends Controller {
     public function postCreateShopStock(Request $request, ShopService $service, $id) {
         $data = $request->only([
             'shop_id', 'item_id', 'currency_id', 'cost', 'use_user_bank', 'use_character_bank', 'is_limited_stock', 'quantity', 'purchase_limit', 'purchase_limit_timeframe', 'is_fto', 'stock_type', 'is_visible',
-            'restock', 'restock_quantity', 'restock_interval', 'range', 'is_timed_stock', 'start_at', 'end_at',
+            'restock', 'restock_quantity', 'restock_interval', 'range', 'disallow_transfer', 'is_timed_stock', 'start_at', 'end_at',
         ]);
-        if ($service->updateShopStock(Shop::find($id), $data, Auth::user())) {
+        if ($service->createShopStock(Shop::find($id), $data, Auth::user())) {
             flash('Shop stock updated successfully.')->success();
 
             return redirect()->back();

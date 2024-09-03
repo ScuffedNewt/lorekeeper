@@ -106,7 +106,7 @@ class ShopService extends Service {
     }
 
     /**
-     * Updates shop stock.
+     * Creates shop stock.
      *
      * @param Shop                  $shop
      * @param array                 $data
@@ -114,7 +114,7 @@ class ShopService extends Service {
      *
      * @return bool|Shop
      */
-    public function updateShopStock($shop, $data, $user) {
+    public function createShopStock($shop, $data, $user) {
         DB::beginTransaction();
 
         try {

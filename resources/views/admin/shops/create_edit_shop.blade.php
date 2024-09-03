@@ -112,7 +112,7 @@
             <div class="row col-12">
                 @foreach ($shop->stock as $stock)
                     <div class="col-md-4">
-                        <div class="card p-3 my-1">
+                        <div class="card h-100 p-3 my-1">
                             <div class="row">
                                 @if ($stock->item->has_image)
                                     <div class="col-2">
