@@ -301,20 +301,4 @@ class ShopController extends Controller {
 
         return redirect()->back();
     }
-
-    public function postRestrictShop(Request $request, ShopService $service, $id) {
-        $data = $request->only([
-            'item_id', 'is_restricted',
-        ]);
-
-        if ($service->restrictShop($data, $id)) {
-            flash('Shop limits updated successfully.')->success();
-        } else {
-            foreach ($service->errors()->getMessages()['error'] as $error) {
-                flash($error)->error();
-            }
-        }
-
-        return redirect()->back();
-    }
 }

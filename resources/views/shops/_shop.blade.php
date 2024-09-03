@@ -9,17 +9,7 @@
             {!! $shop->is_staff ? '<i class="fas fa-crown mr-1"></i>' : '' !!}
             {{ $shop->name }}
         </a>
-        <br>
-        @if ($shop->is_restricted)
-            <div class="text-muted small">(Requires <?php
-            $limits = [];
-            foreach ($shop->limits as $limit) {
-                $name = $limit->item->name;
-                $limits[] = $name;
-            }
-            echo implode(', ', $limits);
-            ?>)</div>
-        @endif
+        @include('widgets._limits', ['object' => $shop, 'compact' => true])
         @if ($shop->is_fto)
             <span class="badge badge-pill badge-success">FTO Shop</span>
         @endif

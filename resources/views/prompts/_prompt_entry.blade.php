@@ -56,6 +56,7 @@
                     </tbody>
                 </table>
             @endif
+            @include('widgets._limits', ['object' => $prompt])
         </div>
         <div class="text-right">
             @if ($prompt->end_at && $prompt->end_at->isPast())

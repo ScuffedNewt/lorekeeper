@@ -199,6 +199,24 @@ class SubmissionController extends Controller {
     }
 
     /**
+     * Shows prompt requirement information.
+     *
+     * @param int $id
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getPromptRequirementInfo($id) {
+        $prompt = Prompt::active()->where('id', $id)->first();
+        if (!$prompt) {
+            return response(404);
+        }
+
+        return view('home._prompt_requirements', [
+            'prompt' => $prompt,
+        ]);
+    }
+
+    /**
      * Creates a new submission.
      *
      * @param App\Services\SubmissionManager $service

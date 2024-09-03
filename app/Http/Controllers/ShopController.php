@@ -9,6 +9,7 @@ use App\Models\Shop\Shop;
 use App\Models\Shop\ShopLog;
 use App\Models\Shop\ShopStock;
 use App\Models\User\UserItem;
+use App\Services\LimitManager;
 use App\Services\ShopManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -57,21 +58,18 @@ class ShopController extends Controller {
             }
         }
 
-        if ($shop->is_restricted) {
+        if (count(getLimits($shop))) {
             if (!Auth::check()) {
                 flash('You must be logged in to enter this shop.')->error();
 
-                return redirect()->to('/shops');
+                return redirect()->to('shops');
             }
-            foreach ($shop->limits as $limit) {
-                $item = $limit->item_id;
-                $check = UserItem::where('item_id', $item)->where('user_id', auth::user()->id)->where('count', '>', 0)->first();
 
-                if (!$check) {
-                    flash('You require a '.$limit->item->name.' to enter this store.')->error();
+            $service = new LimitManager;
+            if (!$service->checkLimits($shop)) {
+                flash($service->errors()->getMessages()['error'][0])->error();
 
-                    return redirect()->to('/shops');
-                }
+                return redirect()->to('shops');
             }
         }
 
@@ -138,6 +136,15 @@ class ShopController extends Controller {
         $stock = ShopStock::where('id', $stockId)->where('shop_id', $id)->first();
         if (!$shop) {
             abort(404);
+        }
+
+        if (count(getLimits($shop))) {
+            $service = new LimitManager;
+            if (!$service->checkLimits($shop)) {
+                flash($service->errors()->getMessages()['error'][0])->error();
+
+                return redirect()->to('shops');
+            }
         }
 
         $user = Auth::user();

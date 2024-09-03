@@ -276,37 +276,6 @@ class ShopService extends Service {
         return $this->rollbackReturn(false);
     }
 
-    public function restrictShop($data, $id) {
-        DB::beginTransaction();
-
-        try {
-            if (!isset($data['is_restricted'])) {
-                $data['is_restricted'] = 0;
-            }
-
-            $shop = Shop::find($id);
-            $shop->is_restricted = $data['is_restricted'];
-            $shop->save();
-
-            $shop->limits()->delete();
-
-            if (isset($data['item_id'])) {
-                foreach ($data['item_id'] as $key => $type) {
-                    ShopLimit::create([
-                        'shop_id'       => $shop->id,
-                        'item_id'       => $type,
-                    ]);
-                }
-            }
-
-            return $this->commitReturn(true);
-        } catch (\Exception $e) {
-            $this->setError('error', $e->getMessage());
-        }
-
-        return $this->rollbackReturn(false);
-    }
-
     /**
      * Processes user input for creating/updating a shop.
      *

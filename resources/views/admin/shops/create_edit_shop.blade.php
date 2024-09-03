@@ -98,35 +98,11 @@
     {!! Form::close() !!}
 
     @if ($shop->id)
-        {!! Form::open(['url' => 'admin/data/shops/restrictions/' . $shop->id]) !!}
-        <h3>Restrict Shop</h3>
-        <div class="form-group">
-            {!! Form::checkbox('is_restricted', 1, $shop->is_restricted, ['class' => 'is-restricted-class form-check-label', 'data-toggle' => 'toggle']) !!}
-            {!! Form::label('is_restricted', 'Should this shop require an item to enter?', ['class' => 'is-restricted-label form-check-label ml-3']) !!} {!! add_help('If turned on, the shop will cannot be entered unless the user currently owns all required items.') !!}
-        </div>
+        <hr />
 
-        <div class="br-form-group" style="display: none">
-            <div><a href="#" class="btn btn-primary mb-3" id="add-feature">Add Item Requirement</a></div>
+        @include('widgets._add_limits', ['object' => $shop])
 
-            <div class="form-group">
-                @foreach ($shop->limits as $limit)
-                    <div class="row mb-2">
-                        {!! Form::label('item_id', 'Item', ['class' => 'col-form-label']) !!}
-                        <div class="col-4">
-                            {!! Form::select('item_id[]', $items, $limit->item_id, ['class' => 'form-control', 'placeholder' => 'Select Item']) !!}
-                        </div>
-                        <a href="#" class="remove-feature btn btn-danger">Remove</a>
-                    </div>
-                @endforeach
-            </div>
-            <div id="featureList" class="form-group">
-            </div>
-        </div>
-        <div class="text-right">
-            {!! Form::submit('Edit', ['class' => 'btn btn-primary']) !!}
-        </div>
-
-        {!! Form::close() !!}
+        <hr />
 
         <h3>Shop Stock</h3>
         <div class="text-right mb-3">

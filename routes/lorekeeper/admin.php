@@ -177,7 +177,7 @@ Route::group(['prefix' => 'data', 'namespace' => 'Data', 'middleware' => 'power:
     Route::post('shops/edit/{id?}', 'ShopController@postCreateEditShop');
     Route::post('shops/delete/{id}', 'ShopController@postDeleteShop');
     Route::post('shops/sort', 'ShopController@postSortShop');
-    Route::post('shops/restrictions/{id}', 'ShopController@postRestrictShop');
+
     // stock
     // create
     Route::get('shops/stock/{id}', 'ShopController@getCreateShopStock');
@@ -257,6 +257,15 @@ Route::group(['prefix' => 'data', 'namespace' => 'Data', 'middleware' => 'power:
     Route::post('prompts/create', 'PromptController@postCreateEditPrompt');
     Route::post('prompts/edit/{id?}', 'PromptController@postCreateEditPrompt');
     Route::post('prompts/delete/{id}', 'PromptController@postDeletePrompt');
+
+    // DYNAMIC LIMITS
+    Route::get('limits', 'LimitController@getIndex');
+    Route::get('limits/create', 'LimitController@getCreateLimit');
+    Route::get('limits/edit/{id}', 'LimitController@getEditLimit');
+    Route::get('limits/delete/{id}', 'LimitController@getDeleteLimit');
+    Route::post('limits/create', 'LimitController@postCreateEditLimit');
+    Route::post('limits/edit/{id?}', 'LimitController@postCreateEditLimit');
+    Route::post('limits/delete/{id}', 'LimitController@postDeleteLimit');
 });
 
 // PAGES
@@ -461,3 +470,8 @@ Route::group(['prefix' => 'designs', 'middleware' => 'power:manage_characters'],
     Route::post('vote/{id}/{action}', 'DesignController@postVote')->where('action', 'approve|reject');
 });
 Route::get('{type}/{status}', 'DesignController@getDesignIndex')->where('type', 'myo-approvals|design-approvals')->where('status', 'pending|approved|rejected');
+
+// LIMITS
+Route::group(['prefix' => 'limits', 'middleware' => 'power:manage_data'], function () {
+    Route::post('/', 'LimitController@postCreateEditLimits');
+});
