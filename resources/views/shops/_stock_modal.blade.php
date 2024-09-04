@@ -9,9 +9,13 @@
             <div>Stock: {{ $stock->quantity }}</div>
         @endif
         @if ($stock->purchase_limit)
-            <div class="text-danger">Max {{ $stock->purchase_limit }} @if ($stock->purchase_limit_timeframe !== 'lifetime')
+            <div class="text-danger">
+                Max {{ $stock->purchase_limit }}
+                @if ($stock->purchase_limit_timeframe !== 'lifetime')
                     {{ $stock->purchase_limit_timeframe }}
-                @endif per user</div>
+                @endif
+                per user
+            </div>
         @endif
         @if ($stock->disallow_transfer)
             <div class="text-danger">Cannot be transferred after purchase</div>

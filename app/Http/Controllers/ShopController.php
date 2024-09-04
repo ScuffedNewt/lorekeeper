@@ -65,9 +65,9 @@ class ShopController extends Controller {
                 return redirect()->to('shops');
             }
 
-            $service = new LimitManager;
-            if (!$service->checkLimits($shop)) {
-                flash($service->errors()->getMessages()['error'][0])->error();
+            $limitService = new LimitManager;
+            if (!$limitService->checkLimits($shop)) {
+                flash($limitService->errors()->getMessages()['error'][0])->error();
 
                 return redirect()->to('shops');
             }
@@ -139,9 +139,9 @@ class ShopController extends Controller {
         }
 
         if (count(getLimits($shop))) {
-            $service = new LimitManager;
-            if (!$service->checkLimits($shop)) {
-                flash($service->errors()->getMessages()['error'][0])->error();
+            $limitService = new LimitManager;
+            if (!$limitService->checkLimits($shop)) {
+                flash($limitService->errors()->getMessages()['error'][0])->error();
 
                 return redirect()->to('shops');
             }

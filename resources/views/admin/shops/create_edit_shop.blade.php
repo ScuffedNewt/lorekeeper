@@ -66,30 +66,26 @@
         {!! Form::label('is_fto', 'FTO Only?', ['class' => 'form-check-label ml-3']) !!} {!! add_help('Only users who are currently FTO and staff can enter.') !!}
     </div>
 
-    <br>
-    <div class="pl-4">
-        <div class="form-group">
-            {!! Form::checkbox('is_timed_shop', 1, $shop->is_timed_shop ?? 0, ['class' => 'form-check-input shop-timed shop-toggle shop-field', 'id' => 'is_timed_shop']) !!}
-            {!! Form::label('is_timed_shop', 'Set Timed Shop', ['class' => 'form-check-label ml-3']) !!} {!! add_help('Sets the shop as timed between the chosen dates.') !!}
-        </div>
-        <div class="shop-timed-quantity {{ $shop->is_timed_shop ? '' : 'hide' }}">
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        {!! Form::label('start_at', 'Start Time') !!} {!! add_help('The shop will cycle in at this date.') !!}
-                        {!! Form::text('start_at', $shop->start_at, ['class' => 'form-control datepicker']) !!}
-                    </div>
+    <div class="form-group">
+        {!! Form::checkbox('is_timed_shop', 1, $shop->is_timed_shop ?? 0, ['class' => 'form-check-input shop-timed shop-toggle shop-field', 'data-toggle' => 'toggle', 'id' => 'is_timed_shop']) !!}
+        {!! Form::label('is_timed_shop', 'Set Timed Shop', ['class' => 'form-check-label ml-3']) !!} {!! add_help('Sets the shop as timed between the chosen dates.') !!}
+    </div>
+    <div class="shop-timed-quantity {{ $shop->is_timed_shop ? '' : 'hide' }}">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    {!! Form::label('start_at', 'Start Time') !!} {!! add_help('The shop will cycle in at this date.') !!}
+                    {!! Form::text('start_at', $shop->start_at, ['class' => 'form-control datepicker']) !!}
                 </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        {!! Form::label('end_at', 'End Time') !!} {!! add_help('The shop will cycle out at this date.') !!}
-                        {!! Form::text('end_at', $shop->end_at, ['class' => 'form-control datepicker']) !!}
-                    </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    {!! Form::label('end_at', 'End Time') !!} {!! add_help('The shop will cycle out at this date.') !!}
+                    {!! Form::text('end_at', $shop->end_at, ['class' => 'form-control datepicker']) !!}
                 </div>
             </div>
         </div>
     </div>
-
 
     <div class="text-right">
         {!! Form::submit($shop->id ? 'Edit' : 'Create', ['class' => 'btn btn-primary']) !!}
@@ -108,58 +104,56 @@
         <div class="text-right mb-3">
             <a href="#" class="add-stock-button btn btn-outline-primary">Add Stock</a>
         </div>
-        <div id="shopStock">
-            <div class="row col-12">
-                @foreach ($shop->stock as $stock)
-                    <div class="col-md-4">
-                        <div class="card h-100 p-3 my-1">
-                            <div class="row">
-                                @if ($stock->item->has_image)
-                                    <div class="col-2">
-                                        <img src="{{ $stock->item->imageUrl }}" style="width: 100%;" alt="{{ $stock->item->name }}">
-                                    </div>
-                                @endif
-                                <div class="col-{{ $stock->item->has_image ? '8' : '10' }}">
-                                    <div><a href="{{ $stock->item->idUrl }}"><strong>{{ $stock->item->name }} - {{ $stock->stock_type }}</strong></a></div>
-                                    <div><strong>Cost: </strong> {!! $stock->currency->display($stock->cost) !!}</div>
+        <div class="row">
+            @foreach ($shop->stock as $stock)
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100 p-3 my-1">
+                        <div class="row">
+                            @if ($stock->item->has_image)
+                                <div class="col-2">
+                                    <img src="{{ $stock->item->imageUrl }}" style="width: 100%;" alt="{{ $stock->item->name }}">
                                 </div>
-                                <div class="row">
-                                    @if (!$stock->is_visible)
-                                        <div class="col-2"> <i class="fas fa-eye-slash"></i></div>
-                                    @endif
-                                    @if ($stock->is_timed_stock)
-                                        <div class="col-2"> <i class="fas fa-clock"></i></div>
-                                    @endif
-                                </div>
+                            @endif
+                            <div class="col-{{ $stock->item->has_image ? '8' : '10' }}">
+                                <div><a href="{{ $stock->item->idUrl }}"><strong>{{ $stock->item->name }} - {{ $stock->stock_type }}</strong></a></div>
+                                <div><strong>Cost: </strong> {!! $stock->currency->display($stock->cost) !!}</div>
                             </div>
-                            @if ($stock->is_limited_stock)
-                                <div>Stock: {{ $stock->quantity }}</div>
-                            @endif
-                            @if ($stock->is_limited_stock)
-                                <div>Restock: {!! $stock->restock ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>' !!}</div>
-                            @endif
-                            @if ($stock->purchase_limit)
-                                <div class="text-danger">Max {{ $stock->purchase_limit }} @if ($stock->purchase_limit_timeframe !== 'lifetime')
-                                        {{ $stock->purchase_limit_timeframe }}
-                                    @endif per user</div>
-                            @endif
-                            @if ($stock->disallow_transfer)
-                                <div class="text-danger">Cannot be transferred</div>
-                            @endif
-                            <div class="text-right">
-                                <button class="btn btn-primary" onclick="editStock({{ $stock->id }})">
-                                    {{-- pencil icon --}}
-                                    <i class="fas fa-pencil-alt"></i>
-                                </button>
-                                <div class="btn btn-danger" onclick="deleteStock({{ $stock->id }})">
-                                    {{-- trash icon --}}
-                                    <i class="fas fa-trash"></i>
-                                </div>
+                            <div class="row">
+                                @if (!$stock->is_visible)
+                                    <div class="col-2"> <i class="fas fa-eye-slash"></i></div>
+                                @endif
+                                @if ($stock->is_timed_stock)
+                                    <div class="col-2"> <i class="fas fa-clock"></i></div>
+                                @endif
+                            </div>
+                        </div>
+                        @if ($stock->is_limited_stock)
+                            <div>Stock: {{ $stock->quantity }}</div>
+                        @endif
+                        @if ($stock->is_limited_stock)
+                            <div>Restock: {!! $stock->restock ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>' !!}</div>
+                        @endif
+                        @if ($stock->purchase_limit)
+                            <div class="text-danger">Max {{ $stock->purchase_limit }} @if ($stock->purchase_limit_timeframe !== 'lifetime')
+                                    {{ $stock->purchase_limit_timeframe }}
+                                @endif per user</div>
+                        @endif
+                        @if ($stock->disallow_transfer)
+                            <div class="text-danger">Cannot be transferred</div>
+                        @endif
+                        <div class="text-right">
+                            <button class="btn btn-primary" onclick="editStock({{ $stock->id }})">
+                                {{-- pencil icon --}}
+                                <i class="fas fa-pencil-alt"></i>
+                            </button>
+                            <div class="btn btn-danger" onclick="deleteStock({{ $stock->id }})">
+                                {{-- trash icon --}}
+                                <i class="fas fa-trash"></i>
                             </div>
                         </div>
                     </div>
-                @endforeach
-            </div>
+                </div>
+            @endforeach
         </div>
     @endif
 
@@ -174,6 +168,7 @@
 
 @section('scripts')
     @parent
+    @include('widgets._datetimepicker_js')
     <script>
         $('#is_timed_shop').change(function() {
             if ($(this).is(':checked')) {

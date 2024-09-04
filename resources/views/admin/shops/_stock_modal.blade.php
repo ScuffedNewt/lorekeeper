@@ -37,37 +37,40 @@
         <div class="row">
             <div class="col-md-6">
                 <div class="form-group">
-                    {!! Form::checkbox('use_user_bank', 1, $stock->use_user_bank ?? 1, ['class' => 'form-check-input stock-toggle stock-field', 'data-name' => 'use_user_bank']) !!}
+                    {!! Form::checkbox('use_user_bank', 1, $stock->use_user_bank ?? 1, ['class' => 'form-check-input stock-toggle stock-field', 'data-toggle' => 'checkbox', 'data-name' => 'use_user_bank']) !!}
                     {!! Form::label('use_user_bank', 'Use User Bank', ['class' => 'form-check-label ml-3']) !!} {!! add_help('This will allow users to purchase the item using the currency in their accounts, provided that users can own that currency.') !!}
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="form-group mb-0">
-                    {!! Form::checkbox('use_character_bank', 1, $stock->use_character_bank ?? 1, ['class' => 'form-check-input stock-toggle stock-field', 'data-name' => 'use_character_bank']) !!}
+                    {!! Form::checkbox('use_character_bank', 1, $stock->use_character_bank ?? 1, ['class' => 'form-check-input stock-toggle stock-field', 'data-toggle' => 'checkbox', 'data-name' => 'use_character_bank']) !!}
                     {!! Form::label('use_character_bank', 'Use Character Bank', ['class' => 'form-check-label ml-3']) !!} {!! add_help('This will allow users to purchase the item using the currency belonging to characters they own, provided that characters can own that currency.') !!}
                 </div>
             </div>
         </div>
 
-        <div class="form-group">
-            {!! Form::checkbox('is_fto', 1, $stock->is_fto ?? 0, ['class' => 'form-check-input stock-toggle stock-field', 'data-name' => 'is_fto']) !!}
-            {!! Form::label('is_fto', 'FTO Only?', ['class' => 'form-check-label ml-3']) !!} {!! add_help('If turned on, only FTO will be able to purchase the item.') !!}
+        <div class="row">
+            <div class="col-md-6 form-group">
+                {!! Form::checkbox('is_fto', 1, $stock->is_fto ?? 0, ['class' => 'form-check-input stock-toggle stock-field', 'data-toggle' => 'checkbox', 'data-name' => 'is_fto']) !!}
+                {!! Form::label('is_fto', 'FTO Only?', ['class' => 'form-check-label ml-3']) !!} {!! add_help('If turned on, only FTO will be able to purchase the item.') !!}
+            </div>
+            <div class="col-md-6 form-group">
+                {!! Form::checkbox('disallow_transfer', 1, $stock->disallow_transfer ?? 0, ['class' => 'form-check-input stock-toggle stock-field', 'data-name' => 'disallow_transfer']) !!}
+                {!! Form::label('disallow_transfer', 'Disallow Transfer', ['class' => 'form-check-label ml-3']) !!} {!! add_help('If turned on, users will be unable to transfer this item after purchase.') !!}
+            </div>
         </div>
 
         <div class="form-group">
-            {!! Form::checkbox('is_limited_stock', 1, $stock->is_limited_stock ?? 0, ['class' => 'form-check-input stock-limited stock-toggle stock-field', 'id' => 'is_limited_stock']) !!}
+            {!! Form::checkbox('is_visible', 1, $stock->is_visible ?? 1, ['class' => 'form-check-input stock-limited stock-toggle stock-field', 'data-toggle' => 'checkbox']) !!}
+            {!! Form::label('is_visible', 'Set Visibility', ['class' => 'form-check-label ml-3']) !!} {!! add_help('If turned off it will not appear in the store.') !!}
+        </div>
+
+        <div class="form-group">
+            {!! Form::checkbox('is_limited_stock', 1, $stock->is_limited_stock ?? 0, ['class' => 'form-check-input stock-limited stock-toggle stock-field', 'data-toggle' => 'checkbox', 'id' => 'is_limited_stock']) !!}
             {!! Form::label('is_limited_stock', 'Set Limited Stock', ['class' => 'form-check-label ml-3']) !!} {!! add_help('If turned on, will limit the amount purchaseable to the quantity set below.') !!}
         </div>
 
-        <div class="form-group">
-            {!! Form::checkbox('disallow_transfer', 1, $stock->disallow_transfer ?? 0, ['class' => 'form-check-input stock-toggle stock-field', 'data-name' => 'disallow_transfer']) !!}
-            {!! Form::label('disallow_transfer', 'Disallow Transfer', ['class' => 'form-check-label ml-3']) !!} {!! add_help('If turned on, users will be unable to transfer this item after purchase.') !!}
-        </div>
 
-        <div class="form-group">
-            {!! Form::checkbox('is_visible', 1, $stock->is_visible ?? 1, ['class' => 'form-check-input stock-limited stock-toggle stock-field']) !!}
-            {!! Form::label('is_visible', 'Set Visibility', ['class' => 'form-check-label ml-3']) !!} {!! add_help('If turned off it will not appear in the store.') !!}
-        </div>
     </div>
 
     <div class="card mb-3 stock-limited-quantity {{ $stock->is_limited_stock ? '' : 'hide' }}">
@@ -77,7 +80,7 @@
                 {!! Form::text('quantity', $stock->quantity ?? 0, ['class' => 'form-control stock-field']) !!}
             </div>
             <div class="my-2">
-                {!! Form::checkbox('restock', 1, $stock->restock ?? 0, ['class' => 'form-check-input']) !!}
+                {!! Form::checkbox('restock', 1, $stock->restock ?? 0, ['class' => 'form-check-input', 'data-toggle' => 'checkbox']) !!}
                 {!! Form::label('restock', 'Auto Restock?', ['class' => 'form-check-label ml-3']) !!} {!! add_help('If ticked to yes it will auto restock at the interval defined below.') !!}
             </div>
             <div>
@@ -85,7 +88,7 @@
                 {!! Form::select('restock_interval', [1 => 'Day', 2 => 'Week', 3 => 'Month'], $stock->restock_interval ?? 2, ['class' => 'form-control stock-field']) !!}
             </div>
             <div class="my-2">
-                {!! Form::checkbox('range', 1, $stock->range ?? 0, ['class' => 'form-check-input']) !!}
+                {!! Form::checkbox('range', 1, $stock->range ?? 0, ['class' => 'form-check-input', 'data-toggle' => 'checkbox']) !!}
                 {!! Form::label('range', 'Restock in Range?', ['class' => 'form-check-label ml-3']) !!} {!! add_help('If ticked to yes it will restock a random quantity between 1 and the quantity set above.') !!}
             </div>
         </div>
@@ -93,20 +96,21 @@
     <div class="row">
         <div class="col-md-6">
             {!! Form::label('purchase_limit', 'User Purchase Limit') !!} {!! add_help('This is the maximum amount of this item a user can purchase from this shop. Set to 0 to allow infinite purchases.') !!}
-            {!! Form::text('purchase_limit', $stock ? $stock->purchase_limit : 0, ['class' => 'form-control stock-field', 'data-name' => 'purchase_limit']) !!}
+            {!! Form::number('purchase_limit', $stock ? $stock->purchase_limit : 0, ['class' => 'form-control stock-field', 'data-name' => 'purchase_limit']) !!}
         </div>
         <div class="col-md-6">
             {!! Form::label('purchase_limit_timeframe', 'Purchase Limit Timeout') !!} {!! add_help('This is the timeframe that the purchase limit will apply to. I.E. yearly will only look at purchases made after the beginning of the current year. Weekly starts on Sunday. Rollover will happen on UTC time.') !!}
             {!! Form::select('purchase_limit_timeframe', ['lifetime' => 'Lifetime', 'yearly' => 'Yearly', 'monthly' => 'Monthly', 'weekly' => 'Weekly', 'daily' => 'Daily'], $stock ? $stock->purchase_limit_timeframe : 0, [
                 'class' => 'form-control stock-field',
                 'data-name' => 'purchase_limit_timeframe',
+                'placeholder' => 'Select Timeframe'
             ]) !!}
         </div>
     </div>
     <br>
     <div class="pl-4">
         <div class="form-group">
-            {!! Form::checkbox('is_timed_stock', 1, $stock->is_timed_stock ?? 0, ['class' => 'form-check-input stock-timed stock-toggle stock-field', 'id' => 'is_timed_stock']) !!}
+            {!! Form::checkbox('is_timed_stock', 1, $stock->is_timed_stock ?? 0, ['class' => 'form-check-input stock-timed stock-toggle stock-field', 'data-toggle' => 'checkbox', 'id' => 'is_timed_stock']) !!}
             {!! Form::label('is_timed_stock', 'Set Timed Stock', ['class' => 'form-check-label ml-3']) !!} {!! add_help('Sets the stock as timed between the chosen dates.') !!}
         </div>
         <div class="stock-timed-quantity {{ $stock->is_timed_stock ? '' : 'hide' }}">
@@ -134,6 +138,10 @@
 </div>
 <script>
     $(document).ready(function() {
+        // foreach .form-check-input
+        $('.form-check-input').each(function() {
+            $(this).attr('data-toggle', 'toggle').bootstrapToggle();
+        });
         $('#type').change(function() {
             var type = $(this).val();
             $.ajax({
@@ -167,6 +175,10 @@
         $(".datepicker").datetimepicker({
             dateFormat: "yy-mm-dd",
             timeFormat: 'HH:mm:ss',
+            changeMonth: true,
+            changeYear: true,
+            timezone: '{!! Carbon\Carbon::now()->utcOffset() !!}',
+            altFieldTimeOnly: false,
             beforeShow: function(input, inst) {
                 const box = inst.input[0].getBoundingClientRect();
                 setTimeout(function() {

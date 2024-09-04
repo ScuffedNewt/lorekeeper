@@ -152,7 +152,6 @@ class ShopController extends Controller {
         }
         // get base modal from type using asset helper
         $model = getAssetModelString(strtolower($type));
-        Log::info([$model, $type]);
 
         return view('admin.shops._stock_item', [
             'items' => $model::orderBy('name')->pluck('name', 'id'),

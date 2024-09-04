@@ -215,6 +215,9 @@ class ShopManager extends Service {
         return $shopQuery->sum('quantity');
     }
 
+    /**
+     * Gets the purchase limit for an item from a shop.
+     */
     public function getStockPurchaseLimit($shopStock, $user) {
         $limit = config('lorekeeper.settings.default_purchase_limit');
         if ($shopStock->purchase_limit > 0) {
