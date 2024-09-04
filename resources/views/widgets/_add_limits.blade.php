@@ -66,12 +66,10 @@
                                 {!! Form::label('Quantity') !!}
                                 {!! Form::number('quantity[]', $limit->quantity, ['class' => 'form-control', 'placeholder' => 'Enter Quantity', 'min' => 0, 'step' => 1]) !!}
                             </div>
-                            @if ($limit->limit_type == 'currency' || $limit->limit_type == 'item')
-                                <div class="form-group debit">
-                                    {!! Form::label('Debit') !!}
-                                    {!! Form::select('debit[]', ['yes' => 'Debit', 'no' => 'Don\'t Debit'], $limit->debit ? 'yes' : 'no', ['class' => 'form-control']) !!}
-                                </div>
-                            @endif
+                            <div class="form-group debit {{ $limit->limit_type == 'currency' || $limit->limit_type == 'item' ? '' : 'hide'}}">
+                                {!! Form::label('Debit') !!}
+                                {!! Form::select('debit[]', ['yes' => 'Debit', 'no' => 'Don\'t Debit'], $limit->debit ? 'yes' : 'no', ['class' => 'form-control']) !!}
+                            </div>
                         </div>
                         <div class="col-md-1 d-flex align-items-center">
                             <div class="btn btn-danger remove-limit mx-auto">X</div>
