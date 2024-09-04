@@ -236,4 +236,17 @@ class ShopManager extends Service {
 
         return $limit;
     }
+
+    /**
+     * Gets how many of a shop item a user owns.
+     *
+     * @param mixed $stock
+     * @param mixed $user
+     */
+    public function getUserOwned($stock, $user) {
+        switch (strtolower($stock->stock_type)) {
+            case 'item':
+                return $user->items()->where('item_id', $stock->item_id)->count();
+        }
+    }
 }

@@ -37,7 +37,9 @@
 
     @foreach ($stocks as $type => $stock)
         @if (count($stock))
-            <h3>{{ $type }}</h3>
+            <h3>
+                {{ $type . (substr($type, -1) == 's' ? '' : 's') }}
+            </h3>
         @endif
         @if (Settings::get('shop_type'))
             @include('shops._tab', ['items' => $stock, 'shop' => $shop])
@@ -45,7 +47,7 @@
             @foreach ($stock as $categoryId => $categoryItems)
                 @php
                     $visible = '';
-                    if (isset($categoryItems->first()->category) && !$categoryItems->first()->category->is_visible) {
+                    if (isset($categoryItems->first()->category) && method_exists($categoryItems->first()->category, 'is_visible') && !$categoryItems->first()->category->is_visible) {
                         $visible = '<i class="fas fa-eye-slash mr-1"></i>';
                     }
                 @endphp

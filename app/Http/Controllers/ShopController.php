@@ -155,7 +155,7 @@ class ShopController extends Controller {
             $quantityLimit = $service->getStockPurchaseLimit($stock, Auth::user());
             $userPurchaseCount = $service->checkUserPurchases($stock, Auth::user());
             $purchaseLimitReached = $service->checkPurchaseLimitReached($stock, Auth::user());
-            $userOwned = UserItem::where('user_id', $user->id)->where('item_id', $stock->item->id)->where('count', '>', 0)->get();
+            $userOwned = $service->getUserOwned($stock, Auth::user());
         }
 
         if ($shop->use_coupons) {
