@@ -10,7 +10,6 @@ use App\Models\Shop\ShopStock;
 use App\Services\ShopService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Log;
 
 class ShopController extends Controller {
     /*

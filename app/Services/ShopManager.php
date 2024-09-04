@@ -216,6 +216,9 @@ class ShopManager extends Service {
 
     /**
      * Gets the purchase limit for an item from a shop.
+     *
+     * @param mixed $shopStock
+     * @param mixed $user
      */
     public function getStockPurchaseLimit($shopStock, $user) {
         $limit = config('lorekeeper.settings.default_purchase_limit');
