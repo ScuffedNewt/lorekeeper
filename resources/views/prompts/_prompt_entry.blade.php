@@ -56,10 +56,10 @@
                     </tbody>
                 </table>
             @endif
-            @if($prompt->children->count())
+            @if ($prompt->children->count())
                 <h4 class="mt-2">Unlocks The Following Prompts:</h4>
                 <div class="row">
-                    @foreach($prompt->children as $children)
+                    @foreach ($prompt->children as $children)
                         <div class="col-md-6">
                             <div class="card mb-3">
                                 <div class="card-body">
@@ -79,9 +79,9 @@
         <div class="text-right">
             @if ($prompt->parent_id)
                 @if ($prompt->getSubmissionCount(Auth::user() ?? null) < $prompt->parent_quantity)
-                    <p class="text-danger">You have not unlocked this prompt yet. You must complete {!! $prompt->parent->displayName !!} {{ $prompt->parent_quantity }} {{ $prompt->parent_quantity > 1 ? 'times' : 'time'}}.</p>
+                    <p class="text-danger">You have not unlocked this prompt yet. You must complete {!! $prompt->parent->displayName !!} {{ $prompt->parent_quantity }} {{ $prompt->parent_quantity > 1 ? 'times' : 'time' }}.</p>
                 @else
-                    <p class="text-success">You have unlocked this prompt by completing {!! $prompt->parent->displayName !!} {{ $prompt->parent_quantity }} {{ $prompt->parent_quantity > 1 ? 'times' : 'time'}}.</p>
+                    <p class="text-success">You have unlocked this prompt by completing {!! $prompt->parent->displayName !!} {{ $prompt->parent_quantity }} {{ $prompt->parent_quantity > 1 ? 'times' : 'time' }}.</p>
                 @endif
             @endif
             @if ($prompt->end_at && $prompt->end_at->isPast())
