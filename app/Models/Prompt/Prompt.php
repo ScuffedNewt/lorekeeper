@@ -2,14 +2,11 @@
 
 namespace App\Models\Prompt;
 
-use Config;
-use DB;
-use Carbon\Carbon;
 use App\Models\Model;
-use App\Models\Prompt\PromptCategory;
+use Carbon\Carbon;
+use App\Models\Submission\Submission;
 
-class Prompt extends Model
-{
+class Prompt extends Model {
     /**
      * The attributes that are mass assignable.
      *
@@ -18,7 +15,7 @@ class Prompt extends Model
     protected $fillable = [
         'prompt_category_id', 'name', 'summary', 'description', 'parsed_description', 'is_active',
         'start_at', 'end_at', 'hide_before_start', 'hide_after_end', 'has_image', 'prefix',
-        'hide_submissions', 'parent_id', 'parent_quantity',
+        'hide_submissions', 'staff_only', 'hash', 'parent_id', 'parent_quantity', 'is_details_visible',
     ];
 
     /**
@@ -29,11 +26,14 @@ class Prompt extends Model
     protected $table = 'prompts';
 
     /**
-     * Dates on the model to convert to Carbon instances.
+     * The attributes that should be cast to native types.
      *
      * @var array
      */
-    public $dates = ['start_at', 'end_at'];
+    protected $casts = [
+        'start_at' => 'datetime',
+        'end_at'   => 'datetime',
+    ];
 
     /**
      * Validation rules for character creation.
@@ -42,11 +42,11 @@ class Prompt extends Model
      */
     public static $createRules = [
         'prompt_category_id' => 'nullable',
-        'name' => 'required|unique:prompts|between:3,100',
-        'prefix' => 'nullable|unique:prompts|between:2,10',
-        'summary' => 'nullable',
-        'description' => 'nullable',
-        'image' => 'mimes:png',
+        'name'               => 'required|unique:prompts|between:3,100',
+        'prefix'             => 'nullable|unique:prompts|between:2,10',
+        'summary'            => 'nullable',
+        'description'        => 'nullable',
+        'image'              => 'mimes:png',
     ];
 
     /**
@@ -56,11 +56,11 @@ class Prompt extends Model
      */
     public static $updateRules = [
         'prompt_category_id' => 'nullable',
-        'name' => 'required|between:3,100',
-        'prefix' => 'nullable|between:2,10',
-        'summary' => 'nullable',
-        'description' => 'nullable',
-        'image' => 'mimes:png',
+        'name'               => 'required|between:3,100',
+        'prefix'             => 'nullable|between:2,10',
+        'summary'            => 'nullable',
+        'description'        => 'nullable',
+        'image'              => 'mimes:png',
     ];
 
     /**********************************************************************************************
@@ -72,17 +72,15 @@ class Prompt extends Model
     /**
      * Get the category the prompt belongs to.
      */
-    public function category()
-    {
-        return $this->belongsTo('App\Models\Prompt\PromptCategory', 'prompt_category_id');
+    public function category() {
+        return $this->belongsTo(PromptCategory::class, 'prompt_category_id');
     }
 
     /**
      * Get the rewards attached to this prompt.
      */
-    public function rewards()
-    {
-        return $this->hasMany('App\Models\Prompt\PromptReward', 'prompt_id');
+    public function rewards() {
+        return $this->hasMany(PromptReward::class, 'prompt_id');
     }
 
      /**
@@ -101,6 +99,13 @@ class Prompt extends Model
         return $this->hasMany('App\Models\Prompt\Prompt', 'parent_id');
     }
 
+    /**
+     * Get the submissions for this prompt.
+     */
+    public function submissions() {
+        return $this->hasMany(Submission::class, 'prompt_id');
+    }
+
     /**********************************************************************************************
 
         SCOPES
@@ -110,91 +115,137 @@ class Prompt extends Model
     /**
      * Scope a query to only include active prompts.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeActive($query)
-    {
+    public function scopeActive($query) {
         return $query->where('is_active', 1)
-            ->where(function($query) {
-                $query->whereNull('start_at')->orWhere('start_at', '<', Carbon::now())->orWhere(function($query) {
+            ->where(function ($query) {
+                $query->whereNull('start_at')->orWhere('start_at', '<', Carbon::now())->orWhere(function ($query) {
                     $query->where('start_at', '>=', Carbon::now())->where('hide_before_start', 0);
                 });
-        })->where(function($query) {
-                $query->whereNull('end_at')->orWhere('end_at', '>', Carbon::now())->orWhere(function($query) {
+            })->where(function ($query) {
+                $query->whereNull('end_at')->orWhere('end_at', '>', Carbon::now())->orWhere(function ($query) {
                     $query->where('end_at', '<=', Carbon::now())->where('hide_after_end', 0);
                 });
-        });
+            });
+    }
 
+    /**
+     * Scope a query to open or closed prompts.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param bool                                  $isOpen
+     *
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeOpen($query, $isOpen) {
+        if ($isOpen) {
+            $query->where(function ($query) {
+                $query->whereNull('end_at')->where('start_at', '<', Carbon::now());
+            })->orWhere(function ($query) {
+                $query->whereNull('start_at')->where('end_at', '>', Carbon::now());
+            })->orWhere(function ($query) {
+                $query->where('start_at', '<', Carbon::now())->where('end_at', '>', Carbon::now());
+            })->orWhere(function ($query) {
+                $query->whereNull('end_at')->whereNull('start_at');
+            });
+        } else {
+            $query->where(function ($query) {
+                $query->whereNull('end_at')->where('start_at', '>', Carbon::now());
+            })->orWhere(function ($query) {
+                $query->whereNull('start_at')->where('end_at', '<', Carbon::now());
+            })->orWhere('start_at', '>', Carbon::now())->orWhere('end_at', '<', Carbon::now());
+        }
+    }
+
+    /**
+     * Scope a query to include or exclude staff-only prompts.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param \App\Models\User\User                 $user
+     *
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeStaffOnly($query, $user) {
+        if ($user && $user->isStaff) {
+            return $query;
+        }
+
+        return $query->where('staff_only', 0);
     }
 
     /**
      * Scope a query to sort prompts in alphabetical order.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @param  bool                                   $reverse
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param bool                                  $reverse
+     *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeSortAlphabetical($query, $reverse = false)
-    {
+    public function scopeSortAlphabetical($query, $reverse = false) {
         return $query->orderBy('name', $reverse ? 'DESC' : 'ASC');
     }
 
     /**
      * Scope a query to sort prompts in category order.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeSortCategory($query)
-    {
-        $ids = PromptCategory::orderBy('sort', 'DESC')->pluck('id')->toArray();
-        return count($ids) ? $query->orderByRaw(DB::raw('FIELD(prompt_category_id, '.implode(',', $ids).')')) : $query;
+    public function scopeSortCategory($query) {
+        if (PromptCategory::all()->count()) {
+            return $query->orderBy(PromptCategory::select('sort')->whereColumn('prompts.prompt_category_id', 'prompt_categories.id'), 'DESC');
+        }
+
+        return $query;
     }
 
     /**
      * Scope a query to sort features by newest first.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeSortNewest($query)
-    {
+    public function scopeSortNewest($query) {
         return $query->orderBy('id', 'DESC');
     }
 
     /**
      * Scope a query to sort features oldest first.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeSortOldest($query)
-    {
+    public function scopeSortOldest($query) {
         return $query->orderBy('id');
     }
 
     /**
      * Scope a query to sort prompts by start date.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @param  bool                                   $reverse
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param bool                                  $reverse
+     *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeSortStart($query, $reverse = false)
-    {
+    public function scopeSortStart($query, $reverse = false) {
         return $query->orderBy('start_at', $reverse ? 'DESC' : 'ASC');
     }
 
     /**
      * Scope a query to sort prompts by end date.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @param  bool                                   $reverse
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param bool                                  $reverse
+     *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeSortEnd($query, $reverse = false)
-    {
+    public function scopeSortEnd($query, $reverse = false) {
         return $query->orderBy('end_at', $reverse ? 'DESC' : 'ASC');
     }
 
@@ -209,8 +260,7 @@ class Prompt extends Model
      *
      * @return string
      */
-    public function getDisplayNameAttribute()
-    {
+    public function getDisplayNameAttribute() {
         return '<a href="'.$this->url.'" class="display-prompt">'.$this->name.'</a>';
     }
 
@@ -219,8 +269,7 @@ class Prompt extends Model
      *
      * @return string
      */
-    public function getImageDirectoryAttribute()
-    {
+    public function getImageDirectoryAttribute() {
         return 'images/data/prompts';
     }
 
@@ -229,9 +278,8 @@ class Prompt extends Model
      *
      * @return string
      */
-    public function getImageFileNameAttribute()
-    {
-        return $this->id . '-image.png';
+    public function getImageFileNameAttribute() {
+        return $this->hash.$this->id.'-image.png';
     }
 
     /**
@@ -239,8 +287,7 @@ class Prompt extends Model
      *
      * @return string
      */
-    public function getImagePathAttribute()
-    {
+    public function getImagePathAttribute() {
         return public_path($this->imageDirectory);
     }
 
@@ -249,10 +296,12 @@ class Prompt extends Model
      *
      * @return string
      */
-    public function getImageUrlAttribute()
-    {
-        if (!$this->has_image) return null;
-        return asset($this->imageDirectory . '/' . $this->imageFileName);
+    public function getImageUrlAttribute() {
+        if (!$this->has_image) {
+            return null;
+        }
+
+        return asset($this->imageDirectory.'/'.$this->imageFileName);
     }
 
     /**
@@ -260,8 +309,7 @@ class Prompt extends Model
      *
      * @return string
      */
-    public function getUrlAttribute()
-    {
+    public function getUrlAttribute() {
         return url('prompts/prompts?name='.$this->name);
     }
 
@@ -270,8 +318,38 @@ class Prompt extends Model
      *
      * @return string
      */
-    public function getAssetTypeAttribute()
-    {
+    public function getAssetTypeAttribute() {
         return 'prompts';
+    }
+
+    /**
+     * Gets the admin edit URL.
+     *
+     * @return string
+     */
+    public function getAdminUrlAttribute() {
+        return url('admin/data/prompts/edit/'.$this->id);
+    }
+
+    /**
+     * Gets the power required to edit this model.
+     *
+     * @return string
+     */
+    public function getAdminPowerAttribute() {
+        return 'edit_data';
+    }
+
+    /**********************************************************************************************
+
+        OTHER FUNCTIONS
+
+    **********************************************************************************************/
+
+    /**
+     * Returns the count of approved submissions for this prompt by a user.
+     */
+    public function getSubmissionCount($user) {
+        return $this->submissions()->where('user_id', $user->id)->where('status', 'approved')->count();
     }
 }
