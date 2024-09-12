@@ -175,8 +175,8 @@ class PromptController extends Controller {
      */
     public function getCreatePrompt() {
         return view('admin.prompts.create_edit_prompt', [
-            'prompt' => new Prompt,
-            'prompts' => ['none' => 'No parent'] + Prompt::active()->pluck('name', 'id')->toArray(),
+            'prompt'     => new Prompt,
+            'prompts'    => ['none' => 'No parent'] + Prompt::active()->pluck('name', 'id')->toArray(),
             'categories' => ['none' => 'No category'] + PromptCategory::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
         ]);
     }
@@ -195,8 +195,8 @@ class PromptController extends Controller {
         }
 
         return view('admin.prompts.create_edit_prompt', [
-            'prompt' => $prompt,
-            'prompts' => ['none' => 'No parent'] + Prompt::active()->where('id', '!=', $prompt->id)->pluck('name', 'id')->toArray(),
+            'prompt'     => $prompt,
+            'prompts'    => ['none' => 'No parent'] + Prompt::active()->where('id', '!=', $prompt->id)->pluck('name', 'id')->toArray(),
             'categories' => ['none' => 'No category'] + PromptCategory::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
         ]);
     }

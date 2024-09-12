@@ -191,7 +191,7 @@ class PromptService extends Service {
                 $data['parent_id'] = null;
             }
             if ((isset($data['parent_id']) && $data['parent_id']) && !Prompt::where('id', $data['parent_id'])->exists()) {
-                throw new \Exception("The selected parent prompt is invalid.");
+                throw new \Exception('The selected parent prompt is invalid.');
             }
 
             $data = $this->populateData($data);
@@ -262,7 +262,7 @@ class PromptService extends Service {
                 $data['parent_id'] = null;
             }
             if ((isset($data['parent_id']) && $data['parent_id']) && !Prompt::where('id', $data['parent_id'])->exists()) {
-                throw new \Exception("The selected parent prompt is invalid.");
+                throw new \Exception('The selected parent prompt is invalid.');
             }
 
             $data = $this->populateData($data, $prompt);
@@ -314,7 +314,7 @@ class PromptService extends Service {
                 throw new \Exception('A submission under this prompt exists. Deleting the prompt will break the submission page - consider setting the prompt to be not active instead.');
             }
             if (Prompt::where('parent_id', $prompt->id)->exists()) {
-                throw new \Exception("A prompt currently has this prompt as its parent.");
+                throw new \Exception('A prompt currently has this prompt as its parent.');
             }
 
             $prompt->rewards()->delete();

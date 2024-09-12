@@ -3,8 +3,8 @@
 namespace App\Models\Prompt;
 
 use App\Models\Model;
-use Carbon\Carbon;
 use App\Models\Submission\Submission;
+use Carbon\Carbon;
 
 class Prompt extends Model {
     /**
@@ -83,19 +83,17 @@ class Prompt extends Model {
         return $this->hasMany(PromptReward::class, 'prompt_id');
     }
 
-     /**
-     * Get the prompts parent
+    /**
+     * Get the prompts parent.
      */
-    public function parent()
-    {
+    public function parent() {
         return $this->belongsTo('App\Models\Prompt\Prompt', 'parent_id');
     }
 
     /**
-     * Get the prompts children
+     * Get the prompts children.
      */
-    public function children()
-    {
+    public function children() {
         return $this->hasMany('App\Models\Prompt\Prompt', 'parent_id');
     }
 
@@ -348,6 +346,8 @@ class Prompt extends Model {
 
     /**
      * Returns the count of approved submissions for this prompt by a user.
+     *
+     * @param mixed $user
      */
     public function getSubmissionCount($user) {
         return $this->submissions()->where('user_id', $user->id)->where('status', 'approved')->count();
