@@ -24,7 +24,7 @@ class CharacterClassService extends Service {
      *
      * @param array $data
      *
-     * @return \App\Models\Character\CharacterClass|bool
+     * @return bool|CharacterClass
      */
     public function createCharacterClass($data) {
         DB::beginTransaction();
@@ -61,7 +61,7 @@ class CharacterClassService extends Service {
      * @param CharacterClass $class
      * @param array          $data
      *
-     * @return \App\Models\Character\CharacterClass|bool
+     * @return bool|CharacterClass
      */
     public function updateCharacterClass($class, $data) {
         DB::beginTransaction();
@@ -132,8 +132,8 @@ class CharacterClassService extends Service {
     /**
      * Handle class data.
      *
-     * @param array                                     $data
-     * @param \App\Models\Character\CharacterClass|null $class
+     * @param array               $data
+     * @param CharacterClass|null $class
      *
      * @return array
      */

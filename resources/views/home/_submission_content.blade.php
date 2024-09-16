@@ -115,8 +115,7 @@
                                 <a href="{{ $character->character->url }}">
                                     {{ $character->character->fullName }}
                                     @if ($character->is_focus)
-                                        <i class="fas fa-bullseye float-right mr-2" data-toggle="tooltip" data-placement="top"
-                                            title="This character is the focus of the submission!"></i>
+                                        <i class="fas fa-bullseye float-right mr-2" data-toggle="tooltip" data-placement="top" title="This character is the focus of the submission!"></i>
                                     @endif
                                 </a>
                             </h3>

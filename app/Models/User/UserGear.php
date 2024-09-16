@@ -2,9 +2,9 @@
 
 namespace App\Models\User;
 
-use App\Models\Model;
 use App\Models\Character\Character;
 use App\Models\Claymore\Gear;
+use App\Models\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class UserGear extends Model {

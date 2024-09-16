@@ -2,8 +2,8 @@
 
 namespace App\Models\Claymore;
 
-use App\Models\Model;
 use App\Models\Currency\Currency;
+use App\Models\Model;
 use App\Models\User\User;
 use App\Models\User\UserGear;
 
@@ -68,14 +68,14 @@ class Gear extends Model {
      * Get the parent of the gear.
      */
     public function parent() {
-        return $this->belongsTo(Gear::class, 'parent_id');
+        return $this->belongsTo(self::class, 'parent_id');
     }
 
     /**
      * Get the children of the gear.
      */
     public function children() {
-        return $this->hasMany(Gear::class, 'parent_id');
+        return $this->hasMany(self::class, 'parent_id');
     }
 
     /**

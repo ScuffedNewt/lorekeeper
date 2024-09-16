@@ -150,8 +150,11 @@ class Stat extends Model {
 
     /**
      * Checks if a certain species / subtype has a different base value.
+     *
+     * @param mixed $type
+     * @param mixed $id
      */
-    public function hasBaseValue($type = 'species', $id) {
+    public function hasBaseValue($type, $id) {
         if (!isset($this->data['bases'])) {
             return false;
         }

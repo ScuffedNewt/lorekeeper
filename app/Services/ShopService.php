@@ -28,7 +28,7 @@ class ShopService extends Service {
      * @param array                 $data
      * @param \App\Models\User\User $user
      *
-     * @return \App\Models\Shop\Shop|bool
+     * @return bool|Shop
      */
     public function createShop($data, $user) {
         DB::beginTransaction();
@@ -69,7 +69,7 @@ class ShopService extends Service {
      * @param array                 $data
      * @param \App\Models\User\User $user
      *
-     * @return \App\Models\Shop\Shop|bool
+     * @return bool|Shop
      */
     public function updateShop($shop, $data, $user) {
         DB::beginTransaction();
@@ -113,7 +113,7 @@ class ShopService extends Service {
      * @param array                 $data
      * @param \App\Models\User\User $user
      *
-     * @return \App\Models\Shop\Shop|bool
+     * @return bool|Shop
      */
     public function updateShopStock($shop, $data, $user) {
         DB::beginTransaction();
@@ -164,7 +164,7 @@ class ShopService extends Service {
      * @param \App\Models\User\User $user
      * @param mixed                 $stock
      *
-     * @return \App\Models\Shop\Shop|bool
+     * @return bool|Shop
      */
     public function editShopStock($stock, $data, $user) {
         DB::beginTransaction();

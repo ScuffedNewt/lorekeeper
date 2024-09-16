@@ -82,9 +82,9 @@
         <div class="form-group">
             {!! Form::label('Species / Subtypes') !!}
             <div id="statList">
-                @if(isset($stat->data['bases']) && $stat->data['bases'])
-                    @foreach ($stat->data['bases'] as $type=>$bases)
-                        @foreach($bases as $id=>$value)
+                @if (isset($stat->data['bases']) && $stat->data['bases'])
+                    @foreach ($stat->data['bases'] as $type => $bases)
+                        @foreach ($bases as $id => $value)
                             <div class="row mb-2">
                                 <div class="col-md-3">
                                     {!! Form::select('base_types[]', ['species' => 'Species', 'subtype' => 'Subtype'], $type, ['class' => 'form-control mr-2 type', 'placeholder' => 'Select Type']) !!}

@@ -175,7 +175,7 @@ function getAssetModelString($type, $namespaced = true) {
                 return 'Element';
             }
             break;
-        // these are special cases, as they do not specifically have a unique model
+            // these are special cases, as they do not specifically have a unique model
         case 'exp':
             return 'Exp';
             break;
@@ -552,7 +552,7 @@ function fillCharacterAssets($assets, $sender, $recipient, $logType, $data, $sub
                 }
             }
         } elseif ($key == 'elements' && count($contents)) {
-            $service = new \App\Services\TypingManager;
+            $service = new App\Services\TypingManager;
             foreach ($contents as $asset) {
                 if (!$service->creditTyping($recipient, $asset['asset'], $sender, $logType)) {
                     return false;
@@ -601,28 +601,33 @@ function createRewardsString($array) {
 
 /**
  * Returns an asset from provided data.
+ *
+ * @param mixed $type
+ * @param mixed $id
+ * @param mixed $isCharacter
  */
 function findReward($type, $id, $isCharacter = false) {
     $reward = null;
     switch ($type) {
         case 'Item':
-            $reward = \App\Models\Item\Item::find($id);
+            $reward = App\Models\Item\Item::find($id);
             break;
         case 'Currency':
-            $reward = \App\Models\Currency\Currency::find($id);
+            $reward = App\Models\Currency\Currency::find($id);
             if (!$isCharacter && !$reward->is_user_owned) {
-                throw new \Exception('Invalid currency selected.');
+                throw new Exception('Invalid currency selected.');
             }
             break;
         case 'Pet':
-            $reward = \App\Models\Pet\Pet::find($id);
+            $reward = App\Models\Pet\Pet::find($id);
             break;
         case 'LootTable':
-            $reward = \App\Models\Loot\LootTable::find($id);
+            $reward = App\Models\Loot\LootTable::find($id);
             break;
         case 'Raffle':
-            $reward = \App\Models\Raffle\Raffle::find($id);
+            $reward = App\Models\Raffle\Raffle::find($id);
             break;
     }
+
     return $reward;
 }

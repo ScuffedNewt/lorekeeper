@@ -382,6 +382,8 @@ class PetController extends Controller {
 
     /**
      * Bonds with a pet.
+     *
+     * @param mixed $id
      */
     public function postBond($id, Request $request, PetManager $service) {
         $pet = UserPet::findOrFail($id);

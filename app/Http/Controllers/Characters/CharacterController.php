@@ -666,6 +666,17 @@ class CharacterController extends Controller {
     }
 
     /**
+     * Shows the characters pets.
+     *
+     * @param string $slug
+     */
+    public function getCharacterPets($slug) {
+        return view('character.pets', [
+            'character'             => $this->character,
+        ]);
+    }
+
+    /**
      * Transfers inventory items back to a user.
      *
      * @param App\Services\InventoryManager $service
@@ -724,17 +735,5 @@ class CharacterController extends Controller {
         }
 
         return redirect()->back();
-    }
-
-    /**
-     * Shows the characters pets.
-     * 
-     * @param string $slug
-     * 
-     */
-    public function getCharacterPets($slug) {
-        return view('character.pets', [
-            'character'             => $this->character,
-        ]);
     }
 }

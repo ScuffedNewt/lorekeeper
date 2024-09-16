@@ -28,7 +28,7 @@ class PetDropService extends Service {
      *
      * @param array $data
      *
-     * @return \App\Models\Pet\PetDropData|bool
+     * @return bool|PetDropData
      */
     public function createPetDrop($data) {
         DB::beginTransaction();
@@ -68,10 +68,10 @@ class PetDropService extends Service {
     /**
      * Updates pet drop data.
      *
-     * @param \App\Models\Pet\PetDropData $drop
-     * @param array                       $data
+     * @param PetDropData $drop
+     * @param array       $data
      *
-     * @return \App\Models\Pet\PetDropData|bool
+     * @return bool|PetDropData
      */
     public function updatePetDrop($drop, $data) {
         DB::beginTransaction();
@@ -117,7 +117,7 @@ class PetDropService extends Service {
     /**
      * Deletes pet drop data.
      *
-     * @param \App\Models\Pet\PetDropData $drop
+     * @param PetDropData $drop
      *
      * @return bool
      */

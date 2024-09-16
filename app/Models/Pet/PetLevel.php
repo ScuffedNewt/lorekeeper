@@ -5,7 +5,6 @@ namespace App\Models\Pet;
 use App\Models\Model;
 
 class PetLevel extends Model {
-
     /**
      * The attributes that are mass assignable.
      *
@@ -49,11 +48,12 @@ class PetLevel extends Model {
             return [];
         }
         $rewards = [];
-        foreach(json_decode($this->attributes['rewards']) as $key=>$reward) {
+        foreach (json_decode($this->attributes['rewards']) as $key=>$reward) {
             if (count(json_decode($this->attributes['rewards'], true)[$key])) {
                 $rewards[] = $reward;
             }
         }
+
         return $rewards;
     }
 }

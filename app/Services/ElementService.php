@@ -30,7 +30,7 @@ class ElementService extends Service {
      * @param array                 $data
      * @param \App\Models\User\User $user
      *
-     * @return \App\Models\Element\Element|bool
+     * @return bool|Element
      */
     public function createElement($data, $user) {
         DB::beginTransaction();
@@ -68,11 +68,11 @@ class ElementService extends Service {
     /**
      * Updates an element.
      *
-     * @param \App\Models\Element\Element $element
-     * @param array                       $data
-     * @param \App\Models\User\User       $user
+     * @param Element               $element
+     * @param array                 $data
+     * @param \App\Models\User\User $user
      *
-     * @return \App\Models\Element\Element|bool
+     * @return bool|Element
      */
     public function updateElement($element, $data, $user) {
         DB::beginTransaction();
@@ -143,8 +143,8 @@ class ElementService extends Service {
     /**
      * Deletes an element.
      *
-     * @param \App\Models\Element\Element $element
-     * @param mixed                       $user
+     * @param Element $element
+     * @param mixed   $user
      *
      * @return bool
      */
@@ -184,8 +184,8 @@ class ElementService extends Service {
     /**
      * Processes user input for creating/updating an element.
      *
-     * @param array                       $data
-     * @param \App\Models\Element\Element $element
+     * @param array   $data
+     * @param Element $element
      *
      * @return array
      */
