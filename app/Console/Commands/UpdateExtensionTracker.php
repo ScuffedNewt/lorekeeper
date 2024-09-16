@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use DB;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class UpdateExtensionTracker extends Command {
     /**
@@ -38,7 +38,7 @@ class UpdateExtensionTracker extends Command {
         $this->info('****************************');
 
         $extendos = [];
-        foreach (glob('config\lorekeeper\ext-tracker\*.php') as $extension) {
+        foreach (glob('config/lorekeeper/ext-tracker/*.php') as $extension) {
             $extendos[basename($extension, '.php')] = include $extension;
         }
 

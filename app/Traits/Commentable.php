@@ -2,8 +2,7 @@
 
 namespace App\Traits;
 
-use App\Models\Comment;
-use Config;
+use App\Models\Comment\Comment;
 
 /**
  * Add this trait to any model that you want to be able to
@@ -14,14 +13,14 @@ trait Commentable {
      * Returns all comments for this model.
      */
     public function commentz() {
-        return $this->morphMany('App\Models\Comment', 'commentable')->withTrashed();
+        return $this->morphMany('App\Models\Comment\Comment', 'commentable')->withTrashed();
     }
 
     /**
      * Returns only approved comments for this model.
      */
     public function approvedComments() {
-        return $this->morphMany('App\Models\Comment', 'commentable')->where('approved', true)->withTrashed();
+        return $this->morphMany('App\Models\Comment\Comment', 'commentable')->where('approved', true)->withTrashed();
     }
 
     /**
@@ -31,7 +30,7 @@ trait Commentable {
      */
     protected static function bootCommentable() {
         static::deleted(function ($commentable) {
-            if (Config::get('lorekeeper.comments.soft_deletes') == true) {
+            if (config('lorekeeper.comments.soft_deletes') == true) {
                 Comment::where('commentable_type', get_class($commentable))->where('commentable_id', $commentable->id)->delete();
             } else {
                 Comment::where('commentable_type', get_class($commentable))->where('commentable_id', $commentable->id)->forceDelete();

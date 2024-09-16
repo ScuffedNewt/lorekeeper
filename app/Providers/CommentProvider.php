@@ -16,7 +16,7 @@ class CommentProvider extends ServiceProvider {
 
         $this->definePermissions();
 
-        Route::model('comment', 'App\Models\Comment');
+        Route::model('comment', 'App\Models\Comment\Comment');
     }
 
     public function register() {
@@ -37,7 +37,7 @@ class CommentProvider extends ServiceProvider {
      * Define permission defined in the config.
      */
     protected function definePermissions() {
-        foreach (Config::get('lorekeeper.comments.permissions', []) as $permission => $policy) {
+        foreach (config('lorekeeper.comments.permissions', []) as $permission => $policy) {
             Gate::define($permission, $policy);
         }
     }

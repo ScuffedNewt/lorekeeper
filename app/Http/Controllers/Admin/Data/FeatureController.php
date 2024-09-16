@@ -9,8 +9,8 @@ use App\Models\Rarity;
 use App\Models\Species\Species;
 use App\Models\Species\Subtype;
 use App\Services\FeatureService;
-use Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class FeatureController extends Controller {
     /*
@@ -164,7 +164,7 @@ class FeatureController extends Controller {
      */
     public function getFeatureIndex(Request $request) {
         $query = Feature::query();
-        $data = $request->only(['rarity_id', 'feature_category_id', 'species_id', 'name']);
+        $data = $request->only(['rarity_id', 'feature_category_id', 'species_id', 'subtype_id', 'name']);
         if (isset($data['rarity_id']) && $data['rarity_id'] != 'none') {
             $query->where('rarity_id', $data['rarity_id']);
         }
@@ -288,5 +288,20 @@ class FeatureController extends Controller {
         }
 
         return redirect()->to('admin/data/traits');
+    }
+
+    /**
+     * Shows the edit subtype portion of the modal.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getCreateEditFeatureSubtype(Request $request) {
+        $species = $request->input('species');
+        $subtype_id = $request->input('subtype_id');
+
+        return view('admin.features._create_edit_feature_subtype', [
+            'subtypes'   => ['0' => 'Select Subtype'] + Subtype::where('species_id', '=', $species)->orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
+            'subtype_id' => $subtype_id,
+        ]);
     }
 }

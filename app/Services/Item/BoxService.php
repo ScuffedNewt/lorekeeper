@@ -5,7 +5,7 @@ namespace App\Services\Item;
 use App\Models\Item\Item;
 use App\Services\InventoryManager;
 use App\Services\Service;
-use DB;
+use Illuminate\Support\Facades\DB;
 
 class BoxService extends Service {
     /*
@@ -29,7 +29,7 @@ class BoxService extends Service {
     /**
      * Processes the data attribute of the tag and returns it in the preferred format.
      *
-     * @param string $tag
+     * @param object $tag
      *
      * @return mixed
      */
@@ -55,7 +55,7 @@ class BoxService extends Service {
     /**
      * Processes the data attribute of the tag and returns it in the preferred format.
      *
-     * @param string $tag
+     * @param object $tag
      * @param array  $data
      *
      * @return bool
@@ -152,16 +152,6 @@ class BoxService extends Service {
      * @return string
      */
     private function getBoxRewardsString($rewards) {
-        $results = 'You have received: ';
-        $result_elements = [];
-        foreach ($rewards as $assetType) {
-            if (isset($assetType)) {
-                foreach ($assetType as $asset) {
-                    array_push($result_elements, $asset['asset']->name.(class_basename($asset['asset']) == 'Raffle' ? ' (Raffle Ticket)' : '').' x'.$asset['quantity']);
-                }
-            }
-        }
-
-        return $results.implode(', ', $result_elements);
+        return 'You have received: '.createRewardsString($rewards);
     }
 }

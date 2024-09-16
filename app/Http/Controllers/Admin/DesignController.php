@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Character\CharacterCategory;
 use App\Models\Character\CharacterDesignUpdate;
 use App\Services\DesignUpdateManager;
-use Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class DesignController extends Controller {
     /**
@@ -20,6 +20,19 @@ class DesignController extends Controller {
      */
     public function getDesignIndex(Request $request, $type, $status) {
         $requests = CharacterDesignUpdate::where('status', ucfirst($status));
+        $data = $request->only(['sort']);
+        if (isset($data['sort'])) {
+            switch ($data['sort']) {
+                case 'newest':
+                    $requests->sortNewest();
+                    break;
+                case 'oldest':
+                    $requests->sortOldest();
+                    break;
+            }
+        } else {
+            $requests->sortOldest();
+        }
         if ($type == 'myo-approvals') {
             $requests = $requests->myos();
         } else {

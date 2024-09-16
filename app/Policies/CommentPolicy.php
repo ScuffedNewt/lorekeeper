@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\Models\Comment;
-use Auth;
+use App\Models\Comment\Comment;
+use Illuminate\Support\Facades\Auth;
 
 class CommentPolicy {
     /**
@@ -21,7 +21,7 @@ class CommentPolicy {
      * @param mixed $user
      */
     public function delete($user, Comment $comment): bool {
-        if (auth::user()->isStaff) {
+        if (Auth::user()->isStaff) {
             return true;
         } else {
             return false;
