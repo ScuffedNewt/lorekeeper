@@ -1,4 +1,4 @@
-{!! Form::open(['url' => 'admin/data/pets/levels/edit/'.$level->id.'/pets/add']) !!}
+{!! Form::open(['url' => 'admin/data/pets/levels/edit/' . $level->id . '/pets/add']) !!}
 
 <div class="alert alert-info mt-0">
     You can add rewards to a pet once it has been added.
@@ -8,7 +8,7 @@
     <i class="fas fa-plus"></i> Add Another Pet
 </div>
 
-@foreach($level->pets as $pet)
+@foreach ($level->pets as $pet)
     <div class="form-group">
         {!! Form::select('pet_ids[]', $pets, $pet->pet_id, ['class' => 'form-control']) !!}
     </div>

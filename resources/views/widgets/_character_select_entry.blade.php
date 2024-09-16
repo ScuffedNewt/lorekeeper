@@ -52,10 +52,15 @@
                                 <tr class="character-reward-row">
                                     @if ($expanded_rewards)
                                         <td>
-                                            {!! Form::select('character_rewardable_type[' . $character->character_id . '][]', ['Item' => 'Item', 'Currency' => 'Currency', 'LootTable' => 'Loot Table', 'Exp' => 'Exp', 'Points' => 'Stat Points', 'Element' => 'Element'], $reward->rewardable_type, [
-                                                'class' => 'form-control character-rewardable-type',
-                                                'placeholder' => 'Select Reward Type',
-                                            ]) !!}
+                                            {!! Form::select(
+                                                'character_rewardable_type[' . $character->character_id . '][]',
+                                                ['Item' => 'Item', 'Currency' => 'Currency', 'LootTable' => 'Loot Table', 'Exp' => 'Exp', 'Points' => 'Stat Points', 'Element' => 'Element'],
+                                                $reward->rewardable_type,
+                                                [
+                                                    'class' => 'form-control character-rewardable-type',
+                                                    'placeholder' => 'Select Reward Type',
+                                                ],
+                                            ) !!}
                                         </td>
                                         <td class="lootDivs">
                                             <div class="character-currencies  {{ $reward->rewardable_type == 'Currency' ? 'show' : 'hide' }}">{!! Form::select('character_rewardable_id[' . $character->character_id . '][]', $characterCurrencies, $reward->rewardable_type == 'Currency' ? $reward->rewardable_id : null, [

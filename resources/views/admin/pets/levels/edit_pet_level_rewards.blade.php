@@ -5,8 +5,13 @@
 @endsection
 
 @section('admin-content')
-    {!! breadcrumbs(['Admin Panel' => 'admin', 'Pets' => 'admin/data/pets', 'Pet Levels' => 'admin/data/pets/levels',
-    'Edit Level' => 'admin/data/pets/levels/edit/' . $level->id, 'Edit Rewards' => 'admin/data/pets/levels/edit/' . $level->id . '/pets/edit'. $petLevel->id]) !!}
+    {!! breadcrumbs([
+        'Admin Panel' => 'admin',
+        'Pets' => 'admin/data/pets',
+        'Pet Levels' => 'admin/data/pets/levels',
+        'Edit Level' => 'admin/data/pets/levels/edit/' . $level->id,
+        'Edit Rewards' => 'admin/data/pets/levels/edit/' . $level->id . '/pets/edit' . $petLevel->id,
+    ]) !!}
 
     <h1>
         Edit {!! $petLevel->pet->displayName !!} Level Rewards
@@ -18,7 +23,7 @@
 
     {!! Form::open(['url' => 'admin/data/pets/levels/edit/' . $level->id . '/pets/edit/' . $petLevel->id]) !!}
 
-        @include('widgets._loot_select', ['loots' => $petLevel->rewards, 'showLootTables' => true, 'showRaffles' => true])
+    @include('widgets._loot_select', ['loots' => $petLevel->rewards, 'showLootTables' => true, 'showRaffles' => true])
 
     <div class="text-right">
         {!! Form::submit($level->id ? 'Edit' : 'Create', ['class' => 'btn btn-primary']) !!}
@@ -27,7 +32,6 @@
     {!! Form::close() !!}
 
     @include('widgets._loot_select_row', ['showLootTables' => true, 'showRaffles' => true])
-
 @endsection
 
 @section('scripts')
