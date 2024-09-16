@@ -51,6 +51,8 @@ class SeedService extends Service {
     /**
      * Processes the data attribute of the tag and returns it in the preferred format for edits.
      *
+     * @param mixed $tag
+     *
      * @return mixed
      */
     public function getTagData($tag) {
@@ -100,6 +102,7 @@ class SeedService extends Service {
      * Processes the data attribute of the tag and returns it in the preferred format.
      *
      * @param array $data
+     * @param mixed $tag
      *
      * @return bool
      */

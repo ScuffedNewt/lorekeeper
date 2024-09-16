@@ -67,6 +67,7 @@ class BarnService extends Service {
      * Processes the data attribute of the tag and returns it in the preferred format.
      *
      * @param array $data
+     * @param mixed $tag
      *
      * @return bool
      */
