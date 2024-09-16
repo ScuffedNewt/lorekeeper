@@ -40,7 +40,13 @@
     @foreach ($elements as $element)
         <div class="card mb-3">
             <div class="card-body">
-                @include('world._element_entry', ['imageUrl' => $element->imageUrl, 'name' => $element->displayName, 'description' => $element->parsed_description, 'idUrl' => $element->idUrl])
+                @include('world._element_entry', [
+                    'imageUrl' => $element->imageUrl,
+                    'name' => $element->displayName,
+                    'description' => $element->parsed_description,
+                    'idUrl' => $element->idUrl,
+                    'searchUrl' => $element->searchUrl,
+                ])
             </div>
         </div>
     @endforeach

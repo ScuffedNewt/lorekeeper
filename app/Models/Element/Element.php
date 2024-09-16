@@ -192,6 +192,15 @@ class Element extends Model {
     }
 
     /**
+     * Search the masterlist for this element.
+     *
+     * @return string
+     */
+    public function getSearchUrlAttribute() {
+        return url('masterlist?element_ids[]='.$this->id);
+    }
+
+    /**
      * Gets the admin edit URL.
      *
      * @return string

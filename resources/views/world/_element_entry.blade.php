@@ -11,6 +11,11 @@
                     <i class="fas fa-search"></i>
                 </a>
             @endif
+            @if (isset($searchUrl) && $searchUrl)
+                <a href="{{ $searchUrl }}" class="world-entry-search text-muted">
+                    <i class="fas fa-list"></i>
+                </a>
+            @endif
         </h3>
         <div class="world-entry-text">
             {!! $description !!}
