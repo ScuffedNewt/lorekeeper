@@ -29,7 +29,7 @@ class SkillService extends Service {
      * @param array                 $data
      * @param \App\Models\User\User $user
      *
-     * @return \App\Models\Skill\SkillCategory|bool
+     * @return bool|SkillCategory
      */
     public function createSkillCategory($data, $user) {
         DB::beginTransaction();
@@ -67,7 +67,7 @@ class SkillService extends Service {
      * @param array                 $data
      * @param \App\Models\User\User $user
      *
-     * @return \App\Models\Skill\SkillCategory|bool
+     * @return bool|SkillCategory
      */
     public function updateSkillCategory($category, $data, $user) {
         DB::beginTransaction();
@@ -168,7 +168,7 @@ class SkillService extends Service {
      * @param array                 $data
      * @param \App\Models\User\User $user
      *
-     * @return \App\Models\Skill\Skill|bool
+     * @return bool|Skill
      */
     public function createSkill($data, $user) {
         DB::beginTransaction();
@@ -220,7 +220,7 @@ class SkillService extends Service {
      * @param array                 $data
      * @param \App\Models\User\User $user
      *
-     * @return \App\Models\Skill\Skill|bool
+     * @return bool|Skill
      */
     public function updateSkill($skill, $data, $user) {
         DB::beginTransaction();
@@ -350,8 +350,8 @@ class SkillService extends Service {
     /**
      * Handle category data.
      *
-     * @param array                                $data
-     * @param \App\Models\Skill\SkillCategory|null $category
+     * @param array              $data
+     * @param SkillCategory|null $category
      *
      * @return array
      */

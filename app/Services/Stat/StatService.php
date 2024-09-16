@@ -55,7 +55,6 @@ class StatService extends Service {
         DB::beginTransaction();
 
         try {
-
             if (!isset($data['name'])) {
                 throw new \Exception('Please provide a name for the stat.');
             }
@@ -80,7 +79,7 @@ class StatService extends Service {
             if (isset($data['types']) && $data['types']) {
                 foreach ($data['types'] as $key=>$type) {
                     if (!isset($data['type_ids'][$key]) || !$data['type_ids'][$key]) {
-                        throw new \Exception('Please select at least one ' . $type . '.');
+                        throw new \Exception('Please select at least one '.$type.'.');
                     }
                     $stat->limits()->create([
                         'species_id' => $data['type_ids'][$key],
@@ -95,7 +94,7 @@ class StatService extends Service {
             if (isset($data['base_type_ids']) && $data['base_type_ids']) {
                 foreach ($data['base_types'] as $key=>$type) {
                     if (!isset($data['base_type_ids'][$key]) || !$data['base_type_ids'][$key]) {
-                        throw new \Exception('Please select at least one ' . $type . '.');
+                        throw new \Exception('Please select at least one '.$type.'.');
                     }
                     // store the base type data
                     $base_data[$type][$data['base_type_ids'][$key]] = $data['base_values'][$key];

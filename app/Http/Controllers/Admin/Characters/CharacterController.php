@@ -106,7 +106,7 @@ class CharacterController extends Controller {
         })->orWhereDoesntHave('limits')->orderBy('name', 'ASC')->get();
 
         return view('admin.masterlist._create_character_stats', [
-            'stats' => $stats,
+            'stats'      => $stats,
             'species_id' => $species,
             'subtype_id' => $subtype,
         ]);

@@ -3,8 +3,6 @@
 namespace App\Models\Species;
 
 use App\Models\Model;
-use App\Models\Skill\Skill;
-use App\Models\Stat\Stat;
 
 class SpeciesLimit extends Model {
     // A generic class that can be used to limit things to certain species / subtypes without having to create a new table for each type of limit.

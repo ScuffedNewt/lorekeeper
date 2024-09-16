@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\User\UserPet;
+use Illuminate\Console\Command;
 
 class AddPetLevels extends Command {
     /**
@@ -33,7 +33,7 @@ class AddPetLevels extends Command {
      * @return mixed
      */
     public function handle() {
-        $this->info("Adding pet levels...");
+        $this->info('Adding pet levels...');
 
         $userPets = UserPet::all();
         // start bar
@@ -46,7 +46,7 @@ class AddPetLevels extends Command {
             }
             $userPet->level()->create([
                 'bonding_level' => 0,
-                'bonding'   => 0,
+                'bonding'       => 0,
             ]);
 
             $bar->advance();

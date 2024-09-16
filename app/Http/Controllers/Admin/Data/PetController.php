@@ -690,7 +690,7 @@ class PetController extends Controller {
 
     /**
      * Gets the pet level deletion modal.
-     * 
+     *
      * @param mixed $id
      */
     public function getDeleteLevel($id) {
@@ -703,7 +703,7 @@ class PetController extends Controller {
 
     /**
      * Deletes a pet level.
-     * 
+     *
      * @param mixed $id
      */
     public function postDeleteLevel(Request $request, PetService $service, $id) {
@@ -720,6 +720,8 @@ class PetController extends Controller {
 
     /**
      * Loads the add pet to level modal.
+     *
+     * @param mixed $id
      */
     public function getAddPetToLevel($id) {
         $level = PetLevel::find($id);
@@ -735,6 +737,8 @@ class PetController extends Controller {
 
     /**
      * Shows the edit pet on level page.
+     *
+     * @param mixed $id
      */
     public function getEditPetLevel($id) {
         $petLevel = PetLevelPet::find($id);
@@ -750,6 +754,8 @@ class PetController extends Controller {
 
     /**
      * Adds pet(s) to a level.
+     *
+     * @param mixed $id
      */
     public function postAddPetToLevel(Request $request, PetService $service, $id) {
         if ($service->addPetsToLevel($request->input('pet_ids'), PetLevel::find($id))) {
@@ -765,6 +771,8 @@ class PetController extends Controller {
 
     /**
      * Edits the rewards for a specific pet on a level.
+     *
+     * @param mixed $id
      */
     public function postEditPetLevel(Request $request, PetService $service, $id) {
         $data = $request->only([

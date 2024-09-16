@@ -2,8 +2,8 @@
 
 namespace App\Models\Claymore;
 
-use App\Models\Model;
 use App\Models\Currency\Currency;
+use App\Models\Model;
 use App\Models\User\User;
 use App\Models\User\UserWeapon;
 
@@ -68,11 +68,11 @@ class Weapon extends Model {
      * Get the parent of the weapon.
      */
     public function parent() {
-        return $this->belongsTo(Weapon::class, 'parent_id');
+        return $this->belongsTo(self::class, 'parent_id');
     }
 
     public function children() {
-        return $this->hasMany(Weapon::class, 'parent_id');
+        return $this->hasMany(self::class, 'parent_id');
     }
 
     public function stats() {

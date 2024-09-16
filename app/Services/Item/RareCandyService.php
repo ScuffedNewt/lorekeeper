@@ -34,8 +34,7 @@ class RareCandyService extends Service {
      *
      * @return mixed
      */
-    public function getTagData($tag) {
-    }
+    public function getTagData($tag) {}
 
     /**
      * Processes the data attribute of the tag and returns it in the preferred format.

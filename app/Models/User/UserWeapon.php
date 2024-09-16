@@ -2,8 +2,8 @@
 
 namespace App\Models\User;
 
-use App\Models\Model;
 use App\Models\Claymore\Weapon;
+use App\Models\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class UserWeapon extends Model {

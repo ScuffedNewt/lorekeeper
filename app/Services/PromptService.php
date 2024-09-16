@@ -32,7 +32,7 @@ class PromptService extends Service {
      * @param array                 $data
      * @param \App\Models\User\User $user
      *
-     * @return \App\Models\Prompt\PromptCategory|bool
+     * @return bool|PromptCategory
      */
     public function createPromptCategory($data, $user) {
         DB::beginTransaction();
@@ -71,7 +71,7 @@ class PromptService extends Service {
      * @param array                 $data
      * @param \App\Models\User\User $user
      *
-     * @return \App\Models\Prompt\PromptCategory|bool
+     * @return bool|PromptCategory
      */
     public function updatePromptCategory($category, $data, $user) {
         DB::beginTransaction();
@@ -173,7 +173,7 @@ class PromptService extends Service {
      * @param array                 $data
      * @param \App\Models\User\User $user
      *
-     * @return \App\Models\Prompt\Prompt|bool
+     * @return bool|Prompt
      */
     public function createPrompt($data, $user) {
         DB::beginTransaction();
@@ -228,7 +228,7 @@ class PromptService extends Service {
      * @param array                 $data
      * @param \App\Models\User\User $user
      *
-     * @return \App\Models\Prompt\Prompt|bool
+     * @return bool|Prompt
      */
     public function updatePrompt($prompt, $data, $user) {
         DB::beginTransaction();
@@ -314,8 +314,8 @@ class PromptService extends Service {
     /**
      * Handle category data.
      *
-     * @param array                                  $data
-     * @param \App\Models\Prompt\PromptCategory|null $category
+     * @param array               $data
+     * @param PromptCategory|null $category
      *
      * @return array
      */
