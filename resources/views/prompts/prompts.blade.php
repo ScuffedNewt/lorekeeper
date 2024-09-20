@@ -50,7 +50,7 @@
         @foreach ($prompts as $prompt)
             <div class="card mb-3">
                 @if ($prompt->parent_id)
-                    @if ($prompt->getSubmissionCount(Auth::user() ?? null) < $prompt->parent_quantity)
+                    @if ($prompt->parent->getSubmissionCount(Auth::user() ?? null) < $prompt->parent_quantity)
                         <div class="card-body" style="background-color:#ddd;">
                             <div class="card-body">
                                 @if ($prompt->is_details_visible)

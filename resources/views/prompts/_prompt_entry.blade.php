@@ -78,7 +78,7 @@
         </div>
         <div class="text-right">
             @if ($prompt->parent_id)
-                @if ($prompt->getSubmissionCount(Auth::user() ?? null) < $prompt->parent_quantity)
+                @if ($prompt->parent->getSubmissionCount(Auth::user() ?? null) < $prompt->parent_quantity)
                     <p class="text-danger">You have not unlocked this prompt yet. You must complete {!! $prompt->parent->displayName !!} {{ $prompt->parent_quantity }} {{ $prompt->parent_quantity > 1 ? 'times' : 'time' }}.</p>
                 @else
                     <p class="text-success">You have unlocked this prompt by completing {!! $prompt->parent->displayName !!} {{ $prompt->parent_quantity }} {{ $prompt->parent_quantity > 1 ? 'times' : 'time' }}.</p>
