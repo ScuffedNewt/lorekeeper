@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Users;
 
+use App\Facades\Settings;
 use App\Http\Controllers\Controller;
 use App\Models\Character\Character;
 use App\Models\Character\CharacterDesignUpdate;
@@ -13,8 +14,8 @@ use App\Models\Trade;
 use App\Models\User\User;
 use App\Models\User\UserItem;
 use App\Services\InventoryManager;
-use Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class InventoryController extends Controller {
     /*
@@ -32,7 +33,7 @@ class InventoryController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getIndex() {
-        $categories = ItemCategory::visible(Auth::check() ? Auth::user() : null)->orderBy('sort', 'DESC')->get();
+        $categories = ItemCategory::visible(Auth::user() ?? null)->orderBy('sort', 'DESC')->get();
         $items = count($categories) ?
             Auth::user()->items()
                 ->where('count', '>', 0)
@@ -76,6 +77,7 @@ class InventoryController extends Controller {
             'userOptions'      => ['' => 'Select User'] + User::visible()->where('id', '!=', $first_instance ? $first_instance->user_id : 0)->orderBy('name')->get()->pluck('verified_name', 'id')->toArray(),
             'readOnly'         => $readOnly,
             'characterOptions' => Character::visible()->myo(0)->where('user_id', optional(Auth::user())->id)->orderBy('sort', 'DESC')->get()->pluck('fullName', 'id')->toArray(),
+            'canTransfer'      => Settings::get('can_transfer_items_directly'),
         ]);
     }
 
@@ -195,6 +197,66 @@ class InventoryController extends Controller {
             'designUpdates'  => $item ? $designUpdates : null,
             'trades'         => $item ? $trades : null,
             'submissions'    => $item ? $submissions : null,
+        ]);
+    }
+
+    /**
+     * Show the full inventory page.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getFullInventory() {
+        $user = Auth::user();
+
+        // Gather the user's characters
+        $characters = $user->allCharacters;
+
+        if (!Auth::check() || !$user->hasPower('manage_characters')) {
+            $characters = $characters->where('is_visible', 1);
+        }
+
+        // Set up Categories
+        $categories = ItemCategory::visible(Auth::user() ?? null)->orderBy('sort', 'DESC')->get();
+
+        if (count($categories)) {
+            $items =
+                Auth::user()->items()
+                    ->where('count', '>', 0)
+                    ->orderByRaw('FIELD(item_category_id,'.implode(',', $categories->pluck('id')->toArray()).')')
+                    ->orderBy('name')
+                    ->orderBy('updated_at')
+                    ->get();
+            foreach ($characters as $character) {
+                $itemCollect = $character->items()
+                    ->where('count', '>', 0)
+                    ->orderByRaw('FIELD(item_category_id,'.implode(',', $categories->pluck('id')->toArray()).')')
+                    ->orderBy('name')
+                    ->orderBy('updated_at')
+                    ->get();
+                isset($items) ? $items = $items->mergeRecursive($itemCollect) : $items = $itemCollect;
+            }
+        } else {
+            $items =
+                Auth::user()->items()
+                    ->where('count', '>', 0)
+                    ->orderBy('name')
+                    ->orderBy('updated_at')
+                    ->get();
+            foreach ($characters as $character) {
+                $itemCollect = $character->items()
+                    ->where('count', '>', 0)
+                    ->orderBy('name')
+                    ->orderBy('updated_at')
+                    ->get();
+                isset($items) ? $items = $items->mergeRecursive($itemCollect) : $items = $itemCollect;
+            }
+        }
+
+        return view('home.inventory_full', [
+            'categories' => $categories->keyBy('id'),
+            'items'      => $items->sortBy('name')->sortBy('updated_at')->groupBy(['item_category_id', 'id']),
+            'user'       => $user,
+            'characters' => $characters,
         ]);
     }
 

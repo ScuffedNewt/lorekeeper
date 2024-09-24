@@ -23,6 +23,27 @@
         </li>
     </ul>
 
+    <div>
+        {!! Form::open(['method' => 'GET', 'class' => 'form-inline justify-content-end']) !!}
+        <div class="form-inline justify-content-end">
+            <div class="form-group ml-3 mb-3">
+                {!! Form::select(
+                    'sort',
+                    [
+                        'newest' => 'Newest First',
+                        'oldest' => 'Oldest First',
+                    ],
+                    Request::get('sort') ?: 'oldest',
+                    ['class' => 'form-control'],
+                ) !!}
+            </div>
+            <div class="form-group ml-3 mb-3">
+                {!! Form::submit('Search', ['class' => 'btn btn-primary']) !!}
+            </div>
+        </div>
+        {!! Form::close() !!}
+    </div>
+
     {!! $requests->render() !!}
     <div class="mb-4 logs-table">
         <div class="logs-table-header">
@@ -36,7 +57,7 @@
                 <div class="col-2 col-md-2">
                     <div class="logs-table-cell">Submitted</div>
                 </div>
-                @if (Config::get('lorekeeper.extensions.design_update_voting'))
+                @if (config('lorekeeper.extensions.design_update_voting'))
                     <div class="col-2 col-md-2">
                         <div class="logs-table-cell">Votes</div>
                     </div>
@@ -49,7 +70,7 @@
         <div class="logs-table-body">
             @foreach ($requests as $r)
                 <div class="logs-table-row">
-                    @if (Config::get('lorekeeper.extensions.design_update_voting'))
+                    @if (config('lorekeeper.extensions.design_update_voting'))
                         <?php
                         $rejectSum = 0;
                         $approveSum = 0;
@@ -73,7 +94,7 @@
                         <div class="col-2 col-md-2">
                             <div class="logs-table-cell">{!! $r->submitted_at ? pretty_date($r->submitted_at) : '---' !!}</div>
                         </div>
-                        @if (Config::get('lorekeeper.extensions.design_update_voting'))
+                        @if (config('lorekeeper.extensions.design_update_voting'))
                             <div class="col-2 col-md-2">
                                 <div class="logs-table-cell">
                                     <strong>

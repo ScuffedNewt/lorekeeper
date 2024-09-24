@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Models\Shop\Shop;
-use DB;
+use Illuminate\Support\Facades\DB;
 
 class ShopService extends Service {
     /*
@@ -27,7 +27,7 @@ class ShopService extends Service {
      * @param array                 $data
      * @param \App\Models\User\User $user
      *
-     * @return \App\Models\Shop\Shop|bool
+     * @return bool|Shop
      */
     public function createShop($data, $user) {
         DB::beginTransaction();
@@ -38,6 +38,7 @@ class ShopService extends Service {
             $image = null;
             if (isset($data['image']) && $data['image']) {
                 $data['has_image'] = 1;
+                $data['hash'] = randomString(10);
                 $image = $data['image'];
                 unset($data['image']);
             } else {
@@ -61,11 +62,11 @@ class ShopService extends Service {
     /**
      * Updates a shop.
      *
-     * @param \App\Models\Shop\Shop $shop
+     * @param Shop                  $shop
      * @param array                 $data
      * @param \App\Models\User\User $user
      *
-     * @return \App\Models\Shop\Shop|bool
+     * @return bool|Shop
      */
     public function updateShop($shop, $data, $user) {
         DB::beginTransaction();
@@ -81,6 +82,7 @@ class ShopService extends Service {
             $image = null;
             if (isset($data['image']) && $data['image']) {
                 $data['has_image'] = 1;
+                $data['hash'] = randomString(10);
                 $image = $data['image'];
                 unset($data['image']);
             }
@@ -102,11 +104,11 @@ class ShopService extends Service {
     /**
      * Updates shop stock.
      *
-     * @param \App\Models\Shop\Shop $shop
+     * @param Shop                  $shop
      * @param array                 $data
      * @param \App\Models\User\User $user
      *
-     * @return \App\Models\Shop\Shop|bool
+     * @return bool|Shop
      */
     public function updateShopStock($shop, $data, $user) {
         DB::beginTransaction();
@@ -154,7 +156,7 @@ class ShopService extends Service {
     /**
      * Deletes a shop.
      *
-     * @param \App\Models\Shop\Shop $shop
+     * @param Shop $shop
      *
      * @return bool
      */
@@ -207,8 +209,8 @@ class ShopService extends Service {
     /**
      * Processes user input for creating/updating a shop.
      *
-     * @param array                 $data
-     * @param \App\Models\Shop\Shop $shop
+     * @param array $data
+     * @param Shop  $shop
      *
      * @return array
      */

@@ -4,8 +4,7 @@ namespace App\Services;
 
 use App\Models\Rank\Rank;
 use App\Models\User\User;
-use Config;
-use DB;
+use Illuminate\Support\Facades\DB;
 
 class RankService extends Service {
     /*
@@ -20,8 +19,8 @@ class RankService extends Service {
     /**
      * Creates a user rank.
      *
-     * @param array                 $data
-     * @param \App\Models\User\User $user
+     * @param array $data
+     * @param User  $user
      *
      * @return bool
      */
@@ -37,7 +36,7 @@ class RankService extends Service {
             $powers = null;
             if (isset($data['powers'])) {
                 foreach ($data['powers'] as $power) {
-                    if (!Config::get('lorekeeper.powers.'.$power)) {
+                    if (!config('lorekeeper.powers.'.$power)) {
                         throw new \Exception('Invalid power selected.');
                     }
                 }
@@ -77,9 +76,9 @@ class RankService extends Service {
     /**
      * Updates a user rank.
      *
-     * @param \App\Models\Rank\Rank $rank
-     * @param array                 $data
-     * @param \App\Models\User\User $user
+     * @param Rank  $rank
+     * @param array $data
+     * @param User  $user
      *
      * @return bool
      */
@@ -95,7 +94,7 @@ class RankService extends Service {
             $powers = null;
             if (isset($data['powers'])) {
                 foreach ($data['powers'] as $power) {
-                    if (!Config::get('lorekeeper.powers.'.$power)) {
+                    if (!config('lorekeeper.powers.'.$power)) {
                         throw new \Exception('Invalid power selected.');
                     }
                 }
@@ -112,8 +111,8 @@ class RankService extends Service {
             $data['icon'] ??= 'fas fa-user';
 
             $rank->update($data);
+            $rank->powers()->delete();
             if ($powers) {
-                $rank->powers()->delete();
                 foreach ($powers as $power) {
                     DB::table('rank_powers')->insert(['rank_id' => $rank->id, 'power' => $power]);
                 }
@@ -130,8 +129,8 @@ class RankService extends Service {
     /**
      * Deletes a user rank.
      *
-     * @param \App\Models\Rank\Rank $rank
-     * @param \App\Models\User\User $user
+     * @param Rank $rank
+     * @param User $user
      *
      * @return bool
      */
@@ -158,8 +157,8 @@ class RankService extends Service {
     /**
      * Sorts user ranks.
      *
-     * @param array                 $data
-     * @param \App\Models\User\User $user
+     * @param array $data
+     * @param User  $user
      *
      * @return bool
      */

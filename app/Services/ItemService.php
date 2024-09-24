@@ -5,8 +5,7 @@ namespace App\Services;
 use App\Models\Item\Item;
 use App\Models\Item\ItemCategory;
 use App\Models\Item\ItemTag;
-use Config;
-use DB;
+use Illuminate\Support\Facades\DB;
 
 class ItemService extends Service {
     /*
@@ -30,7 +29,7 @@ class ItemService extends Service {
      * @param array                 $data
      * @param \App\Models\User\User $user
      *
-     * @return \App\Models\Item\ItemCategory|bool
+     * @return bool|ItemCategory
      */
     public function createItemCategory($data, $user) {
         DB::beginTransaction();
@@ -41,6 +40,7 @@ class ItemService extends Service {
             $image = null;
             if (isset($data['image']) && $data['image']) {
                 $data['has_image'] = 1;
+                $data['hash'] = randomString(10);
                 $image = $data['image'];
                 unset($data['image']);
             } else {
@@ -68,11 +68,11 @@ class ItemService extends Service {
     /**
      * Update a category.
      *
-     * @param \App\Models\Item\ItemCategory $category
-     * @param array                         $data
-     * @param \App\Models\User\User         $user
+     * @param ItemCategory          $category
+     * @param array                 $data
+     * @param \App\Models\User\User $user
      *
-     * @return \App\Models\Item\ItemCategory|bool
+     * @return bool|ItemCategory
      */
     public function updateItemCategory($category, $data, $user) {
         DB::beginTransaction();
@@ -88,6 +88,7 @@ class ItemService extends Service {
             $image = null;
             if (isset($data['image']) && $data['image']) {
                 $data['has_image'] = 1;
+                $data['hash'] = randomString(10);
                 $image = $data['image'];
                 unset($data['image']);
             }
@@ -113,8 +114,8 @@ class ItemService extends Service {
     /**
      * Delete a category.
      *
-     * @param \App\Models\Item\ItemCategory $category
-     * @param mixed                         $user
+     * @param ItemCategory $category
+     * @param mixed        $user
      *
      * @return bool
      */
@@ -181,7 +182,7 @@ class ItemService extends Service {
      * @param array                 $data
      * @param \App\Models\User\User $user
      *
-     * @return \App\Models\Item\Item|bool
+     * @return bool|Item
      */
     public function createItem($data, $user) {
         DB::beginTransaction();
@@ -200,6 +201,7 @@ class ItemService extends Service {
             $image = null;
             if (isset($data['image']) && $data['image']) {
                 $data['has_image'] = 1;
+                $data['hash'] = randomString(10);
                 $image = $data['image'];
                 unset($data['image']);
             } else {
@@ -237,11 +239,11 @@ class ItemService extends Service {
     /**
      * Updates an item.
      *
-     * @param \App\Models\Item\Item $item
+     * @param Item                  $item
      * @param array                 $data
      * @param \App\Models\User\User $user
      *
-     * @return \App\Models\Item\Item|bool
+     * @return bool|Item
      */
     public function updateItem($item, $data, $user) {
         DB::beginTransaction();
@@ -264,6 +266,7 @@ class ItemService extends Service {
             $image = null;
             if (isset($data['image']) && $data['image']) {
                 $data['has_image'] = 1;
+                $data['hash'] = randomString(10);
                 $image = $data['image'];
                 unset($data['image']);
             }
@@ -299,8 +302,8 @@ class ItemService extends Service {
     /**
      * Deletes an item.
      *
-     * @param \App\Models\Item\Item $item
-     * @param mixed                 $user
+     * @param Item  $item
+     * @param mixed $user
      *
      * @return bool
      */
@@ -358,7 +361,7 @@ class ItemService extends Service {
      * @return array
      */
     public function getItemTags() {
-        $tags = Config::get('lorekeeper.item_tags');
+        $tags = config('lorekeeper.item_tags');
         $result = [];
         foreach ($tags as $tag => $tagData) {
             $result[$tag] = $tagData['name'];
@@ -370,9 +373,9 @@ class ItemService extends Service {
     /**
      * Adds an item tag to an item.
      *
-     * @param \App\Models\Item\Item $item
-     * @param string                $tag
-     * @param mixed                 $user
+     * @param Item   $item
+     * @param string $tag
+     * @param mixed  $user
      *
      * @return bool|string
      */
@@ -410,10 +413,10 @@ class ItemService extends Service {
     /**
      * Edits the data associated with an item tag on an item.
      *
-     * @param \App\Models\Item\Item $item
-     * @param string                $tag
-     * @param array                 $data
-     * @param mixed                 $user
+     * @param Item   $item
+     * @param string $tag
+     * @param array  $data
+     * @param mixed  $user
      *
      * @return bool|string
      */
@@ -455,9 +458,9 @@ class ItemService extends Service {
     /**
      * Removes an item tag from an item.
      *
-     * @param \App\Models\Item\Item $item
-     * @param string                $tag
-     * @param mixed                 $user
+     * @param Item   $item
+     * @param string $tag
+     * @param mixed  $user
      *
      * @return bool|string
      */
@@ -489,8 +492,8 @@ class ItemService extends Service {
     /**
      * Handle category data.
      *
-     * @param array                              $data
-     * @param \App\Models\Item\ItemCategory|null $category
+     * @param array             $data
+     * @param ItemCategory|null $category
      *
      * @return array
      */
@@ -523,8 +526,8 @@ class ItemService extends Service {
     /**
      * Processes user input for creating/updating an item.
      *
-     * @param array                 $data
-     * @param \App\Models\Item\Item $item
+     * @param array $data
+     * @param Item  $item
      *
      * @return array
      */
@@ -538,10 +541,13 @@ class ItemService extends Service {
         if (!isset($data['allow_transfer'])) {
             $data['allow_transfer'] = 0;
         }
-        if (!isset($data['is_released']) && Config::get('lorekeeper.extensions.item_entry_expansion.extra_fields')) {
+        if (!isset($data['is_released']) && config('lorekeeper.extensions.item_entry_expansion.extra_fields')) {
             $data['is_released'] = 0;
         } else {
             $data['is_released'] = 1;
+        }
+        if (!isset($data['is_deletable'])) {
+            $data['is_deletable'] = 0;
         }
 
         if (isset($data['remove_image'])) {

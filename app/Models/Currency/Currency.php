@@ -14,7 +14,7 @@ class Currency extends Model {
         'is_user_owned', 'is_character_owned',
         'name', 'abbreviation', 'description', 'parsed_description', 'sort_user', 'sort_character',
         'is_displayed', 'allow_user_to_user', 'allow_user_to_character', 'allow_character_to_user',
-        'has_icon', 'has_image',
+        'has_icon', 'has_image', 'hash',
     ];
 
     /**
@@ -51,6 +51,19 @@ class Currency extends Model {
 
     /**********************************************************************************************
 
+        RELATIONSHIPS
+
+    **********************************************************************************************/
+
+    /**
+     * Get the conversion options for the currency.
+     */
+    public function conversions() {
+        return $this->hasMany(CurrencyConversion::class, 'currency_id');
+    }
+
+    /**********************************************************************************************
+
         ACCESSORS
 
     **********************************************************************************************/
@@ -79,7 +92,7 @@ class Currency extends Model {
      * @return string
      */
     public function getCurrencyImageFileNameAttribute() {
-        return $this->id.'-image.png';
+        return $this->hash.$this->id.'-image.png';
     }
 
     /**
@@ -88,7 +101,7 @@ class Currency extends Model {
      * @return string
      */
     public function getCurrencyIconFileNameAttribute() {
-        return $this->id.'-icon.png';
+        return $this->hash.$this->id.'-icon.png';
     }
 
     /**

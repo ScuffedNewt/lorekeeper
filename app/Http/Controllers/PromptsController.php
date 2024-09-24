@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Prompt\Prompt;
 use App\Models\Prompt\PromptCategory;
-use Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PromptsController extends Controller {
     /*
@@ -50,7 +50,7 @@ class PromptsController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getPrompts(Request $request) {
-        $query = Prompt::active()->staffOnly(Auth::check() ? Auth::user() : null)->with('category');
+        $query = Prompt::active()->staffOnly(Auth::user() ?? null)->with('category');
         $data = $request->only(['prompt_category_id', 'name', 'sort', 'open_prompts']);
         if (isset($data['prompt_category_id']) && $data['prompt_category_id'] != 'none') {
             if ($data['prompt_category_id'] == 'withoutOption') {

@@ -5,8 +5,8 @@ namespace App\Services;
 use App\Models\Loot\Loot;
 use App\Models\Loot\LootTable;
 use App\Models\Prompt\PromptReward;
-use DB;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 
 class LootService extends Service {
     /*
@@ -23,7 +23,7 @@ class LootService extends Service {
      *
      * @param array $data
      *
-     * @return \App\Models\Loot\LootTable|bool
+     * @return bool|LootTable
      */
     public function createLootTable($data) {
         DB::beginTransaction();
@@ -68,10 +68,10 @@ class LootService extends Service {
     /**
      * Updates a loot table.
      *
-     * @param \App\Models\Loot\LootTable $table
-     * @param array                      $data
+     * @param LootTable $table
+     * @param array     $data
      *
-     * @return \App\Models\Loot\LootTable|bool
+     * @return bool|LootTable
      */
     public function updateLootTable($table, $data) {
         DB::beginTransaction();
@@ -116,7 +116,7 @@ class LootService extends Service {
     /**
      * Deletes a loot table.
      *
-     * @param \App\Models\Loot\LootTable $table
+     * @param LootTable $table
      *
      * @return bool
      */
@@ -145,8 +145,8 @@ class LootService extends Service {
     /**
      * Handles the creation of loot for a loot table.
      *
-     * @param \App\Models\Loot\LootTable $table
-     * @param array                      $data
+     * @param LootTable $table
+     * @param array     $data
      */
     private function populateLootTable($table, $data) {
         // Clear the old loot...

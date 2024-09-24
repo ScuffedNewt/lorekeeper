@@ -6,7 +6,7 @@ use App\Models\Character\Character;
 use App\Models\Sales\Sales;
 use App\Models\Sales\SalesCharacter;
 use App\Models\User\User;
-use DB;
+use Illuminate\Support\Facades\DB;
 use Validator;
 
 class SalesService extends Service {
@@ -22,10 +22,10 @@ class SalesService extends Service {
     /**
      * Creates a Sales post.
      *
-     * @param array                 $data
-     * @param \App\Models\User\User $user
+     * @param array $data
+     * @param User  $user
      *
-     * @return \App\Models\Sales\Sales|bool
+     * @return bool|Sales
      */
     public function createSales($data, $user) {
         DB::beginTransaction();
@@ -73,11 +73,11 @@ class SalesService extends Service {
     /**
      * Updates a Sales post.
      *
-     * @param array                 $data
-     * @param \App\Models\User\User $user
-     * @param mixed                 $sales
+     * @param array $data
+     * @param User  $user
+     * @param mixed $sales
      *
-     * @return \App\Models\Sales\Sales|bool
+     * @return bool|Sales
      */
     public function updateSales($sales, $data, $user) {
         DB::beginTransaction();
@@ -204,6 +204,9 @@ class SalesService extends Service {
                     if (isset($data['end_point'][$key])) {
                         $charData[$key]['end_point'] = $data['end_point'][$key];
                     }
+                    if (isset($data['minimum'][$key])) {
+                        $charData[$key]['minimum'] = $data['minimum'][$key];
+                    }
                     break;
                 case 'xta':
                     if (isset($data['autobuy'][$key])) {
@@ -211,6 +214,9 @@ class SalesService extends Service {
                     }
                     if (isset($data['end_point'][$key])) {
                         $charData[$key]['end_point'] = $data['end_point'][$key];
+                    }
+                    if (isset($data['minimum'][$key])) {
+                        $charData[$key]['minimum'] = $data['minimum'][$key];
                     }
                     break;
                 case 'flaffle':

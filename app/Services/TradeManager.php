@@ -2,17 +2,15 @@
 
 namespace App\Services;
 
+use App\Facades\Notifications;
+use App\Facades\Settings;
 use App\Models\Character\Character;
 use App\Models\Character\CharacterTransfer;
 use App\Models\Currency\Currency;
-use App\Models\Item\Item;
 use App\Models\Trade;
 use App\Models\User\User;
 use App\Models\User\UserItem;
-use Config;
-use DB;
-use Notifications;
-use Settings;
+use Illuminate\Support\Facades\DB;
 
 class TradeManager extends Service {
     /*
@@ -27,10 +25,10 @@ class TradeManager extends Service {
     /**
      * Creates a new trade.
      *
-     * @param array                 $data
-     * @param \App\Models\User\User $user
+     * @param array $data
+     * @param User  $user
      *
-     * @return \App\Models\Trade|bool
+     * @return bool|Trade
      */
     public function createTrade($data, $user) {
         DB::beginTransaction();
@@ -80,10 +78,10 @@ class TradeManager extends Service {
     /**
      * Edits a user's side of a trade.
      *
-     * @param array                 $data
-     * @param \App\Models\User\User $user
+     * @param array $data
+     * @param User  $user
      *
-     * @return \App\Models\Trade|bool
+     * @return bool|Trade
      */
     public function editTrade($data, $user) {
         DB::beginTransaction();
@@ -122,10 +120,10 @@ class TradeManager extends Service {
     /**
      * Cancels a trade.
      *
-     * @param array                 $data
-     * @param \App\Models\User\User $user
+     * @param array $data
+     * @param User  $user
      *
-     * @return \App\Models\Trade|bool
+     * @return bool|Trade
      */
     public function cancelTrade($data, $user) {
         DB::beginTransaction();
@@ -167,10 +165,10 @@ class TradeManager extends Service {
     /**
      * Confirms the user's offer.
      *
-     * @param array                 $data
-     * @param \App\Models\User\User $user
+     * @param array $data
+     * @param User  $user
      *
-     * @return \App\Models\Trade|bool
+     * @return bool|Trade
      */
     public function confirmOffer($data, $user) {
         DB::beginTransaction();
@@ -233,10 +231,10 @@ class TradeManager extends Service {
     /**
      * Confirms the trade for a user.
      *
-     * @param array                 $data
-     * @param \App\Models\User\User $user
+     * @param array $data
+     * @param User  $user
      *
-     * @return \App\Models\Trade|bool
+     * @return bool|Trade
      */
     public function confirmTrade($data, $user) {
         DB::beginTransaction();
@@ -311,10 +309,10 @@ class TradeManager extends Service {
     /**
      * Approves a trade in the admin panel.
      *
-     * @param array                 $data
-     * @param \App\Models\User\User $user
+     * @param array $data
+     * @param User  $user
      *
-     * @return \App\Models\Trade|bool
+     * @return bool|Trade
      */
     public function approveTrade($data, $user) {
         DB::beginTransaction();
@@ -361,10 +359,10 @@ class TradeManager extends Service {
     /**
      * Rejects a trade in the admin panel.
      *
-     * @param array                 $data
-     * @param \App\Models\User\User $user
+     * @param array $data
+     * @param User  $user
      *
-     * @return \App\Models\Trade|bool
+     * @return bool|Trade
      */
     public function rejectTrade($data, $user) {
         DB::beginTransaction();
@@ -410,9 +408,9 @@ class TradeManager extends Service {
     /**
      * Handles modification of assets on the user's side of a trade.
      *
-     * @param \App\Models\Trade     $trade
-     * @param array                 $data
-     * @param \App\Models\User\User $user
+     * @param Trade $trade
+     * @param array $data
+     * @param User  $user
      *
      * @return array|bool
      */
@@ -457,7 +455,7 @@ class TradeManager extends Service {
 
             $userAssets = createAssetsArray();
             $assetCount = 0;
-            $assetLimit = Config::get('lorekeeper.settings.trade_asset_limit');
+            $assetLimit = config('lorekeeper.settings.trade_asset_limit');
 
             // Attach items. Technically, the user doesn't lose ownership of the item - we're just adding an additional holding field.
             // Unlike for design updates, we're keeping track of attached items here.
@@ -554,7 +552,7 @@ class TradeManager extends Service {
     /**
      * Returns trade attachments to their owners.
      *
-     * @param \App\Models\Trade $trade
+     * @param Trade $trade
      *
      * @return bool
      */
@@ -609,8 +607,8 @@ class TradeManager extends Service {
     /**
      * Credits trade attachments to their new owners.
      *
-     * @param \App\Models\Trade $trade
-     * @param array             $data
+     * @param Trade $trade
+     * @param array $data
      *
      * @return bool
      */

@@ -1,14 +1,14 @@
 @extends('admin.layout')
 
 @section('admin-title')
-    Pages
+    {{ $page->id ? 'Edit' : 'Create' }} Page
 @endsection
 
 @section('admin-content')
     {!! breadcrumbs(['Admin Panel' => 'admin', 'Pages' => 'admin/pages', ($page->id ? 'Edit' : 'Create') . ' Page' => $page->id ? 'admin/pages/edit/' . $page->id : 'admin/pages/create']) !!}
 
     <h1>{{ $page->id ? 'Edit' : 'Create' }} Page
-        @if ($page->id && !Config::get('lorekeeper.text_pages.' . $page->key))
+        @if ($page->id && !config('lorekeeper.text_pages.' . $page->key))
             <a href="#" class="btn btn-danger float-right delete-page-button">Delete Page</a>
         @endif
         @if ($page->id)
@@ -21,18 +21,14 @@
     <h3>Basic Information</h3>
 
     <div class="row">
-        <div class="col-md-6">
-            <div class="form-group">
-                {!! Form::label('Title') !!}
-                {!! Form::text('title', $page->title, ['class' => 'form-control']) !!}
-            </div>
+        <div class="col-md-6 form-group">
+            {!! Form::label('Title') !!}
+            {!! Form::text('title', $page->title, ['class' => 'form-control']) !!}
         </div>
 
-        <div class="col-md-6">
-            <div class="form-group">
-                {!! Form::label('Key') !!} {!! add_help('This is a unique name used to form the URL of the page. Only alphanumeric characters, dash and underscore (no spaces) can be used.') !!}
-                {!! Form::text('key', $page->key, ['class' => 'form-control']) !!}
-            </div>
+        <div class="col-md-6 form-group">
+            {!! Form::label('Key') !!} {!! add_help('This is a unique name used to form the URL of the page. Only alphanumeric characters, dash and underscore (no spaces) can be used.') !!}
+            {!! Form::text('key', $page->key, ['class' => 'form-control']) !!}
         </div>
     </div>
 
@@ -42,18 +38,14 @@
     </div>
 
     <div class="row">
-        <div class="col-md-4">
-            <div class="form-group">
-                {!! Form::checkbox('is_visible', 1, $page->id ? $page->is_visible : 1, ['class' => 'form-check-input', 'data-toggle' => 'toggle']) !!}
-                {!! Form::label('is_visible', 'Is Viewable', ['class' => 'form-check-label ml-3']) !!} {!! add_help('If this is turned off, users will not be able to view the page even if they have the link to it.') !!}
-            </div>
+        <div class="col-md-4 form-group">
+            {!! Form::checkbox('is_visible', 1, $page->id ? $page->is_visible : 1, ['class' => 'form-check-input', 'data-toggle' => 'toggle']) !!}
+            {!! Form::label('is_visible', 'Is Viewable', ['class' => 'form-check-label ml-3']) !!} {!! add_help('If this is turned off, users will not be able to view the page even if they have the link to it.') !!}
         </div>
 
-        <div class="col-md-4">
-            <div class="form-group">
-                {!! Form::checkbox('can_comment', 1, $page->id ? $page->can_comment : 0, ['class' => 'form-check-input', 'data-toggle' => 'toggle']) !!}
-                {!! Form::label('can_comment', 'Commentable', ['class' => 'form-check-label ml-3']) !!} {!! add_help('If this is turned on, users will be able to comment on the page.') !!}
-            </div>
+        <div class="col-md-4 form-group">
+            {!! Form::checkbox('can_comment', 1, $page->id ? $page->can_comment : 0, ['class' => 'form-check-input', 'data-toggle' => 'toggle']) !!}
+            {!! Form::label('can_comment', 'Commentable', ['class' => 'form-check-label ml-3']) !!} {!! add_help('If this is turned on, users will be able to comment on the page.') !!}
             @if (!Settings::get('comment_dislikes_enabled'))
                 <div class="form-group">
                     {!! Form::checkbox('allow_dislikes', 1, $page->id ? $page->allow_dislikes : 0, ['class' => 'form-check-input', 'data-toggle' => 'toggle']) !!}

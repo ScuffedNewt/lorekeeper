@@ -2,6 +2,7 @@
 
 namespace App\Models\Species;
 
+use App\Models\Feature\Feature;
 use App\Models\Model;
 
 class Subtype extends Model {
@@ -11,7 +12,7 @@ class Subtype extends Model {
      * @var array
      */
     protected $fillable = [
-        'species_id', 'name', 'sort', 'has_image', 'description', 'parsed_description', 'is_visible',
+        'species_id', 'name', 'sort', 'has_image', 'description', 'parsed_description', 'is_visible', 'hash',
     ];
 
     /**
@@ -63,14 +64,21 @@ class Subtype extends Model {
      * Get the species the subtype belongs to.
      */
     public function species() {
-        return $this->belongsTo('App\Models\Species\Species', 'species_id');
+        return $this->belongsTo(Species::class, 'species_id');
+    }
+
+    /**
+     * Get the features associated with this subtype.
+     */
+    public function features() {
+        return $this->hasMany(Feature::class);
     }
 
     /**********************************************************************************************
 
             SCOPES
 
-        **********************************************************************************************/
+    **********************************************************************************************/
 
     /**
      * Scope a query to show only visible subtypes.
@@ -127,7 +135,7 @@ class Subtype extends Model {
      * @return string
      */
     public function getSubtypeImageFileNameAttribute() {
-        return $this->id.'-image.png';
+        return $this->hash.$this->id.'-image.png';
     }
 
     /**
@@ -167,7 +175,16 @@ class Subtype extends Model {
      * @return string
      */
     public function getSearchUrlAttribute() {
-        return url('masterlist?subtype_id='.$this->id);
+        return url('masterlist?subtype_ids[]='.$this->id);
+    }
+
+    /**
+     * Gets the URL the visual index of this subtype's traits.
+     *
+     * @return string
+     */
+    public function getVisualTraitsUrlAttribute() {
+        return url('/world/subtypes/'.$this->id.'/traits');
     }
 
     /**

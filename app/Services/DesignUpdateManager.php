@@ -2,10 +2,12 @@
 
 namespace App\Services;
 
+use App\Facades\Notifications;
 use App\Models\Character\Character;
 use App\Models\Character\CharacterDesignUpdate;
 use App\Models\Character\CharacterFeature;
 use App\Models\Character\CharacterImage;
+use App\Models\Character\CharacterImageSubtype;
 use App\Models\Currency\Currency;
 use App\Models\Feature\Feature;
 use App\Models\Rarity;
@@ -14,12 +16,10 @@ use App\Models\Species\Subtype;
 use App\Models\User\User;
 use App\Models\User\UserItem;
 use Carbon\Carbon;
-use Config;
-use DB;
-use File;
 use Illuminate\Support\Arr;
-use Image;
-use Notifications;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
+use Intervention\Image\Facades\Image;
 
 class DesignUpdateManager extends Service {
     /*
@@ -34,10 +34,10 @@ class DesignUpdateManager extends Service {
     /**
      * Creates a character design update request (or a MYO design approval request).
      *
-     * @param \App\Models\Character\Character $character
-     * @param \App\Models\User\User           $user
+     * @param Character $character
+     * @param User      $user
      *
-     * @return \App\Models\Character\CharacterDesignUpdate|bool
+     * @return bool|CharacterDesignUpdate
      */
     public function createDesignUpdateRequest($character, $user) {
         DB::beginTransaction();
@@ -64,7 +64,7 @@ class DesignUpdateManager extends Service {
                 // Set some data based on the character's existing stats
                 'rarity_id'     => $character->image->rarity_id,
                 'species_id'    => $character->image->species_id,
-                'subtype_id'    => $character->image->subtype_id,
+                'subtype_ids'   => $character->image->subtypes()->pluck('subtype_id'),
             ];
 
             $request = CharacterDesignUpdate::create($data);
@@ -95,8 +95,8 @@ class DesignUpdateManager extends Service {
     /**
      * Saves the comment section of a character design update request.
      *
-     * @param array                                       $data
-     * @param \App\Models\Character\CharacterDesignUpdate $request
+     * @param array                 $data
+     * @param CharacterDesignUpdate $request
      *
      * @return bool
      */
@@ -120,9 +120,9 @@ class DesignUpdateManager extends Service {
     /**
      * Saves the image upload section of a character design update request.
      *
-     * @param array                                       $data
-     * @param \App\Models\Character\CharacterDesignUpdate $request
-     * @param bool                                        $isAdmin
+     * @param array                 $data
+     * @param CharacterDesignUpdate $request
+     * @param bool                  $isAdmin
      *
      * @return bool
      */
@@ -158,7 +158,7 @@ class DesignUpdateManager extends Service {
                     $imageData['use_cropper'] = isset($data['use_cropper']);
                 }
                 if (!$isAdmin && isset($data['image'])) {
-                    $imageData['extension'] = (Config::get('lorekeeper.settings.masterlist_image_format') ? Config::get('lorekeeper.settings.masterlist_image_format') : ($data['extension'] ?? $data['image']->getClientOriginalExtension()));
+                    $imageData['extension'] = (config('lorekeeper.settings.masterlist_image_format') ? config('lorekeeper.settings.masterlist_image_format') : ($data['extension'] ?? $data['image']->getClientOriginalExtension()));
                     $imageData['has_image'] = true;
                 }
                 $request->update($imageData);
@@ -216,7 +216,7 @@ class DesignUpdateManager extends Service {
 
             // Save thumbnail, if we have an image set
             if ((!$isAdmin) || ($isAdmin && isset($data['modify_thumbnail']))) {
-                if (isset($data['use_cropper']) && isset($data['image'])) {
+                if (isset($data['use_cropper']) && (isset($data['image']) || ($isAdmin && isset($data['modify_thumbnail'])))) {
                     (new CharacterManager)->cropThumbnail(Arr::only($data, ['x0', 'x1', 'y0', 'y1']), $request);
                 } elseif (isset($data['thumbnail'])) {
                     $this->handleImage($data['thumbnail'], $request->imageDirectory, $request->thumbnailFileName);
@@ -234,8 +234,8 @@ class DesignUpdateManager extends Service {
     /**
      * Saves the addons section of a character design update request.
      *
-     * @param array                                       $data
-     * @param \App\Models\Character\CharacterDesignUpdate $request
+     * @param array                 $data
+     * @param CharacterDesignUpdate $request
      *
      * @return bool
      */
@@ -346,8 +346,8 @@ class DesignUpdateManager extends Service {
     /**
      * Saves the character features (traits) section of a character design update request.
      *
-     * @param array                                       $data
-     * @param \App\Models\Character\CharacterDesignUpdate $request
+     * @param array                 $data
+     * @param CharacterDesignUpdate $request
      *
      * @return bool
      */
@@ -364,11 +364,27 @@ class DesignUpdateManager extends Service {
 
             $rarity = ($request->character->is_myo_slot && $request->character->image->rarity_id) ? $request->character->image->rarity : Rarity::find($data['rarity_id']);
             $species = ($request->character->is_myo_slot && $request->character->image->species_id) ? $request->character->image->species : Species::find($data['species_id']);
-            if (isset($data['subtype_id']) && $data['subtype_id']) {
-                $subtype = ($request->character->is_myo_slot && $request->character->image->subtype_id) ? $request->character->image->subtype : Subtype::find($data['subtype_id']);
+
+            if (($request->character->is_myo_slot && count($request->character->image->subtypes))) {
+                $subtypes = $request->character->image->subtypes()->pluck('subtype_id')->toArray();
             } else {
-                $subtype = null;
+                if (isset($data['subtype_ids']) && $data['subtype_ids']) {
+                    if (count($data['subtype_ids']) > config('lorekeeper.extensions.multiple_subtype_limit')) {
+                        throw new \Exception('Too many subtypes selected.');
+                    }
+                    $subtypes = $data['subtype_ids'];
+                    foreach ($data['subtype_ids'] as $subtypeId) {
+                        $subtype = Subtype::find($subtypeId);
+                        if (!$subtype) {
+                            throw new \Exception('Invalid subtype selected.');
+                        }
+                        if ($subtype && $subtype->species_id != $species->id) {
+                            throw new \Exception('Subtype does not match the species.');
+                        }
+                    }
+                }
             }
+
             if (!$rarity) {
                 throw new \Exception('Invalid rarity selected.');
             }
@@ -407,7 +423,7 @@ class DesignUpdateManager extends Service {
             // Update other stats
             $request->species_id = $species->id;
             $request->rarity_id = $rarity->id;
-            $request->subtype_id = $subtype ? $subtype->id : null;
+            $request->subtype_ids = $subtypes ?? null;
             $request->has_features = 1;
             $request->save();
 
@@ -422,7 +438,7 @@ class DesignUpdateManager extends Service {
     /**
      * Submit a character design update request to the approval queue.
      *
-     * @param \App\Models\Character\CharacterDesignUpdate $request
+     * @param CharacterDesignUpdate $request
      *
      * @return bool
      */
@@ -459,9 +475,9 @@ class DesignUpdateManager extends Service {
     /**
      * Approves a character design update request and processes it.
      *
-     * @param array                                       $data
-     * @param \App\Models\Character\CharacterDesignUpdate $request
-     * @param \App\Models\User\User                       $user
+     * @param array                 $data
+     * @param CharacterDesignUpdate $request
+     * @param User                  $user
      *
      * @return bool
      */
@@ -551,7 +567,7 @@ class DesignUpdateManager extends Service {
                 }
             }
 
-            $extension = Config::get('lorekeeper.settings.masterlist_image_format') != null ? Config::get('lorekeeper.settings.masterlist_image_format') : $request->extension;
+            $extension = config('lorekeeper.settings.masterlist_image_format') != null ? config('lorekeeper.settings.masterlist_image_format') : $request->extension;
 
             // Create a new image with the request data
             $image = CharacterImage::create([
@@ -566,10 +582,26 @@ class DesignUpdateManager extends Service {
                 'y0'            => $request->y0,
                 'y1'            => $request->y1,
                 'species_id'    => $request->species_id,
-                'subtype_id'    => ($request->character->is_myo_slot && isset($request->character->image->subtype_id)) ? $request->character->image->subtype_id : $request->subtype_id,
                 'rarity_id'     => $request->rarity_id,
                 'sort'          => 0,
             ]);
+
+            // do subtype stuff
+            if ($request->character->is_myo_slot && count($request->character->image->subtypes)) {
+                foreach ($request->character->image->subtypes as $subtype) {
+                    CharacterImageSubtype::create([
+                        'character_image_id' => $image->id,
+                        'subtype_id'         => $subtype->subtype_id,
+                    ]);
+                }
+            } elseif ($request->subtype_ids) {
+                foreach ($request->subtypes() as $subtypeId) {
+                    CharacterImageSubtype::create([
+                        'character_image_id' => $image->id,
+                        'subtype_id'         => $subtypeId,
+                    ]);
+                }
+            }
 
             // Shift the image credits over to the new image
             $request->designers()->update(['character_type' => 'Character', 'character_image_id' => $image->id]);
@@ -629,12 +661,12 @@ class DesignUpdateManager extends Service {
             }
 
             // Note old image to delete it
-            if (Config::get('lorekeeper.extensions.remove_myo_image') && $request->character->is_myo_slot && $data['remove_myo_image'] == 2) {
+            if (config('lorekeeper.extensions.remove_myo_image') && $request->character->is_myo_slot && $data['remove_myo_image'] == 2) {
                 $oldImage = $request->character->image;
             }
 
             // Hide the MYO placeholder image if desired
-            if (Config::get('lorekeeper.extensions.remove_myo_image') && $request->character->is_myo_slot && $data['remove_myo_image'] == 1) {
+            if (config('lorekeeper.extensions.remove_myo_image') && $request->character->is_myo_slot && $data['remove_myo_image'] == 1) {
                 $request->character->image->is_visible = 0;
                 $request->character->image->save();
             }
@@ -659,7 +691,7 @@ class DesignUpdateManager extends Service {
             // If this is for a MYO, set user's FTO status and the MYO status of the slot
             // and clear the character's name
             if ($request->character->is_myo_slot) {
-                if (Config::get('lorekeeper.settings.clear_myo_slot_name_on_approval')) {
+                if (config('lorekeeper.settings.clear_myo_slot_name_on_approval')) {
                     $request->character->name = null;
                 }
                 $request->character->is_myo_slot = 0;
@@ -667,11 +699,11 @@ class DesignUpdateManager extends Service {
                 $request->user->settings->save();
 
                 // Delete the MYO placeholder image if desired
-                if (Config::get('lorekeeper.extensions.remove_myo_image') && $data['remove_myo_image'] == 2) {
+                if (config('lorekeeper.extensions.remove_myo_image') && $data['remove_myo_image'] == 2) {
                     $characterManager = new CharacterManager;
                     if (!$characterManager->deleteImage($oldImage, $user, true)) {
                         foreach ($characterManager->errors()->getMessages()['error'] as $error) {
-                            flash($error)->error();
+                            $characterManager->addError($error);
                         }
                         throw new \Exception('Failed to delete MYO image.');
                     }
@@ -707,11 +739,11 @@ class DesignUpdateManager extends Service {
      * Rejection can be a soft rejection (reopens the request so the user can edit it and resubmit)
      * or a hard rejection (takes the request out of the queue completely).
      *
-     * @param array                                       $data
-     * @param \App\Models\Character\CharacterDesignUpdate $request
-     * @param \App\Models\User\User                       $user
-     * @param bool                                        $forceReject
-     * @param mixed                                       $notification
+     * @param array                 $data
+     * @param CharacterDesignUpdate $request
+     * @param User                  $user
+     * @param bool                  $forceReject
+     * @param mixed                 $notification
      *
      * @return bool
      */
@@ -797,13 +829,14 @@ class DesignUpdateManager extends Service {
     /**
      * Cancels a character design update request.
      *
-     * @param array                                       $data
-     * @param \App\Models\Character\CharacterDesignUpdate $request
-     * @param \App\Models\User\User                       $user
+     * @param array                 $data
+     * @param CharacterDesignUpdate $request
+     * @param User                  $user
+     * @param bool                  $self
      *
      * @return bool
      */
-    public function cancelRequest($data, $request, $user) {
+    public function cancelRequest($data, $request, $user, $self = 0) {
         DB::beginTransaction();
 
         try {
@@ -820,21 +853,30 @@ class DesignUpdateManager extends Service {
             // to add a comment to it. Status is returned to Draft status.
             // Use when rejecting a request that just requires minor modifications to approve.
 
-            // Set staff comment and status
-            $request->staff_id = $user->id;
-            $request->staff_comments = $data['staff_comments'] ?? null;
-            $request->status = 'Draft';
-            if (!isset($data['preserve_queue'])) {
+            if (!$self) {
+                // Set staff comment if this is not a self-cancel
+                $request->staff_id = $user->id;
+                $request->staff_comments = $data['staff_comments'] ?? null;
+                if (!isset($data['preserve_queue'])) {
+                    $request->submitted_at = null;
+                }
+            } else {
                 $request->submitted_at = null;
             }
+
+            // Set status
+            $request->status = 'Draft';
             $request->save();
 
-            // Notify the user
-            Notifications::create('DESIGN_CANCELED', $request->user, [
-                'design_url'    => $request->url,
-                'character_url' => $request->character->url,
-                'name'          => $request->character->fullName,
-            ]);
+            if (!$self) {
+                // Notify the user if it is not being canceled by the user themself.
+                // Note that an admin canceling their own will also not result in a notification
+                Notifications::create('DESIGN_CANCELED', $request->user, [
+                    'design_url'    => $request->url,
+                    'character_url' => $request->character->url,
+                    'name'          => $request->character->fullName,
+                ]);
+            }
 
             return $this->commitReturn(true);
         } catch (\Exception $e) {
@@ -847,7 +889,7 @@ class DesignUpdateManager extends Service {
     /**
      * Deletes a character design update request.
      *
-     * @param \App\Models\Character\CharacterDesignUpdate $request
+     * @param CharacterDesignUpdate $request
      *
      * @return bool
      */
@@ -916,11 +958,11 @@ class DesignUpdateManager extends Service {
     }
 
     /**
-     * Votes on a a character design update request.
+     * Votes on a character design update request.
      *
-     * @param string                                      $action
-     * @param \App\Models\Character\CharacterDesignUpdate $request
-     * @param \App\Models\User\User                       $user
+     * @param string                $action
+     * @param CharacterDesignUpdate $request
+     * @param User                  $user
      *
      * @return bool
      */
@@ -931,7 +973,7 @@ class DesignUpdateManager extends Service {
             if ($request->status != 'Pending') {
                 throw new \Exception('This request cannot be processed.');
             }
-            if (!Config::get('lorekeeper.extensions.design_update_voting')) {
+            if (!config('lorekeeper.extensions.design_update_voting')) {
                 throw new \Exception('This extension is not currently enabled.');
             }
 

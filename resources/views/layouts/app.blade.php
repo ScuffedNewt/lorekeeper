@@ -12,8 +12,10 @@
 
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <!-- ReCaptcha v3 -->
-    {!! RecaptchaV3::initJs() !!}
+    @if (config('lorekeeper.extensions.use_recaptcha'))
+        <!-- ReCaptcha v3 -->
+        {!! RecaptchaV3::initJs() !!}
+    @endif
 
     <title>{{ config('lorekeeper.settings.site_name', 'Lorekeeper') }} -@yield('title')</title>
 
@@ -40,41 +42,37 @@
     <meta name="robots" content="noimageai">
 
     <!-- Scripts -->
-    <script src="{{ asset('js/app.js') }}"></script>
-    <script src="{{ asset('js/site.js') }}"></script>
-    <script src="{{ asset('js/jquery-ui.min.js') }}"></script>
-    <script src="{{ asset('js/bootstrap4-toggle.min.js') }}"></script>
+    <script src="{{ mix('js/app.js') }}"></script>
+    <script defer src="{{ mix('js/app-secondary.js') }}"></script>
+    <script defer src="{{ asset('js/site.js') }}"></script>
     <script src="{{ asset('js/tinymce.min.js') }}"></script>
     <script src="{{ asset('js/jquery.tinymce.min.js') }}"></script>
-    <script src="{{ asset('js/lightbox.min.js') }}"></script>
-    <script src="{{ asset('js/bootstrap-colorpicker.min.js') }}"></script>
-    <script src="{{ asset('js/selectize.min.js') }}"></script>
-    <script src="{{ asset('js/jquery-ui-timepicker-addon.js') }}"></script>
-    <script src="{{ asset('js/croppie.min.js') }}"></script>
+    <script defer src="{{ asset('js/bootstrap-colorpicker.min.js') }}"></script>
+    <script defer src="{{ asset('js/jquery-ui-timepicker-addon.js') }}"></script>
+    <script defer src="{{ asset('js/croppie.min.js') }}"></script>
 
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet" type="text/css">
 
     <!-- Styles -->
-    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+    <link href="{{ mix('css/app.css') }}" rel="stylesheet">
     <link href="{{ asset('css/lorekeeper.css?v=' . filemtime(public_path('css/lorekeeper.css'))) }}" rel="stylesheet">
 
     {{-- Font Awesome --}}
-    <link href="{{ asset('css/all.min.css') }}" rel="stylesheet">
+    <link defer href="{{ asset('css/all.min.css') }}" rel="stylesheet">
 
     {{-- jQuery UI --}}
-    <link href="{{ asset('css/jquery-ui.min.css') }}" rel="stylesheet">
+    <link defer href="{{ asset('css/jquery-ui.min.css') }}" rel="stylesheet">
 
     {{-- Bootstrap Toggle --}}
-    <link href="{{ asset('css/bootstrap4-toggle.min.css') }}" rel="stylesheet">
+    <link defer href="{{ asset('css/bootstrap4-toggle.min.css') }}" rel="stylesheet">
 
-
-    <link href="{{ asset('css/lightbox.min.css') }}" rel="stylesheet">
-    <link href="{{ asset('css/bootstrap-colorpicker.min.css') }}" rel="stylesheet">
-    <link href="{{ asset('css/jquery-ui-timepicker-addon.css') }}" rel="stylesheet">
-    <link href="{{ asset('css/croppie.css') }}" rel="stylesheet">
-    <link href="{{ asset('css/selectize.bootstrap4.css') }}" rel="stylesheet">
+    <link defer href="{{ asset('css/lightbox.min.css') }}" rel="stylesheet">
+    <link defer href="{{ asset('css/bootstrap-colorpicker.min.css') }}" rel="stylesheet">
+    <link defer href="{{ asset('css/jquery-ui-timepicker-addon.css') }}" rel="stylesheet">
+    <link defer href="{{ asset('css/croppie.css') }}" rel="stylesheet">
+    <link defer href="{{ asset('css/selectize.bootstrap4.css') }}" rel="stylesheet">
 
     @if (file_exists(public_path() . '/css/custom.css'))
         <link href="{{ asset('css/custom.css') . '?v=' . filemtime(public_path('css/lorekeeper.css')) }}" rel="stylesheet">
@@ -102,12 +100,12 @@
                         @if (Settings::get('is_maintenance_mode'))
                             <div class="alert alert-secondary">
                                 The site is currently in maintenance mode!
-                                @if (!Auth::user()->hasPower('maintenance_access'))
+                                @if (!Auth::check() || !Auth::user()->hasPower('maintenance_access'))
                                     You can browse public content, but cannot make any submissions.
                                 @endif
                             </div>
                         @endif
-                        @if (Auth::check() && !Config::get('lorekeeper.extensions.navbar_news_notif'))
+                        @if (Auth::check() && !config('lorekeeper.extensions.navbar_news_notif'))
                             @if (Auth::user()->is_news_unread)
                                 <div class="alert alert-info"><a href="{{ url('news') }}">There is a new news post!</a></div>
                             @endif

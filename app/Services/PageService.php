@@ -3,8 +3,7 @@
 namespace App\Services;
 
 use App\Models\SitePage;
-use Config;
-use DB;
+use Illuminate\Support\Facades\DB;
 
 class PageService extends Service {
     /*
@@ -22,7 +21,7 @@ class PageService extends Service {
      * @param array                 $data
      * @param \App\Models\User\User $user
      *
-     * @return \App\Models\SitePage|bool
+     * @return bool|SitePage
      */
     public function createPage($data, $user) {
         DB::beginTransaction();
@@ -57,7 +56,7 @@ class PageService extends Service {
      * @param \App\Models\User\User $user
      * @param mixed                 $page
      *
-     * @return \App\Models\SitePage|bool
+     * @return bool|SitePage
      */
     public function updatePage($page, $data, $user) {
         DB::beginTransaction();
@@ -102,7 +101,7 @@ class PageService extends Service {
 
         try {
             // Specific pages such as the TOS/privacy policy cannot be deleted from the admin panel.
-            if (Config::get('lorekeeper.text_pages.'.$page->key)) {
+            if (config('lorekeeper.text_pages.'.$page->key)) {
                 throw new \Exception('You cannot delete this page.');
             }
 

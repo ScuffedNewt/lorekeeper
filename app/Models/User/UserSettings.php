@@ -12,7 +12,7 @@ class UserSettings extends Model {
      */
     protected $fillable = [
         'is_fto', 'submission_count', 'banned_at', 'ban_reason', 'birthday_setting',
-        'deactivate_reason', 'deactivated_at',
+        'deactivate_reason', 'deactivated_at', 'content_warning_visibility',
     ];
 
     /**
@@ -23,11 +23,14 @@ class UserSettings extends Model {
     protected $table = 'user_settings';
 
     /**
-     * Dates on the model to convert to Carbon instances.
+     * The attributes that should be cast to native types.
      *
      * @var array
      */
-    protected $dates = ['banned_at', 'deactivated_at'];
+    protected $casts = [
+        'banned_at'      => 'datetime',
+        'deactivated_at' => 'datetime',
+    ];
 
     /**
      * The primary key of the model.
@@ -46,6 +49,6 @@ class UserSettings extends Model {
      * Get the user this set of settings belongs to.
      */
     public function user() {
-        return $this->belongsTo('App\Models\User\User');
+        return $this->belongsTo(User::class);
     }
 }

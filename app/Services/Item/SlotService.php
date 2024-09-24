@@ -10,7 +10,7 @@ use App\Models\User\User;
 use App\Services\CharacterManager;
 use App\Services\InventoryManager;
 use App\Services\Service;
-use DB;
+use Illuminate\Support\Facades\DB;
 
 class SlotService extends Service {
     /*
@@ -25,13 +25,15 @@ class SlotService extends Service {
     /**
      * Retrieves any data that should be used in the item tag editing form.
      *
+     * @param mixed $tag
+     *
      * @return array
      */
-    public function getEditData() {
+    public function getEditData($tag) {
         return [
             'rarities'  => ['0' => 'Select Rarity'] + Rarity::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
             'specieses' => ['0' => 'Select Species'] + Species::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
-            'subtypes'  => ['0' => 'Select Subtype'] + Subtype::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
+            'subtypes'  => Subtype::orderBy('sort', 'DESC')->where('species_id', $this->getTagData($tag)['species_id'])->pluck('name', 'id')->toArray(),
             'isMyo'     => true,
         ];
     }
@@ -39,7 +41,7 @@ class SlotService extends Service {
     /**
      * Processes the data attribute of the tag and returns it in the preferred format for edits.
      *
-     * @param string $tag
+     * @param object $tag
      *
      * @return mixed
      */
@@ -47,7 +49,7 @@ class SlotService extends Service {
         //fetch data from DB, if there is no data then set to NULL instead
         $characterData['name'] = $tag->data['name'] ?? null;
         $characterData['species_id'] = isset($tag->data['species_id']) && $tag->data['species_id'] ? $tag->data['species_id'] : null;
-        $characterData['subtype_id'] = isset($tag->data['subtype_id']) && $tag->data['subtype_id'] ? $tag->data['subtype_id'] : null;
+        $characterData['subtype_ids'] = isset($tag->data['subtype_ids']) && $tag->data['subtype_ids'] ? $tag->data['subtype_ids'] : null;
         $characterData['rarity_id'] = isset($tag->data['rarity_id']) && $tag->data['rarity_id'] ? $tag->data['rarity_id'] : null;
         $characterData['description'] = isset($tag->data['description']) && $tag->data['description'] ? $tag->data['description'] : null;
         $characterData['parsed_description'] = parse($characterData['description']);
@@ -80,7 +82,7 @@ class SlotService extends Service {
     /**
      * Processes the data attribute of the tag and returns it in the preferred format for DB storage.
      *
-     * @param string $tag
+     * @param object $tag
      * @param array  $data
      *
      * @return bool
@@ -89,7 +91,7 @@ class SlotService extends Service {
         //put inputs into an array to transfer to the DB
         $characterData['name'] = $data['name'] ?? null;
         $characterData['species_id'] = isset($data['species_id']) && $data['species_id'] ? $data['species_id'] : null;
-        $characterData['subtype_id'] = isset($data['subtype_id']) && $data['subtype_id'] ? $data['subtype_id'] : null;
+        $characterData['subtype_ids'] = isset($data['subtype_ids']) && $data['subtype_ids'] ? $data['subtype_ids'] : null;
         $characterData['rarity_id'] = isset($data['rarity_id']) && $data['rarity_id'] ? $data['rarity_id'] : null;
         $characterData['description'] = isset($data['description']) && $data['description'] ? $data['description'] : null;
         $characterData['parsed_description'] = parse($characterData['description']);
@@ -118,7 +120,7 @@ class SlotService extends Service {
      * Acts upon the item when used from the inventory.
      *
      * @param \App\Models\User\UserItem $stacks
-     * @param \App\Models\User\User     $user
+     * @param User                      $user
      * @param array                     $data
      *
      * @return bool
@@ -188,6 +190,9 @@ class SlotService extends Service {
                         if ($character = $charService->createCharacter($characterData, $user, true)) {
                             flash('<a href="'.$character->url.'">MYO slot</a> created successfully.')->success();
                         } else {
+                            foreach ($charService->errors()->getMessages()['error'] as $error) {
+                                $charService->addError($error);
+                            }
                             throw new \Exception('Failed to use slot.');
                         }
                     }

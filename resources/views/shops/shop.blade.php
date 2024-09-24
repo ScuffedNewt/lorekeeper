@@ -4,6 +4,12 @@
     {{ $shop->name }}
 @endsection
 
+@if ($shop->has_image)
+    @section('meta-img')
+        {{ $shop->shopImageUrl }}
+    @endsection
+@endif
+
 @section('shops-content')
     <x-admin-edit title="Shop" :object="$shop" />
     {!! breadcrumbs(['Shops' => 'shops', $shop->name => $shop->url]) !!}
@@ -13,14 +19,16 @@
     </h1>
 
     <div class="text-center">
-        <img src="{{ $shop->shopImageUrl }}" style="max-width:100%" alt="{{ $shop->name }}" />
+        @if ($shop->has_image)
+            <img src="{{ $shop->shopImageUrl }}" style="max-width:100%" alt="{{ $shop->name }}" />
+        @endif
         <p>{!! $shop->parsed_description !!}</p>
     </div>
 
     @foreach ($items as $categoryId => $categoryItems)
         @php
             $visible = '';
-            if (!$categories[$categoryId]->is_visible) {
+            if ($categoryId && !$categories[$categoryId]->is_visible) {
                 $visible = '<i class="fas fa-eye-slash mr-1"></i>';
             }
         @endphp

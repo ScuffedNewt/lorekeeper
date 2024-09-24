@@ -13,6 +13,7 @@
 
 Route::get('/', 'HomeController@getIndex')->name('home');
 Route::get('login', 'Auth\LoginController@getNewReply');
+
 // Logging in with Aliases
 Route::get('/login/redirect/{driver}', 'Auth\LoginController@getAuthRedirect');
 Route::get('/login/callback/{driver}', 'Auth\LoginController@getAuthCallback');
@@ -20,8 +21,6 @@ Route::get('/login/callback/{driver}', 'Auth\LoginController@getAuthCallback');
 // Registering with Aliases
 Route::get('register/{driver}', 'Auth\RegisterController@getRegisterWithDriver');
 Route::post('register/{driver}', 'Auth\RegisterController@postRegisterWithDriver');
-
-Auth::routes(['verify' => true]);
 
 // BROWSE
 require_once __DIR__.'/lorekeeper/browse.php';
@@ -31,7 +30,7 @@ Route::feeds('feeds');
 /**************************************************************************************************
     Routes that require login
 **************************************************************************************************/
-Route::group(['middleware' => ['auth', 'verified']], function () {
+Route::group(['middleware' => ['auth', 'verified', 'post.throttle']], function () {
     // LINK DA ACCOUNT
     Route::get('/link', 'HomeController@getLink')->name('link');
 

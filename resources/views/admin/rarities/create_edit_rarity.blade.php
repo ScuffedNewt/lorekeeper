@@ -1,7 +1,7 @@
 @extends('admin.layout')
 
 @section('admin-title')
-    Rarities
+    {{ $rarity->id ? 'Edit' : 'Create' }} Rarity
 @endsection
 
 @section('admin-content')
@@ -59,7 +59,13 @@
         <h3>Preview</h3>
         <div class="card mb-3">
             <div class="card-body">
-                @include('world._entry', ['imageUrl' => $rarity->rarityImageUrl, 'name' => $rarity->displayName, 'description' => $rarity->parsed_description])
+                @include('world._rarity_entry', [
+                    'imageUrl' => $rarity->rarityImageUrl,
+                    'name' => $rarity->displayName,
+                    'description' => $rarity->parsed_description,
+                    'searchFeaturesUrl' => $rarity->searchFeaturesUrl,
+                    'searchCharactersUrl' => $rarity->searchCharactersUrl,
+                ])
             </div>
         </div>
     @endif

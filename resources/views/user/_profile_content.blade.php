@@ -1,55 +1,72 @@
 @if ($deactivated)
     <div style="filter:grayscale(1); opacity:0.75">
 @endif
-<h1>
-    <img src="{{ $user->avatarUrl }}" style="width:125px; height:125px; float:left; border-radius:50%; margin-right:25px;" alt="{{ $user->name }}'s Avatar">
-    {!! $user->displayName !!}
-    <a href="{{ url('reports/new?url=') . $user->url }}"><i class="fas fa-exclamation-triangle fa-xs" data-toggle="tooltip" title="Click here to report this user." style="opacity: 50%; font-size:0.5em;"></i></a>
 
-    @if ($user->settings->is_fto)
-        <span class="badge badge-success float-right" data-toggle="tooltip" title="This user has not owned any characters from this world before.">FTO</span>
-    @endif
-</h1>
-<div class="mb-4">
-    <div class="row">
-        <div class="row col-md-6">
-            <div class="col-md-2 col-4">
-                <h5>Alias</h5>
-            </div>
-            <div class="col-md-10 col-8">
-                {!! $user->displayAlias !!}
-                @if (count($aliases) > 1 && Config::get('lorekeeper.extensions.aliases_on_userpage'))
-                    <a class="small collapse-toggle collapsed" href="#otherUserAliases" data-toggle="collapse">&nbsp;</a>
-                    <p class="collapse mb-0" id="otherUserAliases">
-                        @foreach ($aliases as $alias)
-                            @if ($alias != $user->primaryAlias)
-                                <a href="{{ $alias->url }}"><i class="{{ $alias->config['icon'] }} fa-fw mr-1" data-toggle="tooltip" title="{{ $alias->alias . '@' . $alias->siteDisplayName }}"></i></a>
-                            @endif
-                        @endforeach
-                    </p>
+<div class="row mb-3">
+    <div class="col-md-2 text-center">
+        <!-- User Icon -->
+        <img src="{{ $user->avatarUrl }}" class="img-fluid rounded-circle" style="max-height: 125px;" alt="{{ $user->name }}'s Avatar">
+    </div>
+
+    <div class="col">
+        <!-- Username & optional FTO Badge -->
+        <div class="row no-gutters">
+            <div class="col h2 text-center text-md-left">
+                {!! $user->displayName !!}
+                @if ($user->previousUsername)
+                    <small>{!! add_help('Previously known as ' . $user->previousUsername) !!}</small>
                 @endif
+                <a href="{{ url('reports/new?url=') . $user->url }}"><i class="fas fa-exclamation-triangle fa-xs text-danger" data-toggle="tooltip" title="Click here to report this user." style="opacity: 50%;"></i></a>
             </div>
-        </div>
-        <div class="row col-md-6">
-            <div class="col-md-2 col-4">
-                <h5>Joined</h5>
-            </div>
-            <div class="col-md-10 col-8">{!! format_date($user->created_at, false) !!} ({{ $user->created_at->diffForHumans() }})</div>
-        </div>
-        <div class="row col-md-6">
-            <div class="col-md-2 col-4">
-                <h5>Rank</h5>
-            </div>
-            <div class="col-md-10 col-8">{!! $user->rank->displayName !!} {!! add_help($user->rank->parsed_description) !!}</div>
-        </div>
-        @if ($user->birthdayDisplay && isset($user->birthday))
-            <div class="row col-md-6">
-                <div class="col-md-2 col-4">
-                    <h5>Birthday</h5>
+
+            @if ($user->settings->is_fto)
+                <div class="col-md-1 text-center">
+                    <span class="btn badge-success float-md-right" data-toggle="tooltip" title="This user has not owned any characters from this world before.">FTO</span>
                 </div>
-                <div class="col-md-10 col-8">{!! $user->birthdayDisplay !!}</div>
+            @endif
+        </div>
+
+        <!-- User Information -->
+        <div class="row no-gutters">
+            <div class="row col-sm-5">
+                <div class="col-lg-2 col-md-3 col-4">
+                    <h5>Alias</h5>
+                </div>
+                <div class="col-lg-10 col-md-9 col-8">
+                    {!! $user->displayAlias !!}
+                    @if (count($aliases) > 1 && config('lorekeeper.extensions.aliases_on_userpage'))
+                        <a class="small collapse-toggle collapsed" href="#otherUserAliases" data-toggle="collapse">&nbsp;</a>
+                        <p class="collapse mb-0" id="otherUserAliases">
+                            @foreach ($aliases as $alias)
+                                @if ($alias != $user->primaryAlias)
+                                    <a href="{{ $alias->url }}"><i class="{{ $alias->config['icon'] }} fa-fw mr-1" data-toggle="tooltip" title="{{ $alias->alias . '@' . $alias->siteDisplayName }}"></i></a>
+                                @endif
+                            @endforeach
+                        </p>
+                    @endif
+                </div>
             </div>
-        @endif
+            <div class="row col-sm-7">
+                <div class="col-md-3 col-4">
+                    <h5>Joined</h5>
+                </div>
+                <div class="col-md-9 col-8">{!! format_date($user->created_at, false) !!} ({{ $user->created_at->diffForHumans() }})</div>
+            </div>
+            <div class="row col-sm-5">
+                <div class="col-lg-2 col-md-3 col-4">
+                    <h5>Rank</h5>
+                </div>
+                <div class="col-lg-10 col-md-9 col-8">{!! $user->rank->displayName !!} {!! add_help($user->rank->parsed_description) !!}</div>
+            </div>
+            @if ($user->birthdayDisplay && isset($user->birthday))
+                <div class="row col-sm-7">
+                    <div class="col-md-3 col-4">
+                        <h5>Birthday</h5>
+                    </div>
+                    <div class="col-md-9 col-8">{!! $user->birthdayDisplay !!}</div>
+                </div>
+            @endif
+        </div>
     </div>
 </div>
 
@@ -112,7 +129,11 @@
         @foreach ($chunk as $character)
             <div class="col-md-3 col-6 text-center">
                 <div>
-                    <a href="{{ $character->url }}"><img src="{{ $character->image->thumbnailUrl }}" class="img-thumbnail" alt="{{ $character->fullName }}" /></a>
+                    @if ((Auth::check() && Auth::user()->settings->content_warning_visibility == 0 && isset($character->character_warning)) || (isset($character->character_warning) && !Auth::check()))
+                        <a href="{{ $character->url }}"><img src="{{ asset('/images/content_warning.png') }}" class="img-thumbnail" alt="Content Warning - {{ $character->fullName }}" /></a>
+                    @else
+                        <a href="{{ $character->url }}"><img src="{{ $character->image->thumbnailUrl }}" class="img-thumbnail" alt="{{ $character->fullName }}" /></a>
+                    @endif
                 </div>
                 <div class="mt-1">
                     <a href="{{ $character->url }}" class="h5 mb-0">
@@ -121,6 +142,11 @@
                         @endif {{ Illuminate\Support\Str::limit($character->fullName, 20, $end = '...') }}
                     </a>
                 </div>
+                @if ((Auth::check() && Auth::user()->settings->content_warning_visibility < 2 && isset($character->character_warning)) || (isset($character->character_warning) && !Auth::check()))
+                    <div class="small">
+                        <p><span class="text-danger"><strong>Character Warning:</strong></span> {!! nl2br(htmlentities($character->character_warning)) !!}</p>
+                    </div>
+                @endif
             </div>
         @endforeach
     </div>
@@ -157,7 +183,7 @@
                 </div>
                 In a comment:
                 <div class="alert alert-secondary">
-                    [![{{ $user->name }}'s Avatar]({{ asset('/images/avatars/' . $user->avatar) }})]({{ $user->url }}) [{{ $user->name }}]({{ $user->url }})
+                    [![{{ $user->name }}'s Avatar]({{ $user->avatarUrl }})]({{ $user->url }}) [{{ $user->name }}]({{ $user->url }})
                 </div>
             </div>
             @if (Auth::check() && Auth::user()->isStaff)
