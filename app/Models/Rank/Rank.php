@@ -3,8 +3,8 @@
 namespace App\Models\Rank;
 
 use App\Models\Model;
-use Illuminate\Support\Arr;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Arr;
 
 class Rank extends Model {
     use HasFactory;

@@ -10,8 +10,7 @@ use Illuminate\Support\Str;
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User\User>
  */
-class UserFactory extends Factory
-{
+class UserFactory extends Factory {
     protected $model = User::class;
 
     /**
@@ -19,15 +18,14 @@ class UserFactory extends Factory
      *
      * @return array<string, mixed>
      */
-    public function definition(): array
-    {
+    public function definition(): array {
         return [
-            'name' => $this->faker->name,
-            'email' => $this->faker->unique()->safeEmail,
+            'name'              => $this->faker->name,
+            'email'             => $this->faker->unique()->safeEmail,
             'email_verified_at' => now(),
-            'password' => Hash::make('password'), // Default password
-            'remember_token' => Str::random(10),
-            'rank_id' => 1,
+            'password'          => Hash::make('password'), // Default password
+            'remember_token'    => Str::random(10),
+            'rank_id'           => 1,
         ];
     }
 }
