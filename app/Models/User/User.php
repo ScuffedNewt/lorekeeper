@@ -21,13 +21,14 @@ use App\Models\Submission\Submission;
 use App\Traits\Commenter;
 use Carbon\Carbon;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 
 class User extends Authenticatable implements MustVerifyEmail {
-    use Commenter, Notifiable, TwoFactorAuthenticatable;
+    use Commenter, Notifiable, TwoFactorAuthenticatable, HasFactory;
 
     /**
      * The attributes that are mass assignable.
