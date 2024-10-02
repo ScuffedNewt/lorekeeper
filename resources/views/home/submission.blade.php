@@ -12,7 +12,7 @@
     @auth
         @if ($submission->user_id == Auth::user()->id && $submission->status == 'Pending')
             {!! Form::open(['url' => url()->current(), 'id' => 'submissionForm']) !!}
-            @if (!count(getLimits($submission->prompt)))
+            @if ($isClaim || !count(getLimits($submission->prompt)))
                 <div class="text-right">
                     <a href="#" class="btn btn-danger mr-2" id="cancellationButton">Cancel {{ $submission->prompt_id ? 'submission' : 'claim' }}</a>
                 </div>
