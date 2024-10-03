@@ -31,14 +31,14 @@ class Feature extends Model {
      * @var array
      */
     public static $createRules = [
-        'feature_category_id' => 'nullable',
+        'feature_category_id'    => 'nullable',
         'feature_subcategory_id' => 'nullable',
-        'species_id'          => 'nullable',
-        'subtype_id'          => 'nullable',
-        'rarity_id'           => 'required|exists:rarities,id',
-        'name'                => 'required|unique:features|between:3,100',
-        'description'         => 'nullable',
-        'image'               => 'mimes:png',
+        'species_id'             => 'nullable',
+        'subtype_id'             => 'nullable',
+        'rarity_id'              => 'required|exists:rarities,id',
+        'name'                   => 'required|unique:features|between:3,100',
+        'description'            => 'nullable',
+        'image'                  => 'mimes:png',
     ];
 
     /**
@@ -47,14 +47,14 @@ class Feature extends Model {
      * @var array
      */
     public static $updateRules = [
-        'feature_category_id' => 'nullable',
+        'feature_category_id'    => 'nullable',
         'feature_subcategory_id' => 'nullable',
-        'species_id'          => 'nullable',
-        'subtype_id'          => 'nullable',
-        'rarity_id'           => 'required|exists:rarities,id',
-        'name'                => 'required|between:3,100',
-        'description'         => 'nullable',
-        'image'               => 'mimes:png',
+        'species_id'             => 'nullable',
+        'subtype_id'             => 'nullable',
+        'rarity_id'              => 'required|exists:rarities,id',
+        'name'                   => 'required|between:3,100',
+        'description'            => 'nullable',
+        'image'                  => 'mimes:png',
     ];
 
     /**********************************************************************************************
@@ -94,8 +94,7 @@ class Feature extends Model {
     /**
      * Get the category the feature belongs to.
      */
-    public function subcategory()
-    {
+    public function subcategory() {
         return $this->belongsTo('App\Models\Feature\FeatureSubcategory', 'feature_subcategory_id');
     }
 
@@ -213,13 +212,13 @@ class Feature extends Model {
     /**
      * Scope a query to sort features in subcategory order.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @param  bool                                   $reverse
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeSortSubcategory($query)
-    {
+    public function scopeSortSubcategory($query) {
         $ids = FeatureSubcategory::orderBy('sort', 'DESC')->pluck('id')->toArray();
+
         return count($ids) ? $query->orderByRaw(DB::raw('FIELD(feature_subcategory_id, '.implode(',', $ids).')')) : $query;
     }
 

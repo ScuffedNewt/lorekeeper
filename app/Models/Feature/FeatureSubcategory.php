@@ -2,18 +2,16 @@
 
 namespace App\Models\Feature;
 
-use Config;
 use App\Models\Model;
 
-class FeatureSubcategory extends Model
-{
+class FeatureSubcategory extends Model {
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'name', 'sort', 'has_image', 'description', 'parsed_description'
+        'name', 'sort', 'has_image', 'description', 'parsed_description',
     ];
 
     /**
@@ -22,42 +20,41 @@ class FeatureSubcategory extends Model
      * @var string
      */
     protected $table = 'feature_subcategories';
-    
+
     /**
      * Validation rules for creation.
      *
      * @var array
      */
     public static $createRules = [
-        'name' => 'required|unique:feature_subcategories|between:3,100',
+        'name'        => 'required|unique:feature_subcategories|between:3,100',
         'description' => 'nullable',
-        'image' => 'mimes:png',
+        'image'       => 'mimes:png',
     ];
-    
+
     /**
      * Validation rules for updating.
      *
      * @var array
      */
     public static $updateRules = [
-        'name' => 'required|between:3,100',
+        'name'        => 'required|between:3,100',
         'description' => 'nullable',
-        'image' => 'mimes:png',
+        'image'       => 'mimes:png',
     ];
 
     /**********************************************************************************************
-    
+
         ACCESSORS
 
     **********************************************************************************************/
-    
+
     /**
      * Displays the model's name, linked to its encyclopedia page.
      *
      * @return string
      */
-    public function getDisplayNameAttribute()
-    {
+    public function getDisplayNameAttribute() {
         return '<a href="'.$this->url.'" class="display-subcategory">'.$this->name.'</a>';
     }
 
@@ -66,8 +63,7 @@ class FeatureSubcategory extends Model
      *
      * @return string
      */
-    public function getImageDirectoryAttribute()
-    {
+    public function getImageDirectoryAttribute() {
         return 'images/data/trait-subcategories';
     }
 
@@ -76,9 +72,8 @@ class FeatureSubcategory extends Model
      *
      * @return string
      */
-    public function getSubcategoryImageFileNameAttribute()
-    {
-        return $this->id . '-image.png';
+    public function getSubcategoryImageFileNameAttribute() {
+        return $this->id.'-image.png';
     }
 
     /**
@@ -86,20 +81,21 @@ class FeatureSubcategory extends Model
      *
      * @return string
      */
-    public function getSubcategoryImagePathAttribute()
-    {
+    public function getSubcategoryImagePathAttribute() {
         return public_path($this->imageDirectory);
     }
-    
+
     /**
      * Gets the URL of the model's image.
      *
      * @return string
      */
-    public function getSubcategoryImageUrlAttribute()
-    {
-        if (!$this->has_image) return null;
-        return asset($this->imageDirectory . '/' . $this->subcategoryImageFileName);
+    public function getSubcategoryImageUrlAttribute() {
+        if (!$this->has_image) {
+            return null;
+        }
+
+        return asset($this->imageDirectory.'/'.$this->subcategoryImageFileName);
     }
 
     /**
@@ -107,8 +103,7 @@ class FeatureSubcategory extends Model
      *
      * @return string
      */
-    public function getUrlAttribute()
-    {
+    public function getUrlAttribute() {
         return url('world/trait-subcategories?name='.$this->name);
     }
 
@@ -117,8 +112,7 @@ class FeatureSubcategory extends Model
      *
      * @return string
      */
-    public function getSearchUrlAttribute()
-    {
+    public function getSearchUrlAttribute() {
         return url('world/traits?feature_subcategory_id='.$this->id);
     }
 }

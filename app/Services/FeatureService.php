@@ -176,65 +176,71 @@ class FeatureService extends Service {
         return $this->rollbackReturn(false);
     }
 
-     /**********************************************************************************************
-     
-        FEATURE SUBCATEGORIES
+    /**********************************************************************************************
+
+       FEATURE SUBCATEGORIES
 
     **********************************************************************************************/
 
     /**
      * Create a subcategory.
      *
-     * @param  array                 $data
-     * @param  \App\Models\User\User $user
-     * @return \App\Models\Feature\FeatureSubcategory|bool
+     * @param array                 $data
+     * @param \App\Models\User\User $user
+     *
+     * @return bool|FeatureSubcategory
      */
-    public function createFeatureSubcategory($data, $user)
-    {
+    public function createFeatureSubcategory($data, $user) {
         DB::beginTransaction();
 
         try {
             $data = $this->populateSubcategoryData($data);
 
             $image = null;
-            if(isset($data['image']) && $data['image']) {
+            if (isset($data['image']) && $data['image']) {
                 $data['has_image'] = 1;
                 $image = $data['image'];
                 unset($data['image']);
+            } else {
+                $data['has_image'] = 0;
             }
-            else $data['has_image'] = 0;
 
             $subcategory = FeatureSubcategory::create($data);
 
-            if ($image) $this->handleImage($image, $subcategory->subcategoryImagePath, $subcategory->subcategoryImageFileName);
+            if ($image) {
+                $this->handleImage($image, $subcategory->subcategoryImagePath, $subcategory->subcategoryImageFileName);
+            }
 
             return $this->commitReturn($subcategory);
-        } catch(\Exception $e) { 
+        } catch (\Exception $e) {
             $this->setError('error', $e->getMessage());
         }
+
         return $this->rollbackReturn(false);
     }
 
     /**
      * Update a subcategory.
      *
-     * @param  \App\Models\Feature\FeatureSubcategory  $subcategory
-     * @param  array                                $data
-     * @param  \App\Models\User\User                $user
-     * @return \App\Models\Feature\FeatureSubcategory|bool
+     * @param FeatureSubcategory    $subcategory
+     * @param array                 $data
+     * @param \App\Models\User\User $user
+     *
+     * @return bool|FeatureSubcategory
      */
-    public function updateFeatureSubcategory($subcategory, $data, $user)
-    {
+    public function updateFeatureSubcategory($subcategory, $data, $user) {
         DB::beginTransaction();
 
         try {
             // More specific validation
-            if(FeatureSubcategory::where('name', $data['name'])->where('id', '!=', $subcategory->id)->exists()) throw new \Exception("The name has already been taken.");
+            if (FeatureSubcategory::where('name', $data['name'])->where('id', '!=', $subcategory->id)->exists()) {
+                throw new \Exception('The name has already been taken.');
+            }
 
             $data = $this->populateSubcategoryData($data, $subcategory);
 
-            $image = null;            
-            if(isset($data['image']) && $data['image']) {
+            $image = null;
+            if (isset($data['image']) && $data['image']) {
                 $data['has_image'] = 1;
                 $image = $data['image'];
                 unset($data['image']);
@@ -242,88 +248,73 @@ class FeatureService extends Service {
 
             $subcategory->update($data);
 
-            if ($subcategory) $this->handleImage($image, $subcategory->subcategoryImagePath, $subcategory->subcategoryImageFileName);
+            if ($subcategory) {
+                $this->handleImage($image, $subcategory->subcategoryImagePath, $subcategory->subcategoryImageFileName);
+            }
 
             return $this->commitReturn($subcategory);
-        } catch(\Exception $e) { 
+        } catch (\Exception $e) {
             $this->setError('error', $e->getMessage());
         }
+
         return $this->rollbackReturn(false);
-    }
-
-    /**
-     * Handle subcategory data.
-     *
-     * @param  array                                     $data
-     * @param  \App\Models\Feature\FeatureSubcategory|null  $subcategory
-     * @return array
-     */
-    private function populateSubcategoryData($data, $subcategory = null)
-    {
-        if(isset($data['description']) && $data['description']) $data['parsed_description'] = parse($data['description']);
-        
-        if(isset($data['remove_image']))
-        {
-            if($subcategory && $subcategory->has_image && $data['remove_image']) 
-            { 
-                $data['has_image'] = 0; 
-                $this->deleteImage($subcategory->subcategoryImagePath, $subcategory->subcategoryImageFileName); 
-            }
-            unset($data['remove_image']);
-        }
-
-        return $data;
     }
 
     /**
      * Delete a subcategory.
      *
-     * @param  \App\Models\Feature\FeatureSubcategory  $subcategory
+     * @param FeatureSubcategory $subcategory
+     *
      * @return bool
      */
-    public function deleteFeatureSubcategory($subcategory)
-    {
+    public function deleteFeatureSubcategory($subcategory) {
         DB::beginTransaction();
 
         try {
             // Check first if the subcategory is currently in use
-            if(Feature::where('feature_subcategory_id', $subcategory->id)->exists()) throw new \Exception("A trait with this subcategory exists. Please change its subcategory first.");
-            
-            if($subcategory->has_image) $this->deleteImage($subcategory->subcategoryImagePath, $subcategory->subcategoryImageFileName); 
+            if (Feature::where('feature_subcategory_id', $subcategory->id)->exists()) {
+                throw new \Exception('A trait with this subcategory exists. Please change its subcategory first.');
+            }
+
+            if ($subcategory->has_image) {
+                $this->deleteImage($subcategory->subcategoryImagePath, $subcategory->subcategoryImageFileName);
+            }
             $subcategory->delete();
 
             return $this->commitReturn(true);
-        } catch(\Exception $e) { 
+        } catch (\Exception $e) {
             $this->setError('error', $e->getMessage());
         }
+
         return $this->rollbackReturn(false);
     }
 
     /**
      * Sorts subcategory order.
      *
-     * @param  array  $data
+     * @param array $data
+     *
      * @return bool
      */
-    public function sortFeatureSubcategory($data)
-    {
+    public function sortFeatureSubcategory($data) {
         DB::beginTransaction();
 
         try {
             // explode the sort array and reverse it since the order is inverted
             $sort = array_reverse(explode(',', $data));
 
-            foreach($sort as $key => $s) {
+            foreach ($sort as $key => $s) {
                 FeatureSubcategory::where('id', $s)->update(['sort' => $key]);
             }
 
             return $this->commitReturn(true);
-        } catch(\Exception $e) { 
+        } catch (\Exception $e) {
             $this->setError('error', $e->getMessage());
         }
+
         return $this->rollbackReturn(false);
     }
-    
+
     /**********************************************************************************************
 
         FEATURES
@@ -345,9 +336,9 @@ class FeatureService extends Service {
             if (isset($data['feature_category_id']) && $data['feature_category_id'] == 'none') {
                 $data['feature_category_id'] = null;
             }
-            if(isset($data['feature_subcategory_id']) && $data['feature_subcategory_id'] == 'none') {
+            if (isset($data['feature_subcategory_id']) && $data['feature_subcategory_id'] == 'none') {
                 $data['feature_subcategory_id'] = null;
-        }
+            }
             if (isset($data['species_id']) && $data['species_id'] == 'none') {
                 $data['species_id'] = null;
             }
@@ -417,7 +408,7 @@ class FeatureService extends Service {
             if (isset($data['feature_category_id']) && $data['feature_category_id'] == 'none') {
                 $data['feature_category_id'] = null;
             }
-            if(isset($data['feature_subcategory_id']) && $data['feature_subcategory_id'] == 'none') {
+            if (isset($data['feature_subcategory_id']) && $data['feature_subcategory_id'] == 'none') {
                 $data['feature_subcategory_id'] = null;
             }
             if (isset($data['species_id']) && $data['species_id'] == 'none') {
@@ -510,6 +501,30 @@ class FeatureService extends Service {
     }
 
     /**
+     * Handle subcategory data.
+     *
+     * @param array                   $data
+     * @param FeatureSubcategory|null $subcategory
+     *
+     * @return array
+     */
+    private function populateSubcategoryData($data, $subcategory = null) {
+        if (isset($data['description']) && $data['description']) {
+            $data['parsed_description'] = parse($data['description']);
+        }
+
+        if (isset($data['remove_image'])) {
+            if ($subcategory && $subcategory->has_image && $data['remove_image']) {
+                $data['has_image'] = 0;
+                $this->deleteImage($subcategory->subcategoryImagePath, $subcategory->subcategoryImageFileName);
+            }
+            unset($data['remove_image']);
+        }
+
+        return $data;
+    }
+
+    /**
      * Handle category data.
      *
      * @param array                $data
@@ -555,7 +570,7 @@ class FeatureService extends Service {
         if (isset($data['feature_category_id']) && $data['feature_category_id'] == 'none') {
             $data['feature_category_id'] = null;
         }
-        if(isset($data['feature_subcategory_id']) && $data['feature_subcategory_id'] == 'none') {
+        if (isset($data['feature_subcategory_id']) && $data['feature_subcategory_id'] == 'none') {
             $data['feature_subcategory_id'] = null;
         }
         if (!isset($data['is_visible'])) {
