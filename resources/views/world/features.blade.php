@@ -38,7 +38,7 @@
                         'alpha' => 'Sort Alphabetically (A-Z)',
                         'alpha-reverse' => 'Sort Alphabetically (Z-A)',
                         'category' => 'Sort by Category',
-                        'subcategory'       => 'Sort by Subcategory',
+                        'subcategory' => 'Sort by Subcategory',
                         'rarity-reverse' => 'Sort by Rarity (Common to Rare)',
                         'rarity' => 'Sort by Rarity (Rare to Common)',
                         'species' => 'Sort by Species',
