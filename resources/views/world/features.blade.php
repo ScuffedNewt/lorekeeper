@@ -26,6 +26,9 @@
             <div class="form-group ml-3 mb-3">
                 {!! Form::select('feature_category_id', $categories, Request::get('feature_category_id'), ['class' => 'form-control']) !!}
             </div>
+            <div class="form-group ml-3 mb-3">
+                {!! Form::select('feature_subcategory_id', $subcategories, Request::get('feature_subcategory_id'), ['class' => 'form-control']) !!}
+            </div>
         </div>
         <div class="form-inline justify-content-end">
             <div class="form-group ml-3 mb-3">
@@ -35,6 +38,7 @@
                         'alpha' => 'Sort Alphabetically (A-Z)',
                         'alpha-reverse' => 'Sort Alphabetically (Z-A)',
                         'category' => 'Sort by Category',
+                        'subcategory'       => 'Sort by Subcategory',
                         'rarity-reverse' => 'Sort by Rarity (Common to Rare)',
                         'rarity' => 'Sort by Rarity (Rare to Common)',
                         'species' => 'Sort by Species',

@@ -13,6 +13,7 @@
 
     <div class="text-right mb-3">
         <a class="btn btn-primary" href="{{ url('admin/data/trait-categories') }}"><i class="fas fa-folder"></i> Trait Categories</a>
+        <a class="btn btn-primary" href="{{ url('admin/data/trait-subcategories') }}"><i class="fas fa-folder"></i> Trait Subcategories</a>
         <a class="btn btn-primary" href="{{ url('admin/data/traits/create') }}"><i class="fas fa-plus"></i> Create New Trait</a>
     </div>
 
@@ -33,6 +34,9 @@
             </div>
             <div class="form-group ml-3 mb-3">
                 {!! Form::select('feature_category_id', $categories, Request::get('feature_category_id'), ['class' => 'form-control']) !!}
+            </div>
+            <div class="form-group mr-3 mb-3">
+                {!! Form::select('feature_subcategory_id', $subcategories, Request::get('feature_subcategory_id'), ['class' => 'form-control']) !!}
             </div>
         </div>
         <div class="form-inline justify-content-end">

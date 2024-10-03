@@ -16,6 +16,7 @@ class Feature extends Model {
      */
     protected $fillable = [
         'feature_category_id', 'species_id', 'subtype_id', 'rarity_id', 'name', 'has_image', 'description', 'parsed_description', 'is_visible', 'hash',
+        'feature_subcategory_id',
     ];
 
     /**
@@ -31,6 +32,7 @@ class Feature extends Model {
      */
     public static $createRules = [
         'feature_category_id' => 'nullable',
+        'feature_subcategory_id' => 'nullable',
         'species_id'          => 'nullable',
         'subtype_id'          => 'nullable',
         'rarity_id'           => 'required|exists:rarities,id',
@@ -46,6 +48,7 @@ class Feature extends Model {
      */
     public static $updateRules = [
         'feature_category_id' => 'nullable',
+        'feature_subcategory_id' => 'nullable',
         'species_id'          => 'nullable',
         'subtype_id'          => 'nullable',
         'rarity_id'           => 'required|exists:rarities,id',
@@ -86,6 +89,14 @@ class Feature extends Model {
      */
     public function category() {
         return $this->belongsTo(FeatureCategory::class, 'feature_category_id');
+    }
+
+    /**
+     * Get the category the feature belongs to.
+     */
+    public function subcategory()
+    {
+        return $this->belongsTo('App\Models\Feature\FeatureSubcategory', 'feature_subcategory_id');
     }
 
     /**********************************************************************************************
@@ -197,6 +208,19 @@ class Feature extends Model {
         }
 
         return $query->where('is_visible', 1);
+    }
+
+    /**
+     * Scope a query to sort features in subcategory order.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  bool                                   $reverse
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeSortSubcategory($query)
+    {
+        $ids = FeatureSubcategory::orderBy('sort', 'DESC')->pluck('id')->toArray();
+        return count($ids) ? $query->orderByRaw(DB::raw('FIELD(feature_subcategory_id, '.implode(',', $ids).')')) : $query;
     }
 
     /**********************************************************************************************

@@ -22,6 +22,11 @@
                 <strong>Category:</strong> {!! $feature->category->displayName !!}
             </div>
         @endif
+        @if ($feature->feature_subcategory_id)
+            <div>
+                <strong>Subcategory:</strong> {!! $feature->subcategory->displayName !!}
+            </div>
+        @endif
         @if ($feature->species_id)
             <div>
                 <strong>Species:</strong> {!! $feature->species->displayName !!}
