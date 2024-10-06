@@ -22,6 +22,7 @@
                 <div class="shop-name mt-1">
                     <a href="{{ $shop->url }}" class="h5 mb-0">{{ $shop->name }}</a>
                 </div>
+                @include('widgets._limits', ['object' => $shop, 'compact' => true])
             </div>
         @endforeach
     </div>

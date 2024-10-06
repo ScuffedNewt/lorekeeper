@@ -29,4 +29,9 @@
             </tbody>
         </table>
     </div>
+    @if (count(getLimits($prompt)))
+        <div class="card-footer">
+            @include('widgets._limits', ['object' => $prompt])
+        </div>
+    @endif
 </div>
