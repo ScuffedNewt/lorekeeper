@@ -28,7 +28,7 @@
         <div class="card character-bio">
             <div class="card-header">
                 <ul class="nav nav-tabs card-header-tabs">
-                    @foreach ($groups as $group=>$gardens)
+                    @foreach ($groups as $group => $gardens)
                         @foreach ($gardens as $garden)
                             <li class="nav-item">
                                 <a class="nav-link {{ $loop->first && $group == 'unlocked' ? 'active' : '' }}" id="gardenTab-{{ $garden->id }}" data-toggle="tab" href="#{{ strtolower(str_replace(' ', '-', $garden->name)) }}" role="tab">
@@ -40,7 +40,7 @@
                 </ul>
             </div>
             <div class="card-body tab-content">
-                @foreach ($groups as $group=>$gardens)
+                @foreach ($groups as $group => $gardens)
                     @foreach ($gardens as $garden)
                         <div class="tab-pane fade {{ $loop->first && $group == 'unlocked' ? 'show active' : '' }}" id="{{ strtolower(str_replace(' ', '-', $garden->name)) }}">
                             @if ($is_garden_unlocked[$garden->id])
@@ -56,7 +56,7 @@
         </div>
     </div>
     <div id="gridView" class="{{ Settings::get('garden_view') ? (config('lorekeeper.garden.garden_view') == 'grid' ? '' : 'hide') : 'hide' }}">
-        @foreach ($groups as $group=>$gardens)
+        @foreach ($groups as $group => $gardens)
             <div class="card text-center h-100">
                 <div class="card-header">
                     <h3>{{ $group }}</h3>

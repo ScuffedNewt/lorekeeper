@@ -30,7 +30,7 @@
         'extra_options_values' => [
             'is_unlocked' => 'yes',
             'is_auto_unlocked' => 'no',
-        ]
+        ],
     ])
 @endsection
 @section('scripts')
