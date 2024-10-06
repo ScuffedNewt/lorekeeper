@@ -33,16 +33,16 @@ class LimitController extends Controller {
 
     /**
      * Unlocks limits for an object for a user.
-     * 
+     *
      * @param App\Services\LimitService $service
-     * @param int $id
-     * 
+     * @param int                       $id
+     *
      * @return \Illuminate\Http\RedirectResponse
      */
     public function postUnlockLimits(LimitService $service, $id) {
         $limit = Limit::find($id);
         if ($service->unlockLimits($limit->object, Auth::user())) {
-            flash(($limit->object->displayName ?? $limit->object->name) . ' unlocked successfully.')->success();
+            flash(($limit->object->displayName ?? $limit->object->name).' unlocked successfully.')->success();
         } else {
             foreach ($service->errors()->getMessages()['error'] as $error) {
                 flash($error)->error();

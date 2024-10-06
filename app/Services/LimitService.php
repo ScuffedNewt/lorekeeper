@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\Limit\DynamicLimit;
 use App\Models\Limit\Limit;
-use App\Services\LimitManager;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -86,17 +85,15 @@ class LimitService extends Service {
 
     /**
      * Unlocks the limits for an object.
-     * 
-     * @param mixed $object_model
-     * @param mixed $object_id
-     * 
+     *
+     * @param mixed $object
+     *
      * @return bool
      */
     public function unlockLimits($object) {
         DB::beginTransaction();
 
         try {
-
             $service = new LimitManager;
             if (!$service->checkLimits($object, true)) {
                 foreach ($service->errors()->getMessages()['error'] as $error) {
@@ -112,7 +109,6 @@ class LimitService extends Service {
 
         return $this->rollbackReturn(false);
     }
-    
 
     /**********************************************************************************************
 

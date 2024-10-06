@@ -28,6 +28,7 @@ class LimitManager extends Service {
      * checks all limits on an object.
      *
      * @param mixed $object
+     * @param mixed $is_unlock
      */
     public function checkLimits($object, $is_unlock = false) {
         try {
