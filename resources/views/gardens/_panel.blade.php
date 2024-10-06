@@ -3,76 +3,79 @@
         @endif
         <div class="d-flex justify-content-between bg-light" style="font-size: 100% !important; overflow-y: auto;" style="max-height:55em;">
             <div class="col card pb-2 border-0">
-                <h5 class="mt-1">
-                    
-                </h5>
-                @include('gardens._actions', ['type' => 'seed'])
+                @if ($garden->plots->count())
+                    @include('gardens._actions', ['type' => 'seed'])
+                @endif
                 <div class="row justify-content-center">
-                    @foreach ($garden->plots->chunk(3) as $chunk)
-                        @foreach ($chunk as $plot)
-                            <div class="card text-center m-1 col-lg-3 col-md-4 justify-content-center m-0 p-0" style="min-width: 14em; min-height: 14em; background-color: rgb(88, 54, 54); background-image: url({{ asset($plot->backgroundImage) }});">
-                                <!---- if user owns plot --->
-                                @if (Auth::user()->gardenPlots->contains('plot_id', $plot->id))
-                                    @php
-                                        $userPlot = Auth::user()
-                                            ->gardenPlots()
-                                            ->where('plot_id', $plot->id)
-                                            ->first();
-                                    @endphp
-                                    <!--- If plant is dead show dead thing --->
-                                    @if ($userPlot->is_dead)
-                                        <div class="btn btn-dark" style="width: 100%; height: 100%;">
-                                            {!! Form::open(['url' => 'garden/clear/' . $plot->id]) !!}
-                                            <img class="img-fluid my-auto mx-auto pt-2" src="{{ asset('images/garden/dead_seed.png') }}" style="width: 7em; height:7em;">
-                                            <div class="text-danger pt-2">Your plant has died.</div>
-                                            {!! Form::button('Click to Clear', ['class' => 'btn btn-danger', 'type' => 'submit']) !!}
-    
-                                            {!! Form::close() !!}
-                                        </div>
-                                    @else
-                                        @if ($userPlot->started_at)
-                                            <!----If there is a plant growing / animal placed, and it is not time to water / feed --->
-                                            @if ($userPlot->actionReady)
-                                                @include('garden._action', ['plot' => $plot, 'userPlot' => $userPlot])
-                                            @else
-                                                @include('garden._wait', ['plot' => $plot, 'userPlot' => $userPlot])
-                                            @endif
+                    @if ($garden->plots->count())
+                        @foreach ($garden->plots->chunk(3) as $chunk)
+                            @foreach ($chunk as $plot)
+                                <div class="card text-center m-1 col-lg-3 col-md-4 justify-content-center m-0 p-0" style="min-width: 14em; min-height: 14em; background-color: rgb(88, 54, 54); background-image: url({{ asset($plot->backgroundImage) }});">
+                                    <!---- if user owns plot --->
+                                    @if (Auth::user()->gardenPlots->contains('plot_id', $plot->id))
+                                        @php
+                                            $userPlot = Auth::user()
+                                                ->gardenPlots()
+                                                ->where('plot_id', $plot->id)
+                                                ->first();
+                                        @endphp
+                                        <!--- If plant is dead show dead thing --->
+                                        @if ($userPlot->is_dead)
+                                            <div class="btn btn-dark" style="width: 100%; height: 100%;">
+                                                {!! Form::open(['url' => 'garden/clear/' . $plot->id]) !!}
+                                                <img class="img-fluid my-auto mx-auto pt-2" src="{{ asset('images/garden/dead_seed.png') }}" style="width: 7em; height:7em;">
+                                                <div class="text-danger pt-2">Your plant has died.</div>
+                                                {!! Form::button('Click to Clear', ['class' => 'btn btn-danger', 'type' => 'submit']) !!}
+        
+                                                {!! Form::close() !!}
+                                            </div>
                                         @else
-                                            <!----If there is NO plant growing --->
-                                            <i class="fas fa-seedling text-white m-1"></i>
-                                            @if ($plot->plot_type == 'seed')
-                                                @if ($userPlot->modifiers != null)
-                                                    @php $mods = json_decode($userPlot->modifiers, true); @endphp
-                                                    @if ($mods['fertiliser'])
-                                                        <p class="text-white"><i class="fas fa-star"></i> Fertiliser Quality: {{ $mods['fertiliser']['quality'] }}</p>
-                                                    @endif
+                                            @if ($userPlot->started_at)
+                                                <!----If there is a plant growing / animal placed, and it is not time to water / feed --->
+                                                @if ($userPlot->actionReady)
+                                                    @include('garden._action', ['plot' => $plot, 'userPlot' => $userPlot])
+                                                @else
+                                                    @include('garden._wait', ['plot' => $plot, 'userPlot' => $userPlot])
                                                 @endif
-                                                <button type="button" class="seed-button-plant btn btn-success hide" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="plantSeed({{ $userPlot->id }}, 'seed')">
-                                                    Plant Seed!
-                                                </button>
-                                                <button type="button" class="mod-button-plant btn btn-warning text-white hide" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="addModifier({{ $userPlot->id }})">
-                                                    Apply Modifier!
-                                                </button>
                                             @else
-                                                <button type="button" class="{{ $plot->plot_type }}-button-plant btn btn-success hide" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button"
-                                                    onclick="placeAnimal({{ $userPlot->id }}, '{{ $userPlot->plot->plot_type }}')">
-                                                    Place Animal!
-                                                </button>
+                                                <!----If there is NO plant growing --->
+                                                <i class="fas fa-seedling text-white m-1"></i>
+                                                @if ($plot->plot_type == 'seed')
+                                                    @if ($userPlot->modifiers != null)
+                                                        @php $mods = json_decode($userPlot->modifiers, true); @endphp
+                                                        @if ($mods['fertiliser'])
+                                                            <p class="text-white"><i class="fas fa-star"></i> Fertiliser Quality: {{ $mods['fertiliser']['quality'] }}</p>
+                                                        @endif
+                                                    @endif
+                                                    <button type="button" class="seed-button-plant btn btn-success hide" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="plantSeed({{ $userPlot->id }}, 'seed')">
+                                                        Plant Seed!
+                                                    </button>
+                                                    <button type="button" class="mod-button-plant btn btn-warning text-white hide" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="addModifier({{ $userPlot->id }})">
+                                                        Apply Modifier!
+                                                    </button>
+                                                @else
+                                                    <button type="button" class="{{ $plot->plot_type }}-button-plant btn btn-success hide" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button"
+                                                        onclick="placeAnimal({{ $userPlot->id }}, '{{ $userPlot->plot->plot_type }}')">
+                                                        Place Animal!
+                                                    </button>
+                                                @endif
                                             @endif
                                         @endif
+                                        <!---- if not owned plot --->
+                                    @else
+                                        <div class="p-5 container text-white">
+                                            {{-- This plot {!! $plot->isFree ? 'is free!' : 'costs ' . $plot->currency->display($plot->plot_cost) !!} --}}
+                                            {!! Form::open(['url' => 'garden/plots/purchase/' . $plot->id]) !!}
+                                            {!! Form::submit('Purchase plot?', ['class' => 'btn btn-sm btn-primary mt-3']) !!}
+                                            {!! Form::close() !!}
+                                        </div>
                                     @endif
-                                    <!---- if not owned plot --->
-                                @else
-                                    <div class="p-5 container text-white">
-                                        {{-- This plot {!! $plot->isFree ? 'is free!' : 'costs ' . $plot->currency->display($plot->plot_cost) !!} --}}
-                                        {!! Form::open(['url' => 'garden/plots/purchase/' . $plot->id]) !!}
-                                        {!! Form::submit('Purchase plot?', ['class' => 'btn btn-sm btn-primary mt-3']) !!}
-                                        {!! Form::close() !!}
-                                    </div>
-                                @endif
-                            </div>
+                                </div>
+                            @endforeach
                         @endforeach
-                    @endforeach
+                    @else
+                        <div class="alert alert-info">No plots found.</div>
+                    @endif
                 </div>
             </div>
             <!-------------------- SEEDS | ANIMALS -------------------------->

@@ -23,10 +23,6 @@ class GardenController extends Controller {
         $is_garden_unlocked = Garden::visible(Auth::user() ?? null)->get()->mapWithKeys(function ($garden) {
             return [$garden->id => (new LimitManager)->checkLimits($garden)];
         });
-        // dd($is_garden_unlocked);
-
-        // dd((new LimitManager)->checkLimits(Garden::where('name', 'Coop')->first()));
-
 
         return view('gardens.index', [
             'gardens'            => Garden::visible(Auth::user() ?? null)->get(),
