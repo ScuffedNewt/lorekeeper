@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Garden;
 
+use Carbon\Carbon;
 use App\Models\Currency\Currency;
 use App\Models\Item\Item;
 use App\Models\User\UserGardenPlot;
 use App\Models\User\UserItem;
-use Carbon\Carbon;
-use DB;
-use Log;
+use App\Services\Service;
+use Illuminate\Support\Facades\DB;
 
 class PlotManager extends Service {
     /**

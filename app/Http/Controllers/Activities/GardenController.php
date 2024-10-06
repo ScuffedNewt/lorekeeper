@@ -1,55 +1,42 @@
 <?php
 
-namespace App\Http\Controllers\Games;
+namespace App\Http\Controllers\Activities;
 
-use App\Models\GardenPlot;
-use App\Models\Item\ItemTag;
-use App\Models\User\UserGardenPlot;
-use App\Services\PlotManager;
-use Auth;
 use Carbon\Carbon;
+use App\Models\Garden\Garden;
+use App\Models\Garden\GardenPlot;
+use App\Models\User\UserGardenPlot;
+use App\Services\Garden\PlotManager;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class GardenController extends Controller {
+
     /**
-     * return index.
+     * Shows the garden index page.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getIndex() {
-        //getting users seeds items
-        $seedId = ItemTag::where('tag', 'seed')->where('is_active', 1); // Removed get()
-        foreach ($seedId->get() as $seed) {
-            if (isset($seed->data['start_month']) && isset($seed->data['end_month']) &&
-            !Carbon::now()->between(
-                Carbon::create()->day(1)->month($seed->data['start_month']),
-                Carbon::create()->month($seed->data['end_month'])->endOfMonth()
-            )) {
-                // remove seed from array
-                $seedId->where('id', '!=', $seed->id);
-            }
+        return view('gardens.index', [
+            'gardens' => Garden::visible()->get(),
+        ]);
+    }
+
+    /**
+     * Shows the garden page.
+     *
+     * @param mixed $id
+     */
+    public function getGarden($id) {
+        $garden = Garden::visible()->find($id);
+        if (!$garden) {
+            abort(404);
         }
-        $checkSeeds = Auth::user()->items()->whereIn('item_id', $seedId->pluck('item_id'))->where('count', '>', 0)->get()->groupBy(['item_id', 'id']);
 
-        // coops & barns
-        $coopId = ItemTag::where('tag', 'coop')->where('is_active', 1);
-        $barnId = ItemTag::where('tag', 'barn')->where('is_active', 1);
-
-        $checkCoops = Auth::user()->items()->whereIn('item_id', $coopId->pluck('item_id'))->where('count', '>', 0)->get()->groupBy(['item_id', 'id']);
-        $checkBarns = Auth::user()->items()->whereIn('item_id', $barnId->pluck('item_id'))->where('count', '>', 0)->get()->groupBy(['item_id', 'id']);
-        //
-
-        //getting users modifer items
-        $ModifiersId = ItemTag::where('tag', 'fertiliser')->where('is_active', 1); // Removed get()
-        $checkModifiers = Auth::user()->items()->whereIn('item_id', $ModifiersId->pluck('item_id'))->where('count', '>', 0)->get()->groupBy(['item_id', 'id']);
-
-        $this->checkPlots();
-
-        return view('garden.index', [
-            'userSeeds'     => $checkSeeds,
-            'userCoops'     => $checkCoops,
-            'userBarns'     => $checkBarns,
-            'userModifiers' => $checkModifiers,
-            'plots'         => GardenPlot::all(),
+        return view('gardens.garden', [
+            'garden' => $garden,
         ]);
     }
 

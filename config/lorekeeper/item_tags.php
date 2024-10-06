@@ -36,16 +36,4 @@ return [
         'text_color'       => '#ffffff',
         'background_color' => '#6e493d',
     ],
-
-    'barn' => [
-        'name'             => 'Barn Animal',
-        'text_color'       => '#ffffff',
-        'background_color' => '#f6993f',
-    ],
-
-    'coop' => [
-        'name'             => 'Coop Animal',
-        'text_color'       => '#ffffff',
-        'background_color' => '#f6993f',
-    ],
 ];

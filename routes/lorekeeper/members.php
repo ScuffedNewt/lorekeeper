@@ -227,22 +227,9 @@ Route::group(['prefix' => 'comments', 'namespace' => 'Comments'], function () {
 });
 
 /**************************************************************************************************
-Garden
+    Gardens
 **************************************************************************************************/
-Route::group(['prefix' => 'garden', 'namespace' => 'Games'], function () {
+Route::group(['prefix' => 'gardens', 'namespace' => 'Activities'], function () {
     Route::get('/', 'GardenController@getIndex');
-    // destroy
-    Route::get('skull/{id}', 'GardenController@getSkull');
-    Route::post('destroy/{id}', 'GardenController@destroyCrop');
-    // plant / place / modify / water
-    Route::post('plant', 'GardenController@postPlantSeed');
-    Route::post('modify', 'GardenController@postAddModifier');
-    Route::post('action/{id}', 'GardenController@postAction');
-    Route::post('all/{type}', 'GardenController@postActionAll');
-    // died
-    Route::post('clear/{id}', 'GardenController@postClearPlot');
-    //  purchase / collect
-    Route::post('plots/purchase/{id}', 'GardenController@postPurchasePlot');
-    Route::post('claim/{id}', 'GardenController@postClaim');
-    Route::post('collect/{type}', 'GardenController@postCollectAll');
+    Route::get('{id}', 'GardenController@getGarden');
 });

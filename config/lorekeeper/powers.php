@@ -67,4 +67,8 @@ return [
         'name'        => 'Comment on Sales',
         'description' => 'Allow rank to comment on sales in preview mode.',
     ],
+    'manage_gardens' => [
+        'name'        => 'Manage Gardens',
+        'description' => 'Allow rank to create/edit garden plots.',
+    ],
 ];

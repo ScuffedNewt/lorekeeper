@@ -194,9 +194,14 @@ return [
                 'name' => 'Items',
                 'url'  => 'admin/data/items',
             ],
+        ],
+    ],
+    'Gardens'    => [
+        'power' => 'manage_gardens',
+        'links' => [
             [
-                'name' => 'Garden Plots',
-                'url'  => 'admin/data/plots',
+                'name' => 'Gardens',
+                'url'  => 'admin/gardens',
             ],
         ],
     ],

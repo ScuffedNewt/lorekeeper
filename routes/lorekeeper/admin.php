@@ -238,15 +238,6 @@ Route::group(['prefix' => 'data', 'namespace' => 'Data', 'middleware' => 'power:
     Route::post('prompts/create', 'PromptController@postCreateEditPrompt');
     Route::post('prompts/edit/{id?}', 'PromptController@postCreateEditPrompt');
     Route::post('prompts/delete/{id}', 'PromptController@postDeletePrompt');
-
-    // GARDEN PLOTS
-    Route::get('plots', 'PlotController@getIndex');
-    Route::get('plots/create', 'PlotController@getCreatePlot');
-    Route::get('plots/edit/{id}', 'PlotController@getEditPlot');
-    Route::post('plots/create', 'PlotController@postCreateEditPlot');
-    Route::post('plots/edit/{id}', 'PlotController@postCreateEditPlot');
-    Route::get('plots/delete/{id}', 'PlotController@getDeletePlot');
-    Route::post('plots/delete/{id}', 'PlotController@postDeletePlot');
 });
 
 // PAGES
@@ -451,3 +442,22 @@ Route::group(['prefix' => 'designs', 'middleware' => 'power:manage_characters'],
     Route::post('vote/{id}/{action}', 'DesignController@postVote')->where('action', 'approve|reject');
 });
 Route::get('{type}/{status}', 'DesignController@getDesignIndex')->where('type', 'myo-approvals|design-approvals')->where('status', 'pending|approved|rejected');
+
+// GARDENS
+Route::group(['prefix' => 'gardens', 'middleware' => 'power:manage_gardens'], function () {
+    Route::get('/', 'GardenController@getGardenIndex');
+    Route::get('create', 'GardenController@getCreateGarden');
+    Route::get('edit/{id}', 'GardenController@getEditGarden');
+    Route::get('delete/{id}', 'GardenController@getDeleteGarden');
+    Route::post('create', 'GardenController@postCreateEditGarden');
+    Route::post('edit/{id}', 'GardenController@postCreateEditGarden');
+    Route::post('delete/{id}', 'GardenController@postDeleteGarden');
+
+    // GARDEN PLOTS
+    Route::get('edit/{id}/plots/create', 'GardenController@getCreateGardenPlot');
+    Route::get('edit/{id}/plots/edit/{plot}', 'GardenController@getEditGardenPlot');
+    Route::get('edit/{id}/plots/delete/{plot}', 'GardenController@getDeleteGardenPlot');
+    Route::post('edit/{id}/plots/create', 'GardenController@postCreateEditGardenPlot');
+    Route::post('edit/{id}/plots/edit/{plot}', 'GardenController@postCreateEditGardenPlot');
+    Route::post('edit/{id}/plots/delete/{plot}', 'GardenController@postDeleteGardenPlot');
+});
