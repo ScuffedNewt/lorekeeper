@@ -41,8 +41,8 @@ class GardenPlot extends Model {
     **********************************************************************************************/
 
     /**
-     * Get's the plot's formatted name
-     * 
+     * Get's the plot's formatted name.
+     *
      * @return string
      */
     public function getNameAttribute() {

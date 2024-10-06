@@ -119,7 +119,7 @@ class LimitManager extends Service {
                     'object_model' => get_class($object),
                     'object_id'    => $object->id,
                 ]);
-            } else if (!$is_unlock && $limits->first()->is_unlocked && !$limits->first()->is_auto_unlocked) {
+            } elseif (!$is_unlock && $limits->first()->is_unlocked && !$limits->first()->is_auto_unlocked) {
                 throw new \Exception(($limits->first()->object->displayName ?? $limits->first()->object->name).' requires manual unlocking!');
             }
 

@@ -25,8 +25,9 @@ class GardenController extends Controller {
         $groups = Garden::visible(Auth::user() ?? null)->get()->groupBy(function ($garden) use ($is_garden_unlocked) {
             return $is_garden_unlocked[$garden->id] ? 'unlocked' : 'locked';
         })->reverse();
+
         return view('gardens.index', [
-            'groups'            => $groups,
+            'groups'             => $groups,
             'is_garden_unlocked' => $is_garden_unlocked,
         ]);
     }

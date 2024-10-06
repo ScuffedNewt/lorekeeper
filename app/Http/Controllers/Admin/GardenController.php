@@ -150,7 +150,8 @@ class GardenController extends Controller {
     /**
      * Gets the edit garden plot modal.
      *
-     * @param int $id
+     * @param mixed $gardenId
+     * @param mixed $plotId
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
@@ -197,7 +198,8 @@ class GardenController extends Controller {
     /**
      * Gets the garden plot deletion modal.
      *
-     * @param int $id
+     * @param mixed $gardenId
+     * @param mixed $plotId
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
