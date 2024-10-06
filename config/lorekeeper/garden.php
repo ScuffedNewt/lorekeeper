@@ -3,6 +3,6 @@
 return [
 
     // nav or grid
-    'garden_view' => 'nav'
+    'garden_view' => 'nav',
 
 ];

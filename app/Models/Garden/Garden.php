@@ -5,7 +5,6 @@ namespace App\Models\Garden;
 use App\Models\Model;
 
 class Garden extends Model {
-
     /**
      * The attributes that are mass assignable.
      *

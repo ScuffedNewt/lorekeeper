@@ -6,11 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Garden\Garden;
 use App\Models\Garden\GardenPlot;
 use App\Services\Garden\GardenService;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class GardenController extends Controller {
-
     /**********************************************************************************************
 
         GARDENS
@@ -107,7 +106,7 @@ class GardenController extends Controller {
      * Deletes a garden.
      *
      * @param App\Services\Garden\GardenService $service
-     * @param int                      $id
+     * @param int                               $id
      *
      * @return \Illuminate\Http\RedirectResponse
      */
@@ -131,7 +130,9 @@ class GardenController extends Controller {
 
     /**
      * Gets the create garden plot modal.
-     * 
+     *
+     * @param mixed $id
+     *
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getCreateGardenPlot($id) {
@@ -141,7 +142,7 @@ class GardenController extends Controller {
         }
 
         return view('admin.gardens._create_edit_garden_plot', [
-            'plot' => new GardenPlot,
+            'plot'   => new GardenPlot,
             'garden' => $garden,
         ]);
     }
@@ -160,7 +161,7 @@ class GardenController extends Controller {
         }
 
         return view('admin.gardens.edit_garden_plot', [
-            'plot' => $plot,
+            'plot'   => $plot,
             'garden' => $plot->garden,
         ]);
     }
@@ -169,7 +170,8 @@ class GardenController extends Controller {
      * Creates or edits a garden plot.
      *
      * @param App\Services\Garden\GardenService $service
-     * @param int                      $id
+     * @param int                               $id
+     * @param mixed                             $gardenId
      *
      * @return \Illuminate\Http\RedirectResponse
      */
@@ -214,7 +216,7 @@ class GardenController extends Controller {
      * Deletes a garden plot.
      *
      * @param App\Services\Garden\GardenService $service
-     * @param int                      $id
+     * @param int                               $id
      *
      * @return \Illuminate\Http\RedirectResponse
      */

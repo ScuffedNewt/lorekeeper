@@ -2,18 +2,17 @@
 
 namespace App\Http\Controllers\Activities;
 
-use Carbon\Carbon;
 use App\Models\Garden\Garden;
 use App\Models\Garden\GardenPlot;
 use App\Models\User\UserGardenPlot;
-use App\Services\LimitManager;
 use App\Services\Garden\PlotManager;
+use App\Services\LimitManager;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 
 class GardenController extends Controller {
-
     /**
      * Shows the garden index page.
      *
@@ -33,7 +32,7 @@ class GardenController extends Controller {
     /**
      * Shows the garden page.
      *
-     * @param mixed $id
+     * @param mixed $name
      */
     public function getGarden($name) {
         $garden = Garden::visible()->where('name', str_replace('-', ' ', $name))->first();

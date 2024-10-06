@@ -29,7 +29,7 @@ class GardenService extends Service {
      * @param array                 $data
      * @param \App\Models\User\User $user
      *
-     * @return \App\Models\Garden\Garden|bool
+     * @return bool|Garden
      */
     public function createGarden($data, $user) {
         DB::beginTransaction();
@@ -98,11 +98,11 @@ class GardenService extends Service {
     /**
      * Updates an garden.
      *
-     * @param \App\Models\Garden\Garden $garden
+     * @param Garden                $garden
      * @param array                 $data
      * @param \App\Models\User\User $user
      *
-     * @return \App\Models\Garden\Garden|bool
+     * @return bool|Garden
      */
     public function updateGarden($garden, $data, $user) {
         DB::beginTransaction();
@@ -160,8 +160,8 @@ class GardenService extends Service {
     /**
      * Deletes an garden.
      *
-     * @param \App\Models\Garden\Garden $garden
-     * @param mixed                 $user
+     * @param Garden $garden
+     * @param mixed  $user
      *
      * @return bool
      */
@@ -198,11 +198,41 @@ class GardenService extends Service {
         return $this->rollbackReturn(false);
     }
 
+    /**********************************************************************************************
+
+        GARDEN PLOTS
+
+    **********************************************************************************************/
+
+    /**
+     * Creates a new plot.
+     *
+     * @param Garden $garden
+     *
+     * @return bool|GardenPlot
+     */
+    public function createGardenPlot($garden) {
+        DB::beginTransaction();
+
+        try {
+            // Plots don't have any data on creation, so we just need to associate it with the garden
+            $plot = GardenPlot::create([
+                'garden_id' => $garden->id,
+            ]);
+
+            return $this->commitReturn($plot);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
+    }
+
     /**
      * Processes user input for creating/updating an garden.
      *
-     * @param array                 $data
-     * @param \App\Models\Garden\Garden $garden
+     * @param array  $data
+     * @param Garden $garden
      *
      * @return array
      */
@@ -239,35 +269,5 @@ class GardenService extends Service {
         }
 
         return $data;
-    }
-
-    /**********************************************************************************************
-
-        GARDEN PLOTS
-
-    **********************************************************************************************/
-
-    /**
-     * Creates a new plot.
-     *
-     * @param \App\Models\Garden\Garden $garden
-     *
-     * @return \App\Models\Garden\GardenPlot|bool
-     */
-    public function createGardenPlot($garden) {
-        DB::beginTransaction();
-
-        try {
-            // Plots don't have any data on creation, so we just need to associate it with the garden
-            $plot = GardenPlot::create([
-                'garden_id' => $garden->id,
-            ]);
-
-            return $this->commitReturn($plot);
-        } catch (\Exception $e) {
-            $this->setError('error', $e->getMessage());
-        }
-
-        return $this->rollbackReturn(false);
     }
 }
