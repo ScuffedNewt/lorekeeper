@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Limit\DynamicLimit;
 use App\Models\Limit\Limit;
+use App\Services\LimitManager;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -54,13 +55,14 @@ class LimitService extends Service {
             if (isset($data['limit_type'])) {
                 foreach ($data['limit_type'] as $key => $type) {
                     $limit = new Limit([
-                        'object_model' => $object_model,
-                        'object_id'    => $object_id,
-                        'limit_type'   => $data['limit_type'][$key],
-                        'limit_id'     => $data['limit_id'][$key],
-                        'quantity'     => $data['quantity'][$key],
-                        'debit'        => $data['debit'][$key] == 'no' ? 0 : 1,
-                        'is_unlocked'  => $data['is_unlocked'] == 'no' ? 0 : 1,
+                        'object_model'     => $object_model,
+                        'object_id'        => $object_id,
+                        'limit_type'       => $data['limit_type'][$key],
+                        'limit_id'         => $data['limit_id'][$key],
+                        'quantity'         => $data['quantity'][$key],
+                        'debit'            => $data['debit'][$key] == 'no' ? 0 : 1,
+                        'is_unlocked'      => $data['is_unlocked'] == 'no' ? 0 : 1,
+                        'is_auto_unlocked' => $data['is_auto_unlocked'] == 'no' ? 0 : 1,
                     ]);
 
                     if (!$limit->save()) {
@@ -81,6 +83,36 @@ class LimitService extends Service {
 
         return $this->rollbackReturn(false);
     }
+
+    /**
+     * Unlocks the limits for an object.
+     * 
+     * @param mixed $object_model
+     * @param mixed $object_id
+     * 
+     * @return bool
+     */
+    public function unlockLimits($object) {
+        DB::beginTransaction();
+
+        try {
+
+            $service = new LimitManager;
+            if (!$service->checkLimits($object, true)) {
+                foreach ($service->errors()->getMessages()['error'] as $error) {
+                    flash($error)->error();
+                }
+                throw new \Exception('Failed to unlock limits.');
+            }
+
+            return $this->commitReturn(true);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
+    }
+    
 
     /**********************************************************************************************
 

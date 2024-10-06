@@ -29,7 +29,7 @@ class LimitManager extends Service {
      *
      * @param mixed $object
      */
-    public function checkLimits($object) {
+    public function checkLimits($object, $is_unlock = false) {
         try {
             $user = Auth::user();
 
@@ -59,6 +59,11 @@ class LimitManager extends Service {
                         }
 
                         if ($limit->debit) {
+                            // if the limit is not unlocked, check if it is auto unlocked
+                            if (!$is_unlock && $limits->first()->is_unlocked && !$limits->first()->is_auto_unlocked) {
+                                throw new \Exception(($limits->first()->object->displayName ?? $limits->first()->object->name).' requires manual unlocking!');
+                            }
+
                             $stacks = UserItem::where('user_id', $user->id)->where('item_id', $limit->limit_id)->orderBy('count', 'asc')->get(); // asc because pop() removes from the end
 
                             $count = $limit->quantity;
@@ -76,6 +81,11 @@ class LimitManager extends Service {
                         }
 
                         if ($limit->debit) {
+                            // if the limit is not unlocked, check if it is auto unlocked
+                            if (!$is_unlock && $limits->first()->is_unlocked && !$limits->first()->is_auto_unlocked) {
+                                throw new \Exception(($limits->first()->object->displayName ?? $limits->first()->object->name).' requires manual unlocking!');
+                            }
+
                             $service = new CurrencyManager;
                             if (!$service->debitCurrency($user, null, 'Limit Requirements', 'Used in '.$limit->object->displayName.' limit requirements.', $limit->limit, $limit->quantity)) {
                                 foreach ($service->errors()->getMessages()['error'] as $error) {
