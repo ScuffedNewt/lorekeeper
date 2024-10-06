@@ -54,8 +54,8 @@ class LimitManager extends Service {
                         }
                         break;
                     case 'item':
-                        if (!$user->items()->where('item_id', $limit->limit_id)->sum('count') >= $limit->quantity) {
-                            throw new \Exception('You do not have enough of the item '.$limit->object->name.' to complete this action.');
+                        if (!($user->items()->where('item_id', $limit->limit_id)->sum('count') >= $limit->quantity)) {
+                            throw new \Exception('You do not have enough of the item '.$limit->limit->displayName.' to complete this action.');
                         }
 
                         if ($limit->debit) {
@@ -97,7 +97,7 @@ class LimitManager extends Service {
                 $inventoryManager = new InventoryManager;
                 $type = 'Limit Requirements';
                 $data = [
-                    'data' => 'Used in '.$limit->object->displayName ?? $limit->object->name.'\'s limit requirements.',
+                    'data' => 'Used in '.($limit->object->displayName ?? $limit->object->name).'\'s limit requirements.',
                 ];
 
                 foreach ($plucked_stacks as $id=>$quantity) {
