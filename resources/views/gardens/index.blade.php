@@ -16,28 +16,73 @@
         </div>
     </noscript>
 
-    <div class="row">
-        @foreach ($gardens as $garden)
-            <div class="col-md-6">
-                <div class="card p-3 text-center h-100">
-                    @if ($garden->has_image)
-                        <a href="{{ $garden->imageUrl }}" data-lightbox="entry" data-title="{{ $garden->name }}">
-                            <img src="{{ $garden->imageUrl }}" class="img-fluid">
-                        </a>
-                    @else
-                        <div class="alert alert-info">No image set.</div>
-                    @endif
-                    <h2>{{ $garden->name }}</h2>
-                    <a href="{{ url('gardens/' . str_replace(' ', '-', strtolower($garden->name))) }}" class="btn btn-primary">Enter {{ $garden->name }}</a>
-                </div>
+    @if (Settings::get('garden_view'))
+        <div class="text-right mb-3">
+            <div class="btn-group">
+                <button type="button" class="btn btn-secondary active nav-view-button" data-toggle="tooltip" title="Nav View" alt="Nav View"><i class="fas fa-bars"></i></button>
+                <button type="button" class="btn btn-secondary grid-view-button" data-toggle="tooltip" title="Grid View" alt="Grid View"><i class="fas fa-th"></i></button>
             </div>
-        @endforeach
+        </div>
+    @endif
+
+    <div id="navView" class="{{ Settings::get('garden_view') ? 'hide' : (config('lorekeeper.garden.garden_view') == 'nav' ? '' : 'hide') }}">
+        <div class="card character-bio">
+            <div class="card-header">
+                <ul class="nav nav-tabs card-header-tabs">
+                    @foreach ($gardens as $garden)
+                        <li class="nav-item">
+                            <a class="nav-link {{ $loop->first ? 'active' : ''}}" id="gardenTab-{{ $garden->id }}" data-toggle="tab" href="#{{ strtolower(str_replace(' ', '-', $garden->name)) }}" role="tab">
+                                {!! $is_garden_unlocked[$garden->id] ? '' : '<i class="fas fa-lock"></i> ' !!}{{ $garden->name }}
+                            </a>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+            <div class="card-body tab-content">
+                @foreach ($gardens as $garden)
+                    <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}" id="{{ strtolower(str_replace(' ', '-', $garden->name)) }}">
+                        @if ($is_garden_unlocked[$garden->id])
+                            @include('gardens._panel', ['garden' => $garden])
+                        @else
+                            <div class="alert alert-danger">This garden is locked.</div>
+                            @include('widgets._limits', ['object' => $garden])
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+    <div id="gridView" class="{{ Settings::get('garden_view') ? (config('lorekeeper.garden.garden_view') == 'grid' ? '' : 'hide') : 'hide' }}">
+        <div class="row">
+            @foreach ($gardens as $garden)
+                <div class="col-md-6 mb-3">
+                    <div class="card text-center h-100">
+                        <div class="card-body">
+                            @if ($garden->has_image)
+                                <a href="{{ $garden->imageUrl }}" data-lightbox="entry" data-title="{{ $garden->name }}">
+                                    <img src="{{ $garden->imageUrl }}" class="img-fluid">
+                                </a>
+                            @else
+                                <div class="alert alert-info">No image set.</div>
+                            @endif
+                            <h2>{{ $garden->name }}</h2>
+                            <a href="{{ url('gardens/' . str_replace(' ', '-', strtolower($garden->name))) }}" class="btn btn-primary">Enter {{ $garden->name }}</a>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
     </div>
 
 @endsection
 @section('scripts')
+    @parent
+    @if (Settings::get('garden_view'))
+        @include('gardens._view_js')
+    @endif
     <script>
         $(document).ready(function() {
+            $('.userselectize').selectize();
             // vvv
             if (location.hash) {
                 $("a[href='" + location.hash + "']").tab("show");
@@ -51,19 +96,5 @@
             var anchor = location.hash || $("a[data-toggle='tab']").first().attr("href");
             $("a[href='" + anchor + "']").tab("show");
         });
-
-        function getServerTime() {
-            // ajax get call to get the time
-            // check if window is focused otherwise don't update
-            if (!document.hasFocus()) return;
-            $.ajax({
-                url: '{{ url('time') }}',
-                type: 'GET',
-                success: function(data) {
-                    // update the time
-                    now = new Date(data);
-                }
-            });
-        }
     </script>
 @endsection

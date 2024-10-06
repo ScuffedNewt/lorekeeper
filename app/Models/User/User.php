@@ -193,7 +193,7 @@ class User extends Authenticatable implements MustVerifyEmail {
      * Get all of the user's garden plots.
      */
     public function gardenPlots() {
-        return $this->hasMany('App\Models\User\UserGardenPlot');
+        return $this->hasMany(UserGardenPlot::class);
     }
 
     /**

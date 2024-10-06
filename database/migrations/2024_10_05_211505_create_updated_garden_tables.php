@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::dropIfExists('garden_plots');
         Schema::dropIfExists('user_garden_plots');
-        if (Schema::hasColumn('user_items', 'garden_count')) {
+        if (!Schema::hasColumn('user_items', 'garden_count')) {
             Schema::table('user_items', function (Blueprint $table) {
-                $table->dropColumn('garden_count');
+                $table->integer('garden_count')->default(0);
             });
         }
 
@@ -24,8 +24,9 @@ return new class extends Migration
             $table->string('name');
             $table->text('description')->nullable()->default(null);
 
-            $table->boolean('can_perish')->default(0); // Can the garden plot contents perish?
             $table->boolean('is_active')->default(1);
+            $table->boolean('can_perish')->default(0); // Can the garden plot contents perish?
+            $table->boolean('can_use_modifiers')->default(0);
 
             $table->boolean('has_image')->default(0);
             $table->boolean('has_background_image')->default(0);

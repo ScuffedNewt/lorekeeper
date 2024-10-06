@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use App\Models\Garden\Garden;
 use App\Models\Garden\GardenPlot;
 use App\Models\User\UserGardenPlot;
+use App\Services\LimitManager;
 use App\Services\Garden\PlotManager;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -19,8 +20,17 @@ class GardenController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getIndex() {
+        $is_garden_unlocked = Garden::visible(Auth::user() ?? null)->get()->mapWithKeys(function ($garden) {
+            return [$garden->id => (new LimitManager)->checkLimits($garden)];
+        });
+        // dd($is_garden_unlocked);
+
+        // dd((new LimitManager)->checkLimits(Garden::where('name', 'Coop')->first()));
+
+
         return view('gardens.index', [
-            'gardens' => Garden::visible()->get(),
+            'gardens'            => Garden::visible(Auth::user() ?? null)->get(),
+            'is_garden_unlocked' => $is_garden_unlocked,
         ]);
     }
 

@@ -54,7 +54,7 @@ class LimitManager extends Service {
                         }
                         break;
                     case 'item':
-                        if (!$user->items()->where('item_id', $limit->limit_id)->sum('count') >= $limit->quantity) {
+                        if (!($user->items()->where('item_id', $limit->limit_id)->sum('count') >= $limit->quantity)) {
                             throw new \Exception('You do not have enough of the item '.$limit->object->name.' to complete this action.');
                         }
 

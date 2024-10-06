@@ -87,6 +87,8 @@ class AddSiteSettings extends Command {
 
         $this->addSiteSetting('can_transfer_items_directly', 1, 'Whether or not users can directly transfer items to other users without trading. 0: Users cannot directly transfer items. 1: Direct item transfers are allowed.');
 
+        $this->addSiteSetting('garden_view', 1, '0: Based on config (default nav), 1: Users can choose.');
+
         $this->line("\nSite settings up to date!");
     }
 

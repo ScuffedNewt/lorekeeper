@@ -12,7 +12,7 @@ class Garden extends Model {
      * @var array
      */
     protected $fillable = [
-        'name', 'description', 'has_image', 'has_background_image', 'has_plot_image', 'can_perish', 'is_active',
+        'name', 'description', 'has_image', 'has_background_image', 'has_plot_image', 'is_active', 'can_perish', 'can_use_modifiers',
     ];
 
     /**
@@ -21,13 +21,6 @@ class Garden extends Model {
      * @var string
      */
     protected $table = 'gardens';
-
-    /**
-     * Whether the model contains timestamps to be saved and updated.
-     *
-     * @var string
-     */
-    public $timestamps = false;
 
     /**********************************************************************************************
 
