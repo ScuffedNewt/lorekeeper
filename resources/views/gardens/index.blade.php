@@ -28,49 +28,58 @@
         <div class="card character-bio">
             <div class="card-header">
                 <ul class="nav nav-tabs card-header-tabs">
-                    @foreach ($gardens as $garden)
-                        <li class="nav-item">
-                            <a class="nav-link {{ $loop->first ? 'active' : '' }}" id="gardenTab-{{ $garden->id }}" data-toggle="tab" href="#{{ strtolower(str_replace(' ', '-', $garden->name)) }}" role="tab">
-                                {!! $is_garden_unlocked[$garden->id] ? '' : '<i class="fas fa-lock"></i> ' !!}{{ $garden->name }}
-                            </a>
-                        </li>
+                    @foreach ($groups as $group=>$gardens)
+                        @foreach ($gardens as $garden)
+                            <li class="nav-item">
+                                <a class="nav-link {{ $loop->first && $group == 'unlocked' ? 'active' : '' }}" id="gardenTab-{{ $garden->id }}" data-toggle="tab" href="#{{ strtolower(str_replace(' ', '-', $garden->name)) }}" role="tab">
+                                    {!! $is_garden_unlocked[$garden->id] ? '' : '<i class="fas fa-lock"></i> ' !!}{{ $garden->name }}
+                                </a>
+                            </li>
+                        @endforeach
                     @endforeach
                 </ul>
             </div>
             <div class="card-body tab-content">
-                @foreach ($gardens as $garden)
-                    <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}" id="{{ strtolower(str_replace(' ', '-', $garden->name)) }}">
-                        @if ($is_garden_unlocked[$garden->id])
-                            @include('gardens._panel', ['garden' => $garden])
-                        @else
-                            <div class="alert alert-danger">This garden is locked.</div>
-                            @include('widgets._limits', ['object' => $garden])
-                        @endif
-                    </div>
+                @foreach ($groups as $group=>$gardens)
+                    @foreach ($gardens as $garden)
+                        <div class="tab-pane fade {{ $loop->first && $group == 'unlocked' ? 'show active' : '' }}" id="{{ strtolower(str_replace(' ', '-', $garden->name)) }}">
+                            @if ($is_garden_unlocked[$garden->id])
+                                @include('gardens._panel', ['garden' => $garden])
+                            @else
+                                <div class="alert alert-danger">This garden is locked.</div>
+                                @include('widgets._limits', ['object' => $garden])
+                            @endif
+                        </div>
+                    @endforeach
                 @endforeach
             </div>
         </div>
     </div>
     <div id="gridView" class="{{ Settings::get('garden_view') ? (config('lorekeeper.garden.garden_view') == 'grid' ? '' : 'hide') : 'hide' }}">
-        <div class="row">
-            @foreach ($gardens as $garden)
-                <div class="col-md-6 mb-3">
-                    <div class="card text-center h-100">
-                        <div class="card-body">
-                            @if ($garden->has_image)
-                                <a href="{{ $garden->imageUrl }}" data-lightbox="entry" data-title="{{ $garden->name }}">
-                                    <img src="{{ $garden->imageUrl }}" class="img-fluid">
-                                </a>
-                            @else
-                                <div class="alert alert-info">No image set.</div>
-                            @endif
-                            <h2>{{ $garden->name }}</h2>
-                            <a href="{{ url('gardens/' . str_replace(' ', '-', strtolower($garden->name))) }}" class="btn btn-primary">Enter {{ $garden->name }}</a>
-                        </div>
+        @foreach ($groups as $group=>$gardens)
+            <div class="card text-center h-100">
+                <div class="card-header">
+                    <h3>{{ $group }}</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        @foreach ($gardens as $garden)
+                            <div class="col-md-6 mb-3">
+                                @if ($garden->has_image)
+                                    <a href="{{ $garden->imageUrl }}" data-lightbox="entry" data-title="{{ $garden->name }}">
+                                        <img src="{{ $garden->imageUrl }}" class="img-fluid">
+                                    </a>
+                                @else
+                                    <div class="alert alert-info">No image set.</div>
+                                @endif
+                                <h2>{{ $garden->name }}</h2>
+                                <a href="{{ url('gardens/' . str_replace(' ', '-', strtolower($garden->name))) }}" class="btn btn-primary">Enter {{ $garden->name }}</a>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
-            @endforeach
-        </div>
+            </div>
+        @endforeach
     </div>
 @endsection
 @section('scripts')

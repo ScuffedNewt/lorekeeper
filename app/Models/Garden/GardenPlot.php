@@ -39,4 +39,13 @@ class GardenPlot extends Model {
         ATTRIBUTES
 
     **********************************************************************************************/
+
+    /**
+     * Get's the plot's formatted name
+     * 
+     * @return string
+     */
+    public function getNameAttribute() {
+        return $this->garden->name.' - Plot '.$this->id;
+    }
 }

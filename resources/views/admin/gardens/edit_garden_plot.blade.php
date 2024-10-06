@@ -21,7 +21,17 @@
 
     {{-- {!! Form::open(['url' => 'admin/gardens/edit/' . $garden->id . '/plots/edit/' . $plot->id, 'files' => true]) !!} --}}
 
-    @include('widgets._add_limits', ['object' => $plot])
+    <div class="alert alert-info">
+        <b>Note</b>: plot unlocks are handled differently than other limits. The limits are not automatically unlocked.
+    </div>
+    @include('widgets._add_limits', [
+        'object' => $plot,
+        'extra_options' => false,
+        'extra_options_values' => [
+            'is_unlocked' => 'yes',
+            'is_auto_unlocked' => 'no',
+        ]
+    ])
 @endsection
 @section('scripts')
     @parent

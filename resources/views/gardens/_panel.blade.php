@@ -2,7 +2,7 @@
         @if ($garden->can_use_modifiers)
         @endif
         <div class="d-flex justify-content-between bg-light" style="font-size: 100% !important; overflow-y: auto;" style="max-height:55em;">
-            <div class="col card pb-2 border-0">
+            <div class="col card border-0">
                 @if ($garden->plots->count())
                     @include('gardens._actions', ['type' => 'seed'])
                 @endif
@@ -62,7 +62,6 @@
                                                 @endif
                                             @endif
                                         @endif
-                                        <!---- if not owned plot --->
                                     @else
                                         <div class="p-5 container text-white">
                                             {{-- This plot {!! $plot->isFree ? 'is free!' : 'costs ' . $plot->currency->display($plot->plot_cost) !!} --}}
@@ -75,7 +74,7 @@
                             @endforeach
                         @endforeach
                     @else
-                        <div class="alert alert-info">No plots found.</div>
+                        <div class="alert alert-info mb-0">No plots found.</div>
                     @endif
                 </div>
             </div>

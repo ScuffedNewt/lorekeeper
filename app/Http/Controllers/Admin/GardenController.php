@@ -141,7 +141,7 @@ class GardenController extends Controller {
             abort(404);
         }
 
-        return view('admin.gardens._create_edit_garden_plot', [
+        return view('admin.gardens._create_garden_plot', [
             'plot'   => new GardenPlot,
             'garden' => $garden,
         ]);
@@ -154,8 +154,8 @@ class GardenController extends Controller {
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function getEditGardenPlot($id) {
-        $plot = GardenPlot::find($id);
+    public function getEditGardenPlot($gardenId, $plotId) {
+        $plot = GardenPlot::find($plotId);
         if (!$plot) {
             abort(404);
         }
@@ -201,8 +201,8 @@ class GardenController extends Controller {
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function getDeleteGardenPlot($id) {
-        $plot = GardenPlot::find($id);
+    public function getDeleteGardenPlot($gardenId, $plotId) {
+        $plot = GardenPlot::find($plotId);
         if (!$plot) {
             abort(404);
         }

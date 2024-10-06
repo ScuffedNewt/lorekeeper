@@ -22,9 +22,11 @@ class GardenController extends Controller {
         $is_garden_unlocked = Garden::visible(Auth::user() ?? null)->get()->mapWithKeys(function ($garden) {
             return [$garden->id => (new LimitManager)->checkLimits($garden)];
         });
-
+        $groups = Garden::visible(Auth::user() ?? null)->get()->groupBy(function ($garden) use ($is_garden_unlocked) {
+            return $is_garden_unlocked[$garden->id] ? 'unlocked' : 'locked';
+        })->reverse();
         return view('gardens.index', [
-            'gardens'            => Garden::visible(Auth::user() ?? null)->get(),
+            'groups'            => $groups,
             'is_garden_unlocked' => $is_garden_unlocked,
         ]);
     }
