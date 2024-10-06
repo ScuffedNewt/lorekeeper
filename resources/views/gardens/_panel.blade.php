@@ -10,7 +10,8 @@
                     @if ($garden->plots->count())
                         @foreach ($garden->plots->chunk(3) as $chunk)
                             @foreach ($chunk as $plot)
-                                <div class="card text-center m-1 col-lg-3 col-md-4 justify-content-center m-0 p-0" style="min-width: 14em; min-height: 14em; background-color: rgb(88, 54, 54); background-image: url({{ asset($plot->backgroundImage) }});">
+                                <div class="card text-center m-1 col-lg-3 col-md-4 justify-content-center m-0 p-0"
+                                    style="min-width: 14em; min-height: 14em; background-color: rgb(88, 54, 54); background-image: url({{ asset($plot->backgroundImage) }});">
                                     <!---- if user owns plot --->
                                     @if (Auth::user()->gardenPlots->contains('plot_id', $plot->id))
                                         @php
@@ -26,7 +27,7 @@
                                                 <img class="img-fluid my-auto mx-auto pt-2" src="{{ asset('images/garden/dead_seed.png') }}" style="width: 7em; height:7em;">
                                                 <div class="text-danger pt-2">Your plant has died.</div>
                                                 {!! Form::button('Click to Clear', ['class' => 'btn btn-danger', 'type' => 'submit']) !!}
-        
+
                                                 {!! Form::close() !!}
                                             </div>
                                         @else

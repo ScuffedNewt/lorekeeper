@@ -44,8 +44,8 @@
                 </div>
                 <div class="col-md form-group">
                     @if ($garden->has_background_image)
-                        <a href="{{$garden->backgroundImageUrl}}"  data-lightbox="entry" data-title="{{ $garden->name }}">
-                            <img src="{{$garden->backgroundImageUrl}}" class="mw-100 float-left mr-3">
+                        <a href="{{ $garden->backgroundImageUrl }}" data-lightbox="entry" data-title="{{ $garden->name }}">
+                            <img src="{{ $garden->backgroundImageUrl }}" class="mw-100 float-left mr-3">
                         </a>
                     @endif
                     {!! Form::label('Background Image (Optional)') !!} {!! add_help('This image will serve as the background to the garden which plots will be rendered on to.') !!}
@@ -59,8 +59,8 @@
                 </div>
                 <div class="col-md form-group">
                     @if ($garden->has_plot_image)
-                        <a href="{{$garden->plotImageUrl}}"  data-lightbox="entry" data-title="{{ $garden->name }}">
-                            <img src="{{$garden->plotImageUrl}}" class="mw-100 float-left mr-3">
+                        <a href="{{ $garden->plotImageUrl }}" data-lightbox="entry" data-title="{{ $garden->name }}">
+                            <img src="{{ $garden->plotImageUrl }}" class="mw-100 float-left mr-3">
                         </a>
                     @endif
                     {!! Form::label('Default Plot Image (Optional)') !!} {!! add_help('This image is for plots that are not yet ready for planting.') !!}
@@ -75,7 +75,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="card mb-3">
         <div class="card-header h3">
             {!! Form::label('Description (Optional)') !!}
@@ -167,7 +167,7 @@
 
             @if ($garden->id)
                 $('.create-plot').on('click', function() {
-                    loadModal("{{ url('admin/gardens/edit/'.$garden->id.'/plots/create') }}", 'Create Plot');
+                    loadModal("{{ url('admin/gardens/edit/' . $garden->id . '/plots/create') }}", 'Create Plot');
                 });
             @endif
         });

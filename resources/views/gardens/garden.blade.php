@@ -5,7 +5,6 @@
 @endsection
 
 @section('content')
-
     {!! breadcrumbs(['Home' => '/', 'Gardens' => 'gardens', $garden->name => 'gardens/' . $garden->id]) !!}
 
     <h1>{{ $garden->name }}</h1>
@@ -16,5 +15,4 @@
     <div>
         {!! $garden->description !!}
     </div>
-
 @endsection

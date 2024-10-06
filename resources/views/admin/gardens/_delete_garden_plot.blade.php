@@ -1,5 +1,5 @@
 @if ($plot)
-    {!! Form::open(['url' => 'admin/gardens/edit/'.$plot->garden->id.'/plots/delete/'.$plot->id]) !!}
+    {!! Form::open(['url' => 'admin/gardens/edit/' . $plot->garden->id . '/plots/delete/' . $plot->id]) !!}
 
     <p>
         You are about to delete this plot belonging to garden <strong>{{ $plot->garden->name }}</strong>. This is not reversible.

@@ -5,7 +5,6 @@
 @endsection
 
 @section('content')
-
     {!! breadcrumbs(['Home' => '/', 'Gardens' => 'gardens']) !!}
 
     <h1>Gardens</h1>
@@ -31,7 +30,7 @@
                 <ul class="nav nav-tabs card-header-tabs">
                     @foreach ($gardens as $garden)
                         <li class="nav-item">
-                            <a class="nav-link {{ $loop->first ? 'active' : ''}}" id="gardenTab-{{ $garden->id }}" data-toggle="tab" href="#{{ strtolower(str_replace(' ', '-', $garden->name)) }}" role="tab">
+                            <a class="nav-link {{ $loop->first ? 'active' : '' }}" id="gardenTab-{{ $garden->id }}" data-toggle="tab" href="#{{ strtolower(str_replace(' ', '-', $garden->name)) }}" role="tab">
                                 {!! $is_garden_unlocked[$garden->id] ? '' : '<i class="fas fa-lock"></i> ' !!}{{ $garden->name }}
                             </a>
                         </li>
@@ -73,7 +72,6 @@
             @endforeach
         </div>
     </div>
-
 @endsection
 @section('scripts')
     @parent
