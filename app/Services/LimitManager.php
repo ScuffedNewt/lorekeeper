@@ -45,6 +45,11 @@ class LimitManager extends Service {
                 }
             }
 
+            // if the limit is not unlocked, check if it is auto unlocked
+            if (!$is_unlock && $limits->first()->is_unlocked && !$limits->first()->is_auto_unlocked) {
+                throw new \Exception(($limits->first()->object->displayName ?? $limits->first()->object->name).' requires manual unlocking!');
+            }
+
             $plucked_stacks = [];
             foreach ($limits as $limit) {
                 switch ($limit->limit_type) {
@@ -60,11 +65,6 @@ class LimitManager extends Service {
                         }
 
                         if ($limit->debit) {
-                            // if the limit is not unlocked, check if it is auto unlocked
-                            if (!$is_unlock && $limits->first()->is_unlocked && !$limits->first()->is_auto_unlocked) {
-                                throw new \Exception(($limits->first()->object->displayName ?? $limits->first()->object->name).' requires manual unlocking!');
-                            }
-
                             $stacks = UserItem::where('user_id', $user->id)->where('item_id', $limit->limit_id)->orderBy('count', 'asc')->get(); // asc because pop() removes from the end
 
                             $count = $limit->quantity;
@@ -82,11 +82,6 @@ class LimitManager extends Service {
                         }
 
                         if ($limit->debit) {
-                            // if the limit is not unlocked, check if it is auto unlocked
-                            if (!$is_unlock && $limits->first()->is_unlocked && !$limits->first()->is_auto_unlocked) {
-                                throw new \Exception(($limits->first()->object->displayName ?? $limits->first()->object->name).' requires manual unlocking!');
-                            }
-
                             $service = new CurrencyManager;
                             if (!$service->debitCurrency($user, null, 'Limit Requirements', 'Used in '.$limit->object->displayName.' limit requirements.', $limit->limit, $limit->quantity)) {
                                 foreach ($service->errors()->getMessages()['error'] as $error) {
@@ -119,11 +114,13 @@ class LimitManager extends Service {
                 }
             }
 
-            if ($limits->first()->is_unlocked) {
+            if ($limits->first()->is_unlocked && $limits->first()->is_auto_unlocked || $is_unlock) {
                 $user->unlockedLimits()->create([
                     'object_model' => get_class($object),
                     'object_id'    => $object->id,
                 ]);
+            } else if (!$is_unlock && $limits->first()->is_unlocked && !$limits->first()->is_auto_unlocked) {
+                throw new \Exception(($limits->first()->object->displayName ?? $limits->first()->object->name).' requires manual unlocking!');
             }
 
             return true;
