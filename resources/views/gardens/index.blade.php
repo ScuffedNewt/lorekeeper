@@ -28,7 +28,7 @@
                         <div class="alert alert-info">No image set.</div>
                     @endif
                     <h2>{{ $garden->name }}</h2>
-                    <a href="{{ url('gardens/' . $garden->id) }}" class="btn btn-primary">View {{ $garden->name }}</a>
+                    <a href="{{ url('gardens/' . str_replace(' ', '-', strtolower($garden->name))) }}" class="btn btn-primary">Enter {{ $garden->name }}</a>
                 </div>
             </div>
         @endforeach

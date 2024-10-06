@@ -29,8 +29,8 @@ class GardenController extends Controller {
      *
      * @param mixed $id
      */
-    public function getGarden($id) {
-        $garden = Garden::visible()->find($id);
+    public function getGarden($name) {
+        $garden = Garden::visible()->where('name', str_replace('-', ' ', $name))->first();
         if (!$garden) {
             abort(404);
         }

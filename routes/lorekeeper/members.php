@@ -238,5 +238,5 @@ Route::group(['prefix' => 'comments', 'namespace' => 'Comments'], function () {
 **************************************************************************************************/
 Route::group(['prefix' => 'gardens', 'namespace' => 'Activities'], function () {
     Route::get('/', 'GardenController@getIndex');
-    Route::get('{id}', 'GardenController@getGarden');
+    Route::get('{name}', 'GardenController@getGarden');
 });

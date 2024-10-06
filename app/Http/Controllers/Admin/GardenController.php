@@ -159,7 +159,7 @@ class GardenController extends Controller {
             abort(404);
         }
 
-        return view('admin.gardens._create_edit_garden_plot', [
+        return view('admin.gardens.edit_garden_plot', [
             'plot' => $plot,
             'garden' => $plot->garden,
         ]);
@@ -190,5 +190,43 @@ class GardenController extends Controller {
         }
 
         return redirect()->back();
+    }
+
+    /**
+     * Gets the garden plot deletion modal.
+     *
+     * @param int $id
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getDeleteGardenPlot($id) {
+        $plot = GardenPlot::find($id);
+        if (!$plot) {
+            abort(404);
+        }
+
+        return view('admin.gardens._delete_garden_plot', [
+            'plot' => $plot,
+        ]);
+    }
+
+    /**
+     * Deletes a garden plot.
+     *
+     * @param App\Services\Garden\GardenService $service
+     * @param int                      $id
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function postDeleteGardenPlot(Request $request, GardenService $service, $id) {
+        if ($id && $service->deleteGardenPlot(GardenPlot::find($id))) {
+            flash('Garden plot deleted successfully.')->success();
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
+        }
+
+        return redirect()->to('admin/gardens');
     }
 }

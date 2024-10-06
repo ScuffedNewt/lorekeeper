@@ -112,6 +112,8 @@
     {!! Form::close() !!}
 
     @if ($garden->id)
+        @include('widgets._add_limits', ['object' => $garden])
+
         <div class="card mt-3">
             <div class="card-header h3">Plots</div>
             <div class="card-body">
@@ -138,7 +140,7 @@
                                             <div class="alert alert-info">No image set.</div>
                                         @endif
                                         <div class="text-center">
-                                            <div class="btn btn-primary edit-plot" data-plot-id="{{ $plot->id }}">Edit Plot</div>
+                                            <a class="btn btn-primary" href="{{ url('admin/gardens/edit/' . $garden->id . '/plots/edit/' . $plot->id) }}">Edit Plot</a>
                                         </div>
                                     </div>
                                 </div>
@@ -162,10 +164,6 @@
             @if ($garden->id)
                 $('.create-plot').on('click', function() {
                     loadModal("{{ url('admin/gardens/edit/'.$garden->id.'/plots/create') }}", 'Create Plot');
-                });
-
-                $('.edit-plot').on('click', function() {
-                    loadModal("{{ url('admin/gardens/edit/'.$garden->id.'/plots/edit') }}/" + $(this).data('plot-id'), 'Edit Plot');
                 });
             @endif
         });

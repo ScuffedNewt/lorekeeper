@@ -134,6 +134,6 @@ class Garden extends Model {
      * @return string
      */
     public function getIdUrlAttribute() {
-        return url('world/gardens/'.$this->id);
+        return url('world/gardens/'.str_replace(' ', '-', $this->name));
     }
 }
