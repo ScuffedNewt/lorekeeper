@@ -67,13 +67,6 @@ class Subtype extends Model {
         return $this->belongsTo(Species::class, 'species_id');
     }
 
-    /**
-     * Get the features associated with this subtype.
-     */
-    public function features() {
-        return $this->hasMany(Feature::class);
-    }
-
     /**********************************************************************************************
 
             SCOPES
@@ -184,7 +177,7 @@ class Subtype extends Model {
      * @return string
      */
     public function getVisualTraitsUrlAttribute() {
-        return url('/world/subtypes/'.$this->id.'/traits');
+        return url('world/subtypes/'.$this->id.'/traits');
     }
 
     /**
@@ -203,5 +196,20 @@ class Subtype extends Model {
      */
     public function getAdminPowerAttribute() {
         return 'edit_data';
+    }
+
+    /**********************************************************************************************
+
+        OTHER FUNCTIONS
+
+    **********************************************************************************************/
+
+    /**
+     * Get the features associated with this subtype.
+     */
+    public function features() {
+        return Feature::all()->filter(function ($feature) {
+            return in_array($this->id, $feature->subtypes_ids ?? []);
+        });
     }
 }

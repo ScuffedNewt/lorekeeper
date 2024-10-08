@@ -295,7 +295,7 @@ class WorldController extends Controller {
         } else {
             $features = $features
                 ->filter(function ($feature) use ($subtype) {
-                    return !($feature->subtype && $feature->subtype->id != $subtype->id);
+                    return !($feature->subtypd_ids && !in_array($subtype->id, $feature->subtype_ids));
                 })
                 ->groupBy(['feature_category_id', 'id']);
         }

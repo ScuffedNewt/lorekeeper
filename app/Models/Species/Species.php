@@ -176,7 +176,7 @@ class Species extends Model {
      * @return string
      */
     public function getVisualTraitsUrlAttribute() {
-        return url('/world/species/'.$this->id.'/traits');
+        return url('world/species/'.$this->id.'/traits');
     }
 
     /**
