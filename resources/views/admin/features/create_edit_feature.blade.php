@@ -50,8 +50,8 @@
             {!! Form::select('species_id', $specieses, $feature->species_id, ['class' => 'form-control', 'id' => 'species']) !!}
         </div>
         <div class="col-md-4 form-group" id="subtypes">
-            {!! Form::label('Subtype (Optional)') !!} {!! add_help('This is cosmetic and does not limit choice of traits in selections.') !!}
-            {!! Form::select('subtype_id', $subtypes, $feature->subtype_id, ['class' => 'form-control', 'id' => 'subtype']) !!}
+            {!! Form::label('Subtypes (Optional)') !!} {!! add_help('This is cosmetic and does not limit choice of traits in selections.') !!}
+            {!! Form::select('subtype_ids[]', $subtypes, $feature->subtype_ids, ['class' => 'form-control selectize', 'id' => 'subtype', 'multiple', 'placeholder' => 'Select a Species']) !!}
         </div>
     </div>
     <div class="form-group">
@@ -84,6 +84,8 @@
     @parent
     <script>
         $(document).ready(function() {
+            $('.selectize').selectize();
+
             $('.delete-feature-button').on('click', function(e) {
                 e.preventDefault();
                 loadModal("{{ url('admin/data/traits/delete') }}/{{ $feature->id }}", 'Delete Trait');
@@ -97,13 +99,14 @@
 
         function refreshSubtype() {
             var species = $('#species').val();
-            var subtype_id = {{ $feature->subtype_id ?: 'null' }};
+            var subtype_ids = {{ json_encode($feature->subtype_ids) ?: 'null' }};
             $.ajax({
                 type: "GET",
-                url: "{{ url('admin/data/traits/check-subtype') }}?species=" + species + "&subtype_id=" + subtype_id,
+                url: "{{ url('admin/data/traits/check-subtype') }}?species=" + species + "&subtype_ids=" + subtype_ids,
                 dataType: "text"
             }).done(function(res) {
                 $("#subtypes").html(res);
+                $('.selectize').selectize();
             }).fail(function(jqXHR, textStatus, errorThrown) {
                 alert("AJAX call failed: " + textStatus + ", " + errorThrown);
             });

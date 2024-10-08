@@ -25,8 +25,8 @@
         @if ($feature->species_id)
             <div>
                 <strong>Species:</strong> {!! $feature->species->displayName !!}
-                @if ($feature->subtype_id)
-                    ({!! $feature->subtype->displayName !!} subtype)
+                @if ($feature->subtype_ids)
+                    ({!! $feature->displaySubtypes() !!} subtype{{ count($feature->subtype_ids) > 1 ? 's' : '' }})
                 @endif
             </div>
         @endif

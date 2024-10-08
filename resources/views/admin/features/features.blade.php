@@ -25,8 +25,8 @@
             <div class="form-group ml-3 mb-3">
                 {!! Form::select('species_id', $specieses, Request::get('species_id'), ['class' => 'form-control']) !!}
             </div>
-            <div class="form-group ml-3 mb-3">
-                {!! Form::select('subtype_id', $subtypes, Request::get('subtype_id'), ['class' => 'form-control']) !!}
+            <div class="form-group ml-3 mb-3 mt-2">
+                {!! Form::select('subtype_ids[]', $subtypes, Request::get('subtype_ids'), ['class' => 'form-control selectize', 'multiple', 'placeholder' => 'Any Subtype']) !!}
             </div>
             <div class="form-group ml-3 mb-3">
                 {!! Form::select('rarity_id', $rarities, Request::get('rarity_id'), ['class' => 'form-control']) !!}
@@ -93,7 +93,7 @@
                         <div class="logs-table-cell">Species</div>
                     </div>
                     <div class="col-6 col-md-2">
-                        <div class="logs-table-cell">Subtype</div>
+                        <div class="logs-table-cell">Subtypes</div>
                     </div>
                 </div>
             </div>
@@ -119,7 +119,7 @@
                                 <div class="logs-table-cell">{{ $feature->species ? $feature->species->name : '---' }}</div>
                             </div>
                             <div class="col-6 col-md-2">
-                                <div class="logs-table-cell">{{ $feature->subtype ? $feature->subtype->name : '---' }}</div>
+                                <div class="logs-table-cell">{!! $feature->subtype_ids ? $feature->displaySubtypes() : '---' !!}</div>
                             </div>
                             <div class="col-12 col-md-1">
                                 <div class="logs-table-cell"><a href="{{ url('admin/data/traits/edit/' . $feature->id) }}" class="btn btn-primary py-0 px-1 w-100">Edit</a></div>
@@ -137,4 +137,9 @@
 
 @section('scripts')
     @parent
+    <script>
+        $(document).ready(function() {
+            $('.selectize').selectize();
+        })
+    </script>
 @endsection

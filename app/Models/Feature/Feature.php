@@ -15,7 +15,7 @@ class Feature extends Model {
      * @var array
      */
     protected $fillable = [
-        'feature_category_id', 'species_id', 'subtype_id', 'rarity_id', 'name', 'has_image', 'description', 'parsed_description', 'is_visible', 'hash',
+        'feature_category_id', 'species_id', 'subtype_ids', 'rarity_id', 'name', 'has_image', 'description', 'parsed_description', 'is_visible', 'hash',
     ];
 
     /**
@@ -24,6 +24,16 @@ class Feature extends Model {
      * @var string
      */
     protected $table = 'features';
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'subtype_ids' => 'array',
+    ];
+
     /**
      * Validation rules for creation.
      *
@@ -32,7 +42,7 @@ class Feature extends Model {
     public static $createRules = [
         'feature_category_id' => 'nullable',
         'species_id'          => 'nullable',
-        'subtype_id'          => 'nullable',
+        'subtype_ids'         => 'nullable',
         'rarity_id'           => 'required|exists:rarities,id',
         'name'                => 'required|unique:features|between:3,100',
         'description'         => 'nullable',
@@ -47,7 +57,7 @@ class Feature extends Model {
     public static $updateRules = [
         'feature_category_id' => 'nullable',
         'species_id'          => 'nullable',
-        'subtype_id'          => 'nullable',
+        'subtype_ids'         => 'nullable',
         'rarity_id'           => 'required|exists:rarities,id',
         'name'                => 'required|between:3,100',
         'description'         => 'nullable',
@@ -72,13 +82,6 @@ class Feature extends Model {
      */
     public function species() {
         return $this->belongsTo(Species::class);
-    }
-
-    /**
-     * Get the subtype the feature belongs to.
-     */
-    public function subtype() {
-        return $this->belongsTo(Subtype::class);
     }
 
     /**
@@ -144,7 +147,7 @@ class Feature extends Model {
     public function scopeSortSubtype($query) {
         $ids = Subtype::orderBy('sort', 'DESC')->pluck('id')->toArray();
 
-        return count($ids) ? $query->orderBy(DB::raw('FIELD(subtype_id, '.implode(',', $ids).')')) : $query;
+        return count($ids) ? $query->orderBy(DB::raw('FIELD(subtype_ids, '.implode(',', $ids).')')) : $query;
     }
 
     /**
@@ -330,5 +333,17 @@ class Feature extends Model {
         } else {
             return self::where('is_visible', '>=', $visibleOnly)->orderBy('name')->pluck('name', 'id')->toArray();
         }
+    }
+
+    /**
+     * Returns the subtype display for the feature.
+     */
+    public function displaySubtypes() {
+        $result = [];
+        foreach ($this->subtype_ids as $id) {
+            $result[] = Subtype::find($id)->displayName;
+        }
+
+        return implode(', ', $result);
     }
 }

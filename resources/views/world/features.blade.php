@@ -17,8 +17,8 @@
             <div class="form-group ml-3 mb-3">
                 {!! Form::select('species_id', $specieses, Request::get('species_id'), ['class' => 'form-control']) !!}
             </div>
-            <div class="form-group ml-3 mb-3">
-                {!! Form::select('subtype_id', $subtypes, Request::get('subtype_id'), ['class' => 'form-control']) !!}
+            <div class="form-group ml-3 mb-3 mt-2">
+                {!! Form::select('subtype_ids[]', $subtypes, Request::get('subtype_ids'), ['class' => 'form-control selectize', 'multiple', 'placeholder' => 'Any Subtype']) !!}
             </div>
             <div class="form-group ml-3 mb-3">
                 {!! Form::select('rarity_id', $rarities, Request::get('rarity_id'), ['class' => 'form-control']) !!}
@@ -64,4 +64,11 @@
     {!! $features->render() !!}
 
     <div class="text-center mt-4 small text-muted">{{ $features->total() }} result{{ $features->total() == 1 ? '' : 's' }} found.</div>
+@endsection
+@section('scripts')
+    <script>
+        $(document).ready(function() {
+            $('.selectize').selectize();
+        })
+    </script>
 @endsection

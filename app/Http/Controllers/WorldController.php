@@ -148,7 +148,7 @@ class WorldController extends Controller {
      */
     public function getFeatures(Request $request) {
         $query = Feature::visible(Auth::user() ?? null)->with('category')->with('rarity')->with('species');
-        $data = $request->only(['rarity_id', 'feature_category_id', 'species_id', 'subtype_id', 'name', 'sort']);
+        $data = $request->only(['rarity_id', 'feature_category_id', 'species_id', 'subtype_ids', 'name', 'sort']);
         if (isset($data['rarity_id']) && $data['rarity_id'] != 'none') {
             $query->where('rarity_id', $data['rarity_id']);
         }
@@ -166,11 +166,13 @@ class WorldController extends Controller {
                 $query->where('species_id', $data['species_id']);
             }
         }
-        if (isset($data['subtype_id']) && $data['subtype_id'] != 'none') {
-            if ($data['subtype_id'] == 'withoutOption') {
-                $query->whereNull('subtype_id');
+        if (isset($data['subtype_ids']) && $data['subtype_ids']) {
+            if (!in_array('withoutOption', $data['subtype_ids'])) {
+                $query->whereJsonContains('subtype_ids', $data['subtype_ids']);
             } else {
-                $query->where('subtype_id', $data['subtype_id']);
+                $query->where(function ($query) use ($data) {
+                    $query->whereNull('subtype_ids')->orWhereJsonLength('subtype_ids', 0);
+                });
             }
         }
         if (isset($data['name'])) {
@@ -215,7 +217,7 @@ class WorldController extends Controller {
             'features'   => $query->orderBy('id')->paginate(20)->appends($request->query()),
             'rarities'   => ['none' => 'Any Rarity'] + Rarity::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
             'specieses'  => ['none' => 'Any Species'] + ['withoutOption' => 'Without Species'] + Species::visible(Auth::user() ?? null)->orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
-            'subtypes'   => ['none' => 'Any Subtype'] + ['withoutOption' => 'Without Subtype'] + Subtype::visible(Auth::user() ?? null)->orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
+            'subtypes'   => ['withoutOption' => 'Without Subtype'] + Subtype::visible(Auth::user() ?? null)->orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
             'categories' => ['none' => 'Any Category'] + ['withoutOption' => 'Without Category'] + FeatureCategory::visible(Auth::user() ?? null)->orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
         ]);
     }
