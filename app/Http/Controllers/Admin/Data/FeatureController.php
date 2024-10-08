@@ -186,7 +186,7 @@ class FeatureController extends Controller {
             if (!in_array('withoutOption', $data['subtype_ids'])) {
                 $query->whereJsonContains('subtype_ids', $data['subtype_ids']);
             } else {
-                $query->where(function ($query) use ($data) {
+                $query->where(function ($query) {
                     $query->whereNull('subtype_ids')->orWhereJsonLength('subtype_ids', 0);
                 });
             }
