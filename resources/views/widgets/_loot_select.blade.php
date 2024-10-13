@@ -32,22 +32,22 @@
         @if ($loots)
             @foreach ($loots as $loot)
                 <tr class="{{ $prefix }}loot-row">
-                    <td>{!! Form::select($prefix.'rewardable_type[]', ['Item' => 'Item', 'Currency' => 'Currency'] + ($showLootTables ? ['LootTable' => 'Loot Table'] : []) + ($showRaffles ? ['Raffle' => 'Raffle Ticket'] : []), $loot->rewardable_type, [
-                        'class' => 'form-control '.$prefix.'reward-type',
+                    <td>{!! Form::select($prefix . 'rewardable_type[]', ['Item' => 'Item', 'Currency' => 'Currency'] + ($showLootTables ? ['LootTable' => 'Loot Table'] : []) + ($showRaffles ? ['Raffle' => 'Raffle Ticket'] : []), $loot->rewardable_type, [
+                        'class' => 'form-control ' . $prefix . 'reward-type',
                         'placeholder' => 'Select Reward Type',
                     ]) !!}</td>
                     <td class="{{ $prefix }}loot-row-select">
                         @if ($loot->rewardable_type == 'Item')
-                            {!! Form::select($prefix.'rewardable_id[]', $items, $loot->rewardable_id, ['class' => 'form-control '.$prefix.'item-select selectize', 'placeholder' => 'Select Item']) !!}
+                            {!! Form::select($prefix . 'rewardable_id[]', $items, $loot->rewardable_id, ['class' => 'form-control ' . $prefix . 'item-select selectize', 'placeholder' => 'Select Item']) !!}
                         @elseif($loot->rewardable_type == 'Currency')
-                            {!! Form::select($prefix.'rewardable_id[]', $currencies, $loot->rewardable_id, ['class' => 'form-control '.$prefix.'currency-select selectize', 'placeholder' => 'Select Currency']) !!}
+                            {!! Form::select($prefix . 'rewardable_id[]', $currencies, $loot->rewardable_id, ['class' => 'form-control ' . $prefix . 'currency-select selectize', 'placeholder' => 'Select Currency']) !!}
                         @elseif($showLootTables && $loot->rewardable_type == 'LootTable')
-                            {!! Form::select($prefix.'rewardable_id[]', $tables, $loot->rewardable_id, ['class' => 'form-control '.$prefix.'table-select selectize', 'placeholder' => 'Select Loot Table']) !!}
+                            {!! Form::select($prefix . 'rewardable_id[]', $tables, $loot->rewardable_id, ['class' => 'form-control ' . $prefix . 'table-select selectize', 'placeholder' => 'Select Loot Table']) !!}
                         @elseif($showRaffles && $loot->rewardable_type == 'Raffle')
-                            {!! Form::select($prefix.'rewardable_id[]', $raffles, $loot->rewardable_id, ['class' => 'form-control '.$prefix.'raffle-select selectize', 'placeholder' => 'Select Raffle']) !!}
+                            {!! Form::select($prefix . 'rewardable_id[]', $raffles, $loot->rewardable_id, ['class' => 'form-control ' . $prefix . 'raffle-select selectize', 'placeholder' => 'Select Raffle']) !!}
                         @endif
                     </td>
-                    <td>{!! Form::text($prefix.'quantity[]', $loot->quantity, ['class' => 'form-control']) !!}</td>
+                    <td>{!! Form::text($prefix . 'quantity[]', $loot->quantity, ['class' => 'form-control']) !!}</td>
                     <td class="text-right"><a href="#" class="btn btn-danger {{ $prefix }}remove-loot-button">Remove</a></td>
                 </tr>
             @endforeach

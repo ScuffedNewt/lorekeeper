@@ -6,10 +6,11 @@
 
 @section('admin-content')
     {!! breadcrumbs([
-            'Admin Panel' => 'admin', 'Gardens' => 'admin/gardens', 'Garden Objects' => 'admin/gardens/objects',
-            ($object->id ? 'Edit' : 'Create') . ' Garden Object' => $object->id ? 'admin/gardens/objects/edit/' . $object->id : 'admin/gardens/objects/create'
-        ])
-    !!}
+        'Admin Panel' => 'admin',
+        'Gardens' => 'admin/gardens',
+        'Garden Objects' => 'admin/gardens/objects',
+        ($object->id ? 'Edit' : 'Create') . ' Garden Object' => $object->id ? 'admin/gardens/objects/edit/' . $object->id : 'admin/gardens/objects/create',
+    ]) !!}
 
     <h1>{{ $object->id ? 'Edit' : 'Create' }} Garden Object
         @if ($object->id)
@@ -53,7 +54,6 @@
 
     @include('widgets._loot_select_row', ['showLootTables' => true, 'showRaffles' => true])
     @include('widgets._loot_select_row', ['showLootTables' => true, 'showRaffles' => true, 'prefix' => 'potential_'])
-
 @endsection
 @section('scripts')
     @parent
@@ -73,7 +73,7 @@
             });
 
             $('.type').on('change', function() {
-                let type = $(this).val();                
+                let type = $(this).val();
                 $.get("{{ url('admin/gardens/objects/type-options') }}/" + type, function(data) {
                     $('#type-options').html(data);
                 });

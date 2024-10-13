@@ -1,14 +1,14 @@
 @php
     $months = [
-        '1'  => 'January',
-        '2'  => 'February',
-        '3'  => 'March',
-        '4'  => 'April',
-        '5'  => 'May',
-        '6'  => 'June',
-        '7'  => 'July',
-        '8'  => 'August',
-        '9'  => 'September',
+        '1' => 'January',
+        '2' => 'February',
+        '3' => 'March',
+        '4' => 'April',
+        '5' => 'May',
+        '6' => 'June',
+        '7' => 'July',
+        '8' => 'August',
+        '9' => 'September',
         '10' => 'October',
         '11' => 'November',
         '12' => 'December',
@@ -45,7 +45,7 @@
             </b>
         </p>
         <p>Users cannot see seeds that are "out of season" as options on the garden page.</p>
-        
+
         <div class="row">
             <div class="col-md-6">
                 {!! Form::label('Start Month') !!}
@@ -100,7 +100,7 @@
             <div class="card-body">
                 <p>This reward has the potential to be obtained if the bonus chance below succeeds. Only items are only supported currently.</p>
                 @include('widgets._loot_select', ['loots' => isset($object) ? $object->potentialRewards : [], 'showLootTables' => true, 'showRaffles' => true, 'prefix' => 'potential_'])
-                
+
                 {!! Form::label('Bonus Chance Percentage') !!}
                 {!! Form::number('bonus_chance', $object?->data['bonus_chance'] ?? 0, ['class' => 'form-control mb-1', 'min' => 0, 'max' => 100]) !!}
             </div>

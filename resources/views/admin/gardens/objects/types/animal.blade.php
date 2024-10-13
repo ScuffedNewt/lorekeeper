@@ -31,7 +31,7 @@
             <div class="card-body">
                 <p>This reward has the potential to be obtained if the bonus chance below succeeds. Only items are only supported currently.</p>
                 @include('widgets._loot_select', ['loots' => isset($object) ? $object->potentialRewards : [], 'showLootTables' => true, 'showRaffles' => true, 'prefix' => 'potential_'])
-                
+
                 {!! Form::label('Bonus Chance Percentage') !!}
                 {!! Form::number('bonus_chance', $object?->data['bonus_chance'] ?? 0, ['class' => 'form-control mb-1', 'min' => 0, 'max' => 100]) !!}
             </div>
