@@ -225,9 +225,12 @@ function removeAsset(&$array, $asset, $quantity = 1) {
 
 /**
  * Processes the rewardable data from the loot widget to be stored as an asset array.
- * 
- * @param array $data
- * 
+ *
+ * @param array      $data
+ * @param mixed      $isStaff
+ * @param mixed      $extraChecks
+ * @param mixed|null $prefix
+ *
  * @return array
  */
 function processRewardableData($data, $isStaff = false, $extraChecks = false, $prefix = null) {
@@ -238,25 +241,25 @@ function processRewardableData($data, $isStaff = false, $extraChecks = false, $p
             $reward = null;
             switch ($type) {
                 case 'Item':
-                    $reward = \App\Models\Item\Item::find($data[$prefix.'rewardable_id'][$key]);
+                    $reward = App\Models\Item\Item::find($data[$prefix.'rewardable_id'][$key]);
                     break;
                 case 'Currency':
-                    $reward = \App\Models\Currency\Currency::find($data[$prefix.'rewardable_id'][$key]);
+                    $reward = App\Models\Currency\Currency::find($data[$prefix.'rewardable_id'][$key]);
                     if (!$reward->is_user_owned) {
-                        throw new \Exception('Invalid currency selected.');
+                        throw new Exception('Invalid currency selected.');
                     }
                     break;
                 case 'LootTable':
                     if (!$isStaff) {
                         break;
                     }
-                    $reward = \App\Models\Loot\LootTable::find($data[$prefix.'rewardable_id'][$key]);
+                    $reward = App\Models\Loot\LootTable::find($data[$prefix.'rewardable_id'][$key]);
                     break;
                 case 'Raffle':
                     if (!$isStaff && !$extraChecks) {
                         break;
                     }
-                    $reward = \App\Models\Raffle\Raffle::find($data[$prefix.'rewardable_id'][$key]);
+                    $reward = App\Models\Raffle\Raffle::find($data[$prefix.'rewardable_id'][$key]);
                     break;
             }
             if (!$reward) {

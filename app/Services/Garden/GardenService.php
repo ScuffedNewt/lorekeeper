@@ -6,8 +6,8 @@ use App\Models\Garden\Garden;
 use App\Models\Garden\GardenObject;
 use App\Models\Garden\GardenPlot;
 use App\Services\Service;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 
 class GardenService extends Service {
     /*
@@ -232,9 +232,10 @@ class GardenService extends Service {
 
     /**
      * Updates a garden plot's data.
-     * 
+     *
      * @param GardenPlot $plot
-     * 
+     * @param mixed      $data
+     *
      * @return bool|GardenPlot
      */
     public function updateGardenPlot($plot, $data) {
@@ -262,7 +263,7 @@ class GardenService extends Service {
             }
 
             $plot->update([
-                'data' => Arr::only($data, ['can_use_modifiers']),
+                'data'      => Arr::only($data, ['can_use_modifiers']),
                 'has_image' => $data['has_image'],
             ]);
 
@@ -288,6 +289,7 @@ class GardenService extends Service {
      * Creates a new garden object.
      *
      * @param array $data
+     * @param mixed $user
      *
      * @return bool|GardenObject
      */
@@ -295,14 +297,13 @@ class GardenService extends Service {
         DB::beginTransaction();
 
         try {
-
             $objectData = $this->populateObjectData($data);
 
             $object = GardenObject::create([
-                'type' => $data['type'],
+                'type'         => $data['type'],
                 'object_model' => $data['object_model'],
-                'object_id' => $data['object_id'],
-                'data' => $objectData,
+                'object_id'    => $data['object_id'],
+                'data'         => $objectData,
             ]);
 
             if (!$this->logAdminAction($user, 'Created Garden Object', 'Created object #'.$object->id)) {
@@ -321,6 +322,8 @@ class GardenService extends Service {
      * Edits a new garden object.
      *
      * @param array $data
+     * @param mixed $object
+     * @param mixed $user
      *
      * @return bool|GardenObject
      */
@@ -328,14 +331,13 @@ class GardenService extends Service {
         DB::beginTransaction();
 
         try {
-
             $objectData = $this->populateObjectData($data);
 
             $object = $object->update([
-                'type' => $data['type'],
+                'type'         => $data['type'],
                 'object_model' => $data['object_model'],
-                'object_id' => $data['object_id'],
-                'data' => $objectData,
+                'object_id'    => $data['object_id'],
+                'data'         => $objectData,
             ]);
 
             if (!$this->logAdminAction($user, 'Edited Garden Object', 'Edited object #'.$object->id)) {

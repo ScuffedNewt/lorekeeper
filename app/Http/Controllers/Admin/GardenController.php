@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Garden\Garden;
-use App\Models\Garden\GardenPlot;
 use App\Models\Garden\GardenObject;
+use App\Models\Garden\GardenPlot;
 use App\Models\Item\Item;
 use App\Services\Garden\GardenService;
 use Illuminate\Http\Request;
@@ -244,7 +244,7 @@ class GardenController extends Controller {
 
     /**
      * Shows the garden objects index page.
-     * 
+     *
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getGardenObjectsIndex() {
@@ -260,8 +260,8 @@ class GardenController extends Controller {
      */
     public function getCreateGardenObject() {
         return view('admin.gardens.objects.create_edit_garden_object', [
-            'object' => new GardenObject,
-            'object_types' => config('lorekeeper.garden.garden_object_types'),
+            'object'        => new GardenObject,
+            'object_types'  => config('lorekeeper.garden.garden_object_types'),
             'object_models' => [
                 // if you want to add more object types, add them here
                 get_class(new Item) => 'Item',
@@ -284,13 +284,13 @@ class GardenController extends Controller {
         }
 
         return view('admin.gardens.objects.create_edit_garden_object', [
-            'object' => $object,
-            'object_types' => config('lorekeeper.garden.garden_object_types'),
+            'object'        => $object,
+            'object_types'  => config('lorekeeper.garden.garden_object_types'),
             'object_models' => [
                 // if you want to add more object types, add them here
                 get_class(new Item) => 'Item',
             ],
-            'objects' => $object->object_model::all()->pluck('name', 'id')
+            'objects' => $object->object_model::all()->pluck('name', 'id'),
         ]);
     }
 
@@ -321,15 +321,15 @@ class GardenController extends Controller {
 
     /**
      * Gets all of the specified object type's options.
-     * 
+     *
      * @param string $type
-     * 
+     *
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getTypeOptions($type) {
-        if (view()->exists('admin.gardens.objects.types.' . $type)) {
-            return view('admin.gardens.objects.types.' . $type, [
-                // 
+        if (view()->exists('admin.gardens.objects.types.'.$type)) {
+            return view('admin.gardens.objects.types.'.$type, [
+                //
             ])->render();
         }
 
@@ -338,9 +338,9 @@ class GardenController extends Controller {
 
     /**
      * Returns all of the specified object type.
-     * 
+     *
      * @param string $type
-     * 
+     *
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getObjects($type) {

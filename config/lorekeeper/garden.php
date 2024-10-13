@@ -6,10 +6,10 @@ return [
     'garden_view' => 'nav',
 
     'garden_object_types' => [
-        'seed' => 'Seed',
-        'animal' => 'Animal',
+        'seed'       => 'Seed',
+        'animal'     => 'Animal',
         'fertiliser' => 'Fertiliser',
-        'tool' => 'Tool',
-        'food' => 'Food',
+        'tool'       => 'Tool',
+        'food'       => 'Food',
     ],
 ];
