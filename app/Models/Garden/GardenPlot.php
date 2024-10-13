@@ -41,11 +41,42 @@ class GardenPlot extends Model {
     **********************************************************************************************/
 
     /**
-     * Get's the plot's formatted name.
+     * Gets the file directory containing the model's image.
      *
      * @return string
      */
-    public function getNameAttribute() {
-        return $this->garden->name.' - Plot '.$this->id;
+    public function getImageDirectoryAttribute() {
+        return 'images/data/gardens';
+    }
+
+    /**
+     * Gets the file name of the model's image.
+     *
+     * @return string
+     */
+    public function getImageFileNameAttribute() {
+        return $this->id.'-plot-image.png';
+    }
+
+    /**
+     * Gets the path to the file directory containing the model's image.
+     *
+     * @return string
+     */
+    public function getImagePathAttribute() {
+        return public_path($this->imageDirectory);
+    }
+
+    /**
+     * Gets the URL of the model's image.
+     *
+     * @return string
+     */
+    public function getImageUrlAttribute() {
+        if (!$this->has_image) {
+            return null;
+        }
+
+        return asset($this->imageDirectory.'/'.$this->imageFileName);
     }
 }

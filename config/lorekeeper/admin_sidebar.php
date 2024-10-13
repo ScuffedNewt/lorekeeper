@@ -207,6 +207,10 @@ return [
                 'name' => 'Gardens',
                 'url'  => 'admin/gardens',
             ],
+            [
+                'name' => 'Garden Objects',
+                'url'  => 'admin/gardens/objects',
+            ],
         ],
     ],
     'Raffles'    => [

@@ -474,4 +474,16 @@ Route::group(['prefix' => 'gardens', 'middleware' => 'power:manage_gardens'], fu
     Route::post('edit/{gardenId}/plots/create', 'GardenController@postCreateEditGardenPlot');
     Route::post('edit/{gardenId}/plots/edit/{plotId}', 'GardenController@postCreateEditGardenPlot');
     Route::post('edit/{gardenId}/plots/delete/{plotId}', 'GardenController@postDeleteGardenPlot');
+
+    // GARDEN OBJECTS
+    Route::get('objects', 'GardenController@getGardenObjectsIndex');
+    Route::get('objects/create', 'GardenController@getCreateGardenObject');
+    Route::get('objects/edit/{id}', 'GardenController@getEditGardenObject');
+    Route::get('objects/delete/{id}', 'GardenController@getDeleteGardenObject');
+    Route::post('objects/create', 'GardenController@postCreateEditGardenObject');
+    Route::post('objects/edit/{id}', 'GardenController@postCreateEditGardenObject');
+    Route::post('objects/delete/{id}', 'GardenController@postDeleteGardenObject');
+
+    Route::get('objects/type-options/{type?}', 'GardenController@getTypeOptions');
+    Route::get('objects/get-objects/{type?}', 'GardenController@getObjects');
 });

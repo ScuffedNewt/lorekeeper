@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Garden\Garden;
 use App\Models\Garden\GardenPlot;
+use App\Models\Garden\GardenObject;
+use App\Models\Item\Item;
 use App\Services\Garden\GardenService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -178,7 +180,7 @@ class GardenController extends Controller {
      */
     public function postCreateEditGardenPlot(Request $request, GardenService $service, $gardenId, $id = null) {
         $data = $request->only([
-            'data',
+            'can_use_modifiers', 'can_perish', 'image', 'remove_image',
         ]);
         if ($id && $service->updateGardenPlot(GardenPlot::find($id), $data, Auth::user())) {
             flash('Garden plot updated successfully.')->success();
@@ -232,5 +234,127 @@ class GardenController extends Controller {
         }
 
         return redirect()->to('admin/gardens');
+    }
+
+    /**********************************************************************************************
+
+        GARDEN OBJECTS
+
+    **********************************************************************************************/
+
+    /**
+     * Shows the garden objects index page.
+     * 
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getGardenObjectsIndex() {
+        return view('admin.gardens.objects.index', [
+            'objects' => GardenObject::all(),
+        ]);
+    }
+
+    /**
+     * Shows the create garden object page.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getCreateGardenObject() {
+        return view('admin.gardens.objects.create_edit_garden_object', [
+            'object' => new GardenObject,
+            'object_types' => config('lorekeeper.garden.garden_object_types'),
+            'object_models' => [
+                // if you want to add more object types, add them here
+                get_class(new Item) => 'Item',
+            ],
+            'objects' => [null => 'Select Object Type'],
+        ]);
+    }
+
+    /**
+     * Shows the edit garden object page.
+     *
+     * @param int $id
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getEditGardenObject($id) {
+        $object = GardenObject::find($id);
+        if (!$object) {
+            abort(404);
+        }
+
+        return view('admin.gardens.objects.create_edit_garden_object', [
+            'object' => $object,
+            'object_types' => config('lorekeeper.garden.garden_object_types'),
+            'object_models' => [
+                // if you want to add more object types, add them here
+                get_class(new Item) => 'Item',
+            ],
+            'objects' => $object->object_model::all()->pluck('name', 'id')
+        ]);
+    }
+
+    /**
+     * Creates or edits a garden object.
+     *
+     * @param App\Services\Garden\GardenService $service
+     * @param int                               $id
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function postCreateEditGardenObject(Request $request, GardenService $service, $id = null) {
+        $data = $request->all();
+        if ($id && $service->editGardenObject(GardenObject::find($id), $data, Auth::user())) {
+            flash('Garden object updated successfully.')->success();
+        } elseif (!$id && $object = $service->createGardenObject($data, Auth::user())) {
+            flash('Garden object created successfully.')->success();
+
+            return redirect()->to('admin/gardens/objects/edit/'.$object->id);
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
+        }
+
+        return redirect()->back();
+    }
+
+    /**
+     * Gets all of the specified object type's options.
+     * 
+     * @param string $type
+     * 
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getTypeOptions($type) {
+        if (view()->exists('admin.gardens.objects.types.' . $type)) {
+            return view('admin.gardens.objects.types.' . $type, [
+                // 
+            ])->render();
+        }
+
+        return '';
+    }
+
+    /**
+     * Returns all of the specified object type.
+     * 
+     * @param string $type
+     * 
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getObjects($type) {
+        $type = urldecode($type);
+        switch ($type) {
+            case get_class(new Item):
+                $objects = Item::all()->pluck('name', 'id');
+                break;
+            default:
+                $objects = [null => 'Select Object Type'];
+        }
+
+        return view('admin.gardens.objects._objects', [
+            'objects' => $objects,
+        ])->render();
     }
 }

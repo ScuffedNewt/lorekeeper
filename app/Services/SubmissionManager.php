@@ -602,42 +602,7 @@ class SubmissionManager extends Service {
 
             return $assets;
         } else {
-            $assets = createAssetsArray(false);
-            // Process the additional rewards
-            if (isset($data['rewardable_type']) && $data['rewardable_type']) {
-                foreach ($data['rewardable_type'] as $key => $type) {
-                    $reward = null;
-                    switch ($type) {
-                        case 'Item':
-                            $reward = Item::find($data['rewardable_id'][$key]);
-                            break;
-                        case 'Currency':
-                            $reward = Currency::find($data['rewardable_id'][$key]);
-                            if (!$reward->is_user_owned) {
-                                throw new \Exception('Invalid currency selected.');
-                            }
-                            break;
-                        case 'LootTable':
-                            if (!$isStaff) {
-                                break;
-                            }
-                            $reward = LootTable::find($data['rewardable_id'][$key]);
-                            break;
-                        case 'Raffle':
-                            if (!$isStaff && !$isClaim) {
-                                break;
-                            }
-                            $reward = Raffle::find($data['rewardable_id'][$key]);
-                            break;
-                    }
-                    if (!$reward) {
-                        continue;
-                    }
-                    addAsset($assets, $reward, $data['quantity'][$key]);
-                }
-            }
-
-            return $assets;
+            return processRewardableData($data, $isStaff, $isClaim);
         }
     }
 

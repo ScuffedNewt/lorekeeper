@@ -9,8 +9,11 @@ return new class extends Migration {
      * Run the migrations.
      */
     public function up(): void {
-        Schema::dropIfExists('garden_plots');
+        Schema::dropIfExists('garden_objects');
         Schema::dropIfExists('user_garden_plots');
+        Schema::dropIfExists('garden_plots');
+        Schema::dropIfExists('gardens');
+
         if (!Schema::hasColumn('user_items', 'garden_count')) {
             Schema::table('user_items', function (Blueprint $table) {
                 $table->integer('garden_count')->default(0);
@@ -47,12 +50,23 @@ return new class extends Migration {
             $table->timestamp('started_at')->nullable()->default(null);
             $table->json('data')->nullable()->default(null);
         });
+
+        Schema::create('garden_objects', function (Blueprint $table) {
+            $table->id();
+            $table->string('type');
+
+            $table->string('object_model');
+            $table->string('object_id');
+
+            $table->json('data')->nullable()->default(null);
+        });
     }
 
     /**
      * Reverse the migrations.
      */
     public function down(): void {
+        Schema::dropIfExists('garden_objects');
         Schema::dropIfExists('user_garden_plots');
         Schema::dropIfExists('garden_plots');
         Schema::dropIfExists('gardens');

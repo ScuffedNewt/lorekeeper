@@ -3,9 +3,11 @@
 namespace App\Services\Garden;
 
 use App\Models\Garden\Garden;
+use App\Models\Garden\GardenObject;
 use App\Models\Garden\GardenPlot;
 use App\Services\Service;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Arr;
 
 class GardenService extends Service {
     /*
@@ -229,7 +231,133 @@ class GardenService extends Service {
     }
 
     /**
-     * Processes user input for creating/updating an garden.
+     * Updates a garden plot's data.
+     * 
+     * @param GardenPlot $plot
+     * 
+     * @return bool|GardenPlot
+     */
+    public function updateGardenPlot($plot, $data) {
+        DB::beginTransaction();
+
+        try {
+            if (!isset($data['can_use_modifiers'])) {
+                $data['can_use_modifiers'] = 0;
+            }
+
+            if (isset($data['remove_image'])) {
+                if ($plot && $plot->has_image && $data['remove_image']) {
+                    $data['has_image'] = 0;
+                    $this->deleteImage($plot->imagePath, $plot->imageFileName);
+                }
+                unset($data['remove_image']);
+            }
+
+            $image = null;
+            if (isset($data['image']) && $data['image']) {
+                $data['has_image'] = 1;
+                $data['hash'] = randomString(10);
+                $image = $data['image'];
+                unset($data['image']);
+            }
+
+            $plot->update([
+                'data' => Arr::only($data, ['can_use_modifiers']),
+                'has_image' => $data['has_image'],
+            ]);
+
+            if ($image) {
+                $this->handleImage($image, $plot->imagePath, $plot->imageFileName);
+            }
+
+            return $this->commitReturn($plot);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
+    }
+
+    /**********************************************************************************************
+
+        GARDEN OBJECTS
+
+    **********************************************************************************************/
+
+    /**
+     * Creates a new garden object.
+     *
+     * @param array $data
+     *
+     * @return bool|GardenObject
+     */
+    public function createGardenObject($data, $user) {
+        DB::beginTransaction();
+
+        try {
+
+            $objectData = $this->populateObjectData($data);
+
+            $object = GardenObject::create([
+                'type' => $data['type'],
+                'object_model' => $data['object_model'],
+                'object_id' => $data['object_id'],
+                'data' => $objectData,
+            ]);
+
+            if (!$this->logAdminAction($user, 'Created Garden Object', 'Created object #'.$object->id)) {
+                throw new \Exception('Failed to log admin action.');
+            }
+
+            return $this->commitReturn($object);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
+    }
+
+    /**
+     * Edits a new garden object.
+     *
+     * @param array $data
+     *
+     * @return bool|GardenObject
+     */
+    public function editGardenObject($object, $data, $user) {
+        DB::beginTransaction();
+
+        try {
+
+            $objectData = $this->populateObjectData($data);
+
+            $object = $object->update([
+                'type' => $data['type'],
+                'object_model' => $data['object_model'],
+                'object_id' => $data['object_id'],
+                'data' => $objectData,
+            ]);
+
+            if (!$this->logAdminAction($user, 'Edited Garden Object', 'Edited object #'.$object->id)) {
+                throw new \Exception('Failed to log admin action.');
+            }
+
+            return $this->commitReturn($object);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
+    }
+
+    /**********************************************************************************************
+
+        MISC
+
+    **********************************************************************************************/
+
+    /**
+     * Processes user input for creating/updating a garden.
      *
      * @param array  $data
      * @param Garden $garden
@@ -269,5 +397,23 @@ class GardenService extends Service {
         }
 
         return $data;
+    }
+
+    /**
+     * Processes user input for creating/updating a garden object.
+     *
+     * @param array  $data
+     * @param Garden $garden
+     *
+     * @return array
+     */
+    private function populateObjectData($data, $garden = null) {
+        $data['rewards'] = getDataReadyAssets(processRewardableData($data, true, true));
+        $data['potential_rewards'] = getDataReadyAssets(processRewardableData($data, false, true, 'potential_'));
+
+        return Arr::except($data, [
+            '_token', 'type', 'object_model', 'object_id', 'rewardable_type', 'rewardable_id', 'quantity',
+            'potential_rewardable_type', 'potential_rewardable_id', 'potential_quantity',
+        ]);
     }
 }
