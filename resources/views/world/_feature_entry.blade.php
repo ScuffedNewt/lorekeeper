@@ -38,11 +38,15 @@
             <div class="row">
                 @php
                     // Sort children collection in PHP based on the rarity's sort attribute
-                    $sortedChildren = $feature->children()->with('rarity')->get()->sortBy(function ($child, $key) {
-                        return $child->rarity ? $child->rarity->sort : null;
-                    });
+$sortedChildren = $feature
+    ->children()
+    ->with('rarity')
+                        ->get()
+                        ->sortBy(function ($child, $key) {
+                            return $child->rarity ? $child->rarity->sort : null;
+                        });
                 @endphp
-                @foreach($sortedChildren as $i)
+                @foreach ($sortedChildren as $i)
                     <div class="col-md-12">
                         <div class="card">
                             <div class="card-body">
