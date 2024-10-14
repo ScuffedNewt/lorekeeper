@@ -12,7 +12,7 @@ class ObjectReward extends Model
      * @var array
      */
     protected $fillable = [
-        'object_id', 'object_type', 'rewardable_id', 'rewardable_type', 'quantity',
+        'object_id', 'object_type', 'rewardable_id', 'rewardable_type', 'quantity','earner_type'
     ];
 
     /**
@@ -42,7 +42,7 @@ class ObjectReward extends Model
     /**
      * Get the reward attached to the prompt reward.
      */
-    public function reward() 
+    public function reward()
     {
         switch ($this->rewardable_type)
         {
