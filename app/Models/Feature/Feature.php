@@ -93,14 +93,14 @@ class Feature extends Model {
      * Get the parent feature.
      */
     public function parent() {
-        return $this->belongsTo(Feature::class, 'parent_id');
+        return $this->belongsTo(self::class, 'parent_id');
     }
 
     /**
      * Get the child features.
      */
     public function children() {
-        return $this->hasMany(Feature::class, 'parent_id');
+        return $this->hasMany(self::class, 'parent_id');
     }
 
     /**********************************************************************************************
