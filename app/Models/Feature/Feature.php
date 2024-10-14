@@ -16,6 +16,7 @@ class Feature extends Model {
      */
     protected $fillable = [
         'feature_category_id', 'species_id', 'subtype_id', 'rarity_id', 'name', 'has_image', 'description', 'parsed_description', 'is_visible', 'hash',
+        'parent_id',
     ];
 
     /**
@@ -86,6 +87,20 @@ class Feature extends Model {
      */
     public function category() {
         return $this->belongsTo(FeatureCategory::class, 'feature_category_id');
+    }
+
+    /**
+     * Get the parent feature.
+     */
+    public function parent() {
+        return $this->belongsTo(Feature::class, 'parent_id');
+    }
+
+    /**
+     * Get the child features.
+     */
+    public function children() {
+        return $this->hasMany(Feature::class, 'parent_id');
     }
 
     /**********************************************************************************************

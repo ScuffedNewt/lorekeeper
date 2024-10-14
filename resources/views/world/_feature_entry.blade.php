@@ -33,5 +33,25 @@
         <div class="world-entry-text parsed-text">
             {!! $feature->parsed_description !!}
         </div>
+        @if ($feature->children->count())
+            <h3>Trait Variants</h3>
+            <div class="row">
+                @php
+                    // Sort children collection in PHP based on the rarity's sort attribute
+                    $sortedChildren = $feature->children()->with('rarity')->get()->sortBy(function ($child, $key) {
+                        return $child->rarity ? $child->rarity->sort : null;
+                    });
+                @endphp
+                @foreach($sortedChildren as $i)
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-body">
+                                @include('world._feature_variants_entry', ['variant' => $i])
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @endif
     </div>
 </div>

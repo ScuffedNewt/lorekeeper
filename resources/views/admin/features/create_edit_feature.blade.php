@@ -41,15 +41,20 @@
     </div>
 
     <div class="row">
-        <div class="col-md-4 form-group">
+        <div class="col-md-6 form-group">
             {!! Form::label('Trait Category (Optional)') !!}
             {!! Form::select('feature_category_id', $categories, $feature->feature_category_id, ['class' => 'form-control']) !!}
         </div>
-        <div class="col-md-4 form-group">
+        <div class="col-md-6 form-group">
+            <div class="alert alert-info">Traits that are variants of other traits don't appear individually on the encyclopedia.</div>
+            {!! Form::label('Parent Trait (Optional)') !!} {!! add_help('If this trait is a variant of another trait, select the parent trait here.') !!}
+            {!! Form::select('parent_id', $features, $feature->parent_id, ['class' => 'form-control', 'placeholder' => 'Select a Parent Trait']) !!}
+        </div>
+        <div class="col-md-6 form-group">
             {!! Form::label('Species Restriction (Optional)') !!}
             {!! Form::select('species_id', $specieses, $feature->species_id, ['class' => 'form-control', 'id' => 'species']) !!}
         </div>
-        <div class="col-md-4 form-group" id="subtypes">
+        <div class="col-md-6 form-group" id="subtypes">
             {!! Form::label('Subtype (Optional)') !!} {!! add_help('This is cosmetic and does not limit choice of traits in selections.') !!}
             {!! Form::select('subtype_id', $subtypes, $feature->subtype_id, ['class' => 'form-control', 'id' => 'subtype']) !!}
         </div>
@@ -74,7 +79,12 @@
         <h3>Preview</h3>
         <div class="card mb-3">
             <div class="card-body">
-                @include('world._feature_entry', ['feature' => $feature])
+                @if ($feature->parent_id)
+                    <div class="alert alert-info">This item is a variant of another item. It will not appear on the encyclopedia.</div>
+                    @include('world._feature_entry', ['feature' => $feature->parent])
+                @else
+                    @include('world._feature_entry', ['feature' => $feature])
+                @endif
             </div>
         </div>
     @endif

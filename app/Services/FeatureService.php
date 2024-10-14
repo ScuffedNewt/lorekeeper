@@ -272,6 +272,9 @@ class FeatureService extends Service {
             if (isset($data['subtype_id']) && $data['subtype_id'] == 'none') {
                 $data['subtype_id'] = null;
             }
+            if (isset($data['parent_id']) && $feature->children->count() > 0) {
+                throw new \Exception('This feature has children. Please remove them before changing the parent feature.');
+            }
 
             // More specific validation
             if (Feature::where('name', $data['name'])->where('id', '!=', $feature->id)->exists()) {
