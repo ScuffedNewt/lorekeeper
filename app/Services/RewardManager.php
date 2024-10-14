@@ -101,7 +101,7 @@ class RewardManager extends Service
                 }
             }
 
-            flash('Rewards granted successfully.')->success();
+            flash( ($isCharacter ? 'Character' : 'User').' rewards granted successfully.')->success();
 
             return $this->commitReturn(true);
         } catch (\Exception $e) {
