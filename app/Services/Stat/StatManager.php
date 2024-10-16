@@ -157,8 +157,8 @@ class StatManager extends Service {
 
             if ($set) {
                 // check if there are any weapons / gear granting extra to this stat
-                $count = $stat->count;
-                $count += $character->bonusStatCount($stat->id);
+                $count = $character->totalStatCount($stat->stat->id);
+                // $count += $character->bonusStatCount($stat->id); TODO check bonusStatCount func
                 $stat->current_count = $quantity > $count ? $count : $quantity;
             } else {
                 $stat->current_count += $quantity;
