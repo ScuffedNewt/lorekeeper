@@ -7,8 +7,8 @@
         <div class="text-small text-white text-center mt-2 text-wrap" style="font-size:1rem;">
             {!! $stack->item->displayName !!}
             <small><small>
-                <br>Quantity: x{{ $stack->getAvailableQuantityAttribute() }} ({{ $stack->getOthers() }})
-            </small></small>
+                    <br>Quantity: x{{ $stack->getAvailableQuantityAttribute() }} ({{ $stack->getOthers() }})
+                </small></small>
         </div>
     </label>
 @else
@@ -18,11 +18,7 @@
             {!! $stack->first()->name !!}
             <small><small>
                     <br>Quantity: x{{ $stack->sum('pivot.count') - $stack->sum('pivot.garden_count') }}
-                    @if (
-                        $plot->first()->plot_type == 'seed' &&
-                            $stack->first()->tags->where('tag', 'seed')->first() &&
-                            $stack->first()->tags->where('tag', 'seed')->first()->data['quality']
-                    )
+                    @if ($plot->first()->plot_type == 'seed' && $stack->first()->tags->where('tag', 'seed')->first() && $stack->first()->tags->where('tag', 'seed')->first()->data['quality'])
                         <br>Quality: {{ $stack->first()->tags->where('tag', 'seed')->first()->data['quality'] }}
                     @endif
                 </small></small>

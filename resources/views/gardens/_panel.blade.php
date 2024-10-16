@@ -12,8 +12,7 @@
                 @if ($garden->plots->count())
                     @foreach ($garden->plots as $plot)
                         <div class="col-md-3 mb-3 text-center">
-                            <div class="card text-center justify-content-center"
-                                style="max-width: 200px; max-height: 200px; aspect-ratio: 1/1; background-color: rgb(88, 54, 54); background-image: url({{ asset($plot->backgroundImage) }});">
+                            <div class="card text-center justify-content-center" style="max-width: 200px; max-height: 200px; aspect-ratio: 1/1; background-color: rgb(88, 54, 54); background-image: url({{ asset($plot->backgroundImage) }});">
                                 <!---- if user owns plot --->
                                 @if (Auth::user()->gardenPlots->contains('plot_id', $plot->id))
                                     @php
@@ -67,7 +66,6 @@
                                 @else
                                     <div class="container text-white">
                                         @if (\App\Models\Limit\Limit::hasLimits($plot))
-
                                         @else
                                             <i class="fas fa-seedling text-white m-1"></i>
                                         @endif
