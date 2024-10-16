@@ -23,6 +23,10 @@
                     {!! Form::label('Name') !!}
                     {!! Form::text('name', $garden->name, ['class' => 'form-control']) !!}
                 </div>
+                <div class="form-group col-md">
+                    {!! Form::label('Allowed Objects') !!} {!! add_help('What types of objects can be placed or used on plots in this garden? You can have more granular control on plots, but the types should be enabled here.') !!}
+                    {!! Form::select('allowed_object_types', config('lorekeeper.garden.garden_object_types'), null, ['class' => 'form-control selectize', 'multiple', 'placeholder' => 'Select Object Types']) !!}
+                </div>
             </div>
         </div>
     </div>
@@ -32,14 +36,17 @@
         <div class="card-body">
             <div class="row">
                 <div class="col-md form-group">
+                    @if ($garden->has_image)
+                        <a href="{{ $garden->imageUrl }}" data-lightbox="entry" data-title="{{ $garden->name }}">
+                            <img src="{{ $garden->imageUrl }}" class="float-left mr-2" style="max-height: 100px;" />
+                        </a>
+                    @endif
                     {!! Form::label('World Page Image (Optional)') !!} {!! add_help('This image is used only on the world information pages.') !!}
                     <div>{!! Form::file('image') !!}</div>
                     <div class="text-muted">Recommended size: 200px x 200px</div>
                     @if ($garden->has_image)
-                        <div class="form-check">
-                            {!! Form::checkbox('remove_image', 1, false, ['class' => 'form-check-input']) !!}
-                            {!! Form::label('remove_image', 'Remove current image', ['class' => 'form-check-label']) !!}
-                        </div>
+                        {!! Form::checkbox('remove_image', 1, false) !!}
+                        {!! Form::label('remove_image', 'Remove current image', ['class' => 'form-check-label']) !!}
                     @endif
                 </div>
                 <div class="col-md form-group">
@@ -127,10 +134,10 @@
                 @if (!$garden->plots->count())
                     <p>No plots found.</p>
                 @else
-                    <div class="row">
+                    <div class="row no-gutters">
                         @foreach ($garden->plots as $plot)
-                            <div class="col-md-4 justify-content-center text-center">
-                                <div class="card mb-3 h-100">
+                            <div class="col-md-4 justify-content-center text-center mb-3">
+                                <div class="card h-100 mx-2">
                                     <div class="card-body">
                                         @if ($plot->has_image)
                                             <a href="{{ $plot->imageUrl }}" data-lightbox="entry" data-title="{{ $plot->name }}">
@@ -141,7 +148,7 @@
                                                 <img src="{{ $garden->plotImageUrl }}" class="mw-100 mb-3">
                                             </a>
                                         @else
-                                            <div class="alert alert-info">No image set.</div>
+                                            <div class="alert alert-info">No plot image set.</div>
                                         @endif
                                         <div class="text-center">
                                             <a class="btn btn-primary" href="{{ url('admin/gardens/edit/' . $garden->id . '/plots/edit/' . $plot->id) }}">Edit Plot</a>
@@ -170,6 +177,8 @@
                     loadModal("{{ url('admin/gardens/edit/' . $garden->id . '/plots/create') }}", 'Create Plot');
                 });
             @endif
+
+            $('.selectize').selectize();
         });
     </script>
 @endsection

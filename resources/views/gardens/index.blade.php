@@ -7,6 +7,10 @@
 @section('content')
     {!! breadcrumbs(['Home' => '/', 'Gardens' => 'gardens']) !!}
 
+    <head>
+        <link href="{{ asset('css/gardens.css?v=' . filemtime(public_path('css/gardens.css'))) }}" rel="stylesheet">
+    </head>
+
     <h1>Gardens</h1>
     <p>The gardens are a rich place full of life. In it, several species of plants and animals can be found...</p>
     <noscript>

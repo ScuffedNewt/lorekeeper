@@ -331,9 +331,9 @@ class GardenService extends Service {
         DB::beginTransaction();
 
         try {
-            $objectData = $this->populateObjectData($data);
+            $objectData = $this->populateObjectData($data, $object);
 
-            $object = $object->update([
+            $object->update([
                 'type'         => $data['type'],
                 'object_model' => $data['object_model'],
                 'object_id'    => $data['object_id'],
@@ -409,13 +409,80 @@ class GardenService extends Service {
      *
      * @return array
      */
-    private function populateObjectData($data, $garden = null) {
+    private function populateObjectData($data, $object = null, $garden = null) {
+        if ($data['type'] == 'seed' && isset($object)) {
+            $data['stages'] = $this->handleStageImages($data, $object);
+        }
+
         $data['rewards'] = getDataReadyAssets(processRewardableData($data, true, true));
-        $data['potential_rewards'] = getDataReadyAssets(processRewardableData($data, false, true, 'potential_'));
+        $data['potential_rewards'] = getDataReadyAssets(processRewardableData($data, true, true, 'potential_'));
 
         return Arr::except($data, [
             '_token', 'type', 'object_model', 'object_id', 'rewardable_type', 'rewardable_id', 'quantity',
             'potential_rewardable_type', 'potential_rewardable_id', 'potential_quantity',
         ]);
+    }
+
+    /**
+     * Handles stage images for anything that has variable stages,
+     * and no column signifying the number of stages. (such as seed objects)
+     *
+     * @param array $data
+     * @param GardenObject $object
+     *
+     * @return array
+     */
+    private function handleStageImages($data, $object) {
+        if (isset($data['stage_number'])) {
+            $data['stage_number'] = array_filter($data['stage_number']);
+        }
+        if (isset($data['stage_image'])) {
+            $data['stage_image'] = array_filter($data['stage_image']);
+        }
+        ///
+        $stages = [];
+        if (isset($data['stage_number'])) {
+            // if old stages exist
+            if (isset($object->data['stages'])) {
+                foreach ($object->data['stages'] as $stage) {
+                    // if the stage number is not contained in $data['stage_number'], then delete the old image
+                    if (!in_array($stage, $data['stage_number'])) {
+                        if (file_exists(public_path('images/data/gardens/objects/'.$object->id.'-'.$stage.'-image.png'))) {
+                            $this->deleteImage(public_path('images/data/gardens/objects'), $object->id.'-'.$stage.'-image.png');
+                        }
+                    } else {
+                        $stages[] = $stage;
+                    } // make sure there are no duplicates
+                }
+            }
+
+            $stages = array_unique(array_merge($stages, $data['stage_number']));
+            // now go thru new stages
+            foreach ($stages as $key => $stage) {
+                if (isset($data['stage_image'][$key])) {
+                    $this->handleImage($data['stage_image'][$key], public_path('images/data/gardens/objects'), $object->id.'-'.$stage.'-image.png');
+                }
+            }
+        } else {
+            if (isset($object->data['stages']) && !empty($object->data['stages']) && $object->data['stages'] != '[]') {
+                foreach ($object->data['stages'] as $stage) {
+                    $this->deleteImage(public_path('iimages/data/gardens/objects'), $object->id.'-'.$stage.'-image.png');
+                }
+                // delete all of them that begin with the tag id (just in case)
+                // match all files that begin with the tag id
+                $files = glob(public_path('images/data/gardens/objects/'.$object->id.'-*'));
+                // iterate through the files and delete them
+                foreach ($files as $file) {
+                    if (is_file($file)) {
+                        unlink($file);
+                    }
+                }
+            }
+        }
+
+        unset($data['stage_number']);
+        unset($data['stage_image']);
+
+        return $stages;
     }
 }

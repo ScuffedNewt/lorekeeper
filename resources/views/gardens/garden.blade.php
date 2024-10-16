@@ -7,6 +7,10 @@
 @section('content')
     {!! breadcrumbs(['Home' => '/', 'Gardens' => 'gardens', $garden->name => 'gardens/' . $garden->id]) !!}
 
+    <head>
+        <link href="{{ asset('css/gardens.css?v=' . filemtime(public_path('css/gardens.css'))) }}" rel="stylesheet">
+    </head>
+
     <h1>{{ $garden->name }}</h1>
 
     <div>

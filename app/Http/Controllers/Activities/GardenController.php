@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Activities;
 
 use App\Models\Garden\Garden;
+use App\Models\Garden\GardenObject;
 use App\Models\Garden\GardenPlot;
+use App\Models\User\User;
 use App\Models\User\UserGardenPlot;
+use App\Models\User\UserItem;
 use App\Services\Garden\PlotManager;
 use App\Services\LimitManager;
 use Carbon\Carbon;
@@ -26,9 +29,32 @@ class GardenController extends Controller {
             return $is_garden_unlocked[$garden->id] ? 'unlocked' : 'locked';
         })->reverse();
 
+        $user_garden_objects = [];
+        foreach (GardenObject::all() as $gardenObject) {
+            switch ($gardenObject->object_model) {
+                case 'App\Models\Item\Item':
+                    if (!isset($user_garden_objects['items'])) {
+                        $user_garden_objects['items'] = collect();
+                    }
+                    $user_garden_objects['items']->push(
+                        UserItem::where('user_id', Auth::user()->id)->where('item_id', $gardenObject->object_id)->where('count', '>', 0)->get()
+                    );
+                    break;
+
+                default:
+                    flash('Unknown garden object type: ' . $gardenObject->object_model)->error();
+                    return redirect()->back();
+                    break;
+            }
+        }
+        foreach ($user_garden_objects as $key => $user_garden_object) {
+            $user_garden_objects[$key] = $user_garden_object->flatten();
+        }
+
         return view('gardens.index', [
-            'groups'             => $groups,
-            'is_garden_unlocked' => $is_garden_unlocked,
+            'groups'              => $groups,
+            'is_garden_unlocked'  => $is_garden_unlocked,
+            'user_garden_objects' => $user_garden_objects,
         ]);
     }
 

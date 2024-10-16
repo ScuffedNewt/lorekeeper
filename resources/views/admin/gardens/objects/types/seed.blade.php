@@ -65,11 +65,11 @@
         <p><b>If stages exist, the seed will find the "highest" tier stage to display as the image.</b></p>
         <div class="form-group">
             <div id="stageList">
-                @if (isset($object) && $object->data['stages'])
+                @if (isset($object) && isset($object->data['stages']))
                     <p>Leave image form blank to keep old image.</p>
                     @foreach ($object->data['stages'] as $stage)
                         <div class="d-flex mb-2">
-                            <img src="{{ asset('images/data/seed-stages/' . $tag->id . '-' . $stage . '-image.png') }}" alt="Stage {{ $stage }}" class="mr-2" style="height: 50px;">
+                            <img src="{{ asset('images/data/gardens/objects/' . $object->id . '-' . $stage . '-image.png') }}" alt="Stage {{ $stage }}" class="mr-2" style="height: 50px;">
                             {!! Form::file('stage_image[]') !!} {!! add_help('Leave empty to keep old image.') !!}
                             {!! Form::number('stage_number[]', $stage, ['class' => 'form-control mr-2', 'placeholder' => 'When Does the Stage Appear?']) !!}
                             <a href="#" class="remove-stage btn btn-danger mb-2">×</a>
