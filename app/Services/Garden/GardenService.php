@@ -404,8 +404,9 @@ class GardenService extends Service {
     /**
      * Processes user input for creating/updating a garden object.
      *
-     * @param array  $data
-     * @param Garden $garden
+     * @param array      $data
+     * @param Garden     $garden
+     * @param mixed|null $object
      *
      * @return array
      */
@@ -425,9 +426,9 @@ class GardenService extends Service {
 
     /**
      * Handles stage images for anything that has variable stages,
-     * and no column signifying the number of stages. (such as seed objects)
+     * and no column signifying the number of stages. (such as seed objects).
      *
-     * @param array $data
+     * @param array        $data
      * @param GardenObject $object
      *
      * @return array

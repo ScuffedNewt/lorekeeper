@@ -42,7 +42,8 @@ class GardenController extends Controller {
                     break;
 
                 default:
-                    flash('Unknown garden object type: ' . $gardenObject->object_model)->error();
+                    flash('Unknown garden object type: '.$gardenObject->object_model)->error();
+
                     return redirect()->back();
                     break;
             }
