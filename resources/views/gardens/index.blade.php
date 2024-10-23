@@ -36,7 +36,11 @@
                         @foreach ($gardens as $garden)
                             <li class="nav-item">
                                 <a class="nav-link {{ $loop->first && $group == 'unlocked' ? 'active' : '' }}" id="gardenTab-{{ $garden->id }}" data-toggle="tab" href="#{{ strtolower(str_replace(' ', '-', $garden->name)) }}" role="tab">
-                                    {!! $is_garden_unlocked[$garden->id] ? '' : '<i class="fas fa-lock"></i> ' !!}{{ $garden->name }}
+                                    {!! $is_garden_unlocked[$garden->id] ? '' : '<i class="fas fa-lock"></i> ' !!}
+                                    @if ($garden->has_image)
+                                        <img src="{{ $garden->imageUrl }}" class="img-fluid" style="max-height: 3em;">
+                                    @endif
+                                    {{ $garden->name }}
                                 </a>
                             </li>
                         @endforeach
@@ -48,7 +52,10 @@
                     @foreach ($gardens as $garden)
                         <div class="tab-pane fade {{ $loop->first && $group == 'unlocked' ? 'show active' : '' }}" id="{{ strtolower(str_replace(' ', '-', $garden->name)) }}">
                             @if ($is_garden_unlocked[$garden->id])
-                                @include('gardens._panel', ['garden' => $garden])
+                                @include('gardens._panel', [
+                                    'garden' => $garden,
+                                    'user_garden_objects' => $garden->getUserGardenObjects(Auth::user()),
+                                ])
                             @else
                                 <div class="alert alert-danger">This garden is locked.</div>
                                 @include('widgets._limits', ['object' => $garden])
@@ -89,8 +96,9 @@
 @section('scripts')
     @parent
     @if (Settings::get('garden_view'))
-        @include('gardens._view_js')
+        @include('gardens.js._view_js')
     @endif
+    @include('gardens.js._garden_js')
     <script>
         $(document).ready(function() {
             $('.userselectize').selectize();

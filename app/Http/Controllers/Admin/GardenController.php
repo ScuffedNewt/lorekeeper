@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class GardenController extends Controller {
+
     /**********************************************************************************************
 
         GARDENS
@@ -69,7 +70,7 @@ class GardenController extends Controller {
     public function postCreateEditGarden(Request $request, GardenService $service, $id = null) {
         $data = $request->only([
             'name', 'description', 'image', 'remove_image', 'background_image', 'remove_background_image', 'garden_image', 'remove_garden_image',
-            'can_perish', 'is_active',
+            'can_perish', 'is_active', 'allowed_object_types', 'can_use_modifiers',
         ]);
         if ($id && $service->updateGarden(Garden::find($id), $data, Auth::user())) {
             flash('Garden updated successfully.')->success();

@@ -25,6 +25,8 @@ return new class extends Migration {
             $table->string('name');
             $table->text('description')->nullable()->default(null);
 
+            $table->json('allowed_object_types')->nullable()->default(null);
+
             $table->boolean('is_active')->default(1);
             $table->boolean('can_perish')->default(0); // Can the garden plot contents perish?
             $table->boolean('can_use_modifiers')->default(0);

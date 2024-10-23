@@ -1,10 +1,10 @@
 :root{
   --modifier-button-color: hsl(50, 100%, 50%);
-  --seed-button-color: hsl(75, 50%, 50%);
+  --garden-button-color: hsl(75, 50%, 50%);
   --animal-button-color: hsl(19, 73%, 45%);
 }
 
-.btn:active {
+.btn:active, .garden-button.active {
   outline: .5em solid rgba(255, 0, 0, 0.3) !important;
   outline-offset: -4px;
 }
@@ -49,9 +49,9 @@
   filter: grayscale(0%);
 }
 
-.seed-button {
+.garden-button {
   filter: grayscale(40%);
-  background-color: var(--seed-button-color) !important;
+  background-color: var(--garden-button-color) !important;
 }
 
 .animal-button {
@@ -59,23 +59,23 @@
   background-color: var(--animal-button-color) !important;
 }
 
-.animal-button,.seed-button:hover {
+.animal-button,.garden-button:hover {
   filter: saturate(120%)
 }
 
-.animal-button,.seed-button:active {
+.animal-button,.garden-button:active {
   filter: saturate(150%)
 }
 
-.animal-button,.seed-button:not(:disabled):not(.disabled).active {
+.animal-button,.garden-button:not(:disabled):not(.disabled).active {
   filter: saturate(130%)
 }
 
-.animal-button,.seed-button:active img {
+.animal-button,.garden-button:active img {
   filter: grayscale(0%);
 }
 
-.animal-button,.seed-button:not(:disabled):not(.disabled).active img {
+.animal-button,.garden-button:not(:disabled):not(.disabled).active img {
   filter: grayscale(0%);
 }
 

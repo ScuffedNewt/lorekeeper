@@ -3,6 +3,7 @@
 namespace App\Models\Garden;
 
 use App\Models\Model;
+use App\Models\User\UserItem;
 
 class Garden extends Model {
     /**
@@ -12,6 +13,7 @@ class Garden extends Model {
      */
     protected $fillable = [
         'name', 'description', 'has_image', 'has_background_image', 'has_plot_image', 'is_active', 'can_perish', 'can_use_modifiers',
+        'allowed_object_types',
     ];
 
     /**
@@ -20,6 +22,16 @@ class Garden extends Model {
      * @var string
      */
     protected $table = 'gardens';
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'allowed_object_types' => 'array',
+    ];
+
 
     /**********************************************************************************************
 
@@ -127,5 +139,49 @@ class Garden extends Model {
      */
     public function getIdUrlAttribute() {
         return url('world/gardens/'.str_replace(' ', '-', $this->name));
+    }
+
+    /**********************************************************************************************
+
+        OTHER FUNCTIONS
+
+    **********************************************************************************************/
+
+    /**
+     * Get the user's garden objects.
+     *
+     * @param User $user
+     *
+     * @return array
+     */
+    public function getUserGardenObjects($user) {
+        $gardenObjects = $this->allowed_object_types ? GardenObject::whereIn('type', $this->allowed_object_types)->get() : GardenObject::all();
+        $user_garden_objects = [];
+        foreach ($gardenObjects as $gardenObject) {
+            switch ($gardenObject->object_model) {
+                case 'App\Models\Item\Item':
+                    if (!isset($user_garden_objects['items'][$gardenObject->type])) {
+                        $user_garden_objects['items'][$gardenObject->type] = collect();
+                    }
+                    $user_garden_objects['items'][$gardenObject->type]->push(
+                        // merge them all into one collection
+                        UserItem::where('user_id', $user->id)->where('item_id', $gardenObject->object_id)->where('count', '>', 0)->get()
+                    );
+                    break;
+
+                default:
+                    flash('Unknown garden object type: '.$gardenObject->object_model)->error();
+
+                    return redirect()->to('/');
+                    break;
+            }
+        }
+        foreach ($user_garden_objects as $key => $objects) {
+            foreach ($objects as $type=>$user_garden_object) {
+                $user_garden_objects[$key][$type] = $user_garden_object->flatten();
+            }
+        }
+
+        return $user_garden_objects;
     }
 }

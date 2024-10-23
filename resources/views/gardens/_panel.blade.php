@@ -7,22 +7,19 @@
             ACTIONS HERE
             @include('gardens._actions', ['type' => 'seed'])
         @endif --}}
-        <div class="col-9 col-md-9 col-sm-12 justify-content-center">
-            <div class="row">
+        <div class="{{ $garden->plots->count() ? 'col-9 col-md-9 col-sm-12' : 'col-12' }} justify-content-center">
+            <div class="row justify-content-center">
                 @if ($garden->plots->count())
                     @foreach ($garden->plots as $plot)
                         <div class="col-md-3 mb-3 text-center">
                             <div class="card text-center justify-content-center" style="max-width: 200px; max-height: 200px; aspect-ratio: 1/1; background-color: rgb(88, 54, 54); background-image: url({{ asset($plot->backgroundImage) }});">
                                 <!---- if user owns plot --->
-                                @if (Auth::user()->gardenPlots->contains('plot_id', $plot->id))
+                                @if (Auth::user()->gardenPlots->contains('plot_id', $plot->id) || !\App\Models\Limit\Limit::hasLimits($plot))
                                     @php
-                                        $userPlot = Auth::user()
-                                            ->gardenPlots()
-                                            ->where('plot_id', $plot->id)
-                                            ->first();
+                                        $userPlot = Auth::user()->gardenPlots()->where('plot_id', $plot->id)->first();
                                     @endphp
                                     <!--- If plant is dead show dead thing --->
-                                    @if ($userPlot->is_dead)
+                                    @if ($userPlot?->is_dead)
                                         <div class="btn btn-dark" style="width: 100%; height: 100%;">
                                             {!! Form::open(['url' => 'garden/clear/' . $plot->id]) !!}
                                             <img class="img-fluid my-auto mx-auto pt-2" src="{{ asset('images/garden/dead_seed.png') }}" style="width: 7em; height:7em;">
@@ -32,59 +29,51 @@
                                             {!! Form::close() !!}
                                         </div>
                                     @else
-                                        @if ($userPlot->started_at)
-                                            <!----If there is a plant growing / animal placed, and it is not time to water / feed --->
-                                            @if ($userPlot->actionReady)
+                                        @if ($userPlot?->started_at)
+                                            {{-- SOMETHING IN PLOT --}}
+                                            {{-- @if ($userPlot->actionReady)
                                                 @include('garden._action', ['plot' => $plot, 'userPlot' => $userPlot])
                                             @else
                                                 @include('garden._wait', ['plot' => $plot, 'userPlot' => $userPlot])
-                                            @endif
+                                            @endif --}}
                                         @else
+                                            {{-- NOTHING IN PLOT --}}
                                             <!----If there is NO plant growing --->
-                                            <i class="fas fa-seedling text-white m-1"></i>
-                                            @if ($plot->plot_type == 'seed')
-                                                @if ($userPlot->modifiers != null)
-                                                    @php $mods = json_decode($userPlot->modifiers, true); @endphp
-                                                    @if ($mods['fertiliser'])
-                                                        <p class="text-white"><i class="fas fa-star"></i> Fertiliser Quality: {{ $mods['fertiliser']['quality'] }}</p>
-                                                    @endif
+                                            @if ($userPlot?->modifiers)
+                                                @if ($userPlot?->modifiers['fertiliser'])
+                                                    <p class="text-white"><i class="fas fa-star"></i> Fertiliser Quality: {{ $userPlot?->modifiers['fertiliser']['quality'] }}</p>
                                                 @endif
-                                                <button type="button" class="seed-button-plant btn btn-success hide" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="plantSeed({{ $userPlot->id }}, 'seed')">
-                                                    Plant Seed!
-                                                </button>
-                                                <button type="button" class="mod-button-plant btn btn-warning text-white hide" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button" onclick="addModifier({{ $userPlot->id }})">
-                                                    Apply Modifier!
-                                                </button>
-                                            @else
-                                                <button type="button" class="{{ $plot->plot_type }}-button-plant btn btn-success hide" style="width:100%; height :100%;" id="{{ $userPlot->id }}-button"
-                                                    onclick="placeAnimal({{ $userPlot->id }}, '{{ $userPlot->plot->plot_type }}')">
-                                                    Place Animal!
-                                                </button>
                                             @endif
+                                            <i class="fas fa-seedling text-white m-1"></i>
+                                            <div class="action-button btn btn-success hide mx-2 mt-2" id="{{ $userPlot ? $userplot->id : 'unowned-'.$plot->id }}">
+                                                Place
+                                            </div>
                                         @endif
                                     @endif
                                 @else
                                     <div class="container text-white">
-                                        @if (\App\Models\Limit\Limit::hasLimits($plot))
-                                        @else
-                                            <i class="fas fa-seedling text-white m-1"></i>
-                                        @endif
+                                        <i class="fas fa-lock text-white m-1"></i>
                                     </div>
                                 @endif
                             </div>
                         </div>
                     @endforeach
                 @else
-                    <div class="alert alert-info mb-0">No plots found.</div>
+                    <div class="col-12 text-center">
+                        <div class="alert alert-info w-100 mb-0">No plots found.</div>
+                    </div>
                 @endif
             </div>
         </div>
-        <div class="col-3 col-md-3 col-sm-12">
-            @include('gardens._selector', [
-                'user_garden_objects' => $user_garden_objects,
-                'plots' => $garden->plots,
-            ])
-        </div>
+        @if ($garden->plots->count())
+            <div class="col-3 col-md-3 col-sm-12">
+                @include('gardens._selector', [
+                    'garden' => $garden,
+                    'user_garden_objects' => $user_garden_objects,
+                    'plots' => $garden->plots,
+                ])
+            </div>
+        @endif
     </div>
     {{-- <script>
         $("#seedSelector input:radio").change(function() {

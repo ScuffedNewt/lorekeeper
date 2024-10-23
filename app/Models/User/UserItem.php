@@ -133,7 +133,7 @@ class UserItem extends Model {
      *
      * @return string
      */
-    private function getHeldString($tradeCount, $updateCount, $submissionCount, $gardenCount) {
+    public function getHeldString($tradeCount, $updateCount, $submissionCount, $gardenCount) {
         if (!$tradeCount && !$updateCount && !$submissionCount && !$gardenCount) {
             return null;
         }
