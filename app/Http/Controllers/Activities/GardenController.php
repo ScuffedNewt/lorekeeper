@@ -3,11 +3,9 @@
 namespace App\Http\Controllers\Activities;
 
 use App\Models\Garden\Garden;
-use App\Models\Garden\GardenObject;
 use App\Models\Garden\GardenPlot;
 use App\Models\User\User;
 use App\Models\User\UserGardenPlot;
-use App\Models\User\UserItem;
 use App\Services\Garden\PlotManager;
 use App\Services\LimitManager;
 use Carbon\Carbon;

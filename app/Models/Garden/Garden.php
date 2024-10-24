@@ -32,7 +32,6 @@ class Garden extends Model {
         'allowed_object_types' => 'array',
     ];
 
-
     /**********************************************************************************************
 
         RELATIONS
