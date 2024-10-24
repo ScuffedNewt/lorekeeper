@@ -16,7 +16,10 @@
                                 <!---- if user owns plot --->
                                 @if (Auth::user()->gardenPlots->contains('plot_id', $plot->id) || !\App\Models\Limit\Limit::hasLimits($plot))
                                     @php
-                                        $userPlot = Auth::user()->gardenPlots()->where('plot_id', $plot->id)->first();
+                                        $userPlot = Auth::user()
+                                            ->gardenPlots()
+                                            ->where('plot_id', $plot->id)
+                                            ->first();
                                     @endphp
                                     <!--- If plant is dead show dead thing --->
                                     @if ($userPlot?->is_dead)
@@ -45,7 +48,7 @@
                                                 @endif
                                             @endif
                                             <i class="fas fa-seedling text-white m-1"></i>
-                                            <div class="action-button btn btn-success hide mx-2 mt-2" id="{{ $userPlot ? $userplot->id : 'unowned-'.$plot->id }}">
+                                            <div class="action-button btn btn-success hide mx-2 mt-2" id="{{ $userPlot ? $userplot->id : 'unowned-' . $plot->id }}">
                                                 Place
                                             </div>
                                         @endif
