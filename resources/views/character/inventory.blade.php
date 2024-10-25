@@ -46,7 +46,10 @@
                             @foreach ($chunk as $itemId => $stack)
                                 <?php
                                 $canName = $stack->first()->category->can_name;
-                                $stackName = $stack->first()->pivot->pluck('stack_name', 'id')->toArray()[$stack->first()->pivot->id];
+                                $stackName = $stack
+                                    ->first()
+                                    ->pivot->pluck('stack_name', 'id')
+                                    ->toArray()[$stack->first()->pivot->id];
                                 $stackNameClean = htmlentities($stackName);
                                 ?>
                                 <div class="col-sm-3 col-6 text-center inventory-item" data-id="{{ $stack->first()->pivot->id }}"
