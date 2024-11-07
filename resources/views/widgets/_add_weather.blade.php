@@ -11,13 +11,13 @@
 
     <p>
         Weather can be added to this object to give it a little extra flavor. You can add multiple weather types to a single object, and have multiple be active!
-        <br/>You can also optionally set a reset time for the weather, which will cause the weather to change after the set amount of time has passed.
-        <br />This should be treated as: 
-        <ul class="mb-0">
-            <li>The current weather for the object. Ex. if you have a prompt that focuses on character's reaction to the weather.</li>
-            <li>A list of possible weather types that can occur at this object. Ex. Listing a location's typical weather.</li>
-            <li>During what weather types this object is accessible. Ex. if a prompt only becomes available during "rain".</li>
-        </ul>
+        <br />You can also optionally set a reset time for the weather, which will cause the weather to change after the set amount of time has passed.
+        <br />This should be treated as:
+    <ul class="mb-0">
+        <li>The current weather for the object. Ex. if you have a prompt that focuses on character's reaction to the weather.</li>
+        <li>A list of possible weather types that can occur at this object. Ex. Listing a location's typical weather.</li>
+        <li>During what weather types this object is accessible. Ex. if a prompt only becomes available during "rain".</li>
+    </ul>
     </p>
     <p>
         If you want this object to only be accessible during certain weathers, simply enable the "Hidden" option. This means the object will only be visible if <em>The site's weather</em> matches the set weather.

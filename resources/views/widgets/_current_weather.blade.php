@@ -1,6 +1,6 @@
 @php
     $season = getSiteWeather()['season'];
-    $weather = getSiteWeather()['weather']
+    $weather = getSiteWeather()['weather'];
 @endphp
 
 @if (Settings::get('show_weather_on_front_page') && ($season || $weather))
