@@ -464,8 +464,6 @@ class WorldController extends Controller {
         ]);
     }
 
-    /// weather
-
     /**
      * Shows the seasons page.
      *
@@ -523,9 +521,6 @@ class WorldController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getForecast(Request $request) {
-        return view('world.forecast', [
-            'weather' => Weather::where('id', Settings::get('site_weather'))->first(),
-            'season'  => Season::where('id', Settings::get('site_season'))->first(),
-        ]);
+        return view('world.forecast');
     }
 }

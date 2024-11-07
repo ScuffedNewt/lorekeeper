@@ -448,3 +448,24 @@ function prettyProfileName($url) {
         return $url;
     }
 }
+
+/**
+ * Returns the site's current season and weather.
+ * 
+ * @return array
+ */
+function getSiteWeather() {
+    $season = App\Models\Weather\Season::find(Settings::get('site_season'));
+    $weather = App\Models\Weather\Weather::find(Settings::get('site_weather'));
+
+    return ['season' => $season, 'weather' => $weather];
+}
+
+/**
+ * Returns a specific object's weather, if it has one.
+ * 
+ * @param ObjectWeather $object
+ */
+function getObjectWeather($object) {
+    return App\Models\Weather\ObjectWeather::where('object_model', get_class($object))->where('object_id', $object->id)->first();
+}

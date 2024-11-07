@@ -272,20 +272,26 @@ class WeatherService extends Service {
             // match false with all weather_ids
             $active_weather = [];
             $weather_ids = [];
-            foreach ($data['weather_ids'] as $key=>$weather_id) {
+            foreach ($data['weather_ids'] ?? [] as $key=>$weather_id) {
                 $weather_ids[$weather_id] = $data['weight'][$key] ?? 1;
-                if ($data['active'][$key]) {
+                if (isset($data['active'][$key]) && $data['active'][$key]) {
                     $active_weather[] = $weather_id;
                 }
             }
 
             // create the weatherobject
             $objectWeather = ObjectWeather::create([
-                'object_model'    => $object_model,
-                'object_id'       => $object_id,
-                'weathers'        => $weather_ids,
-                'active_weathers' => $active_weather,
-                'reset_period'    => $data['reset_period'] ?? null,
+                'object_model'       => $object_model,
+                'object_id'          => $object_id,
+                'is_hidden'          => $data['is_hidden'],
+                'weathers'           => $weather_ids,
+                'active_weathers'    => $active_weather,
+                'reset_period'       => $data['reset_period'] ?? null,
+                'use_season_weather' => $data['use_season_weather'],
+                'data'               => [
+                    'min_selected_weather' => $data['min_selected_weather'] ?? 1,
+                    'max_selected_weather' => $data['max_selected_weather'] ?? 1,
+                ]
             ]);
 
             // log the action
@@ -312,11 +318,11 @@ class WeatherService extends Service {
         DB::beginTransaction();
 
         try {
-            if (!isset($data['weather_ids']) || !$data['weather_ids']) {
+            if ((!isset($data['weather_ids']) || !$data['weather_ids']) && !isset($data['use_season_weather']) && !$data['use_season_weather']) {
                 throw new \Exception('No weather provided.');
             }
             // check that there is not duplicate element ids
-            if (count($data['weather_ids']) != count(array_unique($data['weather_ids']))) {
+            if (isset($data['weather_ids']) && count($data['weather_ids']) != count(array_unique($data['weather_ids']))) {
                 throw new \Exception('Duplicate weather provided.');
             }
             // check that a weatherobject with this model and id doesn't already exist
@@ -326,18 +332,26 @@ class WeatherService extends Service {
 
             $active_weather = [];
             $weather_ids = [];
-            foreach ($data['weather_ids'] as $key=>$weather_id) {
+            foreach ($data['weather_ids'] ?? [] as $key=>$weather_id) {
                 $weather_ids[$weather_id] = $data['weight'][$key] ?? 1;
-                if ($data['active'][$key]) {
+                if (isset($data['active'][$key]) && $data['active'][$key]) {
                     $active_weather[] = $weather_id;
                 }
             }
 
+            \Log::info(json_encode($data));
+
             // create the weatherobject
             $weatherObject->update([
-                'weathers'        => $weather_ids,
-                'active_weathers' => $active_weather,
-                'reset_period'    => $data['reset_period'] ?? null,
+                'is_hidden'          => $data['is_hidden'] ?? 0,
+                'weathers'           => $weather_ids,
+                'active_weathers'    => $active_weather,
+                'reset_period'       => $data['reset_period'] ?? null,
+                'use_season_weather' => $data['use_season_weather'] ?? 0,
+                'data'               => [
+                    'min_selected_weather' => $data['min_selected_weather'] ?? 1,
+                    'max_selected_weather' => $data['max_selected_weather'] ?? 1,
+                ]
             ]);
 
             // log the action

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Facades\Settings;
 use App\Models\Prompt\Prompt;
 use App\Models\Prompt\PromptCategory;
 use Illuminate\Http\Request;
@@ -50,7 +51,8 @@ class PromptsController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getPrompts(Request $request) {
-        $query = Prompt::active()->staffOnly(Auth::user() ?? null)->with('category');
+        $user = Auth::user() ?? null;
+        $query = Prompt::active($user)->staffOnly($user)->with('category');
         $data = $request->only(['prompt_category_id', 'name', 'sort', 'open_prompts']);
         if (isset($data['prompt_category_id']) && $data['prompt_category_id'] != 'none') {
             if ($data['prompt_category_id'] == 'withoutOption') {
@@ -126,7 +128,8 @@ class PromptsController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getPrompt(Request $request, $id) {
-        $prompt = Prompt::active()->where('id', $id)->first();
+        $prompt = Prompt::active(Auth::user() ?? null)->where('id', $id)->available()->first();
+        
 
         if (!$prompt) {
             abort(404);

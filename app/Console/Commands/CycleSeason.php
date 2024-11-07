@@ -44,7 +44,7 @@ class CycleSeason extends Command {
             return;
         }
 
-        if (!$newSeason | $newSeason->end_month < Carbon::now()->month) {
+        if (!$newSeason || $newSeason->end_month < Carbon::now()->month) {
             $this->info('No season found.');
             Settings::set('site_season', null);
 
@@ -53,5 +53,6 @@ class CycleSeason extends Command {
 
         DB::table('site_settings')->where('key', 'site_season')->update(['value' => $newSeason->id]);
         $this->info('Season adjusted successfully.');
+        $this->info('New season: '.$newSeason->name.'.');
     }
 }

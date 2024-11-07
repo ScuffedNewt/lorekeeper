@@ -39,6 +39,8 @@
                     <div class="col-3 col-md-5">
                         @if (Settings::get('site_weather') == $weather->id)
                             <i class="text-success fas fa-check"></i>
+                        @else
+                            <i class="text-danger fas fa-times"></i>
                         @endif
                     </div>
                     <div class="col-3 col-md-1 text-right"><a href="{{ url('admin/weather/weathers/edit/' . $weather->id) }}" class="btn btn-primary py-0 px-2">Edit</a></div>

@@ -12,7 +12,7 @@ class ObjectWeather extends Model {
      * @var array
      */
     protected $fillable = [
-        'object_model', 'object_id', 'weathers', 'active_weathers', 'reset_period',
+        'object_model', 'object_id', 'weathers', 'active_weathers', 'reset_period', 'use_season_weather', 'is_hidden', 'data',
     ];
 
     /**
@@ -30,6 +30,7 @@ class ObjectWeather extends Model {
     protected $casts = [
         'weathers'        => 'array',
         'active_weathers' => 'array',
+        'data'            => 'array',
     ];
 
     /**********************************************************************************************
@@ -55,9 +56,18 @@ class ObjectWeather extends Model {
      * Returns the weathers for the object as a Weather model.
      */
     public function getWeather() {
-        return Weather::whereIn('id', array_keys($this->weathers))->get();
+        if ($this->use_season_weather && !$this->is_hidden) {
+            $season = getSiteWeather()['season'];
+            if ($season) {
+                $seasonWeather = $season->weather()->get();
+            }
+        } else {
+            $seasonWeather = collect();
+        }
+        $modelWeather = Weather::whereIn('id', array_keys($this->weathers))->get();
+        return $modelWeather->merge($seasonWeather);
     }
-
+    
     /**
      * Returns the active weathers for the object as a Weather model.
      */
@@ -99,6 +109,10 @@ class ObjectWeather extends Model {
             }
         }
 
+        if (!count($message)) {
+            return 'No active weather.';
+        }
+
         return implode(', ', $message);
     }
 
@@ -115,13 +129,31 @@ class ObjectWeather extends Model {
      * Changes the current active weather for the object.
      */
     public function changeWeather() {
+        $availableWeathers = [];
         $totalWeight = 0;
         foreach ($this->weathers as $id=>$weight) {
+            $availableWeathers[$id] = $weight;
             $totalWeight += $weight;
         }
 
+        if ($this->use_season_weather) {
+            $season = getSiteWeather()['season'];
+            if ($season) {
+                foreach ($season->weather as $weather) {
+                    $availableWeathers[$weather->id] = $weather->weight;
+                    $totalWeight += $weather->weight;
+                }
+            }
+        }
+
+        // shuffle the array to get a random order
+        shuffle($availableWeathers);
+
         $chosen_weather = [];
-        for ($i = 0; $i < Settings::get('max_weather_per_object'); $i++) {
+        $min_selected = $this->data['min_weather_selected'] ?? 1;
+        $max_selected = $this->data['max_weather_selected'] ?? 1;
+        $selected = mt_rand($min_selected, $max_selected);
+        for ($i = 0; $i < $selected; $i++) {
             if ($totalWeight == 0) {
                 continue;
             }
@@ -129,7 +161,7 @@ class ObjectWeather extends Model {
             $result = null;
             $prev = null;
             $count = 0;
-            foreach ($this->weathers as $id=>$weight) {
+            foreach ($availableWeathers as $id=>$weight) {
                 $count += $weight;
 
                 if ($roll < $count) {

@@ -316,7 +316,10 @@ class WeatherController extends Controller {
      * @return \Illuminate\Http\RedirectResponse
      */
     public function postObjectWeather(Request $request, WeatherService $service) {
-        $data = $request->only(['objectWeather', 'object_model', 'object_id', 'weather_ids', 'weight', 'reset_period', 'active']);
+        $data = $request->only([
+            'objectWeather', 'object_model', 'object_id', 'weather_ids', 'weight', 'reset_period', 'active',
+            'use_season_weather', 'is_hidden', 'min_selected_weather', 'max_selected_weather',
+        ]);
         if (isset($data['objectWeather']) && $data['objectWeather']) {
             $objectWeather = ObjectWeather::find($data['objectWeather']);
             if (!$objectWeather) {
@@ -326,7 +329,10 @@ class WeatherController extends Controller {
                     'error'   => 'Invalid object weather.',
                 ], 400);
             }
-            if (!$service->editObjectWeather($objectWeather, Arr::only($data, ['weather_ids', 'weight', 'reset_period', 'active']), Auth::user())) {
+            if (!$service->editObjectWeather($objectWeather, Arr::only($data, [
+                    'weather_ids', 'weight', 'reset_period', 'active', 'use_season_weather', 'is_hidden', 'min_selected_weather', 'max_selected_weather'
+                ]), Auth::user())) {
+                flash($service->errors()->getMessages()['error'][0])->error();
                 flash('Failed to edit object weather.')->error();
 
                 return response()->json([
@@ -336,9 +342,12 @@ class WeatherController extends Controller {
         } elseif (!$newObjectWeather = $service->createObjectWeather(
             urldecode($data['object_model']),
             $data['object_id'],
-            Arr::only($data, ['weather_ids', 'weight', 'reset_period', 'active']),
+            Arr::only($data, [
+                'weather_ids', 'weight', 'reset_period', 'active'. 'use_season_weather', 'is_hidden', 'min_selected_weather', 'max_selected_weather'
+            ]),
             Auth::user()
         )) {
+            flash($service->errors()->getMessages()['error'][0])->error();
             flash('Failed to create object weather.')->error();
 
             return response()->json([

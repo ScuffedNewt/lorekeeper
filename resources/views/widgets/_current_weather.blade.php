@@ -1,6 +1,6 @@
 @php
-    $weather = \App\Models\Weather\Weather::where('id', Settings::get('site_weather'))->first();
-    $season = \App\Models\Weather\Season::where('id', Settings::get('site_season'))->first();
+    $season = getSiteWeather()['season'];
+    $weather = getSiteWeather()['weather']
 @endphp
 
 @if (Settings::get('show_weather_on_front_page') && ($season || $weather))

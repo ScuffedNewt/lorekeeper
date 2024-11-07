@@ -41,8 +41,12 @@ class CycleWeather extends Command {
         // weather objects
         $objectWeathers = ObjectWeather::all();
         foreach ($objectWeathers as $objectWeather) {
-            $this->info('Cycling weather for '.$objectWeather->name.'...');
-            $this->info('Reset period: '.$objectWeather->reset_period);
+            $this->info('Cycling weather for '.$objectWeather->object?->name.'...');
+            $this->info('Reset period: '.$objectWeather->reset_period ?? 'None');
+            if (!$objectWeather->reset_period) {
+                $this->info('No reset period set. Skipping...');
+                continue;
+            }
             switch ($objectWeather->reset_period) {
                 case 'Hour':
                     // reset every hour
@@ -87,6 +91,7 @@ class CycleWeather extends Command {
                     break;
                 default:
                     // no reset
+                    $this->info('Unknown reset period. Skipping...');
                     break;
             }
         }
@@ -94,20 +99,33 @@ class CycleWeather extends Command {
         // site wide weather
         $currentSeason = Season::where('id', Settings::get('site_season'))->first();
         if (!$currentSeason) {
-            $this->info('No season found. Please set a season in the admin panel.');
-
-            return;
+            // check that this is not running from the scheduler
+            if (app()->runningInConsole()) {
+                $this->info('No season found. Please set a season in the admin panel.');
+                return;    
+            }
+            $ask = $this->ask('No season found. Do you still want to cycle the weather? (y/n)', 'n');
+            // check
+            if ($ask != 'y') {
+                return;
+            }
         }
 
-        $results = $currentSeason->roll();
-        $finalweather = $results[0]->id;
+        if ($currentSeason) {
+            $results = $currentSeason->roll();
+            $finalweather = $results[0]->weather->id;
+        } else {
+            // select a random weather
+            $randomWeather = Weather::inRandomOrder()->first();
+            $finalweather = $randomWeather->id;
+        }
 
         //change the weather
         if (!Settings::get('cycle_site_weather')) {
             // no reset setting
             $this->info('Not set to cycle weather currently. Adjust the settings if this is an error.');
         } elseif (Settings::get('cycle_site_weather') == 2) {
-            //weekly reset setting
+            // weekly reset setting
             $now = Carbon::now();
             $day = $now->dayOfWeek;
             if ($day != 1) {
@@ -124,5 +142,6 @@ class CycleWeather extends Command {
 
         DB::table('site_settings')->where('key', 'site_weather')->update(['value' => $finalweather]);
         $this->info('Weather adjusted successfully.');
+        $this->info('New weather: '.$results[0]->weather->name.'.');
     }
 }

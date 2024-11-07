@@ -2,6 +2,8 @@
 
 namespace App\Models\Prompt;
 
+use App\Facades\Settings;
+use App\Models\Weather\ObjectWeather;
 use App\Models\Model;
 use Carbon\Carbon;
 
@@ -82,11 +84,39 @@ class Prompt extends Model {
         return $this->hasMany(PromptReward::class, 'prompt_id');
     }
 
+    /**
+     * Gets the weather attached to the prompt for filtering.
+     */
+    public function weather() {
+        return $this->belongsTo(ObjectWeather::class, 'id', 'object_id')->where('object_model', 'App\Models\Prompt\Prompt');
+    }
+
     /**********************************************************************************************
 
         SCOPES
 
     **********************************************************************************************/
+
+    /**
+     * Scope a query to only include prompts that are available based on various factors.
+     * 
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * 
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeAvailable($query, $user = null) {
+        if ($user && $user->isStaff) {
+            return $query;
+        }
+
+        $currentWeather = Settings::get('site_weather');
+        return $query->where(function ($query) use ($currentWeather) {
+            $query->whereHas('weather', function ($query) use ($currentWeather) {
+                $query->whereRaw("JSON_CONTAINS_PATH(weathers, 'one', '$.\"$currentWeather\"')")
+                ->orWhere('is_hidden', 0);
+            })->orWhereDoesntHave('weather');
+        });
+    }
 
     /**
      * Scope a query to only include active prompts.
@@ -95,8 +125,12 @@ class Prompt extends Model {
      *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeActive($query) {
-        return $query->where('is_active', 1)
+    public function scopeActive($query, $user = null) {
+        if ($user && $user->isStaff) {
+            return $query;
+        }
+
+        return $query->available($user)->where('is_active', 1)
             ->where(function ($query) {
                 $query->whereNull('start_at')->orWhere('start_at', '<', Carbon::now())->orWhere(function ($query) {
                     $query->where('start_at', '>=', Carbon::now())->where('hide_before_start', 0);
@@ -118,7 +152,7 @@ class Prompt extends Model {
      */
     public function scopeOpen($query, $isOpen) {
         if ($isOpen) {
-            $query->where(function ($query) {
+            $query->available()->where(function ($query) {
                 $query->whereNull('end_at')->where('start_at', '<', Carbon::now());
             })->orWhere(function ($query) {
                 $query->whereNull('start_at')->where('end_at', '>', Carbon::now());
@@ -128,7 +162,7 @@ class Prompt extends Model {
                 $query->whereNull('end_at')->whereNull('start_at');
             });
         } else {
-            $query->where(function ($query) {
+            $query->available()->where(function ($query) {
                 $query->whereNull('end_at')->where('start_at', '>', Carbon::now());
             })->orWhere(function ($query) {
                 $query->whereNull('start_at')->where('end_at', '<', Carbon::now());
@@ -314,5 +348,15 @@ class Prompt extends Model {
      */
     public function getAdminPowerAttribute() {
         return 'edit_data';
+    }
+
+    /**
+     * Returns if the prompt is normally visible, so that staff can identify hidden prompts.
+     * 
+     * @return bool
+     */
+    public function getIsVisibleAttribute() {
+        // check if the prompt appears in the active scope
+        return $this->active()->exists() && !$this->staff_only;
     }
 }

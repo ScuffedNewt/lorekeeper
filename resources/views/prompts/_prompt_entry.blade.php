@@ -8,9 +8,21 @@
         <x-admin-edit title="Prompt" :object="$prompt" />
         <div class="mb-3">
             @if (isset($isPage))
-                <h1 class="mb-0">{!! $prompt->name !!}</h1>
+                <h1 class="mb-0">
+                    @if (!$prompt->isVisible && Auth::check() && Auth::user()->isStaff)
+                        <i class="fas fa-eye-slash" title="This prompt is hidden to regular users."></i>
+                    @endif
+                    {!! $prompt->name !!}
+                </h1>
             @else
-                <h2 class="mb-0"><a href="{{ url('prompts/' . $prompt->id) }}">{!! $prompt->name !!}</a></h2>
+                <h2 class="mb-0">
+                    <a href="{{ url('prompts/' . $prompt->id) }}">
+                        @if (!$prompt->isVisible && Auth::check() && Auth::user()->isStaff)
+                            <i class="fas fa-eye-slash" title="This prompt is hidden to regular users."></i>
+                        @endif
+                        {!! $prompt->name !!}
+                    </a>
+                </h2>
             @endif
             @if ($prompt->prompt_category_id)
                 <div>
