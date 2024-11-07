@@ -102,7 +102,8 @@ class CycleWeather extends Command {
             // check that this is not running from the scheduler
             if (app()->runningInConsole()) {
                 $this->info('No season found. Please set a season in the admin panel.');
-                return;    
+
+                return;
             }
             $ask = $this->ask('No season found. Do you still want to cycle the weather? (y/n)', 'n');
             // check

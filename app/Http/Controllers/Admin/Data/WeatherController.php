@@ -330,8 +330,8 @@ class WeatherController extends Controller {
                 ], 400);
             }
             if (!$service->editObjectWeather($objectWeather, Arr::only($data, [
-                    'weather_ids', 'weight', 'reset_period', 'active', 'use_season_weather', 'is_hidden', 'min_selected_weather', 'max_selected_weather'
-                ]), Auth::user())) {
+                'weather_ids', 'weight', 'reset_period', 'active', 'use_season_weather', 'is_hidden', 'min_selected_weather', 'max_selected_weather',
+            ]), Auth::user())) {
                 flash($service->errors()->getMessages()['error'][0])->error();
                 flash('Failed to edit object weather.')->error();
 
@@ -343,7 +343,7 @@ class WeatherController extends Controller {
             urldecode($data['object_model']),
             $data['object_id'],
             Arr::only($data, [
-                'weather_ids', 'weight', 'reset_period', 'active'. 'use_season_weather', 'is_hidden', 'min_selected_weather', 'max_selected_weather'
+                'weather_ids', 'weight', 'reset_period', 'active'.'use_season_weather', 'is_hidden', 'min_selected_weather', 'max_selected_weather',
             ]),
             Auth::user()
         )) {

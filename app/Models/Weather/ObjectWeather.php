@@ -2,7 +2,6 @@
 
 namespace App\Models\Weather;
 
-use App\Facades\Settings;
 use App\Models\Model;
 
 class ObjectWeather extends Model {
@@ -65,9 +64,10 @@ class ObjectWeather extends Model {
             $seasonWeather = collect();
         }
         $modelWeather = Weather::whereIn('id', array_keys($this->weathers))->get();
+
         return $modelWeather->merge($seasonWeather);
     }
-    
+
     /**
      * Returns the active weathers for the object as a Weather model.
      */

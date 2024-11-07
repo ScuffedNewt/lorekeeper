@@ -18,7 +18,6 @@ use App\Models\Weather\Season;
 use App\Models\Weather\Weather;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Settings;
 
 class WorldController extends Controller {
     /*

@@ -291,7 +291,7 @@ class WeatherService extends Service {
                 'data'               => [
                     'min_selected_weather' => $data['min_selected_weather'] ?? 1,
                     'max_selected_weather' => $data['max_selected_weather'] ?? 1,
-                ]
+                ],
             ]);
 
             // log the action
@@ -351,7 +351,7 @@ class WeatherService extends Service {
                 'data'               => [
                     'min_selected_weather' => $data['min_selected_weather'] ?? 1,
                     'max_selected_weather' => $data['max_selected_weather'] ?? 1,
-                ]
+                ],
             ]);
 
             // log the action

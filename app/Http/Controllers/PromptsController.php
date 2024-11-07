@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Facades\Settings;
 use App\Models\Prompt\Prompt;
 use App\Models\Prompt\PromptCategory;
 use Illuminate\Http\Request;
@@ -129,7 +128,6 @@ class PromptsController extends Controller {
      */
     public function getPrompt(Request $request, $id) {
         $prompt = Prompt::active(Auth::user() ?? null)->where('id', $id)->available()->first();
-        
 
         if (!$prompt) {
             abort(404);

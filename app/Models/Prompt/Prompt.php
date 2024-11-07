@@ -3,8 +3,8 @@
 namespace App\Models\Prompt;
 
 use App\Facades\Settings;
-use App\Models\Weather\ObjectWeather;
 use App\Models\Model;
+use App\Models\Weather\ObjectWeather;
 use Carbon\Carbon;
 
 class Prompt extends Model {
@@ -99,9 +99,10 @@ class Prompt extends Model {
 
     /**
      * Scope a query to only include prompts that are available based on various factors.
-     * 
+     *
      * @param \Illuminate\Database\Eloquent\Builder $query
-     * 
+     * @param mixed|null                            $user
+     *
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeAvailable($query, $user = null) {
@@ -110,10 +111,11 @@ class Prompt extends Model {
         }
 
         $currentWeather = Settings::get('site_weather');
+
         return $query->where(function ($query) use ($currentWeather) {
             $query->whereHas('weather', function ($query) use ($currentWeather) {
-                $query->whereRaw("JSON_CONTAINS_PATH(weathers, 'one', '$.\"$currentWeather\"')")
-                ->orWhere('is_hidden', 0);
+                $query->whereRaw("JSON_CONTAINS_PATH(weathers, 'one', '$.\"{$currentWeather}\"')")
+                    ->orWhere('is_hidden', 0);
             })->orWhereDoesntHave('weather');
         });
     }
@@ -122,6 +124,7 @@ class Prompt extends Model {
      * Scope a query to only include active prompts.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param mixed|null                            $user
      *
      * @return \Illuminate\Database\Eloquent\Builder
      */
@@ -352,7 +355,7 @@ class Prompt extends Model {
 
     /**
      * Returns if the prompt is normally visible, so that staff can identify hidden prompts.
-     * 
+     *
      * @return bool
      */
     public function getIsVisibleAttribute() {

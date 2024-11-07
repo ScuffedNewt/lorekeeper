@@ -451,7 +451,7 @@ function prettyProfileName($url) {
 
 /**
  * Returns the site's current season and weather.
- * 
+ *
  * @return array
  */
 function getSiteWeather() {
@@ -463,7 +463,7 @@ function getSiteWeather() {
 
 /**
  * Returns a specific object's weather, if it has one.
- * 
+ *
  * @param ObjectWeather $object
  */
 function getObjectWeather($object) {
