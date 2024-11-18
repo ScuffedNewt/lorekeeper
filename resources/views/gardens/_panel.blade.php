@@ -71,8 +71,8 @@
         @if ($garden->plots->count())
             <div class="col-3 col-md-3 col-sm-12">
                 @include('gardens._selector', [
-                    'plots'               => $garden->plots,
-                    'garden'              => $garden,
+                    'plots' => $garden->plots,
+                    'garden' => $garden,
                     'user_garden_objects' => $user_garden_objects,
                 ])
             </div>

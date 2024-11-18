@@ -9,8 +9,8 @@
             @foreach ($objects as $object_type => $stacks)
                 @if (get_class($stacks->first()) == 'App\Models\User\UserItem')
                     @include('gardens.selectors._user_item', [
-                        'object_type'   => $object_type,
-                        'stack_type'    => $type,
+                        'object_type' => $object_type,
+                        'stack_type' => $type,
                         'stacks' => $stacks,
                         'garden' => $garden,
                     ])
