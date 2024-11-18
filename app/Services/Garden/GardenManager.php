@@ -4,9 +4,7 @@ namespace App\Services\Garden;
 
 use App\Models\Garden\Garden;
 use App\Models\Garden\GardenObject;
-use App\Models\Garden\GardenPlot;
 use App\Services\Service;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
 class GardenManager extends Service {
@@ -21,15 +19,14 @@ class GardenManager extends Service {
 
     /**
      * Places an object in the garden on a specified plot.
-     * 
-     * @param User $user
+     *
+     * @param User  $user
      * @param array $data
      */
     public function place($user, $data) {
         DB::beginTransaction();
 
         try {
-
             $garden = Garden::find($data['current_garden_id']);
             if (!$garden) {
                 throw new \Exception('Garden not found.');
@@ -59,5 +56,4 @@ class GardenManager extends Service {
 
         return $this->rollbackReturn(false);
     }
-
 }
