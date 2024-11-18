@@ -7,6 +7,7 @@ use App\Models\Garden\GardenPlot;
 use App\Models\User\User;
 use App\Models\User\UserGardenPlot;
 use App\Services\Garden\PlotManager;
+use App\Services\Garden\GardenManager;
 use App\Services\LimitManager;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -48,6 +49,31 @@ class GardenController extends Controller {
             'garden' => $garden,
         ]);
     }
+
+    /**
+     * Places item / object in the plot.
+     */
+    public function postPlace(GardenManager $service, Request $request) {
+        $data = $request->only([
+            'selected_stack_id', 'current_garden_id', 'plot_id', 'type',
+        ]);
+        if (!$service->place(Auth::user(), $data)) {
+            return response()->json([
+                'status'     => 'error',
+                'errors'     => $service->errors()->getMessages()['error'],
+                'message'    => $request->message,
+            ]);
+        }
+
+        return response()->json([
+            'status'     => 'success',
+            'message'    => $request->message,
+        ]);
+    }
+
+    /************************************************************************************
+     * OLD STUFF
+     ************************************************************************************/
 
     /**
      * Plant seed | Place coop / barn animal.

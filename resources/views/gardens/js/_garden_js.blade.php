@@ -1,56 +1,62 @@
 <script>
     let selected_stack;
     let current_garden;
+    let stack_type;
+    let object_type;
     $('.garden-button').click(function(e) {
         e.preventDefault();
         $('.garden-button').removeClass('active').removeClass('focus');
         let id = $(this).data('garden-id');
         let current_garden_id = $(this).data('current-garden-id');
+        let stack_type = $(this).data('stack-type');
+        let object_type = $(this).data('object-type');
         selected_stack = id;
         current_garden = current_garden_id ?? 'none';
+        stack_type = stack_type;
+        object_type = object_type;
 
-        $(this).addClass('focus');
         console.log('Selected stack: ' + selected_stack);
         console.log('Current garden: ' + current_garden);
+        console.log('Stack type: ' + stack_type);
+        console.log('Object type: ' + object_type);
 
+        $(this).addClass('focus');
         showGardenButtons(selected_stack);
     });
 
     $('.action-button').click(function(e) {
         e.preventDefault();
-        let action = $(this).data('action');
-        console.log('Action: ' + action);
+        let plot_id = $(this).data('plot-id');
         console.log('Selected stack: ' + selected_stack);
         console.log('Current garden: ' + current_garden);
+        console.log('Plot ID: ' + plot_id);
+        console.log('Stack type: ' + stack_type);
+        console.log('Object type: ' + object_type);
 
-        // if (action == 'move') {
-        //     if (current_garden == 'none') {
-        //         alert('Please select a garden to move this item to.');
-        //         return;
-        //     }
-        //     $.ajax({
-        //         url: "{{ url('gardens/move') }}",
-        //         type: 'POST',
-        //         data: {
-        //             'selected_stack': selected_stack,
-        //             'current_garden': current_garden,
-        //             '_token': '{{ csrf_token() }}'
-        //         },
-        //         success: function(data) {
-        //             console.log(data);
-        //             if (data.success) {
-        //                 alert('Item moved successfully.');
-        //                 location.reload();
-        //             } else {
-        //                 alert('Error moving item.');
-        //             }
-        //         },
-        //         error: function(data) {
-        //             console.log(data);
-        //             alert('Error moving item.');
-        //         }
-        //     });
-        // }
+        $.ajax({
+            url: "{{ url('gardens/place') }}",
+            type: 'POST',
+            data: {
+                'object_type': object_type,
+                'stack_type': stack_type,
+                'selected_stack_id': selected_stack,
+                'current_garden_id': current_garden,
+                'plot_id': plot_id,
+                '_token': '{{ csrf_token() }}'
+            },
+            success: function(data) {
+                console.log(data);
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error using item.');
+                }
+            },
+            error: function(data) {
+                console.log(data);
+                alert('Error using item.');
+            }
+        });
     });
 
     function showGardenButtons(selected_stack) {

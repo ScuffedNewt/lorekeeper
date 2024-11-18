@@ -15,7 +15,7 @@ class GardenService extends Service {
     | Garden Service
     |--------------------------------------------------------------------------
     |
-    | Handles the creation and editing of garden categories and gardens.
+    | Handles the creation and editing of garden plots, garden objects, and gardens.
     |
     */
 

@@ -14,11 +14,12 @@
 }
 
 .image-zoom{
+  transform: scale(0.8);
   transition: transform .2s;
 }
 
 .image-zoom:hover {
-  transform: scale(1.2);
+  transform: scale(1);
 }
 
 .modifier-button {

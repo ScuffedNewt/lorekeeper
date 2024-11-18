@@ -48,7 +48,7 @@
                                                 @endif
                                             @endif
                                             <i class="fas fa-seedling text-white m-1"></i>
-                                            <div class="action-button btn btn-success hide mx-2 mt-2" id="{{ $userPlot ? $userplot->id : 'unowned-' . $plot->id }}">
+                                            <div class="action-button btn btn-success hide mx-2 mt-2" data-plot-id="{{ $userPlot ? $userPlot->id : 'unowned-' . $plot->id }}">
                                                 Place
                                             </div>
                                         @endif
@@ -71,55 +71,14 @@
         @if ($garden->plots->count())
             <div class="col-3 col-md-3 col-sm-12">
                 @include('gardens._selector', [
-                    'garden' => $garden,
+                    'plots'               => $garden->plots,
+                    'garden'              => $garden,
                     'user_garden_objects' => $user_garden_objects,
-                    'plots' => $garden->plots,
                 ])
             </div>
         @endif
     </div>
     {{-- <script>
-        $("#seedSelector input:radio").change(function() {
-            selectedSeed = $(this).val();
-            if (selectedSeed == null || selectedSeed == 0) {
-                $(".seed-button-plant").each(function() {
-                    $(this).addClass('hide');
-                })
-            } else {
-                $(".seed-button-plant").each(function() {
-                    $(this).removeClass('hide');
-                })
-                $(".mod-button-plant").each(function() {
-                    $(this).addClass('hide');
-                })
-            }
-        });
-
-        $("#barnSelector input:radio").change(function() {
-            selectedBarn = $(this).val();
-            if (selectedBarn == null || selectedBarn == 0) {
-                $(".barn-button-plant").each(function() {
-                    $(this).addClass('hide');
-                });
-            } else {
-                $(".barn-button-plant").each(function() {
-                    $(this).removeClass('hide');
-                });
-            }
-        });
-
-        $("#coopSelector input:radio").change(function() {
-            selectedCoop = $(this).val();
-            if (selectedCoop == null || selectedCoop == 0) {
-                $(".coop-button-plant").each(function() {
-                    $(this).addClass('hide');
-                });
-            } else {
-                $(".coop-button-plant").each(function() {
-                    $(this).removeClass('hide');
-                });
-            }
-        });
 
 
         $("#modifierSelector input:radio").change(function() {
