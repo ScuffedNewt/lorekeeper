@@ -4,7 +4,13 @@
 <table class="table table-sm" id="lootTable">
     <thead>
         <tr>
-            <th width="5%">@if($daily->type == 'Wheel') Segment  @else Step @endif</th>
+            <th width="5%">
+                @if ($daily->type == 'Wheel')
+                    Segment
+                @else
+                    Step
+                @endif
+            </th>
             <th width="30%">Reward Type</th>
             <th width="35%">Reward</th>
             <th width="20%">Quantity</th>
@@ -12,13 +18,16 @@
         </tr>
     </thead>
     <tbody id="lootTableBody">
-        @if($loots)
-            @foreach($loots as $loot)
+        @if ($loots)
+            @foreach ($loots as $loot)
                 <tr class="loot-row">
                     <td>{!! Form::text('step[]', $loot->step, ['class' => 'form-control bg-dark text-light']) !!}</td>
-                    <td>{!! Form::select('rewardable_type[]', ['Item' => 'Item', 'Currency' => 'Currency'] + ($showLootTables ? ['LootTable' => 'Loot Table'] : []) + ($showRaffles ? ['Raffle' => 'Raffle Ticket'] : []), $loot->rewardable_type, ['class' => 'form-control reward-type', 'placeholder' => 'Select Reward Type']) !!}</td>
+                    <td>{!! Form::select('rewardable_type[]', ['Item' => 'Item', 'Currency' => 'Currency'] + ($showLootTables ? ['LootTable' => 'Loot Table'] : []) + ($showRaffles ? ['Raffle' => 'Raffle Ticket'] : []), $loot->rewardable_type, [
+                        'class' => 'form-control reward-type',
+                        'placeholder' => 'Select Reward Type',
+                    ]) !!}</td>
                     <td class="loot-row-select">
-                        @if($loot->rewardable_type == 'Item')
+                        @if ($loot->rewardable_type == 'Item')
                             {!! Form::select('rewardable_id[]', $items, $loot->rewardable_id, ['class' => 'form-control item-select selectize', 'placeholder' => 'Select Item']) !!}
                         @elseif($loot->rewardable_type == 'Currency')
                             {!! Form::select('rewardable_id[]', $currencies, $loot->rewardable_id, ['class' => 'form-control currency-select selectize', 'placeholder' => 'Select Currency']) !!}

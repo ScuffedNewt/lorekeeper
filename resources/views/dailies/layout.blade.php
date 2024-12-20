@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title') 
-    Dailies :: 
+@section('title')
+    Dailies ::
     @yield('dailies-title')
 @endsection
 
@@ -14,5 +14,5 @@
 @endsection
 
 @section('scripts')
-@parent
+    @parent
 @endsection

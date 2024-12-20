@@ -20,21 +20,21 @@ You can ignore this section if you use an image for the wheel, although text wil
                         </tr>
                     </thead>
                     <tbody id="segmentTableBody">
-                        @if($totalSegments)
-                        @for ($i = 0; $i < $totalSegments; $i++) 
-                        <tr class="segment-row">
-                            <td>{!! Form::number('segment_style[number][]', $i + 1, ['class' => 'form-control bg-dark text-light', 'readonly' => 'true']) !!}</td>
-                            <td>{!! Form::text('segment_style[text][]', $segments[$i]['text'] ?? '', ['class' => 'form-control bg-dark text-light']) !!}</td>
-                            <td>
-                                <div class="input-group cp">
-                                    {!! Form::text('segment_style[color][]', $segments[$i]['fillStyle'] ?? null, ['class' => 'form-control']) !!}
-                                    <span class="input-group-append">
-                                        <span class="input-group-text colorpicker-input-addon"><i></i></span>
-                                    </span>
-                                </div>
-                        </td>
-                        </tr>
-                        @endfor
+                        @if ($totalSegments)
+                            @for ($i = 0; $i < $totalSegments; $i++)
+                                <tr class="segment-row">
+                                    <td>{!! Form::number('segment_style[number][]', $i + 1, ['class' => 'form-control bg-dark text-light', 'readonly' => 'true']) !!}</td>
+                                    <td>{!! Form::text('segment_style[text][]', $segments[$i]['text'] ?? '', ['class' => 'form-control bg-dark text-light']) !!}</td>
+                                    <td>
+                                        <div class="input-group cp">
+                                            {!! Form::text('segment_style[color][]', $segments[$i]['fillStyle'] ?? null, ['class' => 'form-control']) !!}
+                                            <span class="input-group-append">
+                                                <span class="input-group-text colorpicker-input-addon"><i></i></span>
+                                            </span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endfor
                         @endif
                     </tbody>
                 </table>
