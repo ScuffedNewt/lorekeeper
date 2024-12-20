@@ -81,10 +81,9 @@ class DailyController extends Controller {
     public function postCreateEditDaily(Request $request, DailyService $service, $id = null) {
         $id ? $request->validate(Daily::$updateRules) : $request->validate(Daily::$createRules);
         $data = $request->only([
-            'name', 'description', 'image', 'button_image', 'remove_image', 'remove_button_image', 'has_image', 'has_button_image', 'step', 'rewardable_type', 'rewardable_id', 'quantity',
-            'is_active', 'is_progressable', 'is_timed_daily', 'start_at', 'end_at', 'daily_timeframe', 'progress_display', 'is_loop', 'is_streak', 'type',
-            'wheel_image', 'background_image', 'stopper_image', 'remove_wheel', 'remove_background', 'remove_stopper', 'size', 'alignment', 'segment_number', 'segment_style', 'text_orientation', 'text_fontsize',
-            'fee', 'currency_id',
+            'name', 'description', 'image', 'button_image', 'remove_image', 'step', 'type', 'is_active', 'start_at', 'end_at', 'daily_timeframe', 'prize_display', 
+            'step', 'rewardable_type', 'rewardable_id', 'quantity',
+            'data',
         ]);
         if ($id && $service->updateDaily(Daily::find($id), $data, Auth::user())) {
             flash('The '.__('dailies.daily').' was updated successfully.')->success();

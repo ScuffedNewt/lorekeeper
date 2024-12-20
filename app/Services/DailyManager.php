@@ -38,8 +38,6 @@ class DailyManager extends Service {
      * @return App\Models\DailyTimer\DailyTimer|bool
      */
     public function rollDaily($daily, $user, $wheelSegment = null) {
-        // Check if the user has not done the daily that day in a initial transaction
-
         DB::beginTransaction();
 
         try {
@@ -47,7 +45,6 @@ class DailyManager extends Service {
                 throw new \Exception('You have already received your reward.');
             }
 
-            //get daily timer now that we know we can roll. if none exists, create one.
             $dailyTimer = DailyTimer::where('daily_id', $daily->id)->where('user_id', $user->id)->first();
             if (!$dailyTimer) {
                 $dailyTimer = DailyTimer::create([
@@ -60,21 +57,8 @@ class DailyManager extends Service {
                 $dailyTimer->step = $this->getNextStep($daily, $dailyTimer);
                 $dailyTimer->rolled_at = Carbon::now();
             }
-            //save the updated or new timer once the rewards were successfully distributed
             $dailyTimer->save();
-            $this->commitReturn($dailyTimer);
-        } catch (\Exception $e) {
-            $this->setError('error', $e->getMessage());
-            $this->rollbackReturn(false);
 
-            return null;
-        }
-
-        // if so go on to distribute rewards
-
-        DB::beginTransaction();
-
-        try {
             // Check and debit the fee in case the daily has a fee
             if ($daily->currency && $daily->fee > 0) {
                 if (!(new CurrencyManager)->debitCurrency($user, null, 'Daily Fee', 'Paid fee for '.__('dailies.daily').' (<a href="'.$daily->viewUrl.'">#'.$daily->id.'</a>)', $daily->currency, $daily->fee)) {
@@ -82,31 +66,21 @@ class DailyManager extends Service {
                 }
             }
 
-            //build reward data to the correct format used for grants, make sure to only grant the current step
-            if ($daily->type == 'Wheel') { // wheel actually always gets the step calculated by the
+            if ($daily->type == 'Wheel') { // wheel actually always gets the step calculated by the wheel segment
                 $dailyRewards = $daily->rewards()->where('step', $wheelSegment)->get();
-            } else { //other dailies just grab whatever step they are at!
+            } else {
                 $dailyRewards = $daily->rewards()->where('step', $dailyTimer->step)->get();
             }
 
-            //if there is no reward, check if step 0 rewards (Default) are set and pick that instead
+            // if there is no reward, check if step 0 rewards (Default) are set and pick that instead
             if ($dailyRewards->count() <= 0) {
                 $dailyRewards = $daily->rewards()->where('step', 0)->get();
             }
 
-            $rewardData = [];
-            $rewardData['rewardable_type'] = [];
-            $rewardData['rewardable_id'] = [];
-            $rewardData['quantity'] = [];
-
-            foreach ($dailyRewards as $dailyReward) {
-                $rewardData['rewardable_type'][] = $dailyReward->rewardable_type;
-                $rewardData['rewardable_id'][] = $dailyReward->rewardable_id;
-                $rewardData['quantity'][] = $dailyReward->quantity;
+            $assets = createAssetsArray(false);
+            foreach ($dailyRewards as $reward) {
+                addAsset($assets, $reward->reward, $reward->quantity);
             }
-
-            // Get the updated set of rewards
-            $rewards = $this->processRewards($rewardData);
 
             // Distribute user rewards
             $logType = ucwords(__('dailies.daily')).' Rewards';
@@ -114,19 +88,17 @@ class DailyManager extends Service {
                 'data' => 'Received rewards for '.__('dailies.daily').' (<a href="'.$daily->viewUrl.'">#'.$daily->id.'</a>)',
             ];
 
-            $assets = fillUserAssets($rewards, null, $user, $logType, $dailyData);
-            if (!$assets) {
+            $rewards = fillUserAssets($assets, null, $user, $logType, $dailyData);
+            if (!$rewards) {
                 throw new \Exception('Failed to distribute rewards to user.');
             }
-            $this->commitReturn();
 
-            return $assets;
+            return $this->commitReturn($rewards);
         } catch (\Exception $e) {
             $this->setError('error', $e->getMessage());
-            $this->rollbackReturn(false);
-
-            return null;
         }
+
+        return $this->rollbackReturn(false);
     }
 
     /**
@@ -207,52 +179,5 @@ class DailyManager extends Service {
             default:
                 return false;
         }
-    }
-
-    /**
-     * Processes reward data into a format that can be used for distribution.
-     *
-     * @param array $data
-     *
-     * @return array
-     */
-    private function processRewards($data) {
-        $assets = createAssetsArray(false);
-        // Process the additional rewards
-        if (isset($data['rewardable_type']) && $data['rewardable_type']) {
-            foreach ($data['rewardable_type'] as $key => $type) {
-                $reward = null;
-                switch ($type) {
-                    case 'Item':
-                        $reward = Item::find($data['rewardable_id'][$key]);
-                        break;
-                    case 'Currency':
-                        $reward = Currency::find($data['rewardable_id'][$key]);
-                        if (!$reward->is_user_owned) {
-                            throw new \Exception('Invalid currency selected.');
-                        }
-                        break;
-                    case 'LootTable':
-                        $reward = LootTable::find($data['rewardable_id'][$key]);
-                        break;
-                    case 'Raffle':
-                        $reward = Raffle::find($data['rewardable_id'][$key]);
-                        break;
-                        //uncomment if you use pets or awards, may still have to fix/add in other places
-                        /**case 'Pet':
-                        $reward = Pet::find($data['rewardable_id'][$key]);
-                        break;
-                    case 'Award':
-                        $reward = Award::find($data['rewardable_id'][$key]);
-                        break;**/
-                }
-                if (!$reward) {
-                    continue;
-                }
-                addAsset($assets, $reward, $data['quantity'][$key]);
-            }
-        }
-
-        return $assets;
     }
 }

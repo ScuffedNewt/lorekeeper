@@ -39,14 +39,10 @@ class DailyService extends Service {
             if (Daily::where('name', $data['name'])->exists()) {
                 throw new \Exception('The name has already been taken.');
             }
-            $data['is_loop'] = 1; //we like looping dailies
+
             $data = $this->populateDailyData($data);
-
             $daily = Daily::create($data);
-
-            if ($daily->type == 'Wheel') {
-                $this->populateWheel($data, $daily);
-            }
+            $this->populateType($data['data'], $daily);
 
             return $this->commitReturn($daily);
         } catch (\Exception $e) {
@@ -75,14 +71,12 @@ class DailyService extends Service {
 
             $data = $this->populateDailyData($data, $daily);
 
-            $wheel = null;
-            if ($daily->type == 'Wheel') {
-                $wheel = $this->populateWheel($data, $daily);
-            }
+            $data = $this->populateType($data, $daily);
 
-            $data['is_timed_daily'] = isset($data['is_timed_daily']);
-            $data = $this->handleImages($data, $daily, $wheel);
+            $data = $this->handleImages($data, $daily, $daily->wheel);
+
             $daily->update($data);
+
             $this->populateRewards(Arr::only($data, ['rewardable_type', 'rewardable_id', 'quantity', 'step']), $daily);
 
             return $this->commitReturn($daily);
@@ -107,7 +101,7 @@ class DailyService extends Service {
             if ($daily->has_image) {
                 $this->deleteImage($daily->dailyImagePath, $daily->dailyImageFileName);
             }
-            if ($daily->has_button_image) {
+            if (isset($daily->data['has_button_image']) && $daily->data['has_button_image']) {
                 $this->deleteImage($daily->dailyImagePath, $daily->buttonyImageFileName);
             }
 
@@ -172,68 +166,24 @@ class DailyService extends Service {
      * @return array
      */
     private function populateDailyData($data, $daily = null) {
+        // type agnostic data
         if (isset($data['description']) && $data['description']) {
             $data['parsed_description'] = parse($data['description']);
+        } else {
+            $data['parsed_description'] = null;
         }
-        $data['is_active'] = isset($data['is_active']);
-        $data['is_loop'] = isset($data['is_loop']) || (isset($daily) && $daily->type == 'Wheel');
-        $data['is_streak'] = isset($data['is_streak']);
-        if ($data['fee'] == null) {
+        if (!isset($data['fee']) || !$data['fee']) {
             $data['fee'] = 0;
         }
+        $data['is_active'] = isset($data['is_active']);
 
-        //set progressable automatically
-        if (isset($data['step'])) {
-            $steps = array_unique($data['step']);
-            if (count($steps) > 1) {
-                $data['is_progressable'] = 1;
-            }
-            if (count($steps) == 1) {
-                $data['is_progressable'] = 0;
-            }
-        } else {
-            $data['is_progressable'] = 0;
-        }
-
-        //handle image removal
+        // handle image removal
         if (isset($data['remove_image'])) {
             if ($daily && $daily->has_image && $data['remove_image']) {
                 $data['has_image'] = 0;
                 $this->deleteImage($daily->dailyImagePath, $daily->dailyImageFileName);
             }
             unset($data['remove_image']);
-        }
-
-        if (isset($data['remove_button_image'])) {
-            if ($daily && $daily->has_button_image && $data['remove_button_image']) {
-                $data['has_button_image'] = 0;
-                $this->deleteImage($daily->dailyImagePath, $daily->buttonImageFileName);
-            }
-            unset($data['remove_button_image']);
-        }
-
-        if (isset($data['remove_wheel'])) {
-            if ($daily && isset($daily->wheel->wheel_extension) && $data['remove_wheel']) {
-                $this->deleteImage($daily->wheel->imagePath, $daily->wheel->wheelFileName);
-                $daily->wheel->wheel_extension = null;
-            }
-            unset($data['remove_wheel']);
-        }
-
-        if (isset($data['remove_stopper'])) {
-            if ($daily && isset($daily->wheel->stopper_extension) && $data['remove_stopper']) {
-                $this->deleteImage($daily->wheel->imagePath, $daily->wheel->stopperFileName);
-                $daily->wheel->stopper_extension = null;
-            }
-            unset($data['remove_stopper']);
-        }
-
-        if (isset($data['remove_background'])) {
-            if ($daily && isset($daily->wheel->background_extension) && $data['remove_background']) {
-                $this->deleteImage($daily->wheel->imagePath, $daily->wheel->backgroundFileName);
-                $daily->wheel->background_extension = null;
-            }
-            unset($data['remove_background']);
         }
 
         return $data;
@@ -246,7 +196,7 @@ class DailyService extends Service {
      */
     private function populateSegmentStyle($data) {
         $styleObject = [];
-        //set segment style if it applies
+        // set segment style if it applies
         if (isset($data['segment_style'])) {
             for ($i = 0; $i < $data['segment_number']; $i++) {
                 $styleObject[] = [
@@ -285,27 +235,39 @@ class DailyService extends Service {
     }
 
     /**
-     * Populates the wheel with data.
+     * Populates the daily with data specific to its type.
      *
      * @param array $data
      * @param Daily $daily
      */
-    private function populateWheel($data, $daily) {
-        // 'daily_id', 'wheel_extension', 'background_extension', 'stopper_extension', 'size', 'alignment', 'segment_number', 'segment_style', 'text_orientation', 'text_fontsize'
-        if ($daily->wheel) {
-            $daily->wheel->update([
-                'size'             => $data['size'],
-                'alignment'        => $data['alignment'],
-                'segment_number'   => $data['segment_number'],
-                'segment_style'    => $this->populateSegmentStyle($data),
-                'text_orientation' => $data['text_orientation'],
-                'text_fontsize'    => $data['text_fontsize'],
-            ]);
+    private function populateType($data, $daily) {
+        if ($daily->type == 'Wheel') {
+            if (isset($data['remove_wheel'])) {
+                if ($daily && isset($daily->wheel->wheel_extension) && $data['remove_wheel']) {
+                    $this->deleteImage($daily->wheel->imagePath, $daily->wheel->wheelFileName);
+                    $data['wheel_extension'] = null;
+                }
+                unset($data['remove_wheel']);
+            }
+    
+            if (isset($data['remove_stopper'])) {
+                if ($daily && isset($daily->wheel->stopper_extension) && $data['remove_stopper']) {
+                    $this->deleteImage($daily->wheel->imagePath, $daily->wheel->stopperFileName);
+                    $data['stopper_extension'] = null;
+                }
+                unset($data['remove_stopper']);
+            }
+    
+            if (isset($data['remove_background'])) {
+                if ($daily && isset($daily->wheel->background_extension) && $data['remove_background']) {
+                    $this->deleteImage($daily->wheel->imagePath, $daily->wheel->backgroundFileName);
+                    $data['background_extension'] = null;
+                }
+                unset($data['remove_background']);
+            }
 
-            return $daily->wheel;
-        } else {
-            $wheel = DailyWheel::create([
-                'daily_id'             => $daily->id,
+            $wheel = DailyWheel::firstOrNew(['daily_id' => $daily->id]);
+            $wheel->update([
                 'wheel_extension'      => $data['wheel_extension'] ?? null,
                 'background_extension' => $data['background_extension'] ?? null,
                 'stopper_extension'    => $data['stopper_extension'] ?? null,
@@ -316,12 +278,29 @@ class DailyService extends Service {
                 'text_orientation'     => $data['text_orientation'] ?? 'curved',
                 'text_fontsize'        => $data['text_fontsize'] ?? '18',
             ]);
-
-            return $wheel;
+        } else if ($daily->type == 'Button') {
+            if (isset($data['remove_button_image'])) {
+                if ($daily && isset($daily->data['has_button_image']) && $data['remove_button_image']) {
+                    $this->deleteImage($daily->dailyImagePath, $daily->buttonImageFileName);
+                }
+                unset($data['remove_button_image']);
+            }
         }
+
+        // no other population needed for other types
+
+        return $data;
     }
 
-    private function handleImages($data, $daily, $wheel) {
+    /**
+     * Handles image uploads.
+     *
+     * @param mixed  $image
+     * @param string $path
+     * @param string $fileName
+     * @param mixed  $oldFileName
+     */
+    private function handleImages($data, $daily, $wheel = null) {
         $image = null;
         if (isset($data['image']) && $data['image']) {
             $data['has_image'] = 1;
@@ -334,10 +313,10 @@ class DailyService extends Service {
 
         if ($daily->type == 'Button') {
             $buttonImage = null;
-            if (isset($data['button_image']) && $data['button_image']) {
-                $data['has_button_image'] = 1;
-                $buttonImage = $data['button_image'];
-                unset($data['button_image']);
+            if (isset($data['data']['button_image']) && $data['data']['button_image']) {
+                $data['data']['has_button_image'] = 1;
+                $buttonImage = $data['data']['button_image'];
+                unset($data['data']['button_image']);
             }
 
             if ($buttonImage) {
@@ -347,22 +326,22 @@ class DailyService extends Service {
 
         if ($daily->type == 'Wheel') {
             $wheelImage = null;
-            if (isset($data['wheel_image']) && $data['wheel_image']) {
-                $wheelImage = $data['wheel_image'];
-                unset($data['wheel_image']);
+            if (isset($data['data']['wheel_image']) && $data['data']['wheel_image']) {
+                $wheelImage = $data['data']['wheel_image'];
+                unset($data['data']['wheel_image']);
             }
-
             $stopperImage = null;
-            if (isset($data['stopper_image']) && $data['stopper_image']) {
-                $stopperImage = $data['stopper_image'];
-                unset($data['stopper_image']);
+            if (isset($data['data']['stopper_image']) && $data['data']['stopper_image']) {
+                $stopperImage = $data['data']['stopper_image'];
+                unset($data['data']['stopper_image']);
             }
 
             $backgroundImage = null;
-            if (isset($data['background_image']) && $data['background_image']) {
-                $backgroundImage = $data['background_image'];
-                unset($data['background_image']);
+            if (isset($data['data']['background_image']) && $data['data']['background_image']) {
+                $backgroundImage = $data['data']['background_image'];
+                unset($data['data']['background_image']);
             }
+
             if ($wheelImage) {
                 $wheel->wheel_extension = $wheelImage->getClientOriginalExtension();
                 $this->handleImage($wheelImage, $wheel->imagePath, $wheel->wheelFileName, null);
@@ -375,6 +354,7 @@ class DailyService extends Service {
                 $wheel->background_extension = $backgroundImage->getClientOriginalExtension();
                 $this->handleImage($backgroundImage, $wheel->imagePath, $wheel->backgroundFileName, null);
             }
+
             $wheel->save();
         }
 

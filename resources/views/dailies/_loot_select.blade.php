@@ -5,11 +5,7 @@
     <thead>
         <tr>
             <th width="5%">
-                @if ($daily->type == 'Wheel')
-                    Segment
-                @else
-                    Step
-                @endif
+                {{ $daily->stepType }} {!! add_help('Set to \'0\' to make a default reward.') !!}
             </th>
             <th width="30%">Reward Type</th>
             <th width="35%">Reward</th>
@@ -21,7 +17,7 @@
         @if ($loots)
             @foreach ($loots as $loot)
                 <tr class="loot-row">
-                    <td>{!! Form::text('step[]', $loot->step, ['class' => 'form-control bg-dark text-light']) !!}</td>
+                    <td>{!! Form::text('step[]', $loot->step, ['class' => 'form-control bg-dark text-light', 'min' => 0]) !!}</td>
                     <td>{!! Form::select('rewardable_type[]', ['Item' => 'Item', 'Currency' => 'Currency'] + ($showLootTables ? ['LootTable' => 'Loot Table'] : []) + ($showRaffles ? ['Raffle' => 'Raffle Ticket'] : []), $loot->rewardable_type, [
                         'class' => 'form-control reward-type',
                         'placeholder' => 'Select Reward Type',

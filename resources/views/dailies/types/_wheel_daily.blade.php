@@ -1,11 +1,8 @@
-<!--comment this in if you want the daily image to show on the daily page as well and not only on the index --->
-<!---
 <div class="text-center">
     @if ($daily->has_image && !$wheel->backgroundUrl)
-<img src="{{ $daily->dailyImageUrl }}" style="max-width:100%" alt="{{ $daily->name }}" />
-@endif
+        <img src="{{ $daily->dailyImageUrl }}" class="img-fluid" alt="{{ $daily->name }}" />
+    @endif
 </div>
---->
 
 <div class="text-{{ $wheel->alignment }}" style="background-size:cover; background-image:url('{{ $wheel->backgroundUrl }}');">
     <div class="row justify-content-center {{ $wheel->marginAlignment() }}" style="width:{{ $wheel->size }}px;height:50px;">
@@ -22,8 +19,8 @@
     <p>{!! $daily->parsed_description !!}</p>
 </div>
 
-@if (Auth::user())
-    <div class="text-center">
+@if (Auth::check())
+    <div class="text-center mb-2">
         <hr>
         <small>
             @if ($daily->daily_timeframe == 'lifetime')
@@ -44,35 +41,33 @@
     </div>
 @endif
 
-@if ($daily->progress_display != 'none')
-    <div class="card mt-5">
+@if ($daily->prize_display != 'none')
+    <div class="card">
         <div class="card-header">
             <h4 class="m-0 align-items-center">Prize Pool</h4>
         </div>
-
-        <div class="card-body row p-0 m-auto w-100">
-            @foreach ($daily->rewards()->get() as $reward)
-                <div class="col-lg-2 col-6 w-100 }} text-center justify-content-center border p-0">
-                    <div class="row w-100 p-1 m-auto btn-primary">
-                        <div class="col-lg col-6 h-100">
-                            <h5 class="p-1 m-0">{{ $loop->index + 1 }}</h5>
+        <div class="card-body">
+            @if ($daily->rewards()->count())
+                <div class="row px-4">
+                    @foreach ($daily->rewards()->get() as $reward)
+                        <div class="col-lg-2 col-6 w-100 text-center justify-content-center border p-0">
+                            <h5 class="p-1 m-0 w-100 btn-primary mb-2">
+                                {{ $loop->index + 1 }}
+                            </h5>
+                            @if ($reward->rewardImage)
+                                <div class="row justify-content-center">
+                                    <img src="{{ $reward->rewardImage }}" alt="{{ $reward->reward()->first()->name }}" style="max-width:75px;width:100%;" />
+                                </div>
+                            @endif
+                            <p class="mb-2">{{ $reward->quantity }} {{ $reward->reward->first()->name }}</p>
                         </div>
-                        <div class="col p-0">
-                        </div>
-                    </div>
-                    <div class="row w-100 p-0 m-auto">
-                        @if ($daily->progress_display == 'all')
-                            <div class="col-6">
-                                @if ($reward->rewardImage)
-                                    <div class="row justify-content-center"><img src="{{ $reward->rewardImage }}" alt="{{ $reward->reward()->first()->name }}" style="max-width:75px;width:100%;" /></div>
-                                @endif
-                                <div class="row justify-content-center">{{ $reward->quantity }} {{ $reward->reward()->first()->name }}</div>
-
-                            </div>
-                        @endif
-                    </div>
+                    @endforeach
                 </div>
-            @endforeach
+            @else
+                <div class="alert alert-warning mb-0" role="alert">
+                    No rewards have been set for this {{ __('dailies.daily') }} yet!
+                </div>
+            @endif
         </div>
     </div>
 @endif
@@ -140,7 +135,6 @@
                     type: "POST",
                     url: "{{ url(__('dailies.dailies') . '/' . $daily->id) }}",
                     data: {
-                        daily_id: "{{ $daily->id }}",
                         _token: '{{ csrf_token() }}'
                     },
                 }).done(function(res) {

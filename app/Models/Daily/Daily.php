@@ -3,6 +3,7 @@
 namespace App\Models\Daily;
 
 use App\Models\Model;
+use App\Models\Currency\Currency;
 
 class Daily extends Model {
     /**
@@ -11,8 +12,7 @@ class Daily extends Model {
      * @var array
      */
     protected $fillable = [
-        'name', 'sort', 'has_image', 'has_button_image', 'description', 'parsed_description', 'is_active', 'is_progressable', 'is_timed_daily', 'start_at', 'end_at', 'daily_timeframe',
-        'progress_display', 'is_loop', 'is_streak', 'type', 'fee', 'currency_id',
+        'name', 'sort', 'has_image', 'description', 'parsed_description', 'prize_display', 'is_active', 'start_at', 'end_at', 'daily_timeframe', 'type', 'fee', 'currency_id', 'data',
     ];
 
     /**
@@ -20,7 +20,18 @@ class Daily extends Model {
      *
      * @var string
      */
-    protected $table = 'daily';
+    protected $table = 'dailies';
+    
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'data' => 'array',
+        'start_at' => 'datetime',
+        'end_at' => 'datetime',
+    ];
 
     /**
      * Validation rules for creation.
@@ -46,7 +57,7 @@ class Daily extends Model {
 
     /**********************************************************************************************
 
-        ACCESSORS
+        RELATIONSHIPS
 
     **********************************************************************************************/
 
@@ -54,29 +65,35 @@ class Daily extends Model {
      * Get the rewards attached to this daily.
      */
     public function rewards() {
-        return $this->hasMany('App\Models\Daily\DailyReward', 'daily_id');
+        return $this->hasMany(DailyReward::class, 'daily_id');
     }
 
     /**
      * Get the timers attached to this daily.
      */
     public function timers() {
-        return $this->hasMany('App\Models\Daily\DailyTimer', 'daily_id');
+        return $this->hasMany(DailyTimer::class, 'daily_id');
     }
 
     /**
      * Get wheel (if it exists).
      */
     public function wheel() {
-        return $this->hasOne('App\Models\Daily\DailyWheel', 'daily_id');
+        return $this->hasOne(DailyWheel::class, 'daily_id');
     }
 
     /**
      * Get currency (if it exists).
      */
     public function currency() {
-        return $this->belongsTo('App\Models\Currency\Currency');
+        return $this->belongsTo(Currency::class);
     }
+
+    /**********************************************************************************************
+
+        ATTRIBUTES
+
+    **********************************************************************************************/
 
     /**
      * Displays the daily's name, linked to its purchase page.
@@ -178,6 +195,20 @@ class Daily extends Model {
      */
     public function getViewUrlAttribute() {
         return url(__('dailies.dailies').'/'.$this->id);
+    }
+
+    /**
+     * Returns the name of the step for a specific wheel type.
+     */
+    public function getStepTypeAttribute() {
+        switch($this->type) {
+            case 'Wheel':
+                return 'Segment';
+            case 'Advent':
+                return 'Day';
+            default:
+                return 'Step';
+        }
     }
 
     /**********************************************************************************************
