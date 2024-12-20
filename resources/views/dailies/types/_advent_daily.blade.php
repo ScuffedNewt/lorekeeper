@@ -45,7 +45,7 @@
             </div>
         </div>
     </div>
-    <div class="alert alert-{{ ($daily->data['set_days'] ?? false) ? 'warning' : 'info' }} text-center mb-2">
+    <div class="alert alert-{{ $daily->data['set_days'] ?? false ? 'warning' : 'info' }} text-center mb-2">
         @if ($daily->data['set_days'] ?? false)
             Make sure to collect your reward every day to receive all rewards!
         @else
@@ -66,14 +66,14 @@
     </div>
     @if ($daily->has_button_image)
         <div class="row justify-content-center mt-2">
-            {!! Form::open(['url' => 'dailies/'.$daily->id, 'method' => 'post']) !!}
-                {!! Form::button('<img src="'.$daily->buttonImageUrl.'" class="w-100" style="max-width:200px;" />', ['class' => 'btn', 'style' => 'background-color:transparent;', 'disabled' => $isDisabled, 'type' => 'submit']) !!}
+            {!! Form::open(['url' => 'dailies/' . $daily->id, 'method' => 'post']) !!}
+            {!! Form::button('<img src="' . $daily->buttonImageUrl . '" class="w-100" style="max-width:200px;" />', ['class' => 'btn', 'style' => 'background-color:transparent;', 'disabled' => $isDisabled, 'type' => 'submit']) !!}
             {!! Form::close() !!}
         </div>
     @else
         <div class="row justify-content-center mt-2">
-            {!! Form::open(['url' => 'dailies/'.$daily->id, 'method' => 'post']) !!}
-                {!! Form::submit('Collect Advent!', ['class' => 'btn btn-primary', 'disabled' => $isDisabled]) !!}
+            {!! Form::open(['url' => 'dailies/' . $daily->id, 'method' => 'post']) !!}
+            {!! Form::submit('Collect Advent!', ['class' => 'btn btn-primary', 'disabled' => $isDisabled]) !!}
             {!! Form::close() !!}
         </div>
     @endif

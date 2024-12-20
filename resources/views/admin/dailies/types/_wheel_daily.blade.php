@@ -1,5 +1,5 @@
 @php
-    $wheel = $daily->wheel;    
+    $wheel = $daily->wheel;
 @endphp
 
 <h3>Images</h3>

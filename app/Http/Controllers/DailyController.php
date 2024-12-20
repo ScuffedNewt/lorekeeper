@@ -55,6 +55,7 @@ class DailyController extends Controller {
      * Handles a daily roll.
      *
      * @param App\Services\DailyService $service
+     * @param mixed                     $id
      *
      * @return \Illuminate\Http\RedirectResponse
      */
@@ -68,7 +69,7 @@ class DailyController extends Controller {
         if ($daily->type == 'Wheel') {
             $wheelSegment = random_int(1, $daily->wheel->segment_number);
         }
-        if(!$rewards = $service->rollDaily($daily, Auth::user(), $wheelSegment)) {
+        if (!$rewards = $service->rollDaily($daily, Auth::user(), $wheelSegment)) {
             foreach ($service->errors()->getMessages()['error'] as $error) {
                 flash($error)->error();
             }

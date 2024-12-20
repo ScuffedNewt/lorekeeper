@@ -6,8 +6,6 @@ use App\Models\Currency\Currency;
 use App\Models\Daily\Daily;
 use App\Models\Daily\DailyTimer;
 use App\Models\Item\Item;
-use App\Models\Loot\LootTable;
-use App\Models\Raffle\Raffle;
 use Carbon\Carbon;
 use Datetime;
 use DB;

@@ -249,7 +249,7 @@ class DailyService extends Service {
                 }
                 unset($data['remove_wheel']);
             }
-    
+
             if (isset($data['remove_stopper'])) {
                 if ($daily && isset($daily->wheel->stopper_extension) && $data['remove_stopper']) {
                     $this->deleteImage($daily->wheel->imagePath, $daily->wheel->stopperFileName);
@@ -257,7 +257,7 @@ class DailyService extends Service {
                 }
                 unset($data['remove_stopper']);
             }
-    
+
             if (isset($data['remove_background'])) {
                 if ($daily && isset($daily->wheel->background_extension) && $data['remove_background']) {
                     $this->deleteImage($daily->wheel->imagePath, $daily->wheel->backgroundFileName);
@@ -278,7 +278,7 @@ class DailyService extends Service {
                 'text_orientation'     => $data['text_orientation'] ?? 'curved',
                 'text_fontsize'        => $data['text_fontsize'] ?? '18',
             ]);
-        } else if ($daily->type == 'Button') {
+        } elseif ($daily->type == 'Button') {
             if (isset($data['remove_button_image'])) {
                 if ($daily && isset($daily->data['has_button_image']) && $data['remove_button_image']) {
                     $this->deleteImage($daily->dailyImagePath, $daily->buttonImageFileName);
@@ -295,10 +295,9 @@ class DailyService extends Service {
     /**
      * Handles image uploads.
      *
-     * @param mixed  $image
-     * @param string $path
-     * @param string $fileName
-     * @param mixed  $oldFileName
+     * @param mixed      $data
+     * @param mixed      $daily
+     * @param mixed|null $wheel
      */
     private function handleImages($data, $daily, $wheel = null) {
         $image = null;

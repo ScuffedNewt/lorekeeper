@@ -5,7 +5,7 @@
         {!! Form::checkbox('data[is_loop]', 1, $daily->data['is_loop'] ?? 1, ['class' => 'form-check-input', 'data-toggle' => 'toggle']) !!}
         {!! Form::label('data[is_loop]', 'Set Loop', ['class' => 'form-check-label ml-3']) !!} {!! add_help(
             'If turned off, each of
-                the ' .
+                        the ' .
                 __('dailies.daily') .
                 ' rewards will only be able to be claimed once.',
         ) !!}

@@ -2,8 +2,8 @@
 
 namespace App\Models\Daily;
 
-use App\Models\Model;
 use App\Models\Currency\Currency;
+use App\Models\Model;
 
 class Daily extends Model {
     /**
@@ -21,16 +21,16 @@ class Daily extends Model {
      * @var string
      */
     protected $table = 'dailies';
-    
+
     /**
      * The attributes that should be cast to native types.
      *
      * @var array
      */
     protected $casts = [
-        'data' => 'array',
+        'data'     => 'array',
         'start_at' => 'datetime',
-        'end_at' => 'datetime',
+        'end_at'   => 'datetime',
     ];
 
     /**
@@ -201,7 +201,7 @@ class Daily extends Model {
      * Returns the name of the step for a specific wheel type.
      */
     public function getStepTypeAttribute() {
-        switch($this->type) {
+        switch ($this->type) {
             case 'Wheel':
                 return 'Segment';
             case 'Advent':

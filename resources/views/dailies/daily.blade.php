@@ -16,7 +16,14 @@
         {{ $daily->name }}
     </h1>
     @php
-        $isDisabled = isset($cooldown) || !Auth::check() || ($daily->currency_id != null && Auth::user()->getCurrencies(true)->where('id', $daily->currency_id)->first()->quantity < $daily->fee);
+        $isDisabled =
+            isset($cooldown) ||
+            !Auth::check() ||
+            ($daily->currency_id != null &&
+                Auth::user()
+                    ->getCurrencies(true)
+                    ->where('id', $daily->currency_id)
+                    ->first()->quantity < $daily->fee);
     @endphp
 
     @if ($daily->currency)
@@ -29,5 +36,5 @@
         </h4>
     @endif
 
-    @include('dailies.types._'.$daily->type.'_daily', ['wheel' => $daily->wheel])
+    @include('dailies.types._' . $daily->type . '_daily', ['wheel' => $daily->wheel])
 @endsection
