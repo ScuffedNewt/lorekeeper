@@ -37,11 +37,16 @@
         @else
             <div class="form-group col-md-6">
                 {!! Form::label('type', 'Daily Type') !!} {!! add_help('Buttons are just one click to collect a reward. Wheels allow users to spin a wheel each day.') !!}
-                {!! Form::select('type', [
-                    'Wheel'  => 'Wheel',
-                    'Button' => 'Button',
-                    'Advent' => 'Advent',
-                ], $daily ? $daily->type : null, ['class' => 'form-control']) !!}
+                {!! Form::select(
+                    'type',
+                    [
+                        'Wheel' => 'Wheel',
+                        'Button' => 'Button',
+                        'Advent' => 'Advent',
+                    ],
+                    $daily ? $daily->type : null,
+                    ['class' => 'form-control'],
+                ) !!}
             </div>
         @endif
     </div>
@@ -64,7 +69,7 @@
                 ' index and on the ' .
                 __('dailies.daily') .
                 '
-            page as a header.',
+                    page as a header.',
         ) !!}
         <div class="custom-file">
             {!! Form::label('image', 'Choose file...', ['class' => 'custom-file-label']) !!}
@@ -86,15 +91,11 @@
 
     <div class="row">
         <div class="col-md-6 form-group">
-            {!! Form::label('start_at', 'Start Time (Optional)') !!} {!! add_help(
-                'The ' . __('dailies.daily') . ' will cycle in at this date.',
-            ) !!}
+            {!! Form::label('start_at', 'Start Time (Optional)') !!} {!! add_help('The ' . __('dailies.daily') . ' will cycle in at this date.') !!}
             {!! Form::text('start_at', $daily->start_at, ['class' => 'form-control datepicker']) !!}
         </div>
         <div class="col-md-6 form-group">
-            {!! Form::label('end_at', 'End Time (Optional)') !!} {!! add_help(
-                'The ' . __('dailies.daily') . ' will cycle out at this date.',
-            ) !!}
+            {!! Form::label('end_at', 'End Time (Optional)') !!} {!! add_help('The ' . __('dailies.daily') . ' will cycle out at this date.') !!}
             {!! Form::text('end_at', $daily->end_at, ['class' => 'form-control datepicker']) !!}
         </div>
     </div>
@@ -102,26 +103,31 @@
     <div class="row">
         <div class="form-group col-md-6">
             {!! Form::label('daily_timeframe', 'Daily Timeframe') !!} {!! add_help('This is the timeframe that the daily can
-            be collected in. I.E. yearly will only allow one roll per year. Weekly allows one roll per week. Rollover will
-            happen on UTC time.') !!}
+                        be collected in. I.E. yearly will only allow one roll per year. Weekly allows one roll per week. Rollover will
+                        happen on UTC time.') !!}
             {!! Form::select('daily_timeframe', ['daily' => 'Daily', 'weekly' => 'Weekly', 'monthly' => 'Monthly', 'yearly' => 'Yearly'], $daily ? $daily->daily_timeframe : 0, ['class' => 'form-control']) !!}
 
         </div>
         <div class="form-group col-md-6">
             {!! Form::label('prize_display', 'Prize Display') !!} {!! add_help('Decides what kind of information on the rewards for each segment should be shown on the daily page.') !!}
-            {!! Form::select('prize_display', [
-                'none' => 'Hidden Rewards',
-                'hidden' => 'Rewards Hidden Until Collected',
-                'all' => 'All Rewards Shown',
-            ], $daily ? $daily->prize_display : 0, ['class' => 'form-control']) !!}
+            {!! Form::select(
+                'prize_display',
+                [
+                    'none' => 'Hidden Rewards',
+                    'hidden' => 'Rewards Hidden Until Collected',
+                    'all' => 'All Rewards Shown',
+                ],
+                $daily ? $daily->prize_display : 0,
+                ['class' => 'form-control'],
+            ) !!}
         </div>
     </div>
 
     <div class="form-group">
         {!! Form::label('is_active', 'Set Active', ['class' => 'form-check-label ml-3']) !!} {!! add_help(
             'If turned
-                off,
-                the ' .
+                        off,
+                        the ' .
                 __('dailies.daily') .
                 ' will not be visible to regular users.',
         ) !!}
@@ -136,7 +142,7 @@
                 Daily Settings
             </div>
             <div class="card-body">
-                @include('admin.dailies.types._'.$daily->type.'_daily')
+                @include('admin.dailies.types._' . $daily->type . '_daily')
             </div>
         </div>
 
@@ -168,9 +174,8 @@
         'tables' => $tables,
         'raffles' => $raffles,
         'showLootTables' => true,
-        'showRaffles' => true
+        'showRaffles' => true,
     ])
-
 @endsection
 @section('scripts')
     @parent

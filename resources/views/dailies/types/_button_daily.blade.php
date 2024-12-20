@@ -14,14 +14,14 @@
 @if (Auth::check())
     @if ($daily->has_button_image)
         <div class="row justify-content-center mt-2">
-            {!! Form::open(['url' => 'dailies/'.$daily->id, 'method' => 'post']) !!}
-                {!! Form::button('<img src="'.$daily->buttonImageUrl.'" class="w-100" style="max-width:200px;" />', ['class' => 'btn', 'style' => 'background-color:transparent;', 'disabled' => $isDisabled, 'type' => 'submit']) !!}
+            {!! Form::open(['url' => 'dailies/' . $daily->id, 'method' => 'post']) !!}
+            {!! Form::button('<img src="' . $daily->buttonImageUrl . '" class="w-100" style="max-width:200px;" />', ['class' => 'btn', 'style' => 'background-color:transparent;', 'disabled' => $isDisabled, 'type' => 'submit']) !!}
             {!! Form::close() !!}
         </div>
     @else
         <div class="row justify-content-center mt-2">
-            {!! Form::open(['url' => 'dailies/'.$daily->id, 'method' => 'post']) !!}
-                {!! Form::submit('Collect Advent!', ['class' => 'btn btn-primary', 'disabled' => $isDisabled]) !!}
+            {!! Form::open(['url' => 'dailies/' . $daily->id, 'method' => 'post']) !!}
+            {!! Form::submit('Collect Advent!', ['class' => 'btn btn-primary', 'disabled' => $isDisabled]) !!}
             {!! Form::close() !!}
         </div>
     @endif
