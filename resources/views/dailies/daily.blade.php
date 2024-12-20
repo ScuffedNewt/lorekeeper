@@ -5,6 +5,11 @@
 @endsection
 
 @section('dailies-content')
+    <head>
+        <!-- Scripts for wheel of fortune dailies -->
+        <script src="{{ asset('js/winwheel.min.js') }}"></script>
+        <script src="{{ asset('js/tweenmax.min.js') }}"></script>
+    </head>
     {!! breadcrumbs([ucfirst(__('dailies.dailies')) => __('dailies.dailies'), $daily->name => $daily->url]) !!}
 
     <h1>
