@@ -4,15 +4,11 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateDailyTableAndDailyTimers extends Migration
-{
+class CreateDailyTableAndDailyTimers extends Migration {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
-    {
+    public function up() {
         Schema::create('daily', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->increments('id');
@@ -27,8 +23,6 @@ class CreateDailyTableAndDailyTimers extends Migration
 
             $table->integer('sort')->unsigned()->default(0);
             $table->boolean('is_active')->default(1);
-
-
         });
 
         Schema::create('daily_timers', function (Blueprint $table) {
@@ -42,13 +36,9 @@ class CreateDailyTableAndDailyTimers extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
-    {
+    public function down() {
         Schema::dropIfExists('daily');
         Schema::dropIfExists('daily_timers');
-
     }
 }

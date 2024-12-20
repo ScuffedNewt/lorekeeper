@@ -4,15 +4,14 @@ namespace App\Models\Daily;
 
 use App\Models\Model;
 
-class DailyWheel extends Model
-{
+class DailyWheel extends Model {
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'daily_id', 'wheel_extension', 'background_extension', 'stopper_extension', 'size', 'alignment', 'segment_number', 'segment_style', 'text_orientation', 'text_fontsize'
+        'daily_id', 'wheel_extension', 'background_extension', 'stopper_extension', 'size', 'alignment', 'segment_number', 'segment_style', 'text_orientation', 'text_fontsize',
     ];
 
     /**
@@ -28,10 +27,10 @@ class DailyWheel extends Model
      * @var array
      */
     public static $createRules = [
-        'daily_id' => 'required',
-        'wheel_extension' => 'mimes:png',
+        'daily_id'             => 'required',
+        'wheel_extension'      => 'mimes:png',
         'background_extension' => 'mimes:png,jpg',
-        'stopper_extension' => 'mimes:png',
+        'stopper_extension'    => 'mimes:png',
     ];
 
     /**
@@ -40,12 +39,11 @@ class DailyWheel extends Model
      * @var array
      */
     public static $updateRules = [
-        'daily_id' => 'required',
-        'wheel_extension' => 'mimes:png',
+        'daily_id'             => 'required',
+        'wheel_extension'      => 'mimes:png',
         'background_extension' => 'mimes:png,jpg',
-        'stopper_extension' => 'mimes:png',
+        'stopper_extension'    => 'mimes:png',
     ];
-
 
     /**********************************************************************************************
 
@@ -58,8 +56,7 @@ class DailyWheel extends Model
      *
      * @return string
      */
-    public function getImageDirectoryAttribute()
-    {
+    public function getImageDirectoryAttribute() {
         return 'images/data/dailies/wheels';
     }
 
@@ -68,8 +65,7 @@ class DailyWheel extends Model
      *
      * @return string
      */
-    public function getImagePathAttribute()
-    {
+    public function getImagePathAttribute() {
         return public_path($this->imageDirectory);
     }
 
@@ -78,9 +74,8 @@ class DailyWheel extends Model
      *
      * @return string
      */
-    public function getWheelFileNameAttribute()
-    {
-        return $this->id . '-wheel_image.' . $this->wheel_extension;
+    public function getWheelFileNameAttribute() {
+        return $this->id.'-wheel_image.'.$this->wheel_extension;
     }
 
     /**
@@ -88,9 +83,8 @@ class DailyWheel extends Model
      *
      * @return string
      */
-    public function getStopperFileNameAttribute()
-    {
-        return $this->id . '-stopper_image.' . $this->stopper_extension;
+    public function getStopperFileNameAttribute() {
+        return $this->id.'-stopper_image.'.$this->stopper_extension;
     }
 
     /**
@@ -98,56 +92,56 @@ class DailyWheel extends Model
      *
      * @return string
      */
-    public function getBackgroundFileNameAttribute()
-    {
-        return $this->id . '-background_image.' . $this->background_extension;
+    public function getBackgroundFileNameAttribute() {
+        return $this->id.'-background_image.'.$this->background_extension;
     }
-
 
     /**
      * Gets the URL of the model's wheel image.
      *
      * @return string
      */
-    public function getWheelUrlAttribute()
-    {
-        if (!$this->wheel_extension) return null;
-        return asset($this->imageDirectory . '/' . $this->wheelFileName);
-    }
+    public function getWheelUrlAttribute() {
+        if (!$this->wheel_extension) {
+            return null;
+        }
 
+        return asset($this->imageDirectory.'/'.$this->wheelFileName);
+    }
 
     /**
      * Gets the URL of the model's stopper image.
      *
      * @return string
      */
-    public function getStopperUrlAttribute()
-    {
-        if (!$this->stopper_extension) return '/images/stopper.png';
-        return asset($this->imageDirectory . '/' . $this->stopperFileName);
-    }
+    public function getStopperUrlAttribute() {
+        if (!$this->stopper_extension) {
+            return '/images/stopper.png';
+        }
 
+        return asset($this->imageDirectory.'/'.$this->stopperFileName);
+    }
 
     /**
      * Gets the URL of the model's background image.
      *
      * @return string
      */
-    public function getBackgroundUrlAttribute()
-    {
-        if (!$this->background_extension) return null;
-        return asset($this->imageDirectory . '/' . $this->backgroundFileName);
-    }
+    public function getBackgroundUrlAttribute() {
+        if (!$this->background_extension) {
+            return null;
+        }
 
+        return asset($this->imageDirectory.'/'.$this->backgroundFileName);
+    }
 
     /**
      * Gets the URL of the model's encyclopedia page.
      *
      * @return string
      */
-    public function getUrlAttribute()
-    {
-        return url(__('dailies.dailies') . '/' . $this->id);
+    public function getUrlAttribute() {
+        return url(__('dailies.dailies').'/'.$this->id);
     }
 
     /**
@@ -155,9 +149,8 @@ class DailyWheel extends Model
      *
      * @return array
      */
-    public function getSegmentStylesAttribute()
-    {
-        return json_decode($this->attributes["segment_style"], true);
+    public function getSegmentStylesAttribute() {
+        return json_decode($this->attributes['segment_style'], true);
     }
 
     /**
@@ -165,11 +158,9 @@ class DailyWheel extends Model
      *
      * @return array
      */
-    public function getSegmentStyleReplaceAttribute()
-    {
-        return str_replace('"', "'", $this->attributes["segment_style"]);
+    public function getSegmentStyleReplaceAttribute() {
+        return str_replace('"', "'", $this->attributes['segment_style']);
     }
-
 
     /**********************************************************************************************
 
@@ -177,10 +168,7 @@ class DailyWheel extends Model
 
      **********************************************************************************************/
 
-
-
-    public function marginAlignment()
-    {
+    public function marginAlignment() {
         switch ($this->alignment) {
             case 'left':
                 return 'mr-auto ml-lg-5 ml-0';
@@ -192,6 +180,7 @@ class DailyWheel extends Model
                 return 'm-auto';
                 break;
         }
+
         return 'm-auto';
     }
 }

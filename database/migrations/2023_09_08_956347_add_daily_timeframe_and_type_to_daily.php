@@ -4,21 +4,16 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddDailyTimeframeAndTypeToDaily extends Migration
-{
+class AddDailyTimeframeAndTypeToDaily extends Migration {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
-    {
+    public function up() {
         Schema::table('daily', function (Blueprint $table) {
             $table->string('daily_timeframe')->default('daily');
             $table->boolean('is_progressable')->default(0);
             $table->boolean('is_loop')->default(0);
             $table->dropColumn('is_one_off');
-
         });
 
         Schema::table('daily_rewards', function (Blueprint $table) {
@@ -32,11 +27,8 @@ class AddDailyTimeframeAndTypeToDaily extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
-    {
+    public function down() {
         Schema::table('daily', function (Blueprint $table) {
             $table->dropColumn('daily_timeframe');
             $table->dropColumn('is_progressable');

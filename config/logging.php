@@ -96,10 +96,10 @@ return [
             'level'  => 'info',
             'days'   => 14,
         ],
-        
+
         'too_many_attempts' => [
             'driver' => 'daily',
-            'path' => storage_path('logs/too-many-attempts.log'),
+            'path'   => storage_path('logs/too-many-attempts.log'),
         ],
     ],
 

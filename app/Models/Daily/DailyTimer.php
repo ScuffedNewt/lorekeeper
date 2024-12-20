@@ -4,16 +4,14 @@ namespace App\Models\Daily;
 
 use App\Models\Model;
 
-class DailyTimer extends Model
-{
-
+class DailyTimer extends Model {
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
-       "daily_id", "user_id", "rolled_at", 'step'
+        'daily_id', 'user_id', 'rolled_at', 'step',
     ];
 
     /**
@@ -42,6 +40,4 @@ class DailyTimer extends Model
         OTHER FUNCTIONS
 
     **********************************************************************************************/
-
-
 }
