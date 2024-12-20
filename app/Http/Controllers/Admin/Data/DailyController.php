@@ -81,7 +81,7 @@ class DailyController extends Controller {
     public function postCreateEditDaily(Request $request, DailyService $service, $id = null) {
         $id ? $request->validate(Daily::$updateRules) : $request->validate(Daily::$createRules);
         $data = $request->only([
-            'name', 'description', 'image', 'button_image', 'remove_image', 'step', 'type', 'is_active', 'start_at', 'end_at', 'daily_timeframe', 'prize_display', 
+            'name', 'description', 'image', 'button_image', 'remove_image', 'step', 'type', 'is_active', 'start_at', 'end_at', 'daily_timeframe', 'prize_display',
             'step', 'rewardable_type', 'rewardable_id', 'quantity',
             'data',
         ]);
