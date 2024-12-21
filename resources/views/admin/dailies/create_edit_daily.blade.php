@@ -142,7 +142,7 @@
                 Daily Settings
             </div>
             <div class="card-body">
-                @include('admin.dailies.types._' . $daily->type . '_daily')
+                @include('admin.dailies.types._' . strtolower($daily->type) . '_daily')
             </div>
         </div>
 

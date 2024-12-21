@@ -37,5 +37,5 @@
         </h4>
     @endif
 
-    @include('dailies.types._' . $daily->type . '_daily', ['wheel' => $daily->wheel])
+    @include('dailies.types._' . strtolower($daily->type) . '_daily', ['wheel' => $daily->wheel])
 @endsection
