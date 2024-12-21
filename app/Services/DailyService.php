@@ -42,7 +42,6 @@ class DailyService extends Service {
 
             $data = $this->populateDailyData($data);
             $daily = Daily::create($data);
-            $this->populateType($data['data'], $daily);
 
             return $this->commitReturn($daily);
         } catch (\Exception $e) {
@@ -341,20 +340,22 @@ class DailyService extends Service {
                 unset($data['data']['background_image']);
             }
 
-            if ($wheelImage) {
-                $wheel->wheel_extension = $wheelImage->getClientOriginalExtension();
-                $this->handleImage($wheelImage, $wheel->imagePath, $wheel->wheelFileName, null);
-            }
-            if ($stopperImage) {
-                $wheel->stopper_extension = $stopperImage->getClientOriginalExtension();
-                $this->handleImage($stopperImage, $wheel->imagePath, $wheel->stopperFileName, null);
-            }
-            if ($backgroundImage) {
-                $wheel->background_extension = $backgroundImage->getClientOriginalExtension();
-                $this->handleImage($backgroundImage, $wheel->imagePath, $wheel->backgroundFileName, null);
-            }
+            if ($wheel) {
+                if ($wheelImage) {
+                    $wheel->wheel_extension = $wheelImage->getClientOriginalExtension();
+                    $this->handleImage($wheelImage, $wheel->imagePath, $wheel->wheelFileName, null);
+                }
+                if ($stopperImage) {
+                    $wheel->stopper_extension = $stopperImage->getClientOriginalExtension();
+                    $this->handleImage($stopperImage, $wheel->imagePath, $wheel->stopperFileName, null);
+                }
+                if ($backgroundImage) {
+                    $wheel->background_extension = $backgroundImage->getClientOriginalExtension();
+                    $this->handleImage($backgroundImage, $wheel->imagePath, $wheel->backgroundFileName, null);
+                }
 
-            $wheel->save();
+                $wheel->save();
+            }
         }
 
         return $data;

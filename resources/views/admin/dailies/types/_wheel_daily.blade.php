@@ -80,4 +80,10 @@
     </div>
 </div>
 
-@include('dailies._segment_style', ['segments' => $wheel->segmentStyles, 'totalSegments' => $wheel->segment_number])
+@if (!isset($wheel))
+    <div class="alert alert-info">
+        To change the segment styles, first edit the wheel and save it. Then you can edit the segment styles.
+    </div>
+@else
+    @include('dailies._segment_style', ['segments' => $wheel?->segmentStyles, 'totalSegments' => $wheel?->segment_number])
+@endif

@@ -23,7 +23,7 @@
                         <td>
                             <a class="fas fa-arrows-alt-v handle mr-3" href="#"></a>
                             {!! $daily->displayName !!}
-                            @if ($daily->is_timed_daily)
+                            @if ($daily->start_at || $daily->end_at)
                                 <i class="fas fa-clock"></i>
                             @endif
                         </td>

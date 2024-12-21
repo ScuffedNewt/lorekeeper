@@ -183,14 +183,6 @@
     @include('widgets._datetimepicker_js')
     <script>
         $(document).ready(function() {
-            $('#is_timed_daily').change(function() {
-                console.log('changed');
-                if ($(this).is(':checked')) {
-                    $('.daily-timed-quantity').removeClass('hide');
-                } else {
-                    $('.daily-timed-quantity').addClass('hide');
-                }
-            });
             $('.delete-daily-button').on('click', function(e) {
                 e.preventDefault();
                 loadModal("{{ url('admin/data/dailies/delete') }}/{{ $daily->id }}", 'Delete ' + "{{ ucfirst(__('dailies.daily')) }}");
