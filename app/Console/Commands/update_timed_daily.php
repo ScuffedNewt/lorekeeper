@@ -35,12 +35,12 @@ class update_timed_daily extends Command {
      */
     public function handle() {
         //activate or deactivate dailies
-        $hidedaily = Daily::where('is_active', 1)->where(function($query) {
+        $hidedaily = Daily::where('is_active', 1)->where(function ($query) {
             $query->where('start_at', '<', Carbon::now())->where('end_at', '<', Carbon::now())
                 ->orWhere('end_at', '>', Carbon::now())->where('start_at', '>', Carbon::now());
         })->get();
 
-        $showdaily = Daily::where('is_active', 0)->where(function($query) {
+        $showdaily = Daily::where('is_active', 0)->where(function ($query) {
             $query->where('start_at', '<', Carbon::now())
                 ->orWhere('end_at', '>', Carbon::now());
         })->get();
