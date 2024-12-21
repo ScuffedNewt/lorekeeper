@@ -5,6 +5,7 @@
 @endsection
 
 @section('dailies-content')
+
     <head>
         <!-- Scripts for wheel of fortune dailies -->
         <script src="{{ asset('js/winwheel.min.js') }}"></script>
