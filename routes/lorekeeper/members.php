@@ -248,4 +248,6 @@ Route::group(['prefix' => 'gardens', 'namespace' => 'Activities'], function () {
     Route::get('{name}', 'GardenController@getGarden');
 
     Route::post('place', 'GardenController@postPlace');
+    Route::post('interact/{id}', 'GardenController@postInteract');
+    Route::post('collect/{id}', 'GardenController@postCollect');
 });

@@ -13,7 +13,7 @@
                     @foreach ($garden->plots as $plot)
                         <div class="col-md-3 mb-3 text-center">
                             <div class="card text-center justify-content-center" style="max-width: 200px; max-height: 200px; aspect-ratio: 1/1; background-color: rgb(88, 54, 54); background-image: url({{ asset($plot->backgroundImage) }});">
-                                <!---- if user owns plot --->
+                                {{-- if user owns plot --}}
                                 @if (Auth::user()->gardenPlots->contains('plot_id', $plot->id) || !\App\Models\Limit\Limit::hasLimits($plot))
                                     @php
                                         $userPlot = Auth::user()
@@ -21,7 +21,7 @@
                                             ->where('plot_id', $plot->id)
                                             ->first();
                                     @endphp
-                                    <!--- If plant is dead show dead thing --->
+                                    {{-- If plant is dead show dead thing --}}
                                     @if ($userPlot?->is_dead)
                                         <div class="btn btn-dark" style="width: 100%; height: 100%;">
                                             {!! Form::open(['url' => 'garden/clear/' . $plot->id]) !!}
@@ -32,13 +32,13 @@
                                             {!! Form::close() !!}
                                         </div>
                                     @else
-                                        @if ($userPlot?->started_at)
+                                        @if ($userPlot?->started_at && $userPlot?->object)
                                             {{-- SOMETHING IN PLOT --}}
-                                            {{-- @if ($userPlot->actionReady)
-                                                @include('garden._action', ['plot' => $plot, 'userPlot' => $userPlot])
-                                            @else
-                                                @include('garden._wait', ['plot' => $plot, 'userPlot' => $userPlot])
-                                            @endif --}}
+                                            @include('gardens.objects._'. $userPlot->object?->type, [
+                                                'plot' => $plot,
+                                                'userPlot' => $userPlot,
+                                                'object' => $userPlot->object,
+                                            ])
                                         @else
                                             {{-- NOTHING IN PLOT --}}
                                             <!----If there is NO plant growing --->

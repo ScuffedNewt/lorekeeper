@@ -29,7 +29,8 @@
         <div class="card">
             <div class="card-header h5">Potential Rewards</div>
             <div class="card-body">
-                <p>This reward has the potential to be obtained if the bonus chance below succeeds. Only items are only supported currently.</p>
+                <p>This reward has the potential to be obtained if the bonus chance below succeeds.</p>
+                <p><strong>Note: this is planned to use loot weighting in the future to allow different percent chances.</strong></p>
                 @include('widgets._loot_select', ['loots' => isset($object) ? $object->potentialRewards : [], 'showLootTables' => true, 'showRaffles' => true, 'prefix' => 'potential_'])
 
                 {!! Form::label('Bonus Chance Percentage') !!}

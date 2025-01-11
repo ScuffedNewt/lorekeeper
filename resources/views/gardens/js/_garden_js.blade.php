@@ -1,37 +1,27 @@
 <script>
-    let selected_stack;
     let current_garden;
     let stack_type;
+    let stack_id;
     let object_type;
     $('.garden-button').click(function(e) {
         e.preventDefault();
         $('.garden-button').removeClass('active').removeClass('focus');
         let id = $(this).data('garden-id');
         let current_garden_id = $(this).data('current-garden-id');
-        let stack_type = $(this).data('stack-type');
-        let object_type = $(this).data('object-type');
-        selected_stack = id;
+        let stackType = $(this).data('stack-type');
+        let objectType = $(this).data('object-type');
+        stack_id = id;
         current_garden = current_garden_id ?? 'none';
-        stack_type = stack_type;
-        object_type = object_type;
-
-        console.log('Selected stack: ' + selected_stack);
-        console.log('Current garden: ' + current_garden);
-        console.log('Stack type: ' + stack_type);
-        console.log('Object type: ' + object_type);
+        stack_type = stackType;
+        object_type = objectType;
 
         $(this).addClass('focus');
-        showGardenButtons(selected_stack);
+        showGardenButtons();
     });
 
     $('.action-button').click(function(e) {
         e.preventDefault();
         let plot_id = $(this).data('plot-id');
-        console.log('Selected stack: ' + selected_stack);
-        console.log('Current garden: ' + current_garden);
-        console.log('Plot ID: ' + plot_id);
-        console.log('Stack type: ' + stack_type);
-        console.log('Object type: ' + object_type);
 
         $.ajax({
             url: "{{ url('gardens/place') }}",
@@ -39,31 +29,29 @@
             data: {
                 'object_type': object_type,
                 'stack_type': stack_type,
-                'selected_stack_id': selected_stack,
+                'stack_id': stack_id,
                 'current_garden_id': current_garden,
                 'plot_id': plot_id,
                 '_token': '{{ csrf_token() }}'
             },
-            success: function(data) {
-                console.log(data);
-                if (data.success) {
-                    location.reload();
-                } else {
-                    alert('Error using item.');
-                }
-            },
-            error: function(data) {
-                console.log(data);
-                alert('Error using item.');
+            complete: function(response) {
+                location.reload();
             }
         });
     });
 
-    function showGardenButtons(selected_stack) {
-        if (selected_stack == 'deselect') {
-            $('.action-button').addClass('hide');
+    function showGardenButtons() {
+        if (stack_id == 'deselect') {
+            // hide all action buttons
+            $('.action-button').each(function() {
+                $(this).addClass('hide');
+            });
             return;
         }
-        $('.action-button').removeClass('hide');
+
+        // unhide all action buttons
+        $('.action-button').each(function() {
+            $(this).removeClass('hide');
+        });
     }
 </script>

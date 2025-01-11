@@ -347,8 +347,14 @@ function fillUserAssets($assets, $sender, $recipient, $logType, $data) {
         if ($key == 'items' && count($contents)) {
             $service = new App\Services\InventoryManager;
             foreach ($contents as $asset) {
-                if (!$service->creditItem($sender, $recipient, $logType, $data, $asset['asset'], $asset['quantity'])) {
-                    return false;
+                if ($asset['quantity'] < 0) {
+                    if (!$service->debitItem($sender, $logType, $data, null, $asset['quantity'])) {
+                        return false;
+                    }
+                } else {
+                    if (!$service->creditItem($sender, $recipient, $logType, $data, $asset['asset'], $asset['quantity'])) {
+                        return false;
+                    }
                 }
             }
         } elseif ($key == 'currencies' && count($contents)) {

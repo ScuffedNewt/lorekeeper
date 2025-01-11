@@ -575,6 +575,21 @@ class InventoryManager extends Service {
         DB::beginTransaction();
 
         try {
+            if (!$stack) {
+                // get first qualifying stack
+                $stack = UserItem::where([
+                    ['user_id', '=', $owner->id],
+                    ['item_id', '=', $data['item_id']],
+                    ['count', '>', 0],
+                ])->get()->filter(function ($stack) use ($data) {
+                    return $stack->getAvailableQuantityAttribute() > 0;
+                })->first();
+
+                if (!$stack) {
+                    throw new \Exception('No valid item stack found.');
+                }
+            }
+
             $stack->count -= $quantity;
             $stack->save();
 

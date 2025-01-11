@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Activities;
 use App\Models\Garden\Garden;
 use App\Models\Garden\GardenPlot;
 use App\Models\User\User;
-use App\Models\User\UserGardenPlot;
+use App\Models\Garden\UserGardenPlot;
 use App\Services\Garden\GardenManager;
 use App\Services\Garden\PlotManager;
 use App\Services\LimitManager;
@@ -38,6 +38,8 @@ class GardenController extends Controller {
      * Shows the garden page.
      *
      * @param mixed $name
+     * 
+     * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getGarden($name) {
         $garden = Garden::visible()->where('name', str_replace('-', ' ', $name))->first();
@@ -52,12 +54,20 @@ class GardenController extends Controller {
 
     /**
      * Places item / object in the plot.
+     * 
+     * @param GardenManager $service
+     * @param Request $request
+     * 
+     * @return \Illuminate\Http\JsonResponse
      */
     public function postPlace(GardenManager $service, Request $request) {
         $data = $request->only([
-            'selected_stack_id', 'current_garden_id', 'plot_id', 'type',
+            'object_type', 'stack_type', 'stack_id', 'current_garden_id', 'plot_id',
         ]);
         if (!$service->place(Auth::user(), $data)) {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
             return response()->json([
                 'status'     => 'error',
                 'errors'     => $service->errors()->getMessages()['error'],
@@ -65,10 +75,63 @@ class GardenController extends Controller {
             ]);
         }
 
+        flash('Placed successfully!')->success();
         return response()->json([
             'status'     => 'success',
             'message'    => $request->message,
         ]);
+    }
+
+    /**
+     * Adds a modifier to the plot.
+     */
+    // TODO
+
+    /**
+     * Interacts with a plot, watering, feeding, etc.
+     * 
+     * @param GardenManager $service
+     * @param Request $request
+     * @param mixed $id
+     * 
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function postInteract(GardenManager $service, Request $request, $id) {
+        $data = $request->only([
+            // todo
+        ]);
+        $plot = UserGardenPlot::findOrFail($id);
+        if (!$service->interact(Auth::user(), $plot, $data)) {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
+        } else {
+            flash(($plot->object->type == 'seed' ? 'Watered' : 'Fed').' successfully!')->success();
+        }
+
+        return redirect()->to('gardens#'.strtolower(str_replace(' ', '-', $plot->garden->name)));
+    }
+
+    /**
+     * Collects the object from the plot.
+     * 
+     * @param GardenManager $service
+     * @param Request $request
+     * @param mixed $id
+     * 
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function postCollect(GardenManager $service, Request $request, $id) {
+        $plot = UserGardenPlot::findOrFail($id);
+        if (!$service->collect(Auth::user(), $plot)) {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
+        } else {
+            flash('Collected successfully!')->success();
+        }
+
+        return redirect()->to('gardens#'.strtolower(str_replace(' ', '-', $plot->garden->name)));
     }
 
     /************************************************************************************

@@ -22,8 +22,12 @@
     @if (Settings::get('garden_view'))
         <div class="text-right mb-3">
             <div class="btn-group">
-                <button type="button" class="btn btn-secondary active nav-view-button" data-toggle="tooltip" title="Nav View" alt="Nav View"><i class="fas fa-bars"></i></button>
-                <button type="button" class="btn btn-secondary grid-view-button" data-toggle="tooltip" title="Grid View" alt="Grid View"><i class="fas fa-th"></i></button>
+                <button type="button" class="btn btn-secondary active nav-view-button" data-toggle="tooltip" title="Nav View" alt="Nav View">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <button type="button" class="btn btn-secondary grid-view-button" data-toggle="tooltip" title="Grid View" alt="Grid View">
+                    <i class="fas fa-th"></i>
+                </button>
             </div>
         </div>
     @endif

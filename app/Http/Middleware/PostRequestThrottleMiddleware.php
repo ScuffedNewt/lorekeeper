@@ -19,7 +19,7 @@ class PostRequestThrottleMiddleware {
         $allowedRoutes = [
             'admin/*',
         ];
-        if ($request->isMethod('get') || $request->is(...$allowedRoutes)) {
+        if ($request->isMethod('get') || $request->is(...$allowedRoutes) || app()->environment('local')) {
             return $next($request);
         }
 
