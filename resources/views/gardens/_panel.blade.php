@@ -34,7 +34,7 @@
                                     @else
                                         @if ($userPlot?->started_at && $userPlot?->object)
                                             {{-- SOMETHING IN PLOT --}}
-                                            @include('gardens.objects._'. $userPlot->object?->type, [
+                                            @include('gardens.objects._' . $userPlot->object?->type, [
                                                 'plot' => $plot,
                                                 'userPlot' => $userPlot,
                                                 'object' => $userPlot->object,

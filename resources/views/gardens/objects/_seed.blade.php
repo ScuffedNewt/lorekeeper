@@ -5,13 +5,13 @@
 @endif
 @if ($userPlot->canCollect)
     {!! Form::open(['url' => 'gardens/collect/' . $userPlot->id]) !!}
-        {!! Form::button('<i class="fas fa-seedling"></i> Harvest', ['class' => 'btn btn-success mb-4', 'type' => 'submit']) !!}
+    {!! Form::button('<i class="fas fa-seedling"></i> Harvest', ['class' => 'btn btn-success mb-4', 'type' => 'submit']) !!}
     {!! Form::close() !!}
 @else
     @if ($userPlot->actionReady)
         <p class="mb-1">{{ $userPlot->interactedCount }}/{{ $object->data['waterings'] }} Waterings</p>
         {!! Form::open(['url' => 'gardens/interact/' . $userPlot->id]) !!}
-            {!! Form::button('<i class="fas fa-tint"></i> Water', ['class' => 'btn btn-primary mb-2', 'type' => 'submit']) !!}
+        {!! Form::button('<i class="fas fa-tint"></i> Water', ['class' => 'btn btn-primary mb-2', 'type' => 'submit']) !!}
         {!! Form::close() !!}
     @else
         <p class="mb-1">Can be watered in {{ $userPlot->timeUntilReady }}</p>
