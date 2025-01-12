@@ -111,15 +111,14 @@ class UserGardenPlot extends Model {
             return true;
         }
 
-        return $this->data['interacted_at'] < Carbon::now() && $this->interactedCount < $this->actionsRequired || $this->interactedCount >= $this->actionsRequired;
+        return $this->timeUntilReady < Carbon::now() && $this->interactedCount < $this->actionsRequired || $this->interactedCount >= $this->actionsRequired;
     }
 
     /**
      * Returns whether or not the plot is ready to be collected.
      */
     public function getCanCollectAttribute() {
-        dd($this->interactedCount, $this->actionsRequired);
-        return $this->actionReady && $this->interactedCount >= $this->actionsRequired;
+        return $this->actionReady && $this->interactedCount >= $this->actionsRequired && $this->timeUntilReady < Carbon::now();
     }
 
     /**
@@ -132,6 +131,7 @@ class UserGardenPlot extends Model {
             return $this->started_at->addHours($growthTime);
         }
 
-        return $this->data['interacted_at']->addHours($growthTime);
+        $interactedAt = Carbon::parse($this->data['interacted_at']);
+        return $interactedAt->addHours($growthTime);
     }
 }

@@ -1,5 +1,6 @@
     @if ($garden->can_use_modifiers)
         <div class="card w-100">
+            {{-- TODO --}}
         </div>
     @endif
     <div class="row">
@@ -12,7 +13,7 @@
                 @if ($garden->plots->count())
                     @foreach ($garden->plots as $plot)
                         <div class="col-md-3 mb-3 text-center">
-                            <div class="card text-center justify-content-center" style="max-width: 200px; max-height: 200px; aspect-ratio: 1/1; background-color: rgb(88, 54, 54); background-image: url({{ asset($plot->backgroundImage) }});">
+                            <div class="card text-center justify-content-center text-light" style="max-width: 200px; max-height: 200px; aspect-ratio: 1/1; background-color: rgb(88, 54, 54); background-image: url({{ asset($plot->backgroundImage) }});">
                                 {{-- if user owns plot --}}
                                 @if (Auth::user()->gardenPlots->contains('plot_id', $plot->id) || !\App\Models\Limit\Limit::hasLimits($plot))
                                     @php
@@ -56,6 +57,7 @@
                                 @else
                                     <div class="container text-white">
                                         <i class="fas fa-lock text-white m-1"></i>
+                                        {{-- TODO MAKE UNLOCKABLE --}}
                                     </div>
                                 @endif
                             </div>
@@ -78,112 +80,3 @@
             </div>
         @endif
     </div>
-    {{-- <script>
-
-
-        $("#modifierSelector input:radio").change(function() {
-            if ('<?php echo $plots->first()->plot_type; ?>' == 'seed') {
-                selectedModifier = $(this).val();
-                if (selectedModifier == null || selectedModifier == 0) {
-                    $(".mod-button-plant").each(function() {
-                        $(this).addClass('hide');
-                    })
-                } else {
-                    $(".seed-button-plant").each(function() {
-                        $(this).addClass('hide');
-                    })
-                    $(".mod-button-plant").each(function() {
-                        $(this).removeClass('hide');
-                    })
-                }
-            }
-        });
-
-        $('.skull-button-garden').on('click', function(e) {
-            e.preventDefault();
-            var type = $(this).attr('type');
-            loadModal("{{ url('garden/skull') }}" + '/' + $(this).val(), (type == 'seed' ? 'Destroy Crop?' : 'Remove Animal?'));
-        });
-
-        function plantSeed(plot_id) {
-            // disable plant class
-            $(".seed-button-plant").each(function() {
-                $(this).addClass('hide');
-            });
-            if (selectedSeed == null) {
-                alert("Please select a seed to add!");
-            } else {
-                $.ajax({
-                    url: "{{ url('garden/plant') }}",
-                    method: 'post',
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        plot_id: plot_id,
-                        item_id: selectedSeed,
-                        type: 'seed'
-                    },
-                    dataType: 'json',
-                    success: function(data) {
-                        refreshThePage();
-                    },
-                    error: function(error) {
-                        console.log(error);
-                        // refreshThePage();
-                    }
-                });
-            }
-        }
-
-        function placeAnimal(plot_id, plot_type) {
-            if (plot_type == 'coop' && selectedCoop == null) {
-                alert("Please select an animal!");
-            }
-            if (plot_type == 'barn' && selectedBarn == null) {
-                alert("Please select an animal!");
-            }
-            $.ajax({
-                url: "{{ url('garden/plant') }}",
-                method: 'post',
-                data: {
-                    _token: '{{ csrf_token() }}',
-                    plot_id: plot_id,
-                    item_id: (plot_type == 'coop' ? selectedCoop : selectedBarn),
-                    type: plot_type
-                },
-                dataType: 'json',
-                success: function(data) {
-                    refreshThePage();
-                },
-                error: function(error) {
-                    refreshThePage();
-                }
-            });
-        }
-
-        function addModifier(plot_id) {
-            if (selectedModifier == null) {
-                alert("Please select a modifier!");
-            } else {
-                $.ajax({
-                    url: "{{ url('garden/modify') }}",
-                    method: 'post',
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        plot_id: plot_id,
-                        mod_id: selectedModifier
-                    },
-                    dataType: 'json',
-                    success: function(data) {
-                        refreshThePage();
-                    },
-                    error: function(error) {
-                        refreshThePage();
-                    }
-                });
-            }
-        }
-
-        function refreshThePage() {
-            location.reload();
-        }
-    </script> --}}
