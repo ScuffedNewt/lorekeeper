@@ -131,6 +131,7 @@ class UserGardenPlot extends Model {
         }
 
         $interactedAt = Carbon::parse($this->data['interacted_at']);
+
         return $interactedAt->addHours($growthTime);
     }
 }
