@@ -4,7 +4,6 @@ namespace App\Models\Garden;
 
 use App\Models\Model;
 use App\Models\User\User;
-use App\Models\Garden\GardenPlot;
 use Carbon\Carbon;
 
 class UserGardenPlot extends Model {

@@ -2,13 +2,13 @@
 
 namespace App\Services\Garden;
 
-use Carbon\Carbon;
-use App\Models\Limit\Limit;
-use App\Models\Garden\UserGardenPlot;
 use App\Models\Garden\Garden;
-use App\Models\Garden\GardenPlot;
 use App\Models\Garden\GardenObject;
+use App\Models\Garden\GardenPlot;
+use App\Models\Garden\UserGardenPlot;
+use App\Models\Limit\Limit;
 use App\Services\Service;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class GardenManager extends Service {
@@ -26,8 +26,8 @@ class GardenManager extends Service {
      *
      * @param User  $user
      * @param array $data
-     * 
-     * @return boolean
+     *
+     * @return bool
      */
     public function place($user, $data) {
         DB::beginTransaction();
@@ -106,12 +106,12 @@ class GardenManager extends Service {
 
     /**
      * Interacts with a plot.
-     * 
+     *
      * @param User  $user
-     * @param UserGardenPlot $userPlot
-     * @param Garden $garden
-     * 
-     * @return boolean
+     * @param mixed $plot
+     * @param mixed $data
+     *
+     * @return bool
      */
     public function interact($user, $plot, $data) {
         DB::beginTransaction();
@@ -140,7 +140,6 @@ class GardenManager extends Service {
                 'data' => $plotData,
             ]);
 
-
             return $this->commitReturn(true);
         } catch (\Exception $e) {
             $this->setError('error', $e->getMessage());
@@ -151,11 +150,11 @@ class GardenManager extends Service {
 
     /**
      * Collects the object from a plot.
-     * 
-     * @param User  $user
+     *
+     * @param User           $user
      * @param UserGardenPlot $plot
-     * 
-     * @return boolean
+     *
+     * @return bool
      */
     public function collect($user, $plot) {
         DB::beginTransaction();
@@ -191,7 +190,7 @@ class GardenManager extends Service {
             // Logging data
             $logType = 'Collected from Gardens';
             $logData = [
-                'data' => 'Collected ' . $object->displayName . ' from the ' . $plot->garden->displayName . '.',
+                'data' => 'Collected '.$object->displayName.' from the '.$plot->garden->displayName.'.',
             ];
 
             // Distribute user rewards
@@ -199,7 +198,7 @@ class GardenManager extends Service {
                 throw new \Exception('Failed to distribute collected items to user.');
             }
 
-            flash('You have collected: ' . createRewardsString($rewards))->success();
+            flash('You have collected: '.createRewardsString($rewards))->success();
 
             // Reset the plot
             $plot->update([
@@ -223,22 +222,21 @@ class GardenManager extends Service {
 
     /**
      * Plants a seed in a plot.
-     * 
-     * @param User  $user
+     *
+     * @param User           $user
      * @param UserGardenPlot $userPlot
-     * @param Garden $garden
-     * @param GardenObject $object
-     * 
-     * @return boolean
+     * @param Garden         $garden
+     * @param GardenObject   $object
+     *
+     * @return bool
      */
     private function placeSeed($user, $userPlot, $garden, $object) {
         DB::beginTransaction();
 
         try {
-
             $logType = 'Used in Garden';
             $data = [
-                'data' => 'Used to plant a seed in the ' . $garden->displayName . ' garden.',
+                'data' => 'Used to plant a seed in the '.$garden->displayName.' garden.',
             ];
 
             // check if the seed can be planted during this month
@@ -247,7 +245,7 @@ class GardenManager extends Service {
             if ($startMonth && $endMonth) {
                 $currentMonth = Carbon::now()->month;
                 if ($currentMonth < $startMonth || $currentMonth > $endMonth) {
-                    throw new \Exception('This seed cannot be planted during this month, it can only be planted between ' . Carbon::create()->month($startMonth)->format('F') . ' and ' . Carbon::create()->month($endMonth)->format('F') . '.');
+                    throw new \Exception('This seed cannot be planted during this month, it can only be planted between '.Carbon::create()->month($startMonth)->format('F').' and '.Carbon::create()->month($endMonth)->format('F').'.');
                 }
             }
 
@@ -272,7 +270,7 @@ class GardenManager extends Service {
                 'started_at' => Carbon::now(),
                 'data'       => [
                     'object_id' => $object->id,
-                ]
+                ],
             ]);
 
             return $this->commitReturn(true);
@@ -283,20 +281,18 @@ class GardenManager extends Service {
         return $this->rollbackReturn(false);
     }
 
-
     /**
      * Creates a user plot for a specified plot.
-     * 
-     * @param User  $user
+     *
+     * @param User       $user
      * @param GardenPlot $plot
-     * 
+     *
      * @return UserGardenPlot
      */
     private function createUserPlot($user, $plot) {
         DB::beginTransaction();
 
         try {
-
             $userPlot = UserGardenPlot::create([
                 'user_id' => $user->id,
                 'plot_id' => $plot->id,

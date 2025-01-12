@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Activities;
 
 use App\Models\Garden\Garden;
 use App\Models\Garden\GardenPlot;
-use App\Models\User\User;
 use App\Models\Garden\UserGardenPlot;
+use App\Models\User\User;
 use App\Services\Garden\GardenManager;
 use App\Services\Garden\PlotManager;
 use App\Services\LimitManager;
@@ -38,7 +38,7 @@ class GardenController extends Controller {
      * Shows the garden page.
      *
      * @param mixed $name
-     * 
+     *
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getGarden($name) {
@@ -54,10 +54,7 @@ class GardenController extends Controller {
 
     /**
      * Places item / object in the plot.
-     * 
-     * @param GardenManager $service
-     * @param Request $request
-     * 
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function postPlace(GardenManager $service, Request $request) {
@@ -68,6 +65,7 @@ class GardenController extends Controller {
             foreach ($service->errors()->getMessages()['error'] as $error) {
                 flash($error)->error();
             }
+
             return response()->json([
                 'status'     => 'error',
                 'errors'     => $service->errors()->getMessages()['error'],
@@ -76,6 +74,7 @@ class GardenController extends Controller {
         }
 
         flash('Placed successfully!')->success();
+
         return response()->json([
             'status'     => 'success',
             'message'    => $request->message,
@@ -84,16 +83,16 @@ class GardenController extends Controller {
 
     /**
      * Adds a modifier to the plot.
+     *
+     * @param mixed $id
      */
     // TODO
 
     /**
      * Interacts with a plot, watering, feeding, etc.
-     * 
-     * @param GardenManager $service
-     * @param Request $request
+     *
      * @param mixed $id
-     * 
+     *
      * @return \Illuminate\Http\RedirectResponse
      */
     public function postInteract(GardenManager $service, Request $request, $id) {
@@ -114,11 +113,9 @@ class GardenController extends Controller {
 
     /**
      * Collects the object from the plot.
-     * 
-     * @param GardenManager $service
-     * @param Request $request
+     *
      * @param mixed $id
-     * 
+     *
      * @return \Illuminate\Http\RedirectResponse
      */
     public function postCollect(GardenManager $service, Request $request, $id) {

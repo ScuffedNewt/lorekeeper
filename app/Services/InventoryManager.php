@@ -581,7 +581,7 @@ class InventoryManager extends Service {
                     ['user_id', '=', $owner->id],
                     ['item_id', '=', $data['item_id']],
                     ['count', '>', 0],
-                ])->get()->filter(function ($stack) use ($data) {
+                ])->get()->filter(function ($stack) {
                     return $stack->getAvailableQuantityAttribute() > 0;
                 })->first();
 
