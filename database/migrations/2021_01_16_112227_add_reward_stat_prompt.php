@@ -37,7 +37,7 @@ class AddRewardStatPrompt extends Migration {
 
             $table->timestamps();
 
-            //Add sender and recipient type. Set default user to account for preexisting rows
+            // Add sender and recipient type. Set default user to account for preexisting rows
             $table->enum('sender_type', ['User', 'Character'])->nullable()->default('User');
         });
     }

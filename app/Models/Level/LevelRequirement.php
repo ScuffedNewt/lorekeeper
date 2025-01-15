@@ -46,7 +46,7 @@ class LevelRequirement extends Model {
                 return $this->belongsTo(Item::class, 'limit_id');
             case 'Currency':
                 return $this->belongsTo(Currency::class, 'limit_id');
-                //case 'Recipe':
+                // case 'Recipe':
                 //    return $this->belongsTo('App\Models\Recipe\Recipe', 'limit_id');
             case 'None':
                 // Laravel requires a relationship instance to be returned (cannot return null), so returning one that doesn't exist here.

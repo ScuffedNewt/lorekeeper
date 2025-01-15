@@ -32,6 +32,9 @@ class ParsePostRequestFields {
                     } else {
                         $parsedFields[$key] = parse($value);
                     }
+
+                    // Decode HTML special chars
+                    $parsedFields[$key] = htmlspecialchars_decode($parsedFields[$key]);
                 }
             }
 
@@ -58,6 +61,9 @@ class ParsePostRequestFields {
                 } else {
                     $array[$key] = parse($value);
                 }
+
+                // Decode HTML special chars
+                $array[$key] = htmlspecialchars_decode($array[$key]);
             }
         }
 

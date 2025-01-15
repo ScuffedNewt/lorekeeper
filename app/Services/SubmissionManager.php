@@ -65,7 +65,7 @@ class SubmissionManager extends Service {
                     throw new \Exception('This prompt may only be submitted to by staff members.');
                 }
 
-                //level req
+                // level req
                 if ($prompt->level_req) {
                     if (!$user->level || $user->level->current_level < $prompt->level_req) {
                         throw new \Exception('You are not high enough level to enter this prompt');
@@ -663,7 +663,6 @@ class SubmissionManager extends Service {
                         case 'Element': // we don't check for quantity here
                             addAsset($assets, $data['elements'][$reward], 1);
                             break;
-
                     }
                 }
             }

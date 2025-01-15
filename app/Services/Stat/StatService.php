@@ -38,6 +38,8 @@ class StatService extends Service {
                 throw new \Exception('The multiplier must be greater than 0.');
             }
 
+            $data['icon'] ??= '';
+
             $stat = Stat::create($data);
 
             return $this->commitReturn($stat);
@@ -107,6 +109,8 @@ class StatService extends Service {
                 }
             }
             $data['data']['bases'] = $base_data;
+
+            $data['icon'] ??= '';
 
             $stat->update($data);
 

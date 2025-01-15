@@ -1780,10 +1780,10 @@
   "resolved" "https://registry.npmjs.org/binary-extensions/-/binary-extensions-2.2.0.tgz"
   "version" "2.2.0"
 
-"blade-formatter@^1.41.1":
-  "integrity" "sha512-J4L0hsw+r6XSnrEpHMPDldfPeaEmhHwXacs5oFh+9FgDu2Ec7p1tLxA8QXdgcXZU0ILTMkzAtusia10oP05g3Q=="
-  "resolved" "https://registry.npmjs.org/blade-formatter/-/blade-formatter-1.41.1.tgz"
-  "version" "1.41.1"
+"blade-formatter@^1.42.0":
+  "integrity" "sha512-eQ/3U1UVXsZhdaHqIbiPrkMEtkXrUSzTUMNXcyFNmWJTnbqpRsC3H/CmraYfPUZdxJTPeCxcZ1UpxaeB3K4GrA=="
+  "resolved" "https://registry.npmjs.org/blade-formatter/-/blade-formatter-1.42.0.tgz"
+  "version" "1.42.0"
   dependencies:
     "@prettier/plugin-php" "^0.22.2"
     "@shufo/tailwindcss-class-sorter" "3.0.1"
@@ -1795,10 +1795,10 @@
     "find-config" "^1.0.0"
     "glob" "^8.0.1"
     "html-attribute-sorter" "^0.4.3"
-    "ignore" "^5.1.8"
+    "ignore" "^6.0.0"
     "js-beautify" "^1.14.8"
     "lodash" "^4.17.19"
-    "php-parser" "3.1.5"
+    "php-parser" "3.2.1"
     "prettier" "^3.2.5"
     "string-replace-async" "^2.0.0"
     "tailwindcss" "^3.1.8"
@@ -3414,10 +3414,15 @@
   "resolved" "https://registry.npmjs.org/ieee754/-/ieee754-1.2.1.tgz"
   "version" "1.2.1"
 
-"ignore@^5.1.1", "ignore@^5.1.8":
+"ignore@^5.1.1":
   "integrity" "sha512-CmxgYGiEPCLhfLnpPp1MoRmifwEIOgjcHXxOBjv7mY96c+eWScsOP9c112ZyLdWHi0FxHjI+4uVhKYp/gcdRmQ=="
   "resolved" "https://registry.npmjs.org/ignore/-/ignore-5.2.0.tgz"
   "version" "5.2.0"
+
+"ignore@^6.0.0":
+  "integrity" "sha512-InwqeHHN2XpumIkMvpl/DCJVrAHgCsG5+cn1XlnLWGwtZBm8QJfSusItfrwx81CTp5agNZqpKU2J/ccC5nGT4A=="
+  "resolved" "https://registry.npmjs.org/ignore/-/ignore-6.0.2.tgz"
+  "version" "6.0.2"
 
 "imagemin@^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0", "imagemin@^7.0.1":
   "integrity" "sha512-33AmZ+xjZhg2JMCe+vDf6a9mzWukE7l+wAtesjE7KyteqqKjzxv7aVQeWnul1Ve26mWvEQqyPwl0OctNBfSR9w=="
@@ -4371,10 +4376,10 @@
     "safe-buffer" "^5.0.1"
     "sha.js" "^2.4.8"
 
-"php-parser@^3.1.5", "php-parser@3.1.5":
-  "integrity" "sha512-jEY2DcbgCm5aclzBdfW86GM6VEIWcSlhTBSHN1qhJguVePlYe28GhwS0yoeLYXpM2K8y6wzLwrbq814n2PHSoQ=="
-  "resolved" "https://registry.npmjs.org/php-parser/-/php-parser-3.1.5.tgz"
-  "version" "3.1.5"
+"php-parser@^3.1.5", "php-parser@3.2.1":
+  "integrity" "sha512-WT5AMqe39ZdqAxp9Yp7uR6e3clBWlT1dxHHs49GmnDx2d+975NEiLSVy2tRGLdSC9tgdQOLiN1Yz54g1d2cZDQ=="
+  "resolved" "https://registry.npmjs.org/php-parser/-/php-parser-3.2.1.tgz"
+  "version" "3.2.1"
 
 "picocolors@^1.0.0", "picocolors@^1.1.1":
   "integrity" "sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA=="

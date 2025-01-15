@@ -14,7 +14,7 @@ class Stat extends Model {
      * @var array
      */
     protected $fillable = [
-        'name', 'abbreviation', 'base', 'increment', 'multiplier', 'max_level', 'colour', 'data',
+        'name', 'abbreviation', 'base', 'increment', 'multiplier', 'max_level', 'colour', 'data', 'icon',
     ];
 
     /**
@@ -32,6 +32,7 @@ class Stat extends Model {
     public static $createRules = [
         'name'         => 'required|unique:stats|between:3,25',
         'abbreviation' => 'unique:stats|between:1,10',
+        'icon'         => 'nullable',
     ];
 
     /**
@@ -42,6 +43,7 @@ class Stat extends Model {
     public static $updateRules = [
         'name'         => 'required|between:3,25',
         'abbreviation' => 'between:1,10',
+        'icon'         => 'nullable',
     ];
 
     /**********************************************************************************************

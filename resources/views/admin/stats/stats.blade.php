@@ -45,7 +45,7 @@
             <tbody>
                 @foreach ($stats as $stat)
                     <tr class="sort-item" data-id="{{ $stat->id }}">
-                        <td>{{ $stat->name }} ({{ $stat->abbreviation }})</td>
+                        <td><i class="{!! $stat->icon ? $stat->icon . ' mr-2' : '' !!} "></i> {{ $stat->name }} ({{ $stat->abbreviation }})</td>
                         <td>{{ $stat->base }}</td>
                         <td>
                             {{ $stat->increment ?? 'No Increment' }}

@@ -224,6 +224,36 @@
                     @endif
                 </div>
 
+                @if (isset($showMention) && $showMention)
+                    {{-- Mention This tab --}}
+                    <div class="tab-pane fade" id="mention-{{ $image->id }}">
+                        In the rich text editor:
+                        <div class="alert alert-secondary">
+                            [character={{ $character->slug }}]
+                        </div>
+                        @if (!config('lorekeeper.settings.wysiwyg_comments'))
+                            In a comment:
+                            <div class="alert alert-secondary">
+                                [{{ $character->fullName }}]({{ $character->url }})
+                            </div>
+                        @endif
+                        <hr>
+                        <div class="my-2">
+                            <strong>For Thumbnails:</strong>
+                        </div>
+                        In the rich text editor:
+                        <div class="alert alert-secondary">
+                            [charthumb={{ $character->slug }}]
+                        </div>
+                        @if (!config('lorekeeper.settings.wysiwyg_comments'))
+                            In a comment:
+                            <div class="alert alert-secondary">
+                                [![Thumbnail of {{ $character->fullName }}]({{ $character->image->thumbnailUrl }})]({{ $character->url }})
+                            </div>
+                        @endif
+                    </div>
+                @endif
+
                 @if (Auth::check() && Auth::user()->hasPower('manage_characters'))
                     <div class="mt-3">
                         <a href="#" class="btn btn-outline-info btn-sm edit-features" data-id="{{ $image->id }}"><i class="fas fa-cog"></i> Edit</a>
@@ -275,32 +305,6 @@
                     </div>
                 @endif
             </div>
-
-            @if (isset($showMention) && $showMention)
-                {{-- Mention This tab --}}
-                <div class="tab-pane fade" id="mention-{{ $image->id }}">
-                    In the rich text editor:
-                    <div class="alert alert-secondary">
-                        [character={{ $character->slug }}]
-                    </div>
-                    In a comment:
-                    <div class="alert alert-secondary">
-                        [{{ $character->fullName }}]({{ $character->url }})
-                    </div>
-                    <hr>
-                    <div class="my-2">
-                        <strong>For Thumbnails:</strong>
-                    </div>
-                    In the rich text editor:
-                    <div class="alert alert-secondary">
-                        [charthumb={{ $character->slug }}]
-                    </div>
-                    In a comment:
-                    <div class="alert alert-secondary">
-                        [![Thumbnail of {{ $character->fullName }}]({{ $character->image->thumbnailUrl }})]({{ $character->url }})
-                    </div>
-                </div>
-            @endif
 
             @if (Auth::check() && Auth::user()->hasPower('manage_characters'))
                 <div class="tab-pane fade" id="settings-{{ $image->id }}">

@@ -33,7 +33,7 @@
                     @foreach ($chunk as $stat)
                         <div class="col-md-2 p-1 m-2 rounded p-2 stat-entry" style="background-color: {{ $stat->stat->colour }};" data-id="{{ $stat->id }}">
                             <h5 class="text-center">
-                                {{ $stat->stat->name }}
+                                <i class="{!! $stat->icon ? $stat->icon . ' mr-2' : '' !!} "></i> {{ $stat->stat->name }}
                                 (lvl {{ $stat->stat_level }})
                             </h5>
                             <div class="text-center">

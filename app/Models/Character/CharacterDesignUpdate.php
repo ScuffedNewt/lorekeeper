@@ -296,7 +296,7 @@ class CharacterDesignUpdate extends Model {
      * @return string
      */
     public function getThumbnailFileNameAttribute() {
-        return $this->id.'_'.$this->hash.'_th.'.$this->extension;
+        return $this->id.'_'.$this->hash.'_th.'.(config('lorekeeper.settings.masterlist_image_format') != $this->extension ? config('lorekeeper.settings.masterlist_image_format') : $this->extension);
     }
 
     /**

@@ -262,7 +262,7 @@ class Pet extends Model {
             return $userpet->variant->imageUrl;
         }
 
-        //default
+        // default
         return $this->imageUrl;
     }
 

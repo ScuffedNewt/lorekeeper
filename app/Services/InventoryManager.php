@@ -208,7 +208,7 @@ class InventoryManager extends Service {
                     throw new \Exception('Quantity to transfer exceeds item count.');
                 }
 
-                //Check that hold count isn't being exceeded
+                // Check that hold count isn't being exceeded
                 if ($stack->item->category->character_limit > 0) {
                     $limit = $stack->item->category->character_limit;
                 }

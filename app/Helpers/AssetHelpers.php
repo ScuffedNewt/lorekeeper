@@ -182,7 +182,7 @@ function getAssetModelString($type, $namespaced = true) {
                 return 'StatusEffect';
             }
             break;
-        // these are special cases, as they do not specifically have a unique model
+            // these are special cases, as they do not specifically have a unique model
         case 'exp':
             return 'Exp';
             break;
@@ -190,8 +190,6 @@ function getAssetModelString($type, $namespaced = true) {
         case 'points':
             return 'Points';
             break;
-
-
     }
 
     return null;

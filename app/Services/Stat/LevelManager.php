@@ -57,7 +57,7 @@ class LevelManager extends Service {
                 }
             }
 
-            ////////////////////////////////////////////////////// LEVEL REWARDS
+            // //////////////////////////////////////////////////// LEVEL REWARDS
             $levelRewards = $this->processRewards($next);
 
             // Logging data
@@ -76,7 +76,7 @@ class LevelManager extends Service {
                     throw new \Exception('Failed to distribute rewards to user.');
                 }
             }
-            /////////////////////////////////////////////////
+            // ///////////////////////////////////////////////
 
             // create log
             if ($this->createlog($recipient, $recipient->logType, $level->current_level, $next->level)) {

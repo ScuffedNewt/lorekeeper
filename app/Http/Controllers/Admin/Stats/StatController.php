@@ -75,7 +75,7 @@ class StatController extends Controller {
     public function postCreateEditStat(Request $request, StatService $service, $id = null) {
         $id ? $request->validate(Stat::$updateRules) : $request->validate(Stat::$createRules);
         $data = $request->only([
-            'name', 'abbreviation', 'base', 'increment', 'multiplier', 'max_level', 'types', 'type_ids', 'colour', 'base_types', 'base_type_ids', 'base_values',
+            'name', 'abbreviation', 'base', 'increment', 'multiplier', 'max_level', 'types', 'type_ids', 'colour', 'base_types', 'base_type_ids', 'base_values', 'icon',
         ]);
         if ($id && $service->updateStat(Stat::find($id), $data)) {
             flash('Stat updated successfully.')->success();

@@ -6,7 +6,6 @@ use App\Models\Model;
 use App\Models\User\User;
 
 class UserUnlockedLimit extends Model {
-
     /**
      * The attributes that are mass assignable.
      *

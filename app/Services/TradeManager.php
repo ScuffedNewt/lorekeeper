@@ -487,7 +487,7 @@ class TradeManager extends Service {
                 if ($user->id != $trade->sender_id && $user->id != $trade->recipient_id) {
                     throw new \Exception('Error attaching currencies to this trade.');
                 }
-                //dd([$data['currency_id'], $data['currency_quantity']]);
+                // dd([$data['currency_id'], $data['currency_quantity']]);
                 $data['currency_id'] = $data['currency_id']['user-'.$user->id];
                 $data['currency_quantity'] = $data['currency_quantity']['user-'.$user->id];
                 foreach ($data['currency_id'] as $key=> $currencyId) {

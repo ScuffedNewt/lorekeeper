@@ -30,6 +30,15 @@
                 {!! Form::text('abbreviation', $stat->abbreviation, ['class' => 'form-control', 'placeholder' => 'E.g HP']) !!}
             </div>
         </div>
+        <div class="col-md">
+            <div class="form-group">
+                {!! Form::label('Stat Icon (Font-awesome code; optional)') !!}
+                <div class="col-1 align-self-center text-right p-0">
+                    <i id="siconitem" class="{{ $stat->icon }}"></i>
+                </div>
+                    {!! Form::text('icon', $stat->icon, ['class' => 'form-control', 'id' => 'icon']) !!}
+            </div>
+        </div>
     </div>
 
     <div class="row">
@@ -272,6 +281,12 @@
             $('.delete-stat-button').on('click', function(e) {
                 e.preventDefault();
                 loadModal("{{ url('admin/stats/delete') }}/{{ $stat->id }}", 'Delete Stat');
+            });
+
+            $("#icon").change(function() {
+                var text = $('#icon').val();
+                $("#siconitem").removeClass();
+                $("#siconitem").addClass(text);
             });
         });
     </script>

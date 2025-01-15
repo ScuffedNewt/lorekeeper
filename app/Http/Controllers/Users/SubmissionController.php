@@ -117,7 +117,7 @@ class SubmissionController extends Controller {
             'statuses'               => StatusEffect::orderBy('name')->pluck('name', 'id'),
             'inventory'              => $inventory,
             'page'                   => 'submission',
-            'elements'            => Element::orderBy('name')->pluck('name', 'id'),
+            'elements'               => Element::orderBy('name')->pluck('name', 'id'),
             'expanded_rewards'       => config('lorekeeper.extensions.character_reward_expansion.expanded'),
             'userGallerySubmissions' => $gallerySubmissions,
         ]));
@@ -162,7 +162,7 @@ class SubmissionController extends Controller {
             'statuses'               => StatusEffect::orderBy('name')->pluck('name', 'id'),
             'inventory'              => $inventory,
             'page'                   => 'submission',
-            'elements'            => Element::orderBy('name')->pluck('name', 'id'),
+            'elements'               => Element::orderBy('name')->pluck('name', 'id'),
             'expanded_rewards'       => config('lorekeeper.extensions.character_reward_expansion.expanded'),
             'selectedInventory'      => isset($submission->data['user']) ? parseAssetData($submission->data['user']) : null,
             'count'                  => Submission::where('prompt_id', $submission->prompt_id)->where('status', 'Approved')->where('user_id', $submission->user_id)->count(),

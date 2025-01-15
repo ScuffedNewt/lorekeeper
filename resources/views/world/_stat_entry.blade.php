@@ -1,5 +1,5 @@
     <h1>
-        {!! $stat->displayName !!} ({{ $stat->abbreviation }})
+        <i class="{!! $stat->icon ? $stat->icon . ' mr-2' : '' !!} "></i> {!! $stat->displayName !!} ({{ $stat->abbreviation }})
         <x-admin-edit title="Stat" :object="$stat" />
     </h1>
     <hr class="my-3">

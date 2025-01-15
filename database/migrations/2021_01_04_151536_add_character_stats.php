@@ -14,6 +14,7 @@ class AddCharacterStats extends Migration {
             $table->increments('id');
             $table->string('name');
             $table->string('abbreviation');
+            $table->string('icon', 100)->nullable();
             $table->integer('default')->unsigned();
             // step increase so it doesnt have to increase by one
             $table->integer('step')->unsigned()->nullable();
@@ -21,7 +22,7 @@ class AddCharacterStats extends Migration {
             $table->string('multiplier')->nullable();
         });
 
-        //user levels
+        // user levels
         Schema::create('level_users', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('level')->default(1);
