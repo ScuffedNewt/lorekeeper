@@ -36,7 +36,7 @@
                 <div class="col-1 align-self-center text-right p-0">
                     <i id="siconitem" class="{{ $stat->icon }}"></i>
                 </div>
-                    {!! Form::text('icon', $stat->icon, ['class' => 'form-control', 'id' => 'icon']) !!}
+                {!! Form::text('icon', $stat->icon, ['class' => 'form-control', 'id' => 'icon']) !!}
             </div>
         </div>
     </div>
