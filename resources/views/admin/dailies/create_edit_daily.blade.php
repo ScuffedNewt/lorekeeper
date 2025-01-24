@@ -69,7 +69,7 @@
                 ' index and on the ' .
                 __('dailies.daily') .
                 '
-                                            page as a header.',
+                                                    page as a header.',
         ) !!}
         <div class="custom-file">
             {!! Form::label('image', 'Choose file...', ['class' => 'custom-file-label']) !!}
@@ -103,8 +103,8 @@
     <div class="row">
         <div class="form-group col-md-6">
             {!! Form::label('daily_timeframe', 'Daily Timeframe') !!} {!! add_help('This is the timeframe that the daily can
-                                                            be collected in. I.E. yearly will only allow one roll per year. Weekly allows one roll per week. Rollover will
-                                                            happen on UTC time.') !!}
+                                                                        be collected in. I.E. yearly will only allow one roll per year. Weekly allows one roll per week. Rollover will
+                                                                        happen on UTC time.') !!}
             {!! Form::select('daily_timeframe', ['daily' => 'Daily', 'weekly' => 'Weekly', 'monthly' => 'Monthly', 'yearly' => 'Yearly'], $daily ? $daily->daily_timeframe : 0, ['class' => 'form-control']) !!}
 
         </div>
@@ -126,8 +126,8 @@
     <div class="form-group">
         {!! Form::label('is_active', 'Set Active', ['class' => 'form-check-label ml-3']) !!} {!! add_help(
             'If turned
-                                                off,
-                                                the ' .
+                                                        off,
+                                                        the ' .
                 __('dailies.daily') .
                 ' will not be visible to regular users.',
         ) !!}
