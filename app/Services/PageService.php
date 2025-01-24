@@ -114,4 +114,27 @@ class PageService extends Service {
 
         return $this->rollbackReturn(false);
     }
+
+    /**
+     * Regenerates a site page.
+     *
+     * @param mixed $page
+     *
+     * @return bool
+     */
+    public function regenPage($page) {
+        DB::beginTransaction();
+
+        try {
+            $page->parsed_text = parse($page->text);
+
+            $page->save();
+
+            return $this->commitReturn($page);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
+    }
 }

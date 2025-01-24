@@ -170,14 +170,14 @@ class RankService extends Service {
             $sort = array_reverse(explode(',', $data));
 
             // Check if the array contains the admin rank, or anything non-numeric
-            $adminRank = Rank::orderBy('sort', 'DESC')->first();
+            $adminRank = Rank::where('is_admin', 1)->first();
             $count = 0;
             foreach ($sort as $key => $s) {
                 if (!is_numeric($s) || !is_numeric($key)) {
                     throw new \Exception('Invalid sort order.');
                 }
                 if ($s == $adminRank->id) {
-                    throw new \Exception('Sort order of admin rank cannot be changed.');
+                    throw new \Exception('The sort order of the admin rank cannot be changed.');
                 }
 
                 Rank::where('id', $s)->update(['sort' => $key]);

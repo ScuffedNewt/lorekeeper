@@ -229,7 +229,7 @@ class Feature extends Model {
      * @return string
      */
     public function getImageFileNameAttribute() {
-        return $this->hash.$this->id.'-image.png';
+        return $this->id.'-'.$this->hash.'-image.png';
     }
 
     /**
@@ -269,7 +269,7 @@ class Feature extends Model {
      * @return string
      */
     public function getSearchUrlAttribute() {
-        return url('masterlist?feature_id[]='.$this->id);
+        return url('masterlist?feature_ids[]='.$this->id);
     }
 
     /**

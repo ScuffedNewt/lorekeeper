@@ -10,6 +10,8 @@
     <h1>{{ $news->id ? 'Edit' : 'Create' }} News Post
         @if ($news->id)
             <a href="#" class="btn btn-danger float-right delete-news-button">Delete Post</a>
+            <a href="#" class="btn btn-secondary float-right regen-news-button mr-md-2">Regenerate Post</a>
+            <a href="{{ $news->url }}" class="btn btn-info float-right mr-md-2">View Post</a>
         @endif
     </h1>
 
@@ -62,6 +64,10 @@
             $('.delete-news-button').on('click', function(e) {
                 e.preventDefault();
                 loadModal("{{ url('admin/news/delete') }}/{{ $news->id }}", 'Delete Post');
+            });
+            $('.regen-news-button').on('click', function(e) {
+                e.preventDefault();
+                loadModal("{{ url('admin/news/regen') }}/{{ $news->id }}", 'Regenerate Post');
             });
         });
     </script>

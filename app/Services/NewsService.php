@@ -102,6 +102,29 @@ class NewsService extends Service {
     }
 
     /**
+     * Regenerates a news post.
+     *
+     * @param News $news
+     *
+     * @return bool
+     */
+    public function regenNews($news) {
+        DB::beginTransaction();
+
+        try {
+            $news->parsed_text = parse($news->text);
+
+            $news->save();
+
+            return $this->commitReturn($news);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
+    }
+
+    /**
      * Updates queued news posts to be visible and alert users when
      * they should be posted.
      *

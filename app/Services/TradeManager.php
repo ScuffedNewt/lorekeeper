@@ -56,7 +56,9 @@ class TradeManager extends Service {
             ]);
 
             if ($assetData = $this->handleTradeAssets($trade, $data, $user)) {
-                $trade->data = json_encode(['sender' => getDataReadyAssets($assetData['sender'])]);
+                $trade->data = [
+                    'sender' => getDataReadyAssets($assetData['sender']),
+                ];
                 $trade->save();
 
                 // send a notification
@@ -103,7 +105,7 @@ class TradeManager extends Service {
                 $tradeData = $trade->data;
                 $isSender = ($trade->sender_id == $user->id);
                 $tradeData[$isSender ? 'sender' : 'recipient'] = getDataReadyAssets($assetData[$isSender ? 'sender' : 'recipient']);
-                $trade->data = json_encode($tradeData);
+                $trade->data = $tradeData;
                 $trade->{'is_'.($isSender ? 'sender' : 'recipient').'_confirmed'} = 0;
                 $trade->{'is_'.($isSender ? 'recipient' : 'sender').'_trade_confirmed'} = 0;
                 $trade->save();
@@ -487,7 +489,7 @@ class TradeManager extends Service {
                 if ($user->id != $trade->sender_id && $user->id != $trade->recipient_id) {
                     throw new \Exception('Error attaching currencies to this trade.');
                 }
-                //dd([$data['currency_id'], $data['currency_quantity']]);
+                // dd([$data['currency_id'], $data['currency_quantity']]);
                 $data['currency_id'] = $data['currency_id']['user-'.$user->id];
                 $data['currency_quantity'] = $data['currency_quantity']['user-'.$user->id];
                 foreach ($data['currency_id'] as $key=> $currencyId) {
@@ -691,7 +693,7 @@ class TradeManager extends Service {
                         if (!$currency) {
                             throw new \Exception('Cannot credit an invalid currency. ('.$currencyId.')');
                         }
-                        if (!$currencyManager->creditCurrency($trade->{$type}, $trade->{$recipientType}, 'Trade', 'Received in trade [<a href="'.$trade->url.'">#'.$trade->id.']', $currency, $quantity)) {
+                        if (!$currencyManager->creditCurrency($trade->{$type}, $trade->{$recipientType}, 'Trade', 'Received in trade [<a href="'.$trade->url.'">#'.$trade->id.'</a>]', $currency, $quantity)) {
                             throw new \Exception('Could not credit currency. ('.$currencyId.')');
                         }
                     }

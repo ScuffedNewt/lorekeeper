@@ -37,7 +37,7 @@ class SublistService extends Service {
         try {
             $sublist = Sublist::create($data);
 
-            //update categories and species
+            // update categories and species
             if (isset($contents['categories']) && $contents['categories']) {
                 CharacterCategory::whereIn('id', $contents['categories'])->update(['masterlist_sub_id' => $sublist->id]);
             }
@@ -71,10 +71,10 @@ class SublistService extends Service {
                 throw new \Exception('The name has already been taken.');
             }
 
-            //update sublist
+            // update sublist
             $sublist->update($data);
 
-            //update categories and species
+            // update categories and species
             CharacterCategory::where('masterlist_sub_id', $sublist->id)->update(['masterlist_sub_id' => 0]);
             Species::where('masterlist_sub_id', $sublist->id)->update(['masterlist_sub_id' => 0]);
             if (isset($contents['categories'])) {

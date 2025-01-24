@@ -237,7 +237,7 @@ return [
     | It will automatically add transparent borders to the images to make them square,
     | based on the bigger dimension (between width/height).
     | Thumbnails will effectively be small previews of the full masterlist images.
-    | This feature will not replace the manual uploading of thumbnails.
+    | This feature does not disable the manual uploading of thumbnail images.
     |
     | Simply change to "1" to enable, or keep at "0" to disable.
     |
@@ -246,22 +246,41 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Masterlist Image Automation Removing Manual Upload For Users
+    | Masterlist Image Automation Hide Manual Thumbnail
     |--------------------------------------------------------------------------
     |
-    | NOTE: This feature will only function if the above feature, the
-    | Masterlist Image Automation Replacing Cropper, is also enabled.
+    | NOTE: If the "Masterlist Image Automation Replacing Cropper"
+    | setting above is disabled, this setting has no effect.
     |
-    | The following option is for if you DO want to disable the manual uploading
-    | of thumbnails, to ensure users do not attempt to upload their
-    | own thumbnails regardless of the automation.
-    | This will remove it purely for users, not administration.
+    | This disables the option for users to manually upload their own
+    | thumbnail images in design updates, including use of the cropper.
+    | Note that this does not prevent permissioned staff from uploading
+    | custom thumbnail images.
     |
-    | 0: Keeps the manual thumbnail upload for users.
-    | 1: Hides the thumbnail upload for users.
+    | 0: Allows custom thumbnail uploads.
+    | 1: Disallows custom thumbnail uploads.
     |
     */
     'masterlist_image_automation_hide_manual_thumbnail' => 0,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Remove Manual Thumbnail Image Upload
+    |--------------------------------------------------------------------------
+    |
+    | NOTE: If the "Masterlist Image Automation Hide Manual Thumbnail"
+    | setting above is enabled, this setting has no effect.
+    |
+    | This disables the option for users to manually upload their own
+    | thumbnail images in design updates, requiring use of the cropper.
+    | Note that this does not prevent permissioned staff from uploading
+    | custom thumbnail images.
+    |
+    | 0: Allows custom thumbnail uploads.
+    | 1: Disallows custom thumbnail uploads.
+    |
+    */
+    'hide_manual_thumbnail_image_upload' => 0,
 
     /*
     |--------------------------------------------------------------------------
@@ -354,6 +373,37 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Hideable Textarea on Gallery Submissions
+    |--------------------------------------------------------------------------
+    |
+    | Whether or not to be able to hide the textarea on gallery Submissions.
+    |
+    | enable: Set to 1 to show a button to hide the textarea.
+    |
+    | on_image Set to 1 to auto-hide on image upload- will only work
+    | if 'enable' is set to 1.
+    |
+    */
+    'hide_textarea_on_gallery_submissions'              => [
+        'enable'   => 0,
+        'on_image' => 0,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Site FontAwesome Icon Version
+    |--------------------------------------------------------------------------
+    |
+    | What version of FontAwesome the site uses.
+    | 0: Version 5. (Default) 1: Version 6.
+    | 2: A mixed version where icons with v5 classes (i.e. fas) show
+    | the v5 icons and icons with v6 classes (i.e. fa-solid) show the v6 icons.
+    |
+    */
+    'fa_version'                                  => 0,
+
+    /*
+    |--------------------------------------------------------------------------
     | Site Logging Webhook
     |--------------------------------------------------------------------------
     |
@@ -364,4 +414,14 @@ return [
     |
     */
     'site_logging_webhook'                              => env('SITE_LOGGING_WEBHOOK', null),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Enable Character Content Warnings
+    |--------------------------------------------------------------------------
+    |
+    | Allows characters to have content warnings.
+    |
+    */
+    'enable_character_content_warnings'                 => 1,
 ];

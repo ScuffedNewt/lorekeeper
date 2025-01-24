@@ -24,7 +24,10 @@
 
     <div class="form-group">
         {!! Form::label('World Page Image (Optional)') !!} {!! add_help('This image is used only on the world information pages.') !!}
-        <div>{!! Form::file('image') !!}</div>
+        <div class="custom-file">
+            {!! Form::label('image', 'Choose file...', ['class' => 'custom-file-label']) !!}
+            {!! Form::file('image', ['class' => 'custom-file-input']) !!}
+        </div>
         <div class="text-muted">Recommended size: 100px x 100px</div>
         @if ($item->has_image)
             <div class="form-check">
@@ -41,8 +44,8 @@
         </div>
         @if (config('lorekeeper.extensions.item_entry_expansion.extra_fields'))
             <div class="col-md form-group">
-                {!! Form::label('Item Rarity (Optional)') !!} {!! add_help('This should be a number.') !!}
-                {!! Form::number('rarity', $item && $item->rarity ? $item->rarity : '', ['class' => 'form-control']) !!}
+                {!! Form::label('Item Rarity (Optional)') !!}
+                {!! Form::select('rarity_id', $rarities, $item && $item->rarityId ? $item->rarityId : '', ['class' => 'form-control', 'placeholder' => 'Select a Rarity']) !!}
             </div>
         @endif
     </div>

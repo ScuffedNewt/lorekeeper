@@ -17,42 +17,56 @@
 
     <h3>Basic Information</h3>
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div class="form-group">
                 {!! Form::label('Currency Name') !!}
                 {!! Form::text('name', $currency->name, ['class' => 'form-control']) !!}
             </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div class="form-group">
                 {!! Form::label('Abbreviation (Optional)') !!} {!! add_help('This will be used to denote the currency if an icon is not provided. If an abbreviation is not given, the currency\'s full name will be used.') !!}
                 {!! Form::text('abbreviation', $currency->abbreviation, ['class' => 'form-control']) !!}
             </div>
         </div>
+        <div class="col-md-4 form-group">
+            {!! Form::label('Currency Category (Optional)') !!}
+            {!! Form::select('currency_category_id', $categories, $currency->currency_category_id, ['class' => 'form-control', 'placeholder' => 'No category']) !!}
+        </div>
     </div>
 
     <div class="row">
-        <div class="col-md-6 form-group">
-            {!! Form::label('Icon Image (Optional)') !!} {!! add_help('This will be used to denote the currency. If not provided, the abbreviation will be used.') !!}
-            {!! Form::file('icon') !!}
-            <div class="text-muted">Recommended height: 16px</div>
-            @if ($currency->has_icon)
-                <div class="form-check">
-                    {!! Form::checkbox('remove_icon', 1, false, ['class' => 'form-check-input']) !!}
-                    {!! Form::label('remove_icon', 'Remove current image', ['class' => 'form-check-label']) !!}
+        <div class="col-md-6">
+            <div class="form-group">
+                {!! Form::label('Icon Image (Optional)') !!} {!! add_help('This will be used to denote the currency. If not provided, the abbreviation will be used.') !!}
+                <div class="custom-file">
+                    {!! Form::label('icon', 'Choose icon file...', ['class' => 'custom-file-label']) !!}
+                    {!! Form::file('icon', ['class' => 'custom-file-input']) !!}
                 </div>
-            @endif
+                <div class="text-muted">Recommended height: 16px</div>
+                @if ($currency->has_icon)
+                    <div class="form-check">
+                        {!! Form::checkbox('remove_icon', 1, false, ['class' => 'form-check-input']) !!}
+                        {!! Form::label('remove_icon', 'Remove current image', ['class' => 'form-check-label']) !!}
+                    </div>
+                @endif
+            </div>
         </div>
-        <div class="col-md-6 form-group">
-            {!! Form::label('World Page Image (Optional)') !!} {!! add_help('This image is used only on the world information pages.') !!}
-            {!! Form::file('image') !!}
-            <div class="text-muted">Recommended size: 200px x 200px</div>
-            @if ($currency->has_image)
-                <div class="form-check">
-                    {!! Form::checkbox('remove_image', 1, false, ['class' => 'form-check-input']) !!}
-                    {!! Form::label('remove_image', 'Remove current image', ['class' => 'form-check-label']) !!}
+        <div class="col-md-6">
+            <div class="form-group">
+                {!! Form::label('World Page Image (Optional)') !!} {!! add_help('This image is used only on the world information pages.') !!}
+                <div class="custom-file">
+                    {!! Form::label('image', 'Choose file...', ['class' => 'custom-file-label']) !!}
+                    {!! Form::file('image', ['class' => 'custom-file-input']) !!}
                 </div>
-            @endif
+                <div class="text-muted">Recommended size: 200px x 200px</div>
+                @if ($currency->has_image)
+                    <div class="form-check">
+                        {!! Form::checkbox('remove_image', 1, false, ['class' => 'form-check-input']) !!}
+                        {!! Form::label('remove_image', 'Remove current image', ['class' => 'form-check-label']) !!}
+                    </div>
+                @endif
+            </div>
         </div>
     </div>
 
@@ -136,6 +150,11 @@
             </div>
         </div>
     @endif
+
+    <div class="form-group">
+        {!! Form::checkbox('is_visible', 1, $currency->id ? $currency->is_visible : 1, ['class' => 'form-check-input', 'data-toggle' => 'toggle']) !!}
+        {!! Form::label('is_visible', 'Is Visible', ['class' => 'form-check-label ml-3']) !!} {!! add_help('If turned off, the currency will not be visible in the currencies list or available for selection in search. Permissioned staff will still be able to see them, however.') !!}
+    </div>
 
     <div class="text-right">
         {!! Form::submit($currency->id ? 'Edit' : 'Create', ['class' => 'btn btn-primary']) !!}

@@ -17,11 +17,21 @@
             </div>
         @endif
         {!! Form::open(['url' => 'account/avatar', 'files' => true]) !!}
-        <div class="form-group row">
-            {!! Form::label('avatar', 'Update Profile Image', ['class' => 'col-md-2 col-form-label']) !!}
-            <div class="col-md-10">
-                {!! Form::file('avatar', ['class' => 'form-control']) !!}
+        <div class="card mb-3 hide" id="avatarCrop">
+            <div class="card-body">
+                <img src="#" id="cropper" class="hide" alt="" />
+                {!! Form::hidden('x0', null, ['id' => 'cropX0']) !!}
+                {!! Form::hidden('x1', null, ['id' => 'cropX1']) !!}
+                {!! Form::hidden('y0', null, ['id' => 'cropY0']) !!}
+                {!! Form::hidden('y1', null, ['id' => 'cropY1']) !!}
             </div>
+            <div class="alert alert-info mx-3">
+                <b>Note:</b> Cropping does not work on gifs.
+            </div>
+        </div>
+        <div class="custom-file mb-1">
+            {!! Form::label('avatar', 'Update Profile Image', ['class' => 'custom-file-label']) !!}
+            {!! Form::file('avatar', ['class' => 'custom-file-input', 'id' => 'avatar']) !!}
         </div>
         <div class="text-right">
             {!! Form::submit('Edit', ['class' => 'btn btn-primary']) !!}
@@ -84,6 +94,27 @@
                     'birthday_setting',
                     ['0' => '0: No one can see your birthday.', '1' => '1: Members can see your day and month.', '2' => '2: Anyone can see your day and month.', '3' => '3: Full date public.'],
                     Auth::user()->settings->birthday_setting,
+                    ['class' => 'form-control'],
+                ) !!}
+            </div>
+        </div>
+        <div class="text-right">
+            {!! Form::submit('Edit', ['class' => 'btn btn-primary']) !!}
+        </div>
+        {!! Form::close() !!}
+    </div>
+
+    <div class="card p-3 mb-2">
+        <h3>Character Warning Visibility</h3>
+        <p>This setting will change how characters with content warnings are displayed to you.</p>
+        {!! Form::open(['url' => 'account/warning']) !!}
+        <div class="form-group row">
+            <label class="col-md-2 col-form-label">Setting</label>
+            <div class="col-md-10">
+                {!! Form::select(
+                    'content_warning_visibility',
+                    ['0' => '0: Character has pop-up warning and censored icons.', '1' => '1: Character has pop-up warnings only.', '2' => '2: No warnings will appear on characters.'],
+                    Auth::user()->settings->content_warning_visibility,
                     ['class' => 'form-control'],
                 ) !!}
             </div>
@@ -173,4 +204,54 @@
             {!! Form::close() !!}
         @endif
     </div>
+@endsection
+@section('scripts')
+    <script>
+        var $avatarCrop = $('#avatarCrop');
+        var $cropper = $('#cropper');
+        var c = null;
+        var $x0 = $('#cropX0');
+        var $y0 = $('#cropY0');
+        var $x1 = $('#cropX1');
+        var $y1 = $('#cropY1');
+        var zoom = 0;
+
+        function readURL(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    $cropper.attr('src', e.target.result);
+                    c = new Croppie($cropper[0], {
+                        viewport: {
+                            width: 200,
+                            height: 200,
+                        },
+                        boundary: {
+                            width: 250,
+                            height: 250
+                        },
+                        update: function() {
+                            updateCropValues();
+                        }
+                    });
+                    updateCropValues();
+                    $avatarCrop.removeClass('hide');
+                    $cropper.removeClass('hide');
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        $("#avatar").change(function() {
+            readURL(this);
+        });
+
+        function updateCropValues() {
+            var values = c.get();
+            $x0.val(values.points[0]);
+            $y0.val(values.points[1]);
+            $x1.val(values.points[2]);
+            $y1.val(values.points[3]);
+        }
+    </script>
 @endsection

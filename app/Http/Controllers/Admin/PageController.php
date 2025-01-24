@@ -111,4 +111,39 @@ class PageController extends Controller {
 
         return redirect()->to('admin/pages');
     }
+
+    /**
+     * Gets the page regeneration modal.
+     *
+     * @param int $id
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getRegenPage($id) {
+        $page = SitePage::find($id);
+
+        return view('admin.pages._regen_page', [
+            'page' => $page,
+        ]);
+    }
+
+    /**
+     * Regenerates a page.
+     *
+     * @param App\Services\PageService $service
+     * @param int                      $id
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function postRegenPage(Request $request, PageService $service, $id) {
+        if ($id && $service->regenPage(SitePage::find($id))) {
+            flash('Page regenerated successfully.')->success();
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
+        }
+
+        return redirect()->to('admin/pages/edit/'.$id);
+    }
 }

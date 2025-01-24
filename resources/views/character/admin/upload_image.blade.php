@@ -24,7 +24,10 @@
 
     <div class="form-group">
         {!! Form::label('Character Image') !!} {!! add_help('This is the full masterlist image. Note that the image is not protected in any way, so take precautions to avoid art/design theft.') !!}
-        <div>{!! Form::file('image', ['id' => 'mainImage']) !!}</div>
+        <div class="custom-file">
+            {!! Form::label('image', 'Choose file...', ['class' => 'custom-file-label']) !!}
+            {!! Form::file('image', ['class' => 'custom-file-input', 'id' => 'mainImage']) !!}
+        </div>
     </div>
     @if (config('lorekeeper.settings.masterlist_image_automation') === 1)
         <div class="form-group">
@@ -59,7 +62,10 @@
     <div class="card mb-3" id="thumbnailUpload">
         <div class="card-body">
             {!! Form::label('Thumbnail Image') !!} {!! add_help('This image is shown on the masterlist page.') !!}
-            <div>{!! Form::file('thumbnail') !!}</div>
+            <div class="custom-file">
+                {!! Form::label('thumbnail', 'Choose thumbnail...', ['class' => 'custom-file-label']) !!}
+                {!! Form::file('thumbnail', ['class' => 'custom-file-input']) !!}
+            </div>
             <div class="text-muted">Recommended size: {{ config('lorekeeper.settings.masterlist_thumbnails.width') }}px x {{ config('lorekeeper.settings.masterlist_thumbnails.height') }}px</div>
         </div>
     </div>
@@ -113,8 +119,8 @@
     </div>
 
     <div class="form-group" id="subtypes">
-        {!! Form::label('Subtype (Optional)') !!}
-        {!! Form::select('subtype_id', $subtypes, old('subtype_id') ?: $character->image->subtype_id, ['class' => 'form-control', 'id' => 'subtype']) !!}
+        {!! Form::label('Subtypes (Optional)') !!}
+        {!! Form::select('subtype_ids[]', $subtypes, old('subtype_ids') ?: $character->image->subtypes()?->pluck('subtype_id')->toArray(), ['class' => 'form-control', 'id' => 'subtype', 'multiple']) !!}
     </div>
 
     <div class="form-group">
@@ -316,8 +322,6 @@
 
         });
 
-
-
         $("#species").change(function() {
             var species = $('#species').val();
             var id = '<?php echo $character->image->id; ?>';
@@ -330,7 +334,10 @@
             }).fail(function(jqXHR, textStatus, errorThrown) {
                 alert("AJAX call failed: " + textStatus + ", " + errorThrown);
             });
+        });
 
+        $('#subtype').selectize({
+            maxItems: {{ config('lorekeeper.extensions.multiple_subtype_limit') }},
         });
     </script>
 @endsection
