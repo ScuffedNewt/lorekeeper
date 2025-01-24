@@ -7,7 +7,6 @@ use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 class UpdateTimedDaily extends Command {
-
     /**
      * The name and signature of the console command.
      *
