@@ -440,7 +440,7 @@ class GardenService extends Service {
         if (isset($data['stage_image'])) {
             $data['stage_image'] = array_filter($data['stage_image']);
         }
-        ///
+        // /
         $stages = [];
         if (isset($data['stage_number'])) {
             // if old stages exist
