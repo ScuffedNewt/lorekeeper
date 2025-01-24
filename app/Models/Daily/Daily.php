@@ -12,7 +12,8 @@ class Daily extends Model {
      * @var array
      */
     protected $fillable = [
-        'name', 'sort', 'has_image', 'description', 'parsed_description', 'prize_display', 'is_active', 'start_at', 'end_at', 'daily_timeframe', 'type', 'fee', 'currency_id', 'data',
+        'name', 'sort', 'has_image', 'description', 'parsed_description', 'prize_display', 'is_active', 'start_at', 'end_at', 'daily_timeframe',
+        'type', 'fee', 'currency_id', 'data',
     ];
 
     /**
@@ -88,6 +89,29 @@ class Daily extends Model {
     public function currency() {
         return $this->belongsTo(Currency::class);
     }
+
+    /**********************************************************************************************
+
+        SCOPES
+
+    **********************************************************************************************/
+
+    /**
+     * Scope a query to only include active dailies.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     *
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeActive($query) {
+        return $query->where('is_active', 1)
+            ->where(function ($query) {
+                $query->whereNull('start_at')->orWhere('start_at', '<', Carbon::now());
+            })->where(function ($query) {
+                $query->whereNull('end_at')->orWhere('end_at', '>', Carbon::now());
+            });
+    }
+
 
     /**********************************************************************************************
 

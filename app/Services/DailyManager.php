@@ -39,6 +39,9 @@ class DailyManager extends Service {
         DB::beginTransaction();
 
         try {
+            if (!Daily::where('id', $daily->id)->active()->exists()) {
+                throw new \Exception('The daily is not active.');
+            }
             if (!$this->canRoll($daily, $user)) {
                 throw new \Exception('You have already received your reward.');
             }
@@ -108,6 +111,12 @@ class DailyManager extends Service {
      * @return bool
      */
     public function canRoll($daily, $user) {
+        if (!$daily) {
+            return false;
+        }
+        if (!Daily::where('id', $daily->id)->active()->exists()) {
+            return false;
+        }
         $dailyTimer = DailyTimer::where('daily_id', $daily->id)->where('user_id', $user->id)->first();
 
         if ($dailyTimer) {
