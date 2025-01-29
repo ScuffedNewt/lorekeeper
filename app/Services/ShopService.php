@@ -197,6 +197,46 @@ class ShopService extends Service {
                 }
             }
 
+            $shop->stock()->create([
+                'shop_id'                  => $shop->id,
+                'item_id'                  => $data['item_id'],
+                'use_user_bank'            => isset($data['use_user_bank']),
+                'use_character_bank'       => isset($data['use_character_bank']),
+                'is_fto'                   => isset($data['is_fto']),
+                'is_limited_stock'         => isset($data['is_limited_stock']),
+                'quantity'                 => isset($data['is_limited_stock']) ? $data['quantity'] : 0,
+                'purchase_limit'           => $data['purchase_limit'] ?? 0,
+                'purchase_limit_timeframe' => isset($data['purchase_limit']) ? $data['purchase_limit_timeframe'] : null,
+                'stock_type'               => $data['stock_type'],
+                'is_visible'               => $data['is_visible'] ?? 0,
+                'restock'                  => $data['restock'] ?? 0,
+                'restock_quantity'         => isset($data['restock']) && isset($data['quantity']) ? $data['quantity'] : 1,
+                'restock_interval'         => $data['restock_interval'] ?? 2,
+                'range'                    => $data['range'] ?? 0,
+                'disallow_transfer'        => $data['disallow_transfer'] ?? 0,
+                'is_timed_stock'           => isset($data['is_timed_stock']),
+                'start_at'                 => $data['stock_start_at'],
+                'end_at'                   => $data['stock_end_at'],
+                'data'                     => [
+                    'is_random'    => $is_random,
+                    'is_category'  => $is_category,
+                    'category_id'  => $categoryId,
+                    'stock_days'   => $data['stock_days'] ?? null,
+                    'stock_months' => $data['stock_months'] ?? null,
+                ],
+            ]);
+
+            if (isset($data['cost_type']) && isset($data['cost_quantity'])) {
+                foreach ($data['cost_type'] as $key => $costType) {
+                    $stock->costs()->create([
+                        'cost_type' => $costType,
+                        'cost_id'   => $data['cost_id'][$key],
+                        'quantity'  => $data['cost_quantity'][$key],
+                        'group'     => $data['group'][$key] ?? 1,
+                    ]);
+                }
+            }
+
             return $this->commitReturn($shop);
         } catch (\Exception $e) {
             $this->setError('error', $e->getMessage());
@@ -265,8 +305,8 @@ class ShopService extends Service {
                 'is_fto'                   => isset($data['is_fto']),
                 'is_limited_stock'         => isset($data['is_limited_stock']),
                 'quantity'                 => isset($data['is_limited_stock']) ? $data['quantity'] : 0,
-                'purchase_limit'           => $data['purchase_limit'],
-                'purchase_limit_timeframe' => $data['purchase_limit_timeframe'],
+                'purchase_limit'           => $data['purchase_limit'] ?? 0,
+                'purchase_limit_timeframe' => $data['purchase_limit_timeframe'] ?? null,
                 'stock_type'               => $data['stock_type'],
                 'is_visible'               => $data['is_visible'] ?? 0,
                 'restock'                  => $data['restock'] ?? 0,

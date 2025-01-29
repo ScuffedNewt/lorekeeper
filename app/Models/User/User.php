@@ -11,6 +11,7 @@ use App\Models\Claymore\Weapon;
 use App\Models\Claymore\WeaponLog;
 use App\Models\Comment\CommentLike;
 use App\Models\Currency\Currency;
+use App\Models\Currency\CurrencyCategory;
 use App\Models\Currency\CurrencyLog;
 use App\Models\Gallery\GalleryCollaborator;
 use App\Models\Gallery\GalleryFavorite;
@@ -18,6 +19,8 @@ use App\Models\Gallery\GallerySubmission;
 use App\Models\Item\Item;
 use App\Models\Item\ItemLog;
 use App\Models\Level\LevelLog;
+use App\Models\Pet\Pet;
+use App\Models\Pet\PetLog;
 use App\Models\Limit\UserUnlockedLimit;
 use App\Models\Notification;
 use App\Models\Pet\Pet;
@@ -75,6 +78,15 @@ class User extends Authenticatable implements MustVerifyEmail {
      */
     protected $appends = [
         'verified_name',
+    ];
+
+    /**
+     * The relationships that should always be loaded.
+     *
+     * @var array
+     */
+    protected $with = [
+        'rank',
     ];
 
     /**
@@ -185,7 +197,7 @@ class User extends Authenticatable implements MustVerifyEmail {
      * Get the user's pets.
      */
     public function pets() {
-        return $this->belongsToMany(Pet::class, 'user_pets')->withPivot('data', 'updated_at', 'id', 'variant_id', 'character_id', 'pet_name', 'has_image', 'evolution_id')->whereNull('user_pets.deleted_at');
+        return $this->belongsToMany(Pet::class, 'user_pets')->withPivot('data', 'updated_at', 'id', 'character_id', 'pet_name', 'has_image', 'evolution_id')->whereNull('user_pets.deleted_at');
     }
 
     /**
@@ -308,6 +320,19 @@ class User extends Authenticatable implements MustVerifyEmail {
         }
 
         return $this->attributes['has_alias'];
+    }
+
+    /**
+     * Checks if the user has an email.
+     *
+     * @return bool
+     */
+    public function getHasEmailAttribute() {
+        if (!config('lorekeeper.settings.require_email')) {
+            return true;
+        }
+
+        return $this->attributes['email'] && $this->attributes['email_verified_at'];
     }
 
     /**
@@ -519,22 +544,37 @@ class User extends Authenticatable implements MustVerifyEmail {
     /**
      * Get the user's held currencies.
      *
-     * @param bool $showAll
+     * @param bool       $showAll
+     * @param mixed|null $user
+     * @param mixed      $showCategories
      *
      * @return \Illuminate\Support\Collection
      */
-    public function getCurrencies($showAll = false) {
+    public function getCurrencies($showAll = false, $showCategories = false, $user = null) {
         // Get a list of currencies that need to be displayed
         // On profile: only ones marked is_displayed
         // In bank: ones marked is_displayed + the ones the user has
 
         $owned = UserCurrency::where('user_id', $this->id)->pluck('quantity', 'currency_id')->toArray();
 
-        $currencies = Currency::where('is_user_owned', 1);
+        $currencies = Currency::where('is_user_owned', 1)
+            ->whereHas('category', function ($query) use ($user) {
+                $query->visible($user);
+            })
+            ->orWhereNull('currency_category_id')
+            ->visible($user);
         if ($showAll) {
             $currencies->where(function ($query) use ($owned) {
                 $query->where('is_displayed', 1)->orWhereIn('id', array_keys($owned));
             });
+
+            if ($showCategories) {
+                $categories = CurrencyCategory::visible()->orderBy('sort', 'DESC')->get();
+
+                if ($categories->count()) {
+                    $currencies->orderByRaw('FIELD(currency_category_id,'.implode(',', $categories->pluck('id')->toArray()).')');
+                }
+            }
         } else {
             $currencies = $currencies->where('is_displayed', 1);
         }
@@ -543,6 +583,16 @@ class User extends Authenticatable implements MustVerifyEmail {
 
         foreach ($currencies as $currency) {
             $currency->quantity = $owned[$currency->id] ?? 0;
+        }
+
+        if ($showAll && $showCategories) {
+            $currencies = $currencies->groupBy(function ($currency) use ($categories) {
+                if (!$currency->category) {
+                    return 'Miscellaneous';
+                }
+
+                return $categories->where('id', $currency->currency_category_id)->first()->name;
+            });
         }
 
         return $currencies;

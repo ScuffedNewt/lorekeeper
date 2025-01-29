@@ -30,9 +30,10 @@ class Shop extends Model {
      * @var array
      */
     protected $casts = [
-        'data'     => 'array',
-        'end_at'   => 'datetime',
-        'start_at' => 'datetime',
+        'data'            => 'array',
+        'allowed_coupons' => 'array',
+        'end_at'          => 'datetime',
+        'start_at'        => 'datetime',
     ];
 
     /**
@@ -230,7 +231,7 @@ class Shop extends Model {
             return;
         }
         // Get the coupons from the id in allowed_coupons
-        $coupons = Item::whereIn('id', json_decode($this->allowed_coupons, 1))->get();
+        $coupons = Item::whereIn('id', $this->allowed_coupons)->get();
 
         return $coupons;
     }

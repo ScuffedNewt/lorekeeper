@@ -158,8 +158,12 @@ class DesignUpdateManager extends Service {
                     $imageData['use_cropper'] = isset($data['use_cropper']);
                 }
                 if (!$isAdmin && isset($data['image'])) {
-                    if (config('lorekeeper.settings.store_masterlist_fullsizes') != null) {
-                        $imageData['extension'] = config('lorekeeper.settings.masterlist_fullsizes_format');
+                    if (config('lorekeeper.settings.store_masterlist_fullsizes')) {
+                        if (config('lorekeeper.settings.masterlist_fullsizes_format') != null) {
+                            $imageData['extension'] = config('lorekeeper.settings.masterlist_fullsizes_format');
+                        } else {
+                            $imageData['extension'] = $data['image']->getClientOriginalExtension();
+                        }
                     } elseif (config('lorekeeper.settings.masterlist_image_format') != null) {
                         $imageData['extension'] = config('lorekeeper.settings.masterlist_image_format');
                     } else {
@@ -335,10 +339,10 @@ class DesignUpdateManager extends Service {
             }
 
             $request->has_addons = 1;
-            $request->data = json_encode([
+            $request->data = [
                 'user'      => Arr::only(getDataReadyAssets($userAssets), ['user_items', 'currencies']),
                 'character' => Arr::only(getDataReadyAssets($characterAssets), ['currencies']),
-            ]);
+            ];
             $request->save();
 
             return $this->commitReturn(true);
@@ -991,7 +995,7 @@ class DesignUpdateManager extends Service {
                     break;
             }
 
-            $voteData = (isset($request->vote_data) ? collect(json_decode($request->vote_data, true)) : collect([]));
+            $voteData = (isset($request->vote_data) ? collect($request->vote_data, true) : collect([]));
             $voteData->get($user->id) ? $voteData->pull($user->id) : null;
             $voteData->put($user->id, $vote);
             $request->vote_data = $voteData->toJson();

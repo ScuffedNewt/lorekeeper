@@ -178,7 +178,7 @@ class GrantController extends Controller {
     public function getPets() {
         return view('admin.grants.pets', [
             'users' => User::orderBy('id')->pluck('name', 'id'),
-            'pets'  => Pet::orderBy('name')->pluck('name', 'id'),
+            'pets'  => Pet::whereNull('parent_id')->orderBy('name')->pluck('name', 'id'),
         ]);
     }
 
@@ -190,7 +190,7 @@ class GrantController extends Controller {
     public function getPetVariants($id) {
         $pet = Pet::find($id);
 
-        return $pet->variants->pluck('variant_name', 'id')->toArray();
+        return $pet->variants->pluck('name', 'id')->toArray();
     }
 
     /**

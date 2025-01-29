@@ -106,7 +106,7 @@ class SlotService extends Service {
 
         try {
             // get characterData array and put it into the 'data' column of the DB for this tag
-            $tag->update(['data' => json_encode($characterData)]);
+            $tag->update(['data' => $characterData]);
 
             return $this->commitReturn(true);
         } catch (\Exception $e) {

@@ -8,7 +8,6 @@ use App\Models\Model;
 use App\Models\Pet\Pet;
 use App\Models\Pet\PetDrop;
 use App\Models\Pet\PetEvolution;
-use App\Models\Pet\PetVariant;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -22,7 +21,7 @@ class UserPet extends Model {
      */
     protected $fillable = [
         'data', 'pet_id', 'user_id', 'attached_at', 'pet_name', 'has_image', 'artist_url', 'artist_id', 'description',
-        'evolution_id', 'variant_id', 'sort', 'bonded_at',
+        'evolution_id', 'sort', 'bonded_at'
     ];
 
     /**
@@ -39,6 +38,8 @@ class UserPet extends Model {
      */
     protected $casts = [
         'bonded_at' => 'datetime',
+        'attached_at' => 'datetime',
+        'data' => 'array',
     ];
 
     /**
@@ -65,7 +66,7 @@ class UserPet extends Model {
      * Get the pet associated with this pet stack.
      */
     public function pet() {
-        return $this->belongsTo(Pet::class);
+        return $this->belongsTo(Pet::class, 'pet_id');
     }
 
     /**
@@ -73,13 +74,6 @@ class UserPet extends Model {
      */
     public function character() {
         return $this->belongsTo(Character::class, 'character_id');
-    }
-
-    /**
-     * Get the variant associated with this pet stack.
-     */
-    public function variant() {
-        return $this->belongsTo(PetVariant::class, 'variant_id');
     }
 
     /**
@@ -267,18 +261,8 @@ class UserPet extends Model {
         if (!$this->pet->dropData) {
             return null;
         }
-        $rewards = [];
-        // otherwise return base rewards + variant rewards
-        if ($this->variant_id) {
-            if ($this->variant->dropData) {
-                $rewards[] = $this->variant->dropData;
-            }
-        }
-        if (!$this->pet->dropData->override) {
-            $rewards[] = $this->pet->dropData;
-        }
 
-        return $rewards;
+        return $this->pet->dropData;
     }
 
     /**

@@ -52,7 +52,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Alias Requirement
+    | Alias | Email Requirement
     |--------------------------------------------------------------------------
     |
     | Whether or not users are required to link an off-site account to access
@@ -62,8 +62,13 @@ return [
     | (e.g. ownership checking for characters only associated with an off-site account)
     | will still work provided users link the relevant alias(es).
     |
+    | The email option functions as a fallback for users who register with an off-site provider.
+    | If they do not have an email associated with their off-site account, they will be prompted to
+    | provide one on registration / login / site interaction (if this setting is enabled).
+    |
     */
     'require_alias'                                     => 1,
+    'require_email'                                     => 1,
 
     /*
     |--------------------------------------------------------------------------
@@ -237,7 +242,7 @@ return [
     | It will automatically add transparent borders to the images to make them square,
     | based on the bigger dimension (between width/height).
     | Thumbnails will effectively be small previews of the full masterlist images.
-    | This feature will not replace the manual uploading of thumbnails.
+    | This feature does not disable the manual uploading of thumbnail images.
     |
     | Simply change to "1" to enable, or keep at "0" to disable.
     |
@@ -246,22 +251,41 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Masterlist Image Automation Removing Manual Upload For Users
+    | Masterlist Image Automation Hide Manual Thumbnail
     |--------------------------------------------------------------------------
     |
-    | NOTE: This feature will only function if the above feature, the
-    | Masterlist Image Automation Replacing Cropper, is also enabled.
+    | NOTE: If the "Masterlist Image Automation Replacing Cropper"
+    | setting above is disabled, this setting has no effect.
     |
-    | The following option is for if you DO want to disable the manual uploading
-    | of thumbnails, to ensure users do not attempt to upload their
-    | own thumbnails regardless of the automation.
-    | This will remove it purely for users, not administration.
+    | This disables the option for users to manually upload their own
+    | thumbnail images in design updates, including use of the cropper.
+    | Note that this does not prevent permissioned staff from uploading
+    | custom thumbnail images.
     |
-    | 0: Keeps the manual thumbnail upload for users.
-    | 1: Hides the thumbnail upload for users.
+    | 0: Allows custom thumbnail uploads.
+    | 1: Disallows custom thumbnail uploads.
     |
     */
     'masterlist_image_automation_hide_manual_thumbnail' => 0,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Remove Manual Thumbnail Image Upload
+    |--------------------------------------------------------------------------
+    |
+    | NOTE: If the "Masterlist Image Automation Hide Manual Thumbnail"
+    | setting above is enabled, this setting has no effect.
+    |
+    | This disables the option for users to manually upload their own
+    | thumbnail images in design updates, requiring use of the cropper.
+    | Note that this does not prevent permissioned staff from uploading
+    | custom thumbnail images.
+    |
+    | 0: Allows custom thumbnail uploads.
+    | 1: Disallows custom thumbnail uploads.
+    |
+    */
+    'hide_manual_thumbnail_image_upload' => 0,
 
     /*
     |--------------------------------------------------------------------------

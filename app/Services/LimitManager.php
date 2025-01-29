@@ -28,8 +28,9 @@ class LimitManager extends Service {
      * checks all limits on an object.
      *
      * @param mixed $object
+     * @param mixed $is_unlock
      */
-    public function checkLimits($object) {
+    public function checkLimits($object, $is_unlock = false) {
         try {
             $user = Auth::user();
 
@@ -42,6 +43,11 @@ class LimitManager extends Service {
                 if ($user->unlockedLimits()->where('object_model', get_class($object))->where('object_id', $object->id)->exists()) {
                     return true;
                 }
+            }
+
+            // if the limit is not unlocked, check if it is auto unlocked
+            if (!$is_unlock && $limits->first()->is_unlocked && !$limits->first()->is_auto_unlocked) {
+                throw new \Exception(($limits->first()->object->displayName ?? $limits->first()->object->name).' requires manual unlocking!');
             }
 
             $plucked_stacks = [];
@@ -97,7 +103,7 @@ class LimitManager extends Service {
                 $inventoryManager = new InventoryManager;
                 $type = 'Limit Requirements';
                 $data = [
-                    'data' => 'Used in '.$limit->object->displayName ?? $limit->object->name.'\'s limit requirements.',
+                    'data' => 'Used in '.($limit->object->displayName ?? $limit->object->name).'\'s limit requirements.',
                 ];
 
                 foreach ($plucked_stacks as $id=>$quantity) {
@@ -108,11 +114,13 @@ class LimitManager extends Service {
                 }
             }
 
-            if ($limits->first()->is_unlocked) {
+            if ($limits->first()->is_unlocked && $limits->first()->is_auto_unlocked || $is_unlock) {
                 $user->unlockedLimits()->create([
                     'object_model' => get_class($object),
                     'object_id'    => $object->id,
                 ]);
+            } elseif (!$is_unlock && $limits->first()->is_unlocked && !$limits->first()->is_auto_unlocked) {
+                throw new \Exception(($limits->first()->object->displayName ?? $limits->first()->object->name).' requires manual unlocking!');
             }
 
             return true;

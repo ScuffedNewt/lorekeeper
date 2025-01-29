@@ -111,14 +111,45 @@ class ShopLog extends Model {
 
         return 'Purchased from '.$this->shop->name.' by '.
             ($this->character_id ? $this->character->slug.' (owned by '.$this->user->name.')' : $this->user->displayName).' using '.
-            (createRewardsString($cost, true, true) == 'Nothing. :(' ? 'Free' : createRewardsString($cost, true, true));
+            (createRewardsString($cost, true, true) == 'Nothing. :(' ? 'Free' : createRewardsString($cost, true, true))
+            .($this->coupon ? ' with coupon '.$this->coupon->displayName : '');
     }
 
     /**
      * Get the cost of the item.
      */
     public function getTotalCostAttribute() {
-        return mergeAssetsArrays(parseAssetData($this->cost['user']), parseAssetData($this->cost['character']));
+        if (isset($this->cost['user']) && isset($this->cost['character'])) {
+            return mergeAssetsArrays(parseAssetData($this->cost['user']), parseAssetData($this->cost['character']));
+        }
+
+        return parseAssetData($this->cost);
+    }
+
+    /**
+     * Get the base cost of the item.
+     */
+    public function getBaseCostAttribute() {
+        if (isset($this->cost['base'])) {
+            return parseAssetData($this->cost['base']);
+        }
+
+        if (isset($this->cost['user']) && isset($this->cost['character'])) {
+            $assets = mergeAssetsArrays(parseAssetData($this->cost['user']), parseAssetData($this->cost['character']));
+        } else {
+            $assets = parseAssetData($this->cost);
+        }
+
+        foreach ($assets as $key=>$contents) {
+            if (count($contents) == 0) {
+                continue;
+            }
+            foreach ($contents as $asset) {
+                $assets[$key][$asset['asset']->id]['quantity'] = $asset['quantity'] / $this->quantity;
+            }
+        }
+
+        return $assets;
     }
 
     /**
@@ -127,7 +158,34 @@ class ShopLog extends Model {
      * @return string
      */
     public function getDisplayCostAttribute() {
-        return createRewardsString(mergeAssetsArrays(parseAssetData($this->cost['user']), parseAssetData($this->cost['character'])), true, true) == 'Nothing. :('
-            ? 'Free' : createRewardsString(mergeAssetsArrays(parseAssetData($this->cost['user']), parseAssetData($this->cost['character'])), true, true);
+        if (isset($this->cost['user']) && isset($this->cost['character'])) {
+            $assets = mergeAssetsArrays(parseAssetData($this->cost['user']), parseAssetData($this->cost['character']));
+        } else {
+            $assets = parseAssetData($this->cost);
+        }
+
+        return createRewardsString($assets, true, true) == 'Nothing. :(' ? 'Free' : createRewardsString($assets, true, true);
+    }
+
+    /**
+     * Get the cost of the item in a readable format.
+     *
+     * @return string
+     */
+    public function getDisplayBaseCostAttribute() {
+        return createRewardsString($this->baseCost, true, true) == 'Nothing. :(' ? 'Free' : createRewardsString($this->baseCost, true, true);
+    }
+
+    /**
+     * Returns the coupon used (if any).
+     *
+     * @return Item|null
+     */
+    public function getCouponAttribute() {
+        if (!isset($this->cost['coupon'])) {
+            return null;
+        }
+
+        return Item::find($this->cost['coupon']) ?? null;
     }
 }

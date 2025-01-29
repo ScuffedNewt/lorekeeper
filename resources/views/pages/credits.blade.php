@@ -83,6 +83,15 @@
             <a href="http://wiki.lorekeeper.me/index.php?title=Extensions:User_Transfer_Reasons"><strong>User Transfer Reasons</strong></a> by <a href="https://github.com/snupsplus">Snupsplus</a>
         </p>
         <p class="mb-0 col-md-4">
+            <a href="http://wiki.lorekeeper.me/index.php?title=Extensions:Shop_Features"><strong>Shop Features</strong></a> by <a href="https://github.com/ScuffedNewt">ScuffedNewt</a>
+        </p>
+        <p class="mb-0 col-md-4">
+            <a href="http://wiki.lorekeeper.me/index.php?title=Extensions:Dynamic_Limits"><strong>Dynamic Limits</strong></a> by <a href="https://github.com/ScuffedNewt">ScuffedNewt</a>
+        </p>
+        <p class="mb-0 col-md-4">
+            <a href="http://wiki.lorekeeper.me/index.php?title=Extensions:TinyMCE_Code_Editor"><strong>TinyMCE Code Editor</strong></a> by <a href="https://github.com/AW0005">Moif</a>
+        </p>
+        <p class="mb-0 col-md-4">
             <a href="http://wiki.lorekeeper.me/index.php?title=Extensions:Aliases_on_Userpage"><strong>Aliases on Userpage</strong></a> by <a href="https://github.com/SpeedyD">Speedy</a>
             ({{ config('lorekeeper.extensions.aliases_on_userpage') ? 'Enabled' : 'Disabled' }})
         </p>

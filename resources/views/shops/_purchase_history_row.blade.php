@@ -1,6 +1,6 @@
 <div class="row flex-wrap">
     <div class="col-12 col-md-2">
-        <div class="logs-table-cell">{!! $log->item ? $log->item->displayName : '(Deleted Item)' !!}</div>
+        <div class="logs-table-cell">{!! $log->item ? $log->item->displayName : '(Deleted ' . $log->stockType . ')' !!}</div>
     </div>
     <div class="col-12 col-md-2">
         <div class="logs-table-cell">{!! $log->quantity !!}</div>

@@ -19,7 +19,7 @@
     <p>
         You can add requirements to this object by clicking "Add Limit" & selecting a requirement from the dropdown below.
         <br />
-        Requirements are used to determine if a specific action can be preformed on an object.
+        Requirements are used to determine if a specific action can be performed on an object.
         <br /><b>Note that the checks for requirements are automatic, but their usage needs to be defined in the code.</b>
         <br /><b>Dynamic limits are created in the admin panel, but execute their logic in the code.</b>
     </p>
@@ -33,14 +33,27 @@
             @if ($limits)
                 <h5>Limits for {!! $limits->first()->object->displayName !!}</h5>
             @endif
-            <div class="form-group">
-                {!! Form::label('is_unlocked', 'Is Unlocked?') !!}
-                <p>
-                    If this is set to "No", the object will continue to be locked until all requirements are met, every time the user attempts to interact with it.
-                    <br />
-                    If this is set to "Yes", the object will be unlocked for the user to interact with after the requirements are met once. This option is good for one-time unlocks such as shops, locations, certain prompts, etc.
-                </p>
-                {!! Form::select('is_unlocked', ['yes' => 'Yes', 'no' => 'No'], $limits?->first()->is_unlocked ? 'yes' : 'no', ['class' => 'form-control']) !!}
+            <div class="row">
+                <div class="col-md form-group">
+                    {!! Form::label('is_unlocked', 'Is Unlocked?', ['class' => 'form-label font-weight-bold']) !!}
+                    <p>
+                        If this is set to "No", the object will continue to be locked until all requirements are met, every time the user attempts to interact with it.
+                        <br />
+                        If this is set to "Yes", the object will be unlocked for the user to interact with indefinitely after the requirements are met once. This option is good for one-time unlocks such as shops, locations, certain prompts, etc.
+                    </p>
+                    {!! Form::select('is_unlocked', ['yes' => 'Yes', 'no' => 'No'], $limits?->first()->is_unlocked ? 'yes' : 'no', ['class' => 'form-control']) !!}
+                </div>
+                <div class="col-md form-group border-left">
+                    {!! Form::label('is_auto_unlocked', 'Automatically Unlock?', ['class' => 'form-label font-weight-bold']) !!} {!! add_help("This only affects objects with 'Is Unlocked?' set to 'Yes'.") !!}
+                    <p>
+                        If this is set to "No", the user must manually unlock the object by interacting with it - ex. clicking on the "Unlock" button.
+                        <br />
+                        If this is set to "Yes", the object will be automatically unlocked when the user attempts to access them - ex. when a user enters a shop.
+                        <br />
+                        This setting is good for preventing users from being debited before being certain they want to interact with the object.
+                    </p>
+                    {!! Form::select('is_auto_unlocked', ['yes' => 'Yes', 'no' => 'No'], $limits?->first()->is_auto_unlocked ? 'yes' : 'no', ['class' => 'form-control']) !!}
+                </div>
             </div>
             @if ($limits)
                 @foreach ($limits as $limit)

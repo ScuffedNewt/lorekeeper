@@ -27,17 +27,20 @@
                             <div class="col-sm-3 col-6 text-center inventory-item" data-id="{{ $pet->pivot->id }}" data-name="{{ $user->name }}'s {{ $pet->pivot->pet_name ?? $pet->name }}">
                                 <div class="mb-1">
                                     <a href="#" class="inventory-stack">
-                                        <img class="img-fluid rounded" src="{{ $pet->VariantImage($pet->pivot->id) }}" />
+                                        <img class="img-fluid rounded" src="{{ $pet->image($pet->pivot->id) }}" />
                                     </a>
                                 </div>
                                 <div>
                                     <a href="#" class="inventory-stack inventory-stack-name">
+                                        @if (!$pet->is_visible)
+                                            <i class="fas fa-eye-slash mr-1"></i>
+                                        @endif
                                         {{ $pet->pivot->evolution_id ? $pet->evolutions->where('id', $pet->pivot->evolution_id)->first()->evolution_name : $pet->name }}
                                         @if ($pet->pivot->has_image)
                                             <i class="fas fa-brush ml-1" data-toggle="tooltip" title="This pet has custom art."></i>
                                         @endif
                                         @if ($pet->pivot->character_id)
-                                            <span data-toggle="tooltip" title="Attached to {!! getDisplayName(\App\Models\Pet\Pet::class, $pet->pivot->chara_id) !!}"><i class="fas fa-link ml-1"></i></span>
+                                            <span data-toggle="tooltip" title="Attached to {!! strip_tags(getDisplayName(\App\Models\Character\Character::class, $pet->pivot->character_id)) !!}"><i class="fas fa-link ml-1"></i></span>
                                         @endif
                                         @if ($pet->pivot->evolution_id)
                                             <span data-toggle="tooltip" title="This pet has evolved. Stage
@@ -62,22 +65,35 @@
         </div>
     @endforeach
 
-
     <h3>Latest Activity</h3>
-    <table class="table table-sm">
-        <thead>
-            <th>Sender</th>
-            <th>Recipient</th>
-            <th>Pet</th>
-            <th>Log</th>
-            <th>Date</th>
-        </thead>
-        <tbody>
+    <div class="mb-4 logs-table">
+        <div class="logs-table-header">
+            <div class="row">
+                <div class="col-6 col-md-2">
+                    <div class="logs-table-cell">Sender</div>
+                </div>
+                <div class="col-6 col-md-2">
+                    <div class="logs-table-cell">Recipient</div>
+                </div>
+                <div class="col-6 col-md-2">
+                    <div class="logs-table-cell">Item</div>
+                </div>
+                <div class="col-6 col-md-4">
+                    <div class="logs-table-cell">Log</div>
+                </div>
+                <div class="col-6 col-md-2">
+                    <div class="logs-table-cell">Date</div>
+                </div>
+            </div>
+        </div>
+        <div class="logs-table-body">
             @foreach ($logs as $log)
-                @include('user._pet_log_row', ['log' => $log, 'user' => $user])
+                <div class="logs-table-row">
+                    @include('user._pet_log_row', ['log' => $log, 'owner' => $user])
+                </div>
             @endforeach
-        </tbody>
-    </table>
+        </div>
+    </div>
     <div class="text-right">
         <a href="{{ url($user->url . '/pet-logs') }}">View all...</a>
     </div>

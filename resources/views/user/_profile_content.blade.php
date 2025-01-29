@@ -83,7 +83,7 @@
         <div class="card-body text-center">
             <h5 class="card-title">Bank</h5>
             <div class="profile-assets-content">
-                @foreach ($user->getCurrencies(false) as $currency)
+                @foreach ($user->getCurrencies(false, false, Auth::user() ?? null) as $currency)
                     <div>{!! $currency->display($currency->quantity) !!}</div>
                 @endforeach
             </div>
@@ -124,8 +124,17 @@
                         @foreach ($pets as $pet)
                             <div class="col profile-inventory-item">
                                 <a href="{{ url($user->url . '/pets') }}" class="inventory-stack">
-                                    <img class="img-fluid" src="{{ $pet->VariantImage($pet->pivot->id) }}" data-toggle="tooltip" title="{{ $pet->pivot->pet_name ? $pet->pivot->pet_name . ' (' . $pet->name . ')' : $pet->name }}"
-                                        alt="{{ $pet->pivot->pet_name ? $pet->pivot->pet_name . ' (' . $pet->name . ')' : $pet->name }}" />
+                                    @if ($pet->has_image)
+                                        <img class="img-fluid" src="{{ $pet->image($pet->pivot->id) }}" data-toggle="tooltip" title="{{ $pet->pivot->pet_name ? $pet->pivot->pet_name . ' (' . $pet->name . ')' : $pet->name }}"
+                                            alt="{{ $pet->pivot->pet_name ? $pet->pivot->pet_name . ' (' . $pet->name . ')' : $pet->name }}" />
+                                    @else
+                                        <p>
+                                            @if (!$pet->is_visible)
+                                                <i class="fas fa-eye-slash mr-1"></i>
+                                            @endif
+                                            {{ $pet->name }}
+                                        </p>
+                                    @endif
                                 </a>
                             </div>
                         @endforeach
@@ -203,17 +212,17 @@
 <hr class="mb-5" />
 
 <div class="row col-12">
-    <div class="col-md-8">
-
-        @comments(['model' => $user->profile, 'perPage' => 5])
-
-    </div>
-    <div class="col-md-4">
+    @if ($user->settings->allow_profile_comments)
+        <div class="col-md-8">
+            @comments(['model' => $user->profile, 'perPage' => 5])
+        </div>
+    @endif
+    <div class="col-md-{{ $user->settings->allow_profile_comments ? 4 : 12 }}">
         <div class="card mb-4">
-            <div class="card-header">
+            <div class="card-header" data-toggle="collapse" data-target="#mentionHelp" aria-expanded="{{ $user->settings->allow_profile_comments ? 'true' : 'false' }}">
                 <h5>Mention This User</h5>
             </div>
-            <div class="card-body">
+            <div class="card-body collapse {{ $user->settings->allow_profile_comments ? 'show' : '' }}" id="mentionHelp">
                 In the rich text editor:
                 <div class="alert alert-secondary">
                     {{ '@' . $user->name }}

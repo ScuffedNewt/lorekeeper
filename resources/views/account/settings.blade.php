@@ -105,6 +105,22 @@
     </div>
 
     <div class="card p-3 mb-2">
+        <h3>Allow Profile Comments</h3>
+        {!! Form::open(['url' => 'account/comments']) !!}
+        <p>If turned off, all comments on your profile will be hidden.</p>
+        <div class="form-group row">
+            <label class="col-md-2 col-form-label">Setting</label>
+            <div class="col-md-10">
+                {!! Form::select('allow_profile_comments', ['0' => '0: No one can comment on your profile.', '1' => '1: Users can comment on your profile.'], Auth::user()->settings->allow_profile_comments, ['class' => 'form-control']) !!}
+            </div>
+        </div>
+        <div class="text-right">
+            {!! Form::submit('Edit', ['class' => 'btn btn-primary']) !!}
+        </div>
+        {!! Form::close() !!}
+    </div>
+
+    <div class="card p-3 mb-2">
         <h3>Character Warning Visibility</h3>
         <p>This setting will change how characters with content warnings are displayed to you.</p>
         {!! Form::open(['url' => 'account/warning']) !!}

@@ -26,6 +26,16 @@ class Loot extends Model {
      * @var string
      */
     protected $table = 'loots';
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'data' => 'array',
+    ];
+
     /**
      * Validation rules for creation.
      *
@@ -83,24 +93,5 @@ class Loot extends Model {
         }
 
         return null;
-    }
-
-    /**********************************************************************************************
-
-        ACCESSORS
-
-    **********************************************************************************************/
-
-    /**
-     * Get the data attribute as an associative array.
-     *
-     * @return array
-     */
-    public function getDataAttribute() {
-        if (!$this->attributes['data']) {
-            return null;
-        }
-
-        return json_decode($this->attributes['data'], true);
     }
 }

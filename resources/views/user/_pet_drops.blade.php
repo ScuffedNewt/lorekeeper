@@ -27,26 +27,24 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($pet->availableDrops as $available_drops)
-                    @if (isset($available_drops->rewards(true)[strtolower($pet->drops->parameters)]))
-                        @foreach ($available_drops->rewards(true)[strtolower($pet->drops->parameters)] as $reward)
-                            <tr>
-                                @php $reward_object = $reward->rewardable_type::find($reward->rewardable_id); @endphp
-                                <td>
-                                    @if ($reward_object->has_image)
-                                        <img class="img-fluid" style="max-height: 10em;" src="{{ $reward_object->imageUrl }}"><br />
-                                    @endif
-                                    {!! $reward_object->displayName !!}
-                                </td>
-                                <td>Between {{ $reward->min_quantity . ' and ' . $reward->max_quantity }}</td>
-                            </tr>
-                        @endforeach
-                    @else
+                @if (isset($pet->availableDrops->rewards(true)[strtolower($pet->drops->parameters)]))
+                    @foreach ($pet->availabledrops->rewards(true)[strtolower($pet->drops->parameters)] as $reward)
                         <tr>
-                            <td>No drops available for this pet.</td>
+                            @php $reward_object = $reward->rewardable_type::find($reward->rewardable_id); @endphp
+                            <td>
+                                @if ($reward_object->has_image)
+                                    <img class="img-fluid" style="max-height: 10em;" src="{{ $reward_object->imageUrl }}"><br />
+                                @endif
+                                {!! $reward_object->displayName !!}
+                            </td>
+                            <td>Between {{ $reward->min_quantity . ' and ' . $reward->max_quantity }}</td>
                         </tr>
-                    @endif
-                @endforeach
+                    @endforeach
+                @else
+                    <tr>
+                        <td>No drops available for this pet.</td>
+                    </tr>
+                @endif
             </tbody>
         </table>
     @else

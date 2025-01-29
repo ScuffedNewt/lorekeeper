@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
+
 /*
 |--------------------------------------------------------------------------
 | Member Routes
@@ -36,6 +38,7 @@ Route::group(['prefix' => 'account', 'namespace' => 'Users'], function () {
     Route::post('remove-alias/{id}', 'AccountController@postRemoveAlias');
     Route::post('dob', 'AccountController@postBirthday');
     Route::post('warning', 'AccountController@postWarningVisibility');
+    Route::post('comments', 'AccountController@postProfileComments');
 
     Route::get('two-factor/confirm', 'AccountController@getConfirmTwoFactor');
     Route::post('two-factor/enable', 'AccountController@postEnableTwoFactor');
@@ -290,4 +293,11 @@ Route::group(['prefix' => 'comments', 'namespace' => 'Comments'], function () {
     Route::post('{id}/feature', 'CommentController@feature')->name('comments.feature');
     Route::post('{id}/like/{action}', 'CommentController@like')->name('comments.like');
     Route::get('liked', 'CommentController@getLikedComments');
+});
+
+/**************************************************************************************************
+    Comments
+**************************************************************************************************/
+Route::group(['prefix' => 'limits'], function () {
+    Route::post('unlock/{id}', 'Admin\LimitController@postUnlockLimits');
 });

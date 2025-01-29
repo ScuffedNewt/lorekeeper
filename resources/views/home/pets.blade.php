@@ -30,7 +30,7 @@
                         @foreach ($chunk as $pet)
                             <div class="col-sm-3 col-6 text-center inventory-pet" data-id="{{ $pet->pivot->id }}" data-name="{{ $user->name }}'s {{ $pet->name }}">
                                 <div class="mb-1">
-                                    <a href="#" class="inventory-stack"><img src="{{ $pet->VariantImage($pet->pivot->id) }}" class="img-fluid" /></a>
+                                    <a href="#" class="inventory-stack"><img src="{{ $pet->image($pet->pivot->id) }}" class="img-fluid" /></a>
                                 </div>
                                 <div>
                                     <a href="{{ url('pets/view/' . $pet->pivot->id) }}" class="{{ $pet->pivot->pet_name ? 'btn-dark' : 'btn-primary' }} btn btn-sm my-1">
@@ -39,7 +39,7 @@
                                             <i class="fas fa-brush ml-1" data-toggle="tooltip" title="This pet has custom art."></i>
                                         @endif
                                         @if ($pet->pivot->character_id)
-                                            <span data-toggle="tooltip" title="Attached to a character."><i class="fas fa-link ml-1"></i></span>
+                                            <span data-toggle="tooltip" title="Attached to {!! strip_tags(getDisplayName(\App\Models\Character\Character::class, $pet->pivot->character_id)) !!}"><i class="fas fa-link ml-1"></i></span>
                                         @endif
                                         @if ($pet->pivot->evolution_id)
                                             <span data-toggle="tooltip" title="This pet has evolved. Stage

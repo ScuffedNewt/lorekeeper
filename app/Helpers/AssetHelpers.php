@@ -137,7 +137,7 @@ function getAssetModelString($type, $namespaced = true) {
             }
             break;
 
-        case 'loot_tables':
+        case 'loot_tables': case 'loottable':
             if ($namespaced) {
                 return '\App\Models\Loot\LootTable';
             } else {
@@ -279,7 +279,6 @@ function removeAsset(&$array, $asset, $quantity = 1) {
 /**
  * Get a clean version of the asset array to store in the database,
  * where each asset is listed in [id => quantity] format.
- * json_encode this and store in the data attribute.
  *
  * @param array $array
  * @param bool  $isCharacter
@@ -306,7 +305,32 @@ function getDataReadyAssets($array, $isCharacter = false) {
     return $result;
 }
 
-// --------------------------------------------
+/**
+ * Retrieves the data associated with an asset array,
+ * basically reversing the above function.
+ *
+ * @param array $array
+ *
+ * @return array
+ */
+function parseAssetData($array) {
+    $assets = createAssetsArray();
+    foreach ($array as $key => $contents) {
+        $model = getAssetModelString($key);
+        if ($model) {
+            foreach ($contents as $id => $quantity) {
+                $assets[$key][$id] = [
+                    'asset'    => $model::find($id),
+                    'quantity' => $quantity,
+                ];
+            }
+        }
+    }
+
+    return $assets;
+}
+
+// PET DROPS --------------------------------------------
 
 /**
  * Adds an asset to the given array.
@@ -331,7 +355,6 @@ function addDropAsset(&$array, $asset, $min_quantity = 1, $max_quantity = 1) {
 /**
  * Get a clean version of the asset array to store in the database,
  * where each asset is listed in [id => quantity] format.
- * json_encode this and store in the data attribute.
  *
  * @param array $array
  *
@@ -393,34 +416,6 @@ function parseDropAssetData($array) {
 // --------------------------------------------
 
 /**
- * Retrieves the data associated with an asset array,
- * basically reversing the above function.
- * Use the data attribute after json_decode()ing it.
- *
- * @param array $array
- *
- * @return array
- */
-function parseAssetData($array) {
-    $assets = createAssetsArray();
-    foreach ($array as $key => $contents) {
-        $model = getAssetModelString($key);
-        if ($key == 'exp' || $key == 'points') {
-            $assets[$key] = $contents;
-        } elseif ($model) {
-            foreach ($contents as $id => $quantity) {
-                $assets[$key][$id] = [
-                    'asset'    => $model::find($id),
-                    'quantity' => $quantity,
-                ];
-            }
-        }
-    }
-
-    return $assets;
-}
-
-/**
  * Returns if two asset arrays are identical.
  *
  * @param array $first
@@ -456,6 +451,7 @@ function compareAssetArrays($first, $second, $isCharacter = false, $absQuantitie
     return true;
 }
 
+
 /**
  * Distributes the assets in an assets array to the given recipient (user).
  * Loot tables will be rolled before distribution.
@@ -483,7 +479,7 @@ function fillUserAssets($assets, $sender, $recipient, $logType, $data) {
             foreach ($contents as $asset) {
                 if (!$service->creditItem($sender, $recipient, $logType, $data, $asset['asset'], $asset['quantity'])) {
                     foreach ($service->errors()->getMessages()['error'] as $error) {
-                        Log::error($error);
+                        flash($error)->error();
                     }
 
                     return false;
@@ -494,10 +490,18 @@ function fillUserAssets($assets, $sender, $recipient, $logType, $data) {
             foreach ($contents as $asset) {
                 if ($asset['quantity'] < 0) {
                     if (!$service->debitCurrency($sender, $recipient, $logType, $data['data'], $asset['asset'], abs($asset['quantity']))) {
+                        foreach ($service->errors()->getMessages()['error'] as $error) {
+                            flash($error)->error();
+                        }
+
                         return false;
                     }
                 } else {
                     if (!$service->creditCurrency($sender, $recipient, $logType, $data['data'], $asset['asset'], $asset['quantity'])) {
+                        foreach ($service->errors()->getMessages()['error'] as $error) {
+                            flash($error)->error();
+                        }
+
                         return false;
                     }
                 }
@@ -527,6 +531,10 @@ function fillUserAssets($assets, $sender, $recipient, $logType, $data) {
             $service = new App\Services\RaffleManager;
             foreach ($contents as $asset) {
                 if (!$service->addTicket($recipient, $asset['asset'], $asset['quantity'])) {
+                    foreach ($service->errors()->getMessages()['error'] as $error) {
+                        flash($error)->error();
+                    }
+
                     return false;
                 }
             }
@@ -534,6 +542,10 @@ function fillUserAssets($assets, $sender, $recipient, $logType, $data) {
             $service = new App\Services\InventoryManager;
             foreach ($contents as $asset) {
                 if (!$service->moveStack($sender, $recipient, $logType, $data, $asset['asset'], $asset['quantity'])) {
+                    foreach ($service->errors()->getMessages()['error'] as $error) {
+                        flash($error)->error();
+                    }
+
                     return false;
                 }
             }
@@ -541,6 +553,10 @@ function fillUserAssets($assets, $sender, $recipient, $logType, $data) {
             $service = new App\Services\CharacterManager;
             foreach ($contents as $asset) {
                 if (!$service->moveCharacter($asset['asset'], $recipient, $data, $asset['quantity'], $logType)) {
+                    foreach ($service->errors()->getMessages()['error'] as $error) {
+                        flash($error)->error();
+                    }
+
                     return false;
                 }
             }
@@ -666,9 +682,16 @@ function createRewardsString($array, $useDisplayName = true, $absQuantities = fa
     foreach ($array as $key => $contents) {
         foreach ($contents as $asset) {
             if ($useDisplayName) {
-                $string[] = $asset['asset']->displayName.' x'.($absQuantities ? abs($asset['quantity']) : $asset['quantity']);
+                if ($key == 'currencies') {
+                    $name = $asset['asset'] ? $asset['asset']->display(($absQuantities ? abs($asset['quantity']) : $asset['quantity'])) : 'Deleted '.ucfirst(str_replace('_', ' ', $key));
+                    $string[] = $asset['asset'] ? $name : $name.' x'.($absQuantities ? abs($asset['quantity']) : $asset['quantity']);
+                } else {
+                    $name = $asset['asset']->displayName ?? ($asset['asset']->name ?? 'Deleted '.ucfirst(str_replace('_', ' ', $key)));
+                    $string[] = $name.' x'.($absQuantities ? abs($asset['quantity']) : $asset['quantity']);
+                }
             } else {
-                $string[] = $asset['asset']->name.' x'.($absQuantities ? abs($asset['quantity']) : $asset['quantity']);
+                $name = $asset['asset']->name ?? 'Deleted '.ucfirst(str_replace('_', ' ', $key));
+                $string[] = $name.' x'.($absQuantities ? abs($asset['quantity']) : $asset['quantity']);
             }
         }
     }
@@ -681,37 +704,4 @@ function createRewardsString($array, $useDisplayName = true, $absQuantities = fa
     }
 
     return implode(', ', array_slice($string, 0, count($string) - 1)).(count($string) > 2 ? ', and ' : ' and ').end($string);
-}
-
-/**
- * Returns an asset from provided data.
- *
- * @param mixed $type
- * @param mixed $id
- * @param mixed $isCharacter
- */
-function findReward($type, $id, $isCharacter = false) {
-    $reward = null;
-    switch ($type) {
-        case 'Item':
-            $reward = App\Models\Item\Item::find($id);
-            break;
-        case 'Currency':
-            $reward = App\Models\Currency\Currency::find($id);
-            if (!$isCharacter && !$reward->is_user_owned) {
-                throw new Exception('Invalid currency selected.');
-            }
-            break;
-        case 'Pet':
-            $reward = App\Models\Pet\Pet::find($id);
-            break;
-        case 'LootTable':
-            $reward = App\Models\Loot\LootTable::find($id);
-            break;
-        case 'Raffle':
-            $reward = App\Models\Raffle\Raffle::find($id);
-            break;
-    }
-
-    return $reward;
 }

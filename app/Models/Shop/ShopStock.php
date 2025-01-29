@@ -56,6 +56,11 @@ class ShopStock extends Model {
     public function item() {
         $model = getAssetModelString(strtolower($this->stock_type));
 
+        if (!class_exists($model)) {
+            // Laravel requires a relationship instance to be returned (cannot return null), so returning one that doesn't exist here.
+            return $this->belongsTo(self::class, 'id', 'item_id')->whereNull('item_id');
+        }
+
         return $this->belongsTo($model);
     }
 
@@ -177,6 +182,101 @@ class ShopStock extends Model {
         }
 
         return $groupedCosts;
+    }
+
+    /*
+     * Gets the current date associated to the current stocks purchase limit timeframe
+     */
+    public function getPurchaseLimitDateAttribute() {
+        switch ($this->purchase_limit_timeframe) {
+            case 'yearly':
+                $date = strtotime('January 1st');
+                break;
+            case 'monthly':
+                $date = Carbon::now()->startOfMonth()->timestamp;
+                break;
+            case 'weekly':
+                $date = strtotime('last sunday');
+                break;
+            case 'daily':
+                $date = strtotime('midnight');
+                break;
+            default:
+                $date = null;
+        }
+
+        return $date;
+    }
+
+    /**********************************************************************************************
+
+        OTHER FUNCTIONS
+
+    **********************************************************************************************/
+
+    /**
+     * Returns formatted lists of costs for display.
+     */
+    public function displayCosts() {
+        $display = [];
+        $costs = $this->costGroups;
+        foreach ($costs as $group => $groupCosts) {
+            $display[] = createRewardsString($groupCosts);
+        }
+
+        return count($display) ? implode(' <i>OR</i> ', $display) : null;
+    }
+
+    /**
+     * Returns the costs in the format group => rewardString for a form select.
+     */
+    public function costForm() {
+        $costs = $this->costGroups;
+        $select = [];
+        foreach ($costs as $group => $groupCosts) {
+            $select[$group] = createRewardsString($groupCosts, false);
+        }
+
+        return $select;
+    }
+
+    /**
+     * Returns if a group can use coupons.
+     *
+     * @param mixed $group
+     */
+    public function canGroupUseCoupons($group) {
+        return in_array($group, $this->data['can_group_use_coupon'] ?? []);
+    }
+
+    /**
+     * Displays when this stock is available in human readable format.
+     */
+    public function displayTime() {
+        // {!! '<div>' . ($stock->start_at ? pretty_date($stock->start_at) : 'Now') . ' - ' . ($stock->end_at ?  pretty_date($stock->end_at) : 'Always') . '</div>' !!}
+        $days = $this->days;
+        $months = $this->months;
+        $string = '<div>';
+        // if start_at and end_at are set, we need to show that its avaialble only during that time and THEN only on the days and months
+        if ($this->start_at && $this->end_at) {
+            $string .= pretty_date($this->start_at).' - '.pretty_date($this->end_at);
+        } elseif ($this->start_at) {
+            $string .= 'From '.pretty_date($this->start_at);
+        } elseif ($this->end_at) {
+            $string .= 'Until '.pretty_date($this->end_at);
+        }
+
+        if ($days) {
+            $string .= '<br>Available on '.implode(', ', $days);
+        }
+
+        if ($months) {
+            $string .= '<br>During '.implode(', ', $months);
+        }
+
+        $string .= '</div>';
+
+        return $string;
     }
 
     /*

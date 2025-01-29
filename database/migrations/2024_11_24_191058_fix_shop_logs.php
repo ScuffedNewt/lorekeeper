@@ -21,7 +21,7 @@ return new class extends Migration {
             $assets = createAssetsArray(false);
             addAsset($assets, Currency::find($log->currency_id), $log->cost);
             DB::table('shop_log')->where('id', $log->id)->update([
-                'costs' => getDataReadyAssets($assets),
+                'costs' => $log->character_id ? ['character' => getDataReadyAssets($assets)] : ['user' => getDataReadyAssets($assets)],
             ]);
         }
 

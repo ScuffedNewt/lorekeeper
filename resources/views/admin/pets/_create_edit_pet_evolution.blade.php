@@ -24,28 +24,6 @@
     @endif
 </div>
 
-@if ($evolution->id)
-    <hr />
-    <p>Variant images are optional. If you do not want to change the evolution image by variant, leave the field blank.</p>
-    @foreach ($evolution->pet->variants as $variant)
-        <div class="form-group">
-            {{-- hidden form for id --}}
-            {!! Form::hidden('variant_id[]', $variant->id) !!}
-            {{-- display the image --}}
-            @if ($evolution->variantImageExists($variant->id))
-                <img src="{{ $evolution->VariantImageUrl($variant->id) }}" class="img-fluid rounded mb-2" style="max-height: 5em;" alt="{{ $variant->variant_name }} Variant Image" />
-            @endif
-            {!! Form::label($variant->variant_name . ' Variant Image', null, ['class' => 'ml-3']) !!}
-            <div>{!! Form::file('variant_image[]') !!}</div>
-        </div>
-    @endforeach
-
-    <div class="form-check">
-        {!! Form::checkbox('delete', 1, false, ['class' => 'form-check-input']) !!}
-        {!! Form::label('delete', 'Delete Evolution', ['class' => 'form-check-label']) !!}
-    </div>
-@endif
-
 <div class="text-right">
     {!! Form::submit($evolution->id ? 'Edit' : 'Create', ['class' => 'btn btn-primary']) !!}
 </div>

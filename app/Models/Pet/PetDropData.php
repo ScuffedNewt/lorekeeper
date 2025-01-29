@@ -11,7 +11,7 @@ class PetDropData extends Model {
      * @var array
      */
     protected $fillable = [
-        'pet_id', 'parameters', 'data', 'is_active', 'name', 'cap', 'frequency', 'interval', 'variant_data', 'override',
+        'pet_id', 'parameters', 'data', 'is_active', 'name', 'cap', 'frequency', 'interval', 'override',
     ];
 
     /**
@@ -20,6 +20,16 @@ class PetDropData extends Model {
      * @var string
      */
     protected $table = 'pet_drop_data';
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'parameters' => 'array',
+        'data' => 'array',
+    ];
 
     /**
      * Validation rules for pet creation.
@@ -82,19 +92,6 @@ class PetDropData extends Model {
      */
     public function getUrlAttribute() {
         return url('admin/data/pets/drops/edit/'.$this->pet_id);
-    }
-
-    /**
-     * Get the parameter attribute as an associative array.
-     *
-     * @return array
-     */
-    public function getParametersAttribute() {
-        if (isset($this->attributes['parameters'])) {
-            return json_decode($this->attributes['parameters'], true);
-        } else {
-            return null;
-        }
     }
 
     /**
@@ -188,7 +185,7 @@ class PetDropData extends Model {
      *
      * @return array
      */
-    public function Rewards($namespace = false) {
+    public function rewards($namespace = false) {
         if ($this->data && isset($this->data['assets'])) {
             $assets = parseDropAssetData($this->data['assets']);
             $rewards = [];
@@ -210,5 +207,28 @@ class PetDropData extends Model {
         }
 
         return null;
+    }
+
+    /**
+     * gets the rewards as a comma-seperated string.
+     */
+    public function rewardString() {
+        $string = [];
+        foreach ($this->rewards(true) as $label => $reward_values) {
+            foreach ($reward_values as $reward) {
+                $reward_object = $reward->rewardable_type::find($reward->rewardable_id);
+                if ($reward->min_quantity == $reward->max_quantity) {
+                    $string[$label][] = $reward_object->displayname . ' (' . $reward->min_quantity . ')';
+                } else {
+                    $string[$label][] = $reward_object->displayname . ' (' . $reward->min_quantity . '-' . $reward->max_quantity . ')';
+                }
+            }
+        }
+
+        $result = [];
+        foreach ($string as $label => $items) {
+            $result[] = '<div><b>' . $label . ':</b> ' . implode(', ', $items) . '</div>';
+        }
+        return implode('', $result);
     }
 }

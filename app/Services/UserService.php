@@ -282,12 +282,37 @@ class UserService extends Service {
      *
      * @param mixed $data
      * @param mixed $user
+     *
+     * @return bool
      */
     public function updateContentWarningVisibility($data, $user) {
         DB::beginTransaction();
 
         try {
             $user->settings->content_warning_visibility = $data;
+            $user->settings->save();
+
+            return $this->commitReturn(true);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
+    }
+
+    /**
+     * Updates user's profile comment setting.
+     *
+     * @param mixed $data
+     * @param mixed $user
+     *
+     * @return bool
+     */
+    public function updateProfileCommentSetting($data, $user) {
+        DB::beginTransaction();
+
+        try {
+            $user->settings->allow_profile_comments = $data ?? 0;
             $user->settings->save();
 
             return $this->commitReturn(true);
@@ -401,7 +426,7 @@ class UserService extends Service {
             UserUpdateLog::create([
                 'staff_id' => null,
                 'user_id'  => $user->id,
-                'data'     => json_encode(['old_name' => $user->name, 'new_name' => $username]),
+                'data'     => ['old_name' => $user->name, 'new_name' => $username],
                 'type'     => 'Username Change',
             ]);
 
@@ -482,7 +507,7 @@ class UserService extends Service {
                     $tradeManager->rejectTrade(['trade' => $trade, 'reason' => 'User has been banned from site activity.'], $staff);
                 }
 
-                UserUpdateLog::create(['staff_id' => $staff->id, 'user_id' => $user->id, 'data' => json_encode(['is_banned' => 'Yes', 'ban_reason' => $data['ban_reason'] ?? null]), 'type' => 'Ban']);
+                UserUpdateLog::create(['staff_id' => $staff->id, 'user_id' => $user->id, 'data' => ['is_banned' => 'Yes', 'ban_reason' => $data['ban_reason'] ?? null], 'type' => 'Ban']);
 
                 $user->settings->banned_at = Carbon::now();
 
@@ -490,7 +515,7 @@ class UserService extends Service {
                 $user->rank_id = Rank::orderBy('sort')->first()->id;
                 $user->save();
             } else {
-                UserUpdateLog::create(['staff_id' => $staff->id, 'user_id' => $user->id, 'data' => json_encode(['ban_reason' => $data['ban_reason'] ?? null]), 'type' => 'Ban Update']);
+                UserUpdateLog::create(['staff_id' => $staff->id, 'user_id' => $user->id, 'data' => ['ban_reason' => $data['ban_reason'] ?? null], 'type' => 'Ban Update']);
             }
 
             $user->settings->ban_reason = isset($data['ban_reason']) && $data['ban_reason'] ? $data['ban_reason'] : null;
@@ -527,7 +552,7 @@ class UserService extends Service {
                 $user->settings->ban_reason = null;
                 $user->settings->banned_at = null;
                 $user->settings->save();
-                UserUpdateLog::create(['staff_id' => $staff->id, 'user_id' => $user->id, 'data' => json_encode(['is_banned' => 'No']), 'type' => 'Unban']);
+                UserUpdateLog::create(['staff_id' => $staff->id, 'user_id' => $user->id, 'data' => ['is_banned' => 'No'], 'type' => 'Unban']);
             }
 
             return $this->commitReturn(true);
@@ -604,7 +629,7 @@ class UserService extends Service {
                     $tradeManager->rejectTrade(['trade' => $trade, 'reason' => 'User\'s account was deactivated.'], $staff);
                 }
 
-                UserUpdateLog::create(['staff_id' => $staff->id, 'user_id' => $user->id, 'data' => json_encode(['is_deactivated' => 'Yes', 'deactivate_reason' => $data['deactivate_reason'] ?? null]), 'type' => 'Deactivation']);
+                UserUpdateLog::create(['staff_id' => $staff->id, 'user_id' => $user->id, 'data' => ['is_deactivated' => 'Yes', 'deactivate_reason' => $data['deactivate_reason'] ?? null], 'type' => 'Deactivation']);
 
                 $user->settings->deactivated_at = Carbon::now();
 
@@ -620,7 +645,7 @@ class UserService extends Service {
                     'staff_name' => $staff->name,
                 ]);
             } else {
-                UserUpdateLog::create(['staff_id' => $staff->id, 'user_id' => $user->id, 'data' => json_encode(['deactivate_reason' => $data['deactivate_reason'] ?? null]), 'type' => 'Deactivation Update']);
+                UserUpdateLog::create(['staff_id' => $staff->id, 'user_id' => $user->id, 'data' => ['deactivate_reason' => $data['deactivate_reason'] ?? null], 'type' => 'Deactivation Update']);
             }
 
             $user->settings->deactivate_reason = isset($data['deactivate_reason']) && $data['deactivate_reason'] ? $data['deactivate_reason'] : null;
@@ -657,7 +682,7 @@ class UserService extends Service {
                 $user->settings->deactivate_reason = null;
                 $user->settings->deactivated_at = null;
                 $user->settings->save();
-                UserUpdateLog::create(['staff_id' => $staff ? $staff->id : $user->id, 'user_id' => $user->id, 'data' => json_encode(['is_deactivated' => 'No']), 'type' => 'Reactivation']);
+                UserUpdateLog::create(['staff_id' => $staff ? $staff->id : $user->id, 'user_id' => $user->id, 'data' => ['is_deactivated' => 'No'], 'type' => 'Reactivation']);
             }
 
             Notifications::create('USER_REACTIVATED', User::find(Settings::get('admin_user')), [

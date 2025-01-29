@@ -6,7 +6,6 @@ use App\Models\Pet\Pet;
 use App\Models\Pet\PetCategory;
 use App\Models\Pet\PetEvolution;
 use App\Models\Pet\PetLevel;
-use App\Models\Pet\PetVariant;
 use App\Models\User\UserPet;
 use App\Models\User\UserPetLevel;
 use Illuminate\Support\Facades\DB;
@@ -305,115 +304,6 @@ class PetService extends Service {
 
     /**********************************************************************************************
 
-        PET VARIANTS
-
-    **********************************************************************************************/
-
-    /**
-     * Creates a new variant for a pet.
-     *
-     * @param mixed $pet
-     * @param mixed $data
-     */
-    public function createVariant($pet, $data) {
-        DB::beginTransaction();
-
-        try {
-            // check name is unique
-            if (PetVariant::where('variant_name', $data['variant_name'])->where('pet_id', $pet->id)->exists()) {
-                throw new \Exception('The name has already been taken.');
-            }
-
-            $image = null;
-            if (isset($data['variant_image']) && $data['variant_image']) {
-                $data['has_image'] = 1;
-                $image = $data['variant_image'];
-                unset($data['variant_image']);
-            } else {
-                $data['has_image'] = 0;
-            }
-
-            $data['pet_id'] = $pet->id;
-
-            $variant = PetVariant::create($data);
-
-            if ($image) {
-                $this->handleImage($image, $variant->imagePath, $variant->imageFileName);
-            }
-
-            return $this->commitReturn(true);
-        } catch (\Exception $e) {
-            $this->setError('error', $e->getMessage());
-        }
-
-        return $this->rollbackReturn(false);
-    }
-
-    /**
-     * Edits the variants on a pet.
-     *
-     * @param mixed $variant
-     * @param mixed $data
-     */
-    public function editVariant($variant, $data) {
-        DB::beginTransaction();
-
-        try {
-            // check name is unique
-            if (PetVariant::where('variant_name', $data['variant_name'])->where('pet_id', $variant->pet->id)->where('id', '!=', $variant->id)->exists()) {
-                throw new \Exception('The name has already been taken.');
-            }
-
-            if (isset($data['remove_image'])) {
-                if ($variant && $variant->has_image && $data['remove_image']) {
-                    $data['has_image'] = 0;
-                    $this->deleteImage($variant->imagePath, $variant->imageFileName);
-                }
-                unset($data['remove_image']);
-            }
-
-            $image = null;
-            if (isset($data['variant_image']) && $data['variant_image']) {
-                $data['has_image'] = 1;
-                $image = $data['variant_image'];
-                unset($data['variant_image']);
-            }
-
-            $variant->update([
-                'variant_name' => $data['variant_name'],
-                'has_image'    => $data['has_image'] ?? $variant->has_image,
-            ]);
-
-            if ($image) {
-                $this->handleImage($image, $variant->imagePath, $variant->imageFileName);
-            }
-
-            if (isset($data['delete']) && $data['delete']) {
-                // check that no user pets exist with this variant before deleting
-                if (UserPet::where('variant_id', $variant->id)->exists()) {
-                    throw new \Exception('At least one user pet currently is this variant. Please remove the pet(s) before deleting it.');
-                }
-
-                // delete image
-                if ($variant->has_image) {
-                    $this->deleteImage($variant->imagePath, $variant->imageFileName);
-                }
-                $variant->delete();
-                flash('Variant deleted successfully.')->success();
-            } else {
-                flash('Variant updated successfully.')->success();
-            }
-
-            return $this->commitReturn(true);
-        } catch (\Exception $e) {
-            $this->setError('error', $e->getMessage());
-        }
-
-        return $this->rollbackReturn(false);
-    }
-
-    /**********************************************************************************************
-
         PET EVOLUTIONS
 
     **********************************************************************************************/
@@ -498,24 +388,6 @@ class PetService extends Service {
                 $this->handleImage($image, $evolution->imagePath, $evolution->imageFileName);
             }
 
-            // variant images
-            if (isset($data['variant_id']) && $data['variant_id']) {
-                foreach ($data['variant_id'] as $key => $variant_id) {
-                    $variant = PetVariant::find($variant_id);
-                    if ($variant) {
-                        $variant_image = null;
-                        if (isset($data['variant_image'][$key]) && $data['variant_image'][$key]) {
-                            $variant_image = $data['variant_image'][$key];
-                            unset($data['variant_image'][$key]);
-                        }
-
-                        if ($variant_image) {
-                            $this->handleImage($variant_image, $evolution->variantImageDirectory, $evolution->variantImageFileName($variant->id));
-                        }
-                    }
-                }
-            }
-
             if (isset($data['delete']) && $data['delete']) {
                 // check that no user pets exist with this evolution before deleting
                 if (UserPet::where('evolution_id', $evolution->id)->exists()) {
@@ -523,13 +395,7 @@ class PetService extends Service {
                 }
                 // delete image
                 $this->deleteImage($evolution->imagePath, $evolution->imageFileName);
-                // delete all variant images
-                foreach ($evolution->pet->variants as $variant) {
-                    // check if file exists
-                    if ($evolution->variantImageExists($variant->id)) {
-                        $this->deleteImage($evolution->variantImageDirectory, $evolution->variantImageFileName($variant->id));
-                    }
-                }
+
                 $evolution->delete();
                 flash('Evolution deleted successfully.')->success();
             } else {
@@ -542,6 +408,78 @@ class PetService extends Service {
         }
 
         return $this->rollbackReturn(false);
+    }
+
+    /**
+     * Handle category data.
+     *
+     * @param array                            $data
+     * @param \App\Models\Pet\PetCategory|null $category
+     *
+     * @return array
+     */
+    private function populateCategoryData($data, $category = null) {
+        if (isset($data['description']) && $data['description']) {
+            $data['parsed_description'] = parse($data['description']);
+        }
+        if (!isset($data['is_visible'])) {
+            $data['is_visible'] = 0;
+        }
+        if (!isset($data['allow_attach'])) {
+            $data['allow_attach'] = 0;
+            $data['limit'] = null;
+        }
+        // If attachments are allowed, but no limit is set, set it to null.
+        if (isset($data['allow_attach']) && $data['allow_attach'] && !isset($data['limit'])) {
+            $data['limit'] = null;
+        }
+
+        if (isset($data['remove_image'])) {
+            if ($category && $category->has_image && $data['remove_image']) {
+                $data['has_image'] = 0;
+                $this->deleteImage($category->categoryImagePath, $category->categoryImageFileName);
+            }
+            unset($data['remove_image']);
+        }
+
+        return $data;
+    }
+
+    /**
+     * Processes user input for creating/updating an pet.
+     *
+     * @param array               $data
+     * @param \App\Models\Pet\Pet $pet
+     *
+     * @return array
+     */
+    private function populateData($data, $pet = null) {
+        if (isset($data['description']) && $data['description']) {
+            $data['parsed_description'] = parse($data['description']);
+        }
+
+        // If attachments are allowed, but no limit is set, set it to null.
+        if (isset($data['allow_attach']) && $data['allow_attach'] && !isset($data['limit'])) {
+            $data['limit'] = null;
+        }
+
+        if (!isset($data['allow_transfer'])) {
+            $data['allow_transfer'] = 0;
+        }
+
+        if (!isset($data['is_visible'])) {
+            $data['is_visible'] = 0;
+        }
+
+        if (isset($data['remove_image'])) {
+            if ($pet && $pet->has_image && $data['remove_image']) {
+                $data['has_image'] = 0;
+                $this->deleteImage($pet->imagePath, $pet->imageFileName);
+            }
+            unset($data['remove_image']);
+        }
+
+        return $data;
     }
 
     /**********************************************************************************************
@@ -571,6 +509,20 @@ class PetService extends Service {
             }
 
             $level = PetLevel::create($data);
+
+            $rewards = createAssetsArray();
+            if (isset($data['rewardable_type']) && $data['rewardable_type']) {
+                foreach($data['rewardable_type'] as $key => $type) {
+                    $model = getAssetModelString(strtolower($type));
+                    $reward = $model::find($data['rewardable_id'][$key]);
+
+                    addAsset($rewards, $reward, $data['quantity'][$key]);
+                }
+            }
+
+            $level->update([
+                'rewards' => getDataReadyAssets($rewards),
+            ]);
 
             return $this->commitReturn($level);
         } catch (\Exception $e) {
@@ -603,13 +555,17 @@ class PetService extends Service {
 
             $rewards = createAssetsArray();
             if (isset($data['rewardable_id']) && $data['rewardable_id']) {
-                foreach ($data['rewardable_id'] as $key => $rewardable_id) {
-                    $reward = findReward($data['rewardable_type'][$key], $rewardable_id);
-                    $rewards[$reward->assetType] = [
-                        'rewardable_id'   => $rewardable_id,
-                        'rewardable_type' => $data['rewardable_type'][$key],
-                        'quantity'        => $data['quantity'][$key],
-                    ];
+                foreach($data['rewardable_type'] as $key => $type) {
+                    $model = getAssetModelString(strtolower($type));
+                    if (!$model) {
+                        throw new \Exception('Invalid rewardable type selected: ' . $type);
+                    }
+                    $reward = $model::find($data['rewardable_id'][$key]);
+                    if (!$reward) {
+                        throw new \Exception('Invalid rewardable selected.');
+                    }
+
+                    addAsset($rewards, $reward, $data['quantity'][$key]);
                 }
             }
 
@@ -617,7 +573,7 @@ class PetService extends Service {
                 'name'             => $data['name'],
                 'level'            => $data['level'],
                 'bonding_required' => $data['bonding_required'],
-                'rewards'          => json_encode($rewards),
+                'rewards'          => getDataReadyAssets($rewards),
             ]);
 
             return $this->commitReturn($level);
@@ -657,18 +613,31 @@ class PetService extends Service {
     /**
      * Adds pets to a level.
      *
-     * @param mixed $pet_ids
-     * @param mixed $level
+     * @param array                 $pet_ids
+     * @param \App\Models\Pet\PetLevel $level
+     *
+     * @return bool
      */
     public function addPetsToLevel($pet_ids, $level) {
         DB::beginTransaction();
 
         try {
-            $level->pets()->delete();
+            $existingPets = $level->pets()->pluck('pet_id')->toArray();
+
+            // get the ids that need to be deleted
+            $deletePets = array_diff($existingPets, $pet_ids);
+            $level->pets()->whereIn('pet_id', $deletePets)->delete();
 
             $pet_ids = array_unique($pet_ids);
             foreach ($pet_ids as $pet_id) {
                 $pet = Pet::find($pet_id);
+                if (!$pet) {
+                    throw new \Exception('Invalid pet selected.');
+                }
+
+                if ($level->pets()->where('pet_id', $pet_id)->exists()) {
+                    continue;
+                }
                 $level->pets()->create([
                     'pet_id' => $pet_id,
                 ]);
@@ -693,19 +662,23 @@ class PetService extends Service {
 
         try {
             $rewards = createAssetsArray();
-            if (isset($data['rewardable_id']) && $data['rewardable_id']) {
-                foreach ($data['rewardable_id'] as $key => $rewardable_id) {
-                    $reward = findReward($data['rewardable_type'][$key], $rewardable_id);
-                    $rewards[$reward->assetType] = [
-                        'rewardable_id'   => $rewardable_id,
-                        'rewardable_type' => $data['rewardable_type'][$key],
-                        'quantity'        => $data['quantity'][$key],
-                    ];
+            if (isset($data['rewardable_type']) && $data['rewardable_type']) {
+                foreach($data['rewardable_type'] as $key => $type) {
+                    $model = getAssetModelString(strtolower($type));
+                    if (!$model) {
+                        throw new \Exception('Invalid rewardable type selected: ' . $type);
+                    }
+                    $reward = $model::find($data['rewardable_id'][$key]);
+                    if (!$reward) {
+                        throw new \Exception('Invalid rewardable selected.');
+                    }
+
+                    addAsset($rewards, $reward, $data['quantity'][$key]);
                 }
             }
 
             $petLevel->update([
-                'rewards' => json_encode($rewards),
+                'rewards' => getDataReadyAssets($rewards),
             ]);
 
             return $this->commitReturn($petLevel);
@@ -714,79 +687,5 @@ class PetService extends Service {
         }
 
         return $this->rollbackReturn(false);
-    }
-
-    /**
-     * Handle category data.
-     *
-     * @param array            $data
-     * @param PetCategory|null $category
-     *
-     * @return array
-     */
-    private function populateCategoryData($data, $category = null) {
-        if (isset($data['description']) && $data['description']) {
-            $data['parsed_description'] = parse($data['description']);
-        }
-
-        if (!isset($data['is_visible'])) {
-            $data['is_visible'] = 0;
-        }
-
-        if (!isset($data['allow_attach'])) {
-            $data['allow_attach'] = 0;
-            $data['limit'] = null;
-        }
-        // If attachments are allowed, but no limit is set, set it to null.
-        if (isset($data['allow_attach']) && $data['allow_attach'] && !isset($data['limit'])) {
-            $data['limit'] = null;
-        }
-
-        if (isset($data['remove_image'])) {
-            if ($category && $category->has_image && $data['remove_image']) {
-                $data['has_image'] = 0;
-                $this->deleteImage($category->categoryImagePath, $category->categoryImageFileName);
-            }
-            unset($data['remove_image']);
-        }
-
-        return $data;
-    }
-
-    /**
-     * Processes user input for creating/updating an pet.
-     *
-     * @param array $data
-     * @param Pet   $pet
-     *
-     * @return array
-     */
-    private function populateData($data, $pet = null) {
-        if (isset($data['description']) && $data['description']) {
-            $data['parsed_description'] = parse($data['description']);
-        }
-
-        // If attachments are allowed, but no limit is set, set it to null.
-        if (isset($data['allow_attach']) && $data['allow_attach'] && !isset($data['limit'])) {
-            $data['limit'] = null;
-        }
-
-        if (!isset($data['allow_transfer'])) {
-            $data['allow_transfer'] = 0;
-        }
-
-        if (!isset($data['is_visible'])) {
-            $data['is_visible'] = 0;
-        }
-
-        if (isset($data['remove_image'])) {
-            if ($pet && $pet->has_image && $data['remove_image']) {
-                $data['has_image'] = 0;
-                $this->deleteImage($pet->imagePath, $pet->imageFileName);
-            }
-            unset($data['remove_image']);
-        }
-
-        return $data;
     }
 }

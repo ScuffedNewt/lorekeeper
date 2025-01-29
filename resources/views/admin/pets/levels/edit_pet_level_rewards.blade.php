@@ -23,7 +23,7 @@
 
     {!! Form::open(['url' => 'admin/data/pets/levels/edit/' . $level->id . '/pets/edit/' . $petLevel->id]) !!}
 
-    @include('widgets._loot_select', ['loots' => $petLevel->rewards, 'showLootTables' => true, 'showRaffles' => true])
+    @include('widgets._loot_select', ['loots' => $petLevel->rewardData, 'showLootTables' => true, 'showRaffles' => true])
 
     <div class="text-right">
         {!! Form::submit($level->id ? 'Edit' : 'Create', ['class' => 'btn btn-primary']) !!}

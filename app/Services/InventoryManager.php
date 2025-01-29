@@ -471,17 +471,15 @@ class InventoryManager extends Service {
         DB::beginTransaction();
 
         try {
-            $encoded_data = \json_encode($data);
-
             if ($recipient->logType == 'User') {
                 $recipient_stack = UserItem::where([
                     ['user_id', '=', $recipient->id],
                     ['item_id', '=', $item->id],
-                    ['data', '=', $encoded_data],
+                    ['data', '=', $data],
                 ])->first();
 
                 if (!$recipient_stack) {
-                    $recipient_stack = UserItem::create(['user_id' => $recipient->id, 'item_id' => $item->id, 'data' => $encoded_data]);
+                    $recipient_stack = UserItem::create(['user_id' => $recipient->id, 'item_id' => $item->id, 'data' => $data]);
                 }
                 $recipient_stack->count += $quantity;
                 $recipient_stack->save();
@@ -489,11 +487,11 @@ class InventoryManager extends Service {
                 $recipient_stack = CharacterItem::where([
                     ['character_id', '=', $recipient->id],
                     ['item_id', '=', $item->id],
-                    ['data', '=', $encoded_data],
+                    ['data', '=', $data],
                 ])->first();
 
                 if (!$recipient_stack) {
-                    $recipient_stack = CharacterItem::create(['character_id' => $recipient->id, 'item_id' => $item->id, 'data' => $encoded_data]);
+                    $recipient_stack = CharacterItem::create(['character_id' => $recipient->id, 'item_id' => $item->id, 'data' => $data]);
                 }
                 $recipient_stack->count += $quantity;
                 $recipient_stack->save();
@@ -536,11 +534,11 @@ class InventoryManager extends Service {
             $recipient_stack = UserItem::where([
                 ['user_id', '=', $recipient->id],
                 ['item_id', '=', $stack->item_id],
-                ['data', '=', json_encode($stack->data)],
+                ['data', '=', $stack->data],
             ])->first();
 
             if (!$recipient_stack) {
-                $recipient_stack = UserItem::create(['user_id' => $recipient->id, 'item_id' => $stack->item_id, 'data' => json_encode($stack->data)]);
+                $recipient_stack = UserItem::create(['user_id' => $recipient->id, 'item_id' => $stack->item_id, 'data' => $stack->data]);
             }
 
             $stack->count -= $quantity;

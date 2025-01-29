@@ -26,6 +26,16 @@ class Submission extends Model {
      * @var string
      */
     protected $table = 'submissions';
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'data' => 'array',
+    ];
+
     /**
      * Whether the model contains timestamps to be saved and updated.
      *
@@ -171,19 +181,6 @@ class Submission extends Model {
         ACCESSORS
 
     **********************************************************************************************/
-
-    /**
-     * Get the data attribute as an associative array.
-     *
-     * @return array
-     */
-    public function getDataAttribute() {
-        if (!$this->id) {
-            return null;
-        }
-
-        return json_decode($this->attributes['data'], true);
-    }
 
     /**
      * Gets the inventory of the user for selection.

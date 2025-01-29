@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
+
 /*
 |--------------------------------------------------------------------------
 | Browse Routes
@@ -123,6 +125,7 @@ Route::group(['prefix' => 'myo', 'namespace' => 'Characters'], function () {
 Route::group(['prefix' => 'world'], function () {
     Route::get('/', 'WorldController@getIndex');
 
+    Route::get('currency-categories', 'WorldController@getCurrencyCategories');
     Route::get('currencies', 'WorldController@getCurrencies');
     Route::get('rarities', 'WorldController@getRarities');
     Route::get('species', 'WorldController@getSpecieses');

@@ -8,12 +8,12 @@ use App\Models\Item\ItemTag;
 use App\Models\Pet\Pet;
 use App\Models\Pet\PetCategory;
 use App\Models\Pet\PetDrop;
-use App\Models\Pet\PetVariant;
 use App\Models\User\User;
 use App\Models\User\UserItem;
 use App\Models\User\UserPet;
 use App\Services\PetDropService;
 use App\Services\PetManager;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -67,7 +67,7 @@ class PetController extends Controller {
                     return true;
                 }
 
-                return PetVariant::whereIn('id', $tag->data['variant_ids'])->where('pet_id', $stack->pet_id)->exists();
+                return Pet::whereIn('id', $tag->data['variant_ids'])->where('parent_id', $stack->pet->isVariant ? $stack->pet->parent_id : $stack->pet_id)->exists();
             } else {
                 return true;
             }
@@ -250,18 +250,18 @@ class PetController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getPetPage($id) {
-        $pet = UserPet::findOrFail($id);
-        $user = $pet->user;
+        $stack = UserPet::findOrFail($id);
+        $user = $stack->user;
 
         // if the tag has data['variant_ids'], only show if the userpet->pet has a variant that matches
         $tags = ItemTag::where('tag', 'splice')->where('is_active', 1)->get();
-        $tags = $tags->filter(function ($tag) use ($pet) {
+        $tags = $tags->filter(function ($tag) use ($stack) {
             if (isset($tag->data['variant_ids'])) {
                 if (in_array('default', $tag->data['variant_ids'])) {
                     return true;
                 }
 
-                return PetVariant::whereIn('id', $tag->data['variant_ids'])->where('pet_id', $pet->pet_id)->exists();
+                return Pet::whereIn('id', $tag->data['variant_ids'])->where('parent_id', $stack->pet->isVariant ? $stack->pet->parent_id : $stack->pet_id)->exists();
             } else {
                 return true;
             }
@@ -270,8 +270,8 @@ class PetController extends Controller {
 
         return view('user.pet', [
             'user'        => $user,
-            'pet'         => $pet,
-            'drops'       => $pet->drops,
+            'pet'         => $stack,
+            'drops'       => $stack->drops,
             'userOptions' => User::where('id', '!=', $user->id)->orderBy('name')->pluck('name', 'id')->toArray(),
             'logs'        => $user->getPetLogs(),
             'splices'     => $splices,

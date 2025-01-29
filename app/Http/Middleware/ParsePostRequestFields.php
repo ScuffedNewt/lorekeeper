@@ -34,7 +34,9 @@ class ParsePostRequestFields {
                     }
 
                     // Decode HTML special chars
-                    $parsedFields[$key] = htmlspecialchars_decode($parsedFields[$key]);
+                    if ($parsedFields[$key] != null) {
+                        $parsedFields[$key] = htmlspecialchars_decode($parsedFields[$key]);
+                    }
                 }
             }
 
@@ -63,7 +65,9 @@ class ParsePostRequestFields {
                 }
 
                 // Decode HTML special chars
-                $array[$key] = htmlspecialchars_decode($array[$key]);
+                if ($array[$key] != null) {
+                    $array[$key] = htmlspecialchars_decode($array[$key]);
+                }
             }
         }
 

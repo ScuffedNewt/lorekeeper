@@ -1,4 +1,4 @@
-<div class="card character-bio">
+<div class="card character-bio {{ $loop->last ? '' : 'mb-3' }}">
     <div class="card-header">
         <ul class="nav nav-tabs card-header-tabs">
             @foreach ($stock as $categoryId => $categoryItems)
@@ -18,24 +18,30 @@
                     <div class="row mb-3">
                         @foreach ($chunk as $item)
                             <div class="col-sm-3 col-6 text-center inventory-item" data-id="{{ $item->pivot->id }}">
-                                <div class="mb-1">
-                                    @if ($item->has_image)
+                                @if ($item->has_image)
+                                    <div class="mb-1">
                                         <a href="#" class="inventory-stack"><img src="{{ $item->imageUrl }}" alt="{{ $item->name }}" /></a>
-                                    @endif
-                                </div>
+                                    </div>
+                                @endif
                                 <div>
                                     <a href="#" class="inventory-stack inventory-stack-name"><strong>{{ $item->name }}</strong></a>
-                                    <div><strong>Cost: </strong> {!! $currencies[$item->pivot->currency_id]->display((int) $item->pivot->cost) !!}</div>
+                                    <div><strong>Cost: </strong> {!! $shop->displayStockCosts($item->pivot->id) ?? 'Free' !!}</div>
                                     @if ($item->pivot->is_limited_stock)
                                         <div>Stock: {{ $item->pivot->quantity }}</div>
                                     @endif
                                     @if ($item->pivot->purchase_limit)
-                                        <div class="text-danger">Max {{ $item->pivot->purchase_limit }} @if ($item->pivot->purchase_limit_timeframe !== 'lifetime')
+                                        <div class="text-danger">
+                                            Max {{ $item->pivot->purchase_limit }}
+                                            @if ($item->pivot->purchase_limit_timeframe !== 'lifetime')
                                                 {{ $item->pivot->purchase_limit_timeframe }}
-                                            @endif per user</div>
+                                            @endif per user
+                                        </div>
                                     @endif
                                     @if ($item->pivot->disallow_transfer)
                                         <div class="text-danger">Cannot be transferred after purchase</div>
+                                    @endif
+                                    @if ($item->pivot->is_timed_stock)
+                                        <div class="text-info">Available for a limited time!</div>
                                     @endif
                                 </div>
                             </div>

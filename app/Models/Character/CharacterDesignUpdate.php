@@ -43,6 +43,7 @@ class CharacterDesignUpdate extends Model {
     protected $casts = [
         'submitted_at' => 'datetime',
         'subtype_ids'  => 'array',
+        'data'         => 'array',
     ];
 
     /**
@@ -207,15 +208,6 @@ class CharacterDesignUpdate extends Model {
     **********************************************************************************************/
 
     /**
-     * Get the data attribute as an associative array.
-     *
-     * @return array
-     */
-    public function getDataAttribute() {
-        return json_decode($this->attributes['data'], true);
-    }
-
-    /**
      * Get the items (UserItem IDs) attached to this update request.
      *
      * @return array
@@ -296,7 +288,13 @@ class CharacterDesignUpdate extends Model {
      * @return string
      */
     public function getThumbnailFileNameAttribute() {
-        return $this->id.'_'.$this->hash.'_th.'.(config('lorekeeper.settings.masterlist_image_format') != $this->extension ? config('lorekeeper.settings.masterlist_image_format') : $this->extension);
+        if (config('lorekeeper.settings.masterlist_image_format') != null && config('lorekeeper.settings.masterlist_image_format') != $this->extension) {
+            $extension = config('lorekeeper.settings.masterlist_image_format');
+        } else {
+            $extension = $this->extension;
+        }
+
+        return $this->id.'_'.$this->hash.'_th.'.$extension;
     }
 
     /**
@@ -332,7 +330,7 @@ class CharacterDesignUpdate extends Model {
      * @return string
      */
     public function getVoteDataAttribute() {
-        return collect(json_decode($this->attributes['vote_data'], true));
+        return collect($this->attributes['vote_data'], true);
     }
 
     /**********************************************************************************************

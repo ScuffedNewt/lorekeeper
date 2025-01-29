@@ -46,7 +46,7 @@ class HomeController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getLink(Request $request) {
-        // If the user already has a username associated with their account, redirect them
+        // If the user already has an alias associated with their account, redirect them
         if (Auth::check() && Auth::user()->hasAlias) {
             redirect()->to('home');
         }
@@ -101,6 +101,41 @@ class HomeController extends Controller {
         }
 
         return redirect()->to('/');
+    }
+
+    /**
+     * Shows the email page.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getEmail(Request $request) {
+        // If the user already has an email associated with their account, redirect them
+        if (Auth::check() && Auth::user()->hasEmail) {
+            return redirect()->to('home');
+        }
+
+        // Step 1: display a login email
+        return view('auth.email');
+    }
+
+    /**
+     * Posts the email page.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function postEmail(UserService $service, Request $request) {
+        $data = $request->input('email');
+        if ($service->updateEmail(['email' => $data], Auth::user())) {
+            flash('Email added successfully!');
+
+            return redirect()->to('home');
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
+
+            return redirect()->back();
+        }
     }
 
     /**

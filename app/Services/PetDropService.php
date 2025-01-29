@@ -8,7 +8,6 @@ use App\Models\Loot\LootTable;
 use App\Models\Pet\Pet;
 use App\Models\Pet\PetDrop;
 use App\Models\Pet\PetDropData;
-use App\Models\Pet\PetVariantDropData;
 use App\Models\User\UserPet;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -48,7 +47,7 @@ class PetDropService extends Service {
 
             $drop = PetDropData::create([
                 'pet_id'     => $data['pet_id'],
-                'parameters' => json_encode($paramData),
+                'parameters' => $paramData,
                 'frequency'  => $data['drop_frequency'],
                 'interval'   => $data['drop_interval'],
                 'is_active'  => $data['is_active'] ?? 0,
@@ -96,7 +95,7 @@ class PetDropService extends Service {
             $data['max_quantity'] ??= null;
 
             $drop->update([
-                'parameters' => json_encode($paramData),
+                'parameters' => $paramData,
                 'frequency'  => $data['drop_frequency'],
                 'interval'   => $data['drop_interval'],
                 'is_active'  => $data['is_active'] ?? 0,
@@ -125,101 +124,11 @@ class PetDropService extends Service {
         DB::beginTransaction();
 
         try {
-            // if(PetDrop::where('drop_id', $drop->id)->exists()) throw new \Exception('A pet has drops using this data. Consider disabling drops instead.');
+            // if (PetDrop::where('drop_id', $drop->id)->exists()) {
+            //     throw new \Exception('A pet has drops using this data. Consider disabling drops instead.');
+            // }
 
-            $variants = $drop->pet->variants()->has('dropData')->get();
-
-            // Delete variant drop data
-            if ($variants->count()) {
-                foreach ($variants as $variant) {
-                    $variant->dropData()->delete();
-                }
-            }
             $drop->petDrops()->delete();
-            $drop->delete();
-
-            return $this->commitReturn(true);
-        } catch (\Exception $e) {
-            $this->setError('error', $e->getMessage());
-        }
-
-        return $this->rollbackReturn(false);
-    }
-
-    /**********************************************************************************************
-
-        PET VARIANT DROPS
-
-    **********************************************************************************************/
-
-    /**
-     * Creates a pet variant drop.
-     *
-     * @param mixed $data
-     */
-    public function createPetVariantDrop($data) {
-        DB::beginTransaction();
-
-        try {
-            $data['rewardable_type'] ??= null;
-            $data['rewardable_id'] ??= null;
-            $data['min_quantity'] ??= null;
-            $data['max_quantity'] ??= null;
-
-            // check if drop data with this variant id exists
-            if (PetVariantDropData::where('variant_id', $data['variant_id'])->exists()) {
-                throw new \Exception('This pet variant already has drop data. Consider editing the existing data instead.');
-            }
-
-            PetVariantDropData::create([
-                'variant_id' => $data['variant_id'],
-                'data'       => json_encode($this->populateAssetData($data['rewardable_type'], $data['rewardable_id'], $data['min_quantity'], $data['max_quantity'])),
-            ]);
-
-            return $this->commitReturn(true);
-        } catch (\Exception $e) {
-            $this->setError('error', $e->getMessage());
-        }
-
-        return $this->rollbackReturn(false);
-    }
-
-    /**
-     * Edits a pet variant drop.
-     *
-     * @param mixed $drop
-     * @param mixed $data
-     */
-    public function editPetVariantDrop($drop, $data) {
-        DB::beginTransaction();
-
-        try {
-            $data['rewardable_type'] ??= null;
-            $data['rewardable_id'] ??= null;
-            $data['min_quantity'] ??= null;
-            $data['max_quantity'] ??= null;
-
-            $drop->update([
-                'data' => $this->populateAssetData($data['rewardable_type'], $data['rewardable_id'], $data['min_quantity'], $data['max_quantity']),
-            ]);
-
-            return $this->commitReturn(true);
-        } catch (\Exception $e) {
-            $this->setError('error', $e->getMessage());
-        }
-
-        return $this->rollbackReturn(false);
-    }
-
-    /**
-     * Deletes a pet variant drop.
-     *
-     * @param mixed $drop
-     */
-    public function deletePetVariantDrop($drop) {
-        DB::beginTransaction();
-
-        try {
             $drop->delete();
 
             return $this->commitReturn(true);
@@ -311,7 +220,7 @@ class PetDropService extends Service {
     }
 
     /**
-     * Creates pet drop and pet variant drop data.
+     * Creates pet drop.
      *
      * @param mixed $rewardable_type
      * @param mixed $rewardable_id

@@ -298,6 +298,25 @@ class AccountController extends Controller {
     }
 
     /**
+     * Changes user profile comment visibility setting.
+     *
+     * @param App\Services\UserService $service
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function postProfileComments(Request $request, UserService $service) {
+        if ($service->updateProfileCommentSetting($request->input('allow_profile_comments'), Auth::user())) {
+            flash('Setting updated successfully.')->success();
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
+        }
+
+        return redirect()->back();
+    }
+
+    /**
      * Shows the notifications page.
      *
      * @return \Illuminate\Contracts\Support\Renderable

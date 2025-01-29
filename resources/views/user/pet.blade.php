@@ -12,9 +12,7 @@
         : breadcrumbs(['Users' => 'users', $user->name => $user->url, 'Pets' => $user->url . '/pets', $pet->pet_name ? $pet->pet_name . ' (' . $pet->pet->name . ')' : $user->name . "'s " . $pet->pet->name => $pet->url]) !!}
 
     <h1>
-        {!! $pet->pet_name
-            ? $pet->pet_name . ' (' . $user->displayName . "'s " . ($pet->variant_id ? $pet->variant->variant_name . ' ' : '') . $pet->pet->displayName . ')'
-            : $user->name . "'s " . ($pet->variant_id ? $pet->variant->variant_name . ' ' : '') . $pet->pet->displayName !!}
+        {!! $pet->pet_name ? $pet->pet_name . ' (' . $pet->pet->name . ')' : $user->name . "'s " . $pet->pet->name . ($pet->pet->isVariant ? ' (' . $pet->pet->parent->name . ')' : '') !!}
     </h1>
 
     @if (!$namespace)
@@ -33,7 +31,7 @@
 
     <div class="row world-entry">
         <div class="col-md-3 world-entry-image">
-            <img class="img-fluid rounded mb-2" src="{{ $pet->pet->VariantImage($pet->id) }}" data-toggle="tooltip" title="{{ $pet->pet_name ?? $pet->pet->name }}" alt="{{ $pet->pet_name ?? $pet->pet->name }}" />
+            <img class="img-fluid rounded mb-2" src="{{ $pet->pet->image($pet->id) }}" data-toggle="tooltip" title="{{ $pet->pet_name ?? $pet->pet->name }}" alt="{{ $pet->pet_name ?? $pet->pet->name }}" />
         </div>
         <div class="col-md-9">
             <div class="row col-12 world-entry-text">

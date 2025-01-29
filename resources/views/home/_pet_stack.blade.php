@@ -4,7 +4,7 @@
     <div class="text-center">
         <div class="mb-1">
             <a href="{{ $stack->pet->url }}">
-                <img class="img-fluid" src="{{ $stack->pet->variantImage($stack->id) }}" style="width:50%;" />
+                <img class="img-fluid" src="{{ $stack->pet->image($stack->id) }}" />
             </a>
         </div>
         <div class="mb-1"><a href="{{ $stack->pet->url }}">{{ $stack->pet->name }}</a></div>
@@ -112,8 +112,8 @@
                         {!! Form::open(['url' => 'pets/variant/' . $stack->id, 'id' => 'userVariantForm', 'class' => 'collapse']) !!}
                         <p>
                             This will use a splice item!
-                            @if ($stack->variant_id)
-                                <br><b>Current variant:</b> {{ $stack->variant->variant_name }}
+                            @if ($stack->pet->isVariant)
+                                <br><b>Current variant:</b> {{ $stack->pet->name }}
                             @endif
                         </p>
                         <div class="form-group">
@@ -121,9 +121,9 @@
                         </div>
                         <div class="form-group">
                             @php
-                                $variants = ['0' => 'Default'] + $stack->pet->variants()->pluck('variant_name', 'id')->toArray();
+                                $variants = ['0' => 'Default'] + ($stack->pet->isVariant ? $stack->pet->parent->variants()->pluck('name', 'id')->toArray() : $stack->pet->variants()->pluck('name', 'id')->toArray());
                             @endphp
-                            {!! Form::select('variant_id', $variants, $stack->variant_id, ['class' => 'form-control']) !!}
+                            {!! Form::select('variant_id', $variants, $stack->pet->parent_id, ['class' => 'form-control']) !!}
                         </div>
                         <div class="text-right">
                             {!! Form::submit('Change Variant', ['class' => 'btn btn-primary']) !!}
@@ -132,6 +132,7 @@
                     </li>
                 @endif
                 @if ($user->hasPower('edit_inventories'))
+                    {{-- TODO --}}
                     {{-- variant --}}
                     <li class="list-group-item">
                         <a class="card-title h5 collapse-title" data-toggle="collapse" href="#variantForm">[ADMIN] Change Pet Variant</a>
@@ -139,14 +140,14 @@
                         {!! Form::hidden('is_staff', 1) !!}
                         <p>
                             @if ($stack->variant_id)
-                                <br><b>Current variant:</b> {{ $stack->variant->variant_name }}
+                                <br><b>Current variant:</b> {{ $stack->variant->name }}
                             @endif
                         </p>
                         <div class="form-group">
                             @php
-                                $variants = ['0' => 'Default'] + $stack->pet->variants()->pluck('variant_name', 'id')->toArray();
+                                $variants = ['0' => 'Default'] + ($stack->pet->isVariant ? $stack->pet->parent->variants()->pluck('name', 'id')->toArray() : $stack->pet->variants()->pluck('name', 'id')->toArray());
                             @endphp
-                            {!! Form::select('variant_id', $variants, $stack->variant_id, ['class' => 'form-control mt-2']) !!}
+                            {!! Form::select('variant_id', $variants, $stack->pet->isVariant ? $stack->pet_id : 0, ['class' => 'form-control mt-2']) !!}
                         </div>
                         <div class="text-right">
                             {!! Form::submit('Change Variant', ['class' => 'btn btn-primary']) !!}
@@ -239,7 +240,7 @@
                         </li>
                     @else
                         <li class="list-group-item bg-light">
-                            <h5 class="card-title mb-0 text-muted"><i class="fas fa-lock mr-2"></i> Currently attached to a character</h5>
+                            <h5 class="card-title mb-0 text-muted"><i class="fas fa-lock mr-2"></i> Currently attached to {!! $stack->character->displayName !!}</h5>
                         </li>
                     @endif
                 @else

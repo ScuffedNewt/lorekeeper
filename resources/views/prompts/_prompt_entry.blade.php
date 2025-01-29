@@ -6,9 +6,9 @@
         <x-admin-edit title="Prompt" :object="$prompt" />
         <div class="mb-3">
             @if (isset($isPage))
-                <h1 class="mb-0">{!! $prompt->name !!}</h1>
+                <h1 class="mb-0">{!! $prompt->name !!} <a href="{{ $prompt->idUrl }}" class="world-entry-search text-muted"><i class="fas fa-search"></i></a></h1>
             @else
-                <h2 class="mb-0"><a href="{{ url('prompts/' . $prompt->id) }}">{!! $prompt->name !!}</a></h2>
+                <h2 class="mb-0"><a href="{{ $prompt->idUrl }}">{!! $prompt->name !!}</a></h2>
             @endif
             @if ($prompt->prompt_category_id)
                 <div><strong>Category: </strong>{!! $prompt->category->displayName !!}</div>

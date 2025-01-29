@@ -25,11 +25,11 @@ class PetDrop extends Model {
     protected $table = 'pet_drops';
 
     /**
-     * Dates on the model to convert to Carbon instances.
+     * The attributes that should be cast to native types.
      *
      * @var array
      */
-    public $casts = [
+    protected $casts = [
         'next_day' => 'datetime',
     ];
 

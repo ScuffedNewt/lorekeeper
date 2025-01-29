@@ -97,6 +97,8 @@ class AddSiteSettings extends Command {
 
         $this->addSiteSetting('can_transfer_items_directly', 1, 'Whether or not users can directly transfer items to other users without trading. 0: Users cannot directly transfer items. 1: Direct item transfers are allowed.');
 
+        $this->addSiteSetting('allow_users_to_delete_profile_comments', 0, '0: Users cannot delete profile comments, 1: Users can delete profile comments.');
+
         $this->line("\nSite settings up to date!");
     }
 

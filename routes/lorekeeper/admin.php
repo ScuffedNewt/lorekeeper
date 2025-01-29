@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
+
 /*
 |--------------------------------------------------------------------------
 | Admin Routes
@@ -105,7 +107,16 @@ Route::group(['prefix' => 'data', 'namespace' => 'Data', 'middleware' => 'power:
     Route::post('galleries/sort', 'GalleryController@postSortGallery');
 
     // CURRENCIES
-    Route::get('currencies', 'CurrencyController@getIndex');
+    Route::get('currency-categories', 'CurrencyController@getIndex');
+    Route::get('currency-categories/create', 'CurrencyController@getCreateCurrencyCategory');
+    Route::get('currency-categories/edit/{id}', 'CurrencyController@getEditCurrencyCategory');
+    Route::get('currency-categories/delete/{id}', 'CurrencyController@getDeleteCurrencyCategory');
+    Route::post('currency-categories/create', 'CurrencyController@postCreateEditCurrencyCategory');
+    Route::post('currency-categories/edit/{id?}', 'CurrencyController@postCreateEditCurrencyCategory');
+    Route::post('currency-categories/delete/{id}', 'CurrencyController@postDeleteCurrencyCategory');
+    Route::post('currency-categories/sort', 'CurrencyController@postSortCurrencyCategory');
+
+    Route::get('currencies', 'CurrencyController@getCurrencyIndex');
     Route::get('currencies/sort', 'CurrencyController@getSort');
     Route::get('currencies/create', 'CurrencyController@getCreateCurrency');
     Route::get('currencies/edit/{id}', 'CurrencyController@getEditCurrency');
@@ -187,12 +198,6 @@ Route::group(['prefix' => 'data', 'namespace' => 'Data', 'middleware' => 'power:
     Route::post('pets/edit/{id?}', 'PetController@postCreateEditPet');
     Route::post('pets/delete/{id}', 'PetController@postDeletePet');
 
-    // variants
-    Route::get('pets/edit/{pet_id}/variants/create', 'PetController@getCreateEditVariant');
-    Route::get('pets/edit/{pet_id}/variants/edit/{id}', 'PetController@getCreateEditVariant');
-    Route::post('pets/edit/{pet_id}/variants/create', 'PetController@postCreateEditVariant');
-    Route::post('pets/edit/{pet_id}/variants/edit/{id}', 'PetController@postCreateEditVariant');
-
     // evolutions
     Route::get('pets/edit/{pet_id}/evolution/create', 'PetController@getCreateEditEvolution');
     Route::get('pets/edit/{pet_id}/evolution/edit/{id}', 'PetController@getCreateEditEvolution');
@@ -208,28 +213,20 @@ Route::group(['prefix' => 'data', 'namespace' => 'Data', 'middleware' => 'power:
     Route::post('pets/drops/delete/{pet_id}', 'PetController@postDeleteDrop');
     Route::get('pets/drops/widget/{id}', 'PetController@getDropWidget');
 
-    // variants drops
-    Route::get('pets/drops/edit/{pet_id}/variants/create', 'PetController@getCreateVariantDrop');
-    Route::get('pets/drops/edit/{pet_id}/variants/edit/{variant_id}', 'PetController@getEditVariantDrop');
-    Route::post('pets/drops/edit/{pet_id}/variants/create', 'PetController@postCreateEditVariantDrop');
-    Route::post('pets/drops/edit/{pet_id}/variants/edit/{variant_id}', 'PetController@postCreateEditVariantDrop');
-    Route::get('pets/drops/edit/{pet_id}/variants/delete/{variant_id}', 'PetController@getDeleteVariantDrop');
-    Route::post('pets/drops/edit/{pet_id}/variants/delete/{variant_id}', 'PetController@postDeleteVariantDrop');
-
     // levels
     Route::get('pets/levels', 'PetController@getLevelIndex');
     Route::get('pets/levels/create', 'PetController@getCreateLevel');
-    Route::get('pets/levels/edit/{id}', 'PetController@getEditLevel');
-    Route::get('pets/levels/delete/{id}', 'PetController@getDeleteLevel');
+    Route::get('pets/levels/edit/{id}', 'PetController@getEditLevel')->where('id', '[0-9]+');
+    Route::get('pets/levels/delete/{id}', 'PetController@getDeleteLevel')->where('id', '[0-9]+');
     Route::post('pets/levels/create', 'PetController@postCreateEditLevel');
-    Route::post('pets/levels/edit/{id}', 'PetController@postCreateEditLevel');
-    Route::post('pets/levels/delete/{id}', 'PetController@postDeleteLevel');
+    Route::post('pets/levels/edit/{id}', 'PetController@postCreateEditLevel')->where('id', '[0-9]+');
+    Route::post('pets/levels/delete/{id}', 'PetController@postDeleteLevel')->where('id', '[0-9]+');
 
     // level pets
-    Route::get('pets/levels/edit/{level_id}/pets/add', 'PetController@getAddPetToLevel');
-    Route::get('pets/levels/edit/{level_id}/pets/edit/{id}', 'PetController@getEditPetLevel');
-    Route::post('pets/levels/edit/{level_id}/pets/add', 'PetController@postAddPetToLevel');
-    Route::post('pets/levels/edit/{level_id}/pets/edit/{id}', 'PetController@postEditPetLevel');
+    Route::get('pets/levels/edit/{level_id}/pets/add', 'PetController@getAddPetToLevel')->where('level_id', '[0-9]+');
+    Route::get('pets/levels/edit/{level_id}/pets/edit/{id}', 'PetController@getEditPetLevel')->where('level_id', '[0-9]+')->where('id', '[0-9]+');
+    Route::post('pets/levels/edit/{level_id}/pets/add', 'PetController@postAddPetToLevel')->where('level_id', '[0-9]+');
+    Route::post('pets/levels/edit/{level_id}/pets/edit/{id}', 'PetController@postEditPetLevel')->where('level_id', '[0-9]+')->where('id', '[0-9]+');
 
     // SHOPS
     Route::get('shops', 'ShopController@getIndex');
@@ -241,6 +238,20 @@ Route::group(['prefix' => 'data', 'namespace' => 'Data', 'middleware' => 'power:
     Route::post('shops/delete/{id}', 'ShopController@postDeleteShop');
     Route::post('shops/sort', 'ShopController@postSortShop');
     Route::post('shops/restrictions/{id}', 'ShopController@postRestrictShop');
+    // stock
+    // create
+    Route::get('shops/stock/{id}', 'ShopController@getCreateShopStock');
+    Route::post('shops/stock/{id}', 'ShopController@postCreateShopStock');
+    // edit
+    Route::get('shops/stock/edit/{id}', 'ShopController@getEditShopStock');
+    Route::post('shops/stock/edit/{id}', 'ShopController@postEditShopStock');
+    // delete
+    Route::get('shops/stock/delete/{id}', 'ShopController@getDeleteShopStock');
+    Route::post('shops/stock/delete/{id}', 'ShopController@postDeleteShopStock');
+    // misc
+    Route::get('shops/stock-type', 'ShopController@getShopStockType');
+    Route::get('shops/stock-cost-type', 'ShopController@getShopStockCostType');
+
     // stock
     // create
     Route::get('shops/stock/{id}', 'ShopController@getCreateShopStock');
@@ -374,9 +385,11 @@ Route::group(['prefix' => 'pages', 'middleware' => 'power:edit_pages'], function
     Route::get('create', 'PageController@getCreatePage');
     Route::get('edit/{id}', 'PageController@getEditPage');
     Route::get('delete/{id}', 'PageController@getDeletePage');
+    Route::get('regen/{id}', 'PageController@getRegenPage');
     Route::post('create', 'PageController@postCreateEditPage');
     Route::post('edit/{id?}', 'PageController@postCreateEditPage');
     Route::post('delete/{id}', 'PageController@postDeletePage');
+    Route::post('regen/{id}', 'PageController@postRegenPage');
 });
 
 // NEWS
@@ -385,9 +398,11 @@ Route::group(['prefix' => 'news', 'middleware' => 'power:manage_news'], function
     Route::get('create', 'NewsController@getCreateNews');
     Route::get('edit/{id}', 'NewsController@getEditNews');
     Route::get('delete/{id}', 'NewsController@getDeleteNews');
+    Route::get('regen/{id}', 'NewsController@getRegenNews');
     Route::post('create', 'NewsController@postCreateEditNews');
     Route::post('edit/{id?}', 'NewsController@postCreateEditNews');
     Route::post('delete/{id}', 'NewsController@postDeleteNews');
+    Route::post('regen/{id}', 'NewsController@postRegenNews');
 });
 
 // SALES
