@@ -74,7 +74,7 @@ function getAssetKeys($isCharacter = false) {
     if (!$isCharacter) {
         return ['items', 'currencies', 'raffle_tickets', 'loot_tables', 'user_items', 'characters'];
     } else {
-        return ['currencies', 'items', 'character_items', 'loot_tables'];
+        return ['currencies', 'items', 'character_items', 'loot_tables', 'character_skills'];
     }
 }
 
@@ -142,6 +142,14 @@ function getAssetModelString($type, $namespaced = true) {
                 return '\App\Models\Character\CharacterItem';
             } else {
                 return 'CharacterItem';
+            }
+            break;
+        
+        case 'skill': case 'skills':
+            if ($namespaced) {
+                return '\App\Models\Skill\Skill';
+            } else {
+                return 'Skill';
             }
             break;
     }
@@ -458,6 +466,13 @@ function fillCharacterAssets($assets, $sender, $recipient, $logType, $data, $sub
             $service = new App\Services\InventoryManager;
             foreach ($contents as $asset) {
                 if (!$service->creditItem($sender, (($asset['asset']->category && $asset['asset']->category->is_character_owned) ? $recipient : $item_recipient), $logType, $data, $asset['asset'], $asset['quantity'])) {
+                    return false;
+                }
+            }
+        } elseif ($key == 'skills' && count($contents)) {
+            $service = new App\Services\SkillManager;
+            foreach ($contents as $asset) {
+                if (!$service->creditSkill($sender, $recipient, $logType, $data, $asset['asset'], $asset['quantity'])) {
                     return false;
                 }
             }

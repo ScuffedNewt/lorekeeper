@@ -7,7 +7,9 @@
 
 <h1>Skills</h1>
 
-<p>Skills are ...</p>
+<p>
+    Skills are arbitrary abilities that characters can have. They can be used to represent anything from combat abilities to crafting skills to knowledge. Skills can be grouped into categories, which can be used to organize them in a logical way.
+</p>
 
 <div class="text-right mb-3">
     <a class="btn btn-primary" href="{{ url('admin/data/skill-categories') }}"><i class="fas fa-folder"></i> Skill Categories</a>

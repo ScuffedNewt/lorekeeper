@@ -11,27 +11,29 @@
             </a>
             <div class="member-details text-center">
                 <p class="mb-0">
-                <small data-toggle="tooltip" title="Prerequisite/Requires. <br>This children is required.">R: {!! isset($children->prerequisite) ? $children->prerequisite->displayName : 'None' !!}</small>
-                <br>
-                @if(isset($characterSkill))
-                    <small>Level: {{ $characterSkill->level }}</small>
-                @else
-                    <small>Not unlocked.<br>Requires {{ $children->parent->name }} level {{ $children->parent_level }}</small>
-                @endif
+                    <small data-toggle="tooltip" title="Prerequisite/Requires. <br>This children is required.">R: {!! isset($children->prerequisite) ? $children->prerequisite->displayName : 'None' !!}</small>
+                    <br>
+                    @if(isset($characterSkill))
+                        <small>Level: {{ $characterSkill->level }}</small>
+                    @else
+                        <small>Not unlocked.
+                            <br>Requires {{ $children->parent->name }} level {{ $children->parent_level }}
+                        </small>
+                    @endif
                 </p>
             </div>
         </div>
     </div>
 
-@if($children->children->count() && $characterSkill)
-<a href="javascript:void(0);">
-    <i class="fas fa-sort-down" style="margin-left:1px"></i>
-</a>
-    <ul class="active">
-        @foreach($children->children as $child)
-            @include('character._skill_children', ['children' => $child, 'skill' => $skill])
-        
-        @endforeach
-    </ul>
-@endif
+    @if($children->children->count() && $characterSkill)
+        <a href="javascript:void(0);">
+            <i class="fas fa-sort-down" style="margin-left:1px"></i>
+        </a>
+        <ul class="active">
+            @foreach($children->children as $child)
+                @include('character._skill_children', ['children' => $child, 'skill' => $skill])
+            
+            @endforeach
+        </ul>
+    @endif
 </li>
