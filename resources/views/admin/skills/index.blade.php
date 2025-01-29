@@ -10,7 +10,8 @@
     <h1>Skills</h1>
 
     <p>
-        Skills are arbitrary abilities that characters can have and limiters for prompts and any other mechanism you can think to add it to. They can be used to represent anything from combat abilities to crafting skills to knowledge. Skills can be grouped into categories, which can be used to organize them in a logical way.
+        Skills are arbitrary abilities that characters can have and limiters for prompts and any other mechanism you can think to add it to. They can be used to represent anything from combat abilities to crafting skills to knowledge. Skills can be
+        grouped into categories, which can be used to organize them in a logical way.
     </p>
 
     <div class="text-right mb-3">
