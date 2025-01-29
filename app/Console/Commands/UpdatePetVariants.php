@@ -2,18 +2,16 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Pet\Pet;
+use App\Models\Pet\PetDropData;
+use App\Models\Pet\PetEvolution;
+use App\Models\User\UserPet;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
-Use App\Models\Pet\Pet;
-Use App\Models\Pet\PetDropData;
-Use App\Models\Pet\PetEvolution;
-Use App\Models\User\UserPet;
-use App\Services\PetService;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
-class UpdatePetVariants extends Command
-{
+class UpdatePetVariants extends Command {
     /**
      * The name and signature of the console command.
      *
@@ -36,6 +34,7 @@ class UpdatePetVariants extends Command
 
         if (!Schema::hasTable('pet_variants')) {
             $this->info('No pet variants to update');
+
             return;
         }
 
@@ -46,14 +45,14 @@ class UpdatePetVariants extends Command
         foreach ($variants as $variant) {
             $parentPet = Pet::find($variant->pet_id);
             $pet = Pet::create([
-                'name' => $variant->variant_name,
-                'pet_category_id' => $parentPet->pet_category_id,
-                'parent_id' => $variant->pet_id,
-                'has_image' => 1,
-                'description' => $variant->description,
+                'name'               => $variant->variant_name,
+                'pet_category_id'    => $parentPet->pet_category_id,
+                'parent_id'          => $variant->pet_id,
+                'has_image'          => 1,
+                'description'        => $variant->description,
                 'parsed_description' => parse($variant->description),
-                'allow_transfer' => $parentPet->allow_transfer,
-                'limit' => $parentPet->limit,
+                'allow_transfer'     => $parentPet->allow_transfer,
+                'limit'              => $parentPet->limit,
             ]);
 
             // move variant image to pet image
@@ -71,11 +70,10 @@ class UpdatePetVariants extends Command
                 if (file_exists($oldImage)) {
                     // move evolution variant image to pet evolution image
                     $newEvolution = PetEvolution::create([
-                        'pet_id' => $pet->id,
-                        'evolution_name' => $evolution->evolution_name . ' - ' . $variant->variant_name,
+                        'pet_id'          => $pet->id,
+                        'evolution_name'  => $evolution->evolution_name.' - '.$variant->variant_name,
                         'evolution_stage' => $evolution->evolution_stage,
                     ]);
-
 
                     $newImage = $path.'/evolutions/'.$newEvolution->imageFileName;
 
@@ -97,13 +95,13 @@ class UpdatePetVariants extends Command
                 continue;
             }
             $dropData = PetDropData::create([
-                'pet_id' => $pet->id,
+                'pet_id'     => $pet->id,
                 'parameters' => $parentPetDropData->parameters,
-                'is_active' => $parentPetDropData->is_active,
-                'name' => $parentPetDropData->name . ' - ' . $variant->variant_name,
-                'frequency' => $parentPetDropData->frequency,
-                'interval' => $parentPetDropData->interval,
-                'cap' => $parentPetDropData->cap,
+                'is_active'  => $parentPetDropData->is_active,
+                'name'       => $parentPetDropData->name.' - '.$variant->variant_name,
+                'frequency'  => $parentPetDropData->frequency,
+                'interval'   => $parentPetDropData->interval,
+                'cap'        => $parentPetDropData->cap,
                 //
                 'data' => json_decode($variantDropData->data),
             ]);

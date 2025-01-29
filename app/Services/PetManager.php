@@ -9,11 +9,11 @@ use App\Models\Pet\PetDrop;
 use App\Models\User\User;
 use App\Models\User\UserItem;
 use App\Models\User\UserPet;
-use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\DB;
 
 class PetManager extends Service {
@@ -490,8 +490,7 @@ class PetManager extends Service {
                     }
                     throw new \Exception('Could not debit item.');
                 }
-            }
-            else {
+            } else {
                 $this->logAdminAction($pet->user, 'Pet Variant Changed', ['pet' => $pet->id, 'variant' => $id]);
             }
 
@@ -533,8 +532,7 @@ class PetManager extends Service {
 
                     throw new \Exception('Could not debit item.');
                 }
-            }
-            else {
+            } else {
                 $this->logAdminAction($pet->user, 'Pet Evolution Changed', ['pet' => $pet->id, 'evolution' => $id]);
             }
 

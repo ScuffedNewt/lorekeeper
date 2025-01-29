@@ -576,7 +576,7 @@ class PetController extends Controller {
     /**
      * Loads the add pet to level modal.
      *
-     * @param mixed $id
+     * @param mixed $level_id
      */
     public function getAddPetToLevel($level_id) {
         $level = PetLevel::find($level_id);
@@ -611,7 +611,7 @@ class PetController extends Controller {
     /**
      * Adds pet(s) to a level.
      *
-     * @param mixed $id
+     * @param mixed $level_id
      */
     public function postAddPetToLevel(Request $request, PetService $service, $level_id) {
         if ($service->addPetsToLevel($request->input('pet_ids'), PetLevel::find($level_id))) {

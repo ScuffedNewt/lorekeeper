@@ -451,7 +451,6 @@ function compareAssetArrays($first, $second, $isCharacter = false, $absQuantitie
     return true;
 }
 
-
 /**
  * Distributes the assets in an assets array to the given recipient (user).
  * Loot tables will be rolled before distribution.

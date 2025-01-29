@@ -65,14 +65,14 @@ class Pet extends Model {
      * get all the pet variants.
      */
     public function variants() {
-        return $this->hasMany(Pet::class, 'parent_id');
+        return $this->hasMany(self::class, 'parent_id');
     }
 
     /**
      * Get the parent pet of this variant.
      */
     public function parent() {
-        return $this->belongsTo(Pet::class, 'parent_id');
+        return $this->belongsTo(self::class, 'parent_id');
     }
 
     /**
@@ -173,6 +173,7 @@ class Pet extends Model {
         if ($this->parent_id) {
             return '<a href="'.$this->idUrl.'" class="display-item">'.$this->name.' - Variant of '.$this->parent->name.'</a>';
         }
+
         return '<a href="'.$this->idUrl.'" class="display-item">'.$this->name.'</a>';
     }
 
@@ -183,7 +184,7 @@ class Pet extends Model {
      */
     public function getFullNameAttribute() {
         if ($this->parent_id) {
-            return $this->name . ' (' . $this->parent->name . ' Variant)';
+            return $this->name.' ('.$this->parent->name.' Variant)';
         }
 
         return $this->name;

@@ -410,78 +410,6 @@ class PetService extends Service {
         return $this->rollbackReturn(false);
     }
 
-    /**
-     * Handle category data.
-     *
-     * @param array                            $data
-     * @param \App\Models\Pet\PetCategory|null $category
-     *
-     * @return array
-     */
-    private function populateCategoryData($data, $category = null) {
-        if (isset($data['description']) && $data['description']) {
-            $data['parsed_description'] = parse($data['description']);
-        }
-        if (!isset($data['is_visible'])) {
-            $data['is_visible'] = 0;
-        }
-        if (!isset($data['allow_attach'])) {
-            $data['allow_attach'] = 0;
-            $data['limit'] = null;
-        }
-        // If attachments are allowed, but no limit is set, set it to null.
-        if (isset($data['allow_attach']) && $data['allow_attach'] && !isset($data['limit'])) {
-            $data['limit'] = null;
-        }
-
-        if (isset($data['remove_image'])) {
-            if ($category && $category->has_image && $data['remove_image']) {
-                $data['has_image'] = 0;
-                $this->deleteImage($category->categoryImagePath, $category->categoryImageFileName);
-            }
-            unset($data['remove_image']);
-        }
-
-        return $data;
-    }
-
-    /**
-     * Processes user input for creating/updating an pet.
-     *
-     * @param array               $data
-     * @param \App\Models\Pet\Pet $pet
-     *
-     * @return array
-     */
-    private function populateData($data, $pet = null) {
-        if (isset($data['description']) && $data['description']) {
-            $data['parsed_description'] = parse($data['description']);
-        }
-
-        // If attachments are allowed, but no limit is set, set it to null.
-        if (isset($data['allow_attach']) && $data['allow_attach'] && !isset($data['limit'])) {
-            $data['limit'] = null;
-        }
-
-        if (!isset($data['allow_transfer'])) {
-            $data['allow_transfer'] = 0;
-        }
-
-        if (!isset($data['is_visible'])) {
-            $data['is_visible'] = 0;
-        }
-
-        if (isset($data['remove_image'])) {
-            if ($pet && $pet->has_image && $data['remove_image']) {
-                $data['has_image'] = 0;
-                $this->deleteImage($pet->imagePath, $pet->imageFileName);
-            }
-            unset($data['remove_image']);
-        }
-
-        return $data;
-    }
-
     /**********************************************************************************************
 
         PET LEVELS
@@ -512,7 +440,7 @@ class PetService extends Service {
 
             $rewards = createAssetsArray();
             if (isset($data['rewardable_type']) && $data['rewardable_type']) {
-                foreach($data['rewardable_type'] as $key => $type) {
+                foreach ($data['rewardable_type'] as $key => $type) {
                     $model = getAssetModelString(strtolower($type));
                     $reward = $model::find($data['rewardable_id'][$key]);
 
@@ -555,10 +483,10 @@ class PetService extends Service {
 
             $rewards = createAssetsArray();
             if (isset($data['rewardable_id']) && $data['rewardable_id']) {
-                foreach($data['rewardable_type'] as $key => $type) {
+                foreach ($data['rewardable_type'] as $key => $type) {
                     $model = getAssetModelString(strtolower($type));
                     if (!$model) {
-                        throw new \Exception('Invalid rewardable type selected: ' . $type);
+                        throw new \Exception('Invalid rewardable type selected: '.$type);
                     }
                     $reward = $model::find($data['rewardable_id'][$key]);
                     if (!$reward) {
@@ -613,8 +541,8 @@ class PetService extends Service {
     /**
      * Adds pets to a level.
      *
-     * @param array                 $pet_ids
-     * @param \App\Models\Pet\PetLevel $level
+     * @param array    $pet_ids
+     * @param PetLevel $level
      *
      * @return bool
      */
@@ -663,10 +591,10 @@ class PetService extends Service {
         try {
             $rewards = createAssetsArray();
             if (isset($data['rewardable_type']) && $data['rewardable_type']) {
-                foreach($data['rewardable_type'] as $key => $type) {
+                foreach ($data['rewardable_type'] as $key => $type) {
                     $model = getAssetModelString(strtolower($type));
                     if (!$model) {
-                        throw new \Exception('Invalid rewardable type selected: ' . $type);
+                        throw new \Exception('Invalid rewardable type selected: '.$type);
                     }
                     $reward = $model::find($data['rewardable_id'][$key]);
                     if (!$reward) {
@@ -687,5 +615,77 @@ class PetService extends Service {
         }
 
         return $this->rollbackReturn(false);
+    }
+
+    /**
+     * Handle category data.
+     *
+     * @param array            $data
+     * @param PetCategory|null $category
+     *
+     * @return array
+     */
+    private function populateCategoryData($data, $category = null) {
+        if (isset($data['description']) && $data['description']) {
+            $data['parsed_description'] = parse($data['description']);
+        }
+        if (!isset($data['is_visible'])) {
+            $data['is_visible'] = 0;
+        }
+        if (!isset($data['allow_attach'])) {
+            $data['allow_attach'] = 0;
+            $data['limit'] = null;
+        }
+        // If attachments are allowed, but no limit is set, set it to null.
+        if (isset($data['allow_attach']) && $data['allow_attach'] && !isset($data['limit'])) {
+            $data['limit'] = null;
+        }
+
+        if (isset($data['remove_image'])) {
+            if ($category && $category->has_image && $data['remove_image']) {
+                $data['has_image'] = 0;
+                $this->deleteImage($category->categoryImagePath, $category->categoryImageFileName);
+            }
+            unset($data['remove_image']);
+        }
+
+        return $data;
+    }
+
+    /**
+     * Processes user input for creating/updating an pet.
+     *
+     * @param array $data
+     * @param Pet   $pet
+     *
+     * @return array
+     */
+    private function populateData($data, $pet = null) {
+        if (isset($data['description']) && $data['description']) {
+            $data['parsed_description'] = parse($data['description']);
+        }
+
+        // If attachments are allowed, but no limit is set, set it to null.
+        if (isset($data['allow_attach']) && $data['allow_attach'] && !isset($data['limit'])) {
+            $data['limit'] = null;
+        }
+
+        if (!isset($data['allow_transfer'])) {
+            $data['allow_transfer'] = 0;
+        }
+
+        if (!isset($data['is_visible'])) {
+            $data['is_visible'] = 0;
+        }
+
+        if (isset($data['remove_image'])) {
+            if ($pet && $pet->has_image && $data['remove_image']) {
+                $data['has_image'] = 0;
+                $this->deleteImage($pet->imagePath, $pet->imageFileName);
+            }
+            unset($data['remove_image']);
+        }
+
+        return $data;
     }
 }

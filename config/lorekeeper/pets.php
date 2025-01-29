@@ -21,5 +21,5 @@ return [
     |
     */
     'pet_bonding_enabled' => true,
-    'initial_level_name' => 'Wary',
+    'initial_level_name'  => 'Wary',
 ];

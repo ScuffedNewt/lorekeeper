@@ -21,7 +21,7 @@ class UserPet extends Model {
      */
     protected $fillable = [
         'data', 'pet_id', 'user_id', 'attached_at', 'pet_name', 'has_image', 'artist_url', 'artist_id', 'description',
-        'evolution_id', 'sort', 'bonded_at'
+        'evolution_id', 'sort', 'bonded_at',
     ];
 
     /**
@@ -37,9 +37,9 @@ class UserPet extends Model {
      * @var array
      */
     protected $casts = [
-        'bonded_at' => 'datetime',
+        'bonded_at'   => 'datetime',
         'attached_at' => 'datetime',
-        'data' => 'array',
+        'data'        => 'array',
     ];
 
     /**

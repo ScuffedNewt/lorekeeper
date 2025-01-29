@@ -13,14 +13,14 @@ use App\Models\Character\CharacterDesignUpdate;
 use App\Models\Character\CharacterFeature;
 use App\Models\Character\CharacterImage;
 use App\Models\Character\CharacterImageSubtype;
-use App\Models\Character\CharacterStat;
 use App\Models\Character\CharacterLog;
+use App\Models\Character\CharacterStat;
 use App\Models\Character\CharacterTransfer;
 use App\Models\Sales\SalesCharacter;
 use App\Models\Species\Subtype;
 use App\Models\User\User;
-use App\Models\User\UserPet;
 use App\Models\User\UserCharacterLog;
+use App\Models\User\UserPet;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Config;
@@ -1142,8 +1142,8 @@ class CharacterManager extends Service {
     /**
      * Sorts a character's pets.
      *
-     * @param array                 $data
-     * @param \App\Models\User\User $user
+     * @param array $data
+     * @param User  $user
      *
      * @return bool
      */
