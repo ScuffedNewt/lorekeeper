@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\Prompt\Prompt;
 use App\Models\Prompt\PromptCategory;
 use App\Models\Prompt\PromptReward;
-use App\Models\Prompt\PromptSkill;
 use App\Models\Submission\Submission;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;

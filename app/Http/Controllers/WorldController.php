@@ -11,8 +11,8 @@ use App\Models\Item\Item;
 use App\Models\Item\ItemCategory;
 use App\Models\Rarity;
 use App\Models\Shop\Shop;
-use App\Models\Skill\SkillCategory;
 use App\Models\Skill\Skill;
+use App\Models\Skill\SkillCategory;
 use App\Models\Species\Species;
 use App\Models\Species\Subtype;
 use App\Models\User\User;
@@ -543,14 +543,15 @@ class WorldController extends Controller {
     /**
      * Shows the skill categories page.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function getSkillCategories(Request $request)
-    {
+    public function getSkillCategories(Request $request) {
         $query = SkillCategory::query();
         $name = $request->get('name');
-        if($name) $query->where('name', 'LIKE', '%'.$name.'%');
+        if ($name) {
+            $query->where('name', 'LIKE', '%'.$name.'%');
+        }
+
         return view('world.skill_categories', [
             'categories' => $query->paginate(20)->appends($request->query()),
         ]);
@@ -559,20 +560,20 @@ class WorldController extends Controller {
     /**
      * Shows the skills page.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function getSkills(Request $request)
-    {
+    public function getSkills(Request $request) {
         $query = Skill::with('category');
         $data = $request->only(['skill_category_id', 'name', 'sort']);
-        if(isset($data['skill_category_id']) && $data['skill_category_id'] != 'none')
+        if (isset($data['skill_category_id']) && $data['skill_category_id'] != 'none') {
             $query->where('skill_category_id', $data['skill_category_id']);
-        if(isset($data['name']))
+        }
+        if (isset($data['name'])) {
             $query->where('name', 'LIKE', '%'.$data['name'].'%');
+        }
 
         return view('world.skills', [
-            'skills' => $query->paginate(20)->appends($request->query()),
+            'skills'     => $query->paginate(20)->appends($request->query()),
             'categories' => ['none' => 'Any Category'] + SkillCategory::pluck('name', 'id')->toArray(),
         ]);
     }
@@ -580,21 +581,23 @@ class WorldController extends Controller {
     /**
      * Shows an individual skill's page.
      *
-     * @param  int  $id
+     * @param int $id
+     *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function getSkill($id)
-    {
+    public function getSkill($id) {
         $categories = SkillCategory::get();
         $skill = Skill::where('id', $id)->first();
-        if(!$skill) abort(404);
+        if (!$skill) {
+            abort(404);
+        }
 
         return view('world.skill_page', [
-            'skill' => $skill,
-            'imageUrl' => $skill->imageUrl,
-            'name' => $skill->displayName,
+            'skill'       => $skill,
+            'imageUrl'    => $skill->imageUrl,
+            'name'        => $skill->displayName,
             'description' => $skill->parsed_description,
-            'categories' => $categories->keyBy('id'),
+            'categories'  => $categories->keyBy('id'),
         ]);
     }
 }

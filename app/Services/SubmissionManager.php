@@ -10,17 +10,16 @@ use App\Models\Item\Item;
 use App\Models\Loot\LootTable;
 use App\Models\Prompt\Prompt;
 use App\Models\Raffle\Raffle;
+use App\Models\Skill\Skill;
 use App\Models\Submission\Submission;
 use App\Models\Submission\SubmissionCharacter;
 use App\Models\User\User;
 use App\Models\User\UserItem;
-use App\Models\Skill\Skill;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
 class SubmissionManager extends Service {
-
     /*
     |--------------------------------------------------------------------------
     | Submission Manager
@@ -456,10 +455,10 @@ class SubmissionManager extends Service {
                 // Users might not pass in clean arrays (may contain redundant data) so we need to clean that up
                 $assets = $this->processRewards($data + [
                     'character_id' => $c->id,
-                    'currencies' => $currencies,
-                    'items' => $items,
-                    'tables' => $tables,
-                    'skills' => $skills
+                    'currencies'   => $currencies,
+                    'items'        => $items,
+                    'tables'       => $tables,
+                    'skills'       => $skills,
                 ], true);
 
                 if (!$assets = fillCharacterAssets($assets, $user, $c, $promptLogType, $promptData, $submission->user)) {
@@ -470,7 +469,7 @@ class SubmissionManager extends Service {
                     'character_id'  => $c->id,
                     'submission_id' => $submission->id,
                     'data'          => getDataReadyAssets($assets),
-                    'is_focus'      => isset($data['character_is_focus'][$c->id]) ? 1 : 0
+                    'is_focus'      => isset($data['character_is_focus'][$c->id]) ? 1 : 0,
                 ]);
             }
 
@@ -815,10 +814,10 @@ class SubmissionManager extends Service {
             // Users might not pass in clean arrays (may contain redundant data) so we need to clean that up
             $assets = $this->processRewards($data + [
                 'character_id' => $c->id,
-                'currencies' => $currencies,
-                'items' => $items,
-                'tables' => $tables,
-                'skills' => $skills
+                'currencies'   => $currencies,
+                'items'        => $items,
+                'tables'       => $tables,
+                'skills'       => $skills,
             ], true);
 
             // Now we have a clean set of assets (redundant data is gone, duplicate entries are merged)
@@ -827,7 +826,7 @@ class SubmissionManager extends Service {
                 'character_id'  => $c->id,
                 'submission_id' => $submission->id,
                 'data'          => getDataReadyAssets($assets),
-                'is_focus' => isset($data['character_is_focus'][$c->id]) ? 1 : 0
+                'is_focus'      => isset($data['character_is_focus'][$c->id]) ? 1 : 0,
             ]);
         }
 

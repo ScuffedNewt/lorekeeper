@@ -14,10 +14,10 @@ use App\Models\Gallery\GallerySubmission;
 use App\Models\Item\Item;
 use App\Models\Item\ItemCategory;
 use App\Models\Rarity;
+use App\Models\Skill\Skill;
 use App\Models\User\User;
 use App\Models\User\UserCurrency;
 use App\Models\User\UserItem;
-use App\Models\Skill\Skill;
 use App\Services\CharacterManager;
 use App\Services\CurrencyManager;
 use App\Services\DesignUpdateManager;
@@ -460,14 +460,14 @@ class CharacterController extends Controller {
     /**
      * Shows a character's skill logs.
      *
-     * @param  string  $slug
+     * @param string $slug
+     *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function getCharacterSkillLogs($slug)
-    {
+    public function getCharacterSkillLogs($slug) {
         return view('character.character_skill_logs', [
             'character' => $this->character,
-            'logs' => $this->character->getCharacterSkillLogs()
+            'logs'      => $this->character->getCharacterSkillLogs(),
         ]);
     }
 

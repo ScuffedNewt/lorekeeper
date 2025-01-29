@@ -196,7 +196,7 @@ return [
             ],
             [
                 'name' => 'Character Skills',
-                'url' => 'admin/data/skills'
+                'url'  => 'admin/data/skills',
             ],
             [
                 'name' => 'Dynamic Limits',

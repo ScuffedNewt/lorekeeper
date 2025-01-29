@@ -2,18 +2,16 @@
 
 namespace App\Models\Skill;
 
-use Config;
 use App\Models\Model;
 
-class SkillCategory extends Model
-{
+class SkillCategory extends Model {
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'name', 'has_image', 'description'
+        'name', 'has_image', 'description',
     ];
 
     /**
@@ -22,31 +20,31 @@ class SkillCategory extends Model
      * @var string
      */
     protected $table = 'skill_categories';
-    
+
     /**
      * Validation rules for creation.
      *
      * @var array
      */
     public static $createRules = [
-        'name' => 'required|unique:skill_categories|between:3,100',
+        'name'        => 'required|unique:skill_categories|between:3,100',
         'description' => 'nullable',
-        'image' => 'mimes:png',
+        'image'       => 'mimes:png',
     ];
-    
+
     /**
      * Validation rules for updating.
      *
      * @var array
      */
     public static $updateRules = [
-        'name' => 'required|between:3,100',
+        'name'        => 'required|between:3,100',
         'description' => 'nullable',
-        'image' => 'mimes:png',
+        'image'       => 'mimes:png',
     ];
 
     /**********************************************************************************************
-    
+
         ACCESSORS
 
     **********************************************************************************************/
@@ -56,8 +54,7 @@ class SkillCategory extends Model
      *
      * @return string
      */
-    public function getDisplayNameAttribute()
-    {
+    public function getDisplayNameAttribute() {
         return '<a href="'.$this->url.'" class="display-category">'.$this->name.'</a>';
     }
 
@@ -66,8 +63,7 @@ class SkillCategory extends Model
      *
      * @return string
      */
-    public function getImageDirectoryAttribute()
-    {
+    public function getImageDirectoryAttribute() {
         return 'images/data/skill-categories';
     }
 
@@ -76,9 +72,8 @@ class SkillCategory extends Model
      *
      * @return string
      */
-    public function getCategoryImageFileNameAttribute()
-    {
-        return $this->id . '-image.png';
+    public function getCategoryImageFileNameAttribute() {
+        return $this->id.'-image.png';
     }
 
     /**
@@ -86,20 +81,21 @@ class SkillCategory extends Model
      *
      * @return string
      */
-    public function getCategoryImagePathAttribute()
-    {
+    public function getCategoryImagePathAttribute() {
         return public_path($this->imageDirectory);
     }
-    
+
     /**
      * Gets the URL of the model's image.
      *
      * @return string
      */
-    public function getCategoryImageUrlAttribute()
-    {
-        if (!$this->has_image) return null;
-        return asset($this->imageDirectory . '/' . $this->categoryImageFileName);
+    public function getCategoryImageUrlAttribute() {
+        if (!$this->has_image) {
+            return null;
+        }
+
+        return asset($this->imageDirectory.'/'.$this->categoryImageFileName);
     }
 
     /**
@@ -107,8 +103,7 @@ class SkillCategory extends Model
      *
      * @return string
      */
-    public function getUrlAttribute()
-    {
+    public function getUrlAttribute() {
         return url('world/skill-categories?name='.$this->name);
     }
 
@@ -117,8 +112,7 @@ class SkillCategory extends Model
      *
      * @return string
      */
-    public function getSearchUrlAttribute()
-    {
+    public function getSearchUrlAttribute() {
         return url('world/skills?skill_category_id='.$this->id);
     }
 }

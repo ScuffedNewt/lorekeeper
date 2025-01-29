@@ -2,20 +2,16 @@
 
 namespace App\Models\Character;
 
-use Config;
-use DB;
 use App\Models\Model;
 
-class CharacterSkill extends Model
-{
-
+class CharacterSkill extends Model {
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'character_id', 'skill_id', 'level'
+        'character_id', 'skill_id', 'level',
     ];
 
     /**
@@ -34,16 +30,14 @@ class CharacterSkill extends Model
     /**
      * Get the character this profile belongs to.
      */
-    public function character()
-    {
+    public function character() {
         return $this->belongsTo('App\Models\Character\Character', 'character_id');
     }
 
     /**
      * Get the skill.
      */
-    public function skill()
-    {
+    public function skill() {
         return $this->belongsTo('App\Models\Skill\Skill', 'skill_id');
     }
 }

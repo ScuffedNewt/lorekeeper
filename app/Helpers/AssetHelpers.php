@@ -144,7 +144,7 @@ function getAssetModelString($type, $namespaced = true) {
                 return 'CharacterItem';
             }
             break;
-        
+
         case 'skill': case 'skills':
             if ($namespaced) {
                 return '\App\Models\Skill\Skill';

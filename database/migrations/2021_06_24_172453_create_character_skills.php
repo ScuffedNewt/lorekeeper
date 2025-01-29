@@ -4,15 +4,11 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateCharacterSkills extends Migration
-{
+class CreateCharacterSkills extends Migration {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
-    {
+    public function up() {
         Schema::create('skills', function (Blueprint $table) {
             $table->id();
             $table->string('name');
@@ -37,7 +33,7 @@ class CreateCharacterSkills extends Migration
             $table->integer('skill_id');
             $table->integer('level');
         });
-    
+
         Schema::create('prompt_skills', function (Blueprint $table) {
             $table->integer('prompt_id');
             $table->integer('skill_id');
@@ -47,11 +43,8 @@ class CreateCharacterSkills extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
-    {
+    public function down() {
         Schema::dropIfExists('skills');
         Schema::dropIfExists('skill_categories');
         Schema::dropIfExists('character_skills');
