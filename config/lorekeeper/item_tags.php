@@ -30,4 +30,10 @@ return [
         'text_color'       => '#ffffff',
         'background_color' => '#ff5ca8',
     ],
+
+    'degradable' => [
+        'name'             => 'Degradable',
+        'text_color'       => '#ffffff',
+        'background_color' => '#696c7d',
+    ],
 ];

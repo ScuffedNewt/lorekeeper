@@ -353,7 +353,11 @@ class SubmissionManager extends Service {
                 foreach ($stacks as $stackId=> $quantity) {
                     $stack = UserItem::find($stackId);
                     $user = User::find($submission->user_id);
-                    if (!$inventoryManager->debitStack($user, $submission->prompt_id ? 'Prompt Approved' : 'Claim Approved', ['data' => 'Item used in submission (<a href="'.$submission->viewUrl.'">#'.$submission->id.'</a>)'], $stack, $quantity)) {
+                    if (!$inventoryManager->debitStack($user, $submission->prompt_id ? 'Prompt Approved' : 'Claim Approved', ['data' => 'Item used in submission (<a href="'.$submission->viewUrl.'">#'.$submission->id.'</a>)'], $stack, $quantity, 'Prompts')) {
+                        foreach ($inventoryManager->errors()->getMessages()['error'] as $error) {
+                            flash($error)->error();
+                        }
+                        
                         throw new \Exception('Failed to create log for item stack.');
                     }
                 }

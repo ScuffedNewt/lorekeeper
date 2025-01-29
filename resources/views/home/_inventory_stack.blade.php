@@ -43,26 +43,59 @@
                 @foreach ($stack as $itemRow)
                     <tr id="itemRow{{ $itemRow->id }}" class="d-flex {{ $itemRow->isTransferrable ? '' : 'accountbound' }}">
                         @if ($user && !$readOnly && ($stack->first()->user_id == $user->id || $user->hasPower('edit_inventories')))
-                            <td class="col-1">{!! Form::checkbox('ids[]', $itemRow->id, false, ['class' => 'item-check', 'onclick' => 'updateQuantities(this)']) !!}</td>
-                            <td class="col-4">{!! array_key_exists('data', $itemRow->data) ? ($itemRow->data['data'] ? $itemRow->data['data'] : 'N/A') : 'N/A' !!}</td>
+                            <td class="col-1">
+                                {!! Form::checkbox('ids[]', $itemRow->id, false, ['class' => 'item-check', 'onclick' => 'updateQuantities(this)']) !!}
+                            </td>
+                            <td class="col-4">
+                                {!! array_key_exists('data', $itemRow->data) ? ($itemRow->data['data'] ? $itemRow->data['data'] : 'N/A') : 'N/A' !!}
+                            </td>
                         @else
-                            <td class="col-5">{!! array_key_exists('data', $itemRow->data) ? ($itemRow->data['data'] ? $itemRow->data['data'] : 'N/A') : 'N/A' !!}</td>
+                            <td class="col-5">
+                                {!! array_key_exists('data', $itemRow->data) ? ($itemRow->data['data'] ? $itemRow->data['data'] : 'N/A') : 'N/A' !!}
+                            </td>
                         @endif
-                        <td class="col-3">{!! array_key_exists('notes', $itemRow->data) ? ($itemRow->data['notes'] ? $itemRow->data['notes'] : 'N/A') : 'N/A' !!}</td>
+                        <td class="col-3">
+                            {!! array_key_exists('notes', $itemRow->data) ? ($itemRow->data['notes'] ? $itemRow->data['notes'] : 'N/A') : 'N/A' !!}
+                        </td>
                         @if ($user && !$readOnly && ($stack->first()->user_id == $user->id || $user->hasPower('edit_inventories')))
                             @if ($itemRow->availableQuantity)
-                                <td class="col-3">{!! Form::selectRange('', 1, $itemRow->availableQuantity, 1, ['class' => 'quantity-select', 'type' => 'number', 'style' => 'min-width:40px;']) !!} /{{ $itemRow->availableQuantity }} @if ($itemRow->getOthers())
+                                <td class="col-3">
+                                    {!! Form::selectRange('', 1, $itemRow->availableQuantity, 1, ['class' => 'quantity-select', 'type' => 'number', 'style' => 'min-width:40px;']) !!}
+                                    /
+                                    {{ $itemRow->availableQuantity }}
+                                    @if ($itemRow->getOthers())
                                         {{ $itemRow->getOthers() }}
+                                    @endif
+                                    @if ($itemRow->item->tag('degradable'))
+                                        ({{ isset($itemRow->data['uses']) ? $itemRow->data['uses'] : $itemRow->item->tag('degradable')->data['uses'] }}
+                                        /
+                                        {{ $itemRow->item->tag('degradable')->data['uses']}} uses remaining)
                                     @endif
                                 </td>
                             @else
-                                <td class="col-3">{!! Form::selectRange('', 0, 0, 0, ['class' => 'quantity-select', 'type' => 'number', 'style' => 'min-width:40px;', 'disabled']) !!} /{{ $itemRow->availableQuantity }} @if ($itemRow->getOthers())
+                                <td class="col-3">
+                                    {!! Form::selectRange('', 0, 0, 0, ['class' => 'quantity-select', 'type' => 'number', 'style' => 'min-width:40px;', 'disabled']) !!} 
+                                    /
+                                    {{ $itemRow->availableQuantity }}
+                                    @if ($itemRow->getOthers())
                                         {{ $itemRow->getOthers() }}
+                                    @endif
+                                    @if ($itemRow->item->tag('degradable'))
+                                        ({{ isset($itemRow->data['uses']) ? $itemRow->data['uses'] : $itemRow->item->tag('degradable')->data['uses'] }}
+                                        /
+                                        {{ $itemRow->item->tag('degradable')->data['uses']}} uses remaining)
                                     @endif
                                 </td>
                             @endif
                         @else
-                            <td class="col-3">{!! $itemRow->count !!}</td>
+                            <td class="col-3">
+                                {!! $itemRow->count !!}
+                                @if ($itemRow->item->tag('degradable'))
+                                    ({{ isset($itemRow->data['uses']) ? $itemRow->data['uses'] : $itemRow->item->tag('degradable')->data['uses'] }}
+                                    /
+                                    {{ $itemRow->item->tag('degradable')->data['uses']}} uses remaining)
+                                @endif
+                            </td>
                         @endif
                         <td class="col-1">
                             @if (!$itemRow->isTransferrable)
