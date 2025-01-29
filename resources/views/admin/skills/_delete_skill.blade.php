@@ -1,5 +1,5 @@
-@if($skill)
-    {!! Form::open(['url' => 'admin/data/skills/delete/'.$skill->id]) !!}
+@if ($skill)
+    {!! Form::open(['url' => 'admin/data/skills/delete/' . $skill->id]) !!}
 
     <p>You are about to delete the skill <strong>{{ $skill->name }}</strong>. This is not reversible.</p>
     <p>Are you sure you want to delete <strong>{{ $skill->name }}</strong>?</p>
@@ -9,6 +9,6 @@
     </div>
 
     {!! Form::close() !!}
-@else 
+@else
     Invalid skill selected.
 @endif
