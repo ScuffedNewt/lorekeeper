@@ -119,7 +119,7 @@ class CharacterController extends Controller {
     public function getCharacter($slug) {
         return view('character.character', [
             'character'             => $this->character,
-            'skills'                => Skill::where('parent_id', null)->orderBy('name', 'ASC')->get(), // TODO
+            'skills'                => Skill::where('parent_id', null)->orderBy('name', 'ASC')->get(),
             'showMention'           => true,
             'extPrevAndNextBtnsUrl' => '',
         ]);
