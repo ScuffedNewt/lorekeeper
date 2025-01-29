@@ -11,8 +11,8 @@ use App\Models\Item\Item;
 use App\Models\Loot\LootTable;
 use App\Models\Prompt\Prompt;
 use App\Models\Raffle\Raffle;
-use App\Models\Status\StatusEffect;
 use App\Models\Skill\Skill;
+use App\Models\Status\StatusEffect;
 use App\Models\Submission\Submission;
 use App\Models\Submission\SubmissionCharacter;
 use App\Models\User\User;
@@ -491,7 +491,6 @@ class SubmissionManager extends Service {
                     'is_focus'      => isset($data['character_is_focus']) && $data['character_is_focus'][$c->id] ? $data['character_is_focus'][$c->id] : 0,
                     'data'          => getDataReadyAssets($assets),
                 ]);
-
             }
 
             // Increment user submission count if it's a prompt
