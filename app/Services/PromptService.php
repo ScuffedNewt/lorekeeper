@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\Prompt\Prompt;
 use App\Models\Prompt\PromptCategory;
 use App\Models\Prompt\PromptReward;
-use App\Models\Prompt\PromptSkill;
 use App\Models\Submission\Submission;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -397,27 +396,6 @@ class PromptService extends Service {
                     'rewardable_type' => $type,
                     'rewardable_id'   => $data['rewardable_id'][$key] ?? null,
                     'quantity'        => $data['quantity'][$key],
-                ]);
-            }
-        }
-    }
-
-    /**
-     * Processes user input for creating/updating prompt skill rewards.
-     *
-     * @param array  $data
-     * @param Prompt $prompt
-     */
-    private function populateSkills($data, $prompt) {
-        // Clear the old skills...
-        $prompt->skills()->delete();
-
-        if (isset($data['skill_id'])) {
-            foreach ($data['skill_id'] as $key => $type) {
-                PromptSkill::create([
-                    'prompt_id'       => $prompt->id,
-                    'skill_id'        => $type,
-                    'quantity'        => $data['skill_quantity'][$key],
                 ]);
             }
         }

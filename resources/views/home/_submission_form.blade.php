@@ -116,9 +116,6 @@
         <div id="characters" class="mb-3">
             @foreach ($submission->characters as $character)
                 @include('widgets._character_select_entry', [
-                    'characterCurrencies' => $characterCurrencies,
-                    'items' => $items,
-                    'tables' => [],
                     'showTables' => false,
                     'character' => $character,
                     'expanded_rewards' => $expanded_rewards,
@@ -176,9 +173,9 @@
 
 {!! Form::close() !!}
 
-@include('widgets._character_select', ['characterCurrencies' => $characterCurrencies, 'showLootTables' => false, 'showElements' => true, 'showStatuses' => true])
+@include('widgets._character_select', ['showLootTables' => false, 'showElements' => true, 'showStatuses' => true])
 @if ($isClaim)
-    @include('widgets._loot_select_row', ['items' => $items, 'currencies' => $currencies, 'showLootTables' => false, 'showRaffles' => true])
+    @include('widgets._loot_select_row', ['showLootTables' => false, 'showRaffles' => true])
 @else
-    @include('widgets._loot_select_row', ['items' => $items, 'currencies' => $currencies, 'showLootTables' => false, 'showRaffles' => false])
+    @include('widgets._loot_select_row', ['showLootTables' => false, 'showRaffles' => false])
 @endif

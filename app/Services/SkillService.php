@@ -298,7 +298,40 @@ class SkillService extends Service {
     }
 
     /**
-     * Processes user input for creating/updating an skill.
+     * Deletes an skill.
+     *
+     * @param Skill $skill
+     *
+     * @return bool
+     */
+    public function deleteSkill($skill) {
+        DB::beginTransaction();
+
+        try {
+            // Check first if the skill is currently owned or if some other site feature uses it
+            if (DB::table('character_skills')->where([['skill_id', '=', $skill->id]])->exists()) {
+                throw new \Exception('At least one character currently owns this skill. Please remove the skill(s) before deleting it.');
+            }
+
+            DB::table('character_skills')->where('skill_id', $skill->id)->delete();
+            if ($skill->has_image) {
+                $this->deleteImage($skill->imagePath, $skill->imageFileName);
+            }
+            $skill->delete();
+
+            return $this->commitReturn(true);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
+    }
+
+    /**
+     * Handle category data.
+     *
+     * @param array              $data
+     * @param SkillCategory|null $category
      *
      * @param array $data
      * @param Skill $skill
@@ -347,7 +380,7 @@ class SkillService extends Service {
         if (isset($data['remove_image'])) {
             if ($skill && $skill->has_image && $data['remove_image']) {
                 $data['has_image'] = 0;
-                $this->deleteImage($skill->imagePath, $skill->imageFileName);
+                $this->deleteImage($category->categoryImagePath, $category->categoryImageFileName);
             }
             unset($data['remove_image']);
         }

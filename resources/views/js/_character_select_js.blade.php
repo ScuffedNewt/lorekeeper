@@ -75,6 +75,9 @@
                     $cell.children('.character-elements').addClass('show');
                     $cell.children('.character-elements').removeClass('hide');
                     $cell.parent().find('.character-rewardable-quantity').addClass('hide');
+                } else if (val == 'Skill') {
+                    $cell.children('.character-skills').addClass('show');
+                    $cell.children('.character-skills').removeClass('hide');
                 }
             });
         }
@@ -89,6 +92,7 @@
             node.find('.character-claymores-id').attr('name', 'character_rewardable_id[' + id + '][]');
             node.find('.character-element-id').attr('name', 'character_rewardable_id[' + id + '][]');
             node.find('.character-status-id').attr('name', 'character_rewardable_id[' + id + '][]');
+            node.find('.character-skill-id').attr('name', 'character_rewardable_id[' + id + '][]');
         }
 
     });

@@ -5,6 +5,9 @@
         ->get()
         ->pluck('fullName', 'slug')
         ->toArray();
+    $items = \App\Models\Item\Item::released()->orderBy('name')->pluck('name', 'id');
+    $characterCurrencies = \App\Models\Currency\Currency::where('is_character_owned', 1)->orderBy('sort_character', 'DESC')->pluck('name', 'id');
+    $skills = \App\Models\Skill\Skill::orderBy('name')->pluck('name', 'id');
     $tables = \App\Models\Loot\LootTable::orderBy('name')->pluck('name', 'id');
     $elements = \App\Models\Element\Element::orderBy('name')->pluck('name', 'id');
 @endphp
@@ -53,7 +56,7 @@
                                         <td>
                                             {!! Form::select(
                                                 'character_rewardable_type[' . $character->character_id . '][]',
-                                                ['Item' => 'Item', 'Currency' => 'Currency', 'LootTable' => 'Loot Table', 'Exp' => 'Exp', 'Points' => 'Stat Points', 'Element' => 'Element', 'StatusEffect' => 'Status Effect'],
+                                                ['Item' => 'Item', 'Currency' => 'Currency', 'LootTable' => 'Loot Table', 'Exp' => 'Exp', 'Points' => 'Stat Points', 'Element' => 'Element', 'StatusEffect' => 'Status Effect', 'Skill' => 'Skill'],
                                                 $reward->rewardable_type,
                                                 [
                                                     'class' => 'form-control character-rewardable-type',
@@ -81,6 +84,10 @@
                                                 'placeholder' => 'Select Status Effect',
                                             ]) !!}
                                             </div>
+                                            <div class="character-skills {{ $reward->rewardable_type == 'Skill' ? 'show' : 'hide' }}">{!! Form::select('character_rewardable_id[' . $character->character_id . '][]', $skills, $reward->rewardable_type == 'Skill' ? $reward->rewardable_id : null, [
+                                                'class' => 'form-control character-skill-id',
+                                                'placeholder' => 'Select Skill',
+                                            ]) !!}</div>
                                         </td>
                                     @else
                                         <td class="lootDivs">

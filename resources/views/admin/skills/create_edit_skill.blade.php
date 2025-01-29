@@ -17,9 +17,15 @@
 
     <h3>Basic Information</h3>
 
-    <div class="form-group">
-        {!! Form::label('Name') !!}
-        {!! Form::text('name', $skill->name, ['class' => 'form-control']) !!}
+    <div class="row">
+        <div class="col-md-6 form-group">
+            {!! Form::label('Name') !!}
+            {!! Form::text('name', $skill->name, ['class' => 'form-control']) !!}
+        </div>
+        <div class="col-md-6 form-group">
+            {!! Form::label('Skill Category (Optional)') !!}
+            {!! Form::select('skill_category_id', $categories, $skill->skill_category_id, ['class' => 'form-control']) !!}
+        </div>
     </div>
 
     <div class="form-group">
@@ -39,17 +45,12 @@
         {!! Form::textarea('description', $skill->description, ['class' => 'form-control wysiwyg']) !!}
     </div>
 
-    <div class="form-group">
-        {!! Form::label('Skill Category (Optional)') !!}
-        {!! Form::select('skill_category_id', $categories, $skill->skill_category_id, ['class' => 'form-control']) !!}
-    </div>
-
     <div class="row">
         <div class="col-md">
             <div class="form-group">
                 {!! Form::label('Parent (Optional)') !!} {!! add_help('Related skill that transforms into this skill.') !!}
+                <p class="mb-0">A parent locks this skill and all prompts associated with this skill until the parent level is reached. It is also in the same tree as the skill.</p>
                 {!! Form::select('parent_id', $skills, $skill->parent_id, ['class' => 'form-control mb-1']) !!}
-                <p>A parent locks this skill and all prompts associated with this skill until the parent level is reached. It is also in the same tree as the skill.</p>
             </div>
         </div>
         <div class="col-md">
@@ -62,9 +63,10 @@
 
     <div class="form-group">
         {!! Form::label('Prerequisite (Optional)') !!} {!! add_help('Unrelated skill required to have before the character can learn this skill.') !!}
+        <p class="mb-0">A prerequisite is required to have at least level 1 in to enter any prompts with this skill reward.</p>
         {!! Form::select('prerequisite_id', $skills, $skill->prerequisite_id, ['class' => 'form-control mb-1']) !!}
-        <p>A prerequisite is required to have at least level 1 in to enter any prompts with this skill reward.</p>
     </div>
+
 
     <div class="form-group">
         {!! Form::checkbox('is_visible', 1, $skill->id ? $skill->is_visible : 1, ['class' => 'form-check-input', 'data-toggle' => 'toggle']) !!}

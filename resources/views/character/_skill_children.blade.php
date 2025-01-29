@@ -21,7 +21,9 @@
                     @if (isset($characterSkill))
                         <small>Level: {{ $characterSkill->level }}</small>
                     @else
-                        <small>Not unlocked.<br>Requires {{ $children->parent->name }} level {{ $children->parent_level }}</small>
+                        <small>Not unlocked.
+                            <br>Requires {{ $children->parent->name }} level {{ $children->parent_level }}
+                        </small>
                     @endif
                 </p>
             </div>

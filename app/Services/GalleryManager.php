@@ -431,7 +431,7 @@ class GalleryManager extends Service {
             $voteData = (isset($submission->vote_data) ? collect($submission->vote_data, true) : collect([]));
             $voteData->get($user->id) ? $voteData->pull($user->id) : null;
             $voteData->put($user->id, $vote);
-            $submission->vote_data = $voteData->toJson();
+            $submission->vote_data = $voteData;
 
             $submission->save();
 

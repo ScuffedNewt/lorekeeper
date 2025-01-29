@@ -74,7 +74,7 @@ function getAssetKeys($isCharacter = false) {
     if (!$isCharacter) {
         return ['items', 'currencies', 'pets', 'weapons', 'gears', 'raffle_tickets', 'loot_tables', 'user_items', 'characters', 'exp', 'points'];
     } else {
-        return ['currencies', 'items', 'character_items', 'loot_tables', 'elements', 'exp', 'points', 'statuses'];
+        return ['currencies', 'items', 'character_items', 'loot_tables', 'elements', 'exp', 'points', 'statuses', 'character_skills'];
     }
 }
 
@@ -168,6 +168,15 @@ function getAssetModelString($type, $namespaced = true) {
                 return 'CharacterItem';
             }
             break;
+
+        case 'skill': case 'skills':
+            if ($namespaced) {
+                return '\App\Models\Skill\Skill';
+            } else {
+                return 'Skill';
+            }
+            break;
+
         case 'elements':
             if ($namespaced) {
                 return '\App\Models\Element\Element';
@@ -175,6 +184,7 @@ function getAssetModelString($type, $namespaced = true) {
                 return 'Element';
             }
             break;
+
         case 'statuses':
             if ($namespaced) {
                 return '\App\Models\Status\StatusEffect';
@@ -182,7 +192,8 @@ function getAssetModelString($type, $namespaced = true) {
                 return 'StatusEffect';
             }
             break;
-            // these are special cases, as they do not specifically have a unique model
+
+        // these are special cases, as they do not specifically have a unique model
         case 'exp':
             return 'Exp';
             break;
@@ -658,6 +669,13 @@ function fillCharacterAssets($assets, $sender, $recipient, $logType, $data, $sub
             $service = new App\Services\StatusEffectManager;
             foreach ($contents as $asset) {
                 if (!$service->creditStatusEffect($sender, $recipient, $logType, $data['data'], $asset['asset'], $asset['quantity'])) {
+                    return false;
+                }
+            }
+        } elseif ($key == 'skills' && count($contents)) {
+            $service = new App\Services\SkillManager;
+            foreach ($contents as $asset) {
+                if (!$service->creditSkill($sender, $recipient, $logType, $data, $asset['asset'], $asset['quantity'])) {
                     return false;
                 }
             }

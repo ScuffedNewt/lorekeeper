@@ -12,6 +12,7 @@ use App\Models\Loot\LootTable;
 use App\Models\Prompt\Prompt;
 use App\Models\Raffle\Raffle;
 use App\Models\Status\StatusEffect;
+use App\Models\Skill\Skill;
 use App\Models\Submission\Submission;
 use App\Models\Submission\SubmissionCharacter;
 use App\Models\User\User;
@@ -423,6 +424,7 @@ class SubmissionManager extends Service {
             $itemIds = [];
             $tableIds = [];
             $elementIds = [];
+            $skillIds = [];
             if (isset($data['character_currency_id'])) {
                 foreach ($data['character_currency_id'] as $c) {
                     foreach ($c as $currencyId) {
@@ -432,7 +434,7 @@ class SubmissionManager extends Service {
             } elseif (isset($data['character_rewardable_id'])) {
                 $data['character_rewardable_id'] = array_map([$this, 'innerNull'], $data['character_rewardable_id']);
                 foreach ($data['character_rewardable_id'] as $ckey => $c) {
-                    foreach ($c as $key                            => $id) {
+                    foreach ($c as $key => $id) {
                         switch ($data['character_rewardable_type'][$ckey][$key]) {
                             case 'Currency': $currencyIds[] = $id;
                                 break;
@@ -444,6 +446,8 @@ class SubmissionManager extends Service {
                                 break;
                             case 'StatusEffect': $statusIds[] = $id;
                                 break;
+                            case 'Skill': $skillIds[] = $id;
+                                break;
                         }
                     }
                 } // Expanded character rewards
@@ -453,17 +457,19 @@ class SubmissionManager extends Service {
             array_unique($tableIds);
             array_unique($elementIds);
             array_unique($statusIds);
+            array_unique($skillIds);
             $currencies = Currency::whereIn('id', $currencyIds)->where('is_character_owned', 1)->get()->keyBy('id');
             $items = Item::whereIn('id', $itemIds)->get()->keyBy('id');
             $tables = LootTable::whereIn('id', $tableIds)->get()->keyBy('id');
             $statuses = StatusEffect::whereIn('id', $statusIds)->get()->keyBy('id');
             $elements = Element::whereIn('id', $elementIds)->get()->keyBy('id');
+            $skills = Skill::whereIn('id', $skillIds)->get()->keyBy('id');
 
             // We're going to remove all characters from the submission and reattach them with the updated data
             $submission->characters()->delete();
 
             // Distribute character rewards
-            foreach ($characters as $key => $c) {
+            foreach ($characters as $c) {
                 // Users might not pass in clean arrays (may contain redundant data) so we need to clean that up
                 $assets = $this->processRewards($data + [
                     'character_id' => $c->id,
@@ -472,6 +478,7 @@ class SubmissionManager extends Service {
                     'tables'       => $tables,
                     'elements'     => $elements,
                     'statuses'     => $statuses,
+                    'skills'       => $skills,
                 ], true);
 
                 if (!$assets = fillCharacterAssets($assets, $user, $c, $promptLogType, $promptData, $submission->user)) {
@@ -485,30 +492,6 @@ class SubmissionManager extends Service {
                     'data'          => getDataReadyAssets($assets),
                 ]);
 
-                // here we do da skills
-                $skillManager = new SkillManager;
-                $skills = [];
-                if (isset($data['character_is_focus']) && $data['character_is_focus'][$c->id] && $submission->prompt_id) {
-                    if (isset($data['skill_id'])) {
-                        foreach ($data['skill_id'] as $key => $skill_id) {
-                            // find skill
-                            $skill = Skill::find($skill_id);
-                            if (!$skill) {
-                                continue;
-                            }
-                            $quantity = $data['skill_quantity'][$key];
-                            // add info to $skills
-                            $skills[] = [
-                                'skill'    => $skill->id,
-                                'quantity' => $quantity,
-                            ];
-                            if (!$skillManager->creditSkill($user, $c, $skill, $quantity, 'Prompt Reward')) {
-                                throw new \Exception('Failed to credit skill.');
-                            }
-                        }
-                    }
-                    // credit exp and stats
-                }
             }
 
             // Increment user submission count if it's a prompt
@@ -663,6 +646,9 @@ class SubmissionManager extends Service {
                         case 'Element': // we don't check for quantity here
                             addAsset($assets, $data['elements'][$reward], 1);
                             break;
+                        case 'Skill': if ($data['character_rewardable_quantity'][$data['character_id']][$key]) {
+                            addAsset($assets, $data['skills'][$reward], $data['character_rewardable_quantity'][$data['character_id']][$key]);
+                        } break;
                     }
                 }
             }
@@ -849,6 +835,7 @@ class SubmissionManager extends Service {
         $itemIds = [];
         $tableIds = [];
         $elementIds = [];
+        $skillIds = [];
         if (isset($data['character_currency_id'])) {
             foreach ($data['character_currency_id'] as $c) {
                 foreach ($c as $currencyId) {
@@ -873,6 +860,8 @@ class SubmissionManager extends Service {
                             break;
                         case 'StatusEffect': $statusIds[] = $id;
                             break;
+                        case 'Skill': $skillIds[] = $id;
+                            break;
                     }
                 }
             } // Expanded character rewards
@@ -882,11 +871,13 @@ class SubmissionManager extends Service {
         array_unique($tableIds);
         array_unique($elementIds);
         array_unique($statusIds);
+        array_unique($skillIds);
         $currencies = Currency::whereIn('id', $currencyIds)->where('is_character_owned', 1)->get()->keyBy('id');
         $items = Item::whereIn('id', $itemIds)->get()->keyBy('id');
         $tables = LootTable::whereIn('id', $tableIds)->get()->keyBy('id');
         $elements = Element::whereIn('id', $elementIds)->get()->keyBy('id');
         $statuses = StatusEffect::whereIn('id', $statusIds)->get()->keyBy('id');
+        $skills = Skill::whereIn('id', $skillIds)->get()->keyBy('id');
 
         // Attach characters
         foreach ($characters as $key => $c) {
@@ -915,7 +906,14 @@ class SubmissionManager extends Service {
             }
 
             // Users might not pass in clean arrays (may contain redundant data) so we need to clean that up
-            $assets = $this->processRewards($data + ['character_id' => $c->id, 'currencies' => $currencies, 'items' => $items, 'tables' => $tables, 'elements' => $elements], true);
+            $assets = $this->processRewards($data + [
+                'character_id' => $c->id,
+                'currencies'   => $currencies,
+                'items'        => $items,
+                'tables'       => $tables,
+                'skills'       => $skills,
+                'elements'     => $elements,
+            ], true);
 
             // Now we have a clean set of assets (redundant data is gone, duplicate entries are merged)
             // so we can attach the character to the submission
@@ -924,6 +922,7 @@ class SubmissionManager extends Service {
                 'submission_id' => $submission->id,
                 'is_focus'      => isset($data['character_is_focus']) && $data['character_is_focus'][$c->id] ? $data['character_is_focus'][$c->id] : 0,
                 'data'          => getDataReadyAssets($assets),
+                'is_focus'      => isset($data['character_is_focus'][$c->id]) ? 1 : 0,
             ]);
         }
 
