@@ -8,7 +8,6 @@ use App\Models\Loot\Loot;
 use App\Models\Loot\LootTable;
 use App\Models\Model;
 use App\Models\Pet\Pet;
-use App\Models\Pet\Pet;
 use App\Models\Raffle\Raffle;
 use App\Models\Stat\Stat;
 

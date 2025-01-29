@@ -22,8 +22,6 @@ use App\Models\Level\LevelLog;
 use App\Models\Limit\UserUnlockedLimit;
 use App\Models\Notification;
 use App\Models\Pet\Pet;
-use App\Models\Pet\Pet;
-use App\Models\Pet\PetLog;
 use App\Models\Pet\PetLog;
 use App\Models\Rank\Rank;
 use App\Models\Rank\RankPower;
