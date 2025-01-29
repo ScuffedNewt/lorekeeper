@@ -15,7 +15,7 @@ class Weapon extends Model {
      */
     protected $fillable = [
         'weapon_category_id', 'name', 'has_image', 'description', 'parsed_description', 'allow_transfer',
-        'parent_id', 'currency_id', 'cost', 'is_visible',
+        'parent_id', 'is_visible',
     ];
 
     protected $appends = ['image_url'];
@@ -68,13 +68,19 @@ class Weapon extends Model {
      * Get the parent of the weapon.
      */
     public function parent() {
-        return $this->belongsTo(self::class, 'parent_id');
+        return $this->belongsTo(self::class, 'parent_id')->where('is_visible', 1);
     }
 
+    /**
+     * Get the children of the weapon.
+     */
     public function children() {
-        return $this->hasMany(self::class, 'parent_id');
+        return $this->hasMany(self::class, 'parent_id')->where('is_visible', 1);
     }
 
+    /**
+     * Get the weapon's stats.
+     */
     public function stats() {
         return $this->hasMany(WeaponStat::class);
     }
@@ -180,7 +186,7 @@ class Weapon extends Model {
      * @return string
      */
     public function getDisplayNameAttribute() {
-        return '<a href="'.$this->url.'" class="display-item">'.$this->name.'</a>';
+        return '<a href="'.$this->idUrl.'" class="display-item">'.$this->name.'</a>';
     }
 
     /**

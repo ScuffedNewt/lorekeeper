@@ -83,29 +83,6 @@
 
         <h2>Rewards</h2>
         @include('widgets._loot_select', ['loots' => $submission->rewards, 'showLootTables' => true, 'showRaffles' => true])
-        @if ($submission->prompt_id)
-            <div class="mb-3">
-                <h2>Skill Rewards</h2>
-                <div class="form-group">
-                    <div id="skillList">
-                        @foreach ($submission->prompt->skills as $skill)
-                            <div class="d-flex mb-2">
-                                {!! Form::select('skill_id[]', $skills, $skill->skill_id, ['class' => 'form-control mr-2 skill-select original', 'placeholder' => 'Select Skill']) !!}
-                                {!! Form::text('skill_quantity[]', $skill->quantity, ['class' => 'form-control mr-2', 'placeholder' => 'Amount of level']) !!}
-                                <a href="#" class="remove-skill btn btn-danger mb-2">×</a>
-                            </div>
-                        @endforeach
-                    </div>
-                    <div><a href="#" class="btn btn-primary" id="add-skill">Add Skill Reward</a></div>
-                </div>
-
-                <hr />
-            </div>
-
-            <div class="mb-3">
-                @include('home._prompt', ['prompt' => $submission->prompt, 'staffView' => true])
-            </div>
-        @endif
 
         <h2>Characters</h2>
         <p>Only focus characters will receive skill rewards. Exp and stat point rewards are on a per-character basis.</p>
@@ -184,12 +161,6 @@
 
         {!! Form::close() !!}
 
-        <div class="skill-row hide mb-2">
-            {!! Form::select('skill_id[]', $skills, null, ['class' => 'form-control mr-2 skill-select', 'placeholder' => 'Select Skill']) !!}
-            {!! Form::text('skill_quantity[]', null, ['class' => 'form-control mr-2', 'placeholder' => 'Amount of level']) !!}
-            <a href="#" class="remove-skill btn btn-danger mb-2">×</a>
-        </div>
-
         <div id="characterComponents" class="hide">
             <div class="submission-character mb-3 card">
                 <div class="card-body">
@@ -239,7 +210,7 @@
                 <tr class="character-reward-row">
                     @if ($expanded_rewards)
                         <td>
-                            {!! Form::select('character_rewardable_type[]', ['Item' => 'Item', 'Currency' => 'Currency', 'LootTable' => 'Loot Table', 'Exp' => 'Exp', 'Points' => 'Stat Points', 'Element' => 'Element', 'StatusEffect' => 'Status Effect'], null, [
+                            {!! Form::select('character_rewardable_type[]', ['Item' => 'Item', 'Currency' => 'Currency', 'LootTable' => 'Loot Table', 'Exp' => 'Exp', 'Points' => 'Stat Points', 'Element' => 'Element', 'StatusEffect' => 'Status Effect', 'Skill' => 'Skill'], null, [
                                 'class' => 'form-control character-rewardable-type',
                                 'placeholder' => 'Select Reward Type',
                             ]) !!}
@@ -251,6 +222,7 @@
                             <div class="character-claymores hide">{!! Form::number('character_claymores_id[]', 1, ['class' => 'form-control character-claymores-id']) !!}</div>
                             <div class="character-elements hide">{!! Form::select('character_rewardable_id[]', $elements, 0, ['class' => 'form-control character-element-id', 'placeholder' => 'Select Element']) !!}</div>
                             <div class="character-statuses hide">{!! Form::select('character_rewardable_id[]', $statuses, 0, ['class' => 'form-control character-status-id', 'placeholder' => 'Select Status Effect']) !!}</div>
+                            <div class="character-skills hide">{!! Form::select('character_rewardable_id[]', $skills, 0, ['class' => 'form-control character-skill-id', 'placeholder' => 'Select Skill']) !!}</div>
                         </td>
                     @else
                         <td class="lootDivs">

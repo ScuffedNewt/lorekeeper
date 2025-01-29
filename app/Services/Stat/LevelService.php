@@ -3,7 +3,6 @@
 namespace App\Services\Stat;
 
 use App\Models\Level\Level;
-use App\Models\Level\LevelRequirement;
 use App\Models\Level\LevelReward;
 use App\Services\Service;
 use Illuminate\Support\Arr;
@@ -29,7 +28,6 @@ class LevelService extends Service {
             ]);
 
             $this->populateRewards(Arr::only($data, ['rewardable_type', 'rewardable_id', 'quantity']), $level);
-            $this->populateLimits($level, Arr::only($data, ['limit_type', 'limit_id', 'limit_quantity']));
 
             return $this->commitReturn($level);
         } catch (\Exception $e) {
@@ -56,7 +54,6 @@ class LevelService extends Service {
             ]);
 
             $this->populateRewards(Arr::only($data, ['rewardable_type', 'rewardable_id', 'quantity']), $level);
-            $this->populateLimits($level, Arr::only($data, ['limit_type', 'limit_id', 'limit_quantity']));
 
             return $this->commitReturn($level);
         } catch (\Exception $e) {
@@ -86,9 +83,10 @@ class LevelService extends Service {
                     throw new \Exception('At least one user has already reached this level.');
                 }
             }
-            if (DB::table('prompts')->where('level_req', '>=', $level->level)->exists()) {
-                throw new \Exception('A prompt currently has this level as a requirement.');
-            }
+            // TODO
+            // if (DB::table('prompts')->where('level_req', '>=', $level->level)->exists()) {
+            //     throw new \Exception('A prompt currently has this level as a requirement.');
+            // }
             $level->rewards()->delete();
             $level->delete();
 
@@ -125,27 +123,6 @@ class LevelService extends Service {
                     'rewardable_type' => $type,
                     'rewardable_id'   => $data['rewardable_id'][$key],
                     'quantity'        => $data['quantity'][$key],
-                ]);
-            }
-        }
-    }
-
-    /**
-     * Processes user input for creating/updating level requirements.
-     *
-     * @param array $data
-     * @param Level $level
-     */
-    private function populateLimits($level, $data) {
-        $level->limits()->delete();
-
-        if (isset($data['limit_type'])) {
-            foreach ($data['limit_type'] as $key => $type) {
-                LevelRequirement::create([
-                    'level_id'        => $level->id,
-                    'limit_type'      => $type,
-                    'limit_id'        => $data['limit_id'][$key],
-                    'quantity'        => $data['limit_quantity'][$key],
                 ]);
             }
         }

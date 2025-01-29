@@ -51,6 +51,13 @@ class LimitService extends Service {
                 flash('Deleted '.count($limits).' old limits.')->success();
             }
 
+            if (!isset($data['is_unlocked'])) {
+                $data['is_unlocked'] = 'no';
+            }
+            if (!isset($data['is_auto_unlocked'])) {
+                $data['is_auto_unlocked'] = 'no';
+            }
+
             if (isset($data['limit_type'])) {
                 foreach ($data['limit_type'] as $key => $type) {
                     $limit = new Limit([

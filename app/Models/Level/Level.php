@@ -53,13 +53,6 @@ class Level extends Model {
     }
 
     /**
-     * Get the limits attached to this level.
-     */
-    public function limits() {
-        return $this->hasMany(LevelRequirement::class, 'level_id');
-    }
-
-    /**
      * Get the next level.
      */
     public function nextLevel() {

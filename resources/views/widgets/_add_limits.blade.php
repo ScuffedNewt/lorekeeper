@@ -1,6 +1,4 @@
 @php
-    // $limits = \App\Models\Limit\DynamicLimit::all();
-
     // map the keys and the 'name' value of config('lorekeeper.limits.limit_types')
     $limitTypes = collect(config('lorekeeper.limits.limit_types'))->map(function ($value, $key) {
         return $value['name'];
@@ -11,10 +9,20 @@
     $items = \App\Models\Item\Item::orderBy('name')->pluck('name', 'id')->toArray();
     $currencies = \App\Models\Currency\Currency::orderBy('name')->pluck('name', 'id')->toArray();
     $dynamics = \App\Models\Limit\DynamicLimit::orderBy('name')->pluck('name', 'id')->toArray();
+    $levels = \App\Models\Level\Level::orderBy('level')->get()->map(function ($level) {
+        return $level->level . ' (' . $level->level_type . ')';
+    })->pluck('name', 'id')->toArray();
+    $stats = \App\Models\Stat\Stat::orderBy('name')->pluck('name', 'id')->toArray();
+    $classes = \App\Models\Character\CharacterClass::orderBy('name')->pluck('name', 'id')->toArray();
+    $elements = \App\Models\Element\Element::orderBy('name')->pluck('name', 'id')->toArray();
+
+    if (!isset($showUnlocked)) {
+        $showUnlocked = true;
+    }
 @endphp
 
 <div class="card p-4 mb-3 mt-3" id="limit-card">
-    <h3>Limits</h3>
+    <h3>{{ isset($customHeader) ? $customHeader : 'Limits' }}</h3>
 
     <p>
         You can add requirements to this object by clicking "Add Limit" & selecting a requirement from the dropdown below.
@@ -33,28 +41,30 @@
             @if ($limits)
                 <h5>Limits for {!! $limits->first()->object->displayName !!}</h5>
             @endif
-            <div class="row">
-                <div class="col-md form-group">
-                    {!! Form::label('is_unlocked', 'Is Unlocked?', ['class' => 'form-label font-weight-bold']) !!}
-                    <p>
-                        If this is set to "No", the object will continue to be locked until all requirements are met, every time the user attempts to interact with it.
-                        <br />
-                        If this is set to "Yes", the object will be unlocked for the user to interact with indefinitely after the requirements are met once. This option is good for one-time unlocks such as shops, locations, certain prompts, etc.
-                    </p>
-                    {!! Form::select('is_unlocked', ['yes' => 'Yes', 'no' => 'No'], $limits?->first()->is_unlocked ? 'yes' : 'no', ['class' => 'form-control']) !!}
+            @if ($showUnlocked)
+                <div class="row">
+                    <div class="col-md form-group">
+                        {!! Form::label('is_unlocked', 'Is Unlocked?', ['class' => 'form-label font-weight-bold']) !!}
+                        <p>
+                            If this is set to "No", the object will continue to be locked until all requirements are met, every time the user attempts to interact with it.
+                            <br />
+                            If this is set to "Yes", the object will be unlocked for the user to interact with indefinitely after the requirements are met once. This option is good for one-time unlocks such as shops, locations, certain prompts, etc.
+                        </p>
+                        {!! Form::select('is_unlocked', ['yes' => 'Yes', 'no' => 'No'], $limits?->first()->is_unlocked ? 'yes' : 'no', ['class' => 'form-control']) !!}
+                    </div>
+                    <div class="col-md form-group border-left">
+                        {!! Form::label('is_auto_unlocked', 'Automatically Unlock?', ['class' => 'form-label font-weight-bold']) !!} {!! add_help("This only affects objects with 'Is Unlocked?' set to 'Yes'.") !!}
+                        <p>
+                            If this is set to "No", the user must manually unlock the object by interacting with it - ex. clicking on the "Unlock" button.
+                            <br />
+                            If this is set to "Yes", the object will be automatically unlocked when the user attempts to access them - ex. when a user enters a shop.
+                            <br />
+                            This setting is good for preventing users from being debited before being certain they want to interact with the object.
+                        </p>
+                        {!! Form::select('is_auto_unlocked', ['yes' => 'Yes', 'no' => 'No'], $limits?->first()->is_auto_unlocked ? 'yes' : 'no', ['class' => 'form-control']) !!}
+                    </div>
                 </div>
-                <div class="col-md form-group border-left">
-                    {!! Form::label('is_auto_unlocked', 'Automatically Unlock?', ['class' => 'form-label font-weight-bold']) !!} {!! add_help("This only affects objects with 'Is Unlocked?' set to 'Yes'.") !!}
-                    <p>
-                        If this is set to "No", the user must manually unlock the object by interacting with it - ex. clicking on the "Unlock" button.
-                        <br />
-                        If this is set to "Yes", the object will be automatically unlocked when the user attempts to access them - ex. when a user enters a shop.
-                        <br />
-                        This setting is good for preventing users from being debited before being certain they want to interact with the object.
-                    </p>
-                    {!! Form::select('is_auto_unlocked', ['yes' => 'Yes', 'no' => 'No'], $limits?->first()->is_auto_unlocked ? 'yes' : 'no', ['class' => 'form-control']) !!}
-                </div>
-            </div>
+            @endif
             @if ($limits)
                 @foreach ($limits as $limit)
                     <div class="row">
@@ -72,9 +82,17 @@
                                 {!! Form::select('limit_id[]', $currencies, $limit->limit_id, ['class' => 'form-control limit currencies', 'placeholder' => 'Select Limit']) !!}
                             @elseif ($limit->limit_type == 'dynamic')
                                 {!! Form::select('limit_id[]', $dynamics, $limit->limit_id, ['class' => 'form-control limit dynamics', 'placeholder' => 'Select Limit']) !!}
+                            @elseif ($limit->limit_type == 'level')
+                                {!! Form::select('limit_id[]', $levels, $limit->limit_id, ['class' => 'form-control limit levels', 'placeholder' => 'Select Limit']) !!}
+                            @elseif ($limit->limit_type == 'stat')
+                                {!! Form::select('limit_id[]', $stats, $limit->limit_id, ['class' => 'form-control limit stats', 'placeholder' => 'Select Limit']) !!}
+                            @elseif ($limit->limit_type == 'class')
+                                {!! Form::select('limit_id[]', $classes, $limit->limit_id, ['class' => 'form-control limit classes', 'placeholder' => 'Select Limit']) !!}
+                            @elseif ($limit->limit_type == 'element')
+                                {!! Form::select('limit_id[]', $elements, $limit->limit_id, ['class' => 'form-control limit elements', 'placeholder' => 'Select Limit']) !!}
                             @endif
                         </div>
-                        <div class="col-md-4 quantity {{ $limit->limit_type == 'dynamic' ? 'hide' : '' }}">
+                        <div class="col-md-4 quantity {{ in_array($limit->limit_type, ['dynamic', 'element', 'class']) ? 'hide' : '' }}">
                             <div class="form-group">
                                 {!! Form::label('Quantity') !!}
                                 {!! Form::number('quantity[]', $limit->quantity, ['class' => 'form-control', 'placeholder' => 'Enter Quantity', 'min' => 0, 'step' => 1]) !!}
@@ -84,8 +102,8 @@
                                 {!! Form::select('debit[]', ['yes' => 'Debit', 'no' => 'Don\'t Debit'], $limit->debit ? 'yes' : 'no', ['class' => 'form-control']) !!}
                             </div>
                         </div>
-                        <div class="col-md-1 d-flex align-items-center">
-                            <div class="btn btn-danger remove-limit mx-auto">X</div>
+                        <div class="col-md-{{ in_array($limit->limit_type, ['dynamic', 'element', 'class']) ? '5 d-flex align-items-center mt-2' : '1 d-flex align-items-center' }}">
+                            <div class="btn btn-danger remove-limit {{ in_array($limit->limit_type, ['dynamic', 'element', 'class']) ? '' : 'mx-auto' }}">X</div>
                         </div>
                     </div>
                 @endforeach
@@ -130,6 +148,10 @@
     {!! Form::select('limit_id[]', $items, null, ['class' => 'form-control limit items', 'placeholder' => 'Select Limit']) !!}
     {!! Form::select('limit_id[]', $currencies, null, ['class' => 'form-control limit currencies', 'placeholder' => 'Select Limit']) !!}
     {!! Form::select('limit_id[]', $dynamics, null, ['class' => 'form-control limit dynamics', 'placeholder' => 'Select Limit']) !!}
+    {!! Form::select('limit_id[]', $levels, null, ['class' => 'form-control limit levels', 'placeholder' => 'Select Limit']) !!}
+    {!! Form::select('limit_id[]', $stats, null, ['class' => 'form-control limit stats', 'placeholder' => 'Select Limit']) !!}
+    {!! Form::select('limit_id[]', $classes, null, ['class' => 'form-control limit classes', 'placeholder' => 'Select Limit']) !!}
+    {!! Form::select('limit_id[]', $elements, null, ['class' => 'form-control limit elements', 'placeholder' => 'Select Limit']) !!}
 </div>
 
 <script>
@@ -139,6 +161,10 @@
         let $itemSelect = $('#rows').find('.items');
         let $currencySelect = $('#rows').find('.currencies');
         let $dynamicSelect = $('#rows').find('.dynamics');
+        let $levelSelect = $('#rows').find('.levels');
+        let $statSelect = $('#rows').find('.stats');
+        let $classSelect = $('#rows').find('.classes');
+        let $elementSelect = $('#rows').find('.elements');
 
         $('.limits-selectize').selectize();
 
@@ -161,6 +187,10 @@
             else if (val == 'item') $clone = $itemSelect.clone();
             else if (val == 'currency') $clone = $currencySelect.clone();
             else if (val == 'dynamic') $clone = $dynamicSelect.clone();
+            else if (val == 'level') $clone = $levelSelect.clone();
+            else if (val == 'stat') $clone = $statSelect.clone();
+            else if (val == 'class') $clone = $classSelect.clone();
+            else if (val == 'element') $clone = $elementSelect.clone();
 
             $limit.html('');
             $limit.append($limitLabel.clone());
@@ -174,7 +204,7 @@
                 $(this).parent().parent().parent().find('.quantity').removeClass('hide');
             } else {
                 $(this).parent().parent().parent().find('.debit').addClass('hide');
-                if (val == 'dynamic') {
+                if (val == 'dynamic' || val == 'class') {
                     $(this).parent().parent().parent().find('.quantity').addClass('hide');
                 } else {
                     $(this).parent().parent().parent().find('.quantity').removeClass('hide');
@@ -197,6 +227,10 @@
                 else if (val == 'item') $clone = $itemSelect.clone();
                 else if (val == 'currency') $clone = $currencySelect.clone();
                 else if (val == 'dynamic') $clone = $dynamicSelect.clone();
+                else if (val == 'level') $clone = $levelSelect.clone();
+                else if (val == 'stat') $clone = $statSelect.clone();
+                else if (val == 'class') $clone = $classSelect.clone();
+                else if (val == 'element') $clone = $elementSelect.clone();
 
                 $cell.html('');
                 $cell.append($limitLabel.clone());
@@ -208,7 +242,7 @@
                     $(this).parent().parent().find('.quantity').removeClass('hide');
                 } else {
                     $(this).parent().parent().find('.debit').addClass('hide');
-                    if (val == 'dynamic') {
+                    if (val == 'dynamic' || val == 'class') {
                         $(this).parent().parent().find('.quantity').addClass('hide');
                     } else {
                         $(this).parent().parent().find('.quantity').removeClass('hide');

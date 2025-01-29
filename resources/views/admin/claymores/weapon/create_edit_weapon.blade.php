@@ -44,22 +44,10 @@
         <div class="col-md">
             <div class="form-group">
                 {!! Form::label('Weapon Parent (Optional)') !!}
+                @if ($weapon->id)
+                    <div class="text-muted">You can set upgrade costs when the parent weapon is set.</div>
+                @endif
                 {!! Form::select('parent_id', $weapons, $weapon->parent_id, ['class' => 'form-control']) !!}
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md">
-            <div class="form-group">
-                {!! Form::label('Weapon->Parent Currency Type (Optional)') !!} {!! add_help('If you want this weapon to be able to turn into its parent.') !!}
-                {!! Form::select('currency_id', $currencies, $weapon->currency_id, ['class' => 'form-control']) !!}
-            </div>
-        </div>
-        <div class="col-md">
-            <div class="form-group">
-                {!! Form::label('Weapon->Parent Currency Cost (Optional)') !!} {!! add_help('This should be a number.') !!}
-                {!! Form::number('cost', $weapon->cost, ['class' => 'form-control']) !!}
             </div>
         </div>
     </div>
@@ -87,28 +75,41 @@
     {!! Form::close() !!}
 
     @if ($weapon->id)
-        @if ($stats)
-            {!! Form::open(['url' => 'admin/weapons/stats/' . $weapon->id]) !!}
-            <h3>Stats {!! add_help('Leave empty to have no effect on stat.') !!}</h3>
-            @foreach ($stats as $stat)
-                @php
-                    if ($weapon->stats->where('stat_id', $stat->id)->first()) {
-                        $base = $weapon->stats->where('stat_id', $stat->id)->first()->count;
-                    } else {
-                        $base = null;
-                    }
-                @endphp
-                <div class="form-group">
-                    {!! Form::label($stat->name) !!}
-                    {!! Form::number('stats[' . $stat->id . ']', $base, ['class' => 'form-control']) !!}
+        @if ($stats->count())
+            {!! Form::open(['url' => 'admin/stats/create']) !!}
+                <h3>Stats {!! add_help('Leave empty to have no effect on stat.') !!}</h3>
+
+                @foreach ($stats as $stat)
+                    @php
+                        if ($weapon->stats->where('stat_id', $stat->id)->first()) {
+                            $base = $weapon->stats->where('stat_id', $stat->id)->first()->count;
+                        } else {
+                            $base = null;
+                        }
+                    @endphp
+                    <div class="form-group">
+                        {!! Form::label($stat->name) !!}
+                        {!! Form::number('stats[' . $stat->id . ']', $base, ['class' => 'form-control']) !!}
+                    </div>
+                @endforeach
+
+                <div class="text-right">
+                    {!! Form::submit('Edit Stats', ['class' => 'btn btn-primary']) !!}
                 </div>
-            @endforeach
-            <div class="text-right">
-                {!! Form::submit('Edit Stats', ['class' => 'btn btn-primary']) !!}
-            </div>
 
             {!! Form::close() !!}
+        @else
+            <div class="alert alert-warning mt-3">
+                <strong>Warning:</strong> No stats have been created yet. You can create stats <a href="{{ url('admin/stats/create') }}">here</a>.
+            </div>
         @endif
+
+        @include('widgets._add_limits', [
+            'object' => $weapon,
+            'info' => 'Limits are used to upgrade weapons.',
+            'showUnlocked' => false,
+            'customHeader' => 'Weapon Upgrade Limits',
+        ])
 
         @include('widgets._add_typing', ['object' => $weapon, 'info' => 'Typings are used to determine effectiveness in battles.'])
 

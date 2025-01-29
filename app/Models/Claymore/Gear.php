@@ -15,7 +15,7 @@ class Gear extends Model {
      */
     protected $fillable = [
         'gear_category_id', 'name', 'has_image', 'description', 'parsed_description', 'allow_transfer',
-        'parent_id', 'currency_id', 'cost', 'is_visible',
+        'parent_id', 'is_visible',
     ];
 
     protected $appends = ['image_url'];
@@ -186,7 +186,7 @@ class Gear extends Model {
      * @return string
      */
     public function getDisplayNameAttribute() {
-        return '<a href="'.$this->url.'" class="display-item">'.$this->name.'</a>';
+        return '<a href="'.$this->idUrl.'" class="display-item">'.$this->name.'</a>';
     }
 
     /**

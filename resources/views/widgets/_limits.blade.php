@@ -3,6 +3,9 @@
         return $value['name'];
     });
     $limits = \App\Models\Limit\Limit::hasLimits($object) ? \App\Models\Limit\Limit::getLimits($object) : null;
+    if (!isset($hideUnlock)) {
+        $hideUnlock = false;
+    }
 @endphp
 
 @if ($limits)
@@ -37,7 +40,7 @@
                 @endforeach
             </tbody>
         </table>
-        @if (!$limits->first()->isUnlocked(Auth::user() ?? null) && !$limits->first()->is_auto_unlocked)
+        @if (!$hideUnlock && !$limits->first()->isUnlocked(Auth::user() ?? null) && !$limits->first()->is_auto_unlocked)
             <div class="alert alert-secondary p-0 mt-2 mb-0">
                 {!! Form::open(['url' => 'limits/unlock/' . $limits->first()->id]) !!}
                 {!! Form::submit('Unlock', ['class' => 'btn btn-sm btn-secondary']) !!}

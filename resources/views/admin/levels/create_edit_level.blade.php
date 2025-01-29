@@ -41,9 +41,6 @@
         {!! Form::text('description', $level->description, ['class' => 'form-control wysiwyg']) !!}
     </div>
 
-    <h3>Requirements</h3>
-    @include('widgets._level_limit_select', ['loots' => $level->limits])
-    <br>
     <h3>Rewards</h3>
     <p>
         Rewards are awarded when the {{ $type }} levels up.
@@ -53,6 +50,17 @@
     </p>
     @include('widgets._loot_select', ['loots' => $level->rewards, 'showLootTables' => true, 'showRaffles' => true])
 
+    <hr />
+
+    @if ($level->id)
+        @include('widgets._add_limits', ['object' => $level])
+    @else
+        <h3>Limits</h3>
+        <div class="alert alert-info">
+            <strong>Save the level first</strong> to add limits.
+        </div>
+    @endif
+
     <div class="text-right">
         {!! Form::submit($level->id ? 'Edit' : 'Create', ['class' => 'btn btn-primary']) !!}
     </div>
@@ -60,13 +68,11 @@
     {!! Form::close() !!}
 
     @include('widgets._loot_select_row', ['showLootTables' => true, 'showRaffles' => true])
-    @include('widgets._level_limit_row')
 @endsection
 
 @section('scripts')
     @parent
     @include('js._loot_js', ['showLootTables' => true, 'showRaffles' => true])
-    @include('js._level_limit_js')
     <script>
         $(document).ready(function() {
 

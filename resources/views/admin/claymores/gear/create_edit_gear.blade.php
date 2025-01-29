@@ -44,22 +44,10 @@
         <div class="col-md">
             <div class="form-group">
                 {!! Form::label('Gear Parent (Optional)') !!}
+                @if ($gear->id)
+                    <div class="text-muted">You can set upgrade costs when the parent gear is set.</div>
+                @endif
                 {!! Form::select('parent_id', $gears, $gear->parent_id, ['class' => 'form-control']) !!}
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md">
-            <div class="form-group">
-                {!! Form::label('Gear->Parent Currency Type (Optional)') !!} {!! add_help('If you want this gear to be able to turn into its parent.') !!}
-                {!! Form::select('currency_id', $currencies, $gear->currency_id, ['class' => 'form-control']) !!}
-            </div>
-        </div>
-        <div class="col-md">
-            <div class="form-group">
-                {!! Form::label('Gear->Parent Currency Cost (Optional)') !!} {!! add_help('This should be a number.') !!}
-                {!! Form::number('cost', $gear->cost, ['class' => 'form-control']) !!}
             </div>
         </div>
     </div>
@@ -76,7 +64,7 @@
         </div>
         <div class="col-md form-group">
             {!! Form::checkbox('is_visible', 1, $gear->id ? $gear->is_visible : 1, ['class' => 'form-check-input', 'data-toggle' => 'toggle']) !!}
-            {!! Form::label('is_visible', 'Is Visible', ['class' => 'form-check-label ml-3']) !!} {!! add_help('If this is turned off, this gear will not be visible on world pages.') !!}
+            {!! Form::label('is_visible', 'Is Visible', ['class' => 'form-check-label ml-3']) !!} {!! add_help('If this is turned off, this gear category will not be visible on world pages.') !!}
         </div>
     </div>
 
@@ -87,35 +75,55 @@
     {!! Form::close() !!}
 
     @if ($gear->id)
-        @if ($stats)
-            {!! Form::open(['url' => 'admin/gear/stats/' . $gear->id]) !!}
-            <h3>Stats {!! add_help('Leave empty to have no effect on stat.') !!}</h3>
-            @foreach ($stats as $stat)
-                @php
-                    if ($gear->stats->where('stat_id', $stat->id)->first()) {
-                        $base = $gear->stats->where('stat_id', $stat->id)->first()->count;
-                    } else {
-                        $base = null;
-                    }
-                @endphp
-                <div class="form-group">
-                    {!! Form::label($stat->name) !!}
-                    {!! Form::number('stats[' . $stat->id . ']', $base, ['class' => 'form-control m-1']) !!}
+        @if ($stats->count())
+            {!! Form::open(['url' => 'admin/stats/create']) !!}
+                <h3>Stats {!! add_help('Leave empty to have no effect on stat.') !!}</h3>
+
+                @foreach ($stats as $stat)
+                    @php
+                        if ($gear->stats->where('stat_id', $stat->id)->first()) {
+                            $base = $gear->stats->where('stat_id', $stat->id)->first()->count;
+                        } else {
+                            $base = null;
+                        }
+                    @endphp
+                    <div class="form-group">
+                        {!! Form::label($stat->name) !!}
+                        {!! Form::number('stats[' . $stat->id . ']', $base, ['class' => 'form-control']) !!}
+                    </div>
+                @endforeach
+
+                <div class="text-right">
+                    {!! Form::submit('Edit Stats', ['class' => 'btn btn-primary']) !!}
                 </div>
-            @endforeach
-            <div class="text-right">
-                {!! Form::submit('Edit Stats', ['class' => 'btn btn-primary']) !!}
-            </div>
 
             {!! Form::close() !!}
+        @else
+            <div class="alert alert-warning mt-3">
+                <strong>Warning:</strong> No stats have been created yet. You can create stats <a href="{{ url('admin/stats/create') }}">here</a>.
+            </div>
         @endif
+
+        @include('widgets._add_limits', [
+            'object' => $gear,
+            'info' => 'Limits are used to upgrade gears.',
+            'showUnlocked' => false,
+            'customHeader' => 'Gear Upgrade Limits',
+        ])
 
         @include('widgets._add_typing', ['object' => $gear, 'info' => 'Typings are used to determine effectiveness in battles.'])
 
         <h3>Preview</h3>
         <div class="card mb-3">
             <div class="card-body">
-                @include('world._claymore_entry', ['item' => $gear, 'imageUrl' => $gear->imageUrl, 'name' => $gear->displayName, 'description' => $gear->description, 'searchUrl' => $gear->searchUrl, 'visible' => $gear->is_visible])
+                @include('world._claymore_entry', [
+                    'item' => $gear,
+                    'imageUrl' => $gear->imageUrl,
+                    'name' => $gear->displayName,
+                    'description' => $gear->description,
+                    'searchUrl' => $gear->searchUrl,
+                    'visible' => $gear->is_visible,
+                ])
             </div>
         </div>
     @endif

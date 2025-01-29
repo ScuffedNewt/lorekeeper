@@ -1,7 +1,11 @@
 {{-- for use with gear or weapons --}}
 <div class="row world-entry">
     @if ($imageUrl)
-        <div class="col-md-3 world-entry-image"><a href="{{ $imageUrl }}" data-lightbox="entry" data-title="{{ $name }}"><img src="{{ $imageUrl }}" class="world-entry-image" /></a></div>
+        <div class="col-md-3 world-entry-image">
+            <a href="{{ $imageUrl }}" data-lightbox="entry" data-title="{{ $name }}">
+                <img src="{{ $imageUrl }}" class="rounded world-entry-image" />
+            </a>
+        </div>
     @endif
     <div class="{{ $imageUrl ? 'col-md-9' : 'col-12' }}">
         @if (isset($edit))
@@ -20,54 +24,42 @@
             @endif
         </h3>
         <div class="world-entry-text">
-            @if ($item)
-                <h5>@include('world._typing', ['object' => $item])</h5>
-                <div class="row">
-                    <div class="col-6">
-                        <h5>Parent</h5>
-                        <div class="row">
-                            @if ($item->parent_id && $item->parent)
-                                <div class="col-md">
-                                    {!! $item->parent->displayName !!}
-                                    @if ($item->cost && $item->currency_id <= 0)
-                                        <small>
-                                            (Upgrade costs {{ $item->cost }}
-                                            @if ($item->currency_id != 0)
-                                                <img src="{!! $item->currency->iconurl !!}">
-                                                {!! $item->currency->displayName !!})
-                                            @elseif($item->currency_id == 0)
-                                                stat points.)
-                                            @endif
-                                        </small>
-                                    @else
-                                        <small>(No upgrade cost set.)</small>
-                                    @endif
-                                </div>
-                            @else
-                                <div class="col-md">No Parent.</div>
-                            @endif
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <h5>Children</h5>
-                        <div class="row">
-                            @if ($item->children->count())
-                                @foreach ($item->children as $child)
-                                    <div class="col-md">
-                                        {!! $child->displayName !!}
-                                    </div>
-                                @endforeach
-                            @else
-                                <div class="col-md">No Children.</div>
-                            @endif
-                        </div>
-                    </div>
-                </div>
+            <h5>@include('world._typing', ['object' => $item])</h5>
+            <p>{!! $description !!}</p>
+            @if ($item->parent || $item->children->count() || $item->stats->count())
+                <hr />
             @endif
-            <p>
-                {!! $description !!}
-            </p>
-            @if (count($item->stats ?? []))
+            @if ($item->parent)
+                <h5 class="alert alert-secondary">Upgrade of: {!! $item->parent->displayName !!}</h5>
+            @endif
+            @if ($item->children->count())
+                <h5 class="alert alert-info">Upgrades:</h5>
+                @foreach ($item->children as $child)
+                    <div class="card">
+                        <h5 class="card-header inventory-header">
+                            <a class="inventory-collapse-toggle collapse-toggle collapsed" href="#drop-collapse" data-toggle="collapse">
+                                @if ($child->has_image)
+                                    <img src="{{ $child->imageUrl }}" class="rounded world-entry-image" style="max-height: 50px;" />
+                                @endif
+                                {!! $child->name !!}
+                            </a>
+                        </h5>
+                        <div class="collapse" id="drop-collapse">
+                            <div class="card-body">
+                                @if (count(getLimits($child)))
+                                    @include('widgets._limits', [
+                                        'object' => $child,
+                                        'hideUnlock' => true,
+                                    ])
+                                @else
+                                    No upgrade cost set.
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            @endif
+            @if ($item->stats?->count())
                 <h4>Stats</h4>
                 <table class="table table-sm">
                     <thead>

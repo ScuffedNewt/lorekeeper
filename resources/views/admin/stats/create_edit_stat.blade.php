@@ -32,9 +32,13 @@
         </div>
         <div class="col-md">
             <div class="form-group">
-                {!! Form::label('Stat Icon (Font-awesome code; optional)') !!}
-                <div class="col-1 align-self-center text-right p-0">
-                    <i id="siconitem" class="{{ $stat->icon }}"></i>
+                <div class="row">
+                    <div class="col-8">
+                        {!! Form::label('Stat Icon (Font-awesome code; optional)') !!}
+                    </div>
+                    <div class="col-4">
+                        <i id="siconitem" class="{{ $stat->icon }}"></i>
+                    </div>
                 </div>
                 {!! Form::text('icon', $stat->icon, ['class' => 'form-control', 'id' => 'icon']) !!}
             </div>

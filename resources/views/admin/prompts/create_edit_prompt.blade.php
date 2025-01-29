@@ -89,15 +89,6 @@
     </div>
 
     <div class="form-group">
-        {!! Form::checkbox('level_check', 1, $prompt->level_req ? 1 : 0, ['class' => 'is-level-class form-check-input', 'data-toggle' => 'toggle']) !!}
-        {!! Form::label('level_check', 'Should this prompt have a level requirement?', ['class' => 'form-check-label ml-3']) !!}
-    </div>
-    <div class="level-form-group" style="display: none">
-        {!! Form::number('level_req', $prompt->level_req ? $prompt->level_req : 1, ['class' => 'form-control mb-1', 'min' => 1]) !!}
-    </div>
-    <!------------------------------------->
-
-    <div class="form-group">
         {!! Form::label('Hide Submissions (Optional)') !!} {!! add_help('Hide submissions to this prompt until the prompt ends, or forever. <strong>Hiding until the prompt ends requires a set end time.</strong>') !!}
         {!! Form::select('hide_submissions', [0 => 'Submissions Visible After Approval', 1 => 'Hide Submissions Until Prompt Ends', 2 => 'Hide Submissions Always'], $prompt->hide_submissions, ['class' => 'form-control']) !!}
     </div>
@@ -105,37 +96,14 @@
     <h3>Rewards</h3>
     <p>Rewards are credited on a per-user basis. Mods are able to modify the specific rewards granted at approval time.</p>
     <p>You can add loot tables containing any kind of currencies (both user- and character-attached), but be sure to keep track of which are being distributed! Character-only currencies cannot be given to users.</p>
-    <p><b>Note that any EXP or Point rewards added here will be creditted directly to the user. If you want to reward EXP or Points to a specific character, you must add them during approval.</b></p>
+    <p><b>Note that any EXP or Point rewards added here will be creditted directly to the user. If you want to reward EXP or Points to a specific character, you must add them during approval directly to the character.</b></p>
     @include('widgets._loot_select', ['loots' => $prompt->rewards, 'showLootTables' => true, 'showRaffles' => true])
-
-    <hr class="w-70">
-
-    <h3>Skill Rewards</h3>
-    <p>Skills are rewarded to focus characters. These are the default rewards, however, they can be modified on approval.</p>
-    <div class="form-group">
-        <div id="skillList">
-            @foreach ($prompt->skills as $skill)
-                <div class="d-flex mb-2">
-                    {!! Form::select('skill_id[]', $skills, $skill->skill_id, ['class' => 'form-control mr-2 skill-select original', 'placeholder' => 'Select Skill']) !!}
-                    {!! Form::text('skill_quantity[]', $skill->quantity, ['class' => 'form-control mr-2', 'placeholder' => 'Amount of level']) !!}
-                    <a href="#" class="remove-skill btn btn-danger mb-2">×</a>
-                </div>
-            @endforeach
-        </div>
-        <div><a href="#" class="btn btn-primary" id="add-skill">Add Skill Reward</a></div>
-    </div>
 
     <div class="text-right">
         {!! Form::submit($prompt->id ? 'Edit' : 'Create', ['class' => 'btn btn-primary']) !!}
     </div>
 
     {!! Form::close() !!}
-
-    <div class="skill-row hide mb-2">
-        {!! Form::select('skill_id[]', $skills, null, ['class' => 'form-control mr-2 skill-select', 'placeholder' => 'Select Skill']) !!}
-        {!! Form::text('skill_quantity[]', null, ['class' => 'form-control mr-2', 'placeholder' => 'Amount of level']) !!}
-        <a href="#" class="remove-skill btn btn-danger mb-2">×</a>
-    </div>
 
     @include('widgets._loot_select_row', ['showLootTables' => true, 'showRaffles' => true])
 
@@ -157,33 +125,6 @@
     @include('widgets._datetimepicker_js')
     <script>
         $(document).ready(function() {
-
-            $('.original.skill-select').selectize();
-            $('#add-skill').on('click', function(e) {
-                e.preventDefault();
-                addSkillRow();
-            });
-            $('.remove-skill').on('click', function(e) {
-                e.preventDefault();
-                removeSkillRow($(this));
-            })
-
-            function addSkillRow() {
-                var $clone = $('.skill-row').clone();
-                $('#skillList').append($clone);
-                $clone.removeClass('hide skill-row');
-                $clone.addClass('d-flex');
-                $clone.find('.remove-skill').on('click', function(e) {
-                    e.preventDefault();
-                    removeSkillRow($(this));
-                })
-                $clone.find('.skill-select').selectize();
-            }
-
-            function removeSkillRow($trigger) {
-                $trigger.parent().remove();
-            }
-
             $('.delete-prompt-button').on('click', function(e) {
                 e.preventDefault();
                 loadModal("{{ url('admin/data/prompts/delete') }}/{{ $prompt->id }}", 'Delete Prompt');

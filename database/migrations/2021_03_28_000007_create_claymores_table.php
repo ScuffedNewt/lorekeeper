@@ -15,7 +15,7 @@ class CreateClaymoresTable extends Migration {
         Schema::create('character_classes', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
-            $table->text('description');
+            $table->text('description')->nullable()->default(null);
             $table->boolean('has_image')->default(0);
         });
 
