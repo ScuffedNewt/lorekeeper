@@ -357,7 +357,7 @@ class SubmissionManager extends Service {
                         foreach ($inventoryManager->errors()->getMessages()['error'] as $error) {
                             flash($error)->error();
                         }
-                        
+
                         throw new \Exception('Failed to create log for item stack.');
                     }
                 }

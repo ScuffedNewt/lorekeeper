@@ -16,7 +16,7 @@ class DegradableService extends Service {
         return [
             'activities' => [
                 'Prompts', 'Design Update',
-            ]
+            ],
         ];
     }
 
@@ -51,11 +51,10 @@ class DegradableService extends Service {
         DB::beginTransaction();
 
         try {
-
             $itemData = [
-                'uses' => $data['uses'],
-                'usage_rate' => $data['usage_rate'],
-                'consumption_type' => $data['consumption_type']
+                'uses'             => $data['uses'],
+                'usage_rate'       => $data['usage_rate'],
+                'consumption_type' => $data['consumption_type'],
             ];
 
             $tag->update(['data' => $itemData]);

@@ -566,6 +566,7 @@ class InventoryManager extends Service {
      * @param array                                $data
      * @param \App\Models\Item\UserItem            $stack
      * @param mixed                                $quantity
+     * @param mixed|null                           $activity
      *
      * @return bool
      */
@@ -573,14 +574,13 @@ class InventoryManager extends Service {
         DB::beginTransaction();
 
         try {
-
             $degradable = $stack->item->tag('degradable');
             if ($activity && $degradable) {
                 // Check if the item is degradable and has a usage rate for the activity.
-                $usageRate = isset($degradable->data['usage_rate'][$activity]) ? $degradable->data['usage_rate'][$activity] : null;
-                $consumptionType = isset($degradable->data['consumption_type'][$activity]) ? $degradable->data['consumption_type'][$activity] : null;
+                $usageRate = $degradable->data['usage_rate'][$activity] ?? null;
+                $consumptionType = $degradable->data['consumption_type'][$activity] ?? null;
                 if ($usageRate || (!$usageRate && ($consumptionType && $consumptionType != 'consume'))) {
-                    $uses = isset($stack->data['uses']) ? $stack->data['uses'] : $degradable->data['uses'];
+                    $uses = $stack->data['uses'] ?? $degradable->data['uses'];
 
                     if ($uses - $quantity < 0) {
                         throw new \Exception('This item ('.$stack->item->name.') does not have enough uses left for this activity.');
@@ -602,7 +602,7 @@ class InventoryManager extends Service {
                 }
             } else {
                 $stack->count -= $quantity;
-                $stack->save();    
+                $stack->save();
             }
 
             if ($type && !$this->createLog($owner ? $owner->id : null, $owner ? $owner->logType : null, null, null, $stack->id, $type, $data['data'], $stack->item->id, $quantity)) {
