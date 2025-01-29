@@ -2,15 +2,12 @@
 
 namespace App\Models;
 
-use Config;
-use Settings;
-
+use App\Facades\Settings;
 use App\Models\Character\Character;
+use App\Models\User\User;
+use App\Models\User\UserItem;
 
-use App\Models\Model;
-
-class Trade extends Model
-{
+class Trade extends Model {
     /**
      * The attributes that are mass assignable.
      *
@@ -19,7 +16,7 @@ class Trade extends Model
     protected $fillable = [
         'sender_id', 'recipient_id', 'comments',
         'status', 'is_sender_confirmed', 'is_recipient_confirmed', 'is_sender_trade_confirmed', 'is_recipient_trade_confirmed',
-        'is_approved', 'reason', 'data'
+        'is_approved', 'reason', 'data',
     ];
 
     /**
@@ -30,6 +27,15 @@ class Trade extends Model
     protected $table = 'trades';
 
     /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'data' => 'array',
+    ];
+
+    /**
      * Whether the model contains timestamps to be saved and updated.
      *
      * @var string
@@ -37,7 +43,7 @@ class Trade extends Model
     public $timestamps = true;
 
     /**********************************************************************************************
-    
+
         RELATIONS
 
     **********************************************************************************************/
@@ -45,40 +51,36 @@ class Trade extends Model
     /**
      * Get the user who initiated the trade.
      */
-    public function sender() 
-    {
-        return $this->belongsTo('App\Models\User\User', 'sender_id');
+    public function sender() {
+        return $this->belongsTo(User::class, 'sender_id');
     }
 
     /**
      * Get the user who received the trade.
      */
-    public function recipient() 
-    {
-        return $this->belongsTo('App\Models\User\User', 'recipient_id');
+    public function recipient() {
+        return $this->belongsTo(User::class, 'recipient_id');
     }
 
     /**
      * Get the staff member who approved the character transfer.
      */
-    public function staff() 
-    {
-        return $this->belongsTo('App\Models\User\User', 'staff_id');
+    public function staff() {
+        return $this->belongsTo(User::class, 'staff_id');
     }
 
     /**********************************************************************************************
-    
+
         SCOPES
 
     **********************************************************************************************/
 
-    public function scopeCompleted($query)
-    {
+    public function scopeCompleted($query) {
         return $query->where('status', 'Completed')->orWhere('status', 'Rejected');
     }
 
     /**********************************************************************************************
-    
+
         ACCESSORS
 
     **********************************************************************************************/
@@ -88,12 +90,15 @@ class Trade extends Model
      *
      * @return bool
      */
-    public function getIsActiveAttribute()
-    {
-        if($this->status == 'Pending') return true;
+    public function getIsActiveAttribute() {
+        if ($this->status == 'Pending') {
+            return true;
+        }
 
-        if(Settings::get('open_transfers_queue')) {
-            if($this->status == 'Accepted' && $this->is_approved == 0) return true;
+        if (Settings::get('open_transfers_queue')) {
+            if ($this->status == 'Accepted' && $this->is_approved == 0) {
+                return true;
+            }
         }
 
         return false;
@@ -104,20 +109,12 @@ class Trade extends Model
      *
      * @return bool
      */
-    public function getIsConfirmableAttribute()
-    {
-        if($this->is_sender_confirmed && $this->is_recipient_confirmed) return true;
-        return false;
-    }
+    public function getIsConfirmableAttribute() {
+        if ($this->is_sender_confirmed && $this->is_recipient_confirmed) {
+            return true;
+        }
 
-    /**
-     * Get the data attribute as an associative array.
-     *
-     * @return array
-     */
-    public function getDataAttribute()
-    {
-        return json_decode($this->attributes['data'], true);
+        return false;
     }
 
     /**
@@ -125,63 +122,88 @@ class Trade extends Model
      *
      * @return string
      */
-    public function getUrlAttribute()
-    {
+    public function getUrlAttribute() {
         return url('trades/'.$this->id);
     }
 
+    /**
+     * Gets the stacks of the trade keyed by sender and recipient.
+     *
+     * @return array
+     */
+    public function getStacksAttribute() {
+        $stacks = [];
+        foreach ($this->data as $side => $assets) {
+            if (isset($assets['user_items'])) {
+                $user_items = UserItem::with('item')->find(array_keys($assets['user_items']));
+                $items = $user_items->map(function ($user_item) use ($assets) {
+                    $user_item['quantity'] = $assets['user_items'][$user_item->id];
+
+                    return $user_item;
+                });
+                $stacks[$side] = $items->groupBy('item_id');
+            }
+        }
+
+        return $stacks;
+    }
+
     /**********************************************************************************************
-    
+
         OTHER FUNCTIONS
 
     **********************************************************************************************/
-    
+
     /**
      * Gets all characters involved in the trade.
      *
      * @return \Illuminate\Support\Collection
      */
-    public function getCharacterData()
-    {
+    public function getCharacterData() {
         return Character::with('user')->whereIn('id', array_merge($this->getCharacters($this->sender), $this->getCharacters($this->recipient)))->get();
     }
 
     /**
      * Gets the inventory of the given user for selection.
      *
-     * @param  \App\Models\User\User $user
+     * @param User $user
+     *
      * @return array
      */
-    public function getInventory($user)
-    {
+    public function getInventory($user) {
         $type = $this->sender_id == $user->id ? 'sender' : 'recipient';
         $inventory = $this->data && isset($this->data[$type]) && isset($this->data[$type]['user_items']) ? $this->data[$type]['user_items'] : [];
+
         return $inventory;
     }
 
     /**
      * Gets the characters of the given user for selection.
      *
-     * @param  \App\Models\User\User $user
+     * @param User $user
+     *
      * @return array
      */
-    public function getCharacters($user)
-    {
+    public function getCharacters($user) {
         $type = $this->sender_id == $user->id ? 'sender' : 'recipient';
         $characters = $this->data && isset($this->data[$type]) && isset($this->data[$type]['characters']) ? $this->data[$type]['characters'] : [];
-        if($characters) $characters = array_keys($characters);
+        if ($characters) {
+            $characters = array_keys($characters);
+        }
+
         return $characters;
     }
 
     /**
      * Gets the currencies of the given user for selection.
      *
-     * @param  \App\Models\User\User $user
+     * @param User $user
+     *
      * @return array
      */
-    public function getCurrencies($user)
-    {
+    public function getCurrencies($user) {
         $type = $this->sender_id == $user->id ? 'sender' : 'recipient';
+
         return $this->data && isset($this->data[$type]) && isset($this->data[$type]['currencies']) ? $this->data[$type]['currencies'] : [];
     }
 }
