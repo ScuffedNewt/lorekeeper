@@ -37,7 +37,7 @@ class UserStatController extends Controller {
     public function postLevel(LevelManager $service) {
         $user = Auth::user();
         if ($service->level($user)) {
-            flash('Successfully levelled up!')->success();
+            flash('Successfully leveled up!')->success();
         } else {
             foreach ($service->errors()->getMessages()['error'] as $error) {
                 flash($error)->error();

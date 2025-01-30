@@ -133,6 +133,14 @@ class WeaponController extends Controller {
         return redirect()->to('admin/weapons');
     }
 
+    /**
+     * Edits a weapon's stats.
+     * 
+     * @param App\Services\WeaponService $service
+     * @param int                        $id
+     * 
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function postEditWeaponStats(Request $request, WeaponService $service, $id) {
         if ($id && $service->editStats($request->only(['stats']), $id)) {
             flash('Weapon stats edited successfully.')->success();

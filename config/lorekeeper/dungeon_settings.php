@@ -13,6 +13,9 @@ return [
     'regen_health_amount'           => 10,
     'regen_health_time'             => 60, // in minutes, will run at every hour + minutes * n
 
+    // resets character's stats on transfer TODO
+    'reset_stats_on_transfer' => true,
+
     // by default, these should be the stat ids
     'stats' => [
         'health'  => [

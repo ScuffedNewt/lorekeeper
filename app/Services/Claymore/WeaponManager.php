@@ -11,6 +11,7 @@ use App\Models\User\UserWeapon;
 use App\Services\CurrencyManager;
 use App\Services\Service;
 use App\Services\Stat\StatManager;
+use App\Services\LimitManager;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
@@ -327,34 +328,42 @@ class WeaponManager extends Service {
      *
      * @return UserWeapon
      */
-    public function upgradeWeapon($weapon, $isStaff = false) {
+    public function upgradeWeapon($weapon, $child_id, $isStaff = false) {
         DB::beginTransaction();
 
         try {
+
+            $childWeapon = Weapon::find($child_id);
+            if (!$childWeapon) {
+                throw new \Exception('Invalid weapon selected.');
+            }
+
+            if ($childWeapon->parent_id != $weapon->weapon_id) {
+                throw new \Exception('Invalid weapon selected.');
+            }
+
             if (!$isStaff) {
-                if ($weapon->weapon->currency_id != 0) {
-                    $service = new CurrencyManager;
+                if ($weapon->user_id != Auth::user()->id && !$isStaff) {
+                    throw new \Exception('You do not own this weapon.');
+                }
 
-                    $currency = Currency::find($weapon->weapon->currency_id);
-                    if (!$currency) {
-                        throw new \Exception('Invalid currency set by admin.');
-                    }
+                $limitData = [
+                    'character_ids' => $weapon->character_id ? [$weapon->character_id] : [],
+                ];
 
-                    $user = User::find($weapon->user_id);
-                    if (!$service->debitCurrency($user, null, 'Weapon Upgrade', 'Upgraded '.$weapon->weapon->displayName.' to '.$weapon->weapon->parent->displayName.'', $currency, $weapon->weapon->cost)) {
-                        throw new \Exception('Could not debit currency.');
-                    }
-                } elseif ($weapon->weapon->currency_id == 0) {
-                    $service = new StatManager;
-
-                    $user = User::find($weapon->user_id);
-                    if (!$service->debitStat($user, null, 'Weapon Upgrade', 'Upgraded '.$weapon->weapon->displayName.' to '.$weapon->weapon->parent->displayName.'', $weapon->weapon->cost)) {
-                        throw new \Exception('Could not debit points.');
+                if (count(getLimits($childWeapon))) {
+                    $limitService = new LimitManager;
+                    if (!$limitService->checkLimits($childWeapon, false, $limitData, 'Weapon Upgrade', 'Upgraded '.$weapon->weapon->displayName.' to '.$childWeapon->displayName)) {
+                        foreach($limitService->errors()->getMessages()['error'] as $error) {
+                            flash($error)->error();
+                        }
+        
+                        throw new \Exception('Failed to upgrade weapon.');
                     }
                 }
             }
 
-            $weapon->weapon_id = $weapon->weapon->parent_id;
+            $weapon->weapon_id = $child_id;
             $weapon->save();
 
             return $this->commitReturn(true);

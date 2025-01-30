@@ -66,6 +66,15 @@ class Level extends Model {
     **********************************************************************************************/
 
     /**
+     * Displays the model's name, linked to its encyclopedia page.
+     *
+     * @return string
+     */
+    public function getDisplayNameAttribute() {
+        return '<a href="'.url('world/levels'). '/' . strtolower($this->level_type).'" class="display-prompt">'.ucfirst($this->level_type).' Level '.$this->level.'</a>';
+    }
+
+    /**
      * Gets the admin edit URL.
      *
      * @return string

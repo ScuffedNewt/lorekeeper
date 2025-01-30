@@ -56,23 +56,29 @@
                                 @endif
                             </div>
                             @if ($gear->parent)
-                                <h5 class="alert alert-secondary">Upgrade of: {!! $gear->parent->displayName !!}</h5>
+                                <h5 class="alert alert-secondary">
+                                    Upgrade of:
+                                    @if ($gear->parent->has_image)
+                                        <img src="{{ $gear->parent->imageUrl }}" class="rounded world-entry-image" style="max-height: 50px;" />
+                                    @endif
+                                    {!! $gear->parent->displayName !!}
+                                </h5>
                             @endif
                             {!! $description !!}
                             @if ($gear->children->count())
                                 <h5 class="alert alert-info">Upgrades:</h5>
                                 @foreach ($gear->children as $child)
                                     <div class="card">
-                                        <h5 class="card-header inventory-header">
-                                            <a class="inventory-collapse-toggle collapse-toggle collapsed" href="#drop-collapse" data-toggle="collapse">
+                                        <h5 class="card-header border-bottom-0 inventory-header">
+                                            <a class="inventory-collapse-toggle collapse-toggle collapsed" href="#{{ $child->id }}-drop-collapse" data-toggle="collapse">
                                                 @if ($child->has_image)
                                                     <img src="{{ $child->imageUrl }}" class="rounded world-entry-image" style="max-height: 50px;" />
                                                 @endif
                                                 {!! $child->name !!}
                                             </a>
                                         </h5>
-                                        <div class="collapse" id="drop-collapse">
-                                            <div class="card-body">
+                                        <div class="collapse" id="{{ $child->id }}-drop-collapse">
+                                            <div class="card-body py-0">
                                                 @if (count(getLimits($child)))
                                                     @include('widgets._limits', [
                                                         'object' => $child,

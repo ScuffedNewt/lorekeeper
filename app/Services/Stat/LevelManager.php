@@ -7,6 +7,7 @@ use App\Models\Character\CharacterCurrency;
 use App\Models\Character\CharacterItem;
 use App\Models\Level\Level;
 use App\Models\User\User;
+use App\Services\LimitManager;
 use App\Services\Service;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -40,20 +41,14 @@ class LevelManager extends Service {
                 throw new \Exception('Error debiting exp.');
             }
 
-            foreach ($next->limits as $limit) {
-                $rewardType = $limit->limit_type;
-                $check = null;
-                switch ($rewardType) {
-                    case 'Item':
-                        $check = CharacterItem::where('item_id', $limit->reward->id)->where('character_id', $character->id)->where('count', '>', 0)->first();
-                        break;
-                    case 'Currency':
-                        $check = CharacterCurrency::where('currency_id', $limit->reward->id)->where('character_id', $character->id)->where('count', '>', 0)->first();
-                        break;
-                }
-
-                if (!$check) {
-                    throw new \Exception('You require '.$limit->reward->name.' to level up.');
+            if (count(getLimits($next))) {
+                $limitService = new LimitManager;
+                if (!$limitService->checkLimits($next, false, null, 'Level Up', 'Used to level up ' . $recipient->displayName . ' to level ' . $next->level)) {
+                    foreach($limitService->errors()->getMessages()['error'] as $error) {
+                        flash($error)->error();
+                    }
+    
+                    throw new \Exception('Failed to level up due to limit restrictions.');
                 }
             }
 

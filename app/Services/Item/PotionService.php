@@ -123,11 +123,8 @@ class PotionService extends Service {
                             $characterStat,
                             $character,
                             $quantity,
-                            true,
-                            [
-                                'type' => 'Potion Used',
-                                'data' => $stack->item->name.' used on '.$character->name,
-                            ]
+                            'Potion Used',
+                            $stack->item->name.' used on '.$character->name
                         )) {
                             foreach ($service->errors()->getMessages()['error'] as $error) {
                                 flash($error)->error();

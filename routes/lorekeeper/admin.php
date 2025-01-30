@@ -673,14 +673,14 @@ Route::group(['prefix' => 'gear', 'namespace' => 'Claymores', 'middleware' => 'p
 // WEAPONS
 Route::group(['prefix' => 'weapons', 'namespace' => 'Claymores', 'middleware' => 'power:edit_claymores'], function () {
     Route::get('/', 'WeaponController@getWeaponIndex');
-    Route::get('/create', 'WeaponController@getCreateWeapon');
-    Route::post('/create', 'WeaponController@postCreateEditWeapon');
-    Route::get('/edit/{id}', 'WeaponController@getEditWeapon');
-    Route::post('/edit/{id}', 'WeaponController@postCreateEditWeapon');
+    Route::get('create', 'WeaponController@getCreateWeapon');
+    Route::post('create', 'WeaponController@postCreateEditWeapon');
+    Route::get('edit/{id}', 'WeaponController@getEditWeapon');
+    Route::post('edit/{id}', 'WeaponController@postCreateEditWeapon');
     Route::get('delete/{id}', 'WeaponController@getDeleteWeapon');
     Route::post('delete/{id}', 'WeaponController@postDeleteWeapon');
 
-    Route::post('/stats/{id}', 'WeaponController@postEditWeaponStats');
+    Route::post('stats/{id}', 'WeaponController@postEditWeaponStats');
 
     // categories
     Route::get('weapon-categories', 'WeaponController@getWeaponCategoryIndex');

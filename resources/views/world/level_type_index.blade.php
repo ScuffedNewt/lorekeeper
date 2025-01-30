@@ -28,31 +28,14 @@
                 <hr class="my-3">
                 <div class="row">
                     <div class="col-md-6">
-                        <h3>Requires</h3>
-                        @if ($level->limits->count())
-                            <p>The following are required to reach this level:</p>
-                            <table class="table table-sm">
-                                <thead>
-                                    <tr>
-                                        <th width="70%">Requires</th>
-                                        <th width="30%">Amount</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($level->limits as $limit)
-                                        <tr>
-                                            <td>{!! $limit->reward ? $limit->reward->displayName : $limit->rewardable_type !!}</td>
-                                            <td>{{ $limit->quantity }}</td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        @else
-                            <p>No requirements.</p>
-                        @endif
+                        @include('widgets._limits', [
+                            'object' => $level,
+                            'hideUnlock' => true,
+                            'showNoLimits' => true,
+                        ])
                     </div>
                     <div class="col-md-6">
-                        <h3>Rewards</h3>
+                        <h4>Rewards</h4>
                         @if ($level->rewards->count())
                             <p>You will receive the following rewards when you reach this level:</p>
                             <table class="table table-sm">

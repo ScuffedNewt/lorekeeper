@@ -110,7 +110,7 @@ class CharacterStatController extends Controller {
         }
 
         if ($service->level($character)) {
-            flash('Successfully levelled up!')->success();
+            flash('Successfully leveled up!')->success();
         } else {
             foreach ($service->errors()->getMessages()['error'] as $error) {
                 flash($error)->error();
@@ -134,7 +134,7 @@ class CharacterStatController extends Controller {
         $isStaff = Auth::user()->id != $character->user_id && Auth::user()->hasPower('manage_characters');
         $stat = Stat::find($stat_id);
         if ($service->levelCharacterStat($character, $stat, $isStaff)) {
-            flash('Characters stat levelled successfully!')->success();
+            flash('Characters stat leveled successfully!')->success();
         } else {
             foreach ($service->errors()->getMessages()['error'] as $error) {
                 flash($error)->error();

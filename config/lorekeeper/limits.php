@@ -23,9 +23,13 @@ return [
             'name'        => 'Stats',
             'description' => 'Stat limits require a character to have a certain amount of a specific stat.',
         ],
-        'level' => [
-            'name'        => 'Levels',
-            'description' => 'Level limits require a character OR user to have a certain level.',
+        'character_level' => [
+            'name'        => 'Character Levels',
+            'description' => 'Level limits require a character to have a certain level.',
+        ],
+        'user_level' => [
+            'name'        => 'User Levels',
+            'description' => 'Level limits require a user to have a certain level.',
         ],
         'class' => [
             'name'        => 'Classes',

@@ -9,9 +9,12 @@
     $items = \App\Models\Item\Item::orderBy('name')->pluck('name', 'id')->toArray();
     $currencies = \App\Models\Currency\Currency::orderBy('name')->pluck('name', 'id')->toArray();
     $dynamics = \App\Models\Limit\DynamicLimit::orderBy('name')->pluck('name', 'id')->toArray();
-    $levels = \App\Models\Level\Level::orderBy('level')->get()->map(function ($level) {
-        return $level->level . ' (' . $level->level_type . ')';
-    })->pluck('name', 'id')->toArray();
+    $characterLevels = \App\Models\Level\Level::where('level_type', 'Character')->orderBy('level')->get()->mapWithKeys(function ($level) {
+        return [$level->id => 'Level ' . $level->level];
+    });
+    $userLevels = \App\Models\Level\Level::where('level_type', 'User')->orderBy('level')->get()->mapWithKeys(function ($level) {
+        return [$level->id => 'Level ' . $level->level];
+    })->toArray();
     $stats = \App\Models\Stat\Stat::orderBy('name')->pluck('name', 'id')->toArray();
     $classes = \App\Models\Character\CharacterClass::orderBy('name')->pluck('name', 'id')->toArray();
     $elements = \App\Models\Element\Element::orderBy('name')->pluck('name', 'id')->toArray();
@@ -82,8 +85,10 @@
                                 {!! Form::select('limit_id[]', $currencies, $limit->limit_id, ['class' => 'form-control limit currencies', 'placeholder' => 'Select Limit']) !!}
                             @elseif ($limit->limit_type == 'dynamic')
                                 {!! Form::select('limit_id[]', $dynamics, $limit->limit_id, ['class' => 'form-control limit dynamics', 'placeholder' => 'Select Limit']) !!}
-                            @elseif ($limit->limit_type == 'level')
-                                {!! Form::select('limit_id[]', $levels, $limit->limit_id, ['class' => 'form-control limit levels', 'placeholder' => 'Select Limit']) !!}
+                            @elseif ($limit->limit_type == 'character_level')
+                                {!! Form::select('limit_id[]', $characterLevels, $limit->limit_id, ['class' => 'form-control limit character-levels', 'placeholder' => 'Select Limit']) !!}
+                            @elseif ($limit->limit_type == 'user_level')
+                                {!! Form::select('limit_id[]', $userLevels, $limit->limit_id, ['class' => 'form-control limit user-levels', 'placeholder' => 'Select Limit']) !!}
                             @elseif ($limit->limit_type == 'stat')
                                 {!! Form::select('limit_id[]', $stats, $limit->limit_id, ['class' => 'form-control limit stats', 'placeholder' => 'Select Limit']) !!}
                             @elseif ($limit->limit_type == 'class')
@@ -92,18 +97,18 @@
                                 {!! Form::select('limit_id[]', $elements, $limit->limit_id, ['class' => 'form-control limit elements', 'placeholder' => 'Select Limit']) !!}
                             @endif
                         </div>
-                        <div class="col-md-4 quantity {{ in_array($limit->limit_type, ['dynamic', 'element', 'class']) ? 'hide' : '' }}">
+                        <div class="col-md-4 quantity {{ in_array($limit->limit_type, ['dynamic', 'element', 'user_level', 'character_level']) ? 'hide' : '' }}">
                             <div class="form-group">
                                 {!! Form::label('Quantity') !!}
                                 {!! Form::number('quantity[]', $limit->quantity, ['class' => 'form-control', 'placeholder' => 'Enter Quantity', 'min' => 0, 'step' => 1]) !!}
                             </div>
-                            <div class="form-group debit {{ $limit->limit_type == 'currency' || $limit->limit_type == 'item' ? '' : 'hide' }}">
+                            <div class="form-group debit {{ in_array($limit->limit_type, ['currency', 'item', 'stat']) ? '' : 'hide' }}">
                                 {!! Form::label('Debit') !!}
                                 {!! Form::select('debit[]', ['yes' => 'Debit', 'no' => 'Don\'t Debit'], $limit->debit ? 'yes' : 'no', ['class' => 'form-control']) !!}
                             </div>
                         </div>
-                        <div class="col-md-{{ in_array($limit->limit_type, ['dynamic', 'element', 'class']) ? '5 d-flex align-items-center mt-2' : '1 d-flex align-items-center' }}">
-                            <div class="btn btn-danger remove-limit {{ in_array($limit->limit_type, ['dynamic', 'element', 'class']) ? '' : 'mx-auto' }}">X</div>
+                        <div class="col-md-{{ in_array($limit->limit_type, ['dynamic', 'element', 'user_level', 'character_level']) ? '5 d-flex align-items-center mt-2' : '1 mt-2 d-flex align-items-center' }}">
+                            <div class="btn btn-danger remove-limit {{ in_array($limit->limit_type, ['dynamic', 'element']) ? '' : 'mx-auto' }}">X</div>
                         </div>
                     </div>
                 @endforeach
@@ -148,7 +153,8 @@
     {!! Form::select('limit_id[]', $items, null, ['class' => 'form-control limit items', 'placeholder' => 'Select Limit']) !!}
     {!! Form::select('limit_id[]', $currencies, null, ['class' => 'form-control limit currencies', 'placeholder' => 'Select Limit']) !!}
     {!! Form::select('limit_id[]', $dynamics, null, ['class' => 'form-control limit dynamics', 'placeholder' => 'Select Limit']) !!}
-    {!! Form::select('limit_id[]', $levels, null, ['class' => 'form-control limit levels', 'placeholder' => 'Select Limit']) !!}
+    {!! Form::select('limit_id[]', $characterLevels, null, ['class' => 'form-control limit character-levels', 'placeholder' => 'Select Limit']) !!}
+    {!! Form::select('limit_id[]', $userLevels, null, ['class' => 'form-control limit user-levels', 'placeholder' => 'Select Limit']) !!}
     {!! Form::select('limit_id[]', $stats, null, ['class' => 'form-control limit stats', 'placeholder' => 'Select Limit']) !!}
     {!! Form::select('limit_id[]', $classes, null, ['class' => 'form-control limit classes', 'placeholder' => 'Select Limit']) !!}
     {!! Form::select('limit_id[]', $elements, null, ['class' => 'form-control limit elements', 'placeholder' => 'Select Limit']) !!}
@@ -161,7 +167,8 @@
         let $itemSelect = $('#rows').find('.items');
         let $currencySelect = $('#rows').find('.currencies');
         let $dynamicSelect = $('#rows').find('.dynamics');
-        let $levelSelect = $('#rows').find('.levels');
+        let $characterLevelSelect = $('#rows').find('.character-levels');
+        let $userLevelSelect = $('#rows').find('.user-levels');
         let $statSelect = $('#rows').find('.stats');
         let $classSelect = $('#rows').find('.classes');
         let $elementSelect = $('#rows').find('.elements');
@@ -187,7 +194,8 @@
             else if (val == 'item') $clone = $itemSelect.clone();
             else if (val == 'currency') $clone = $currencySelect.clone();
             else if (val == 'dynamic') $clone = $dynamicSelect.clone();
-            else if (val == 'level') $clone = $levelSelect.clone();
+            else if (val == 'character_level') $clone = $characterLevelSelect.clone();
+            else if (val == 'user_level') $clone = $userLevelSelect.clone();
             else if (val == 'stat') $clone = $statSelect.clone();
             else if (val == 'class') $clone = $classSelect.clone();
             else if (val == 'element') $clone = $elementSelect.clone();
@@ -199,12 +207,12 @@
             // remove hide on quantity
             $(this).parent().parent().find('.quantity').removeClass('hide');
             // remove hide on debit if type is currency or item, otherwise hide it
-            if (val == 'currency' || val == 'item') {
+            if (val == 'currency' || val == 'item' || val == 'stat') {
                 $(this).parent().parent().parent().find('.debit').removeClass('hide');
                 $(this).parent().parent().parent().find('.quantity').removeClass('hide');
             } else {
                 $(this).parent().parent().parent().find('.debit').addClass('hide');
-                if (val == 'dynamic' || val == 'class') {
+                if (val == 'dynamic' || val == 'element' || val == 'user_level' || val == 'character_level') {
                     $(this).parent().parent().parent().find('.quantity').addClass('hide');
                 } else {
                     $(this).parent().parent().parent().find('.quantity').removeClass('hide');
@@ -227,7 +235,8 @@
                 else if (val == 'item') $clone = $itemSelect.clone();
                 else if (val == 'currency') $clone = $currencySelect.clone();
                 else if (val == 'dynamic') $clone = $dynamicSelect.clone();
-                else if (val == 'level') $clone = $levelSelect.clone();
+                else if (val == 'character_level') $clone = $characterLevelSelect.clone();
+                else if (val == 'user_level') $clone = $userLevelSelect.clone();
                 else if (val == 'stat') $clone = $statSelect.clone();
                 else if (val == 'class') $clone = $classSelect.clone();
                 else if (val == 'element') $clone = $elementSelect.clone();
@@ -237,12 +246,12 @@
                 $cell.append($clone);
 
                 $(this).parent().parent().find('.quantity').removeClass('hide');
-                if (val == 'currency' || val == 'item') {
+                if (val == 'currency' || val == 'item' || val == 'stat') {
                     $(this).parent().parent().find('.debit').removeClass('hide');
                     $(this).parent().parent().find('.quantity').removeClass('hide');
                 } else {
                     $(this).parent().parent().find('.debit').addClass('hide');
-                    if (val == 'dynamic' || val == 'class') {
+                    if (val == 'dynamic' || val == 'element' || val == 'user_level' || val == 'character_level') {
                         $(this).parent().parent().find('.quantity').addClass('hide');
                     } else {
                         $(this).parent().parent().find('.quantity').removeClass('hide');

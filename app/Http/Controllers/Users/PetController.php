@@ -76,7 +76,7 @@ class PetController extends Controller {
 
         return view('home._pet_stack', [
             'stack'             => $stack,
-            'chara'             => $chara,
+            'characters'        => $stack->user->characters()->get()->pluck('fullName', 'id')->toArray(),
             'user'              => Auth::user(),
             'userOptions'       => ['' => 'Select User'] + User::visible()->where('id', '!=', $stack ? $stack->user_id : 0)->orderBy('name')->get()->pluck('verified_name', 'id')->toArray(),
             'readOnly'          => $readOnly,

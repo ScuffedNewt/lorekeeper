@@ -16,6 +16,10 @@ return new class extends Migration
         Schema::table('prompts', function (Blueprint $table) {
             $table->dropColumn('level_req');
         });
+
+        Schema::table('count_log', function (Blueprint $table) {
+            $table->text('log')->change();
+        });
     }
 
     /**

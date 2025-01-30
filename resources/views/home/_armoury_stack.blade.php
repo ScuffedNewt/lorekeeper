@@ -55,10 +55,10 @@
                         </a>
                         {!! Form::open(['url' => 'armoury/' . $type . '/attach/' . $stack->id, 'id' => 'attachForm', 'class' => 'collapse']) !!}
                         <p>Attach this equipment to a character you own! They'll appear on the character's page and any stat bonuses will automatically be applied.</p>
-                        <p>Gears can be detached.</p>
+                        <p>Equipment can be detached.</p>
                         <div class="form-group">
                             {!! Form::label('id', 'Slug') !!} {!! add_help('Insert your character\'s slug.') !!}
-                            {!! Form::select('id', $chara, null, ['class' => 'form-control']) !!}
+                            {!! Form::select('id', $characters, null, ['class' => 'form-control']) !!}
                         </div>
                         <div class="text-right">
                             {!! Form::submit('Attach', ['class' => 'btn btn-primary']) !!}
@@ -68,27 +68,46 @@
                         <a class="card-title h5">You cannot currently attach / detach this equipment! It is under cooldown.</a>
                     @endif
                 </li>
-                @if ($stack->equipment->parent_id && $stack->equipment->cost && $stack->equipment->currency_id <= 0)
+                @if ($stack->equipment->children->count() > 0)
                     <li class="list-group-item">
                         <a class="card-title h5 collapse-title" data-toggle="collapse" href="#upgradeForm">
                             @if ($stack->user_id != $user->id)
                                 [ADMIN]
                             @endif Upgrade Equipment
                         </a>
-                        {!! Form::open(['url' => 'armoury/' . $type . '/upgrade/' . $stack->id, 'id' => 'upgradeForm', 'class' => 'collapse']) !!}
-                        <p class="alert alert-info my-2">This equipment can be upgraded to {!! $stack->equipment->parent->displayName !!}!</p>
-                        <p>Upgrade costs {{ $stack->equipment->cost }}
-                            @if ($stack->equipment->currency_id != 0)
-                                <img src="{!! $stack->equipment->currency->iconurl !!}"> {!! $stack->equipment->currency->displayName !!}.
-                            @else
-                                stat points.
-                            @endif
-                            The upgrade cannot be reversed.
-                        </p>
-                        <div class="text-right">
-                            {!! Form::submit('Upgrade', ['class' => 'btn btn-primary']) !!}
+                        <div class="collapse pt-2" id="upgradeForm">
+                            @foreach ($stack->equipment->children as $child)
+                                <div class="card {{ $loop->last ? '' : 'mb-2' }}">
+                                    <div class="h5 card-header border-bottom-0" data-toggle="collapse" data-target="#upgrade-{{$child->id}}"
+                                        role="button" aria-expanded="false" aria-controls="upgrade-{{$child->id}}">
+                                        Upgrade to
+                                        @if ($child->has_image)
+                                            <img src="{{ $child->imageUrl }}" class="img-fluid" style="max-height: 20px;" />
+                                        @endif
+                                        {{ $child->name }}
+                                    </div>
+                                    <div class="collapse" id="upgrade-{{$child->id}}">
+                                        <div class="card-body">
+                                            <div class="text-center">
+                                                @include('widgets._limits', [
+                                                    'object'     => $child,
+                                                    'compact'    => true,
+                                                    'hideUnlock' => true,
+                                                ])
+                                            </div>
+                                            <span class="text-danger">
+                                                The upgrade cannot be reversed.
+                                            </span>
+                                            <div class="text-right">
+                                                {!! Form::open(['url' => 'armoury/' . $type . '/upgrade/' . $stack->id . '/' . $child->id]) !!}
+                                                {!! Form::button('Upgrade to ' . $child->name, ['class' => 'btn btn-primary', 'type' => 'submit']) !!}
+                                                {!! Form::close() !!}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
                         </div>
-                        {!! Form::close() !!}
                     </li>
                 @endif
                 @if ($stack->isTransferrable || $user->hasPower('edit_inventories'))

@@ -76,7 +76,7 @@
 
     @if ($weapon->id)
         @if ($stats->count())
-            {!! Form::open(['url' => 'admin/stats/create']) !!}
+            {!! Form::open(['url' => 'admin/weapons/stats/'.$weapon->id]) !!}
                 <h3>Stats {!! add_help('Leave empty to have no effect on stat.') !!}</h3>
 
                 @foreach ($stats as $stat)

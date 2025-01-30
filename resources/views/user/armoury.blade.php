@@ -25,7 +25,9 @@
                                 <div class="mb-1">
                                     <a href="#" class="weapon-stack">
                                         @if ($weapon->pivot->has_image)
-                                        <img src="{{ url('images/data/user-weapons/' . $weapon->pivot->id . '-image.png') }}">@else<img src="{{ $weapon->imageUrl }}" />
+                                            <img class="rounded" src="{{ $weapon->getStackImageUrl($weapon->pivot->id) }}" data-toggle="tooltip" title="{{ $weapon->name }}" />
+                                        @elseif($weapon->imageUrl)
+                                            <img class="rounded" src="{{ $weapon->imageUrl }}" data-toggle="tooltip" title="{{ $weapon->name }}" />
                                         @endif
                                     </a>
                                 </div>
@@ -82,40 +84,71 @@
     <h3>Latest Activity</h3>
 
     <h5>Gear</h5>
-    <div class="row ml-md-2 mb-4">
-        <div class="d-flex row flex-wrap col-12 mt-1 pt-1 px-0 ubt-bottom">
-            <div class="col-6 col-md-2 font-weight-bold">Sender</div>
-            <div class="col-6 col-md-2 font-weight-bold">Recipient</div>
-            <div class="col-6 col-md-2 font-weight-bold">Gear</div>
-            <div class="col-6 col-md-4 font-weight-bold">Log</div>
-            <div class="col-6 col-md-2 font-weight-bold">Date</div>
+    <div class="mb-4 logs-table">
+        <div class="logs-table-header">
+            <div class="row">
+                <div class="col-6 col-md-2">
+                    <div class="logs-table-cell">Sender</div>
+                </div>
+                <div class="col-6 col-md-2">
+                    <div class="logs-table-cell">Recipient</div>
+                </div>
+                <div class="col-6 col-md-2">
+                    <div class="logs-table-cell">Gear</div>
+                </div>
+                <div class="col-6 col-md-4">
+                    <div class="logs-table-cell">Log</div>
+                </div>
+                <div class="col-6 col-md-2">
+                    <div class="logs-table-cell">Date</div>
+                </div>
+            </div>
         </div>
-        @foreach ($gearLogs as $log)
-            @include('user._gear_log_row', ['log' => $log, 'owner' => $user])
-        @endforeach
+        <div class="logs-table-body">
+            @foreach ($gearLogs as $log)
+                <div class="logs-table-row">
+                    @include('user._gear_log_row', ['log' => $log, 'owner' => $user])
+                </div>
+            @endforeach
+        </div>
     </div>
     <div class="text-right">
         <a href="{{ url($user->url . '/gear-logs') }}">View all...</a>
     </div>
 
     <h5>Weapon</h5>
-    <div class="row ml-md-2 mb-4">
-        <div class="d-flex row flex-wrap col-12 mt-1 pt-1 px-0 ubt-bottom">
-            <div class="col-6 col-md-2 font-weight-bold">Sender</div>
-            <div class="col-6 col-md-2 font-weight-bold">Recipient</div>
-            <div class="col-6 col-md-2 font-weight-bold">Weapon</div>
-            <div class="col-6 col-md-4 font-weight-bold">Log</div>
-            <div class="col-6 col-md-2 font-weight-bold">Date</div>
+    <div class="mb-4 logs-table">
+        <div class="logs-table-header">
+            <div class="row">
+                <div class="col-6 col-md-2">
+                    <div class="logs-table-cell">Sender</div>
+                </div>
+                <div class="col-6 col-md-2">
+                    <div class="logs-table-cell">Recipient</div>
+                </div>
+                <div class="col-6 col-md-2">
+                    <div class="logs-table-cell">Weapon</div>
+                </div>
+                <div class="col-6 col-md-4">
+                    <div class="logs-table-cell">Log</div>
+                </div>
+                <div class="col-6 col-md-2">
+                    <div class="logs-table-cell">Date</div>
+                </div>
+            </div>
         </div>
-        @foreach ($weaponLogs as $log)
-            @include('user._weapon_log_row', ['log' => $log, 'owner' => $user])
-        @endforeach
+        <div class="logs-table-body">
+            @foreach ($weaponLogs as $log)
+                <div class="logs-table-row">
+                    @include('user._weapon_log_row', ['log' => $log, 'owner' => $user])
+                </div>
+            @endforeach
+        </div>
     </div>
     <div class="text-right">
         <a href="{{ url($user->url . '/weapon-logs') }}">View all...</a>
     </div>
 @endsection
-
 @section('scripts')
     <script>
         $(document).ready(function() {

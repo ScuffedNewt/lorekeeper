@@ -30,29 +30,35 @@
                 <hr />
             @endif
             @if ($item->parent)
-                <h5 class="alert alert-secondary">Upgrade of: {!! $item->parent->displayName !!}</h5>
+                <h5 class="alert alert-secondary">
+                    Upgrade of:
+                    @if ($item->parent->has_image)
+                        <img src="{{ $item->parent->imageUrl }}" class="rounded world-entry-image" style="max-height: 50px;" />
+                    @endif
+                    {!! $item->parent->displayName !!}
+                </h5>
             @endif
             @if ($item->children->count())
                 <h5 class="alert alert-info">Upgrades:</h5>
                 @foreach ($item->children as $child)
-                    <div class="card">
-                        <h5 class="card-header inventory-header">
-                            <a class="inventory-collapse-toggle collapse-toggle collapsed" href="#drop-collapse" data-toggle="collapse">
+                    <div class="card {{ $loop->last ? '' : 'mb-3' }}">
+                        <h5 class="card-header inventory-header border-bottom-0">
+                            <a class="inventory-collapse-toggle collapse-toggle collapsed" href="#drop-collapse-{{ $child->id }}" data-toggle="collapse">
                                 @if ($child->has_image)
                                     <img src="{{ $child->imageUrl }}" class="rounded world-entry-image" style="max-height: 50px;" />
                                 @endif
                                 {!! $child->name !!}
                             </a>
                         </h5>
-                        <div class="collapse" id="drop-collapse">
-                            <div class="card-body">
+                        <div class="collapse" id="drop-collapse-{{ $child->id }}">
+                            <div class="card-body py-0">
                                 @if (count(getLimits($child)))
                                     @include('widgets._limits', [
                                         'object' => $child,
                                         'hideUnlock' => true,
                                     ])
                                 @else
-                                    No upgrade cost set.
+                                    <div class="mt-3 alert alert-info">This upgrade is free.</div>
                                 @endif
                             </div>
                         </div>

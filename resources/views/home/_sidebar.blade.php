@@ -8,7 +8,7 @@
         <div class="sidebar-item"><a href="{{ url('inventory') }}" class="{{ set_active('inventory*') }}">Inventory</a></div>
         <div class="sidebar-item"><a href="{{ url('bank') }}" class="{{ set_active('bank*') }}">Bank</a></div>
         <div class="sidebar-item"><a href="{{ url('armoury') }}" class="{{ set_active('armoury*') }}">Armoury</a></div>
-        <div class="sidebar-item"><a href="{{ url('userstats') }}" class="{{ set_active('userstats*') }}">Stat Information</a></div>
+        <div class="sidebar-item"><a href="{{ url('user-stats') }}" class="{{ set_active('user-stats*') }}">Stat Information</a></div>
     </li>
     <li class="sidebar-section">
         <div class="sidebar-section-header">Activity</div>

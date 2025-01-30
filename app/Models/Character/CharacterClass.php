@@ -83,7 +83,7 @@ class CharacterClass extends Model {
      * @return string
      */
     public function getDisplayNameAttribute() {
-        return '<a href="'.$this->url.'" class="display-category">'.$this->name.'</a>';
+        return '<a href="'.$this->url.'" class="display-category">'.$this->name.' Class</a>';
     }
 
     /**

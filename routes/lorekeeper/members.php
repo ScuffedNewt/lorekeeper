@@ -100,7 +100,7 @@ Route::group(['prefix' => 'armoury', 'namespace' => 'Users'], function () {
     Route::post('{type}/name/{id}', 'ArmouryController@postName');
     Route::post('{type}/attach/{id}', 'ArmouryController@postAttach');
     Route::post('{type}/detach/{id}', 'ArmouryController@postDetach');
-    Route::post('{type}/upgrade/{id}', 'ArmouryController@postUpgrade');
+    Route::post('{type}/upgrade/{id}/{child_id}', 'ArmouryController@postUpgrade');
     Route::post('{type}/image/{id}', 'ArmouryController@postImage');
 
     Route::get('{type}/selector', 'ArmouryController@getSelector');
@@ -130,7 +130,7 @@ Route::group(['prefix' => 'bank', 'namespace' => 'Users'], function () {
     Route::post('convert', 'BankController@postConvertCurrency');
 });
 
-Route::group(['prefix' => 'userstats', 'namespace' => 'Users'], function () {
+Route::group(['prefix' => 'user-stats', 'namespace' => 'Users'], function () {
     Route::get('/', 'UserStatController@getIndex');
     Route::post('level', 'UserStatController@postLevel');
     Route::post('transfer', 'UserStatController@postTransfer');

@@ -51,11 +51,12 @@
 
                 {{-- Basic info --}}
                 <div class="tab-pane fade show active" id="info-{{ $image->id }}">
-                    <div class="row">
-                        <div class="col-lg-4 col-md-6 col-4">
+                    <div class="row no-gutters">
+                        <div class="col-lg-4 col-5">
                             <h5>Class</h5>
                         </div>
-                        <div class="col-lg-8 col-md-6 col-8">{!! $image->character->class_id ? $image->character->class->displayName : 'None' !!}
+                        <div class="col-lg-8 col-7 pl-1">
+                            {!! $image->character->class_id ? $image->character->class->displayName : 'None' !!}
                             @if (Auth::check())
                                 @if (Auth::user()->isStaff || (Auth::user()->id == $image->character->user_id && $image->character->class_id == null))
                                     <a href="#" class="btn btn-outline-info btn-sm edit-class ml-1" data-id="{{ $image->character->id }}"><i class="fas fa-cog"></i></a>
@@ -98,11 +99,11 @@
                         $type = $type ?? null;
                     @endphp
                     @if ($type || (Auth::check() && Auth::user()->hasPower('manage_characters')))
-                        <div class="row">
-                            <div class="col-lg-4 col-md-6 col-4">
+                        <div class="row no-gutters">
+                            <div class="col-lg-4 col-5">
                                 <h5>Typing</h5>
                             </div>
-                            <div class="col-lg-8 col-md-6 col-8 row">
+                            <div class="col-lg-8 col-7 pl-1 row no-gutters">
                                 <h5>{!! $type?->displayElements !!}</h5>
                                 @if (Auth::check() && Auth::user()->hasPower('manage_characters'))
                                     {!! add_help('Typing is assigned on an image basis') !!}
@@ -216,6 +217,57 @@
                             </div>
                         </div>
                     @endif
+
+                    @if (Auth::check() && Auth::user()->hasPower('manage_characters'))
+                        <div class="mt-3">
+                            <a href="#" class="btn btn-outline-info btn-sm edit-features" data-id="{{ $image->id }}"><i class="fas fa-cog"></i> Edit</a>
+                        </div>
+                    @endif
+                </div>
+
+                {{-- Image notes --}}
+                <div class="tab-pane fade" id="notes-{{ $image->id }}">
+                    @if ($image->parsed_description)
+                        <div class="parsed-text imagenoteseditingparse">{!! $image->parsed_description !!}</div>
+                    @else
+                        <div class="imagenoteseditingparse">No additional notes given.</div>
+                    @endif
+                    @if (Auth::check() && Auth::user()->hasPower('manage_characters'))
+                        <div class="mt-3">
+                            <a href="#" class="btn btn-outline-info btn-sm edit-notes" data-id="{{ $image->id }}"><i class="fas fa-cog"></i> Edit</a>
+                        </div>
+                    @endif
+                </div>
+
+                {{-- Image credits --}}
+                <div class="tab-pane fade" id="credits-{{ $image->id }}">
+
+                    <div class="row no-gutters mb-2">
+                        <div class="col-lg-4 col-4">
+                            <h5>Design</h5>
+                        </div>
+                        <div class="col-lg-8 col-8">
+                            @foreach ($image->designers as $designer)
+                                <div>{!! $designer->displayLink() !!}</div>
+                            @endforeach
+                        </div>
+                    </div>
+                    <div class="row no-gutters">
+                        <div class="col-lg-4 col-4">
+                            <h5>Art</h5>
+                        </div>
+                        <div class="col-lg-8 col-8">
+                            @foreach ($image->artists as $artist)
+                                <div>{!! $artist->displayLink() !!}</div>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    @if (Auth::check() && Auth::user()->hasPower('manage_characters'))
+                        <div class="mt-3">
+                            <a href="#" class="btn btn-outline-info btn-sm edit-credits" data-id="{{ $image->id }}"><i class="fas fa-cog"></i> Edit</a>
+                        </div>
+                    @endif
                 </div>
 
                 @if (isset($showMention) && $showMention)
@@ -249,90 +301,38 @@
                 @endif
 
                 @if (Auth::check() && Auth::user()->hasPower('manage_characters'))
-                    <div class="mt-3">
-                        <a href="#" class="btn btn-outline-info btn-sm edit-features" data-id="{{ $image->id }}"><i class="fas fa-cog"></i> Edit</a>
-                    </div>
-                @endif
-            </div>
-
-            {{-- Image notes --}}
-            <div class="tab-pane fade" id="notes-{{ $image->id }}">
-                @if ($image->parsed_description)
-                    <div class="parsed-text imagenoteseditingparse">{!! $image->parsed_description !!}</div>
-                @else
-                    <div class="imagenoteseditingparse">No additional notes given.</div>
-                @endif
-                @if (Auth::check() && Auth::user()->hasPower('manage_characters'))
-                    <div class="mt-3">
-                        <a href="#" class="btn btn-outline-info btn-sm edit-notes" data-id="{{ $image->id }}"><i class="fas fa-cog"></i> Edit</a>
-                    </div>
-                @endif
-            </div>
-
-            {{-- Image credits --}}
-            <div class="tab-pane fade" id="credits-{{ $image->id }}">
-
-                <div class="row no-gutters mb-2">
-                    <div class="col-lg-4 col-4">
-                        <h5>Design</h5>
-                    </div>
-                    <div class="col-lg-8 col-8">
-                        @foreach ($image->designers as $designer)
-                            <div>{!! $designer->displayLink() !!}</div>
-                        @endforeach
-                    </div>
-                </div>
-                <div class="row no-gutters">
-                    <div class="col-lg-4 col-4">
-                        <h5>Art</h5>
-                    </div>
-                    <div class="col-lg-8 col-8">
-                        @foreach ($image->artists as $artist)
-                            <div>{!! $artist->displayLink() !!}</div>
-                        @endforeach
-                    </div>
-                </div>
-
-                @if (Auth::check() && Auth::user()->hasPower('manage_characters'))
-                    <div class="mt-3">
-                        <a href="#" class="btn btn-outline-info btn-sm edit-credits" data-id="{{ $image->id }}"><i class="fas fa-cog"></i> Edit</a>
-                    </div>
-                @endif
-            </div>
-
-            @if (Auth::check() && Auth::user()->hasPower('manage_characters'))
-                <div class="tab-pane fade" id="settings-{{ $image->id }}">
-                    {!! Form::open(['url' => 'admin/character/image/' . $image->id . '/settings']) !!}
-                    <div class="form-group">
-                        {!! Form::checkbox('is_visible', 1, $image->is_visible, ['class' => 'form-check-input', 'data-toggle' => 'toggle']) !!}
-                        {!! Form::label('is_visible', 'Is Viewable', ['class' => 'form-check-label ml-3']) !!} {!! add_help('If this is turned off, the image will not be visible by anyone without the Manage Masterlist power.') !!}
-                    </div>
-                    <div class="form-group">
-                        {!! Form::checkbox('is_valid', 1, $image->is_valid, ['class' => 'form-check-input', 'data-toggle' => 'toggle']) !!}
-                        {!! Form::label('is_valid', 'Is Valid', ['class' => 'form-check-label ml-3']) !!} {!! add_help('If this is turned off, the image will still be visible, but displayed with a note that the image is not a valid reference.') !!}
-                    </div>
-                    @if (config('lorekeeper.settings.enable_character_content_warnings'))
+                    <div class="tab-pane fade" id="settings-{{ $image->id }}">
+                        {!! Form::open(['url' => 'admin/character/image/' . $image->id . '/settings']) !!}
                         <div class="form-group">
-                            {!! Form::label('Content Warnings') !!} {!! add_help('These warnings will be displayed on the character\'s page. They are not required, but are recommended if the character contains sensitive content.') !!}
-                            {!! Form::text('content_warnings', null, ['class' => 'form-control', 'id' => 'warningList', 'data-init-value' => $image->editWarnings]) !!}
+                            {!! Form::checkbox('is_visible', 1, $image->is_visible, ['class' => 'form-check-input', 'data-toggle' => 'toggle']) !!}
+                            {!! Form::label('is_visible', 'Is Viewable', ['class' => 'form-check-label ml-3']) !!} {!! add_help('If this is turned off, the image will not be visible by anyone without the Manage Masterlist power.') !!}
                         </div>
-                    @endif
-                    <div class="text-right">
-                        {!! Form::submit('Edit', ['class' => 'btn btn-primary mb-3']) !!}
-                    </div>
-                    {!! Form::close() !!}
+                        <div class="form-group">
+                            {!! Form::checkbox('is_valid', 1, $image->is_valid, ['class' => 'form-check-input', 'data-toggle' => 'toggle']) !!}
+                            {!! Form::label('is_valid', 'Is Valid', ['class' => 'form-check-label ml-3']) !!} {!! add_help('If this is turned off, the image will still be visible, but displayed with a note that the image is not a valid reference.') !!}
+                        </div>
+                        @if (config('lorekeeper.settings.enable_character_content_warnings'))
+                            <div class="form-group">
+                                {!! Form::label('Content Warnings') !!} {!! add_help('These warnings will be displayed on the character\'s page. They are not required, but are recommended if the character contains sensitive content.') !!}
+                                {!! Form::text('content_warnings', null, ['class' => 'form-control', 'id' => 'warningList', 'data-init-value' => $image->editWarnings]) !!}
+                            </div>
+                        @endif
+                        <div class="text-right">
+                            {!! Form::submit('Edit', ['class' => 'btn btn-primary mb-3']) !!}
+                        </div>
+                        {!! Form::close() !!}
 
-                    <div class="text-right">
-                        @if ($character->character_image_id != $image->id)
-                            <a href="#" class="btn btn-outline-info btn-sm active-image" data-id="{{ $image->id }}">Set Active</a>
-                        @endif <a href="#" class="btn btn-outline-info btn-sm reupload-image" data-id="{{ $image->id }}">Reupload Image</a> <a href="#" class="btn btn-outline-danger btn-sm delete-image"
-                            data-id="{{ $image->id }}">Delete</a>
+                        <div class="text-right">
+                            @if ($character->character_image_id != $image->id)
+                                <a href="#" class="btn btn-outline-info btn-sm active-image" data-id="{{ $image->id }}">Set Active</a>
+                            @endif <a href="#" class="btn btn-outline-info btn-sm reupload-image" data-id="{{ $image->id }}">Reupload Image</a> <a href="#" class="btn btn-outline-danger btn-sm delete-image"
+                                data-id="{{ $image->id }}">Delete</a>
+                        </div>
                     </div>
-                </div>
-            @endif
+                @endif
+            </div>
         </div>
     </div>
-</div>
 </div>
 
 @include('widgets._character_warning_js')

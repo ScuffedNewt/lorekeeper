@@ -10,6 +10,7 @@ use App\Models\User\User;
 use App\Models\User\UserGear;
 use App\Models\User\UserWeapon;
 use App\Services\Claymore\WeaponManager;
+use App\Services\Claymore\GearManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -59,13 +60,12 @@ class ArmouryController extends Controller {
         } else {
             $stack = UserWeapon::withTrashed()->where('id', $id)->with('weapon')->first();
         }
-        $chara = Character::where('user_id', $stack->user_id)->pluck('slug', 'id');
 
         $readOnly = $request->get('read_only') ?: ((Auth::check() && $stack && !$stack->deleted_at && ($stack->user_id == Auth::user()->id || Auth::user()->hasPower('edit_inventories'))) ? 0 : 1);
 
         return view('home._armoury_stack', [
             'stack'       => $stack,
-            'chara'       => $chara,
+            'characters'  => $stack->user->characters()->get()->pluck('fullName', 'id')->toArray(),
             'user'        => Auth::user(),
             'userOptions' => ['' => 'Select User'] + User::visible()->where('id', '!=', $stack ? $stack->user_id : 0)->orderBy('name')->get()->pluck('verified_name', 'id')->toArray(),
             'readOnly'    => $readOnly,
@@ -174,20 +174,26 @@ class ArmouryController extends Controller {
      * @param mixed $type
      * @param mixed $id
      */
-    public function postUpgrade($type, $id) {
-        $equipment = ($type == 'gear' ? UserGear::find($id) : UserWeapon::find($id));
-        if (Auth::user()->isStaff && $equipment->user_id != Auth::user()->id) {
-            $isStaff = true;
+    public function postUpgrade($type, $id, $child_id) {
+        if ($type == 'gear') {
+            $equipment = UserGear::findOrFail($id);
+            $service = new GearManager;
+            if ($service->upgradeGear($equipment, $child_id, Auth::user()->isStaff && $equipment->user_id != Auth::user()->id)) {
+                flash('Gear upgraded successfully.')->success();
+            } else {
+                foreach ($service->errors()->getMessages()['error'] as $error) {
+                    flash($error)->error();
+                }
+            }
         } else {
-            $isStaff = false;
-        }
-
-        $service = ($type == 'gear' ? new GearManager : new WeaponManager);
-        if ($service->upgrade($equipment, $isStaff)) {
-            flash(ucfirst($type == 'weapons' ? 'weapon' : $type).' upgraded successfully.')->success();
-        } else {
-            foreach ($service->errors()->getMessages()['error'] as $error) {
-                flash($error)->error();
+            $equipment = UserWeapon::findOrFail($id);
+            $service = new WeaponManager;
+            if ($service->upgradeWeapon($equipment, $child_id, Auth::user()->isStaff && $equipment->user_id != Auth::user()->id)) {
+                flash('Weapon upgraded successfully.')->success();
+            } else {
+                foreach ($service->errors()->getMessages()['error'] as $error) {
+                    flash($error)->error();
+                }
             }
         }
 

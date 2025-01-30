@@ -101,7 +101,7 @@ class StatManager extends Service {
      * @param mixed $character
      * @param mixed $quantity
      */
-    public function editCharacterStatBaseCount($stat, $character, $quantity) {
+    public function editCharacterStatBaseCount($stat, $character, $quantity, $logType = null, $logData = null) {
         DB::beginTransaction();
 
         try {
@@ -115,10 +115,7 @@ class StatManager extends Service {
             $stat->count = $quantity;
             $stat->save();
 
-            $type = 'Staff Edit';
-            $data = 'Edited Base Stat Value by Staff';
-
-            if (!$this->createCountLog($sender->id, $sender->logtype, $character, $type, $data, $quantity, $stat->id)) {
+            if (!$this->createCountLog($sender->id, $sender->logtype, $character, $logType ?? 'Staff Edit', $logData ?? 'Edited Base Stat Value by Staff', $quantity, $stat->id)) {
                 throw new \Exception('Error creating log.');
             }
 
@@ -140,12 +137,12 @@ class StatManager extends Service {
      * @param bool  $override
      * @param mixed $set
      */
-    public function editCharacterStatCurrentCount($stat, $character, $quantity, $set = true, $override = false) {
+    public function editCharacterStatCurrentCount($stat, $character, $quantity, $logType = null, $logData = null) {
         DB::beginTransaction();
 
         try {
             $sender = Auth::user();
-            if (!$sender->isStaff && !$override) {
+            if (!$sender->isStaff && (!$logType || !$logData)) {
                 throw new \Exception('You are not staff.');
             }
 
@@ -155,26 +152,13 @@ class StatManager extends Service {
                 $stat->save();
             }
 
-            if ($set) {
-                // check if there are any weapons / gear granting extra to this stat
-                $count = $character->totalStatCount($stat->stat->id);
-                // $count += $character->bonusStatCount($stat->id); TODO check bonusStatCount func
-                $stat->current_count = $quantity > $count ? $count : $quantity;
-            } else {
-                $stat->current_count += $quantity;
-            }
+            // check if there are any weapons / gear granting extra to this stat
+            $count = $character->totalStatCount($stat->stat->id);
+            // $count += $character->bonusStatCount($stat->id); TODO check bonusStatCount func
+            $stat->current_count = $quantity > $count ? $count : $quantity;
             $stat->save();
 
-            if ($override) {
-                // if different logs are needed
-                $type = $override['type'];
-                $data = $override['data'];
-            } else {
-                $type = 'Staff Edit';
-                $data = 'Edited Current Count by Staff';
-            }
-
-            if (!$this->createCountLog($sender->id, $sender->logtype, $character, $type, $data, $quantity, $stat->id)) {
+            if (!$this->createCountLog($sender->id, $sender->logtype, $character, $logType ?? 'Staff Edit', $logData ?? 'Edited Current Count by Staff', $quantity, $stat->id)) {
                 throw new \Exception('Error creating log.');
             }
 
@@ -219,7 +203,7 @@ class StatManager extends Service {
                 Notifications::create('STAT_GRANT', $user, [
                     'sender_url'  => $staff->url,
                     'sender_name' => $staff->name,
-                    'stat_url'    => url('/userstats'),
+                    'stat_url'    => url('/user-stats'),
                 ]);
             }
 

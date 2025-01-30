@@ -7,6 +7,7 @@ use App\Models\Character\Character;
 use App\Models\Claymore\Gear;
 use App\Models\User\User;
 use App\Models\User\UserGear;
+use App\Services\LimitManager;
 use App\Services\Service;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
@@ -322,34 +323,42 @@ class GearManager extends Service {
      *
      * @return UserGear
      */
-    public function upgradeGear($gear, $isStaff = false) {
+    public function upgradeGear($gear, $child_id, $isStaff = false) {
         DB::beginTransaction();
 
         try {
+
+            $childGear = Gear::find($child_id);
+            if (!$childGear) {
+                throw new \Exception('Invalid gear selected.');
+            }
+
+            if ($childGear->parent_id != $gear->gear_id) {
+                throw new \Exception('Invalid gear selected.');
+            }
+
             if (!$isStaff) {
-                if ($gear->gear->currency_id != 0) {
-                    $service = new CurrencyManager;
+                if ($gear->user_id != Auth::user()->id && !$isStaff) {
+                    throw new \Exception('You do not own this gear.');
+                }
 
-                    $currency = Currency::find($gear->gear->currency_id);
-                    if (!$currency) {
-                        throw new \Exception('Invalid currency set by admin.');
-                    }
+                $limitData = [
+                    'character_ids' => $gear->character_id ? [$gear->character_id] : [],
+                ];
 
-                    $user = User::find($gear->user_id);
-                    if (!$service->debitCurrency($user, null, 'Gear Upgrade', 'Upgraded '.$gear->gear->displayName.' to '.$gear->gear->parent->displayName.'', $currency, $gear->gear->cost)) {
-                        throw new \Exception('Could not debit currency.');
-                    }
-                } elseif ($gear->gear->currency_id == 0) {
-                    $service = new StatManager;
-
-                    $user = User::find($gear->user_id);
-                    if (!$service->debitStat($user, null, 'Gear Upgrade', 'Upgraded '.$gear->gear->displayName.' to '.$gear->gear->parent->displayName.'', $gear->gear->cost)) {
-                        throw new \Exception('Could not debit points.');
+                if (count(getLimits($childGear))) {
+                    $limitService = new LimitManager;
+                    if (!$limitService->checkLimits($childGear, false, $limitData, 'Gear Upgrade', 'Upgraded '.$gear->gear->displayName.' to '.$childGear->displayName)) {
+                        foreach($limitService->errors()->getMessages()['error'] as $error) {
+                            flash($error)->error();
+                        }
+        
+                        throw new \Exception('Failed to upgrade gear.');
                     }
                 }
             }
 
-            $gear->gear_id = $gear->gear->parent_id;
+            $gear->gear_id = $child_id;
             $gear->save();
 
             return $this->commitReturn(true);

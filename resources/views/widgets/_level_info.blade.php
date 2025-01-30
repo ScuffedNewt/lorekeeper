@@ -22,9 +22,9 @@
                             <p>You have enough EXP to advance to the next level!</p>
                         </b>
                     </div>
-                    {!! Form::open(['url' => $level->user ? '/userstats/level' : $level->character->url . '/stats/level']) !!}
+                    {!! Form::open(['url' => $level->user ? '/user-stats/level' : $level->character->url . '/stats/level']) !!}
 
-                    {!! Form::submit('Level up!', ['class' => 'btn btn-success mb-2']) !!}
+                    {!! Form::submit('Level Up!', ['class' => 'btn btn-success mb-2']) !!}
 
                     {!! Form::close() !!}
                 @endif

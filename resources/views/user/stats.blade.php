@@ -15,7 +15,7 @@
 
     <div class="container mb-3 text-right">
         @if (Auth::check() && Auth::user()->id == $user->id)
-            <a href="{{ url('userstats') }}">
+            <a href="{{ url('user-stats') }}">
                 <div class="btn btn-primary mr-0">
                     Go to Personal Stat Page
                 </div>

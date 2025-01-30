@@ -56,14 +56,20 @@
                                 @endif
                             </div>
                             @if ($weapon->parent)
-                                <h5 class="alert alert-secondary">Upgrade of: {!! $weapon->parent->displayName !!}</h5>
+                                <h5 class="alert alert-secondary">
+                                    Upgrade of:
+                                    @if ($weapon->parent->has_image)
+                                        <img src="{{ $weapon->parent->imageUrl }}" class="rounded world-entry-image" style="max-height: 50px;" />
+                                    @endif
+                                    {!! $weapon->parent->displayName !!}
+                                </h5>
                             @endif
                             {!! $description !!}
                             @if ($weapon->children->count())
                                 <h5 class="alert alert-info">Upgrades:</h5>
                                 @foreach ($weapon->children as $child)
                                     <div class="card">
-                                        <h5 class="card-header inventory-header">
+                                        <h5 class="card-header border-bottom-0 inventory-header">
                                             <a class="inventory-collapse-toggle collapse-toggle collapsed" href="#drop-collapse" data-toggle="collapse">
                                                 @if ($child->has_image)
                                                     <img src="{{ $child->imageUrl }}" class="rounded world-entry-image" style="max-height: 50px;" />
@@ -72,7 +78,7 @@
                                             </a>
                                         </h5>
                                         <div class="collapse" id="drop-collapse">
-                                            <div class="card-body">
+                                            <div class="card-body py-0">
                                                 @if (count(getLimits($child)))
                                                     @include('widgets._limits', [
                                                         'object' => $child,

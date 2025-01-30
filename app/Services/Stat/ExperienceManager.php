@@ -42,7 +42,7 @@ class ExperienceManager extends Service {
                         'quantity'         => $data['quantity'],
                         'sender_url'       => $staff->url,
                         'sender_name'      => $staff->name,
-                        'stat_url'         => url('/userstats'),
+                        'stat_url'         => url('/user-stats'),
                     ]);
                 } else {
                     throw new \Exception('Failed to credit exp to '.$user->name.'.');

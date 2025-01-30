@@ -11,7 +11,7 @@
         ($level->id ? 'Edit' : 'Create ') . ucfirst($type) . ' Level' => $level->id ? 'admin/levels/' . $type . '/edit/' . $level->id : 'admin/levels/' . $type . '/create',
     ]) !!}
 
-    <h1>{{ $level->id ? 'Edit' : 'Create' }} Level
+    <h1>{{ $level->id ? 'Edit' : 'Create' }} {{ ucfirst($type) }} Level
         @if ($level->id)
             <a href="#" class="btn btn-outline-danger float-right delete-level-button">Delete Level</a>
         @endif
@@ -50,22 +50,25 @@
     </p>
     @include('widgets._loot_select', ['loots' => $level->rewards, 'showLootTables' => true, 'showRaffles' => true])
 
+    <div class="text-right">
+        {!! Form::submit($level->id ? 'Edit' : 'Create', ['class' => 'btn btn-primary']) !!}
+    </div>
+
+    {!! Form::close() !!}
+
     <hr />
 
     @if ($level->id)
-        @include('widgets._add_limits', ['object' => $level])
+        @include('widgets._add_limits', [
+            'object' => $level,
+            'showUnlocked' => false,
+        ])
     @else
         <h3>Limits</h3>
         <div class="alert alert-info">
             <strong>Save the level first</strong> to add limits.
         </div>
     @endif
-
-    <div class="text-right">
-        {!! Form::submit($level->id ? 'Edit' : 'Create', ['class' => 'btn btn-primary']) !!}
-    </div>
-
-    {!! Form::close() !!}
 
     @include('widgets._loot_select_row', ['showLootTables' => true, 'showRaffles' => true])
 @endsection

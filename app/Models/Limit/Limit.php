@@ -4,6 +4,10 @@ namespace App\Models\Limit;
 
 use App\Models\Currency\Currency;
 use App\Models\Item\Item;
+use App\Models\Level\Level;
+use App\Models\Element\Element;
+use App\Models\Character\CharacterClass;
+use App\Models\Stat\Stat;
 use App\Models\Model;
 use App\Models\Prompt\Prompt;
 
@@ -50,6 +54,16 @@ class Limit extends Model {
                 return $this->belongsTo(Currency::class, 'limit_id');
             case 'dynamic':
                 return $this->belongsTo(DynamicLimit::class, 'limit_id');
+            case 'character_level':
+                return $this->belongsTo(Level::class, 'limit_id')->where('level_type', 'character');
+            case 'user_level':
+                return $this->belongsTo(Level::class, 'limit_id')->where('level_type', 'user');
+            case 'element':
+                return $this->belongsTo(Element::class, 'limit_id');
+            case 'stat':
+                return $this->belongsTo(Stat::class, 'limit_id');
+            case 'class':
+                return $this->belongsTo(CharacterClass::class, 'limit_id');
         }
     }
 

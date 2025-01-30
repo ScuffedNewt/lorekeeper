@@ -106,7 +106,7 @@ class ElementalPotionService extends Service {
                                 throw new \Exception('Failed to create typing.');
                             }
                         } else {
-                            if (!$service->editTyping($typing, array_merge(json_decode($typing->element_ids), [$stack->item->tag($data['tag'])->data['element_id']]))) {
+                            if (!$service->editTyping($typing, array_merge($typing->element_ids, [$stack->item->tag($data['tag'])->data['element_id']]))) {
                                 foreach ($service->errors()->getMessages()['error'] as $error) {
                                     flash($error)->error();
                                 }

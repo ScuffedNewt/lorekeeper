@@ -16,21 +16,7 @@
             <div class="world-entry-text">
                 <div class="row">
                     <div class="col-6">
-                        <h4>Requirements</h4>
-                        @if ($level->limits->count())
-                            <div class="text-danger">Requires:
-                                <?php
-                                $limits = [];
-                                foreach ($level->limits as $limit) {
-                                    $name = $limit->reward->name;
-                                    $limits[] = $name;
-                                }
-                                echo implode(', ', $limits);
-                                ?>
-                            </div>
-                        @else
-                            <p>No requirements.</p>
-                        @endif
+                        @include('widgets._limits', ['object' => $level])
                     </div>
                     <div class="col-6">
                         <h4>Rewards</h4>

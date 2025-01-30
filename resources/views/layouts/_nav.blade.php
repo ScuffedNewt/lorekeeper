@@ -47,7 +47,7 @@
                             <a class="dropdown-item" href="{{ url('bank') }}">
                                 Bank
                             </a>
-                            <a class="dropdown-item" href="{{ url('userstats') }}">
+                            <a class="dropdown-item" href="{{ url('user-stats') }}">
                                 Stat Information
                             </a>
                             <div class="dropdown-divider"></div>
