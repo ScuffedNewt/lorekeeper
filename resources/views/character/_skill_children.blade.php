@@ -1,9 +1,6 @@
 @if ($character->skills()->where('skill_id', $children->id)->exists())
     @php
-        $characterSkill = $character
-            ->skills()
-            ->where('skill_id', $children->id)
-            ->first();
+        $characterSkill = $character->skills()->where('skill_id', $children->id)->first();
     @endphp
 @else
     @php $characterSkill = null; @endphp

@@ -193,7 +193,7 @@ function getAssetModelString($type, $namespaced = true) {
             }
             break;
 
-        // these are special cases, as they do not specifically have a unique model
+            // these are special cases, as they do not specifically have a unique model
         case 'exp':
             return 'Exp';
             break;

@@ -2,9 +2,7 @@
     $elements = \App\Models\Element\Element::orderBy('name')->pluck('name', 'id');
     // check if there is a type for this object if not passed
     if (!isset($type)) {
-        $type = \App\Models\Element\Typing::where('typing_model', get_class($object))
-            ->where('typing_id', $object->id)
-            ->first();
+        $type = \App\Models\Element\Typing::where('typing_model', get_class($object))->where('typing_id', $object->id)->first();
     }
     $type = $type ?? null;
 @endphp

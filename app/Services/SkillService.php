@@ -330,9 +330,7 @@ class SkillService extends Service {
     /**
      * Handle category data.
      *
-     * @param array              $data
-     * @param SkillCategory|null $category
-     *
+     * @param array $data
      * @param array $data
      * @param Skill $skill
      *

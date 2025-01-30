@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin\Data;
 use App\Http\Controllers\Controller;
 use App\Models\Prompt\Prompt;
 use App\Models\Prompt\PromptCategory;
-use App\Models\Skill\Skill;
 use App\Services\PromptService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
