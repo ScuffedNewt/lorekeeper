@@ -3,14 +3,13 @@
 namespace App\Http\Controllers\Users;
 
 use App\Http\Controllers\Controller;
-use App\Models\Character\Character;
 use App\Models\Claymore\GearCategory;
 use App\Models\Claymore\WeaponCategory;
 use App\Models\User\User;
 use App\Models\User\UserGear;
 use App\Models\User\UserWeapon;
-use App\Services\Claymore\WeaponManager;
 use App\Services\Claymore\GearManager;
+use App\Services\Claymore\WeaponManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -173,6 +172,7 @@ class ArmouryController extends Controller {
      *
      * @param mixed $type
      * @param mixed $id
+     * @param mixed $child_id
      */
     public function postUpgrade($type, $id, $child_id) {
         if ($type == 'gear') {

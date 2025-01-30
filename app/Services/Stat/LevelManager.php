@@ -3,8 +3,6 @@
 namespace App\Services\Stat;
 
 use App\Models\Character\Character;
-use App\Models\Character\CharacterCurrency;
-use App\Models\Character\CharacterItem;
 use App\Models\Level\Level;
 use App\Models\User\User;
 use App\Services\LimitManager;
@@ -43,11 +41,11 @@ class LevelManager extends Service {
 
             if (count(getLimits($next))) {
                 $limitService = new LimitManager;
-                if (!$limitService->checkLimits($next, false, null, 'Level Up', 'Used to level up ' . $recipient->displayName . ' to level ' . $next->level)) {
-                    foreach($limitService->errors()->getMessages()['error'] as $error) {
+                if (!$limitService->checkLimits($next, false, null, 'Level Up', 'Used to level up '.$recipient->displayName.' to level '.$next->level)) {
+                    foreach ($limitService->errors()->getMessages()['error'] as $error) {
                         flash($error)->error();
                     }
-    
+
                     throw new \Exception('Failed to level up due to limit restrictions.');
                 }
             }

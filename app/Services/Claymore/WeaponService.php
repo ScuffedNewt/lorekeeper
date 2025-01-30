@@ -307,10 +307,10 @@ class WeaponService extends Service {
 
     /**
      * Edits a weapon's stats.
-     * 
+     *
      * @param array $data
      * @param int   $id
-     * 
+     *
      * @return bool
      */
     public function editStats($data, $id) {

@@ -309,10 +309,10 @@ class GearService extends Service {
 
     /**
      * Edits a gear's stats.
-     * 
+     *
      * @param array $data
      * @param int   $id
-     * 
+     *
      * @return bool
      */
     public function editStats($data, $id) {

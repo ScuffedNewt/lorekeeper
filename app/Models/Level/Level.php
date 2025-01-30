@@ -71,7 +71,7 @@ class Level extends Model {
      * @return string
      */
     public function getDisplayNameAttribute() {
-        return '<a href="'.url('world/levels'). '/' . strtolower($this->level_type).'" class="display-prompt">'.ucfirst($this->level_type).' Level '.$this->level.'</a>';
+        return '<a href="'.url('world/levels').'/'.strtolower($this->level_type).'" class="display-prompt">'.ucfirst($this->level_type).' Level '.$this->level.'</a>';
     }
 
     /**

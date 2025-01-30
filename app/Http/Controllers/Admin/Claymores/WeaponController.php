@@ -135,10 +135,10 @@ class WeaponController extends Controller {
 
     /**
      * Edits a weapon's stats.
-     * 
+     *
      * @param App\Services\WeaponService $service
      * @param int                        $id
-     * 
+     *
      * @return \Illuminate\Http\RedirectResponse
      */
     public function postEditWeaponStats(Request $request, WeaponService $service, $id) {
