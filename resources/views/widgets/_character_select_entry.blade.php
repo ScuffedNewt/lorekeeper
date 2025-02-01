@@ -10,6 +10,7 @@
     $skills = \App\Models\Skill\Skill::orderBy('name')->pluck('name', 'id');
     $tables = \App\Models\Loot\LootTable::orderBy('name')->pluck('name', 'id');
     $elements = \App\Models\Element\Element::orderBy('name')->pluck('name', 'id');
+    $statuses = \App\Models\Status\StatusEffect::orderBy('name')->pluck('name', 'id');
 @endphp
 
 <div class="submission-character mb-3 card">
