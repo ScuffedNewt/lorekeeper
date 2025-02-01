@@ -210,7 +210,7 @@ class PromptService extends Service {
 
             $this->populateRewards(Arr::only($data, ['rewardable_type', 'rewardable_id', 'quantity']), $prompt);
 
-            //$this->populateSkills(Arr::only($data, ['skill_id', 'skill_quantity']), $prompt);
+            // $this->populateSkills(Arr::only($data, ['skill_id', 'skill_quantity']), $prompt);
 
             return $this->commitReturn($prompt);
         } catch (\Exception $e) {
@@ -270,7 +270,7 @@ class PromptService extends Service {
 
             $this->populateRewards(Arr::only($data, ['rewardable_type', 'rewardable_id', 'quantity']), $prompt);
 
-            //$this->populateSkills(Arr::only($data, ['skill_id', 'skill_quantity']), $prompt);
+            // $this->populateSkills(Arr::only($data, ['skill_id', 'skill_quantity']), $prompt);
 
             return $this->commitReturn($prompt);
         } catch (\Exception $e) {
