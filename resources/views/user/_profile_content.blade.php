@@ -122,7 +122,7 @@
                 @if (count($pets))
                     <div class="row">
                         @foreach ($pets as $pet)
-                            <div class="col profile-inventory-item">
+                            <div class="col-md-3 col-6 profile-inventory-item">
                                 <a href="{{ url($user->url . '/pets') }}" class="inventory-stack">
                                     @if ($pet->has_image)
                                         <img class="img-fluid" src="{{ $pet->image($pet->pivot->id) }}" data-toggle="tooltip" title="{{ $pet->pivot->pet_name ? $pet->pivot->pet_name . ' (' . $pet->name . ')' : $pet->name }}"
@@ -155,7 +155,7 @@
                         @foreach ($armours as $armour)
                             <div class="col-md-3 col-6 profile-inventory-item">
                                 @if ($armour->imageUrl)
-                                    <img src="{{ $armour->imageUrl }}" data-toggle="tooltip" title="{{ $armour->name }}" alt="{{ $armour->name }}" />
+                                    <img class="img-fluid" src="{{ $armour->imageUrl }}" data-toggle="tooltip" title="{{ $armour->name }}" alt="{{ $armour->name }}" />
                                 @else
                                     <p>{{ $armour->name }}</p>
                                 @endif
