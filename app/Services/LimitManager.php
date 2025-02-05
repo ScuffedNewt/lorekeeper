@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\Element\Typing;
 use App\Models\Limit\Limit;
 use App\Models\Submission\Submission;
-use App\Models\Element\Typing;
 use App\Models\User\UserItem;
 use App\Services\Stat\StatManager;
 use Illuminate\Support\Facades\Auth;
@@ -29,8 +29,11 @@ class LimitManager extends Service {
     /**
      * checks all limits on an object.
      *
-     * @param mixed $object
-     * @param mixed $is_unlock
+     * @param mixed      $object
+     * @param mixed      $is_unlock
+     * @param mixed|null $data
+     * @param mixed|null $logType
+     * @param mixed|null $logData
      */
     public function checkLimits($object, $is_unlock = false, $data = null, $logType = null, $logData = null) {
         try {

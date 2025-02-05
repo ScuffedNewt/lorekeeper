@@ -320,6 +320,7 @@ class GearManager extends Service {
      * @param UserGear
      * @param mixed $gear
      * @param mixed $isStaff
+     * @param mixed $child_id
      *
      * @return UserGear
      */
@@ -327,7 +328,6 @@ class GearManager extends Service {
         DB::beginTransaction();
 
         try {
-
             $childGear = Gear::find($child_id);
             if (!$childGear) {
                 throw new \Exception('Invalid gear selected.');
@@ -349,10 +349,10 @@ class GearManager extends Service {
                 if (count(getLimits($childGear))) {
                     $limitService = new LimitManager;
                     if (!$limitService->checkLimits($childGear, false, $limitData, 'Gear Upgrade', 'Upgraded '.$gear->gear->displayName.' to '.$childGear->displayName)) {
-                        foreach($limitService->errors()->getMessages()['error'] as $error) {
+                        foreach ($limitService->errors()->getMessages()['error'] as $error) {
                             flash($error)->error();
                         }
-        
+
                         throw new \Exception('Failed to upgrade gear.');
                     }
                 }

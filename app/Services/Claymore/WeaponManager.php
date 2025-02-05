@@ -5,13 +5,10 @@ namespace App\Services\Claymore;
 use App\Facades\Notifications;
 use App\Models\Character\Character;
 use App\Models\Claymore\Weapon;
-use App\Models\Currency\Currency;
 use App\Models\User\User;
 use App\Models\User\UserWeapon;
-use App\Services\CurrencyManager;
-use App\Services\Service;
-use App\Services\Stat\StatManager;
 use App\Services\LimitManager;
+use App\Services\Service;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
@@ -325,6 +322,7 @@ class WeaponManager extends Service {
      * @param UserWeapon
      * @param mixed $weapon
      * @param mixed $isStaff
+     * @param mixed $child_id
      *
      * @return UserWeapon
      */
@@ -332,7 +330,6 @@ class WeaponManager extends Service {
         DB::beginTransaction();
 
         try {
-
             $childWeapon = Weapon::find($child_id);
             if (!$childWeapon) {
                 throw new \Exception('Invalid weapon selected.');
@@ -354,10 +351,10 @@ class WeaponManager extends Service {
                 if (count(getLimits($childWeapon))) {
                     $limitService = new LimitManager;
                     if (!$limitService->checkLimits($childWeapon, false, $limitData, 'Weapon Upgrade', 'Upgraded '.$weapon->weapon->displayName.' to '.$childWeapon->displayName)) {
-                        foreach($limitService->errors()->getMessages()['error'] as $error) {
+                        foreach ($limitService->errors()->getMessages()['error'] as $error) {
                             flash($error)->error();
                         }
-        
+
                         throw new \Exception('Failed to upgrade weapon.');
                     }
                 }

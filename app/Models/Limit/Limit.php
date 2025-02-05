@@ -2,14 +2,14 @@
 
 namespace App\Models\Limit;
 
+use App\Models\Character\CharacterClass;
 use App\Models\Currency\Currency;
+use App\Models\Element\Element;
 use App\Models\Item\Item;
 use App\Models\Level\Level;
-use App\Models\Element\Element;
-use App\Models\Character\CharacterClass;
-use App\Models\Stat\Stat;
 use App\Models\Model;
 use App\Models\Prompt\Prompt;
+use App\Models\Stat\Stat;
 
 class Limit extends Model {
     /**

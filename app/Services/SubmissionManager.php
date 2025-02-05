@@ -418,6 +418,7 @@ class SubmissionManager extends Service {
             $tableIds = [];
             $elementIds = [];
             $skillIds = [];
+            $statusIds = [];
             if (isset($data['character_currency_id'])) {
                 foreach ($data['character_currency_id'] as $c) {
                     foreach ($c as $currencyId) {
@@ -828,6 +829,7 @@ class SubmissionManager extends Service {
         $tableIds = [];
         $elementIds = [];
         $skillIds = [];
+        $statusIds = [];
         if (isset($data['character_currency_id'])) {
             foreach ($data['character_currency_id'] as $c) {
                 foreach ($c as $currencyId) {

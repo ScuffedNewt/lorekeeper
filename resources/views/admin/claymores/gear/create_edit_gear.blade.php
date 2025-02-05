@@ -76,26 +76,26 @@
 
     @if ($gear->id)
         @if ($stats->count())
-            {!! Form::open(['url' => 'admin/weapons/stats/'.$gear->id]) !!}
-                <h3>Stats {!! add_help('Leave empty to have no effect on stat.') !!}</h3>
+            {!! Form::open(['url' => 'admin/weapons/stats/' . $gear->id]) !!}
+            <h3>Stats {!! add_help('Leave empty to have no effect on stat.') !!}</h3>
 
-                @foreach ($stats as $stat)
-                    @php
-                        if ($gear->stats->where('stat_id', $stat->id)->first()) {
-                            $base = $gear->stats->where('stat_id', $stat->id)->first()->count;
-                        } else {
-                            $base = null;
-                        }
-                    @endphp
-                    <div class="form-group">
-                        {!! Form::label($stat->name) !!}
-                        {!! Form::number('stats[' . $stat->id . ']', $base, ['class' => 'form-control']) !!}
-                    </div>
-                @endforeach
-
-                <div class="text-right">
-                    {!! Form::submit('Edit Stats', ['class' => 'btn btn-primary']) !!}
+            @foreach ($stats as $stat)
+                @php
+                    if ($gear->stats->where('stat_id', $stat->id)->first()) {
+                        $base = $gear->stats->where('stat_id', $stat->id)->first()->count;
+                    } else {
+                        $base = null;
+                    }
+                @endphp
+                <div class="form-group">
+                    {!! Form::label($stat->name) !!}
+                    {!! Form::number('stats[' . $stat->id . ']', $base, ['class' => 'form-control']) !!}
                 </div>
+            @endforeach
+
+            <div class="text-right">
+                {!! Form::submit('Edit Stats', ['class' => 'btn btn-primary']) !!}
+            </div>
 
             {!! Form::close() !!}
         @else

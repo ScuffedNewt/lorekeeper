@@ -97,9 +97,11 @@ class StatManager extends Service {
     /**
      * sets the stat BASE VALUE directly.
      *
-     * @param mixed $stat
-     * @param mixed $character
-     * @param mixed $quantity
+     * @param mixed      $stat
+     * @param mixed      $character
+     * @param mixed      $quantity
+     * @param mixed|null $logType
+     * @param mixed|null $logData
      */
     public function editCharacterStatBaseCount($stat, $character, $quantity, $logType = null, $logData = null) {
         DB::beginTransaction();
@@ -131,11 +133,11 @@ class StatManager extends Service {
      * Edit the current stat amount. Edits directly unless $set is false, then it increments / decrements.
      * Staff Only function, unless override is true.
      *
-     * @param mixed $stat
-     * @param mixed $character
-     * @param mixed $quantity
-     * @param bool  $override
-     * @param mixed $set
+     * @param mixed      $stat
+     * @param mixed      $character
+     * @param mixed      $quantity
+     * @param mixed|null $logType
+     * @param mixed|null $logData
      */
     public function editCharacterStatCurrentCount($stat, $character, $quantity, $logType = null, $logData = null) {
         DB::beginTransaction();

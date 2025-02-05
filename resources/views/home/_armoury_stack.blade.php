@@ -78,20 +78,19 @@
                         <div class="collapse pt-2" id="upgradeForm">
                             @foreach ($stack->equipment->children as $child)
                                 <div class="card {{ $loop->last ? '' : 'mb-2' }}">
-                                    <div class="h5 card-header border-bottom-0" data-toggle="collapse" data-target="#upgrade-{{$child->id}}"
-                                        role="button" aria-expanded="false" aria-controls="upgrade-{{$child->id}}">
+                                    <div class="h5 card-header border-bottom-0" data-toggle="collapse" data-target="#upgrade-{{ $child->id }}" role="button" aria-expanded="false" aria-controls="upgrade-{{ $child->id }}">
                                         Upgrade to
                                         @if ($child->has_image)
                                             <img src="{{ $child->imageUrl }}" class="img-fluid" style="max-height: 20px;" />
                                         @endif
                                         {{ $child->name }}
                                     </div>
-                                    <div class="collapse" id="upgrade-{{$child->id}}">
+                                    <div class="collapse" id="upgrade-{{ $child->id }}">
                                         <div class="card-body">
                                             <div class="text-center">
                                                 @include('widgets._limits', [
-                                                    'object'     => $child,
-                                                    'compact'    => true,
+                                                    'object' => $child,
+                                                    'compact' => true,
                                                     'hideUnlock' => true,
                                                 ])
                                             </div>
