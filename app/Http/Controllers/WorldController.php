@@ -146,7 +146,7 @@ class WorldController extends Controller {
     public function getSpecieses(Request $request) {
         $query = Species::query();
 
-        if (config('lorekeeper.extensions.species_trait_index.enable')) {
+        if (config('lorekeeper.extensions.visual_trait_index.enable_species_index')) {
             $query->withCount('features');
         }
 

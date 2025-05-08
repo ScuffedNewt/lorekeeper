@@ -471,10 +471,11 @@ function compareAssetArrays($first, $second, $isCharacter = false, $absQuantitie
  * @param App\Models\User\User $recipient
  * @param string               $logType
  * @param string               $data
+ * @param mixed|null           $selected
  *
  * @return array
  */
-function fillUserAssets($assets, $sender, $recipient, $logType, $data) {
+function fillUserAssets($assets, $sender, $recipient, $logType, $data, $selected = null) {
     // Roll on any loot tables
     if (isset($assets['loot_tables'])) {
         foreach ($assets['loot_tables'] as $table) {
@@ -487,12 +488,30 @@ function fillUserAssets($assets, $sender, $recipient, $logType, $data) {
         if ($key == 'items' && count($contents)) {
             $service = new App\Services\InventoryManager;
             foreach ($contents as $asset) {
-                if (!$service->creditItem($sender, $recipient, $logType, $data, $asset['asset'], $asset['quantity'])) {
-                    foreach ($service->errors()->getMessages()['error'] as $error) {
-                        flash($error)->error();
+                if ($asset['quantity'] < 0) {
+                    if (!$selected) {
+                        flash('No selected item found for debiting.')->error();
+
+                        return false;
                     }
 
-                    return false;
+                    foreach ($selected as $stackData) {
+                        if (!$service->debitStack($sender, $logType, $data, $stackData['stack'], $stackData['quantity'])) {
+                            foreach ($service->errors()->getMessages()['error'] as $error) {
+                                flash($error)->error();
+                            }
+
+                            return false;
+                        }
+                    }
+                } else {
+                    if (!$service->creditItem($sender, $recipient, $logType, $data, $asset['asset'], $asset['quantity'])) {
+                        foreach ($service->errors()->getMessages()['error'] as $error) {
+                            flash($error)->error();
+                        }
+
+                        return false;
+                    }
                 }
             }
         } elseif ($key == 'currencies' && count($contents)) {

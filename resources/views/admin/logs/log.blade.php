@@ -1,7 +1,7 @@
 @extends('admin.layout')
 
 @section('admin-title')
-    Site Images
+    Log Viewer - {{ $name }}
 @endsection
 
 @section('admin-content')

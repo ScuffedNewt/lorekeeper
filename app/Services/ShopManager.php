@@ -129,6 +129,7 @@ class ShopManager extends Service {
             $baseStockCost = mergeAssetsArrays(createAssetsArray(true), createAssetsArray());
             $userCostAssets = createAssetsArray();
             $characterCostAssets = createAssetsArray(true);
+            $selected = [];
             foreach ($costs as $cost) {
                 $costQuantity = abs($cost->quantity);
                 if ($coupon) { // coupon applies to ALL costs in the selected group.
@@ -153,7 +154,7 @@ class ShopManager extends Service {
                     $costQuantity *= $quantity;
                 }
 
-                if ($cost->item->assetType == 'currency') {
+                if ($cost->item->assetType == 'currencies') {
                     if ($data['bank'] == 'user') {
                         if (!$cost->item->is_user_owned) {
                             throw new \Exception('You cannot use your user bank to pay for this item.');
@@ -167,6 +168,47 @@ class ShopManager extends Service {
 
                         addAsset($characterCostAssets, $cost->item, -$costQuantity);
                     }
+                } elseif ($cost->item->assetType == 'items') {
+                    $requiredQuantity = $costQuantity;
+                    if (isset($data['stack_id'])) {
+                        foreach ($data['stack_id'] as $userItemStackId) {
+                            $stack = UserItem::where('id', $userItemStackId)->where('user_id', $user->id)->where('item_id', $cost->item->id)->where('count', '>', '0')->first();
+                            if (!$stack) {
+                                continue;
+                            }
+
+                            $stackQuantity = $data['stack_quantity'][$userItemStackId] ?? $stack->count;
+                            $requiredQuantity -= $stackQuantity;
+                            $selected[] = [
+                                'stack'    => $stack,
+                                'quantity' => $stackQuantity,
+                            ];
+                        }
+                    } else {
+                        $stacks = UserItem::where('user_id', $user->id)->where('item_id', $cost->item->id)->where('count', '>', '0')->get();
+                        foreach ($stacks as $stack) {
+                            if ($stack->count >= $requiredQuantity) {
+                                $selected[] = [
+                                    'stack'    => $stack,
+                                    'quantity' => $requiredQuantity,
+                                ];
+                                $requiredQuantity = 0;
+                                break;
+                            } else {
+                                $selected[] = [
+                                    'stack'    => $stack,
+                                    'quantity' => $stack->count,
+                                ];
+                                $requiredQuantity -= $stack->count;
+                            }
+                        }
+                    }
+
+                    if ($requiredQuantity > 0) {
+                        throw new \Exception('You do not have enough, or have not selected enough, of the required item to purchase this item.');
+                    }
+
+                    addAsset($userCostAssets, $cost->item, -$costQuantity);
                 } else {
                     addAsset($userCostAssets, $cost->item, -$costQuantity);
                 }
@@ -185,7 +227,7 @@ class ShopManager extends Service {
             if (!fillUserAssets($userCostAssets, $user, null, 'Shop Purchase', [
                 'data' => 'Purchased '.$shopStock->item->name.' x'.$quantity.' from '.$shop->name.
                 ($coupon ? '. Coupon used: '.$couponUserItem->item->name : ''),
-            ])) {
+            ], $selected)) {
                 throw new \Exception('Failed to purchase item - could not debit costs.');
             }
 

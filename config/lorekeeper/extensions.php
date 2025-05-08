@@ -124,4 +124,7 @@ return [
     // Multiple Subtypes - Newt
     'exclusionary_search'    => 0, // If enabled, searching for multiple subtypes will only return results that have all of the subtypes specified. If disabled, it will return results that have any of the subtypes specified.
     'multiple_subtype_limit' => 10, // The maximum number of subtypes a character can have.
+
+    // TinyMCE Code Editor - Moif
+    'tinymce_code_editor'   => 1, // If enabled, uses the more advanced code editor instead of TinyMCE's default.
 ];

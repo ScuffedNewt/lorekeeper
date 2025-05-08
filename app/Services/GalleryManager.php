@@ -107,7 +107,6 @@ class GalleryManager extends Service {
             if (isset($currencyFormData) && $currencyFormData) {
                 $data['data']['currencyData'] = $currencyFormData;
                 $data['data']['total'] = calculateGroupCurrency($currencyFormData);
-                $data['data'] = collect($data['data'])->toJson();
             }
 
             $submission->update($data);
@@ -626,9 +625,9 @@ class GalleryManager extends Service {
                         'total'        => $submission->data['total'],
                         'value'        => $data['value'],
                         'staff'        => $user->id,
-                    ])->toJson();
+                    ]);
                 } else {
-                    $valueData = collect(['value' => $data['value'], 'staff' => $user->id])->toJson();
+                    $valueData = ['value' => $data['value'], 'staff' => $user->id];
                 }
 
                 // Update the submission with the new data and mark it as processed
@@ -658,9 +657,9 @@ class GalleryManager extends Service {
                         'total'        => $submission->data['total'],
                         'ineligible'   => 1,
                         'staff'        => $user->id,
-                    ])->toJson();
+                    ]);
                 } else {
-                    $valueData = collect(['ineligible' => 1, 'staff' => $user->id])->toJson();
+                    $valueData = ['ineligible' => 1, 'staff' => $user->id];
                 }
 
                 // Update the submission, including marking it as processed

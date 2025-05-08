@@ -183,6 +183,7 @@ class ShopController extends Controller {
             'userPurchaseCount'    => $userPurchaseCount,
             'purchaseLimitReached' => $purchaseLimitReached,
             'userOwned'            => $user ? $userOwned : null,
+            'inventory'            => $user ? UserItem::with('item')->whereNull('deleted_at')->where('count', '>', '0')->where('user_id', Auth::user()->id)->get() : null,
         ]);
     }
 
@@ -195,7 +196,7 @@ class ShopController extends Controller {
      */
     public function postBuy(Request $request, ShopManager $service) {
         $request->validate(ShopLog::$createRules);
-        if ($service->buyStock($request->only(['stock_id', 'shop_id', 'slug', 'bank', 'quantity', 'use_coupon', 'coupon', 'cost_group']), Auth::user())) {
+        if ($service->buyStock($request->only(['stock_id', 'shop_id', 'slug', 'bank', 'quantity', 'use_coupon', 'coupon', 'cost_group', 'stack_id', 'stack_quantity']), Auth::user())) {
             flash('Successfully purchased item.')->success();
         } else {
             foreach ($service->errors()->getMessages()['error'] as $error) {

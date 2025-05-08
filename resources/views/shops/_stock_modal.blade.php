@@ -100,7 +100,7 @@
                         This item can be paid for with either your user account bank, or a character's bank. Please choose which you would like to use.
                         <br />
                         <strong>
-                            Note: Only currencies are taken from character banks. Items are taken from user banks.
+                            Note: Only currencies are taken from character banks. Items and other costs are taken from user banks.
                         </strong>
                     </p>
                     <div class="form-group">
@@ -120,15 +120,15 @@
                             </div>
                         </div>
                     </div>
-                @elseif($stock->use_user_bank)
+                @elseif ($stock->use_user_bank)
                     <p>This item will be paid for using your user account bank.</p>
                     {!! Form::hidden('bank', 'user') !!}
-                @elseif($stock->use_character_bank)
+                @elseif ($stock->use_character_bank)
                     <p>
                         This item must be paid for using a character's bank. Enter the code of the character whose bank you would like to use to purchase the item.
                         <br />
                         <strong>
-                            Note: Only currencies are taken from character banks. Items are taken from user banks.
+                            Note: Only currencies are taken from character banks. Items and other costs are taken from user banks.
                         </strong>
                     </p>
                     {!! Form::hidden('bank', 'character') !!}
@@ -136,6 +136,18 @@
                         {!! Form::label('slug', 'Character Code') !!}
                         {!! Form::text('slug', null, ['class' => 'form-control']) !!}
                     </div>
+                @endif
+                @if ($stock->costs()->where('cost_type', '!=', 'Currency')->count())
+                    <div class="alert alert-warning">
+                        This item has non-currency costs! These costs will be taken from your inventory automatically if not chosen from the list below.
+                    </div>
+                    @include('widgets._inventory_select', [
+                        'user' => Auth::user(),
+                        'inventory' => $inventory,
+                        'selected' => [],
+                        'page' => false,
+                        'customHeaderClass' => 'h5',
+                    ])
                 @endif
                 @if ($stock->shop->use_coupons && $userCoupons !== null)
                     @if (Settings::get('limited_stock_coupon_settings') == 0)
@@ -165,6 +177,7 @@
 @endif
 
 @if (Auth::check())
+    @include('widgets._inventory_select_js')
     <script>
         var $useCharacterBank = $('.use-character-bank');
         $('.bank-select').on('click', function(e) {

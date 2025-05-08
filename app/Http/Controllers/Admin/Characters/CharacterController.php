@@ -295,7 +295,7 @@ class CharacterController extends Controller {
             abort(404);
         }
 
-        return view('character.admin._edit_description_modal', [
+        return view('character.admin._edit_description', [
             'character' => $this->character,
             'isMyo'     => false,
         ]);
@@ -314,7 +314,7 @@ class CharacterController extends Controller {
             abort(404);
         }
 
-        return view('character.admin._edit_description_modal', [
+        return view('character.admin._edit_description', [
             'character' => $this->character,
             'isMyo'     => true,
         ]);
