@@ -2,9 +2,9 @@
 
 namespace App\Models\Daily;
 
-use Carbon\Carbon;
 use App\Models\Currency\Currency;
 use App\Models\Model;
+use Carbon\Carbon;
 
 class Daily extends Model {
     /**

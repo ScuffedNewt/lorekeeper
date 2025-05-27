@@ -63,6 +63,7 @@ class DailyController extends Controller {
         $daily = Daily::where('id', $id)->where('is_active', 1)->first();
         if (!$daily) {
             flash('Invalid '.__('dailies.daily').' selected.')->error();
+
             return redirect()->back();
         }
 
@@ -75,7 +76,7 @@ class DailyController extends Controller {
                 flash($error)->error();
             }
         } else {
-            flash('You have received: ' . createRewardsString($rewards))->success();
+            flash('You have received: '.createRewardsString($rewards))->success();
         }
 
         if (!$request->ajax()) {

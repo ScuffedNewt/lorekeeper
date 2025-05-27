@@ -136,11 +136,11 @@ class DailyManager extends Service {
 
     /**
      * Calculates the cooldown for the daily.
-     * 
-     * @param \App\Models\Daily\Daily $daily
-     * @param \App\Models\Daily\DailyTimer|null $timer
-     * 
-     * @return \Carbon\Carbon|null
+     *
+     * @param Daily           $daily
+     * @param DailyTimer|null $timer
+     *
+     * @return Carbon|null
      */
     public function getDailyCooldown($daily, $timer) {
         // If there is no timer, the cooldown is null
@@ -158,10 +158,10 @@ class DailyManager extends Service {
 
     /**
      * Calculates the next step for the daily.
-     * 
-     * @param \App\Models\Daily\Daily $daily
-     * @param \App\Models\Daily\DailyTimer $dailyTimer
-     * 
+     *
+     * @param Daily      $daily
+     * @param DailyTimer $dailyTimer
+     *
      * @return int
      */
     private function getNextStep($daily, $dailyTimer) {
@@ -188,10 +188,10 @@ class DailyManager extends Service {
 
     /**
      * Checks if the daily is an active streak.
-     * 
-     * @param \App\Models\Daily\Daily $daily
-     * @param \App\Models\Daily\DailyTimer $dailyTimer
-     * 
+     *
+     * @param Daily      $daily
+     * @param DailyTimer $dailyTimer
+     *
      * @return bool
      */
     private function isActiveStreak($daily, $dailyTimer) {

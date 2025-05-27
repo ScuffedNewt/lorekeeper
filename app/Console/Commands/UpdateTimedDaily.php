@@ -34,7 +34,7 @@ class UpdateTimedDaily extends Command {
      * @return int
      */
     public function handle() {
-        //activate or deactivate dailies
+        // activate or deactivate dailies
         $hidedaily = Daily::where('is_active', 1)->where(function ($query) {
             $query->where('end_at', '<', Carbon::now());
         })->get();

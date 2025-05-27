@@ -22,6 +22,15 @@ class DailyWheel extends Model {
     protected $table = 'daily_wheels';
 
     /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'segment_style' => 'array',
+    ];
+
+    /**
      * Validation rules for creation.
      *
      * @var array
@@ -43,15 +52,6 @@ class DailyWheel extends Model {
         'wheel_extension'      => 'mimes:png',
         'background_extension' => 'mimes:png,jpg',
         'stopper_extension'    => 'mimes:png',
-    ];
-
-    /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'segment_style' => 'array',
     ];
 
     /**********************************************************************************************
