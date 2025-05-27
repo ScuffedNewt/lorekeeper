@@ -49,8 +49,8 @@
             {!! Form::text('close_at', $recipe->close_at, ['class' => 'form-control datepicker']) !!}
         </div>
     </div>
-    <div class="alert alert-info">Recipes that have been unlocked (if set to require unlocking) cannot be crafted if the recipe is not ''open'' or is ''closed''</div>
 </div>
+<div class="alert alert-info">Recipes that have been unlocked (if set to require unlocking) cannot be crafted if the recipe is not ''open'' or is ''closed''</div>
 
 <div class="form-group">
     {!! Form::label('Time to Craft (Optional)') !!} <p>The amount of time (in minutes, e.g 1 hour -> 60) that a recipe will take to craft</p>
