@@ -4,15 +4,11 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddTimesToRecipes extends Migration
-{
+class AddTimesToRecipes extends Migration {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
-    {
+    public function up() {
         Schema::table('recipes', function (Blueprint $table) {
             //
             $table->timestamp('open_at')->nullable()->default(null);
@@ -23,11 +19,8 @@ class AddTimesToRecipes extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
-    {
+    public function down() {
         Schema::table('recipes', function (Blueprint $table) {
             //
             $table->dropColumn('open_at');

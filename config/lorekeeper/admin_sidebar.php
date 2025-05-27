@@ -114,7 +114,7 @@ return [
             ],
             [
                 'name' => 'Recipe Grants',
-                'url' => 'admin/grants/recipes'
+                'url'  => 'admin/grants/recipes',
             ],
         ],
     ],
@@ -200,11 +200,11 @@ return [
             ],
             [
                 'name' => 'Recipes',
-                'url' => 'admin/data/recipes'
+                'url'  => 'admin/data/recipes',
             ],
             [
                 'name' => 'Crafting Slots',
-                'url' => 'admin/data/slots'
+                'url'  => 'admin/data/slots',
             ],
             [
                 'name' => 'Dynamic Limits',

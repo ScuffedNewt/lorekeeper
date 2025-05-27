@@ -1,65 +1,69 @@
-<?php namespace App\Services;
+<?php
 
-use App\Services\Service;
+namespace App\Services;
 
-use DB;
-use Config;
-
-use App\Models\Recipe\CraftingSlot;
 use App\Models\Currency\Currency;
 use App\Models\User\UserCraftingSlot;
-use App\Services\CurrencyManager;
+use DB;
 
-class SlotManager extends Service
-{   
+class SlotManager extends Service {
     /**
-     * purchases a slot for a user
+     * purchases a slot for a user.
      *
-     * @param  array                  $data
-     * @param  \App\Models\User\User  $user
-     * @return bool|\App\Models\Slot\Slot
+     * @param \App\Models\User\User $user
+     * @param mixed                 $slot
+     *
+     * @return \App\Models\Slot\Slot|bool
      */
-    public function purchaseSlot($slot, $user)
-    {
+    public function purchaseSlot($slot, $user) {
         DB::beginTransaction();
 
         try {
-
-            if(!$slot) throw new \Exception('Not a valid slot.');
-            
-            if($slot->free)
-            {
-                if(!$this->createSlot($user, $slot)) throw new \Exception('Error creating slot for user.');
+            if (!$slot) {
+                throw new \Exception('Not a valid slot.');
             }
-            else {
 
+            if ($slot->free) {
+                if (!$this->createSlot($user, $slot)) {
+                    throw new \Exception('Error creating slot for user.');
+                }
+            } else {
                 $service = new CurrencyManager;
 
                 $currency = Currency::find($slot->currency_id);
-                if(!$currency) throw new \Exception('Could not find currency');
+                if (!$currency) {
+                    throw new \Exception('Could not find currency');
+                }
                 $quantity = $slot->slot_cost;
 
-                if($quantity <= 0) throw new \Exception('Quantity cannot be 0 or less.');
+                if ($quantity <= 0) {
+                    throw new \Exception('Quantity cannot be 0 or less.');
+                }
 
-                if(!$service->debitCurrency($user, null, 'Bought Crafting Slot', 'Bought Crafing Slot #' . $slot->id .' for ' . $slot->slot_cost . ' ' . $currency->name, $currency, $quantity)) throw new \Exception('Not enough currency to buy this.');
+                if (!$service->debitCurrency($user, null, 'Bought Crafting Slot', 'Bought Crafing Slot #'.$slot->id.' for '.$slot->slot_cost.' '.$currency->name, $currency, $quantity)) {
+                    throw new \Exception('Not enough currency to buy this.');
+                }
 
-                if(!$this->createSlot($user, $slot)) throw new \Exception('Error creating slot for user.');
-
+                if (!$this->createSlot($user, $slot)) {
+                    throw new \Exception('Error creating slot for user.');
+                }
             }
 
             return $this->commitReturn($slot);
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             $this->setError('error', $e->getMessage());
         }
+
         return $this->rollbackReturn(false);
     }
 
-    public function createSlot($user, $slot)
-    {
+    public function createSlot($user, $slot) {
         DB::beginTransaction();
 
         try {
-            if(!$slot) throw new \Exception('Not a valid slot.');
+            if (!$slot) {
+                throw new \Exception('Not a valid slot.');
+            }
 
             $madeSlot = UserCraftingSlot::create([
                 'user_id' => $user->id,
@@ -67,9 +71,10 @@ class SlotManager extends Service
             ]);
 
             return $this->commitReturn($madeSlot);
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             $this->setError('error', $e->getMessage());
         }
+
         return $this->rollbackReturn(false);
     }
 }

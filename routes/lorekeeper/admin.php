@@ -350,7 +350,7 @@ Route::group(['prefix' => 'grants', 'namespace' => 'Users', 'middleware' => 'pow
 
     Route::get('items', 'GrantController@getItems');
     Route::post('items', 'GrantController@postItems');
-    
+
     Route::get('item-search', 'GrantController@getItemSearch');
 
     Route::get('recipes', 'GrantController@getRecipes');

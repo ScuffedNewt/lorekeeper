@@ -32,8 +32,8 @@ return [
     ],
 
     'recipe' => [
-        'name' => 'Recipe',
-        'text_color' => '#ffffff',
-        'background_color' => '#6D18A7'
+        'name'             => 'Recipe',
+        'text_color'       => '#ffffff',
+        'background_color' => '#6D18A7',
     ],
 ];

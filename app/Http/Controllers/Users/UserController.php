@@ -340,16 +340,17 @@ class UserController extends Controller {
     /**
      * Shows a user's recipe logs.
      *
-     * @param  string  $name
+     * @param string $name
+     *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function getUserRecipeLogs($name)
-    {
+    public function getUserRecipeLogs($name) {
         $user = $this->user;
+
         return view('user.recipe_logs', [
-            'user' => $this->user,
-            'logs' => $this->user->getRecipeLogs(0),
-            'sublists' => Sublist::orderBy('sort', 'DESC')->get()
+            'user'     => $this->user,
+            'logs'     => $this->user->getRecipeLogs(0),
+            'sublists' => Sublist::orderBy('sort', 'DESC')->get(),
         ]);
     }
 

@@ -3,26 +3,16 @@
 namespace App\Models\Recipe;
 
 use App\Models\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
-class CraftingSlot extends Model
-{
-
+class CraftingSlot extends Model {
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'currency_id', 'free', 'slot_cost'
+        'currency_id', 'free', 'slot_cost',
     ];
-
-    /**
-     * Whether the model contains timestamps to be saved and updated.
-     *
-     * @var string
-     */
-    public $timestamps = false;
 
     /**
      * The table associated with the model.
@@ -31,8 +21,15 @@ class CraftingSlot extends Model
      */
     protected $table = 'crafting_slots';
 
+    /**
+     * Whether the model contains timestamps to be saved and updated.
+     *
+     * @var string
+     */
+    public $timestamps = false;
+
     /**********************************************************************************************
-    
+
         RELATIONS
 
     **********************************************************************************************/
@@ -40,8 +37,7 @@ class CraftingSlot extends Model
     /**
      * Get the user who owns the stack.
      */
-    public function currency() 
-    {
+    public function currency() {
         return $this->belongsTo('App\Models\Currency\Currency');
     }
 }

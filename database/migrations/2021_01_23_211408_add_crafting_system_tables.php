@@ -4,15 +4,11 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddCraftingSystemTables extends Migration
-{
+class AddCraftingSystemTables extends Migration {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
-    {
+    public function up() {
         Schema::create('recipes', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->increments('id');
@@ -73,21 +69,18 @@ class AddCraftingSystemTables extends Migration
             // The sender_id, if granted by an admin, is the admin user's id.
             // Recipes shouldn't be user-user transferrable, so if it's null then it's implied that it's purchased.
             // Recipes should always belong to a user, but they can be purchased using character currency, ergo character_id
-            $table->unsignedInteger('sender_id')->nullable(); 
+            $table->unsignedInteger('sender_id')->nullable();
             $table->unsignedInteger('recipient_id')->nullable(); // Nullable in the case that a recipe has to be rescinded for whatever reason
-            $table->unsignedInteger('character_id')->nullable(); 
-            
+            $table->unsignedInteger('character_id')->nullable();
+
             $table->timestamps();
         });
     }
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
-    {
+    public function down() {
         Schema::dropIfExists('recipes');
         Schema::dropIfExists('recipe_limits');
         Schema::dropIfExists('recipe_ingredients');

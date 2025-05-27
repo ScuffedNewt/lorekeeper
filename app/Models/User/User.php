@@ -18,11 +18,10 @@ use App\Models\Limit\UserUnlockedLimit;
 use App\Models\Notification;
 use App\Models\Rank\Rank;
 use App\Models\Rank\RankPower;
+use App\Models\Recipe\Recipe;
 use App\Models\Shop\ShopLog;
 use App\Models\Submission\Submission;
 use App\Traits\Commenter;
-use App\Models\Recipe\Recipe;
-use App\Models\User\UserRecipeLog;
 use Carbon\Carbon;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -180,8 +179,7 @@ class User extends Authenticatable implements MustVerifyEmail {
     /**
      * Get the user's items.
      */
-    public function recipes()
-    {
+    public function recipes() {
         return $this->belongsToMany('App\Models\Recipe\Recipe', 'user_recipes')->withPivot('id');
     }
 
@@ -224,8 +222,7 @@ class User extends Authenticatable implements MustVerifyEmail {
         return $this->hasMany(UserUnlockedLimit::class);
     }
 
-    public function craftingSlots()
-    {
+    public function craftingSlots() {
         return $this->hasMany('App\Models\User\UserCraftingSlot');
     }
 
@@ -635,19 +632,22 @@ class User extends Authenticatable implements MustVerifyEmail {
     /**
      * Get the user's recipe logs.
      *
-     * @param  int  $limit
-     * @return \Illuminate\Support\Collection|\Illuminate\Pagination\LengthAwarePaginator
+     * @param int $limit
+     *
+     * @return \Illuminate\Pagination\LengthAwarePaginator|\Illuminate\Support\Collection
      */
-    public function getRecipeLogs($limit = 10)
-    {
+    public function getRecipeLogs($limit = 10) {
         $user = $this;
-        $query = UserRecipeLog::with('recipe')->where(function($query) use ($user) {
+        $query = UserRecipeLog::with('recipe')->where(function ($query) use ($user) {
             $query->with('sender')->where('sender_id', $user->id)->whereNotIn('log_type', ['Staff Grant', 'Prompt Rewards', 'Claim Rewards']);
-        })->orWhere(function($query) use ($user) {
+        })->orWhere(function ($query) use ($user) {
             $query->with('recipient')->where('recipient_id', $user->id)->where('log_type', '!=', 'Staff Removal');
         })->orderBy('id', 'DESC');
-        if($limit) return $query->take($limit)->get();
-        else return $query->paginate(30);
+        if ($limit) {
+            return $query->take($limit)->get();
+        } else {
+            return $query->paginate(30);
+        }
     }
 
     /**
@@ -765,38 +765,44 @@ class User extends Authenticatable implements MustVerifyEmail {
     }
 
     /**
-     * Checks if the user has the named recipe
+     * Checks if the user has the named recipe.
+     *
+     * @param mixed $recipe_id
      *
      * @return bool
      */
-    public function hasRecipe($recipe_id)
-    {
+    public function hasRecipe($recipe_id) {
         $recipe = Recipe::find($recipe_id);
         $user_has = $this->recipes->contains($recipe);
         $default = !$recipe->needs_unlocking;
+
         return $default ? true : $user_has;
     }
 
-
     /**
      * Returned recipes listed that are owned
-     * Reversal simply
+     * Reversal simply.
+     *
+     * @param mixed $ids
+     * @param mixed $reverse
      *
      * @return object
      */
-    public function ownedRecipes($ids, $reverse = false)
-    {
-        $recipes = Recipe::find($ids); $recipeCollection = [];
-        foreach($recipes as $recipe)
-        {
-            if($reverse) {
-                if(!$this->recipes->contains($recipe)) $recipeCollection[] = $recipe;
-            }
-            else {
-                if($this->recipes->contains($recipe)) $recipeCollection[] = $recipe;
+    public function ownedRecipes($ids, $reverse = false) {
+        $recipes = Recipe::find($ids);
+        $recipeCollection = [];
+        foreach ($recipes as $recipe) {
+            if ($reverse) {
+                if (!$this->recipes->contains($recipe)) {
+                    $recipeCollection[] = $recipe;
+                }
+            } else {
+                if ($this->recipes->contains($recipe)) {
+                    $recipeCollection[] = $recipe;
+                }
             }
         }
+
         return $recipeCollection;
     }
-
 }

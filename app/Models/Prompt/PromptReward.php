@@ -5,9 +5,9 @@ namespace App\Models\Prompt;
 use App\Models\Currency\Currency;
 use App\Models\Item\Item;
 use App\Models\Loot\LootTable;
-use App\Models\Recipe\Recipe;
 use App\Models\Model;
 use App\Models\Raffle\Raffle;
+use App\Models\Recipe\Recipe;
 
 class PromptReward extends Model {
     /**
@@ -73,7 +73,8 @@ class PromptReward extends Model {
             case 'Recipe':
                 return $this->belongsTo(Recipe::class, 'rewardable_id');
                 break;
-        }   
+        }
+
         return null;
     }
 }
