@@ -277,6 +277,7 @@ class DailyService extends Service {
                 'text_orientation'     => $data['text_orientation'] ?? 'curved',
                 'text_fontsize'        => $data['text_fontsize'] ?? '18',
             ]);
+            $wheel->save();
         } elseif ($daily->type == 'Button') {
             if (isset($data['remove_button_image'])) {
                 if ($daily && isset($daily->data['has_button_image']) && $data['remove_button_image']) {

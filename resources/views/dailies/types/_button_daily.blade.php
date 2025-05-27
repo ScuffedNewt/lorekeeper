@@ -21,7 +21,7 @@
     @else
         <div class="row justify-content-center mt-2">
             {!! Form::open(['url' => 'dailies/' . $daily->id, 'method' => 'post']) !!}
-            {!! Form::submit('Collect Advent!', ['class' => 'btn btn-primary', 'disabled' => $isDisabled]) !!}
+            {!! Form::submit('Collect!', ['class' => 'btn btn-primary', 'disabled' => $isDisabled]) !!}
             {!! Form::close() !!}
         </div>
     @endif

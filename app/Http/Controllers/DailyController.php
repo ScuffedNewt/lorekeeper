@@ -75,7 +75,7 @@ class DailyController extends Controller {
                 flash($error)->error();
             }
         } else {
-            flash(createRewardsString($rewards))->success();
+            flash('You have received: ' . createRewardsString($rewards))->success();
         }
 
         if (!$request->ajax()) {

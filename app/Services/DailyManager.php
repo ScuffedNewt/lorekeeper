@@ -134,25 +134,41 @@ class DailyManager extends Service {
         return true;
     }
 
+    /**
+     * Calculates the cooldown for the daily.
+     * 
+     * @param \App\Models\Daily\Daily $daily
+     * @param \App\Models\Daily\DailyTimer|null $timer
+     * 
+     * @return \Carbon\Carbon|null
+     */
     public function getDailyCooldown($daily, $timer) {
         // If there is no timer, the cooldown is null
         if (!$timer) {
-            return null;
+            return;
         }
         // If the timer is up/we are good, cooldown is also null
         if ($timer->rolled_at < $daily->dailyTimeframeDate) {
-            return null;
+            return;
         }
 
         // return next date
         return Carbon::createFromFormat('Y-m-d H:i:s', $daily->nextDate);
     }
 
+    /**
+     * Calculates the next step for the daily.
+     * 
+     * @param \App\Models\Daily\Daily $daily
+     * @param \App\Models\Daily\DailyTimer $dailyTimer
+     * 
+     * @return int
+     */
     private function getNextStep($daily, $dailyTimer) {
         $step = $dailyTimer->step;
         $maxStep = $daily->maxStep;
 
-        //if streak daily, check if a day was missed and if so, set dailytimer step to 1
+        // if streak daily, check if a day was missed and if so, set dailytimer step to 1
         if ($daily->type == 'Wheel') {
             return 0;
         }
@@ -170,6 +186,14 @@ class DailyManager extends Service {
         }
     }
 
+    /**
+     * Checks if the daily is an active streak.
+     * 
+     * @param \App\Models\Daily\Daily $daily
+     * @param \App\Models\Daily\DailyTimer $dailyTimer
+     * 
+     * @return bool
+     */
     private function isActiveStreak($daily, $dailyTimer) {
         $date1 = new Datetime($daily->dailyTimeframeDate);
         $date2 = new Datetime($dailyTimer->rolled_at);
