@@ -263,7 +263,7 @@ class UserController extends Controller {
             'user' => $this->user,
             'logs' => $this->user->getCurrencyLogs(),
         ] + (Auth::check() && Auth::user()->id == $this->user->id ? [
-            'currencyOptions' => Currency::where('allow_user_to_user', 1)->where('is_user_owned', 1)->whereIn('id', UserCurrency::where('user_id', $this->user->id)->pluck('currency_id')->toArray())->orderBy('sort_user', 'DESC')->pluck('name', 'id')->toArray(),
+            'currencyOptions' => Currency::visible(Auth::user() ?? null)->where('allow_user_to_user', 1)->where('is_user_owned', 1)->whereIn('id', UserCurrency::where('user_id', $this->user->id)->pluck('currency_id')->toArray())->orderBy('sort_user', 'DESC')->pluck('name', 'id')->toArray(),
             'userOptions'     => User::where('id', '!=', Auth::user()->id)->orderBy('name')->pluck('name', 'id')->toArray(),
         ] : []));
     }

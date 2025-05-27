@@ -89,10 +89,9 @@
 
 @section('scripts')
     @parent
-
     @include('admin.sales._character_select_js')
     @include('widgets._datetimepicker_js')
-
+    @include('js._tinymce_wysiwyg')
     <script>
         $(document).ready(function() {
             $('.delete-sales-button').on('click', function(e) {

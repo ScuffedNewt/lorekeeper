@@ -12,10 +12,12 @@ use App\Models\Character\CharacterDesignUpdate;
 use App\Models\Character\CharacterFeature;
 use App\Models\Character\CharacterImage;
 use App\Models\Character\CharacterImageSubtype;
+use App\Models\Character\CharacterLog;
 use App\Models\Character\CharacterTransfer;
 use App\Models\Sales\SalesCharacter;
 use App\Models\Species\Subtype;
 use App\Models\User\User;
+use App\Models\User\UserCharacterLog;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Config;
@@ -251,7 +253,7 @@ class CharacterManager extends Service {
             }
 
             // Save the processed image
-            $image->save($characterImage->imagePath.'/'.$characterImage->fullsizeFileName, 100, config('lorekeeper.settings.masterlist_fullsizes_format'));
+            $image->save($characterImage->imagePath.'/'.$characterImage->fullsizeFileName, 100, config('lorekeeper.settings.masterlist_fullsizes_format') != null ? config('lorekeeper.settings.masterlist_fullsizes_format') : $characterImage->fullsize_extension);
         } else {
             // Delete fullsize if it was previously created.
             if (isset($characterImage->fullsize_hash) ? file_exists(public_path($characterImage->imageDirectory.'/'.$characterImage->fullsizeFileName)) : false) {
@@ -263,7 +265,7 @@ class CharacterManager extends Service {
         if (config('lorekeeper.settings.masterlist_image_dimension') != 0) {
             if ($image->width() > $image->height()) {
                 // Landscape
-                if (config('lorekeeper.settings.masterlist_image_dimension_target') == 'short') {
+                if (config('lorekeeper.settings.masterlist_image_dimension_target') == 'shorter') {
                     $image->resize(null, config('lorekeeper.settings.masterlist_image_dimension'), function ($constraint) {
                         $constraint->aspectRatio();
                         $constraint->upsize();
@@ -276,7 +278,7 @@ class CharacterManager extends Service {
                 }
             } else {
                 // Portrait
-                if (config('lorekeeper.settings.masterlist_image_dimension_target') == 'short') {
+                if (config('lorekeeper.settings.masterlist_image_dimension_target') == 'shorter') {
                     $image->resize(config('lorekeeper.settings.masterlist_image_dimension'), null, function ($constraint) {
                         $constraint->aspectRatio();
                         $constraint->upsize();
@@ -302,11 +304,11 @@ class CharacterManager extends Service {
 
                 $wmScale = config('lorekeeper.settings.watermark_percent');
 
-                //Assume Landscape by Default
+                // Assume Landscape by Default
                 $maxSize = $imageWidth * $wmScale;
 
                 if ($imageWidth > $imageHeight) {
-                    //Landscape
+                    // Landscape
                     $maxSize = $imageWidth * $wmScale;
                 } else {
                     // Portrait
@@ -314,7 +316,7 @@ class CharacterManager extends Service {
                 }
 
                 if ($wmWidth > $wmHeight) {
-                    //Landscape
+                    // Landscape
                     $watermark->resize($maxSize, null, function ($constraint) {
                         $constraint->aspectRatio();
                     });
@@ -410,11 +412,11 @@ class CharacterManager extends Service {
 
                     $wmScale = config('lorekeeper.settings.watermark_percent');
 
-                    //Assume Landscape by Default
+                    // Assume Landscape by Default
                     $maxSize = $imageWidth * $wmScale;
 
                     if ($imageWidth > $imageHeight) {
-                        //Landscape
+                        // Landscape
                         $maxSize = $imageWidth * $wmScale;
                     } else {
                         // Portrait
@@ -422,7 +424,7 @@ class CharacterManager extends Service {
                     }
 
                     if ($wmWidth > $wmHeight) {
-                        //Landscape
+                        // Landscape
                         $watermark->resize($maxSize, null, function ($constraint) {
                             $constraint->aspectRatio();
                         });
@@ -512,26 +514,33 @@ class CharacterManager extends Service {
      * @return bool
      */
     public function createLog($senderId, $senderUrl, $recipientId, $recipientUrl, $characterId, $type, $data, $logType, $isUpdate = false, $oldData = null, $newData = null) {
-        return DB::table($logType == 'character' ? 'character_log' : 'user_character_log')->insert(
-            [
-                'sender_id'     => $senderId,
-                'sender_url'    => $senderUrl,
-                'recipient_id'  => $recipientId,
-                'recipient_url' => $recipientUrl,
-                'character_id'  => $characterId,
-                'log'           => $type.($data ? ' ('.$data.')' : ''),
-                'log_type'      => $type,
-                'data'          => $data,
-                'created_at'    => Carbon::now(),
-                'updated_at'    => Carbon::now(),
-            ] + ($logType == 'character' ?
-                [
-                    'change_log' => $isUpdate ? json_encode([
+        $log = null;
+
+        $shared = [
+            'sender_id'     => $senderId,
+            'sender_url'    => $senderUrl,
+            'recipient_id'  => $recipientId,
+            'recipient_url' => $recipientUrl,
+            'character_id'  => $characterId,
+            'log'           => $type.($data ? ' ('.$data.')' : ''),
+            'log_type'      => $type,
+            'data'          => $data,
+        ];
+
+        if ($logType == 'character') {
+            $log = CharacterLog::create(
+                $shared + [
+                    'change_log' => $isUpdate ? [
                         'old' => $oldData,
                         'new' => $newData,
-                    ]) : null,
-                ] : [])
-        );
+                    ] : null,
+                ]
+            );
+        } else {
+            $log = UserCharacterLog::create($shared);
+        }
+
+        return $log;
     }
 
     /**
@@ -1055,12 +1064,12 @@ class CharacterManager extends Service {
 
             $count = 0;
             foreach ($images as $image) {
-                //if($count == 1)
-                //{
+                // if($count == 1)
+                // {
                 //    // Set the first one as the active image
                 //    $image->character->image_id = $image->id;
                 //    $image->character->save();
-                //}
+                // }
                 $image->sort = $count;
                 $image->save();
                 $count++;
@@ -1558,7 +1567,7 @@ class CharacterManager extends Service {
             if ($sender) {
                 Notifications::create('CHARACTER_SENT', $sender, [
                     'character_name' => $character->slug,
-                    'character_slug' => $character->slug,
+                    'character_url'  => $character->is_myo_slot ? 'myo/'.$character->id : 'character/'.$character->slug,
                     'sender_name'    => $user->name,
                     'sender_url'     => $user->url,
                     'recipient_name' => is_object($recipient) ? $recipient->name : prettyProfileName($recipient),
@@ -1568,7 +1577,7 @@ class CharacterManager extends Service {
             if (is_object($recipient)) {
                 Notifications::create('CHARACTER_RECEIVED', $recipient, [
                     'character_name' => $character->slug,
-                    'character_slug' => $character->slug,
+                    'character_url'  => $character->is_myo_slot ? 'myo/'.$character->id : 'character/'.$character->slug,
                     'sender_name'    => $user->name,
                     'sender_url'     => $user->url,
                 ]);
@@ -1606,16 +1615,16 @@ class CharacterManager extends Service {
 
                 // Process the character move if the transfer has already been approved
                 if ($transfer->is_approved) {
-                    //check the cooldown saved
+                    // check the cooldown saved
                     if (isset($transfer->data['cooldown'])) {
                         $cooldown = $transfer->data['cooldown'];
                     }
                     $this->moveCharacter($transfer->character, $transfer->recipient, 'User Transfer', $cooldown);
                     if (!Settings::get('open_transfers_queue')) {
-                        $transfer->data = json_encode([
+                        $transfer->data = [
                             'cooldown' => $cooldown,
                             'staff_id' => null,
-                        ]);
+                        ];
                     }
 
                     // Notify sender of the successful transfer
@@ -1628,9 +1637,9 @@ class CharacterManager extends Service {
                 }
             } else {
                 $transfer->status = 'Rejected';
-                $transfer->data = json_encode([
+                $transfer->data = [
                     'staff_id' => null,
-                ]);
+                ];
 
                 // Notify sender that transfer has been rejected
                 Notifications::create('CHARACTER_TRANSFER_REJECTED', $transfer->sender, [
@@ -1709,10 +1718,10 @@ class CharacterManager extends Service {
 
             if ($data['action'] == 'Approve') {
                 $transfer->is_approved = 1;
-                $transfer->data = json_encode([
+                $transfer->data = [
                     'staff_id' => $user->id,
                     'cooldown' => $data['cooldown'] ?? Settings::get('transfer_cooldown'),
-                ]);
+                ];
 
                 // Process the character move if the recipient has already accepted the transfer
                 if ($transfer->status == 'Accepted') {
@@ -1754,9 +1763,9 @@ class CharacterManager extends Service {
 
                 $transfer->status = 'Rejected';
                 $transfer->reason = $data['reason'] ?? null;
-                $transfer->data = json_encode([
+                $transfer->data = [
                     'staff_id' => $user->id,
-                ]);
+                ];
 
                 // Notify both parties that the request was denied
                 Notifications::create('CHARACTER_TRANSFER_DENIED', $transfer->sender, [

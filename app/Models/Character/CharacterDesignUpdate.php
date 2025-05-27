@@ -25,7 +25,7 @@ class CharacterDesignUpdate extends Model {
         'hash', 'species_id', 'subtype_ids', 'rarity_id',
         'has_comments', 'has_image', 'has_addons', 'has_features',
         'submitted_at', 'update_type', 'fullsize_hash',
-        'approval_votes', 'rejection_votes',
+        'vote_data',
     ];
 
     /**
@@ -43,6 +43,8 @@ class CharacterDesignUpdate extends Model {
     protected $casts = [
         'submitted_at' => 'datetime',
         'subtype_ids'  => 'array',
+        'data'         => 'array',
+        'vote_data'    => 'array',
     ];
 
     /**
@@ -179,25 +181,15 @@ class CharacterDesignUpdate extends Model {
     }
 
     /**
-     * Scope a query to sort updates by oldest first.
-     *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     *
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeSortOldest($query) {
-        return $query->orderBy('id');
-    }
-
-    /**
      * Scope a query to sort updates by newest first.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param mixed                                 $reverse
      *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeSortNewest($query) {
-        return $query->orderBy('id', 'DESC');
+    public function scopeSortNewest($query, $reverse = false) {
+        return $query->orderBy('id', $reverse ? 'ASC' : 'DESC');
     }
 
     /**********************************************************************************************
@@ -205,15 +197,6 @@ class CharacterDesignUpdate extends Model {
         ACCESSORS
 
     **********************************************************************************************/
-
-    /**
-     * Get the data attribute as an associative array.
-     *
-     * @return array
-     */
-    public function getDataAttribute() {
-        return json_decode($this->attributes['data'], true);
-    }
 
     /**
      * Get the items (UserItem IDs) attached to this update request.
@@ -296,7 +279,13 @@ class CharacterDesignUpdate extends Model {
      * @return string
      */
     public function getThumbnailFileNameAttribute() {
-        return $this->id.'_'.$this->hash.'_th.'.$this->extension;
+        if (config('lorekeeper.settings.masterlist_image_format') != null && config('lorekeeper.settings.masterlist_image_format') != $this->extension) {
+            $extension = config('lorekeeper.settings.masterlist_image_format');
+        } else {
+            $extension = $this->extension;
+        }
+
+        return $this->id.'_'.$this->hash.'_th.'.$extension;
     }
 
     /**
@@ -324,15 +313,6 @@ class CharacterDesignUpdate extends Model {
      */
     public function getUrlAttribute() {
         return url('designs/'.$this->id);
-    }
-
-    /**
-     * Gets the voting data of the design update request.
-     *
-     * @return string
-     */
-    public function getVoteDataAttribute() {
-        return collect(json_decode($this->attributes['vote_data'], true));
     }
 
     /**********************************************************************************************
@@ -384,5 +364,45 @@ class CharacterDesignUpdate extends Model {
         }
 
         return implode(', ', $result);
+    }
+
+    /**
+     * Gets the voting data of the gallery submission and performs preliminary processing.
+     *
+     * @param bool $withUsers
+     *
+     * @return array
+     */
+    public function getVoteData($withUsers = 0) {
+        $voteData['raw'] = $this->vote_data;
+
+        // Only query users if necessary, and condense to one query per submission
+        if ($withUsers) {
+            $users = User::whereIn('id', array_keys($voteData['raw']))->select('id', 'name', 'rank_id')->get();
+        } else {
+            $users = null;
+        }
+
+        $voteData['raw'] = collect($voteData['raw'])->mapWithKeys(function ($vote, $id) use ($users) {
+            return [$id => [
+                'vote' => $vote,
+                'user' => $users ? $users->where('id', $id)->first() : $id,
+            ]];
+        });
+
+        // Tally approve/reject sums for ease
+        $voteData['approve'] = $voteData['reject'] = 0;
+        foreach ($voteData['raw'] as $vote) {
+            switch ($vote['vote']) {
+                case 1:
+                    $voteData['reject'] += 1;
+                    break;
+                case 2:
+                    $voteData['approve'] += 1;
+                    break;
+            }
+        }
+
+        return $voteData;
     }
 }

@@ -107,6 +107,8 @@
     @include('widgets._loot_select_row', ['showLootTables' => true, 'showRaffles' => true])
 
     @if ($prompt->id)
+        @include('widgets._add_limits', ['object' => $prompt])
+
         <h3>Preview</h3>
         <div class="card mb-3">
             <div class="card-body">
@@ -120,6 +122,7 @@
     @parent
     @include('js._loot_js', ['showLootTables' => true, 'showRaffles' => true])
     @include('widgets._datetimepicker_js')
+    @include('js._tinymce_wysiwyg')
     <script>
         $(document).ready(function() {
             $('.delete-prompt-button').on('click', function(e) {

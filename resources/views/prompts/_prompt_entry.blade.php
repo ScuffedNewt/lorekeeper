@@ -6,9 +6,9 @@
         <x-admin-edit title="Prompt" :object="$prompt" />
         <div class="mb-3">
             @if (isset($isPage))
-                <h1 class="mb-0">{!! $prompt->name !!}</h1>
+                <h1 class="mb-0">{!! $prompt->name !!} <a href="{{ $prompt->idUrl }}" class="world-entry-search text-muted"><i class="fas fa-search"></i></a></h1>
             @else
-                <h2 class="mb-0"><a href="{{ url('prompts/' . $prompt->id) }}">{!! $prompt->name !!}</a></h2>
+                <h2 class="mb-0"><a href="{{ $prompt->idUrl }}">{!! $prompt->name !!}</a></h2>
             @endif
             @if ($prompt->prompt_category_id)
                 <div><strong>Category: </strong>{!! $prompt->category->displayName !!}</div>
@@ -23,7 +23,7 @@
         <div class="world-entry-text">
             <p>{{ $prompt->summary }}</p>
             <h3 class="mb-3"><a data-toggle="collapse" href="#prompt-{{ $prompt->id }}" @if (isset($isPage)) aria-expanded="true" @endif>Details <i class="fas fa-angle-down"></i></a></h3>
-            <div class="collapse @if (isset($isPage)) show @endif mb-5" id="prompt-{{ $prompt->id }}">
+            <div class="collapse @if (isset($isPage)) show @endif" id="prompt-{{ $prompt->id }}">
                 @if ($prompt->parsed_description)
                     {!! $prompt->parsed_description !!}
                 @else
@@ -55,6 +55,13 @@
                         @endforeach
                     </tbody>
                 </table>
+            @endif
+            @if (count(getLimits($prompt)))
+                <hr />
+                @include('widgets._limits', [
+                    'object' => $prompt,
+                    'hideUnlock' => true,
+                ])
             @endif
         </div>
         <div class="text-right">

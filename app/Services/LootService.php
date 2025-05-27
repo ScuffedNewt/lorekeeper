@@ -166,7 +166,7 @@ class LootService extends Service {
                 'rewardable_id'   => $data['rewardable_id'][$key] ?? 1,
                 'quantity'        => $data['quantity'][$key],
                 'weight'          => $data['weight'][$key],
-                'data'            => isset($lootData) ? json_encode($lootData) : null,
+                'data'            => $lootData ?? null,
             ]);
         }
     }

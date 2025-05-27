@@ -241,7 +241,7 @@ class SalesService extends Service {
                 'image_id'     => $data['image_id'][$key] ?? $character->image->id,
                 'sales_id'     => $sales->id,
                 'type'         => $charData[$key]['type'],
-                'data'         => json_encode($charData[$key]),
+                'data'         => $charData[$key],
                 'description'  => $data['description'][$key] ?? null,
                 'link'         => $data['link'][$key] ?? null,
                 'is_open'      => $data['character_is_open'][$character->slug] ?? ($data['new_entry'][$key] ? 1 : 0),

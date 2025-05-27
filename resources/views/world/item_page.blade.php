@@ -95,14 +95,14 @@
                                     </p>
                                 @endif
                                 {!! $description !!}
-                                @if (((isset($item->uses) && $item->uses) || (isset($item->source) && $item->source) || $shops->count() || (isset($item->data['prompts']) && $item->data['prompts'])) && config('lorekeeper.extensions.item_entry_expansion.extra_fields'))
+                                @if (((isset($item->uses) && $item->uses) || (isset($item->source) && $item->source) || $item->shop_stock_count || (isset($item->data['prompts']) && $item->data['prompts'])) && config('lorekeeper.extensions.item_entry_expansion.extra_fields'))
 
                                     @if (isset($item->uses) && $item->uses)
                                         <p>
                                             <strong>Uses:</strong> {!! $item->uses !!}
                                         </p>
                                     @endif
-                                    @if ((isset($item->source) && $item->source) || $shops->count() || (isset($item->data['prompts']) && $item->data['prompts']))
+                                    @if ((isset($item->source) && $item->source) || $item->shop_stock_count || (isset($item->data['prompts']) && $item->data['prompts']))
                                         <h5>Availability</h5>
                                         <div class="row">
                                             @if (isset($item->data['release']) && $item->data['release'])
@@ -111,13 +111,13 @@
                                                     <p>{!! $item->data['release'] !!}</p>
                                                 </div>
                                             @endif
-                                            @if ($shops->count())
+                                            @if ($item->shop_stock_count)
                                                 <div class="col">
                                                     <p>
                                                         <strong>Purchaseable At:</strong>
                                                     </p>
                                                     <div class="row">
-                                                        @foreach ($shops as $shop)
+                                                        @foreach ($item->shops(Auth::user() ?? null) as $shop)
                                                             <span class="badge" style="font-size:95%; margin:5px;">
                                                                 <a href="{{ $shop->url }}">
                                                                     {{ $shop->name }}

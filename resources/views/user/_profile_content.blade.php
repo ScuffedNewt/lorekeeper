@@ -83,7 +83,7 @@
         <div class="card-body text-center">
             <h5 class="card-title">Bank</h5>
             <div class="profile-assets-content">
-                @foreach ($user->getCurrencies(false) as $currency)
+                @foreach ($user->getCurrencies(false, false, Auth::user() ?? null) as $currency)
                     <div>{!! $currency->display($currency->quantity) !!}</div>
                 @endforeach
             </div>
@@ -156,35 +156,39 @@
 <hr class="mb-5" />
 
 <div class="row col-12">
-    <div class="col-md-8">
-
-        @comments(['model' => $user->profile, 'perPage' => 5])
-
-    </div>
-    <div class="col-md-4">
+    @if ($user->settings->allow_profile_comments)
+        <div class="col-md-8">
+            @comments(['model' => $user->profile, 'perPage' => 5])
+        </div>
+    @endif
+    <div class="col-md-{{ $user->settings->allow_profile_comments ? 4 : 12 }}">
         <div class="card mb-4">
-            <div class="card-header">
+            <div class="card-header" data-toggle="collapse" data-target="#mentionHelp" aria-expanded="{{ $user->settings->allow_profile_comments ? 'true' : 'false' }}">
                 <h5>Mention This User</h5>
             </div>
-            <div class="card-body">
+            <div class="card-body collapse {{ $user->settings->allow_profile_comments ? 'show' : '' }}" id="mentionHelp">
                 In the rich text editor:
                 <div class="alert alert-secondary">
                     {{ '@' . $user->name }}
                 </div>
-                In a comment:
-                <div class="alert alert-secondary">
-                    [{{ $user->name }}]({{ $user->url }})
-                </div>
+                @if (!config('lorekeeper.settings.wysiwyg_comments'))
+                    In a comment:
+                    <div class="alert alert-secondary">
+                        [{{ $user->name }}]({{ $user->url }})
+                    </div>
+                @endif
                 <hr>
                 <div class="my-2"><strong>For Names and Avatars:</strong></div>
                 In the rich text editor:
                 <div class="alert alert-secondary">
                     {{ '%' . $user->name }}
                 </div>
-                In a comment:
-                <div class="alert alert-secondary">
-                    [![{{ $user->name }}'s Avatar]({{ $user->avatarUrl }})]({{ $user->url }}) [{{ $user->name }}]({{ $user->url }})
-                </div>
+                @if (!config('lorekeeper.settings.wysiwyg_comments'))
+                    In a comment:
+                    <div class="alert alert-secondary">
+                        [![{{ $user->name }}'s Avatar]({{ $user->avatarUrl }})]({{ $user->url }}) [{{ $user->name }}]({{ $user->url }})
+                    </div>
+                @endif
             </div>
             @if (Auth::check() && Auth::user()->isStaff)
                 <div class="card-footer">

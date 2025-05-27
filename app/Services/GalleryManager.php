@@ -107,7 +107,6 @@ class GalleryManager extends Service {
             if (isset($currencyFormData) && $currencyFormData) {
                 $data['data']['currencyData'] = $currencyFormData;
                 $data['data']['total'] = calculateGroupCurrency($currencyFormData);
-                $data['data'] = collect($data['data'])->toJson();
             }
 
             $submission->update($data);
@@ -187,6 +186,10 @@ class GalleryManager extends Service {
             // Check that the user can edit the submission
             if (!$submission->user_id == $user->id && !$user->hasPower('manage_submissions')) {
                 throw new \Exception("You can't edit this submission.");
+            }
+
+            if ($submission->status == 'Rejected') {
+                throw new \Exception('This submission has been rejected and cannot be edited.');
             }
 
             // Check that there is text and/or an image, including if there is an existing image (via the existence of a hash)
@@ -368,7 +371,7 @@ class GalleryManager extends Service {
 
                 // Check if all collaborators have approved, and if so send a notification to the
                 // submitting user (unless they are the last to approve-- which shouldn't happen, but)
-                if ($submission->collaboratorApproved) {
+                if ($submission->collaboratorApproval) {
                     if (Settings::get('gallery_submissions_require_approval') && $submission->gallery->votes_required > 0) {
                         if ($submission->user->id != $user->id) {
                             Notifications::create('GALLERY_COLLABORATORS_APPROVED', $submission->user, [
@@ -406,7 +409,7 @@ class GalleryManager extends Service {
             if ($submission->status != 'Pending') {
                 throw new \Exception('This request cannot be processed.');
             }
-            if (!$submission->collaboratorApproved) {
+            if (!$submission->collaboratorApproval) {
                 throw new \Exception("This submission's collaborators have not all approved yet.");
             }
 
@@ -424,30 +427,18 @@ class GalleryManager extends Service {
 
             // Get existing vote data if it exists, remove any existing vote data for the user,
             // add the new vote data, and json encode it
-            $voteData = (isset($submission->vote_data) ? collect(json_decode($submission->vote_data, true)) : collect([]));
+            $voteData = (isset($submission->vote_data) ? collect($submission->vote_data, true) : collect([]));
             $voteData->get($user->id) ? $voteData->pull($user->id) : null;
             $voteData->put($user->id, $vote);
-            $submission->vote_data = $voteData->toJson();
+            $submission->vote_data = $voteData;
 
             $submission->save();
 
-            // Count up the existing votes to see if the required number has been reached
-            $rejectSum = 0;
-            $approveSum = 0;
-            foreach ($submission->voteData as $voter=> $vote) {
-                if ($vote == 1) {
-                    $rejectSum += 1;
-                }
-                if ($vote == 2) {
-                    $approveSum += 1;
-                }
-            }
-
-            // And if so, process the submission
-            if ($action == 'reject' && $rejectSum >= $submission->gallery->votes_required) {
+            // Process the submission if the required number of votes has been reached
+            if ($action == 'reject' && $submission->getVoteData()['reject'] >= $submission->gallery->votes_required) {
                 $this->rejectSubmission($submission, $user);
             }
-            if ($action == 'accept' && $approveSum >= $submission->gallery->votes_required) {
+            if ($action == 'accept' && $submission->getVoteData()['approve'] >= $submission->gallery->votes_required) {
                 $this->acceptSubmission($submission);
             }
 
@@ -634,9 +625,9 @@ class GalleryManager extends Service {
                         'total'        => $submission->data['total'],
                         'value'        => $data['value'],
                         'staff'        => $user->id,
-                    ])->toJson();
+                    ]);
                 } else {
-                    $valueData = collect(['value' => $data['value'], 'staff' => $user->id])->toJson();
+                    $valueData = ['value' => $data['value'], 'staff' => $user->id];
                 }
 
                 // Update the submission with the new data and mark it as processed
@@ -666,9 +657,9 @@ class GalleryManager extends Service {
                         'total'        => $submission->data['total'],
                         'ineligible'   => 1,
                         'staff'        => $user->id,
-                    ])->toJson();
+                    ]);
                 } else {
-                    $valueData = collect(['ineligible' => 1, 'staff' => $user->id])->toJson();
+                    $valueData = ['ineligible' => 1, 'staff' => $user->id];
                 }
 
                 // Update the submission, including marking it as processed
@@ -886,7 +877,7 @@ class GalleryManager extends Service {
                 // Send a notification to included characters' owners now that the submission is accepted
                 // but not for the submitting user's own characters
                 foreach ($submission->characters as $character) {
-                    if ($character->user && $character->character->user->id != $submission->user->id) {
+                    if ($character->character->user && $character->character->user->id != $submission->user->id) {
                         Notifications::create('GALLERY_SUBMISSION_CHARACTER', $character->character->user, [
                             'sender'        => $submission->user->name,
                             'sender_url'    => $submission->user->url,

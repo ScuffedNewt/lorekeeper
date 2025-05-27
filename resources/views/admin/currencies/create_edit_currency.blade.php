@@ -17,17 +17,21 @@
 
     <h3>Basic Information</h3>
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div class="form-group">
                 {!! Form::label('Currency Name') !!}
                 {!! Form::text('name', $currency->name, ['class' => 'form-control']) !!}
             </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div class="form-group">
                 {!! Form::label('Abbreviation (Optional)') !!} {!! add_help('This will be used to denote the currency if an icon is not provided. If an abbreviation is not given, the currency\'s full name will be used.') !!}
                 {!! Form::text('abbreviation', $currency->abbreviation, ['class' => 'form-control']) !!}
             </div>
+        </div>
+        <div class="col-md-4 form-group">
+            {!! Form::label('Currency Category (Optional)') !!}
+            {!! Form::select('currency_category_id', $categories, $currency->currency_category_id, ['class' => 'form-control', 'placeholder' => 'No category']) !!}
         </div>
     </div>
 
@@ -147,6 +151,11 @@
         </div>
     @endif
 
+    <div class="form-group">
+        {!! Form::checkbox('is_visible', 1, $currency->id ? $currency->is_visible : 1, ['class' => 'form-check-input', 'data-toggle' => 'toggle']) !!}
+        {!! Form::label('is_visible', 'Is Visible', ['class' => 'form-check-label ml-3']) !!} {!! add_help('If turned off, the currency will not be visible in the currencies list or available for selection in search. Permissioned staff will still be able to see them, however.') !!}
+    </div>
+
     <div class="text-right">
         {!! Form::submit($currency->id ? 'Edit' : 'Create', ['class' => 'btn btn-primary']) !!}
     </div>
@@ -184,6 +193,7 @@
 
 @section('scripts')
     @parent
+    @include('js._tinymce_wysiwyg')
     <script>
         $(document).ready(function() {
             var $userOwned = $('#userOwned');

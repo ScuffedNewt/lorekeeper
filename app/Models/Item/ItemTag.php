@@ -22,6 +22,15 @@ class ItemTag extends Model {
      */
     protected $table = 'item_tags';
 
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'data' => 'array',
+    ];
+
     /**********************************************************************************************
 
         RELATIONS
@@ -100,15 +109,6 @@ class ItemTag extends Model {
      */
     public function getAdminUrlAttribute() {
         return url('admin/data/items/tag/'.$this->item_id.'/'.$this->tag);
-    }
-
-    /**
-     * Get the data attribute as an associative array.
-     *
-     * @return array
-     */
-    public function getDataAttribute() {
-        return json_decode($this->attributes['data'], true);
     }
 
     /**

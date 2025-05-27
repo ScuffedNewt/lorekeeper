@@ -62,7 +62,8 @@ class DailyController extends Controller {
     public function postRoll(Request $request, DailyManager $service, $id) {
         $daily = Daily::where('id', $id)->where('is_active', 1)->first();
         if (!$daily) {
-            throw new \Exception('Invalid '.__('dailies.daily').' selected.');
+            flash('Invalid '.__('dailies.daily').' selected.')->error();
+            return redirect()->back();
         }
 
         $wheelSegment = null;

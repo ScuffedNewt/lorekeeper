@@ -236,7 +236,7 @@
 @endsection
 
 @section('scripts')
-    @include('widgets._inventory_select_js', ['readOnly' => true])
+    @include('widgets._inventory_select_js')
     @include('widgets._inventory_view_js')
     <script>
         $(document).ready(function() {

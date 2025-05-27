@@ -198,6 +198,10 @@ return [
                 'name' => 'Items',
                 'url'  => 'admin/data/items',
             ],
+            [
+                'name' => 'Dynamic Limits',
+                'url'  => 'admin/data/limits',
+            ],
         ],
     ],
     'Raffles'    => [

@@ -215,13 +215,13 @@ class ItemService extends Service {
             }
 
             $item->update([
-                'data' => json_encode([
+                'data' => [
                     'uses'      => isset($data['uses']) && $data['uses'] ? $data['uses'] : null,
                     'release'   => isset($data['release']) && $data['release'] ? $data['release'] : null,
                     'prompts'   => isset($data['prompts']) && $data['prompts'] ? $data['prompts'] : null,
                     'resell'    => isset($data['currency_quantity']) ? [$data['currency_id'] => $data['currency_quantity']] : null,
                     'rarity_id' => isset($data['rarity_id']) && $data['rarity_id'] ? $data['rarity_id'] : null,
-                ]), // rarity, availability info (original source, purchase locations, drop locations)
+                ], // rarity, availability info (original source, purchase locations, drop locations)
             ]);
 
             if ($image) {
@@ -278,13 +278,13 @@ class ItemService extends Service {
             }
 
             $item->update([
-                'data' => json_encode([
+                'data' => [
                     'uses'      => isset($data['uses']) && $data['uses'] ? $data['uses'] : null,
                     'release'   => isset($data['release']) && $data['release'] ? $data['release'] : null,
                     'prompts'   => isset($data['prompts']) && $data['prompts'] ? $data['prompts'] : null,
                     'resell'    => isset($data['currency_quantity']) ? [$data['currency_id'] => $data['currency_quantity']] : null,
                     'rarity_id' => isset($data['rarity_id']) && $data['rarity_id'] ? $data['rarity_id'] : null,
-                ]), // rarity, availability info (original source, purchase locations, drop locations)
+                ], // rarity, availability info (original source, purchase locations, drop locations)
             ]);
 
             if ($item) {

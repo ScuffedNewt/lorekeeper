@@ -773,3 +773,15 @@ tr.accountbound {
 .content-warning:hover {
     filter: none;
 }
+
+/* CODE EDITOR *************************************************************************************/
+#ace-code-editor-wrapper .editor-btn {
+    background: white;
+    font-size: 14px;
+    height: 34px;
+    width: 34px;
+}
+
+#ace-code-editor-wrapper .editor-btn:hover {
+    background: buttonface;
+}

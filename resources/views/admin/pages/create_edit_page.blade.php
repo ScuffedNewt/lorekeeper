@@ -12,6 +12,7 @@
             <a href="#" class="btn btn-danger float-right delete-page-button">Delete Page</a>
         @endif
         @if ($page->id)
+            <a href="#" class="btn btn-secondary float-right regen-page-button mr-md-2">Regenerate Page</a>
             <a href="{{ $page->url }}" class="btn btn-info float-right mr-md-2">View Page</a>
         @endif
     </h1>
@@ -64,11 +65,16 @@
 
 @section('scripts')
     @parent
+    @include('js._tinymce_wysiwyg')
     <script>
         $(document).ready(function() {
             $('.delete-page-button').on('click', function(e) {
                 e.preventDefault();
                 loadModal("{{ url('admin/pages/delete') }}/{{ $page->id }}", 'Delete Page');
+            });
+            $('.regen-page-button').on('click', function(e) {
+                e.preventDefault();
+                loadModal("{{ url('admin/pages/regen') }}/{{ $page->id }}", 'Regenerate Page');
             });
         });
     </script>

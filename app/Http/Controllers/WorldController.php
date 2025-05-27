@@ -4,13 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Character\CharacterCategory;
 use App\Models\Currency\Currency;
+use App\Models\Currency\CurrencyCategory;
 use App\Models\Feature\Feature;
 use App\Models\Feature\FeatureCategory;
 use App\Models\Item\Item;
 use App\Models\Item\ItemCategory;
 use App\Models\Rarity;
 use App\Models\Shop\Shop;
-use App\Models\Shop\ShopStock;
 use App\Models\Species\Species;
 use App\Models\Species\Subtype;
 use App\Models\User\User;
@@ -38,19 +38,73 @@ class WorldController extends Controller {
     }
 
     /**
+     * Shows the currency categories page.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getCurrencyCategories(Request $request) {
+        $query = CurrencyCategory::query();
+        $name = $request->get('name');
+        if ($name) {
+            $query->where('name', 'LIKE', '%'.$name.'%');
+        }
+
+        return view('world.currency_categories', [
+            'categories' => $query->visible(Auth::user() ?? null)->orderBy('sort', 'DESC')->orderBy('id')->paginate(20)->appends($request->query()),
+        ]);
+    }
+
+    /**
      * Shows the currency page.
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getCurrencies(Request $request) {
-        $query = Currency::query();
-        $name = $request->get('name');
-        if ($name) {
-            $query->where('name', 'LIKE', '%'.$name.'%')->orWhere('abbreviation', 'LIKE', '%'.$name.'%');
+        $query = Currency::query()->visible(Auth::user() ?? null)->with('category')->where(function ($query) {
+            $query->whereHas('category', function ($query) {
+                $query->visible(Auth::user() ?? null);
+            })->orWhereNull('currency_category_id');
+        });
+
+        $data = $request->only(['currency_category_id', 'name', 'sort']);
+        if (isset($data['name'])) {
+            $query->where(function ($query) use ($data) {
+                $query->where('name', 'LIKE', '%'.$data['name'].'%')->orWhere('abbreviation', 'LIKE', '%'.$data['name'].'%');
+            });
+        }
+        if (isset($data['currency_category_id'])) {
+            if ($data['currency_category_id'] == 'withoutOption') {
+                $query->whereNull('currency_category_id');
+            } else {
+                $query->where('currency_category_id', $data['currency_category_id']);
+            }
+        }
+
+        if (isset($data['sort'])) {
+            switch ($data['sort']) {
+                case 'alpha':
+                    $query->sortAlphabetical();
+                    break;
+                case 'alpha-reverse':
+                    $query->sortAlphabetical(true);
+                    break;
+                case 'category':
+                    $query->sortCategory();
+                    break;
+                case 'newest':
+                    $query->sortNewest();
+                    break;
+                case 'oldest':
+                    $query->sortNewest(true);
+                    break;
+            }
+        } else {
+            $query->sortCategory();
         }
 
         return view('world.currencies', [
-            'currencies' => $query->orderBy('name')->orderBy('id')->paginate(20)->appends($request->query()),
+            'currencies' => $query->visible(Auth::user() ?? null)->orderBy('name')->orderBy('id')->paginate(20)->appends($request->query()),
+            'categories' => ['withoutOption' => 'Without Category'] + CurrencyCategory::visible(Auth::user() ?? null)->orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
         ]);
     }
 
@@ -78,15 +132,45 @@ class WorldController extends Controller {
      */
     public function getSpecieses(Request $request) {
         $query = Species::query();
-        $name = $request->get('name');
-        if ($name) {
-            $query->where('name', 'LIKE', '%'.$name.'%');
+
+        if (config('lorekeeper.extensions.visual_trait_index.enable_species_index')) {
+            $query->withCount('features');
+        }
+
+        $data = $request->only(['name', 'sort']);
+
+        if (isset($data['name'])) {
+            $query->where('name', 'LIKE', '%'.$data['name'].'%');
+        }
+        if (isset($data['sort'])) {
+            switch ($data['sort']) {
+                case 'standard':
+                    $query->sortStandard();
+                    break;
+                case 'standard-reverse':
+                    $query->sortStandard(true);
+                    break;
+                case 'alpha':
+                    $query->sortAlphabetical();
+                    break;
+                case 'alpha-reverse':
+                    $query->sortAlphabetical(true);
+                    break;
+                case 'newest':
+                    $query->sortNewest();
+                    break;
+                case 'oldest':
+                    $query->sortNewest(true);
+                    break;
+            }
+        } else {
+            $query->sortStandard();
         }
 
         return view('world.specieses', [
             'specieses' => $query->with(['subtypes' => function ($query) {
-                $query->visible(Auth::user() ?? null)->orderBy('sort', 'DESC');
-            }])->visible(Auth::user() ?? null)->orderBy('sort', 'DESC')->orderBy('id')->paginate(20)->appends($request->query()),
+                $query->visible(Auth::user() ?? null)->sortStandard();
+            }])->visible(Auth::user() ?? null)->paginate(20)->appends($request->query()),
         ]);
     }
 
@@ -96,14 +180,47 @@ class WorldController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getSubtypes(Request $request) {
-        $query = Subtype::query();
-        $name = $request->get('name');
-        if ($name) {
-            $query->where('name', 'LIKE', '%'.$name.'%');
+        $query = Subtype::query()->with('species');
+        $data = $request->only(['species_id', 'name', 'sort']);
+
+        if (isset($data['species_id']) && $data['species_id'] != 'none') {
+            $query->where('species_id', $data['species_id']);
+        }
+        if (isset($data['name'])) {
+            $query->where('name', 'LIKE', '%'.$data['name'].'%');
+        }
+
+        if (isset($data['sort'])) {
+            switch ($data['sort']) {
+                case 'standard':
+                    $query->sortStandard();
+                    break;
+                case 'standard-reverse':
+                    $query->sortStandard(true);
+                    break;
+                case 'alpha':
+                    $query->sortAlphabetical();
+                    break;
+                case 'alpha-reverse':
+                    $query->sortAlphabetical(true);
+                    break;
+                case 'species':
+                    $query->sortSpecies();
+                    break;
+                case 'newest':
+                    $query->sortNewest();
+                    break;
+                case 'oldest':
+                    $query->sortNewest(true);
+                    break;
+            }
+        } else {
+            $query->sortStandard();
         }
 
         return view('world.subtypes', [
-            'subtypes' => $query->with('species')->visible(Auth::user() ?? null)->orderBy('sort', 'DESC')->orderBy('id')->paginate(20)->appends($request->query()),
+            'subtypes'   => $query->visible(Auth::user() ?? null)->paginate(20)->appends($request->query()),
+            'specieses'  => ['none' => 'Any Species'] + Species::visible(Auth::user() ?? null)->orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
         ]);
     }
 
@@ -147,8 +264,10 @@ class WorldController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getFeatures(Request $request) {
-        $query = Feature::visible(Auth::user() ?? null)->with('category')->with('rarity')->with('species');
+        $query = Feature::visible(Auth::user() ?? null)->with('category', 'rarity', 'species', 'subtype');
+
         $data = $request->only(['rarity_id', 'feature_category_id', 'species_id', 'subtype_id', 'name', 'sort']);
+
         if (isset($data['rarity_id']) && $data['rarity_id'] != 'none') {
             $query->where('rarity_id', $data['rarity_id']);
         }
@@ -204,7 +323,7 @@ class WorldController extends Controller {
                     $query->sortNewest();
                     break;
                 case 'oldest':
-                    $query->sortOldest();
+                    $query->sortNewest(true);
                     break;
             }
         } else {
@@ -230,6 +349,7 @@ class WorldController extends Controller {
     public function getSpeciesFeatures($id) {
         $categories = FeatureCategory::orderBy('sort', 'DESC')->get();
         $rarities = Rarity::orderBy('sort', 'ASC')->get();
+
         $species = Species::visible(Auth::user() ?? null)->where('id', $id)->first();
         if (!$species) {
             abort(404);
@@ -238,7 +358,7 @@ class WorldController extends Controller {
             abort(404);
         }
 
-        $features = $species->features()->visible(Auth::user() ?? null);
+        $features = $species->features()->visible(Auth::user() ?? null)->with('rarity', 'subtype');
         $features = count($categories) ?
             $features->orderByRaw('FIELD(feature_category_id,'.implode(',', $categories->pluck('id')->toArray()).')') :
             $features;
@@ -344,7 +464,7 @@ class WorldController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getFeatureDetail($id) {
-        $feature = Feature::visible(Auth::user() ?? null)->where('id', $id)->first();
+        $feature = Feature::visible(Auth::user() ?? null)->where('id', $id)->with('species', 'subtype', 'rarity')->first();
 
         if (!$feature) {
             abort(404);
@@ -362,6 +482,10 @@ class WorldController extends Controller {
      */
     public function getItems(Request $request) {
         $query = Item::with('category')->released(Auth::user() ?? null);
+
+        if (config('lorekeeper.extensions.item_entry_expansion.extra_fields')) {
+            $query->with('artist', 'shopStock')->withCount('shopStock');
+        }
 
         $categoryVisibleCheck = ItemCategory::visible(Auth::user() ?? null)->pluck('id', 'name')->toArray();
         // query where category is visible, or, no category and released
@@ -405,7 +529,7 @@ class WorldController extends Controller {
                     $query->sortNewest();
                     break;
                 case 'oldest':
-                    $query->sortOldest();
+                    $query->sortNewest(true);
                     break;
             }
         } else {
@@ -429,9 +553,13 @@ class WorldController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getItem($id) {
-        $categories = ItemCategory::orderBy('sort', 'DESC')->get();
+        $item = Item::where('id', $id)->released(Auth::user() ?? null)->with('category');
 
-        $item = Item::where('id', $id)->released(Auth::user() ?? null)->first();
+        if (config('lorekeeper.extensions.item_entry_expansion.extra_fields')) {
+            $item->with('artist', 'shopStock')->withCount('shopStock');
+        }
+
+        $item = $item->first();
 
         if (!$item) {
             abort(404);
@@ -447,8 +575,6 @@ class WorldController extends Controller {
             'imageUrl'    => $item->imageUrl,
             'name'        => $item->displayName,
             'description' => $item->parsed_description,
-            'categories'  => $categories->keyBy('id'),
-            'shops'       => Shop::whereIn('id', ShopStock::where('item_id', $item->id)->pluck('shop_id')->unique()->toArray())->orderBy('sort', 'DESC')->get(),
         ]);
     }
 
@@ -458,7 +584,8 @@ class WorldController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getCharacterCategories(Request $request) {
-        $query = CharacterCategory::query();
+        $query = CharacterCategory::query()->with('sublist');
+
         $name = $request->get('name');
         if ($name) {
             $query->where('name', 'LIKE', '%'.$name.'%')->orWhere('code', 'LIKE', '%'.$name.'%');
