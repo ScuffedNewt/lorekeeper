@@ -63,7 +63,7 @@
                 @if ($showRecipes)
                     else if (val == 'Recipe') $clone = $recipeSelect.clone();
                 @endif
-        
+
                 $cell.html('');
                 $cell.append($clone);
                 $clone.selectize();

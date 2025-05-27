@@ -2,7 +2,10 @@
     <table class="table table-sm">
         <tbody id="ingredientRow">
             <tr class="ingredient-row">
-                <td>{!! Form::select('ingredient_type[]', ['Item' => 'Item', 'MultiItem' => 'Multi Item', 'Category' => 'Category', 'MultiCategory' => 'Multi Category', 'Currency' => 'Currency'], null, ['class' => 'form-control ingredient-type', 'placeholder' => 'Select Ingredient Type']) !!}</td>
+                <td>{!! Form::select('ingredient_type[]', ['Item' => 'Item', 'MultiItem' => 'Multi Item', 'Category' => 'Category', 'MultiCategory' => 'Multi Category', 'Currency' => 'Currency'], null, [
+                    'class' => 'form-control ingredient-type',
+                    'placeholder' => 'Select Ingredient Type',
+                ]) !!}</td>
                 <td class="ingredient-row-select"></td>
                 <td>{!! Form::text('ingredient_quantity[]', 1, ['class' => 'form-control ingredient-quantity']) !!}</td>
                 <td class="text-right"><a href="#" class="btn btn-danger remove-ingredient-button">Remove</a></td>
@@ -35,7 +38,7 @@
     </div>
 
     {!! Form::select('ingredient_data[]', $currencies, null, ['class' => 'form-control currency-select', 'placeholder' => 'Select Currency']) !!}
-    
+
     <div class="multi-item-entry mb-2">
         {!! Form::select('ingredient_data[][]', $items, null, ['class' => 'form-control multi-item-select', 'placeholder' => 'Select Item']) !!}
         <div class="text-right text-uppercase" style="margin-top: -0.5em;"><a href="#" class="remove-multi-entry-button text-danger">Remove Item</a></div>

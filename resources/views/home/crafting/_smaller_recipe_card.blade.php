@@ -2,7 +2,7 @@
     <div class="card alert-secondary rounded-0 py-0 col-form-label" data-id="{{ $recipe->id }}" data-name="{{ $recipe->name }}">
         <div class="p-2 row">
             <div class="col">
-                @if(isset($recipe->image_url))
+                @if (isset($recipe->image_url))
                     <img src="{{ $recipe->imageUrl }}" class="recipe-image mr-2" style="max-height:15px; width:auto;">
                 @endif
                 <h4 class="mb-0 mt-0 d-inline col-form-label">{!! $recipe->displayName !!}</h4>

@@ -11,12 +11,12 @@
         </tr>
     </thead>
     <tbody id="limitTableBody">
-        @if($limits)
-            @foreach($limits as $limit)
+        @if ($limits)
+            @foreach ($limits as $limit)
                 <tr class="limit-row">
                     <td>{!! Form::select('limit_type[]', ['Item' => 'Item', 'Currency' => 'Currency', 'Recipe' => 'Recipe'], $limit->limit_type, ['class' => 'form-control reward-type', 'placeholder' => 'Select limit Type']) !!}</td>
                     <td class="limit-row-select">
-                        @if($limit->limit_type == 'Item')
+                        @if ($limit->limit_type == 'Item')
                             {!! Form::select('limit_id[]', $items, $limit->limit_id, ['class' => 'form-control item-select selectize', 'placeholder' => 'Select Item']) !!}
                         @elseif($limit->limit_type == 'Currency')
                             {!! Form::select('limit_id[]', $currencies, $limit->limit_id, ['class' => 'form-control currency-select selectize', 'placeholder' => 'Select Currency']) !!}

@@ -2,10 +2,10 @@
 
 
 <a data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
-    {!! Form::checkbox('all_recipes', 1, !(is_array($tag->getData())), ['class' => 'form-check-input', 'data-toggle' => 'toggle', 'data-on' => 'Take from all unlockable Recipes', 'data-off' => 'Use specific Recipes']) !!}
+    {!! Form::checkbox('all_recipes', 1, !is_array($tag->getData()), ['class' => 'form-check-input', 'data-toggle' => 'toggle', 'data-on' => 'Take from all unlockable Recipes', 'data-off' => 'Use specific Recipes']) !!}
 </a>
 <br /><br />
-  <div class="collapse {{ (is_array($tag->getData())) ? 'show' : '' }}" id="collapseExample">
+<div class="collapse {{ is_array($tag->getData()) ? 'show' : '' }}" id="collapseExample">
     <div class="card card-body">
 
 
@@ -21,11 +21,11 @@
                 </tr>
             </thead>
             <tbody id="lootTableBody">
-                @if(is_array($tag->getData()))
-                    @foreach($tag->getData() as $loot)
+                @if (is_array($tag->getData()))
+                    @foreach ($tag->getData() as $loot)
                         <tr class="loot-row">
                             <td class="loot-row-select">
-                                    {!! Form::select('rewardable_id[]', $recipes, $loot->rewardable_id, ['class' => 'form-control recipe-select selectize', 'placeholder' => 'Select Recipe']) !!}
+                                {!! Form::select('rewardable_id[]', $recipes, $loot->rewardable_id, ['class' => 'form-control recipe-select selectize', 'placeholder' => 'Select Recipe']) !!}
                             </td>
                             <td>{!! Form::text('quantity[]', $loot->quantity, ['class' => 'form-control']) !!}</td>
                             <td class="text-right"><a href="#" class="btn btn-danger remove-loot-button">Remove</a></td>
@@ -37,6 +37,6 @@
 
 
     </div>
-  </div>
+</div>
 
-  <hr>
+<hr>

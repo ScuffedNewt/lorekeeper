@@ -11,12 +11,15 @@
         </tr>
     </thead>
     <tbody id="rewardTableBody">
-        @if($rewards)
-            @foreach($rewards as $reward)
+        @if ($rewards)
+            @foreach ($rewards as $reward)
                 <tr class="reward-row">
-                    <td>{!! Form::select('rewardable_type[]', ['Item' => 'Item', 'Currency' => 'Currency', 'LootTable' => 'Loot Table', 'Raffle' => 'Raffle'], $reward->rewardable_type, ['class' => 'form-control reward-type selectize', 'placeholder' => 'Select Reward Type']) !!}</td>
+                    <td>{!! Form::select('rewardable_type[]', ['Item' => 'Item', 'Currency' => 'Currency', 'LootTable' => 'Loot Table', 'Raffle' => 'Raffle'], $reward->rewardable_type, [
+                        'class' => 'form-control reward-type selectize',
+                        'placeholder' => 'Select Reward Type',
+                    ]) !!}</td>
                     <td class="reward-row-select">
-                        @if($reward->rewardable_type == 'Item')
+                        @if ($reward->rewardable_type == 'Item')
                             {!! Form::select('rewardable_id[]', $items, $reward->rewardable_id, ['class' => 'form-control item-select selectize', 'placeholder' => 'Select Item']) !!}
                         @elseif($reward->rewardable_type == 'Currency')
                             {!! Form::select('rewardable_id[]', $currencies, $reward->rewardable_id, ['class' => 'form-control currency-select selectize', 'placeholder' => 'Select Currency']) !!}
