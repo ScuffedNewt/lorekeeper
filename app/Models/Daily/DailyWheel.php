@@ -45,6 +45,15 @@ class DailyWheel extends Model {
         'stopper_extension'    => 'mimes:png',
     ];
 
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'segment_style' => 'array',
+    ];
+
     /**********************************************************************************************
 
         ACCESSORS
@@ -142,15 +151,6 @@ class DailyWheel extends Model {
      */
     public function getUrlAttribute() {
         return url(__('dailies.dailies').'/'.$this->id);
-    }
-
-    /**
-     * Get the segment_style as an associative array.
-     *
-     * @return array
-     */
-    public function getSegmentStylesAttribute() {
-        return json_decode($this->attributes['segment_style'], true);
     }
 
     /**

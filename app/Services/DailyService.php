@@ -206,7 +206,7 @@ class DailyService extends Service {
             }
         }
 
-        return json_encode($styleObject);
+        return $styleObject;
     }
 
     /**
