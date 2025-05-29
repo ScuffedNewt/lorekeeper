@@ -29,9 +29,9 @@
                     <div class="col-2 col-md-2"> #{{ $slot->id }} {{ $slot->name }} </div>
                     <div class="col-8 col-md-8 text-center">
                         @include('widgets._limits', [
-                            'object'       => $slot,
-                            'compact'      => true,
-                            'hideUnlock'   => true,
+                            'object' => $slot,
+                            'compact' => true,
+                            'hideUnlock' => true,
                             'showNoLimits' => true,
                         ])
                     </div>

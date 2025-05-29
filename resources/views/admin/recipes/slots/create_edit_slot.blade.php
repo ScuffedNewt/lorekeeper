@@ -34,7 +34,6 @@
     @if ($slot->id)
         @include('widgets._add_limits', ['object' => $slot])
     @endif
-
 @endsection
 
 @section('scripts')

@@ -20,7 +20,7 @@
     <div class="collapse show" id="recipeDetails">
         <div class="row">
             @include('widgets._limits', [
-                'object' => $recipe
+                'object' => $recipe,
             ])
             <div class="col-md-6">
                 <h5>Ingredients</h5>
@@ -38,7 +38,7 @@
                     @foreach ($type as $item)
                         <div class="alert alert-secondary">
                             @include('home.crafting._recipe_reward_entry', [
-                                'reward' => $item
+                                'reward' => $item,
                             ])
                         </div>
                     @endforeach
@@ -59,7 +59,7 @@
                     'inventory' => $inventory,
                     'categories' => $categories,
                     'selected' => $selected,
-                    'page' => $page
+                    'page' => $page,
                 ])
                 <div class="text-right">
                     {!! Form::submit('Craft', ['class' => 'btn btn-primary']) !!}
@@ -72,7 +72,7 @@
                 'inventory' => $inventory,
                 'categories' => $categories,
                 'selected' => $selected,
-                'page' => $page
+                'page' => $page,
             ])
             <div class="text-right">
                 {!! Form::submit('Craft', ['class' => 'btn btn-primary']) !!}

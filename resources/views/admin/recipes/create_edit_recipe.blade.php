@@ -85,7 +85,7 @@
             <div class="card h-100">
                 <div class="card-header h3">Recipe Rewards</div>
                 <div class="card-body">
-                        @include('widgets._recipe_reward_select', ['rewards' => $recipe->rewards])
+                    @include('widgets._recipe_reward_select', ['rewards' => $recipe->rewards])
                 </div>
             </div>
         </div>
