@@ -179,23 +179,25 @@ Route::group(['prefix' => 'data', 'namespace' => 'Data', 'middleware' => 'power:
     Route::get('items/tag/{id}', 'ItemController@getAddItemTag');
     Route::post('items/tag/{id}', 'ItemController@postAddItemTag');
 
-    // RECIPES
-    Route::get('recipes', 'RecipeController@getRecipeIndex');
-    Route::get('recipes/create', 'RecipeController@getCreateRecipe');
-    Route::get('recipes/edit/{id}', 'RecipeController@getEditRecipe');
-    Route::get('recipes/delete/{id}', 'RecipeController@getDeleteRecipe');
-    Route::post('recipes/create', 'RecipeController@postCreateEditRecipe');
-    Route::post('recipes/edit/{id?}', 'RecipeController@postCreateEditRecipe');
-    Route::post('recipes/delete/{id}', 'RecipeController@postDeleteRecipe');
+    Route::group(['prefix' => 'recipes'], function () {
+        // RECIPES
+        Route::get('/', 'RecipeController@getRecipeIndex');
+        Route::get('create', 'RecipeController@getCreateRecipe');
+        Route::get('edit/{id}', 'RecipeController@getEditRecipe');
+        Route::get('delete/{id}', 'RecipeController@getDeleteRecipe');
+        Route::post('create', 'RecipeController@postCreateEditRecipe');
+        Route::post('edit/{id?}', 'RecipeController@postCreateEditRecipe');
+        Route::post('delete/{id}', 'RecipeController@postDeleteRecipe');
 
-    // CRAFTING SLOTS
-    Route::get('slots', 'SlotController@getIndex');
-    Route::get('slots/create', 'SlotController@getCreateSlot');
-    Route::get('slots/edit/{id}', 'SlotController@getEditSlot');
-    Route::post('slots/create', 'SlotController@postCreateEditSlot');
-    Route::post('slots/edit/{id}', 'SlotController@postCreateEditSlot');
-    Route::get('slots/delete/{id}', 'SlotController@getDeleteSlot');
-    Route::post('slots/delete/{id}', 'SlotController@postDeleteSlot');
+        // CRAFTING RECIPE SLOTS
+        Route::get('slots', 'RecipeController@getCraftingSlotIndex');
+        Route::get('slots/create', 'RecipeController@getCreateCraftingSlot');
+        Route::get('slots/edit/{id}', 'RecipeController@getEditCraftingSlot');
+        Route::post('slots/create', 'RecipeController@postCreateEditCraftingSlot');
+        Route::post('slots/edit/{id}', 'RecipeController@postCreateEditCraftingSlot');
+        Route::get('slots/delete/{id}', 'RecipeController@getDeleteCraftingSlot');
+        Route::post('slots/delete/{id}', 'RecipeController@postDeleteCraftingSlot');
+    });
 
     // SHOPS
     Route::get('shops', 'ShopController@getIndex');

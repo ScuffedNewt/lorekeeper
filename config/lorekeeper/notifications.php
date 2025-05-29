@@ -444,4 +444,11 @@ return [
         'message' => 'You have received a staff grant of the crafting recipe {recipe_name} from <a href="{sender_url}">{sender_name}</a>. (<a href="{url}">View Unlocked Recipes</a>)',
         'url'     => 'crafting',
     ],
+
+    // RECIPE_COMPLETED
+    601 => [
+        'name'    => 'Recipe Completed',
+        'message' => 'You have completed crafting {recipe_name}, make sure to claim your reward! (<a href="{url}">View Crafting</a>)',
+        'url'     => 'crafting',
+    ],
 ];

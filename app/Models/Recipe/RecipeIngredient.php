@@ -2,7 +2,9 @@
 
 namespace App\Models\Recipe;
 
-use App;
+use App\Models\Currency\Currency;
+use App\Models\Item\Item;
+use App\Models\Item\ItemCategory;
 use App\Models\Model;
 
 class RecipeIngredient extends Model {
@@ -46,6 +48,15 @@ class RecipeIngredient extends Model {
         'quantity'        => 'required|integer|min:1',
     ];
 
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'ingredient_data' => 'array',
+    ];
+
     /**********************************************************************************************
 
         RELATIONS
@@ -56,7 +67,7 @@ class RecipeIngredient extends Model {
      * Get the associated recipe.
      */
     public function recipe() {
-        return $this->belongsTo('App\Models\Recipe\Recipe');
+        return $this->belongsTo(Recipe::class, 'recipe_id');
     }
 
     /**********************************************************************************************
@@ -71,7 +82,7 @@ class RecipeIngredient extends Model {
      * @return string
      */
     public function getDataAttribute() {
-        return json_decode($this->ingredient_data);
+        return $this->ingredient_data;
     }
 
     /**
@@ -82,17 +93,43 @@ class RecipeIngredient extends Model {
     public function getIngredientAttribute() {
         switch ($this->ingredient_type) {
             case 'Item':
-                return App\Models\Item\Item::where('id', $this->data[0])->get()[0];
+                return Item::where('id', $this->data[0])->first();
             case 'MultiItem':
-                return App\Models\Item\Item::whereIn('id', $this->data)->get();
+                return Item::whereIn('id', $this->data)->get();
             case 'Category':
-                return App\Models\Item\ItemCategory::where('id', $this->data[0])->get()[0];
+                return ItemCategory::where('id', $this->data[0])->first();
             case 'MultiCategory':
-                return App\Models\Item\ItemCategory::whereIn('id', $this->data)->get();
+                return ItemCategory::whereIn('id', $this->data)->get();
             case 'Currency':
-                return App\Models\Currency\Currency::where('id', $this->data[0])->get()[0];
+                return Currency::where('id', $this->data[0])->first();
         }
 
         return null;
+    }
+
+    /**********************************************************************************************
+
+        OTHER FUNCTIONS
+
+    **********************************************************************************************/
+
+    /**
+     * Returns if the user has enough of this ingredient.
+     * 
+     * @param User $user
+     * 
+     * @return bool
+     */
+    public function hasIngredient($user) {
+        switch ($this->ingredient_type) {
+            case 'Item':
+                return $user->items()->where('item_id', $this->data[0])->sum('count') >= $this->quantity;
+            case 'MultiItem':
+                return $user->items()->whereIn('item_id', $this->data)->sum('count') >= $this->quantity;
+            case 'Currency':
+                return $user->currencies()->where('currency_id', $this->data[0])->sum('quantity') >= $this->quantity;
+        }
+
+        return false;
     }
 }

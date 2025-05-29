@@ -12,7 +12,8 @@ class Recipe extends Model {
      * @var array
      */
     protected $fillable = [
-        'name', 'has_image', 'needs_unlocking', 'description', 'parsed_description', 'reference_url', 'artist_alias', 'artist_url', 'is_limited', 'open_at', 'close_at', 'time',
+        'name', 'has_image', 'needs_unlocking', 'description', 'parsed_description', 'reference_url', 'artist_alias', 'artist_url',
+        'open_at', 'close_at', 'time', 'is_visible', 'required_slot_id',
     ];
 
     protected $appends = ['image_url'];
@@ -46,6 +47,15 @@ class Recipe extends Model {
         'image'       => 'mimes:png',
     ];
 
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'output' => 'array',
+    ];
+
     /**********************************************************************************************
 
         RELATIONS
@@ -56,18 +66,21 @@ class Recipe extends Model {
      * Get the recipe's ingredients.
      */
     public function ingredients() {
-        return $this->hasMany('App\Models\Recipe\RecipeIngredient');
+        return $this->hasMany(RecipeIngredient::class, 'recipe_id');
     }
 
     /**
      * Get the users who have this recipe.
      */
     public function users() {
-        return $this->belongsToMany('App\Models\User\User', 'user_recipes')->withPivot('id');
+        return $this->belongsToMany(User::class, 'user_recipes')->withPivot('id');
     }
 
-    public function limits() {
-        return $this->hasMany('App\Models\Recipe\RecipeLimit');
+    /**
+     * Gets the recipe's required slot type.
+     */
+    public function requiredSlot() {
+        return $this->belongsTo(RecipeSlot::class, 'required_slot_id');
     }
 
     /**********************************************************************************************
@@ -83,8 +96,12 @@ class Recipe extends Model {
      *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeActive($query) {
-        return $query->where(function ($query) {
+    public function scopeActive($query, $user = null) {
+        if ($user && $user->hasPower('edit_data')) {
+            return $query;
+        }
+
+        return $query->where('is_visible', 1)->where(function ($query) {
             $query->whereNull('open_at')->orWhere('open_at', '<', Carbon::now());
         })->where(function ($query) {
             $query->whereNull('close_at')->orWhere('close_at', '>', Carbon::now());
@@ -150,8 +167,7 @@ class Recipe extends Model {
     public function getRewardsAttribute() {
         $rewards = [];
         if ($this->output) {
-            $assets = $this->getRewardItemsAttribute();
-
+            $assets = parseAssetData($this->output);
             foreach ($assets as $type => $a) {
                 $class = getAssetModelString($type, false);
                 foreach ($a as $id => $asset) {
@@ -165,15 +181,6 @@ class Recipe extends Model {
         }
 
         return $rewards;
-    }
-
-    /**
-     * Interprets the json output and retrieves the corresponding items.
-     *
-     * @return array
-     */
-    public function getRewardItemsAttribute() {
-        return parseAssetData(json_decode($this->output, true));
     }
 
     /**
@@ -244,7 +251,7 @@ class Recipe extends Model {
     }
 
     /**
-     * Gets the currency's asset type for asset management.
+     * Gets the recipe's asset type for asset management.
      *
      * @return string
      */
@@ -258,7 +265,7 @@ class Recipe extends Model {
      * @return bool
      */
     public function getLockedAttribute() {
-        return $this->needs_unlocking && !User;
+        return $this->needs_unlocking;
     }
 
     /**

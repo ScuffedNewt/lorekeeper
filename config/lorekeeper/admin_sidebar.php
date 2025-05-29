@@ -199,12 +199,8 @@ return [
                 'url'  => 'admin/data/items',
             ],
             [
-                'name' => 'Recipes',
+                'name' => 'Crafting Recipes',
                 'url'  => 'admin/data/recipes',
-            ],
-            [
-                'name' => 'Crafting Slots',
-                'url'  => 'admin/data/slots',
             ],
             [
                 'name' => 'Dynamic Limits',

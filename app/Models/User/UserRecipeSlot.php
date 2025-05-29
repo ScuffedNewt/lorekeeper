@@ -4,7 +4,7 @@ namespace App\Models\User;
 
 use App\Models\Model;
 
-class UserCraftingSlot extends Model {
+class UserRecipeSlot extends Model {
     /**
      * The attributes that are mass assignable.
      *
@@ -14,21 +14,22 @@ class UserCraftingSlot extends Model {
         'slot_id', 'user_id', 'recipe_id', 'started_at',
     ];
 
-    protected $dates = ['started_at', 'end_at'];
-
     /**
      * The table associated with the model.
      *
      * @var string
      */
-    protected $table = 'user_crafting_slots';
+    protected $table = 'user_recipe_slots';
 
-    /**
-     * Whether the model contains timestamps to be saved and updated.
+        /**
+     * The attributes that should be cast to native types.
      *
-     * @var string
+     * @var array
      */
-    public $timestamps = false;
+    protected $casts = [
+        'started_at' => 'datetime',
+        'end_at'     => 'datetime',
+    ];
 
     /**********************************************************************************************
 
@@ -40,20 +41,20 @@ class UserCraftingSlot extends Model {
      * Get the user who owns the stack.
      */
     public function user() {
-        return $this->belongsTo('App\Models\User\User');
+        return $this->belongsTo(User::class);
     }
 
     /**
      * Get the item associated with this item stack.
      */
     public function slot() {
-        return $this->belongsTo('App\Models\Recipe\CraftingSlot');
+        return $this->belongsTo(RecipeSlot::class, 'slot_id');
     }
 
     /**
      * Get the item associated with this item stack.
      */
     public function recipe() {
-        return $this->belongsTo('App\Models\Recipe\Recipe');
+        return $this->belongsTo(Recipe::class, 'recipe_id');
     }
 }

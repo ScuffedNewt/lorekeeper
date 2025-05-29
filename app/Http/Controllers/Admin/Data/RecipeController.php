@@ -9,8 +9,11 @@ use App\Models\Item\ItemCategory;
 use App\Models\Loot\LootTable;
 use App\Models\Raffle\Raffle;
 use App\Models\Recipe\Recipe;
+use App\Models\Recipe\RecipeIngredient;
+use App\Models\Recipe\RecipeReward;
+use App\Models\Recipe\RecipeSlot;
 use App\Services\RecipeService;
-use Auth;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 class RecipeController extends Controller {
@@ -60,6 +63,7 @@ class RecipeController extends Controller {
             'tables'     => LootTable::orderBy('name')->pluck('name', 'id'),
             'raffles'    => Raffle::where('rolled_at', null)->where('is_active', 1)->orderBy('name')->pluck('name', 'id'),
             'recipes'    => Recipe::orderBy('name')->pluck('name', 'id'),
+            'slots'      => RecipeSlot::orderBy('name')->pluck('name', 'id'),
         ]);
     }
 
@@ -84,6 +88,7 @@ class RecipeController extends Controller {
             'tables'     => LootTable::orderBy('name')->pluck('name', 'id'),
             'raffles'    => Raffle::where('rolled_at', null)->where('is_active', 1)->orderBy('name')->pluck('name', 'id'),
             'recipes'    => Recipe::orderBy('name')->pluck('name', 'id'),
+            'slots'      => RecipeSlot::orderBy('name')->pluck('name', 'id'),
         ]);
     }
 
@@ -102,7 +107,7 @@ class RecipeController extends Controller {
             'ingredient_type', 'ingredient_data', 'ingredient_quantity',
             'rewardable_type', 'rewardable_id', 'reward_quantity',
             'is_limited', 'limit_type', 'limit_id', 'limit_quantity',
-            'close_at', 'open_at', 'time',
+            'close_at', 'open_at', 'time', 'required_slot_id', 'is_visible',
         ]);
         if ($id && $service->updateRecipe(Recipe::find($id), $data, Auth::user())) {
             flash('Recipe updated successfully.')->success();
@@ -156,85 +161,66 @@ class RecipeController extends Controller {
 
     /**********************************************************************************************
 
-        RECIPE TAGS
+        CRAFTING RECIPE SLOTS
 
     **********************************************************************************************/
 
     /**
-     * Gets the tag addition page.
-     *
-     * @param App\Services\RecipeService $service
-     * @param int                        $id
+     * Shows the crafting slots index.
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function getAddRecipeTag(RecipeService $service, $id) {
-        $recipe = Recipe::find($id);
-
-        return view('admin.recipes.add_tag', [
-            'recipe' => $recipe,
-            'tags'   => array_diff($service->getRecipeTags(), $recipe->tags()->pluck('tag')->toArray()),
+    public function getCraftingSlotIndex() {
+        return view('admin.recipes.slots.index', [
+            'slots' => RecipeSlot::all(),
         ]);
     }
 
     /**
-     * Adds a tag to an recipe.
-     *
-     * @param App\Services\RecipeService $service
-     * @param int                        $id
-     *
-     * @return \Illuminate\Http\RedirectResponse
+     * Shows the create crafting slot page.
+     * 
+     * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function postAddRecipeTag(Request $request, RecipeService $service, $id) {
-        $recipe = Recipe::find($id);
-        $tag = $request->get('tag');
-        if ($tag = $service->addRecipeTag($recipe, $tag)) {
-            flash('Tag added successfully.')->success();
-
-            return redirect()->to($tag->adminUrl);
-        } else {
-            foreach ($service->errors()->getMessages()['error'] as $error) {
-                flash($error)->error();
-            }
-        }
-
-        return redirect()->back();
+    public function getCreateCraftingSlot() {
+        return view('admin.recipes.slots.create_edit_slot', [
+            'slot' => new RecipeSlot,
+        ]);
     }
 
     /**
-     * Gets the tag editing page.
+     * Shows the edit crafting slot page.
      *
-     * @param int   $id
-     * @param mixed $tag
+     * @param int $id
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function getEditRecipeTag(RecipeService $service, $id, $tag) {
-        $recipe = Recipe::find($id);
-        $tag = $recipe->tags()->where('tag', $tag)->first();
-        if (!$recipe || !$tag) {
+    public function getEditCraftingSlot($id) {
+        $slot = RecipeSlot::find($id);
+        if (!$slot) {
             abort(404);
         }
 
-        return view('admin.recipes.edit_tag', [
-            'recipe' => $recipe,
-            'tag'    => $tag,
-        ] + $tag->getEditData());
+        return view('admin.recipes.slots.create_edit_slot', [
+            'slot'       => $slot,
+        ]);
     }
 
     /**
-     * Edits tag data for an recipe.
+     * Creates or edits an slot.
      *
      * @param App\Services\RecipeService $service
-     * @param int                        $id
-     * @param string                     $tag
+     * @param int|null                 $id
      *
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function postEditRecipeTag(Request $request, RecipeService $service, $id, $tag) {
-        $recipe = Recipe::find($id);
-        if ($service->editRecipeTag($recipe, $tag, $request->all())) {
-            flash('Tag edited successfully.')->success();
+    public function postCreateEditCraftingSlot(Request $request, RecipeService $service, $id = null) {
+        $data = $request->only(['name', 'description']);
+        if ($id && $service->updateCraftingSlot(RecipeSlot::find($id), $data, Auth::user())) {
+            flash('Slot updated successfully.')->success();
+        } elseif (!$id && $slot = $service->createCraftingSlot($data, Auth::user())) {
+            flash('Slot created successfully.')->success();
+
+            return redirect()->to('admin/data/recipes/slots/edit/'.$slot->id);
         } else {
             foreach ($service->errors()->getMessages()['error'] as $error) {
                 flash($error)->error();
@@ -245,42 +231,37 @@ class RecipeController extends Controller {
     }
 
     /**
-     * Gets the recipe tag deletion modal.
+     * Gets the slot deletion modal.
      *
-     * @param int    $id
-     * @param string $tag
+     * @param int $id
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function getDeleteRecipeTag($id, $tag) {
-        $recipe = Recipe::find($id);
-        $tag = $recipe->tags()->where('tag', $tag)->first();
+    public function getDeleteCraftingSlot($id) {
+        $slot = RecipeSlot::find($id);
 
-        return view('admin.recipes._delete_recipe_tag', [
-            'recipe' => $recipe,
-            'tag'    => $tag,
+        return view('admin.recipes.slots._delete_slot', [
+            'slot' => $slot,
         ]);
     }
 
     /**
-     * Deletes a tag from an recipe.
+     * Creates or edits an slot.
      *
-     * @param App\Services\RecipeService $service
-     * @param int                        $id
-     * @param string                     $tag
+     * @param App\Services\SlotService $service
+     * @param int                      $id
      *
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function postDeleteRecipeTag(Request $request, RecipeService $service, $id, $tag) {
-        $recipe = Recipe::find($id);
-        if ($service->deleteRecipeTag($recipe, $tag)) {
-            flash('Tag deleted successfully.')->success();
+    public function postDeleteCraftingSlot(Request $request, RecipeService $service, $id) {
+        if ($id && $service->deleteCraftingSlot(RecipeSlot::find($id))) {
+            flash('Slot deleted successfully.')->success();
         } else {
             foreach ($service->errors()->getMessages()['error'] as $error) {
                 flash($error)->error();
             }
         }
 
-        return redirect()->to('admin/data/recipes/edit/'.$recipe->id);
+        return redirect()->to('admin/data/recipes/slots');
     }
 }

@@ -2,14 +2,14 @@
 
 namespace App\Services;
 
+use App\Facades\Notifications;
 use App\Models\Recipe\Recipe;
 use App\Models\Recipe\RecipeIngredient;
-use App\Models\Recipe\RecipeLimit;
+use App\Models\Recipe\RecipeSlot;
 use App\Models\User\User;
 use App\Models\User\UserRecipe;
 use Carbon\Carbon;
-use DB;
-use Notifications;
+use Illuminate\Support\Facades\DB;
 
 class RecipeService extends Service {
     /*
@@ -79,6 +79,7 @@ class RecipeService extends Service {
             $image = null;
             if (isset($data['image']) && $data['image']) {
                 $data['has_image'] = 1;
+                $data['hash'] = randomString(10);
                 $image = $data['image'];
                 unset($data['image']);
             } else {
@@ -87,8 +88,6 @@ class RecipeService extends Service {
 
             $recipe = Recipe::create($data);
             $this->populateIngredients($recipe, $data);
-            // limits
-            $this->populateLimits($recipe, $data);
 
             $recipe->output = $this->populateRewards($data);
             $recipe->save();
@@ -139,12 +138,11 @@ class RecipeService extends Service {
 
             $data = $this->populateData($data);
             $this->populateIngredients($recipe, $data);
-            // do limits
-            $this->populateLimits($recipe, $data);
 
             $image = null;
             if (isset($data['image']) && $data['image']) {
                 $data['has_image'] = 1;
+                $data['hash'] = randomString(10);
                 $image = $data['image'];
                 unset($data['image']);
             }
@@ -310,6 +308,93 @@ class RecipeService extends Service {
         return $this->rollbackReturn(false);
     }
 
+    /**********************************************************************************************
+
+        CRAFTING RECIPE SLOTS
+
+    **********************************************************************************************/
+
+    /**
+     * Creates a new slot.
+     *
+     * @param array                 $data
+     * @param \App\Models\User\User $user
+     *
+     * @return \App\Models\Slot\Slot|bool
+     */
+    public function createCraftingSlot($data, $user) {
+        DB::beginTransaction();
+
+        try {
+
+            $slot = RecipeSlot::create($data);
+
+            return $this->commitReturn($slot);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
+    }
+
+    /**
+     * Updates an slot.
+     *
+     * @param \App\Models\Slot\Slot $slot
+     * @param array                 $data
+     * @param \App\Models\User\User $user
+     *
+     * @return \App\Models\Slot\Slot|bool
+     */
+    public function updateCraftingSlot($slot, $data, $user) {
+        DB::beginTransaction();
+
+        try {
+
+            $slot->update($data);
+
+            return $this->commitReturn($slot);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
+    }
+
+    /**
+     * Deletes a crafting recipe slot.
+     *
+     * @param \App\Models\Slot\Slot $slot
+     *
+     * @return bool
+     */
+    public function deleteCraftingSlot($slot) {
+        DB::beginTransaction();
+
+        try {
+            // Check first if the slot is currently owned or if some other site feature uses it
+            if (DB::table('user_recipe_slots')->where(['slot_id', '=', $slot->id])->exists()) {
+                throw new \Exception('At least one user currently owns this slot. Please remove the slot(s) before deleting it.');
+            }
+
+            DB::table('user_recipe_slots')->where('slot_id', $slot->id)->delete();
+
+            $slot->delete();
+
+            return $this->commitReturn(true);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
+    }
+
+    /**********************************************************************************************
+
+        MISCELLANEOUS
+
+    **********************************************************************************************/
+
     /**
      * Creates an recipe log.
      *
@@ -357,6 +442,10 @@ class RecipeService extends Service {
             $data['needs_unlocking'] = 0;
         }
 
+        if (!isset($data['is_visible'])) {
+            $data['is_visible'] = 0;
+        }
+
         if (isset($data['remove_image'])) {
             if ($recipe && $recipe->has_image && $data['remove_image']) {
                 $data['has_image'] = 0;
@@ -384,7 +473,7 @@ class RecipeService extends Service {
             RecipeIngredient::create([
                 'recipe_id'       => $recipe->id,
                 'ingredient_type' => $type,
-                'ingredient_data' => json_encode($data['ingredient_data'][$key]),
+                'ingredient_data' => $data['ingredient_data'][$key],
                 'quantity'        => $data['ingredient_quantity'][$key],
             ]);
         }
@@ -423,36 +512,5 @@ class RecipeService extends Service {
         }
 
         return null;
-    }
-
-    /**
-     * Adds limits to the recipe.
-     *
-     * @param Recipe $recipe
-     * @param array  $data
-     */
-    private function populateLimits($recipe, $data) {
-        if (!isset($data['is_limited'])) {
-            $data['is_limited'] = 0;
-        }
-
-        $recipe->is_limited = $data['is_limited'];
-        $recipe->save();
-
-        $recipe->limits()->delete();
-
-        if (isset($data['limit_type'])) {
-            foreach ($data['limit_type'] as $key => $type) {
-                if (!isset($data['limit_id'][$key])) {
-                    throw new \Exception('One of the limits was not specified.');
-                }
-                RecipeLimit::create([
-                    'recipe_id'  => $recipe->id,
-                    'limit_type' => $type,
-                    'limit_id'   => $data['limit_id'][$key],
-                    'quantity'   => $data['limit_quantity'][$key],
-                ]);
-            }
-        }
     }
 }

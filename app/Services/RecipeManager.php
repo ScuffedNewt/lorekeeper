@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Models\Currency\Currency;
 use App\Models\Recipe\Recipe;
 use App\Models\User\User;
-use App\Models\User\UserCraftingSlot;
+use App\Models\User\UserRecipeSlot;
 use App\Models\User\UserCurrency;
 use App\Models\User\UserItem;
 use App\Models\User\UserRecipe;
@@ -15,9 +15,9 @@ use DB;
 class RecipeManager extends Service {
     /**********************************************************************************************
 
-         RECIPE CRAFTING
+        RECIPE CRAFTING
 
-     **********************************************************************************************/
+    **********************************************************************************************/
 
     /**
      * Attempts to craft the specified recipe.
@@ -74,10 +74,12 @@ class RecipeManager extends Service {
                 });
 
                 // Check for sufficient ingredients
-                $plucked = $this->pluckIngredients($user, $recipe, $stacks);
-                if (!$plucked) {
+                $pluckedData = $this->pluckIngredients($user, $recipe, $stacks);
+                if (!$pluckedData['hasAllIngredients']) {
                     throw new \Exception('Insufficient ingredients selected.');
                 }
+
+                $plucked = $pluckedData['plucked'];
 
                 // Debit the ingredients
                 $service = new InventoryManager;
@@ -108,7 +110,7 @@ class RecipeManager extends Service {
                 if (!isset($data['slot_id'])) {
                     throw new \Exception('Invalid slot selected');
                 }
-                $userSlot = UserCraftingSlot::find($data['slot_id']);
+                $userSlot = UserRecipeSlot::find($data['slot_id']);
                 // save things
                 $userSlot->recipe_id = $recipe->id;
                 $userSlot->started_at = Carbon::now();
@@ -211,6 +213,9 @@ class RecipeManager extends Service {
         return $plucked;
     }
 
+    /**
+     * Claims a recipe that has been crafted and rewards the user.
+     */
     public function claimRecipe($userSlot, $user) {
         DB::beginTransaction();
 

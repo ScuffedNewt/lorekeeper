@@ -45,19 +45,19 @@
         </table>
         @if (!$hideUnlock)
             @if (Auth::check() && !$limits->first()->isUnlocked(Auth::user() ?? null) && !$limits->first()->is_auto_unlocked)
-                <div class="alert alert-secondary p-0 mt-2 mb-0">
+                <div class="alert alert-secondary p-0 mb-0">
                     {!! Form::open(['url' => 'limits/unlock/' . $limits->first()->id]) !!}
                     {!! Form::submit('Unlock', ['class' => 'btn btn-sm btn-secondary']) !!}
                     {!! Form::close() !!}
                 </div>
             @else
-                <div class="alert alert-secondary p-0 mt-2 mb-0">
+                <div class="alert alert-secondary p-0 mb-0">
                     You must be logged in to unlock this limit.
                 </div>
             @endif
         @endif
     @else
-        <div class="alert alert-{{ $limits->first()->isUnlocked(Auth::user() ?? null) ? 'info' : 'danger' }} p-0 mt-2">
+        <div class="alert alert-{{ $limits->first()->isUnlocked(Auth::user() ?? null) ? 'info' : 'danger' }} p-0 mb-0">
             <small>
                 (Requires {!! implode(
                     ', ',
@@ -66,7 +66,7 @@
                         })->toArray(),
                 ) !!})
                 @if (!$hideUnlock && !$limits->first()->isUnlocked(Auth::user() ?? null) && !$limits->first()->is_auto_unlocked)
-                    <div class="alert alert-secondary p-0 mt-2 mb-0">
+                    <div class="alert alert-secondary p-0 mb-0">
                         <small>
                             {!! Form::open(['url' => 'limits/unlock/' . $limits->first()->id]) !!}
                             {!! Form::submit('Unlock', ['class' => 'btn btn-sm btn-secondary']) !!}
@@ -78,8 +78,16 @@
         </div>
     @endif
 @elseif ($showNoLimits)
-    <h4 class="my-3">{!! $object->displayName !!}'s Requirements</h4>
-    <div class="alert alert-info">
-        No requirements to access this {{ $object->assetType ? (substr($object->assetType, -1) === 's' ? substr($object->assetType, 0, -1) : $object->assetType) : '' }}.
-    </div>
+    @if (!isset($compact) || !$compact)
+        <h4 class="my-3">{!! $object->displayName !!}'s Requirements</h4>
+        <div class="alert alert-info">
+            No requirements to access this {{ $object->assetType ? (substr($object->assetType, -1) === 's' ? substr($object->assetType, 0, -1) : $object->assetType) : '' }}.
+        </div>
+    @else
+        <div class="alert alert-info p-0 mb-0">
+            <small>
+                No requirements to access this {{ $object->assetType ? (substr($object->assetType, -1) === 's' ? substr($object->assetType, 0, -1) : str_replace('_', ' ', $object->assetType)) : '' }}.
+            </small>
+        </div>
+    @endif
 @endif

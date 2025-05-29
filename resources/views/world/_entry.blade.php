@@ -11,7 +11,7 @@
             <x-admin-edit title="{{ $edit['title'] }}" :object="$edit['object']" />
         @endif
         <h3>
-            @if (!$visible)
+            @if (!isset($visible) || !$visible)
                 <i class="fas fa-eye-slash mr-1"></i>
             @endif
             {!! $name !!}

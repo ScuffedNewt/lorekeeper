@@ -223,7 +223,7 @@ class User extends Authenticatable implements MustVerifyEmail {
     }
 
     public function craftingSlots() {
-        return $this->hasMany('App\Models\User\UserCraftingSlot');
+        return $this->hasMany('App\Models\User\UserRecipeSlot');
     }
 
     /**********************************************************************************************
