@@ -317,8 +317,8 @@ class RecipeService extends Service {
     /**
      * Creates a new slot.
      *
-     * @param array                 $data
-     * @param \App\Models\User\User $user
+     * @param array $data
+     * @param User  $user
      *
      * @return \App\Models\Slot\Slot|bool
      */
@@ -326,7 +326,6 @@ class RecipeService extends Service {
         DB::beginTransaction();
 
         try {
-
             $slot = RecipeSlot::create($data);
 
             return $this->commitReturn($slot);
@@ -342,7 +341,7 @@ class RecipeService extends Service {
      *
      * @param \App\Models\Slot\Slot $slot
      * @param array                 $data
-     * @param \App\Models\User\User $user
+     * @param User                  $user
      *
      * @return \App\Models\Slot\Slot|bool
      */
@@ -350,7 +349,6 @@ class RecipeService extends Service {
         DB::beginTransaction();
 
         try {
-
             $slot->update($data);
 
             return $this->commitReturn($slot);

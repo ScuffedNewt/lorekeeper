@@ -21,7 +21,7 @@ class UserRecipeSlot extends Model {
      */
     protected $table = 'user_recipe_slots';
 
-        /**
+    /**
      * The attributes that should be cast to native types.
      *
      * @var array

@@ -5,10 +5,10 @@ namespace App\Services;
 use App\Models\Currency\Currency;
 use App\Models\Recipe\Recipe;
 use App\Models\User\User;
-use App\Models\User\UserRecipeSlot;
 use App\Models\User\UserCurrency;
 use App\Models\User\UserItem;
 use App\Models\User\UserRecipe;
+use App\Models\User\UserRecipeSlot;
 use Carbon\Carbon;
 use DB;
 
@@ -215,6 +215,9 @@ class RecipeManager extends Service {
 
     /**
      * Claims a recipe that has been crafted and rewards the user.
+     *
+     * @param mixed $userSlot
+     * @param mixed $user
      */
     public function claimRecipe($userSlot, $user) {
         DB::beginTransaction();

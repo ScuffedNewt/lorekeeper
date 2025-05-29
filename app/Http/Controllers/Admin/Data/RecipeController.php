@@ -9,12 +9,10 @@ use App\Models\Item\ItemCategory;
 use App\Models\Loot\LootTable;
 use App\Models\Raffle\Raffle;
 use App\Models\Recipe\Recipe;
-use App\Models\Recipe\RecipeIngredient;
-use App\Models\Recipe\RecipeReward;
 use App\Models\Recipe\RecipeSlot;
 use App\Services\RecipeService;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class RecipeController extends Controller {
     /*
@@ -178,7 +176,7 @@ class RecipeController extends Controller {
 
     /**
      * Shows the create crafting slot page.
-     * 
+     *
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getCreateCraftingSlot() {
@@ -209,7 +207,7 @@ class RecipeController extends Controller {
      * Creates or edits an slot.
      *
      * @param App\Services\RecipeService $service
-     * @param int|null                 $id
+     * @param int|null                   $id
      *
      * @return \Illuminate\Http\RedirectResponse
      */

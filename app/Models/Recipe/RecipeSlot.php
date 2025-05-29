@@ -2,8 +2,8 @@
 
 namespace App\Models\Recipe;
 
-use App\Models\User\UserRecipeSlot;
 use App\Models\Model;
+use App\Models\User\UserRecipeSlot;
 
 class RecipeSlot extends Model {
     /**

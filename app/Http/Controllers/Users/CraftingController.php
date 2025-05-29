@@ -8,12 +8,11 @@ use App\Models\Item\ItemCategory;
 use App\Models\Recipe\Recipe;
 use App\Models\Recipe\RecipeSlot;
 use App\Models\User\User;
-use App\Models\User\UserRecipeSlot;
 use App\Models\User\UserItem;
+use App\Models\User\UserRecipeSlot;
 use App\Services\RecipeManager;
-use App\Services\SlotManager;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CraftingController extends Controller {
     /*
@@ -95,10 +94,9 @@ class CraftingController extends Controller {
 
     /**
      * Claims a recipe.
-     * 
-     * @param RecipeManager $service
+     *
      * @param int $id
-     * 
+     *
      * @return \Illuminate\Http\RedirectResponse
      */
     public function postClaimRecipe(RecipeManager $service, $id) {

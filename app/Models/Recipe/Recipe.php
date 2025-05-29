@@ -26,6 +26,15 @@ class Recipe extends Model {
     protected $table = 'recipes';
 
     /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'output' => 'array',
+    ];
+
+    /**
      * Validation rules for creation.
      *
      * @var array
@@ -45,15 +54,6 @@ class Recipe extends Model {
         'name'        => 'required',
         'description' => 'nullable',
         'image'       => 'mimes:png',
-    ];
-
-    /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'output' => 'array',
     ];
 
     /**********************************************************************************************
@@ -93,6 +93,7 @@ class Recipe extends Model {
      * Scope a query to only include active prompts.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param mixed|null                            $user
      *
      * @return \Illuminate\Database\Eloquent\Builder
      */

@@ -25,6 +25,15 @@ class RecipeIngredient extends Model {
     protected $table = 'recipe_ingredients';
 
     /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'ingredient_data' => 'array',
+    ];
+
+    /**
      * Validation rules for creation.
      *
      * @var array
@@ -46,15 +55,6 @@ class RecipeIngredient extends Model {
         'ingredient_type' => 'required',
         'ingredient_data' => 'required',
         'quantity'        => 'required|integer|min:1',
-    ];
-
-    /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'ingredient_data' => 'array',
     ];
 
     /**********************************************************************************************
@@ -115,9 +115,9 @@ class RecipeIngredient extends Model {
 
     /**
      * Returns if the user has enough of this ingredient.
-     * 
+     *
      * @param User $user
-     * 
+     *
      * @return bool
      */
     public function hasIngredient($user) {
