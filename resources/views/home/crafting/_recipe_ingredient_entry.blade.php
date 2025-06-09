@@ -15,14 +15,16 @@
                 <div>
                     {!! $ingredient->ingredient->displayName !!}
                 </div>
-                @if ($ingredient->hasIngredient(Auth::user()))
-                    <span class="badge btn-sm btn-success ml-1 p-2" data-toggle="tooltip" title="You have this ingredient!">
-                        <i class="fas fa-check" style="margin-right: 1px;"></i>
-                    </span>
-                @else
-                    <span class="badge btn-sm btn-danger ml-1 p-2" data-toggle="tooltip" title="You're missing this ingredient...">
-                        <i class="fas fa-times" style="margin-right: 1px;"></i>
-                    </span>
+                @if (Auth::check())
+                    @if ($ingredient->hasIngredient(Auth::user()))
+                        <span class="badge btn-sm btn-success ml-1 p-2" data-toggle="tooltip" title="You have this ingredient!">
+                            <i class="fas fa-check" style="margin-right: 1px;"></i>
+                        </span>
+                    @else
+                        <span class="badge btn-sm btn-danger ml-1 p-2" data-toggle="tooltip" title="You're missing this ingredient...">
+                            <i class="fas fa-times" style="margin-right: 1px;"></i>
+                        </span>
+                    @endif
                 @endif
             </div>
         </div>
@@ -81,14 +83,16 @@
             @endif
             <div class="col pl-2">
                 {!! $ingredient->ingredient->display_name !!}
-                @if ($ingredient->hasIngredient(Auth::user()))
-                    <span class="badge btn-sm btn-success ml-1 p-1" data-toggle="tooltip" title="You have this ingredient!" style="font-size: 90%;">
-                        <i class="fas fa-check" style="margin-right: 1px;"></i>
-                    </span>
-                @else
-                    <span class="badge btn-sm btn-danger ml-1" data-toggle="tooltip" title="You're missing this ingredient..." style="font-size: 90%;">
-                        <i class="fas fa-times" style="margin-right: 1px;"></i>
-                    </span>
+                @if (Auth::check())
+                    @if ($ingredient->hasIngredient(Auth::user()))
+                        <span class="badge btn-sm btn-success ml-1 p-1" data-toggle="tooltip" title="You have this ingredient!" style="font-size: 90%;">
+                            <i class="fas fa-check" style="margin-right: 1px;"></i>
+                        </span>
+                    @else
+                        <span class="badge btn-sm btn-danger ml-1" data-toggle="tooltip" title="You're missing this ingredient..." style="font-size: 90%;">
+                            <i class="fas fa-times" style="margin-right: 1px;"></i>
+                        </span>
+                    @endif
                 @endif
             </div>
         </div>
