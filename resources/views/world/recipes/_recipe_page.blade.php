@@ -27,7 +27,11 @@
                         </div>
                     @endif
                     <div>
+                        <x-admin-edit title="Recipe" :object="$recipe" />
                         <h1 class="mb-0">
+                            @if (!$recipe->is_visible)
+                                <i class="fas fa-eye-slash mr-1"></i>
+                            @endif
                             {!! $recipe->name !!}
                         </h1>
                         @if ($recipe->category)
@@ -42,7 +46,7 @@
                         <div>
                             @if ($recipe->needs_unlocking)
                                 @if (Auth::check() && Auth::user()->hasRecipe($recipe->id))
-                                    <div class="alert alert-success row no-gutters align-items-center" style="font-size: 1.25em;">
+                                    <div class="alert alert-success row no-gutters align-items-center mb-2" style="font-size: 1.25em;">
                                         <div class="col-auto pr-2">
                                             <i class="fas fa-lock-open" aria-hidden="true"></i>
                                         </div>
@@ -51,7 +55,7 @@
                                         </div>
                                     </div>
                                 @else
-                                    <div class="alert alert-danger row no-gutters align-items-center" style="font-size: 1.25em;">
+                                    <div class="alert alert-danger row no-gutters align-items-center mb-2" style="font-size: 1.25em;">
                                         <div class="col-auto pr-2">
                                             <i class="fas fa-lock" aria-hidden="true"></i>
                                         </div>
@@ -61,7 +65,7 @@
                                     </div>
                                 @endif
                             @else
-                                <div class="alert alert-success row no-gutters align-items-center" style="font-size: 1.25em;">
+                                <div class="alert alert-success row no-gutters align-items-center mb-2" style="font-size: 1.25em;">
                                     <div class="col-auto pr-2">
                                         <i class="fas fa-lock-open" aria-hidden="true"></i>
                                     </div>

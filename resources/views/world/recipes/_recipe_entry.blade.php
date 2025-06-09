@@ -7,7 +7,11 @@
         </div>
     @endif
     <div class="{{ $imageUrl ? 'col-md-9' : 'col-12' }}">
+        <x-admin-edit title="Recipe" :object="$recipe" />
         <h3 class="mb-0">
+            @if (!$recipe->is_visible)
+                <i class="fas fa-eye-slash mr-1"></i>
+            @endif
             {!! $name !!}
             @if (isset($idUrl) && $idUrl)
                 <a href="{{ $idUrl }}" class="world-entry-search text-muted"><i class="fas fa-search"></i></a>

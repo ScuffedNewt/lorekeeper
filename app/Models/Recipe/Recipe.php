@@ -284,6 +284,24 @@ class Recipe extends Model {
     }
 
     /**
+     * Gets the admin edit URL.
+     *
+     * @return string
+     */
+    public function getAdminUrlAttribute() {
+        return url('admin/data/recipes/edit/'.$this->id);
+    }
+
+    /**
+     * Gets the power required to edit this model.
+     *
+     * @return string
+     */
+    public function getAdminPowerAttribute() {
+        return 'edit_data';
+    }
+
+    /**
      * Gets the currency's asset type for asset management.
      *
      * @return bool
