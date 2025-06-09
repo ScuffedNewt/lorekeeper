@@ -9,6 +9,7 @@ use App\Models\Item\ItemCategory;
 use App\Models\Loot\LootTable;
 use App\Models\Raffle\Raffle;
 use App\Models\Recipe\Recipe;
+use App\Models\Recipe\RecipeCategory;
 use App\Models\Recipe\RecipeSlot;
 use App\Services\RecipeService;
 use Illuminate\Http\Request;
@@ -26,6 +27,141 @@ class RecipeController extends Controller {
 
     /**********************************************************************************************
 
+        RECIPE CATEGORIES
+
+    **********************************************************************************************/
+
+    /**
+     * Shows the recipe category index.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getIndex(Request $request) {
+        $query = RecipeCategory::query();
+        $data = $request->only(['name']);
+        if (isset($data['name'])) {
+            $query->where('name', 'LIKE', '%'.$data['name'].'%');
+        }
+        $query->orderBy('sort', 'DESC');
+
+        return view('admin.recipes.recipe_categories', [
+            'categories' => $query->paginate(20)->appends($request->query()),
+        ]);
+    }
+
+    /**
+     * Shows the create recipe category page.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getCreateRecipeCategory() {
+        return view('admin.recipes.create_edit_recipe_category', [
+            'category' => new RecipeCategory,
+        ]);
+    }
+
+    /**
+     * Shows the edit recipe category page.
+     *
+     * @param int $id
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getEditRecipeCategory($id) {
+        $category = RecipeCategory::find($id);
+        if (!$category) {
+            abort(404);
+        }
+
+        return view('admin.recipes.create_edit_recipe_category', [
+            'category' => $category,
+        ]);
+    }
+
+    /**
+     * Creates or edits an recipe category.
+     *
+     * @param App\Services\RecipeService $service
+     * @param int|null                 $id
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function postCreateEditRecipeCategory(Request $request, RecipeService $service, $id = null) {
+        $id ? $request->validate(RecipeCategory::$updateRules) : $request->validate(RecipeCategory::$createRules);
+        $data = $request->only([
+            'name', 'description', 'image', 'remove_image', 'is_visible',
+        ]);
+        if ($id && $service->updateRecipeCategory(RecipeCategory::find($id), $data, Auth::user())) {
+            flash('Recipe category updated successfully.')->success();
+        } elseif (!$id && $category = $service->createRecipeCategory($data, Auth::user())) {
+            flash('Recipe category created successfully.')->success();
+
+            return redirect()->to('admin/data/recipe-categories/edit/'.$category->id);
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
+        }
+
+        return redirect()->back();
+    }
+
+    /**
+     * Gets the recipe category deletion modal.
+     *
+     * @param int $id
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getDeleteRecipeCategory($id) {
+        $category = RecipeCategory::find($id);
+
+        return view('admin.recipes._delete_recipe_category', [
+            'category' => $category,
+        ]);
+    }
+
+    /**
+     * Deletes an recipe category.
+     *
+     * @param App\Services\RecipeService $service
+     * @param int                      $id
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function postDeleteRecipeCategory(Request $request, RecipeService $service, $id) {
+        if ($id && $service->deleteRecipeCategory(RecipeCategory::find($id), Auth::user())) {
+            flash('Recipe category deleted successfully.')->success();
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
+        }
+
+        return redirect()->to('admin/data/recipe-categories');
+    }
+
+    /**
+     * Sorts recipe categories.
+     *
+     * @param App\Services\RecipeService $service
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function postSortRecipeCategory(Request $request, RecipeService $service) {
+        if ($service->sortRecipeCategory($request->get('sort'))) {
+            flash('Recipe category order updated successfully.')->success();
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
+        }
+
+        return redirect()->back();
+    }
+
+    /**********************************************************************************************
+
         RECIPES
 
     **********************************************************************************************/
@@ -37,13 +173,17 @@ class RecipeController extends Controller {
      */
     public function getRecipeIndex(Request $request) {
         $query = Recipe::query();
-        $data = $request->only(['name']);
+        $data = $request->only(['name', 'recipe_category_id']);
         if (isset($data['name'])) {
             $query->where('name', 'LIKE', '%'.$data['name'].'%');
+        }
+        if (isset($data['recipe_category_id'])) {
+            $query->where('recipe_category_id', $data['recipe_category_id']);
         }
 
         return view('admin.recipes.recipes', [
             'recipes' => $query->paginate(20)->appends($request->query()),
+            'recipeCategories' => RecipeCategory::orderBy('sort', 'DESC')->pluck('name', 'id'),
         ]);
     }
 
@@ -62,6 +202,7 @@ class RecipeController extends Controller {
             'raffles'    => Raffle::where('rolled_at', null)->where('is_active', 1)->orderBy('name')->pluck('name', 'id'),
             'recipes'    => Recipe::orderBy('name')->pluck('name', 'id'),
             'slots'      => RecipeSlot::orderBy('name')->pluck('name', 'id'),
+            'recipeCategories' => RecipeCategory::orderBy('sort', 'DESC')->pluck('name', 'id'),
         ]);
     }
 
@@ -87,6 +228,7 @@ class RecipeController extends Controller {
             'raffles'    => Raffle::where('rolled_at', null)->where('is_active', 1)->orderBy('name')->pluck('name', 'id'),
             'recipes'    => Recipe::orderBy('name')->pluck('name', 'id'),
             'slots'      => RecipeSlot::orderBy('name')->pluck('name', 'id'),
+            'recipeCategories' => RecipeCategory::orderBy('sort', 'DESC')->pluck('name', 'id'),
         ]);
     }
 
@@ -106,6 +248,7 @@ class RecipeController extends Controller {
             'rewardable_type', 'rewardable_id', 'reward_quantity',
             'is_limited', 'limit_type', 'limit_id', 'limit_quantity',
             'close_at', 'open_at', 'time', 'required_slot_id', 'is_visible',
+            'recipe_category_id',
         ]);
         if ($id && $service->updateRecipe(Recipe::find($id), $data, Auth::user())) {
             flash('Recipe updated successfully.')->success();

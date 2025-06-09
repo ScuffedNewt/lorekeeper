@@ -13,6 +13,15 @@
                 <a href="{{ $idUrl }}" class="world-entry-search text-muted"><i class="fas fa-search"></i></a>
             @endif
         </h3>
+        @if ($recipe->category)
+            <div class="mb-1">
+                <span class="font-weight-bold">Category:</span>
+                @if (!$recipe->category->is_visible)
+                    <i class="fas fa-eye-slash mx-1 text-danger"></i>
+                @endif
+                {!! $recipe->category->displayName !!}
+            </div>
+        @endif
         <div>
             @if ($recipe->needs_unlocking)
                 @if (Auth::check() && Auth::user()->hasRecipe($recipe->id))
@@ -45,8 +54,13 @@
                 </div>
             @endif
         </div>
-        <hr>
+        <hr class="mb-0">
         <div class="row no-gutters">
+            <div class="col-12 mb-2">
+                @include('widgets._limits', [
+                    'object' => $recipe,
+                ])
+            </div>
             <div class="col-md-6 pr-md-1">
                 <h5 class="mb-0">Ingredients</h5>
                 @for ($i = 0; $i < count($recipe->ingredients) && $i < 3; ++$i)

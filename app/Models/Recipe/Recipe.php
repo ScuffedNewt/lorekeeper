@@ -14,7 +14,7 @@ class Recipe extends Model {
      */
     protected $fillable = [
         'name', 'has_image', 'needs_unlocking', 'description', 'parsed_description', 'reference_url', 'artist_alias', 'artist_url',
-        'open_at', 'close_at', 'time', 'is_visible', 'required_slot_id',
+        'open_at', 'close_at', 'time', 'is_visible', 'required_slot_id', 'recipe_category_id',
     ];
 
     protected $appends = ['image_url'];
@@ -82,6 +82,13 @@ class Recipe extends Model {
      */
     public function requiredSlot() {
         return $this->belongsTo(RecipeSlot::class, 'required_slot_id');
+    }
+
+    /**
+     * Gets the recipe's category.
+     */
+    public function category() {
+        return $this->belongsTo(RecipeCategory::class, 'recipe_category_id');
     }
 
     /**********************************************************************************************
@@ -153,6 +160,21 @@ class Recipe extends Model {
      */
     public function scopeSortNeedsUnlocking($query) {
         return $query->where('needs_unlocking', 1);
+    }
+
+    /**
+     * Scope a query to sort recipes in category order.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     *
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeSortCategory($query) {
+        if (RecipeCategory::all()->count()) {
+            return $query->orderBy(RecipeCategory::select('sort')->whereColumn('recipes.recipe_category_id', 'recipe_categories.id'), 'DESC');
+        }
+
+        return $query;
     }
 
     /**********************************************************************************************

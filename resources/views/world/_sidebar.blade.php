@@ -20,7 +20,8 @@
         <div class="sidebar-item"><a href="{{ url('world/currencies') }}" class="{{ set_active('world/currencies*') }}">All Currencies</a></div>
     </li>
     <li class="sidebar-section">
-        <div class="sidebar-section-header">Recipes</div>
+        <div class="sidebar-section-header">Crafting Recipes</div>
+        <div class="sidebar-item"><a href="{{ url('world/recipe-categories') }}" class="{{ set_active('world/recipe-categories*') }}">Recipe Categories</a></div>
         <div class="sidebar-item"><a href="{{ url('world/recipes') }}" class="{{ set_active('world/recipes*') }}">All Recipes</a></div>
     </li>
 </ul>

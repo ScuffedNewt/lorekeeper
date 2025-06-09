@@ -16,12 +16,14 @@
             Show
         </a>
     </h3>
-    <hr>
+    <hr class="mb-0">
     <div class="collapse show" id="recipeDetails">
         <div class="row no-gutters">
-            @include('widgets._limits', [
-                'object' => $recipe,
-            ])
+            <div class="col-12 mb-2">
+                @include('widgets._limits', [
+                    'object' => $recipe,
+                ])
+            </div>
             <div class="col-md-6 pr-md-1">
                 <h5 class="mb-0">Ingredients</h5>
                 @foreach ($recipe->ingredients as $ingredient)
@@ -46,7 +48,7 @@
             </div>
         </div>
     </div>
-    @if ($selected || $recipe->checkRecipe(Auth::user()))
+    @if ($recipe->checkRecipe(Auth::user()))
         <hr>
         {!! Form::open(['url' => 'crafting/craft/' . $recipe->id]) !!}
         @if ($recipe->time)

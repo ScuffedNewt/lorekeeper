@@ -30,6 +30,15 @@
                         <h1 class="mb-0">
                             {!! $recipe->name !!}
                         </h1>
+                        @if ($recipe->category)
+                            <div class="mb-1">
+                                <span class="font-weight-bold">Category:</span>
+                                @if (!$recipe->category->is_visible)
+                                    <i class="fas fa-eye-slash mx-1 text-danger"></i>
+                                @endif
+                                {!! $recipe->category->displayName !!}
+                            </div>
+                        @endif
                         <div>
                             @if ($recipe->needs_unlocking)
                                 @if (Auth::check() && Auth::user()->hasRecipe($recipe->id))
@@ -67,8 +76,14 @@
                                 {!! $recipe->description !!}
                             </div>
                         @endif
-                        <hr>
+                        <hr class="mb-0">
                         <div class="row no-gutters">
+                            <div class="col-12 mb-2">
+                                @include('widgets._limits', [
+                                    'object' => $recipe,
+                                ])
+                            </div>
+
                             <div class="col-md-6 pr-md-1">
                                 <h5 class="mb-0">Ingredients</h5>
                                 @foreach ($recipe->ingredients as $ingredient)
@@ -91,7 +106,6 @@
                                 @endforeach
                             </div>
                         </div>
-
                         @if (!$recipe->needs_unlocking || (Auth::check() && Auth::user()->hasRecipe($recipe->id)))
                             <div class="text-center mt-2">
                                 <a href="{{ url('crafting') }}" class="btn btn-primary h5 text-white">

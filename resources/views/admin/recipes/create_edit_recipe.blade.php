@@ -30,9 +30,13 @@
                 </div>
             @endif
         </div>
-        <div class="col-md-8 form-group">
+        <div class="col-md-4 form-group">
             {!! Form::label('Name') !!}
             {!! Form::text('name', $recipe->name, ['class' => 'form-control']) !!}
+        </div>
+        <div class="col-md-4 form-group">
+            {!! Form::label('Recipe Category (Optional)') !!}
+            {!! Form::select('recipe_category_id', $recipeCategories, $recipe->recipe_category_id, ['class' => 'form-control', 'placeholder' => 'Select a Category']) !!}
         </div>
     </div>
 
@@ -109,16 +113,11 @@
         <h3>Preview</h3>
         <div class="card mb-3">
             <div class="card-body">
-                @include('world._entry', [
+                @include('world.recipes._recipe_entry', [
+                    'recipe' => $recipe,
                     'imageUrl' => $recipe->imageUrl,
                     'name' => $recipe->displayName,
                     'description' => $recipe->parsed_description,
-                    'searchUrl' => $recipe->searchUrl,
-                    'visible' => $recipe->is_visible,
-                    'edit' => [
-                        'title' => 'Recipe',
-                        'object' => $recipe,
-                    ],
                 ])
             </div>
         </div>

@@ -11,6 +11,7 @@ use App\Models\Item\Item;
 use App\Models\Item\ItemCategory;
 use App\Models\Rarity;
 use App\Models\Recipe\Recipe;
+use App\Models\Recipe\RecipeCategory;
 use App\Models\Shop\Shop;
 use App\Models\Species\Species;
 use App\Models\Species\Subtype;
@@ -598,13 +599,44 @@ class WorldController extends Controller {
     }
 
     /**
-     * Shows the items page.
+     * Shows the recipe categories page.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getRecipeCategories(Request $request) {
+        $query = RecipeCategory::query();
+        $name = $request->get('name');
+        if ($name) {
+            $query->where('name', 'LIKE', '%'.$name.'%');
+        }
+
+        return view('world.recipes.recipe_categories', [
+            'categories' => $query->visible(Auth::user() ?? null)->orderBy('sort', 'DESC')->orderBy('id')->paginate(20)->appends($request->query()),
+        ]);
+    }
+
+    /**
+     * Shows the recipes page.
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getRecipes(Request $request) {
-        $query = Recipe::active();
-        $data = $request->only(['name', 'sort']);
+        $query = Recipe::with('category')->active(Auth::user() ?? null);
+
+        $categoryVisibleCheck = RecipeCategory::visible(Auth::user() ?? null)->pluck('id', 'name')->toArray();
+        // query where category is visible, or, no category and released
+        $query->where(function ($query) use ($categoryVisibleCheck) {
+            $query->whereIn('recipe_category_id', $categoryVisibleCheck)->orWhereNull('recipe_category_id');
+        });
+        $data = $request->only(['name', 'sort', 'recipe_category_id']);
+        if (isset($data['recipe_category_id'])) {
+            if ($data['recipe_category_id'] == 'withoutOption') {
+                $query->whereNull('recipe_category_id');
+            } else {
+                $query->where('recipe_category_id', $data['recipe_category_id']);
+            }
+        }
+
         if (isset($data['name'])) {
             $query->where('name', 'LIKE', '%'.$data['name'].'%');
         }
@@ -626,6 +658,9 @@ class WorldController extends Controller {
                 case 'locked':
                     $query->sortNeedsUnlocking();
                     break;
+                case 'category':
+                    $query->sortCategory();
+                    break;
             }
         } else {
             $query->sortNewest();
@@ -633,6 +668,7 @@ class WorldController extends Controller {
 
         return view('world.recipes.recipes', [
             'recipes' => $query->paginate(20)->appends($request->query()),
+            'categories' => ['withoutOption' => 'Without Category'] + RecipeCategory::visible(Auth::user() ?? null)->orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
         ]);
     }
 
@@ -650,6 +686,11 @@ class WorldController extends Controller {
         }
         if ($recipe->active()->first() == false) {
             abort(404);
+        }
+        if ($recipe->category && !$recipe->category->is_visible) {
+            if (Auth::check() ? !Auth::user()->isStaff : true) {
+                abort(404);
+            }
         }
 
         return view('world.recipes._recipe_page', [
