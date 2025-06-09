@@ -23,8 +23,8 @@
             {!! Form::text('name', Request::get('name'), ['class' => 'form-control', 'placeholder' => 'Name']) !!}
         </div>
         <div class="form-group mr-3 mb-3">
-                {!! Form::select('recipe_category_id', $recipeCategories, Request::get('recipe_category_id'), ['class' => 'form-control', 'placeholder' => 'Any Category']) !!}
-            </div>
+            {!! Form::select('recipe_category_id', $recipeCategories, Request::get('recipe_category_id'), ['class' => 'form-control', 'placeholder' => 'Any Category']) !!}
+        </div>
         <div class="form-group mb-3">
             {!! Form::submit('Search', ['class' => 'btn btn-primary']) !!}
         </div>

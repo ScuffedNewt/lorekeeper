@@ -66,7 +66,7 @@
                     'name' => $category->displayName,
                     'description' => $category->parsed_description,
                     'searchUrl' => $category->searchUrl,
-                    'category' => $category
+                    'category' => $category,
                 ])
             </div>
         </div>
