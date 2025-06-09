@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Item\Item;
 use App\Models\Item\ItemCategory;
 use App\Models\Recipe\Recipe;
+use App\Models\Recipe\RecipeCategory;
 use App\Models\Recipe\RecipeSlot;
 use App\Models\User\User;
 use App\Models\User\UserItem;
@@ -30,8 +31,15 @@ class CraftingController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getIndex(Request $request) {
+        $categories = RecipeCategory::visible(Auth::user() ?? null)->orderBy('sort', 'DESC')->get();
+
         return view('home.crafting.index', [
-            'default'     => Recipe::active()->where('needs_unlocking', '0')->get(),
+            'default'     => Recipe::active()
+                ->where('needs_unlocking', '0')
+                ->when($categories->isNotEmpty(), function ($query) use ($categories) {
+                    return $query->orderByRaw('FIELD(recipe_category_id,'.implode(',', $categories->pluck('id')->toArray()).')');
+                })
+                ->get(),
             'slots'       => RecipeSlot::get(),
             'userSlots'   => UserRecipeSlot::where('user_id', Auth::user()->id)->get(),
         ]);

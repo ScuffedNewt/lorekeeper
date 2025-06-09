@@ -6,6 +6,7 @@ use App\Models\Currency\Currency;
 use App\Models\Item\Item;
 use App\Models\Item\ItemCategory;
 use App\Models\Model;
+use App\Models\User\UserCurrency;
 
 class RecipeIngredient extends Model {
     /**
@@ -127,7 +128,7 @@ class RecipeIngredient extends Model {
             case 'MultiItem':
                 return $user->items()->whereIn('item_id', $this->data)->sum('count') >= $this->quantity;
             case 'Currency':
-                return $user->currencies()->where('currency_id', $this->data[0])->sum('quantity') >= $this->quantity;
+                return UserCurrency::where('user_id', $user->id)->where('currency_id', $this->data[0])->sum('quantity') >= $this->quantity;
         }
 
         return false;

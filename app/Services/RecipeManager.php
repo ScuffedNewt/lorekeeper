@@ -75,17 +75,16 @@ class RecipeManager extends Service {
 
                 // Check for sufficient ingredients
                 $pluckedData = $this->pluckIngredients($user, $recipe, $stacks);
-                if (!$pluckedData['hasAllIngredients']) {
+                if (!$pluckedData) {
                     throw new \Exception('Insufficient ingredients selected.');
                 }
 
-                $plucked = $pluckedData['plucked'];
-
+                $plucked = $pluckedData;
                 // Debit the ingredients
                 $service = new InventoryManager;
                 foreach ($plucked as $id => $quantity) {
                     $stack = UserItem::find($id);
-                    if (!$service->debitStack($user, 'Crafting', ['data' => 'Used in '.$recipe->name.' Recipe'], $stack, $quantity)) {
+                    if (!$service->debitStack($user, 'Crafting', ['data' => 'Used in '.$recipe->displayName.' recipe'], $stack, $quantity)) {
                         throw new \Exception('Items could not be removed.');
                     }
                 }
@@ -99,7 +98,7 @@ class RecipeManager extends Service {
             // Debit the currency
             $service = new CurrencyManager;
             foreach ($currency_ingredients as $ingredient) {
-                if (!$service->debitCurrency($user, null, 'Crafting', 'Used in '.$recipe->name.' Recipe', Currency::find($ingredient->data[0]), $ingredient->quantity)) {
+                if (!$service->debitCurrency($user, null, 'Crafting', 'Used in '.$recipe->displayName.' recipe', Currency::find($ingredient->data[0]), $ingredient->quantity)) {
                     throw new \Exception('Currency could not be debited.');
                 }
             }
@@ -123,7 +122,7 @@ class RecipeManager extends Service {
                     'data' => 'Received rewards from '.$recipe->displayName.' recipe',
                 ];
 
-                if (!fillUserAssets($recipe->rewardItems, null, $user, $logType, $craftingData)) {
+                if (!fillUserAssets(parseAssetData($recipe->output), null, $user, $logType, $craftingData)) {
                     throw new \Exception('Failed to distribute rewards to user.');
                 }
             }
@@ -237,7 +236,7 @@ class RecipeManager extends Service {
                 'data' => 'Received rewards from '.$recipe->displayName.' recipe',
             ];
 
-            if (!fillUserAssets($recipe->rewardItems, null, $user, $logType, $craftingData)) {
+            if (!fillUserAssets(parseAssetData($recipe->output), null, $user, $logType, $craftingData)) {
                 throw new \Exception('Failed to distribute rewards to user.');
             }
 

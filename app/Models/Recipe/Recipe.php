@@ -3,6 +3,7 @@
 namespace App\Models\Recipe;
 
 use App\Models\Model;
+use App\Models\User\UserCurrency;
 use Carbon\Carbon;
 
 class Recipe extends Model {
@@ -13,7 +14,7 @@ class Recipe extends Model {
      */
     protected $fillable = [
         'name', 'has_image', 'needs_unlocking', 'description', 'parsed_description', 'reference_url', 'artist_alias', 'artist_url',
-        'open_at', 'close_at', 'time', 'is_visible', 'required_slot_id',
+        'open_at', 'close_at', 'time', 'is_visible', 'required_slot_id', 'recipe_category_id',
     ];
 
     protected $appends = ['image_url'];
@@ -81,6 +82,13 @@ class Recipe extends Model {
      */
     public function requiredSlot() {
         return $this->belongsTo(RecipeSlot::class, 'required_slot_id');
+    }
+
+    /**
+     * Gets the recipe's category.
+     */
+    public function category() {
+        return $this->belongsTo(RecipeCategory::class, 'recipe_category_id');
     }
 
     /**********************************************************************************************
@@ -152,6 +160,21 @@ class Recipe extends Model {
      */
     public function scopeSortNeedsUnlocking($query) {
         return $query->where('needs_unlocking', 1);
+    }
+
+    /**
+     * Scope a query to sort recipes in category order.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     *
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeSortCategory($query) {
+        if (RecipeCategory::all()->count()) {
+            return $query->orderBy(RecipeCategory::select('sort')->whereColumn('recipes.recipe_category_id', 'recipe_categories.id'), 'DESC');
+        }
+
+        return $query;
     }
 
     /**********************************************************************************************
@@ -261,6 +284,24 @@ class Recipe extends Model {
     }
 
     /**
+     * Gets the admin edit URL.
+     *
+     * @return string
+     */
+    public function getAdminUrlAttribute() {
+        return url('admin/data/recipes/edit/'.$this->id);
+    }
+
+    /**
+     * Gets the power required to edit this model.
+     *
+     * @return string
+     */
+    public function getAdminPowerAttribute() {
+        return 'edit_data';
+    }
+
+    /**
      * Gets the currency's asset type for asset management.
      *
      * @return bool
@@ -277,8 +318,8 @@ class Recipe extends Model {
     public function getOnlyCurrencyAttribute() {
         if (count($this->ingredients)) {
             $type = [];
-            foreach ($this->ingredients as $ingredient) {
-                $type[] = $ingredient->ingredient_type;
+            foreach ($this->ingredients as $ingredientredient) {
+                $type[] = $ingredientredient->ingredient_type;
             }
             $types = array_flip($type);
             if (count($types) == 1 && key($types) == 'Currency') {
@@ -289,5 +330,34 @@ class Recipe extends Model {
         } else {
             return false;
         }
+    }
+
+    /**
+     * Returns whether or not the viewing user can craft this recipe.
+     *
+     * @param mixed $user
+     *
+     * @return bool
+     */
+    public function checkRecipe($user) {
+        $ingredients = $this->ingredients->sortBy('ingredient_type');
+        if ($this->onlyCurrency) {
+            foreach ($ingredients as $ingredient) {
+                $currencyCheck = UserCurrency::where('user_id', $user->id)->where('currency_id', $ingredient->ingredient->id)->first();
+                if (!$currencyCheck) {
+                    return false;
+                } elseif ($currencyCheck->quantity < $ingredient->quantity) {
+                    return false;
+                }
+            }
+        } else {
+            foreach ($ingredients as $ingredient) {
+                if (!$ingredient->hasIngredient($user)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 }

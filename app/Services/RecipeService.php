@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Facades\Notifications;
 use App\Models\Recipe\Recipe;
+use App\Models\Recipe\RecipeCategory;
 use App\Models\Recipe\RecipeIngredient;
 use App\Models\Recipe\RecipeSlot;
 use App\Models\User\User;
@@ -20,6 +21,159 @@ class RecipeService extends Service {
     | Handles the creation and editing of recipe categories and recipes.
     |
     */
+
+    /**********************************************************************************************
+
+        RECIPE CATEGORIES
+
+    **********************************************************************************************/
+
+    /**
+     * Create a category.
+     *
+     * @param array $data
+     * @param User  $user
+     *
+     * @return bool|RecipeCategory
+     */
+    public function createRecipeCategory($data, $user) {
+        DB::beginTransaction();
+
+        try {
+            $data = $this->populateCategoryData($data);
+
+            $image = null;
+            if (isset($data['image']) && $data['image']) {
+                $data['has_image'] = 1;
+                $data['hash'] = randomString(10);
+                $image = $data['image'];
+                unset($data['image']);
+            } else {
+                $data['has_image'] = 0;
+            }
+
+            $category = RecipeCategory::create($data);
+
+            if (!$this->logAdminAction($user, 'Created Recipe Category', 'Created '.$category->displayName)) {
+                throw new \Exception('Failed to log admin action.');
+            }
+
+            if ($image) {
+                $this->handleImage($image, $category->categoryImagePath, $category->categoryImageFileName);
+            }
+
+            return $this->commitReturn($category);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
+    }
+
+    /**
+     * Update a category.
+     *
+     * @param RecipeCategory $category
+     * @param array          $data
+     * @param User           $user
+     *
+     * @return bool|RecipeCategory
+     */
+    public function updateRecipeCategory($category, $data, $user) {
+        DB::beginTransaction();
+
+        try {
+            // More specific validation
+            if (RecipeCategory::where('name', $data['name'])->where('id', '!=', $category->id)->exists()) {
+                throw new \Exception('The name has already been taken.');
+            }
+
+            $data = $this->populateCategoryData($data, $category);
+
+            $image = null;
+            if (isset($data['image']) && $data['image']) {
+                $data['has_image'] = 1;
+                $data['hash'] = randomString(10);
+                $image = $data['image'];
+                unset($data['image']);
+            }
+
+            $category->update($data);
+
+            if (!$this->logAdminAction($user, 'Updated Recipe Category', 'Updated '.$category->displayName)) {
+                throw new \Exception('Failed to log admin action.');
+            }
+
+            if ($category) {
+                $this->handleImage($image, $category->categoryImagePath, $category->categoryImageFileName);
+            }
+
+            return $this->commitReturn($category);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
+    }
+
+    /**
+     * Delete a category.
+     *
+     * @param RecipeCategory $category
+     * @param mixed          $user
+     *
+     * @return bool
+     */
+    public function deleteRecipeCategory($category, $user) {
+        DB::beginTransaction();
+
+        try {
+            // Check first if the category is currently in use
+            if (Recipe::where('recipe_category_id', $category->id)->exists()) {
+                throw new \Exception('An recipe with this category exists. Please change or remove its category first.');
+            }
+            if (!$this->logAdminAction($user, 'Deleted Recipe Category', 'Deleted '.$category->name)) {
+                throw new \Exception('Failed to log admin action.');
+            }
+
+            if ($category->has_image) {
+                $this->deleteImage($category->categoryImagePath, $category->categoryImageFileName);
+            }
+            $category->delete();
+
+            return $this->commitReturn(true);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
+    }
+
+    /**
+     * Sorts category order.
+     *
+     * @param array $data
+     *
+     * @return bool
+     */
+    public function sortRecipeCategory($data) {
+        DB::beginTransaction();
+
+        try {
+            // explode the sort array and reverse it since the order is inverted
+            $sort = array_reverse(explode(',', $data));
+
+            foreach ($sort as $key => $s) {
+                RecipeCategory::where('id', $s)->update(['sort' => $key]);
+            }
+
+            return $this->commitReturn(true);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
+    }
 
     /**********************************************************************************************
 
@@ -48,6 +202,12 @@ class RecipeService extends Service {
             }
             if (!isset($data['rewardable_type'])) {
                 throw new \Exception('Please add at least one reward to the recipe.');
+            }
+            if (isset($data['recipe_category_id']) && $data['recipe_category_id'] == 'none') {
+                $data['recipe_category_id'] = null;
+            }
+            if ((isset($data['recipe_category_id']) && $data['recipe_category_id']) && !RecipeCategory::where('id', $data['recipe_category_id'])->exists()) {
+                throw new \Exception('The selected recipe category is invalid.');
             }
 
             $data = $this->populateData($data);
@@ -92,6 +252,10 @@ class RecipeService extends Service {
             $recipe->output = $this->populateRewards($data);
             $recipe->save();
 
+            if (!$this->logAdminAction($user, 'Created Recipe', 'Created '.$recipe->displayName)) {
+                throw new \Exception('Failed to log admin action.');
+            }
+
             if ($image) {
                 $this->handleImage($image, $recipe->imagePath, $recipe->imageFileName);
             }
@@ -117,13 +281,12 @@ class RecipeService extends Service {
         DB::beginTransaction();
 
         try {
-            if (isset($data['recipe_category_id']) && $data['recipe_category_id'] == 'none') {
-                $data['recipe_category_id'] = null;
-            }
-
             // More specific validation
             if (Recipe::where('name', $data['name'])->where('id', '!=', $recipe->id)->exists()) {
                 throw new \Exception('The name has already been taken.');
+            }
+            if (isset($data['recipe_category_id']) && $data['recipe_category_id'] == 'none') {
+                $data['recipe_category_id'] = null;
             }
             if ((isset($data['recipe_category_id']) && $data['recipe_category_id']) && !RecipeCategory::where('id', $data['recipe_category_id'])->exists()) {
                 throw new \Exception('The selected recipe category is invalid.');
@@ -150,6 +313,10 @@ class RecipeService extends Service {
             $recipe->update($data);
             $recipe->output = $this->populateRewards($data);
             $recipe->save();
+
+            if (!$this->logAdminAction($user, 'Updated Recipe', 'Updated '.$recipe->displayName)) {
+                throw new \Exception('Failed to log admin action.');
+            }
 
             if ($recipe) {
                 $this->handleImage($image, $recipe->imagePath, $recipe->imageFileName);
@@ -188,6 +355,11 @@ class RecipeService extends Service {
 
             DB::table('user_recipes_log')->where('recipe_id', $recipe->id)->delete();
             DB::table('user_recipes')->where('recipe_id', $recipe->id)->delete();
+
+            if (!$this->logAdminAction($user, 'Deleted Recipe', 'Deleted '.$recipe->name)) {
+                throw new \Exception('Failed to log admin action.');
+            }
+
             // FIXME $recipe->tags()->delete();
             if ($recipe->has_image) {
                 $this->deleteImage($recipe->imagePath, $recipe->imageFileName);
@@ -419,6 +591,36 @@ class RecipeService extends Service {
                 'updated_at'   => Carbon::now(),
             ]
         );
+    }
+
+    /**
+     * Handle category data.
+     *
+     * @param array               $data
+     * @param RecipeCategory|null $category
+     *
+     * @return array
+     */
+    private function populateCategoryData($data, $category = null) {
+        if (isset($data['description']) && $data['description']) {
+            $data['parsed_description'] = parse($data['description']);
+        } else {
+            $data['parsed_description'] = null;
+        }
+
+        if (!isset($data['is_visible'])) {
+            $data['is_visible'] = 0;
+        }
+
+        if (isset($data['remove_image'])) {
+            if ($category && $category->has_image && $data['remove_image']) {
+                $data['has_image'] = 0;
+                $this->deleteImage($category->categoryImagePath, $category->categoryImageFileName);
+            }
+            unset($data['remove_image']);
+        }
+
+        return $data;
     }
 
     /**

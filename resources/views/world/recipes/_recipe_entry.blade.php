@@ -1,49 +1,75 @@
 <div class="row world-entry">
     @if ($imageUrl)
-        <div class="col-md-3 world-entry-image"><a href="{{ $imageUrl }}" data-lightbox="entry" data-title="{{ $name }}"><img src="{{ $imageUrl }}" class="world-entry-image" /></a></div>
+        <div class="col-md-3 world-entry-image">
+            <a href="{{ $imageUrl }}" data-lightbox="entry" data-title="{{ $name }}">
+                <img src="{{ $imageUrl }}" />
+            </a>
+        </div>
     @endif
     <div class="{{ $imageUrl ? 'col-md-9' : 'col-12' }}">
-        <h3>
-            @if ($recipe->needs_unlocking)
-                @if (Auth::check() && Auth::user()->hasRecipe($recipe->id))
-                    <i class="fas fa-lock-open" data-toggle="tooltip" title="You have this recipe!"></i>
-                @else
-                    <i class="fas fa-lock" style="opacity:0.5" data-toggle="tooltip" title="You do not have this recipe."></i>
-                @endif
-            @else
-                <i class="fas fa-lock-open" data-toggle="tooltip" title="This recipe is automatically unlocked."></i>
+        <x-admin-edit title="Recipe" :object="$recipe" />
+        <h3 class="mb-0">
+            @if (!$recipe->is_visible)
+                <i class="fas fa-eye-slash mr-1"></i>
             @endif
-
-            {!! $name !!} @if (isset($idUrl) && $idUrl)
+            {!! $name !!}
+            @if (isset($idUrl) && $idUrl)
                 <a href="{{ $idUrl }}" class="world-entry-search text-muted"><i class="fas fa-search"></i></a>
             @endif
         </h3>
-
-
-        <div class="row">
-
-            @if ($recipe->is_limited)
-                <div class="col-md-4">
-                    <h5>Requirements</h5>
-
-                    <div class="alert alert-secondary">
-                        <?php
-                        $limits = [];
-                        foreach ($recipe->limits as $limit) {
-                            $name = $limit->reward->name;
-                            $quantity = $limit->quantity > 1 ? $limit->quantity . ' ' : '';
-                            $limits[] = $quantity . $name;
-                        }
-                        echo implode(', ', $limits);
-                        ?>
+        @if ($recipe->category)
+            <div class="mb-1">
+                <span class="font-weight-bold">Category:</span>
+                @if (!$recipe->category->is_visible)
+                    <i class="fas fa-eye-slash mx-1 text-danger"></i>
+                @endif
+                {!! $recipe->category->displayName !!}
+            </div>
+        @endif
+        <div>
+            @if ($recipe->needs_unlocking)
+                @if (Auth::check() && Auth::user()->hasRecipe($recipe->id))
+                    <div class="alert alert-success row no-gutters align-items-center" style="font-size: 1.25em;">
+                        <div class="col-auto pr-2">
+                            <i class="fas fa-lock-open" aria-hidden="true"></i>
+                        </div>
+                        <div class="col text-center text-md-left">
+                            You <b>have unlocked</b> and own this recipe!
+                        </div>
+                    </div>
+                @else
+                    <div class="alert alert-danger row no-gutters align-items-center" style="font-size: 1.25em;">
+                        <div class="col-auto pr-2">
+                            <i class="fas fa-lock" aria-hidden="true"></i>
+                        </div>
+                        <div class="col text-center text-md-left">
+                            You have <b>not yet unlocked</b> and do not have this recipe.
+                        </div>
+                    </div>
+                @endif
+            @else
+                <div class="alert alert-success row no-gutters align-items-center" style="font-size: 1.25em;">
+                    <div class="col-auto pr-2">
+                        <i class="fas fa-lock-open" aria-hidden="true"></i>
+                    </div>
+                    <div class="col text-center text-md-left">
+                        This recipe is <b>automatically unlocked.</b>
                     </div>
                 </div>
             @endif
-            <div class="col-md">
-                <h5>Ingredients</h5>
+        </div>
+        <hr class="mb-0">
+        <div class="row no-gutters">
+            <div class="col-12 mb-2">
+                @include('widgets._limits', [
+                    'object' => $recipe,
+                ])
+            </div>
+            <div class="col-md-6 pr-md-1">
+                <h5 class="mb-0">Ingredients</h5>
                 @for ($i = 0; $i < count($recipe->ingredients) && $i < 3; ++$i)
                     <?php $ingredient = $recipe->ingredients[$i]; ?>
-                    <div class="alert alert-secondary">
+                    <div class="alert alert-secondary mb-1">
                         @include('home.crafting._recipe_ingredient_entry', ['ingredient' => $ingredient])
                     </div>
                 @endfor
@@ -51,17 +77,19 @@
                     <i class="fas fa-ellipsis-h mb-3"></i>
                 @endif
             </div>
-            <div class="col-md">
-                <h5>Rewards</h5>
+            <div class="col-md-6 pl-md-1">
+                <h5 class="mb-0">Rewards</h5>
                 <?php $counter = 0; ?>
-                @foreach ($recipe->reward_items as $type)
+                @foreach (parseAssetData($recipe->output) as $type)
                     @foreach ($type as $item)
                         @if ($counter > 3)
                             @break
                         @endif
                         <?php ++$counter; ?>
-                        <div class="alert alert-secondary">
-                            @include('home.crafting._recipe_reward_entry', ['reward' => $item])
+                        <div class="alert alert-secondary mb-1">
+                            @include('home.crafting._recipe_reward_entry', [
+                                'reward' => $item,
+                            ])
                         </div>
                     @endforeach
                 @endforeach
