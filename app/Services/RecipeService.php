@@ -31,8 +31,8 @@ class RecipeService extends Service {
     /**
      * Create a category.
      *
-     * @param array                 $data
-     * @param \App\Models\User\User $user
+     * @param array $data
+     * @param User  $user
      *
      * @return bool|RecipeCategory
      */
@@ -73,9 +73,9 @@ class RecipeService extends Service {
     /**
      * Update a category.
      *
-     * @param RecipeCategory          $category
-     * @param array                 $data
-     * @param \App\Models\User\User $user
+     * @param RecipeCategory $category
+     * @param array          $data
+     * @param User           $user
      *
      * @return bool|RecipeCategory
      */
@@ -120,7 +120,7 @@ class RecipeService extends Service {
      * Delete a category.
      *
      * @param RecipeCategory $category
-     * @param mixed        $user
+     * @param mixed          $user
      *
      * @return bool
      */
@@ -596,7 +596,7 @@ class RecipeService extends Service {
     /**
      * Handle category data.
      *
-     * @param array             $data
+     * @param array               $data
      * @param RecipeCategory|null $category
      *
      * @return array

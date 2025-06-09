@@ -5,8 +5,8 @@ namespace App\Models\Recipe;
 use App\Models\Currency\Currency;
 use App\Models\Item\Item;
 use App\Models\Item\ItemCategory;
-use App\Models\User\UserCurrency;
 use App\Models\Model;
+use App\Models\User\UserCurrency;
 
 class RecipeIngredient extends Model {
     /**

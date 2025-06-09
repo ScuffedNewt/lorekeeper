@@ -667,7 +667,7 @@ class WorldController extends Controller {
         }
 
         return view('world.recipes.recipes', [
-            'recipes' => $query->paginate(20)->appends($request->query()),
+            'recipes'    => $query->paginate(20)->appends($request->query()),
             'categories' => ['withoutOption' => 'Without Category'] + RecipeCategory::visible(Auth::user() ?? null)->orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
         ]);
     }

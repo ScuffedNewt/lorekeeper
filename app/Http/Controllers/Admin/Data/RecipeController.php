@@ -82,7 +82,7 @@ class RecipeController extends Controller {
      * Creates or edits an recipe category.
      *
      * @param App\Services\RecipeService $service
-     * @param int|null                 $id
+     * @param int|null                   $id
      *
      * @return \Illuminate\Http\RedirectResponse
      */
@@ -125,7 +125,7 @@ class RecipeController extends Controller {
      * Deletes an recipe category.
      *
      * @param App\Services\RecipeService $service
-     * @param int                      $id
+     * @param int                        $id
      *
      * @return \Illuminate\Http\RedirectResponse
      */
@@ -182,7 +182,7 @@ class RecipeController extends Controller {
         }
 
         return view('admin.recipes.recipes', [
-            'recipes' => $query->paginate(20)->appends($request->query()),
+            'recipes'          => $query->paginate(20)->appends($request->query()),
             'recipeCategories' => RecipeCategory::orderBy('sort', 'DESC')->pluck('name', 'id'),
         ]);
     }
@@ -194,14 +194,14 @@ class RecipeController extends Controller {
      */
     public function getCreateRecipe() {
         return view('admin.recipes.create_edit_recipe', [
-            'recipe'     => new Recipe,
-            'items'      => Item::orderBy('name')->pluck('name', 'id'),
-            'categories' => ItemCategory::orderBy('name')->pluck('name', 'id'),
-            'currencies' => Currency::where('is_user_owned', 1)->orderBy('name')->pluck('name', 'id'),
-            'tables'     => LootTable::orderBy('name')->pluck('name', 'id'),
-            'raffles'    => Raffle::where('rolled_at', null)->where('is_active', 1)->orderBy('name')->pluck('name', 'id'),
-            'recipes'    => Recipe::orderBy('name')->pluck('name', 'id'),
-            'slots'      => RecipeSlot::orderBy('name')->pluck('name', 'id'),
+            'recipe'           => new Recipe,
+            'items'            => Item::orderBy('name')->pluck('name', 'id'),
+            'categories'       => ItemCategory::orderBy('name')->pluck('name', 'id'),
+            'currencies'       => Currency::where('is_user_owned', 1)->orderBy('name')->pluck('name', 'id'),
+            'tables'           => LootTable::orderBy('name')->pluck('name', 'id'),
+            'raffles'          => Raffle::where('rolled_at', null)->where('is_active', 1)->orderBy('name')->pluck('name', 'id'),
+            'recipes'          => Recipe::orderBy('name')->pluck('name', 'id'),
+            'slots'            => RecipeSlot::orderBy('name')->pluck('name', 'id'),
             'recipeCategories' => RecipeCategory::orderBy('sort', 'DESC')->pluck('name', 'id'),
         ]);
     }
@@ -220,14 +220,14 @@ class RecipeController extends Controller {
         }
 
         return view('admin.recipes.create_edit_recipe', [
-            'recipe'     => $recipe,
-            'items'      => Item::orderBy('name')->pluck('name', 'id'),
-            'categories' => ItemCategory::orderBy('name')->pluck('name', 'id'),
-            'currencies' => Currency::where('is_user_owned', 1)->orderBy('name')->pluck('name', 'id'),
-            'tables'     => LootTable::orderBy('name')->pluck('name', 'id'),
-            'raffles'    => Raffle::where('rolled_at', null)->where('is_active', 1)->orderBy('name')->pluck('name', 'id'),
-            'recipes'    => Recipe::orderBy('name')->pluck('name', 'id'),
-            'slots'      => RecipeSlot::orderBy('name')->pluck('name', 'id'),
+            'recipe'           => $recipe,
+            'items'            => Item::orderBy('name')->pluck('name', 'id'),
+            'categories'       => ItemCategory::orderBy('name')->pluck('name', 'id'),
+            'currencies'       => Currency::where('is_user_owned', 1)->orderBy('name')->pluck('name', 'id'),
+            'tables'           => LootTable::orderBy('name')->pluck('name', 'id'),
+            'raffles'          => Raffle::where('rolled_at', null)->where('is_active', 1)->orderBy('name')->pluck('name', 'id'),
+            'recipes'          => Recipe::orderBy('name')->pluck('name', 'id'),
+            'slots'            => RecipeSlot::orderBy('name')->pluck('name', 'id'),
             'recipeCategories' => RecipeCategory::orderBy('sort', 'DESC')->pluck('name', 'id'),
         ]);
     }
