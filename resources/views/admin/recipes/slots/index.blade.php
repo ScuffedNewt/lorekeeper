@@ -13,6 +13,7 @@
     <p>Each slot can have a cost associated with it, which is paid to unlock the slot OR whenever a recipe is crafted.</p>
 
     <div class="text-right mb-3">
+        <a class="btn btn-secondary" href="{{ url('admin/data/recipes') }}"><i class="fas fa-undo"></i> Return to Recipes</a>
         <a class="btn btn-primary" href="{{ url('admin/data/recipes/slots/create') }}"><i class="fas fa-plus"></i> Create New Recipe Slot</a>
     </div>
 
