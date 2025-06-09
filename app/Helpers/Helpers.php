@@ -483,3 +483,12 @@ function faVersion() {
 
     return asset($directory.'/'.$version.'.min.css');
 }
+
+/**
+ * checks if a certain object has any limits.
+ *
+ * @param mixed $object
+ */
+function hasLimits($object) {
+    return App\Models\Limit\Limit::where('object_model', get_class($object))->where('object_id', $object->id)->exists();
+}

@@ -45,7 +45,7 @@
         </table>
         @if (!$hideUnlock)
             @if (Auth::check() && !$limits->first()->isUnlocked(Auth::user() ?? null) && !$limits->first()->is_auto_unlocked)
-                <div class="alert alert-secondary p-0 mb-0">
+                <div class="alert alert-secondary text-center p-0 mb-0">
                     {!! Form::open(['url' => 'limits/unlock/' . $limits->first()->id]) !!}
                     {!! Form::submit('Unlock', ['class' => 'btn btn-sm btn-secondary']) !!}
                     {!! Form::close() !!}
@@ -66,7 +66,7 @@
                         })->toArray(),
                 ) !!})
                 @if (!$hideUnlock && !$limits->first()->isUnlocked(Auth::user() ?? null) && !$limits->first()->is_auto_unlocked)
-                    <div class="alert alert-secondary p-0 mb-0">
+                    <div class="alert alert-secondary text-center p-0 mb-0">
                         <small>
                             {!! Form::open(['url' => 'limits/unlock/' . $limits->first()->id]) !!}
                             {!! Form::submit('Unlock', ['class' => 'btn btn-sm btn-secondary']) !!}

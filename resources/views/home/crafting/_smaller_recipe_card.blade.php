@@ -1,16 +1,16 @@
-<div class="col-md-3 px-1 mb-2">
-    <div class="card alert-secondary rounded-0 py-0 col-form-label" data-id="{{ $recipe->id }}" data-name="{{ $recipe->name }}">
-        <div class="p-2 row">
-            <div class="col">
-                @if (isset($recipe->image_url))
-                    <img src="{{ $recipe->imageUrl }}" class="recipe-image mr-2" style="max-height:15px; width:auto;">
-                @endif
+<div class="col-md-4 mb-2">
+    <div class="card h-100 alert-secondary py-0" data-id="{{ $recipe->id }}" data-name="{{ $recipe->name }}">
+        <div class="d-flex justify-content-between align-items-center p-1">
+            @if ($recipe->has_image)
+                <div class="col-md-6">
+                    <img src="{{ $recipe->imageUrl }}" class="img-fluid">
+                </div>
+            @endif
+            <div class="col-md-{{ $recipe->has_image ? '6' : '12' }}">
                 <h4 class="mb-0 mt-0 d-inline col-form-label">
                     {!! $recipe->displayName !!}
                 </h4>
-            </div>
-            <div class="col-auto mx-2 text-right">
-                <a class="btn btn-secondary btn-sm ml-2 btn-craft w-100" style="line-height:1;" href="">
+                <a class="btn btn-secondary btn-sm btn-craft" style="line-height:1;" href="">
                     Craft
                 </a>
             </div>

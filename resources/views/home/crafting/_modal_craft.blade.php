@@ -18,10 +18,13 @@
     </h3>
     <hr>
     <div class="collapse show" id="recipeDetails">
-        <div class="row">
+        @if (hasLimits($recipe))
             @include('widgets._limits', [
                 'object' => $recipe,
             ])
+            <hr />
+        @endif
+        <div class="row">
             <div class="col-md-6">
                 <h5>Ingredients</h5>
                 @foreach ($recipe->ingredients as $ingredient)

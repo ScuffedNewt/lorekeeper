@@ -39,16 +39,9 @@
                     <i class="fas fa-ellipsis-h mb-3"></i>
                 @endif
             </div>
-            @if ($recipe->is_limited)
-                <div class="text-danger small">(Requires <?php
-                $limits = [];
-                foreach ($recipe->limits as $limit) {
-                    $name = $limit->reward->name;
-                    $limits[] = $name;
-                }
-                echo implode(', ', $limits);
-                ?>)</div>
-            @endif
+            @include('widgets._limits', [
+                'object' => $recipe,
+            ])
         </div>
         <a class="btn btn-primary btn-block btn-craft" href="">Craft</a>
     </div>
