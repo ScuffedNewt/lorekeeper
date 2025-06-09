@@ -17,8 +17,11 @@
 
     <div class="row">
         <div class="col-md-4 form-group">
-            {!! Form::label('World Page Image (Optional)') !!} {!! add_help('This image is used only on the world information pages.') !!}
-            <div>{!! Form::file('image') !!}</div>
+            {!! Form::label('Recipe Image (Optional)') !!} {!! add_help('This image for the recipe, its world entry, and world page.') !!}
+            <div class="custom-file">
+                {!! Form::label('image', 'Choose file...', ['class' => 'custom-file-label']) !!}
+                {!! Form::file('image', ['class' => 'custom-file-input']) !!}
+            </div>
             <div class="text-muted">Recommended size: 100px x 100px</div>
             @if ($recipe->has_image)
                 <div class="form-check">

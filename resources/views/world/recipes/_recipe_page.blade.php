@@ -20,10 +20,12 @@
             <div class="card mb-3">
                 <div class="card-body">
                     @if ($recipe->imageUrl)
-                        <div class="world-entry-image text-center mb-2"><a href="{{ $recipe->imageUrl }}" data-lightbox="entry" data-title="{{ $recipe->name }}"><img src="{{ $recipe->imageUrl }}" class="world-entry-image mw-100"
-                                    style="max-height:300px;" /></a></div>
+                        <div class="world-entry-image text-center mb-2">
+                            <a href="{{ $recipe->imageUrl }}" data-lightbox="entry" data-title="{{ $recipe->name }}">
+                                <img src="{{ $recipe->imageUrl }}" class="world-entry-image mw-100" style="max-height:300px;" />
+                            </a>
+                        </div>
                     @endif
-
                     <div>
                         <h1>
                             @if ($recipe->needs_unlocking)
@@ -71,10 +73,12 @@
                             </div>
                             <div class="col-md-6">
                                 <h5>Rewards</h5>
-                                @foreach ($recipe->reward_items as $type)
+                                @foreach (parseAssetData($recipe->output) as $type)
                                     @foreach ($type as $item)
                                         <div class="alert alert-secondary">
-                                            @include('home.crafting._recipe_reward_entry', ['reward' => $item])
+                                            @include('home.crafting._recipe_reward_entry', [
+                                                'reward' => $item,
+                                            ])
                                         </div>
                                     @endforeach
                                 @endforeach

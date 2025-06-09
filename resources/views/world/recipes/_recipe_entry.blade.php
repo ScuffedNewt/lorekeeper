@@ -1,6 +1,10 @@
 <div class="row world-entry">
     @if ($imageUrl)
-        <div class="col-md-3 world-entry-image"><a href="{{ $imageUrl }}" data-lightbox="entry" data-title="{{ $name }}"><img src="{{ $imageUrl }}" class="world-entry-image" /></a></div>
+        <div class="col-md-3 world-entry-image">
+            <a href="{{ $imageUrl }}" data-lightbox="entry" data-title="{{ $name }}">
+                <img src="{{ $imageUrl }}" />
+            </a>
+        </div>
     @endif
     <div class="{{ $imageUrl ? 'col-md-9' : 'col-12' }}">
         <h3>
@@ -19,13 +23,10 @@
             @endif
         </h3>
 
-
         <div class="row">
-
             @if ($recipe->is_limited)
                 <div class="col-md-4">
                     <h5>Requirements</h5>
-
                     <div class="alert alert-secondary">
                         <?php
                         $limits = [];
@@ -54,14 +55,16 @@
             <div class="col-md">
                 <h5>Rewards</h5>
                 <?php $counter = 0; ?>
-                @foreach ($recipe->reward_items as $type)
+                @foreach (parseAssetData($recipe->output) as $type)
                     @foreach ($type as $item)
                         @if ($counter > 3)
                             @break
                         @endif
                         <?php ++$counter; ?>
                         <div class="alert alert-secondary">
-                            @include('home.crafting._recipe_reward_entry', ['reward' => $item])
+                            @include('home.crafting._recipe_reward_entry', [
+                                'reward' => $item,
+                            ])
                         </div>
                     @endforeach
                 @endforeach
