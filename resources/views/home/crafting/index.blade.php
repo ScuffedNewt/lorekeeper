@@ -10,17 +10,17 @@
     <h1>
         My Recipe Book
     </h1>
-    <p> This is a list of recipes that you have unlocked, as well as automatically unlocked recipes. </p>
+    <p>This is a list of recipes that you have unlocked, as well as automatically unlocked recipes.</p>
 
-    <div class="row mb-3">
-        <div class="col-md-6">
+    <div class="row no-gutters">
+        <div class="col-md-6 pr-md-1 mb-3">
             <div class="card h-100">
                 <div class="card-header">
                     <h3>Free Recipes</h3>
                 </div>
                 <div class="card-body">
                     @if ($default->count())
-                        <div class="row mx-0">
+                        <div class="row no-gutters">
                             @foreach ($default as $recipe)
                                 @include('home.crafting._smaller_recipe_card', ['recipe' => $recipe])
                             @endforeach
@@ -31,14 +31,14 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-6 pl-md-1 mb-3">
             <div class="card h-100">
                 <div class="card-header">
                     <h3>Your Unlocked Recipes</h3>
                 </div>
                 <div class="card-body">
                     @if (Auth::user()->recipes->count())
-                        <div class="row mx-0">
+                        <div class="row no-gutters">
                             @foreach (Auth::user()->recipes as $recipe)
                                 @include('home.crafting._smaller_recipe_card', ['recipe' => $recipe])
                             @endforeach
@@ -46,7 +46,7 @@
                     @else
                         You haven't unlocked any recipes!
                     @endif
-                    <div class="text-right mb-4">
+                    <div class="text-right mt-2">
                         <a href="{{ url(Auth::user()->url . '/recipe-logs') }}">View logs...</a>
                     </div>
                 </div>
@@ -59,13 +59,15 @@
             Crafting Recipe Slots
         </div>
         <div class="card-body">
-            <p>Recipe slots are used for recipes that require time to craft. Each slot can have a cost associated with it, which is paid to unlock the slot OR whenever a recipe is crafted.</p>
+            <p class="mb-1">
+                Recipe slots are used for recipes that require time to craft. Each slot can have a cost associated with it, which is paid to unlock the slot OR whenever a recipe is crafted.
+            </p>
             <p>Each slot can only be used for one recipe at a time.</p>
             <hr />
             <div class="row ml-2">
                 @foreach ($slots as $slot)
                     <div class="col-md-3">
-                        <div class="card text-center d-flex justify-content-center align-items-center" style="width: 200px; height: 200px; background-color: grey;">
+                        <div class="card bg-secondary text-center d-flex justify-content-center align-items-center" style="width: 200px; height: 200px;">
                             <div class="h5 text-white mb-0">
                                 <i class="fas fa-tools"></i>
                                 {{ $slot->displayName }}

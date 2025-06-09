@@ -18,25 +18,25 @@
     </h3>
     <hr>
     <div class="collapse show" id="recipeDetails">
-        <div class="row">
+        <div class="row no-gutters">
             @include('widgets._limits', [
                 'object' => $recipe,
             ])
-            <div class="col-md-6">
-                <h5>Ingredients</h5>
+            <div class="col-md-6 pr-md-1">
+                <h5 class="mb-0">Ingredients</h5>
                 @foreach ($recipe->ingredients as $ingredient)
-                    <div class="alert alert-secondary">
+                    <div class="alert alert-secondary mb-1">
                         @include('home.crafting._recipe_ingredient_entry', [
                             'ingredient' => $ingredient,
                         ])
                     </div>
                 @endforeach
             </div>
-            <div class="col-md-6">
-                <h5>Rewards</h5>
+            <div class="col-md-6 pl-md-1">
+                <h5 class="mb-0">Rewards</h5>
                 @foreach (parseAssetData($recipe->output) as $type)
                     @foreach ($type as $item)
-                        <div class="alert alert-secondary">
+                        <div class="alert alert-secondary mb-1">
                             @include('home.crafting._recipe_reward_entry', [
                                 'reward' => $item,
                             ])
@@ -46,7 +46,8 @@
             </div>
         </div>
     </div>
-    @if ($selected || $recipe->onlyCurrency)
+    @if ($selected || $recipe->checkRecipe(Auth::user()))
+        <hr>
         {!! Form::open(['url' => 'crafting/craft/' . $recipe->id]) !!}
         @if ($recipe->time)
             @if (!$slots->count())

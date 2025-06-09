@@ -3,6 +3,7 @@
 namespace App\Models\Recipe;
 
 use App\Models\Model;
+use App\Models\User\UserCurrency;
 use Carbon\Carbon;
 
 class Recipe extends Model {
@@ -289,5 +290,34 @@ class Recipe extends Model {
         } else {
             return false;
         }
+    }
+
+    /**
+     * Returns whether or not the viewing user can craft this recipe.
+     *
+     * @param mixed $user
+     *
+     * @return bool
+     */
+    public function checkRecipe($user) {
+        $ingredients = $this->ingredients->sortBy('ingredient_type');
+        if ($this->onlyCurrency) {
+            foreach ($ingredients as $ing) {
+                $currencyCheck = UserCurrency::where('user_id', $user->id)->where('currency_id', $ing->ingredient->id)->first();
+                if (!$currencyCheck) {
+                    return false;
+                } elseif ($currencyCheck->quantity < $ing->quantity) {
+                    return false;
+                }
+            }
+        } else {
+            foreach ($ingredients as $ing) {
+                if (!$ing->hasIngredient($user)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 }

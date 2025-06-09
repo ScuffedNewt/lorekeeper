@@ -770,6 +770,15 @@ tr.accountbound {
     width: 150px;
 }
 
+.recipe-icon-container {
+    aspect-ratio: 1 / 1;
+    width: 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .content-warning {
     filter: blur(2px) grayscale(60%);
     transition: filter 0.25s ease;
