@@ -52,7 +52,7 @@
                             </div>
                             <div class="col-6 col-md-2">
                                 <div class="logs-table-cell">
-                                    {{ $limit->quantity > 0 ? 'x'.$limit->quantity : 'N/A' }}
+                                    {{ $limit->quantity > 0 ? 'x' . $limit->quantity : 'N/A' }}
                                 </div>
                             </div>
                             <div class="col-6 col-md-2">
