@@ -495,8 +495,11 @@ function hasLimits($object) {
 
 /**
  * Checks if a user has a limit unlocked.
+ *
+ * @param mixed $object
  */
 function hasUnlockedLimits($object) {
-    $service = new App\Services\LimitManager();
+    $service = new App\Services\LimitManager;
+
     return $service->checkLimits($object);
 }
