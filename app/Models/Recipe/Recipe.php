@@ -363,6 +363,8 @@ class Recipe extends Model {
 
     /**
      * Returns whether or not a user has unlocked this recipe.
+     *
+     * @param mixed $user
      */
     public function hasUserUnlocked($user) {
         if (!$this->needs_unlocking && !hasLimits($this)) {
@@ -371,9 +373,9 @@ class Recipe extends Model {
 
         if ($this->needs_unlocking && hasLimits($this)) {
             return Auth::user()->hasRecipe($this->id) && hasUnlockedLimits($this);
-        } else if (!$this->needs_unlocking && hasLimits($this)) {
+        } elseif (!$this->needs_unlocking && hasLimits($this)) {
             return hasUnlockedLimits($this);
-        } else if ($this->needs_unlocking && !hasLimits($this)) {
+        } elseif ($this->needs_unlocking && !hasLimits($this)) {
             return Auth::user()->hasRecipe($this->id);
         }
 
