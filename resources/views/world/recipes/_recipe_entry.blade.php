@@ -26,29 +26,40 @@
                 {!! $recipe->category->displayName !!}
             </div>
         @endif
-        <div>
-            @if ($recipe->needs_unlocking)
-                @if (Auth::check() && Auth::user()->hasRecipe($recipe->id))
-                    <div class="alert alert-success row no-gutters align-items-center" style="font-size: 1.25em;">
-                        <div class="col-auto pr-2">
-                            <i class="fas fa-lock-open" aria-hidden="true"></i>
+        <div> 
+            @if ($recipe->needs_unlocking || hasLimits($recipe))
+                @if (Auth::check())
+                    @if ($recipe->hasUserUnlocked(Auth::user()))
+                        <div class="alert alert-success row no-gutters align-items-center my-2" style="font-size: 1.25em;">
+                            <div class="col-auto pr-2">
+                                <i class="fas fa-lock-open" aria-hidden="true"></i>
+                            </div>
+                            <div class="col text-center text-md-left">
+                                You <b>have unlocked</b> and own this recipe!
+                            </div>
                         </div>
-                        <div class="col text-center text-md-left">
-                            You <b>have unlocked</b> and own this recipe!
+                    @else
+                        <div class="alert alert-danger row no-gutters align-items-center my-2" style="font-size: 1.25em;">
+                            <div class="col-auto pr-2">
+                                <i class="fas fa-lock" aria-hidden="true"></i>
+                            </div>
+                            <div class="col text-center text-md-left">
+                                You have <b>not yet unlocked</b> and do not have this recipe.
+                            </div>
                         </div>
-                    </div>
+                    @endif
                 @else
-                    <div class="alert alert-danger row no-gutters align-items-center" style="font-size: 1.25em;">
+                    <div class="alert alert-danger row no-gutters align-items-center my-2" style="font-size: 1.25em;">
                         <div class="col-auto pr-2">
                             <i class="fas fa-lock" aria-hidden="true"></i>
                         </div>
                         <div class="col text-center text-md-left">
-                            You have <b>not yet unlocked</b> and do not have this recipe.
+                            You <b>must be logged in</b> to unlock this recipe.
                         </div>
                     </div>
                 @endif
             @else
-                <div class="alert alert-success row no-gutters align-items-center" style="font-size: 1.25em;">
+                <div class="alert alert-success row no-gutters align-items-center my-2" style="font-size: 1.25em;">
                     <div class="col-auto pr-2">
                         <i class="fas fa-lock-open" aria-hidden="true"></i>
                     </div>
@@ -60,11 +71,14 @@
         </div>
         <hr class="mb-0">
         <div class="row no-gutters">
-            <div class="col-12 mb-2">
-                @include('widgets._limits', [
-                    'object' => $recipe,
-                ])
-            </div>
+            @if (hasLimits($recipe))
+                <div class="col-12 mb-2">
+                    @include('widgets._limits', [
+                        'object' => $recipe,
+                    ])
+                    <hr />
+                </div>
+            @endif
             <div class="col-md-6 pr-md-1">
                 <h5 class="mb-0">Ingredients</h5>
                 @for ($i = 0; $i < count($recipe->ingredients) && $i < 3; ++$i)

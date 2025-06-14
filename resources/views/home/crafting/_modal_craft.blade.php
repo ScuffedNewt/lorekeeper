@@ -3,6 +3,9 @@
         Invalid recipe selected.
     </div>
 @else
+    <div class="float-right">
+        <x-admin-edit title="Recipe" :object="$recipe" />
+    </div>
     @if ($recipe->imageUrl)
         <div class="text-center">
             <div class="mb-3">
@@ -10,56 +13,69 @@
             </div>
         </div>
     @endif
-    <h3>
-        Recipe Details
-        <a class="small inventory-collapse-toggle collapse-toggle" href="#recipeDetails" data-toggle="collapse">
-            Show
-        </a>
-    </h3>
-    <hr class="mb-0">
-    <div class="collapse show" id="recipeDetails">
-        <div class="row no-gutters">
-            @if (hasLimits($recipe))
-                <div class="col-12 mb-2">
-                    @include('widgets._limits', [
-                        'object' => $recipe,
-                    ])
-                    <hr />
-                </div>
-            @endif
-            <div class="col-md-6 pr-md-1">
-                <h5 class="mb-0">Ingredients</h5>
-                @foreach ($recipe->ingredients as $ingredient)
-                    <div class="alert alert-secondary mb-1">
-                        @include('home.crafting._recipe_ingredient_entry', [
-                            'ingredient' => $ingredient,
+    <div class="card">
+        <div class="h3 card-header">
+            Recipe Details
+            <a class="small inventory-collapse-toggle collapse-toggle" href="#recipeDetails" data-toggle="collapse">
+                Show
+            </a>
+        </div>
+        <div class="collapse show" id="recipeDetails">
+            <div class="card-body row no-gutters">
+                @if (hasLimits($recipe))
+                    <div class="col-12 mb-2">
+                        @include('widgets._limits', [
+                            'object' => $recipe,
                         ])
+                        <hr />
                     </div>
-                @endforeach
-            </div>
-            <div class="col-md-6 pl-md-1">
-                <h5 class="mb-0">Rewards</h5>
-                @foreach (parseAssetData($recipe->output) as $type)
-                    @foreach ($type as $item)
+                @endif
+                <div class="col-md-6 pr-md-1">
+                    <h5 class="mb-0">Ingredients</h5>
+                    @foreach ($recipe->ingredients as $ingredient)
                         <div class="alert alert-secondary mb-1">
-                            @include('home.crafting._recipe_reward_entry', [
-                                'reward' => $item,
+                            @include('home.crafting._recipe_ingredient_entry', [
+                                'ingredient' => $ingredient,
                             ])
                         </div>
                     @endforeach
-                @endforeach
+                </div>
+                <div class="col-md-6 pl-md-1">
+                    <h5 class="mb-0">Rewards</h5>
+                    @foreach (parseAssetData($recipe->output) as $type)
+                        @foreach ($type as $item)
+                            <div class="alert alert-secondary mb-1">
+                                @include('home.crafting._recipe_reward_entry', [
+                                    'reward' => $item,
+                                ])
+                            </div>
+                        @endforeach
+                    @endforeach
+                </div>
             </div>
         </div>
-    </div>
-    @if ($recipe->checkRecipe(Auth::user()))
-        <hr>
-        {!! Form::open(['url' => 'crafting/craft/' . $recipe->id]) !!}
-        @if ($recipe->time)
-            @if (!$slots->count())
-                <p class="alert alert-danger">This recipe requires time to craft! However, you do not have any slots available right now.</p>
+        @if ($recipe->checkRecipe(Auth::user()))
+            <hr>
+            {!! Form::open(['url' => 'crafting/craft/' . $recipe->id]) !!}
+            @if ($recipe->time)
+                @if (!$slots->count())
+                    <p class="alert alert-danger">This recipe requires time to craft! However, you do not have any slots available right now.</p>
+                @else
+                    <p class="alert alert-info">This recipe requires time to craft! Please select the slot # you'd like to use.</p>
+                    {!! Form::select('slot_id', $slots, null, ['class' => 'form-control mb-2']) !!}
+                    @include('widgets._inventory_select', [
+                        'user' => Auth::user(),
+                        'inventory' => $inventory,
+                        'categories' => $categories,
+                        'selected' => $selected,
+                        'page' => $page,
+                    ])
+                    <div class="text-right">
+                        {!! Form::submit('Craft', ['class' => 'btn btn-primary']) !!}
+                    </div>
+                    {!! Form::close() !!}
+                @endif
             @else
-                <p class="alert alert-info">This recipe requires time to craft! Please select the slot # you'd like to use.</p>
-                {!! Form::select('slot_id', $slots, null, ['class' => 'form-control mb-2']) !!}
                 @include('widgets._inventory_select', [
                     'user' => Auth::user(),
                     'inventory' => $inventory,
@@ -73,21 +89,9 @@
                 {!! Form::close() !!}
             @endif
         @else
-            @include('widgets._inventory_select', [
-                'user' => Auth::user(),
-                'inventory' => $inventory,
-                'categories' => $categories,
-                'selected' => $selected,
-                'page' => $page,
-            ])
-            <div class="text-right">
-                {!! Form::submit('Craft', ['class' => 'btn btn-primary']) !!}
-            </div>
-            {!! Form::close() !!}
+            <div class="alert alert-danger mb-0 rounded-0">You do not have all of the required recipe ingredients.</div>
         @endif
-    @else
-        <div class="alert alert-danger">You do not have all of the required recipe ingredients.</div>
-    @endif
+    </div>
 @endif
 
 @include('widgets._inventory_select_js')
