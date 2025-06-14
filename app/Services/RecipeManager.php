@@ -5,15 +5,12 @@ namespace App\Services;
 use App\Models\Currency\Currency;
 use App\Models\Recipe\Recipe;
 use App\Models\User\User;
-use App\Models\User\UserCurrency;
 use App\Models\User\UserItem;
-use App\Models\User\UserRecipe;
 use App\Models\User\UserRecipeSlot;
 use Carbon\Carbon;
 use DB;
 
 class RecipeManager extends Service {
-
     /**********************************************************************************************
 
         RECIPE CRAFTING
@@ -41,7 +38,7 @@ class RecipeManager extends Service {
                 }
             }
 
-            dd("test");
+            dd('test');
             // Check for sufficient currencies
             $user_currencies = $user->getCurrencies(true);
             $currency_ingredients = $recipe->ingredients->where('ingredient_type', 'Currency');
