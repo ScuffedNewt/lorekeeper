@@ -9,24 +9,33 @@ return new class extends Migration {
      * Run the migrations.
      */
     public function up(): void {
-        Schema::create('recipe_categories', function (Blueprint $table) {
-            $table->engine = 'InnoDB';
-            $table->increments('id');
+        if (!Schema::hasTable('recipe_categories')) {
+            Schema::create('recipe_categories', function (Blueprint $table) {
+                $table->engine = 'InnoDB';
+                $table->increments('id');
 
-            $table->string('name');
-            $table->integer('sort')->default(0);
-            $table->text('description')->nullable()->default(null);
-            $table->text('parsed_description')->nullable()->default(null);
+                $table->string('name');
+                $table->integer('sort')->default(0);
+                $table->text('description')->nullable()->default(null);
+                $table->text('parsed_description')->nullable()->default(null);
 
-            $table->boolean('has_image')->default(0);
-            $table->boolean('is_visible')->default(0);
+                $table->boolean('has_image')->default(0);
+                $table->boolean('is_visible')->default(0);
 
-            $table->string('hash', 10)->nullable()->default(null);
-        });
+                $table->string('hash', 10)->nullable()->default(null);
+            });
+        } else {
+            Schema::table('recipe_categories', function (Blueprint $table) {
+                $table->boolean('is_visible')->default(0);
+                $table->string('hash', 10)->nullable()->default(null);
+            });
+        }
 
-        Schema::table('recipes', function (Blueprint $table) {
-            $table->integer('recipe_category_id')->nullable()->default(null);
-        });
+        if (!Schema::hasColumn('recipes', 'recipe_category_id')) {
+            Schema::table('recipes', function (Blueprint $table) {
+                $table->integer('recipe_category_id')->nullable()->default(null);
+            });
+        }
     }
 
     /**
