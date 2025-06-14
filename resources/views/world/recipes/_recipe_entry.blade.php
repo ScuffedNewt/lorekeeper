@@ -26,7 +26,7 @@
                 {!! $recipe->category->displayName !!}
             </div>
         @endif
-        <div> 
+        <div>
             @if ($recipe->needs_unlocking || hasLimits($recipe))
                 @if (Auth::check())
                     @if ($recipe->hasUserUnlocked(Auth::user()))
