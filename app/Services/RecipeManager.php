@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use DB;
 
 class RecipeManager extends Service {
+
     /**********************************************************************************************
 
         RECIPE CRAFTING
@@ -33,27 +34,14 @@ class RecipeManager extends Service {
 
         try {
             // Check user has all limits
-            if ($recipe->is_limited) {
-                foreach ($recipe->limits as $limit) {
-                    $limitType = $limit->limit_type;
-                    $check = null;
-                    switch ($limitType) {
-                        case 'Item':
-                            $check = UserItem::where('item_id', $limit->reward->id)->where('user_id', $user->id)->where('count', '>=', $limit->quantity)->first();
-                            break;
-                        case 'Currency':
-                            $check = UserCurrency::where('currency_id', $limit->reward->id)->where('user_id', $user->id)->where('quantity', '>=', $limit->quantity)->first();
-                            break;
-                        case 'Recipe':
-                            $check = UserRecipe::where('recipe_id', $limit->reward->id)->where('user_id', $user->id)->first();
-                            break;
-                    }
-
-                    if (!$check) {
-                        throw new \Exception('You require '.$limit->reward->name.' x '.$limit->quantity.' to craft this');
-                    }
+            if (hasLimits($recipe)) {
+                $limitService = new LimitManager;
+                if (!$limitService->checkLimits($recipe)) {
+                    throw new \Exception($limitService->errors()->getMessages()['error'][0]);
                 }
             }
+
+            dd("test");
             // Check for sufficient currencies
             $user_currencies = $user->getCurrencies(true);
             $currency_ingredients = $recipe->ingredients->where('ingredient_type', 'Currency');

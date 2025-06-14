@@ -20,7 +20,7 @@
                     Craft
                 </a>
             </div>
-            <div class="col-2 pl-1 d-flex flex-column h-100">
+            <div class="col-3 pl-1 d-flex flex-column h-100">
                 @if ($recipe->checkRecipe(Auth::user()))
                     <span class="badge btn-sm btn-success d-flex align-items-center justify-content-center h-100 w-100" data-toggle="tooltip" title="You have the ingredients to craft this recipe!" style="font-size: 90%;">
                         <i class="fas fa-check"></i>

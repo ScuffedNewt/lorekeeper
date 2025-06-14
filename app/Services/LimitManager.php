@@ -50,7 +50,7 @@ class LimitManager extends Service {
             }
 
             // if the limit is not unlocked, check if it is auto unlocked
-            if (!$is_unlock && $limits->first()->is_unlocked && !$limits->first()->is_auto_unlocked) {
+            if (!$is_unlock && !$limits->first()->is_auto_unlocked) {
                 throw new \Exception(($limits->first()->object->displayName ?? $limits->first()->object->name).' requires manual unlocking!');
             }
 
