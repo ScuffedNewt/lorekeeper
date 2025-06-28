@@ -248,7 +248,7 @@ class DailyService extends Service {
                 }
                 unset($data['remove_wheel']);
             } else {
-                $data['wheel_extension'] = $data['wheel_extension'] ?? ($daily->wheel->wheel_extension ?? null);
+                $data['wheel_extension'] ??= ($daily->wheel->wheel_extension ?? null);
             }
 
             if (isset($data['remove_stopper'])) {
@@ -258,7 +258,7 @@ class DailyService extends Service {
                 }
                 unset($data['remove_stopper']);
             } else {
-                $data['stopper_extension'] = $data['stopper_extension'] ?? ($daily->wheel->stopper_extension ?? null);
+                $data['stopper_extension'] ??= ($daily->wheel->stopper_extension ?? null);
             }
 
             if (isset($data['remove_background'])) {
@@ -268,7 +268,7 @@ class DailyService extends Service {
                 }
                 unset($data['remove_background']);
             } else {
-                $data['background_extension'] = $data['background_extension'] ?? ($daily->wheel->background_extension ?? null);
+                $data['background_extension'] ??= ($daily->wheel->background_extension ?? null);
             }
 
             $wheel = DailyWheel::firstOrNew(['daily_id' => $daily->id]);
