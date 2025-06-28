@@ -76,7 +76,7 @@
     <link defer href="{{ asset('css/selectize.bootstrap4.css') }}" rel="stylesheet">
 
     @if (file_exists(public_path() . '/css/custom.css'))
-        <link href="{{ asset('css/custom.css') . '?v=' . filemtime(public_path('css/lorekeeper.css')) }}" rel="stylesheet">
+        <link href="{{ asset('css/custom.css') . '?v=' . filemtime(public_path('css/custom.css')) }}" rel="stylesheet">
     @endif
 
     @include('feed::links')

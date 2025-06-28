@@ -12,6 +12,11 @@
         </small>
     </div>
     <div class="card-body">
+        @if ($news->has_image)
+            <div class="news-image">
+                <img src="{{ $news->imageUrl }}" alt="{{ $news->name }}" class="w-100" />
+            </div>
+        @endif
         <div class="parsed-text">
             {!! $news->parsed_text !!}
         </div>
