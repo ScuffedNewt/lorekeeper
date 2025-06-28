@@ -5,8 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Daily\Daily;
 use App\Models\Daily\DailyTimer;
 use App\Services\DailyManager;
-use Auth;
+use App\Services\LimitManager;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class DailyController extends Controller {
     /*
@@ -41,7 +42,8 @@ class DailyController extends Controller {
         if (!$daily) {
             abort(404);
         }
-        $timer = (Auth::user()) ? DailyTimer::where('daily_id', $daily->id)->where('user_id', Auth::user()->id)->first() : null;
+
+        $timer = Auth::user() ? DailyTimer::where('daily_id', $daily->id)->where('user_id', Auth::user()->id)->first() : null;
 
         return view('dailies.daily', [
             'daily'    => $daily,
@@ -67,10 +69,26 @@ class DailyController extends Controller {
             return redirect()->back();
         }
 
+        if (count(getLimits($daily))) {
+            if (!Auth::check()) {
+                flash('You must be logged in to claim this daily.')->error();
+
+                return redirect()->to('dailies');
+            }
+
+            $limitService = new LimitManager;
+            if (!$limitService->checkLimits($daily)) {
+                flash($limitService->errors()->getMessages()['error'][0])->error();
+
+                return redirect()->to('dailies');
+            }
+        }
+
         $wheelSegment = null;
         if ($daily->type == 'Wheel') {
             $wheelSegment = random_int(1, $daily->wheel->segment_number);
         }
+
         if (!$rewards = $service->rollDaily($daily, Auth::user(), $wheelSegment)) {
             foreach ($service->errors()->getMessages()['error'] as $error) {
                 flash($error)->error();

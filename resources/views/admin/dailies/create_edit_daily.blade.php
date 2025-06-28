@@ -51,17 +51,6 @@
         @endif
     </div>
 
-    <div class="row">
-        <div class="form-group col">
-            {!! Form::label('Fee (Optional)') !!} {!! add_help('Add a fee here if the user should pay for rolling the daily.') !!}
-            {!! Form::text('fee', $daily->fee ?? 0, ['class' => 'form-control']) !!}
-        </div>
-        <div class="form-group col">
-            {!! Form::label('currency_id', 'Currency (Optional)') !!} {!! add_help('Which currency the fee should be in. If left unselected, no fee will be applied.') !!}
-            {!! Form::select('currency_id', $currencies, $daily->currency_id ?? null, ['class' => 'form-control', 'placeholder' => 'Select Currency']) !!}
-        </div>
-    </div>
-
     <div class="form-group">
         {!! Form::label(__('dailies.daily') . ' Image (Optional)') !!} {!! add_help(
             'This image is used on the ' .
@@ -167,6 +156,14 @@
     </div>
 
     {!! Form::close() !!}
+
+    @if ($daily->id)
+        <hr />
+        
+        @include('widgets._add_limits', [
+            'object' => $daily
+        ])
+    @endif
 
     @include('dailies._loot_select_row', [
         'items' => $items,

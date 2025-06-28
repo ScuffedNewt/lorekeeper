@@ -22,6 +22,11 @@
                 <div class="daily-name mt-1">
                     <a href="{{ $daily->url }}" class="h5 mb-0">{{ $daily->name }}</a>
                 </div>
+                @include('widgets._limits', [
+                    'object' => $daily,
+                    'compact' => true,
+                    'hideUnlock' => true,
+                ])
             </div>
         @endforeach
     </div>

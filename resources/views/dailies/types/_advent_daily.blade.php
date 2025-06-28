@@ -1,7 +1,7 @@
 @php
     // get the current day as an int from the daily->start_at
     if (!isset($daily->start_at)) {
-        return redirect()->route('dailies.index')->with('error', 'Advent Daily is a type of daily that is a countdown to a specific date, therefore, a "Start At" date must be set.');
+        return redirect()->url('dailies')->with('error', 'Advent Daily is a type of daily that is a countdown to a specific date, therefore, a "Start At" date must be set.');
     }
     $daysSinceStart = $daily->start_at?->diffInDays(now()) + 1;
     if (!isset($timer)) {

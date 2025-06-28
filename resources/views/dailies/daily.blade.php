@@ -20,12 +20,16 @@
         $isDisabled = isset($cooldown) || !Auth::check() || ($daily->currency_id != null && Auth::user()->getCurrencies(true)->where('id', $daily->currency_id)->first()->quantity < $daily->fee);
     @endphp
 
-    @if ($daily->currency)
+    @if (count(getLimits($daily)))
         <h4>
-            <span class="badge badge-warning"><i class="fas fa-exclamation-triangle"></i> This {{ __('dailies.daily') }} takes a {!! $daily->currency->display($daily->fee) !!} fee to play!</span>
-            @if (Auth::user() && Auth::user()->getCurrencies(true)->where('id', $daily->currency_id)->first()->quantity < $daily->fee)
-                <span class="badge badge-secondary"><i class="fas fa-exclamation-triangle"></i> You do not have enough currency to play.</span>
-            @endif
+            <span class="badge badge-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                This {{ __('dailies.daily') }} takes a fee to play!
+            </span>
+            @include('widgets._limits', [
+                'object' => $daily,
+                'hideUnlock' => true,
+            ])
         </h4>
     @endif
 

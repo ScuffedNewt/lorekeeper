@@ -9,7 +9,11 @@
             {!! $shop->is_staff ? '<i class="fas fa-crown mr-1"></i>' : '' !!}
             {{ $shop->name }}
         </a>
-        @include('widgets._limits', ['object' => $shop, 'compact' => true])
+        @include('widgets._limits', [
+            'object' => $shop,
+            'compact' => true,
+            'hideUnlock' => true,
+        ])
         @if ($shop->is_fto)
             <span class="badge badge-pill badge-success">FTO Shop</span>
         @endif
