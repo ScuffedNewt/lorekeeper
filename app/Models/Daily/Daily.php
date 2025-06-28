@@ -2,7 +2,6 @@
 
 namespace App\Models\Daily;
 
-use App\Models\Currency\Currency;
 use App\Models\Model;
 use Carbon\Carbon;
 

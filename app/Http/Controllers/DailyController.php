@@ -44,6 +44,7 @@ class DailyController extends Controller {
         }
         if ($daily->type == 'Advent' && !isset($daily->start_at)) {
             flash('Advent Daily is a type of daily that is a countdown to a specific date, therefore, a "Start At" date must be set.')->error();
+
             return redirect()->to('dailies');
         }
 
