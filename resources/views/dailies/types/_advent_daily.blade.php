@@ -26,11 +26,11 @@
                                 <div class="col-md-4">
                                     @if ($reward->rewardImage)
                                         <div class="row justify-content-center">
-                                            <img src="{{ $reward->rewardImage }}" alt="{{ $reward->reward->displayName }}" style="max-width:75px;width:100%;" />
+                                            <img src="{{ $reward->rewardImage }}" alt="{{ $reward->reward->name }}" style="max-width:75px;width:100%;" />
                                         </div>
                                     @endif
                                     <p class="mb-2">
-                                        {{ $reward->quantity }} {{ $reward->reward->displayName }}
+                                        {{ $reward->quantity }} {!! $reward->reward->displayName !!}
                                     </p>
                                 </div>
                             @endforeach
