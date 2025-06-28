@@ -121,7 +121,7 @@ class DailyManager extends Service {
 
         if ($dailyTimer) {
             // if the daily does not loop, we stop users once they collected the max step.
-            if (!$daily->is_loop && $dailyTimer->step >= $daily->maxStep) {
+            if ((!isset($daily->data['is_loop']) || !$daily->data['is_loop']) && $dailyTimer->step >= $daily->maxStep) {
                 return false;
             }
 

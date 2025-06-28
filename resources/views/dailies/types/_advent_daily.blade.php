@@ -1,8 +1,5 @@
 @php
     // get the current day as an int from the daily->start_at
-    if (!isset($daily->start_at)) {
-        return redirect()->url('dailies')->with('error', 'Advent Daily is a type of daily that is a countdown to a specific date, therefore, a "Start At" date must be set.');
-    }
     $daysSinceStart = $daily->start_at?->diffInDays(now()) + 1;
     if (!isset($timer)) {
         $timer = (object) ['step' => 0];
@@ -29,10 +26,12 @@
                                 <div class="col-md-4">
                                     @if ($reward->rewardImage)
                                         <div class="row justify-content-center">
-                                            <img src="{{ $reward->rewardImage }}" alt="{{ $reward->reward()->first()->name }}" style="max-width:75px;width:100%;" />
+                                            <img src="{{ $reward->rewardImage }}" alt="{{ $reward->reward->displayName }}" style="max-width:75px;width:100%;" />
                                         </div>
                                     @endif
-                                    <p class="mb-2">{{ $reward->quantity }} {{ $reward->reward->first()->name }}</p>
+                                    <p class="mb-2">
+                                        {{ $reward->quantity }} {{ $reward->reward->displayName }}
+                                    </p>
                                 </div>
                             @endforeach
                         </div>

@@ -81,13 +81,13 @@ class DailyReward extends Model {
     public function getRewardImageAttribute() {
         switch ($this->rewardable_type) {
             case 'Item':
-                return (isset($this->reward->imageUrl)) ? $this->reward->imageUrl : '/images/inventory.png';
+                return (isset($this->reward->imageUrl)) ? $this->reward->imageUrl : asset('images/inventory.png');
             case 'Currency':
-                return (isset($this->reward->currencyImageUrl)) ? $this->reward->currencyImageUrl : '/images/currency.png';
+                return (isset($this->reward->currencyImageUrl)) ? $this->reward->currencyImageUrl : asset('images/currency.png');
             case 'LootTable':
-                return '/images/loot.png';
+                return asset('images/loot.png');
             case 'Raffle':
-                return '/images/raffle.png';
+                return asset('images/raffle.png');
         }
 
         return null;

@@ -42,6 +42,10 @@ class DailyController extends Controller {
         if (!$daily) {
             abort(404);
         }
+        if ($daily->type == 'Advent' && !isset($daily->start_at)) {
+            flash('Advent Daily is a type of daily that is a countdown to a specific date, therefore, a "Start At" date must be set.')->error();
+            return redirect()->to('dailies');
+        }
 
         $timer = Auth::user() ? DailyTimer::where('daily_id', $daily->id)->where('user_id', Auth::user()->id)->first() : null;
 

@@ -14,7 +14,7 @@ class Daily extends Model {
      */
     protected $fillable = [
         'name', 'sort', 'has_image', 'description', 'parsed_description', 'prize_display', 'is_active', 'start_at', 'end_at', 'daily_timeframe',
-        'type', 'fee', 'currency_id', 'data',
+        'type', 'data',
     ];
 
     /**
@@ -67,7 +67,7 @@ class Daily extends Model {
      * Get the rewards attached to this daily.
      */
     public function rewards() {
-        return $this->hasMany(DailyReward::class, 'daily_id');
+        return $this->hasMany(DailyReward::class, 'daily_id')->orderBy('step', 'ASC');
     }
 
     /**
@@ -82,13 +82,6 @@ class Daily extends Model {
      */
     public function wheel() {
         return $this->hasOne(DailyWheel::class, 'daily_id');
-    }
-
-    /**
-     * Get currency (if it exists).
-     */
-    public function currency() {
-        return $this->belongsTo(Currency::class);
     }
 
     /**********************************************************************************************

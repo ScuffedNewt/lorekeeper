@@ -171,9 +171,6 @@ class DailyService extends Service {
         } else {
             $data['parsed_description'] = null;
         }
-        if (!isset($data['fee']) || !$data['fee']) {
-            $data['fee'] = 0;
-        }
         $data['is_active'] = isset($data['is_active']);
 
         // handle image removal
