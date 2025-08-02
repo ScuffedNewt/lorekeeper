@@ -167,6 +167,34 @@
                         $(this).next().toggle();
                     });
                 });
+				
+			function LiveClockJS(){
+				var date = new Date();
+				date.setUTCMinutes(date.getUTCMinutes()+{!! Carbon\Carbon::now()->utcOffset() !!});
+				var h = date.getUTCHours(); // 0 - 23
+				var m = date.getUTCMinutes(); // 0 - 59
+				var s = date.getUTCSeconds(); // 0 - 59
+				var day = date.getUTCDate();
+				var month = date.getUTCMonth().toString();
+				var year = date.getUTCFullYear();
+				const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+				
+				h = (h < 10) ? "0" + h : h;
+				m = (m < 10) ? "0" + m : m;
+				s = (s < 10) ? "0" + s : s;
+				
+				var time = day + " " + monthNames[month] + " " + year + ", " + h + ":" + m + ":" + s;
+				
+				var clocks = document.getElementsByClassName("LiveClock");
+				
+				$( "span.LiveClock" ).each(function() {
+					$( this ).html(time);;
+				});
+				
+				setTimeout(LiveClockJS, 1000);
+			}
+			
+			LiveClockJS();
         </script>
     </div>
 </body>
