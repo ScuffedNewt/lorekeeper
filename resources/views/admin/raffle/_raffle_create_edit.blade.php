@@ -10,7 +10,7 @@
 </div>
 <div class="form-group">
     {!! Form::label('winner_count', 'Number of Winners to Draw') !!}
-    {!! Form::text('winner_count', $raffle->winner_count, ['class' => 'form-control']) !!}
+    {!! Form::text('winner_count', $raffle->winner_count ?? 1, ['class' => 'form-control']) !!}
 </div>
 <div class="form-group">
     {!! Form::label('group_id', 'Raffle Group') !!} {!! add_help('Raffle groups must be created before you can select them here.') !!}
@@ -78,9 +78,4 @@
 
 @include('js._modal_loot_js', ['showLootTables' => false, 'showRaffles' => false])
 
-<script>
-    $(".datepicker").datetimepicker({
-        dateFormat: "yy-mm-dd",
-        timeFormat: 'HH:mm:ss',
-    });
-</script>
+@include('widgets._datetimepicker_js')
