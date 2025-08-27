@@ -1,4 +1,8 @@
-@if ($raffle->logs->count() && $raffle->logs()->where('type', 'Reward')->get()->count() && Auth::check() && Auth::user()->isStaff)
+@if (
+    $raffle->logs->count() &&
+        $raffle->logs()->where('type', 'Reward')->get()->count() &&
+        Auth::check() &&
+        Auth::user()->isStaff)
     <div class="card mb-3 mt-3">
         <div class="card-header h3">Users Rewarded</div>
         <div class="logs-table">
@@ -30,7 +34,9 @@
     </div>
 @endif
 
-@if ($raffle->logs->count() && $raffle->logs()->where('type', 'Reroll')->get()->count())
+@if (
+    $raffle->logs->count() &&
+        $raffle->logs()->where('type', 'Reroll')->get()->count())
     <div class="card mb-3 mt-3">
         <div class="card-header h3">Raffle Changelog</div>
         <div class="logs-table">
