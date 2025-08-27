@@ -3,8 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Sales\Sales;
-use Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\View;
 
 class SalesController extends Controller {
     /*
@@ -15,6 +16,14 @@ class SalesController extends Controller {
     | Displays sales posts and updates the user's sales read status.
     |
     */
+
+    /**
+     * Create a new controller instance.
+     */
+    public function __construct() {
+        View::share('forsale', Sales::visible()->orderBy('updated_at', 'DESC')->where('is_open', 1)->get());
+        View::share('recentsales', Sales::visible()->orderBy('updated_at', 'DESC')->take(10)->get());
+    }
 
     /**
      * Shows the sales index.

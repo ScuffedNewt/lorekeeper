@@ -6,8 +6,7 @@ use App\Models\Character\Character;
 use App\Models\Shop\Shop;
 use App\Models\Shop\ShopLog;
 use App\Models\Shop\ShopStock;
-use Config;
-use DB;
+use Illuminate\Support\Facades\DB;
 
 class ShopManager extends Service {
     /*
@@ -31,7 +30,7 @@ class ShopManager extends Service {
         DB::beginTransaction();
 
         try {
-            $quantity = $data['quantity'];
+            $quantity = ceil($data['quantity']);
             if (!$quantity || $quantity == 0) {
                 throw new \Exception('Invalid quantity selected.');
             }
@@ -58,6 +57,10 @@ class ShopManager extends Service {
                 throw new \Exception('You have already purchased the maximum amount of this item you can buy.');
             }
 
+            if ($shopStock->purchase_limit && $quantity > $shopStock->purchase_limit) {
+                throw new \Exception('The quantity specified exceeds the amount of this item you can buy.');
+            }
+
             $total_cost = $shopStock->cost * $quantity;
 
             $character = null;
@@ -75,6 +78,9 @@ class ShopManager extends Service {
                 $character = Character::where('slug', $data['slug'])->first();
                 if (!$character) {
                     throw new \Exception('Please enter a valid character code.');
+                }
+                if ($character->user_id != $user->id) {
+                    throw new \Exception('That character does not belong to you.');
                 }
                 if (!(new CurrencyManager)->debitCurrency($character, null, 'Shop Purchase', 'Purchased '.$shopStock->item->name.' from '.$shop->name, $shopStock->currency, $total_cost)) {
                     throw new \Exception('Not enough currency to make this purchase.');
@@ -111,7 +117,7 @@ class ShopManager extends Service {
 
             // Give the user the item, noting down 1. whose currency was used (user or character) 2. who purchased it 3. which shop it was purchased from
             if (!(new InventoryManager)->creditItem(null, $user, 'Shop Purchase', [
-                'data' => $shopLog->itemData,
+                'data'  => $shopLog->itemData,
                 'notes' => 'Purchased '.format_date($shopLog->created_at),
             ], $shopStock->item, $quantity)) {
                 throw new \Exception('Failed to purchase item.');
@@ -154,7 +160,7 @@ class ShopManager extends Service {
     }
 
     public function getStockPurchaseLimit($shopStock, $user) {
-        $limit = Config::get('lorekeeper.settings.default_purchase_limit');
+        $limit = config('lorekeeper.settings.default_purchase_limit');
         if ($shopStock->purchase_limit > 0) {
             $user_purchase_limit = $shopStock->purchase_limit - $this->checkUserPurchases($shopStock, $user);
             if ($user_purchase_limit < $limit) {

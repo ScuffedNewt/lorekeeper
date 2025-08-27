@@ -5,12 +5,15 @@
 @endsection
 
 @section('meta-img')
-    {{ asset('/images/avatars/' . $user->avatar) }}
+    {{ $user->avatarUrl }}
 @endsection
 
 @section('profile-content')
     {!! breadcrumbs(['Users' => 'users', $user->name => $user->url]) !!}
 
+    @if (mb_strtolower($user->name) != mb_strtolower($name))
+        <div class="alert alert-info">This user has changed their name to <strong>{{ $user->name }}</strong>.</div>
+    @endif
 
     @if ($user->is_banned)
         <div class="alert alert-danger">This user has been banned.</div>

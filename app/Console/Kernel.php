@@ -20,17 +20,17 @@ class Kernel extends ConsoleKernel {
      */
     protected function schedule(Schedule $schedule) {
         $schedule->command('check-news')
-                ->everyMinute();
+            ->everyMinute();
         $schedule->command('check-sales')
-                ->everyMinute();
+            ->everyMinute();
         $schedule->command('roll-raffle')
-                ->everyMinute();
+            ->everyMinute();
         $schedule->exec('rm public/images/avatars/*.tmp')
-                ->daily();
+            ->daily();
         $schedule->command('update-extension-tracker')
-                ->daily();
+            ->daily();
         $schedule->command('update-staff-reward-actions')
-                ->daily();
+            ->daily();
     }
 
     /**

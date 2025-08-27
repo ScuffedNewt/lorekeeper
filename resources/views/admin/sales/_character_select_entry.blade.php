@@ -1,3 +1,12 @@
+@php
+    $characters = \App\Models\Character\Character::visible(Auth::check() ? Auth::user() : null)
+        ->myo(0)
+        ->orderBy('slug', 'DESC')
+        ->get()
+        ->pluck('fullName', 'slug')
+        ->toArray();
+@endphp
+
 <div class="sales-character-entry mb-3 card">
     <div class="card-body">
         <div class="text-right"><a href="#" class="remove-character text-muted"><i class="fas fa-times"></i></a></div>
@@ -7,14 +16,14 @@
                     <div class="character-image-blank hide">Enter character code.</div>
                     <div class="character-image-loaded">
                         @include('home._character', ['character' => $character->character])
+                        {!! Form::hidden('image_id[]', $character->image_id) !!}
                     </div>
                 </div>
             </div>
             <div class="col-md-10">
-                <a href="#" class="float-right fas fa-close"></a>
                 <div class="form-group">
                     {!! Form::label('slug[]', 'Character Code') !!}
-                    {!! Form::text('slug[]', $character->character->slug, ['class' => 'form-control character-code']) !!}
+                    {!! Form::select('slug[]', $characters, $character->character->slug, ['class' => 'form-control character-code', 'placeholder' => 'Select Character']) !!}
                 </div>
                 <div class="character-details">
                     <h4>Sale Details</h4>

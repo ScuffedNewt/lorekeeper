@@ -5,8 +5,8 @@ namespace App\Services;
 use App\Models\Loot\Loot;
 use App\Models\Loot\LootTable;
 use App\Models\Prompt\PromptReward;
-use DB;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 
 class LootService extends Service {
     /*
@@ -29,7 +29,6 @@ class LootService extends Service {
         DB::beginTransaction();
 
         try {
-
             // More specific validation
             foreach ($data['rewardable_type'] as $key => $type) {
                 if (!$type) {
@@ -78,7 +77,6 @@ class LootService extends Service {
         DB::beginTransaction();
 
         try {
-
             // More specific validation
             foreach ($data['rewardable_type'] as $key => $type) {
                 if (!$type) {

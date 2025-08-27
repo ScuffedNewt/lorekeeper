@@ -3,6 +3,8 @@
 namespace App\Models\Submission;
 
 use App\Models\Model;
+use App\Models\Prompt\Prompt;
+use App\Models\User\User;
 use Carbon\Carbon;
 
 class Submission extends Model {
@@ -58,28 +60,28 @@ class Submission extends Model {
      * Get the prompt this submission is for.
      */
     public function prompt() {
-        return $this->belongsTo('App\Models\Prompt\Prompt', 'prompt_id');
+        return $this->belongsTo(Prompt::class, 'prompt_id');
     }
 
     /**
      * Get the user who made the submission.
      */
     public function user() {
-        return $this->belongsTo('App\Models\User\User', 'user_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     /**
      * Get the staff who processed the submission.
      */
     public function staff() {
-        return $this->belongsTo('App\Models\User\User', 'staff_id');
+        return $this->belongsTo(User::class, 'staff_id');
     }
 
     /**
      * Get the characters attached to the submission.
      */
     public function characters() {
-        return $this->hasMany('App\Models\Submission\SubmissionCharacter', 'submission_id');
+        return $this->hasMany(SubmissionCharacter::class, 'submission_id');
     }
 
     /**********************************************************************************************
@@ -100,6 +102,17 @@ class Submission extends Model {
     }
 
     /**
+     * Scope a query to only include drafted submissions.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     *
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeDrafts($query) {
+        return $query->where('status', 'Drafts');
+    }
+
+    /**
      * Scope a query to only include viewable submissions.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
@@ -109,13 +122,13 @@ class Submission extends Model {
      */
     public function scopeViewable($query, $user = null) {
         $forbiddenSubmissions = $this
-        ->whereHas('prompt', function ($q) {
-            $q->where('hide_submissions', 1)->whereNotNull('end_at')->where('end_at', '>', Carbon::now());
-        })
-        ->orWhereHas('prompt', function ($q) {
-            $q->where('hide_submissions', 2);
-        })
-        ->orWhere('status', '!=', 'Approved')->pluck('id')->toArray();
+            ->whereHas('prompt', function ($q) {
+                $q->where('hide_submissions', 1)->whereNotNull('end_at')->where('end_at', '>', Carbon::now());
+            })
+            ->orWhereHas('prompt', function ($q) {
+                $q->where('hide_submissions', 2);
+            })
+            ->orWhere('status', '!=', 'Approved')->pluck('id')->toArray();
 
         if ($user && $user->hasPower('manage_submissions')) {
             return $query;
@@ -176,8 +189,6 @@ class Submission extends Model {
      */
     public function getInventory($user) {
         return $this->data && isset($this->data['user']['user_items']) ? $this->data['user']['user_items'] : [];
-
-        return $inventory;
     }
 
     /**

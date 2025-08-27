@@ -11,8 +11,8 @@ use App\Models\Species\Species;
 use App\Models\Species\Subtype;
 use App\Models\User\User;
 use App\Services\CharacterManager;
-use Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CharacterImageController extends Controller {
     /*
@@ -43,7 +43,7 @@ class CharacterImageController extends Controller {
             'specieses' => ['0' => 'Select Species'] + Species::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
             'subtypes'  => ['0' => 'Select Subtype'] + Subtype::where('species_id', '=', $this->character->image->species_id)->orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
             'users'     => User::query()->orderBy('name')->pluck('name', 'id')->toArray(),
-            'features'  => Feature::getDropdownItems(),
+            'features'  => Feature::getDropdownItems(1),
             'isMyo'     => false,
         ]);
     }
@@ -106,7 +106,7 @@ class CharacterImageController extends Controller {
             'rarities'  => ['0' => 'Select Rarity'] + Rarity::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
             'specieses' => ['0' => 'Select Species'] + Species::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
             'subtypes'  => ['0' => 'Select Subtype'] + Subtype::where('species_id', '=', $image->species_id)->orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
-            'features'  => Feature::getDropdownItems(),
+            'features'  => Feature::getDropdownItems(1),
         ]);
     }
 
@@ -249,6 +249,7 @@ class CharacterImageController extends Controller {
      * @return \Illuminate\Http\RedirectResponse
      */
     public function postImageReupload(Request $request, CharacterManager $service, $id) {
+        $request->validate(['image' => CharacterImage::$createRules['image'], 'thumbnail' => CharacterImage::$createRules['thumbnail']]);
         $data = $request->only(['image', 'thumbnail', 'x0', 'x1', 'y0', 'y1', 'use_cropper']);
         $image = CharacterImage::find($id);
         if (!$image) {

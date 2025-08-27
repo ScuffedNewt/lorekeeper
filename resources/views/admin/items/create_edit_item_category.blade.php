@@ -1,7 +1,7 @@
 @extends('admin.layout')
 
 @section('admin-title')
-    Item Categories
+    {{ $category->id ? 'Edit' : 'Create' }} Item Category
 @endsection
 
 @section('admin-content')
@@ -11,7 +11,7 @@
         ($category->id ? 'Edit' : 'Create') . ' Category' => $category->id ? 'admin/data/item-categories/edit/' . $category->id : 'admin/data/item-categories/create',
     ]) !!}
 
-    <h1>{{ $category->id ? 'Edit' : 'Create' }} Category
+    <h1>{{ $category->id ? 'Edit' : 'Create' }} Item Category
         @if ($category->id)
             <a href="#" class="btn btn-danger float-right delete-category-button">Delete Category</a>
         @endif
@@ -28,7 +28,10 @@
 
     <div class="form-group">
         {!! Form::label('World Page Image (Optional)') !!} {!! add_help('This image is used only on the world information pages.') !!}
-        <div>{!! Form::file('image') !!}</div>
+        <div class="custom-file">
+            {!! Form::label('image', 'Choose file...', ['class' => 'custom-file-label']) !!}
+            {!! Form::file('image', ['class' => 'custom-file-input']) !!}
+        </div>
         <div class="text-muted">Recommended size: 200px x 200px</div>
         @if ($category->has_image)
             <div class="form-check">
@@ -41,6 +44,11 @@
     <div class="form-group">
         {!! Form::label('Description (Optional)') !!}
         {!! Form::textarea('description', $category->description, ['class' => 'form-control wysiwyg']) !!}
+    </div>
+
+    <div class="form-group">
+        {!! Form::checkbox('is_visible', 1, $category->id ? $category->is_visible : 1, ['class' => 'form-check-input', 'data-toggle' => 'toggle']) !!}
+        {!! Form::label('is_visible', 'Is Visible', ['class' => 'form-check-label ml-3']) !!} {!! add_help('If turned off, the category will not be visible in the category list or available for selection in search. Permissioned staff will still be able to add items to them, however.') !!}
     </div>
 
     <div class="card mb-3" id="characterOptions">

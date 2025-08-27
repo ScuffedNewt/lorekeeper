@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Users;
 use App\Http\Controllers\Controller;
 use App\Models\Character\CharacterBookmark;
 use App\Services\BookmarkManager;
-use Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class BookmarkController extends Controller {
     /*
@@ -25,9 +25,9 @@ class BookmarkController extends Controller {
      */
     public function getBookmarks(Request $request) {
         $query = CharacterBookmark::join('characters', 'character_bookmarks.character_id', '=', 'characters.id')
-        ->join('character_images', 'characters.character_image_id', '=', 'character_images.id')
-        ->with('character.image')->with('character.user')->visible()
-        ->where('character_bookmarks.user_id', Auth::user()->id);
+            ->join('character_images', 'characters.character_image_id', '=', 'character_images.id')
+            ->with('character.image')->with('character.user')->visible()
+            ->where('character_bookmarks.user_id', Auth::user()->id);
 
         switch ($request->get('sort')) {
             case 'number_desc':

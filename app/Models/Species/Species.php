@@ -2,6 +2,8 @@
 
 namespace App\Models\Species;
 
+use App\Models\Character\Sublist;
+use App\Models\Feature\Feature;
 use App\Models\Model;
 
 class Species extends Model {
@@ -11,7 +13,7 @@ class Species extends Model {
      * @var array
      */
     protected $fillable = [
-        'name', 'sort', 'has_image', 'description', 'parsed_description', 'masterlist_sub_id',
+        'name', 'sort', 'has_image', 'description', 'parsed_description', 'masterlist_sub_id', 'is_visible', 'hash',
     ];
 
     /**
@@ -52,21 +54,43 @@ class Species extends Model {
      * Get the subtypes for this species.
      */
     public function subtypes() {
-        return $this->hasMany('App\Models\Species\Subtype');
+        return $this->hasMany(Subtype::class);
     }
 
     /**
      * Get the sub masterlist for this species.
      */
     public function sublist() {
-        return $this->belongsTo('App\Models\Character\Sublist', 'masterlist_sub_id');
+        return $this->belongsTo(Sublist::class, 'masterlist_sub_id');
     }
 
     /**
      * Get the features associated with this species.
      */
     public function features() {
-        return $this->hasMany('App\Models\Feature\Feature');
+        return $this->hasMany(Feature::class);
+    }
+
+    /**********************************************************************************************
+
+        SCOPES
+
+    **********************************************************************************************/
+
+    /**
+     * Scope a query to show only visible species.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param mixed|null                            $user
+     *
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeVisible($query, $user = null) {
+        if ($user && $user->hasPower('edit_data')) {
+            return $query;
+        }
+
+        return $query->where('is_visible', 1);
     }
 
     /**********************************************************************************************
@@ -99,7 +123,7 @@ class Species extends Model {
      * @return string
      */
     public function getSpeciesImageFileNameAttribute() {
-        return $this->id.'-image.png';
+        return $this->hash.$this->id.'-image.png';
     }
 
     /**
@@ -153,5 +177,23 @@ class Species extends Model {
      */
     public function getVisualTraitsUrlAttribute() {
         return url('/world/species/'.$this->id.'/traits');
+    }
+
+    /**
+     * Gets the admin edit URL.
+     *
+     * @return string
+     */
+    public function getAdminUrlAttribute() {
+        return url('admin/data/species/edit/'.$this->id);
+    }
+
+    /**
+     * Gets the power required to edit this model.
+     *
+     * @return string
+     */
+    public function getAdminPowerAttribute() {
+        return 'edit_data';
     }
 }

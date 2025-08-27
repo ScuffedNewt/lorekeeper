@@ -2,17 +2,15 @@
 
 namespace App\Services;
 
+use App\Facades\Notifications;
+use App\Facades\Settings;
 use App\Models\Character\Character;
 use App\Models\Character\CharacterTransfer;
 use App\Models\Currency\Currency;
-use App\Models\Item\Item;
 use App\Models\Trade;
 use App\Models\User\User;
 use App\Models\User\UserItem;
-use Config;
-use DB;
-use Notifications;
-use Settings;
+use Illuminate\Support\Facades\DB;
 
 class TradeManager extends Service {
     /*
@@ -291,7 +289,6 @@ class TradeManager extends Service {
                     ]);
                 }
             } else {
-
                 // Notify the other user
                 Notifications::create('TRADE_UPDATE', $user->id == $trade->sender_id ? $trade->recipient : $trade->sender, [
                     'sender_url'  => $user->url,
@@ -429,7 +426,7 @@ class TradeManager extends Service {
             // First return any item stacks attached to the trade
 
             if (isset($tradeData[$type]['user_items'])) {
-                foreach ($tradeData[$type]['user_items'] as $userItemId=>$quantity) {
+                foreach ($tradeData[$type]['user_items'] as $userItemId=> $quantity) {
                     $quantity = (int) $quantity;
                     $userItemRow = UserItem::find($userItemId);
                     if (!$userItemRow) {
@@ -447,7 +444,7 @@ class TradeManager extends Service {
             // This is stored in the data attribute
             $currencyManager = new CurrencyManager;
             if (isset($tradeData[$type]['currencies'])) {
-                foreach ($tradeData[$type]['currencies'] as $currencyId=>$quantity) {
+                foreach ($tradeData[$type]['currencies'] as $currencyId=> $quantity) {
                     $quantity = (int) $quantity;
                     $currencyManager->creditCurrency(null, $user, null, null, $currencyId, $quantity);
                 }
@@ -458,7 +455,7 @@ class TradeManager extends Service {
 
             $userAssets = createAssetsArray();
             $assetCount = 0;
-            $assetLimit = Config::get('lorekeeper.settings.trade_asset_limit');
+            $assetLimit = config('lorekeeper.settings.trade_asset_limit');
 
             // Attach items. Technically, the user doesn't lose ownership of the item - we're just adding an additional holding field.
             // Unlike for design updates, we're keeping track of attached items here.
@@ -493,7 +490,7 @@ class TradeManager extends Service {
                 //dd([$data['currency_id'], $data['currency_quantity']]);
                 $data['currency_id'] = $data['currency_id']['user-'.$user->id];
                 $data['currency_quantity'] = $data['currency_quantity']['user-'.$user->id];
-                foreach ($data['currency_id'] as $key=>$currencyId) {
+                foreach ($data['currency_id'] as $key=> $currencyId) {
                     $currency = Currency::where('allow_user_to_user', 1)->where('id', $currencyId)->first();
                     if (!$currency) {
                         throw new \Exception('Invalid currency selected.');
@@ -694,7 +691,7 @@ class TradeManager extends Service {
                         if (!$currency) {
                             throw new \Exception('Cannot credit an invalid currency. ('.$currencyId.')');
                         }
-                        if (!$currencyManager->creditCurrency($trade->{$type}, $trade->{$recipientType}, 'Trade', 'Received in trade [<a href="'.$trade->url.'">#'.$trade->id.']', $currency, $quantity)) {
+                        if (!$currencyManager->creditCurrency($trade->{$type}, $trade->{$recipientType}, 'Trade', 'Received in trade [<a href="'.$trade->url.'">#'.$trade->id.'</a>]', $currency, $quantity)) {
                             throw new \Exception('Could not credit currency. ('.$currencyId.')');
                         }
                     }

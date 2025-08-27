@@ -24,9 +24,12 @@
 
     <div class="form-group">
         {!! Form::label('Character Image') !!} {!! add_help('This is the full masterlist image. Note that the image is not protected in any way, so take precautions to avoid art/design theft.') !!}
-        <div>{!! Form::file('image', ['id' => 'mainImage']) !!}</div>
+        <div class="custom-file">
+            {!! Form::label('image', 'Choose file...', ['class' => 'custom-file-label']) !!}
+            {!! Form::file('image', ['class' => 'custom-file-input', 'id' => 'mainImage']) !!}
+        </div>
     </div>
-    @if (Config::get('lorekeeper.settings.masterlist_image_automation') === 1)
+    @if (config('lorekeeper.settings.masterlist_image_automation') === 1)
         <div class="form-group">
             {!! Form::checkbox('use_cropper', 1, 1, ['class' => 'form-check-input', 'data-toggle' => 'toggle', 'id' => 'useCropper']) !!}
             {!! Form::label('use_cropper', 'Use Thumbnail Automation', ['class' => 'form-check-label ml-3']) !!} {!! add_help('A thumbnail is required for the upload (used for the masterlist). You can use the Thumbnail Automation, or upload a custom thumbnail.') !!}
@@ -59,8 +62,11 @@
     <div class="card mb-3" id="thumbnailUpload">
         <div class="card-body">
             {!! Form::label('Thumbnail Image') !!} {!! add_help('This image is shown on the masterlist page.') !!}
-            <div>{!! Form::file('thumbnail') !!}</div>
-            <div class="text-muted">Recommended size: {{ Config::get('lorekeeper.settings.masterlist_thumbnails.width') }}px x {{ Config::get('lorekeeper.settings.masterlist_thumbnails.height') }}px</div>
+            <div class="custom-file">
+                {!! Form::label('thumbnail', 'Choose thumbnail...', ['class' => 'custom-file-label']) !!}
+                {!! Form::file('thumbnail', ['class' => 'custom-file-input']) !!}
+            </div>
+            <div class="text-muted">Recommended size: {{ config('lorekeeper.settings.masterlist_thumbnails.width') }}px x {{ config('lorekeeper.settings.masterlist_thumbnails.height') }}px</div>
         </div>
     </div>
     <p class="alert alert-info">
@@ -124,8 +130,9 @@
 
     <div class="form-group">
         {!! Form::label('Traits') !!}
+        <div><a href="#" class="btn btn-primary mb-2" id="add-feature">Add Trait</a></div>
         <div id="featureList">
-            @if (Config::get('lorekeeper.extensions.autopopulate_image_features'))
+            @if (config('lorekeeper.extensions.autopopulate_image_features'))
                 @foreach ($character->image->features as $feature)
                     <div class="d-flex mb-2">
                         {!! Form::select('feature_id[]', $features, $feature->feature_id, ['class' => 'form-control mr-2 feature-select original', 'placeholder' => 'Select Trait']) !!}
@@ -135,7 +142,6 @@
                 @endforeach
             @endif
         </div>
-        <div><a href="#" class="btn btn-primary" id="add-feature">Add Trait</a></div>
         <div class="feature-row hide mb-2">
             {!! Form::select('feature_id[]', $features, null, ['class' => 'form-control mr-2 feature-select', 'placeholder' => 'Select Trait']) !!}
             {!! Form::text('feature_data[]', null, ['class' => 'form-control mr-2', 'placeholder' => 'Extra Info (Optional)']) !!}
@@ -244,7 +250,7 @@
                     e.preventDefault();
                     removeFeatureRow($(this));
                 })
-                @if (Config::get('lorekeeper.extensions.organised_traits_dropdown'))
+                @if (config('lorekeeper.extensions.organised_traits_dropdown'))
                     $clone.find('.feature-select').selectize({
                         render: {
                             item: featureSelectedRender
@@ -265,8 +271,8 @@
 
             // Croppie ////////////////////////////////////////////////////////////////////////////////////
 
-            var thumbnailWidth = {{ Config::get('lorekeeper.settings.masterlist_thumbnails.width') }};
-            var thumbnailHeight = {{ Config::get('lorekeeper.settings.masterlist_thumbnails.height') }};
+            var thumbnailWidth = {{ config('lorekeeper.settings.masterlist_thumbnails.width') }};
+            var thumbnailHeight = {{ config('lorekeeper.settings.masterlist_thumbnails.height') }};
             var $cropper = $('#cropper');
             var c = null;
             var $x0 = $('#cropX0');

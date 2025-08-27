@@ -5,8 +5,8 @@ namespace App\Models\Item;
 use App\Models\Model;
 use App\Models\Prompt\Prompt;
 use App\Models\Shop\Shop;
+use App\Models\Shop\ShopStock;
 use App\Models\User\User;
-use App\Models\User\UserItem;
 
 class Item extends Model {
     /**
@@ -16,7 +16,7 @@ class Item extends Model {
      */
     protected $fillable = [
         'item_category_id', 'name', 'has_image', 'description', 'parsed_description', 'allow_transfer',
-        'data', 'reference_url', 'artist_alias', 'artist_url', 'artist_id', 'is_released',
+        'data', 'reference_url', 'artist_alias', 'artist_url', 'artist_id', 'is_released', 'hash',
     ];
 
     protected $appends = ['image_url'];
@@ -27,6 +27,16 @@ class Item extends Model {
      * @var string
      */
     protected $table = 'items';
+
+    /**
+     * The relationships that should always be loaded.
+     *
+     * @var array
+     */
+    protected $with = [
+        'tags',
+    ];
+
     /**
      * Validation rules for creation.
      *
@@ -70,21 +80,28 @@ class Item extends Model {
      * Get the category the item belongs to.
      */
     public function category() {
-        return $this->belongsTo('App\Models\Item\ItemCategory', 'item_category_id');
+        return $this->belongsTo(ItemCategory::class, 'item_category_id');
     }
 
     /**
      * Get the item's tags.
      */
     public function tags() {
-        return $this->hasMany('App\Models\Item\ItemTag', 'item_id');
+        return $this->hasMany(ItemTag::class, 'item_id');
     }
 
     /**
      * Get the user that drew the item art.
      */
     public function artist() {
-        return $this->belongsTo('App\Models\User\User', 'artist_id');
+        return $this->belongsTo(User::class, 'artist_id');
+    }
+
+    /**
+     * Get shop stock for this item.
+     */
+    public function shopStock() {
+        return $this->hasMany(ShopStock::class, 'item_id');
     }
 
     /**********************************************************************************************
@@ -146,11 +163,16 @@ class Item extends Model {
      * Scope a query to show only released or "released" (at least one user-owned stack has ever existed) items.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param mixed|null                            $user
      *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeReleased($query) {
-        return $query->whereIn('id', UserItem::pluck('item_id')->toArray())->orWhere('is_released', 1);
+    public function scopeReleased($query, $user = null) {
+        if ($user && $user->hasPower('edit_data')) {
+            return $query;
+        }
+
+        return $query->where('is_released', 1);
     }
 
     /**********************************************************************************************
@@ -183,7 +205,7 @@ class Item extends Model {
      * @return string
      */
     public function getImageFileNameAttribute() {
-        return $this->id.'-image.png';
+        return $this->hash.$this->id.'-image.png';
     }
 
     /**
@@ -339,17 +361,18 @@ class Item extends Model {
     }
 
     /**
-     * Get the shops attribute as an associative array.
+     * Get the shops that stock this item.
      *
-     * @return array
+     * @return \Illuminate\Database\Eloquent\Collection
      */
     public function getShopsAttribute() {
-        if (!$this->data) {
+        if (!config('lorekeeper.extensions.item_entry_expansion.extra_fields') || !$this->shop_stock_count) {
             return null;
         }
-        $itemShops = $this->data['shops'];
 
-        return Shop::whereIn('id', $itemShops)->get();
+        $shops = Shop::whereIn('id', $this->shopStock->pluck('shop_id')->toArray())->orderBy('sort', 'DESC')->get();
+
+        return $shops;
     }
 
     /**
@@ -363,7 +386,29 @@ class Item extends Model {
         }
         $itemPrompts = $this->data['prompts'];
 
-        return Prompt::whereIn('id', $itemPrompts)->get();
+        if (count($itemPrompts)) {
+            return Prompt::whereIn('id', $itemPrompts)->get();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Gets the admin edit URL.
+     *
+     * @return string
+     */
+    public function getAdminUrlAttribute() {
+        return url('admin/data/items/edit/'.$this->id);
+    }
+
+    /**
+     * Gets the power required to edit this model.
+     *
+     * @return string
+     */
+    public function getAdminPowerAttribute() {
+        return 'edit_data';
     }
 
     /**********************************************************************************************
