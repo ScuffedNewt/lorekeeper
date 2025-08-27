@@ -37,6 +37,7 @@
     <p>No raffles found.</p>
     @endif
 @endsection
+
 @section('scripts')
     @parent
 @endsection

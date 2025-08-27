@@ -56,11 +56,18 @@
 
             <li class="list-group-item">
                 <i class="fas {{ $raffle->is_active ? 'fa-eye' : 'fa-eye-slash' }} mr-2"></i>
-                <a href="{{ url('admin/raffles/view/' . $raffle->id) }}">{{ $raffle->name }} {{ $raffle->is_fto ? ' (FTO / Non-Owner Only)' : '' }}</a>
+                <a href="{{ url('raffles/view/' . $raffle->id) }}">
+                    {{ $raffle->name }} {{ $raffle->is_fto ? ' (FTO / Non-Owner Only)' : '' }}
+                </a>
                 @if ($raffle->is_active < 2)
                     <div class="float-right">
+                        <a href="{{ url('admin/raffles/view/' . $raffle->id) }}" class="btn btn-xs btn-outline-primary p-1" data-toggle="tooltip" title="View Raffle Admin Index">
+                            <i class="fas fa-crown"></i>
+                        </a>
                         @if (!$raffle->group_id)
-                            <a href="#" class="roll-raffle btn btn-outline-danger btn-xs p-2" data-id="{{ $raffle->id }}">Roll Raffle</a>
+                            <a href="#" class="roll-raffle btn btn-outline-danger btn-xs p-2" data-id="{{ $raffle->id }}">
+                                Roll Raffle
+                            </a>
                         @endif
                         <a href="#" class="edit-raffle btn btn-xs btn-outline-primary p-2" data-id="{{ $raffle->id }}">
                             Edit Raffle
@@ -70,25 +77,26 @@
             </li>
             <?php $prevGroup = $raffle->group_id; ?>
             @endforeach
-        @endsection
-        @section('scripts')
-            @parent
-            <script>
-                $('.edit-group').on('click', function(e) {
-                    e.preventDefault();
-                    loadModal("{{ url('/admin/raffles/edit/group/') }}/" + $(this).data('id'), 'Edit Raffle Group');
-                });
-                $('.edit-raffle').on('click', function(e) {
-                    e.preventDefault();
-                    loadModal("{{ url('/admin/raffles/edit/raffle/') }}/" + $(this).data('id'), 'Edit Raffle');
-                });
-                $('.roll-raffle').on('click', function(e) {
-                    e.preventDefault();
-                    loadModal("{{ url('/admin/raffles/roll/raffle/') }}/" + $(this).data('id'), 'Roll Raffle');
-                });
-                $('.roll-group').on('click', function(e) {
-                    e.preventDefault();
-                    loadModal("{{ url('/admin/raffles/roll/group/') }}/" + $(this).data('id'), 'Roll Raffle Group');
-                });
-            </script>
-        @endsection
+@endsection
+
+@section('scripts')
+    @parent
+    <script>
+        $('.edit-group').on('click', function(e) {
+            e.preventDefault();
+            loadModal("{{ url('/admin/raffles/edit/group/') }}/" + $(this).data('id'), 'Edit Raffle Group');
+        });
+        $('.edit-raffle').on('click', function(e) {
+            e.preventDefault();
+            loadModal("{{ url('/admin/raffles/edit/raffle/') }}/" + $(this).data('id'), 'Edit Raffle');
+        });
+        $('.roll-raffle').on('click', function(e) {
+            e.preventDefault();
+            loadModal("{{ url('/admin/raffles/roll/raffle/') }}/" + $(this).data('id'), 'Roll Raffle');
+        });
+        $('.roll-group').on('click', function(e) {
+            e.preventDefault();
+            loadModal("{{ url('/admin/raffles/roll/group/') }}/" + $(this).data('id'), 'Roll Raffle Group');
+        });
+    </script>
+@endsection
