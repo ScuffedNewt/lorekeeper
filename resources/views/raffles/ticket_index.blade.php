@@ -24,7 +24,7 @@
                 <div class="alert alert-warning mb-2">This raffle will close {{ $raffle->end_at->format('F j, Y g:i A') }}.</div>
             @endif
         @endif
-        @if ($raffle->rewards)
+        @if ($raffle->rewards->count())
             <div class="alert alert-info mb-2">
                 This raffle gives you rewards for entering!<br>
                 <a class="card-title collapse-title" data-toggle="collapse" href="#rewards">View Rewards</a>
