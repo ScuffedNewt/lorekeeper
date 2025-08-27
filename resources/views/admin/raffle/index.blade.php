@@ -59,7 +59,7 @@
                 <ul class="list-group list-group-flush">
                     @foreach ($raffle as $r)
                         <li class="list-group-item">
-                            <i class="fas {{ ($r->group && $r->group->is_active && $r->is_active || !$r->group && $r->is_active) ? 'fa-eye' : 'fa-eye-slash' }} mr-2"></i>
+                            <i class="fas {{ ($r->group && $r->group->is_active && $r->is_active) || (!$r->group && $r->is_active) ? 'fa-eye' : 'fa-eye-slash' }} mr-2"></i>
                             <a href="{{ url('raffles/view/' . $r->id) }}">
                                 {{ $r->name }} {{ $r->is_fto ? ' (FTO / Non-Owner Only)' : '' }}
                             </a>
