@@ -8,7 +8,9 @@
     <x-admin-edit title="Raffle" :object="$raffle" />
     {!! breadcrumbs(['Raffles' => 'raffles', 'Raffle: ' . $raffle->name => 'raffles/view/' . $raffle->id]) !!}
     <h1>
-        Raffle: {{ $raffle->name }} {{ $raffle->is_fto ? ' (FTO / Non-Owner Only)' : '' }}</h1>
+        Raffle: {{ $raffle->name }} {{ $raffle->is_fto ? ' (FTO / Non-Owner Only)' : '' }}
+    </h1>
+
     @if ($raffle->is_active == 1)
         @if ($raffle->end_at)
             @if ($raffle->end_at < Carbon\Carbon::now())
@@ -59,24 +61,38 @@
         <div class="alert alert-danger">This raffle is closed. Rolled: {!! format_date($raffle->rolled_at) !!}</div>
         <div class="card mb-3">
             <div class="card-header h3">Winner(s)</div>
-            <div class="table-responsive">
-                <table class="table table-sm mb-0">
-                    <thead>
-                        <th class="col-xs-1 text-center" style="width: 100px;">#</th>
-                        <th>User</th>
-                    </thead>
-                    <tbody>
-                        @foreach ($raffle->tickets()->winners()->get() as $winner)
-                            <tr>
-                                <td class="text-center">{{ $winner->position }}</td>
-                                <td class="text-left">{!! $winner->displayHolderName !!} @if ($winner->reroll)
-                                        <span class="text-danger">(Reroll)</span>
-                                    @endif
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+            <div class="logs-table">
+                <div class="logs-table-header">
+                    <div class="row no-gutters font-weight-bold">
+                        <div class="col-2 col-md-1 text-center">
+                            <div class="logs-table-cell">#</div>
+                        </div>
+                        <div class="col">
+                            <div class="logs-table-cell">User</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="logs-table-body">
+                    @foreach ($raffle->tickets()->winners()->get() as $winner)
+                        <div class="logs-table-row">
+                            <div class="row no-gutters flex-wrap">
+                                <div class="col-2 col-md-1 text-center">
+                                    <div class="logs-table-cell">
+                                        {{ $winner->position }}
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="logs-table-cell">
+                                        {!! $winner->displayHolderName !!}
+                                        @if ($winner->reroll)
+                                            <span class="text-danger">(Reroll)</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
             </div>
         </div>
     @endif
@@ -91,14 +107,13 @@
 
     <div class="text-right">{!! $tickets->render() !!}</div>
 
-
     <div class="mb-4 logs-table">
         <div class="logs-table-header">
-            <div class="row">
-                <div class="col-2 col-md-1 font-weight-bold">
+            <div class="row no-gutters font-weight-bold">
+                <div class="col-2 col-md-1">
                     <div class="logs-table-cell">#</div>
                 </div>
-                <div class="col-10 col-md-11 font-weight-bold">
+                <div class="col">
                     <div class="logs-table-cell">User</div>
                 </div>
             </div>
@@ -106,28 +121,29 @@
         <div class="logs-table-body">
             @foreach ($tickets as $count => $ticket)
                 <div class="logs-table-row">
-                    <div class="row flex-wrap">
+                    <div class="row no-gutters flex-wrap">
                         <div class="col-2 col-md-1">
                             <div class="logs-table-cell">
                                 {{ $page * 100 + $count + 1 }}
                                 @if (Auth::check() && $ticket->user_id && $ticket->user->name == Auth::user()->name)
-                                    <i class="fas fa-ticket-alt ml-2"></i>
+                                    <i class="fas fa-ticket-alt ml-1"></i>
                                 @endif
                             </div>
                         </div>
-                        <div class="col-10 col-md-11">
+                        <div class="col">
                             <div class="logs-table-cell">{!! $ticket->displayHolderName !!}</div>
                         </div>
                     </div>
                 </div>
             @endforeach
         </div>
+    </div>
 
-        <div class="text-right">{!! $tickets->render() !!}</div>
+    <div class="text-right">{!! $tickets->render() !!}</div>
 
-        @include('raffles._logs', ['raffle' => $raffle])
+    @include('raffles._logs', ['raffle' => $raffle])
+@endsection
 
-    @endsection
-    @section('scripts')
-        @parent
-    @endsection
+@section('scripts')
+    @parent
+@endsection
