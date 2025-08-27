@@ -6,7 +6,7 @@ use App\Models\Raffle\Raffle;
 use App\Models\Raffle\RaffleGroup;
 use App\Services\RaffleManager;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Request;
 
 class RaffleController extends Controller {
     /*

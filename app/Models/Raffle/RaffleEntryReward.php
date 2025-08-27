@@ -2,9 +2,9 @@
 
 namespace App\Models\Raffle;
 
-use App\Models\Model;
-use App\Models\Item\Item;
 use App\Models\Currency\Currency;
+use App\Models\Item\Item;
+use App\Models\Model;
 
 class RaffleEntryReward extends Model {
     /**
