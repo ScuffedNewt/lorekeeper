@@ -14,27 +14,31 @@
     </ul>
 
     @if (count($raffles))
-        <?php $prevGroup = null; ?>
-        <ul class="list-group mb-3">
-            @foreach ($raffles as $raffle)
-                @if ($prevGroup != $raffle->group_id)
-        </ul>
-        @if ($prevGroup)
-            </div>
-        @endif
-        <div class="card mb-3">
-            <div class="card-header h3">{{ $groups[$raffle->group_id]->name }}</div>
-            <ul class="list-group list-group-flush">
-    @endif
+        @foreach ($raffles as $key => $raffle)
+            <div class="card mb-3">
+                @if ($key != 'Ungrouped')
+                    <div class="card-header">
+                        <h3 class="d-inline mb-0">
+                            {{ $key }}
+                        </h3>
+                    </div>
+                @endif
 
-    <li class="list-group-item">
-        <x-admin-edit title="Raffle" :object="$raffle" />
-        <a href="{{ url('raffles/view/' . $raffle->id) }}">{{ $raffle->name }} {{ $raffle->is_fto ? ' (FTO / Non-Owner Only)' : '' }}</a>
-    </li>
-    <?php $prevGroup = $raffle->group_id; ?>
-    @endforeach
-@else
-    <p>No raffles found.</p>
+                <ul class="list-group list-group-flush">
+                    @foreach ($raffle as $r)
+                        <li class="list-group-item">
+                            <x-admin-edit title="Raffle" :object="$r" />
+                            <a href="{{ url('raffles/view/' . $r->id) }}">
+                                {{ $r->name }} {{ $r->is_fto ? ' (FTO / Non-Owner Only)' : '' }}
+                            </a>
+                            {!! $r->rolled_at ? '<span class="text-muted small">(Rolled ' . pretty_date($r->rolled_at) . ')</span>' : '' !!}
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+        @endforeach
+    @else
+        <p>No raffles found.</p>
     @endif
 @endsection
 

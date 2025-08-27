@@ -27,10 +27,16 @@ class RaffleController extends Controller {
         } else {
             $raffles->where('is_active', '!=', 2);
         }
-        $raffles = $raffles->orderBy('group_id')->orderBy('order');
+        $query = $raffles->orderBy('group_id', 'ASC')
+            ->orderBy('order')
+            ->get();
+
+        $grouped = $query->groupBy(function ($item) {
+            return $item->group ? $item->group->name : 'Ungrouped';
+        });
 
         return view('admin.raffle.index', [
-            'raffles' => $raffles->get(),
+            'raffles' => $grouped,
             'groups'  => RaffleGroup::whereIn('id', $raffles->pluck('group_id')->toArray())->get()->keyBy('id'),
         ]);
     }

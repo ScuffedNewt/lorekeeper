@@ -31,52 +31,59 @@
         </p>
     @endif
 
-    <?php $prevGroup = null; ?>
-    <ul class="list-group mb-3">
-        @foreach ($raffles as $raffle)
-            @if ($prevGroup != $raffle->group_id)
-    </ul>
-    @if ($prevGroup)
-        </div>
-    @endif
-    <div class="card mb-3">
-        <div class="card-header">
-            <h3 class="d-inline">{{ $groups[$raffle->group_id]->name }} <span class="badge badge-xs {{ $groups[$raffle->group_id]->is_active ? 'badge-success' : 'badge-danger' }}">{{ $groups[$raffle->group_id]->is_active ? 'Visible' : 'Hidden' }}</span>
-            </h3>
+    @if ($raffles->count())
+        @foreach ($raffles as $key => $raffle)
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h3 class="d-inline mb-0">
+                        {{ $key }}
+                        @if ($raffle->first()->group_id > 0)
+                            <span class="badge badge-xs {{ $raffle->first()->group->is_active ? 'badge-success' : 'badge-danger' }}">
+                                {{ $raffle->first()->group->is_active ? 'Visible' : 'Hidden' }}
+                            </span>
 
-            @if ($raffle->is_active < 2)
-                <div class="float-right">
-                    <a href="#" class="roll-group btn btn-outline-danger btn-sm" data-id="{{ $groups[$raffle->group_id]->id }}">Roll Group</a>
-                    <a href="#" class="edit-group btn btn-outline-primary btn-sm" data-id="{{ $groups[$raffle->group_id]->id }}">Edit Group</a>
-                </div>
-            @endif
-        </div>
-        <ul class="list-group list-group-flush">
-            @endif
-
-            <li class="list-group-item">
-                <i class="fas {{ $raffle->is_active ? 'fa-eye' : 'fa-eye-slash' }} mr-2"></i>
-                <a href="{{ url('raffles/view/' . $raffle->id) }}">
-                    {{ $raffle->name }} {{ $raffle->is_fto ? ' (FTO / Non-Owner Only)' : '' }}
-                </a>
-                @if ($raffle->is_active < 2)
-                    <div class="float-right">
-                        <a href="{{ url('admin/raffles/view/' . $raffle->id) }}" class="btn btn-xs btn-outline-primary p-1" data-toggle="tooltip" title="View Raffle Admin Index">
-                            <i class="fas fa-crown"></i>
-                        </a>
-                        @if (!$raffle->group_id)
-                            <a href="#" class="roll-raffle btn btn-outline-danger btn-xs p-2" data-id="{{ $raffle->id }}">
-                                Roll Raffle
-                            </a>
+                            @if ($raffle->first()->group->raffles()->whereNotNull('rolled_at')->count() < 1)
+                                <div class="float-right">
+                                    <a href="#" class="roll-group btn btn-outline-danger btn-sm" data-id="{{ $raffle->first()->group_id }}">
+                                        Roll Group
+                                    </a>
+                                    <a href="#" class="edit-group btn btn-outline-primary btn-sm" data-id="{{ $raffle->first()->group_id }}">
+                                        Edit Group
+                                    </a>
+                                </div>
+                            @endif
                         @endif
-                        <a href="#" class="edit-raffle btn btn-xs btn-outline-primary p-2" data-id="{{ $raffle->id }}">
-                            Edit Raffle
-                        </a>
-                    </div>
-                @endif
-            </li>
-            <?php $prevGroup = $raffle->group_id; ?>
-            @endforeach
+                    </h3>
+                </div>
+
+                <ul class="list-group list-group-flush">
+                    @foreach ($raffle as $r)
+                        <li class="list-group-item">
+                            <i class="fas {{ ($r->group && $r->group->is_active && $r->is_active || !$r->group && $r->is_active) ? 'fa-eye' : 'fa-eye-slash' }} mr-2"></i>
+                            <a href="{{ url('raffles/view/' . $r->id) }}">
+                                {{ $r->name }} {{ $r->is_fto ? ' (FTO / Non-Owner Only)' : '' }}
+                            </a>
+                            <div class="float-right">
+                                <a href="{{ url('admin/raffles/view/' . $r->id) }}" class="btn btn-xs btn-outline-primary p-1" data-toggle="tooltip" title="View Raffle Admin Index">
+                                    <i class="fas fa-crown"></i>
+                                </a>
+                                @if ($r->is_active < 2)
+                                    <a href="#" class="roll-raffle btn btn-outline-danger btn-xs p-2" data-id="{{ $r->id }}">
+                                        Roll Raffle
+                                    </a>
+                                    <a href="#" class="edit-raffle btn btn-xs btn-outline-primary p-2" data-id="{{ $r->id }}">
+                                        Edit Raffle
+                                    </a>
+                                @endif
+                            </div>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+        @endforeach
+    @else
+        <p>No raffles found.</p>
+    @endif
 @endsection
 
 @section('scripts')
