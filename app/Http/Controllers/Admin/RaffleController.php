@@ -12,6 +12,7 @@ use App\Models\User\User;
 use App\Services\RaffleManager;
 use App\Services\RaffleService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class RaffleController extends Controller {
     /**
