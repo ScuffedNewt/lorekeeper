@@ -57,7 +57,6 @@
     </div>
 
     {!! Form::close() !!}
-
 @endsection
 
 @section('scripts')
