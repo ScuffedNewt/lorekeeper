@@ -144,6 +144,35 @@ function parse($text, &$pings = null) {
 }
 
 /**
+ * Parses runbooks into rendered views.
+ *
+ * @param string $text
+ *
+ * @return string|null
+ */
+function parseRunbooks($text) {
+    if (!$text) {
+        return null;
+    }
+
+    $matches = null;
+    $count = preg_match_all('/\[runbook:([^\[\]&<>?"\']+)\]/', $text, $matches, PREG_SET_ORDER, 0);
+    if ($count) {
+        foreach ($matches as $match) {
+            if (isset($match[1])) {
+                $runbook = App\Models\Runbook::find($match[1]);
+                if ($runbook) {
+                    $rendered = view('runbooks._runbook', ['runbook' => $runbook])->render();
+                    $text = preg_replace('/\[runbook:'.$match[1].'\]/', $rendered, $text);
+                }
+            }
+        }
+    }
+
+    return $text;
+}
+
+/**
  * Parses a piece of user-entered text to match user mentions
  * and replace with a link.
  *

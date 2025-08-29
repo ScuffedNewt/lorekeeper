@@ -16,7 +16,7 @@
         {!! Form::open(['url' => 'designs/' . $request->id . '/comments']) !!}
         <div class="form-group">
             {!! Form::label('Comments (Optional)') !!}
-            {!! Form::textarea('comments', $request->comments, ['class' => 'form-control']) !!}
+            {!! Form::textarea('comments', $request->comments, ['class' => 'form-control wysiwyg']) !!}
         </div>
         <div class="text-right">
             {!! Form::submit('Save', ['class' => 'btn btn-primary']) !!}
@@ -25,8 +25,12 @@
     @else
         <div class="card">
             <div class="card-body">
-                {!! nl2br(htmlentities($request->comments)) !!}
+                {!! $request->comments !!}
             </div>
         </div>
     @endif
+@endsection
+@section('scripts')
+    @parent
+    @include('js._tinymce_wysiwyg')
 @endsection

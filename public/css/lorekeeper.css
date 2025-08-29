@@ -785,3 +785,42 @@ tr.accountbound {
 #ace-code-editor-wrapper .editor-btn:hover {
     background: buttonface;
 }
+
+/* Transition effect for sliding */
+.runbook-slide-card {
+    transition: transform 0.4s ease-in-out;
+}
+.runbook-slide-card.hidden {
+    transform: translateX(100%);
+}
+
+/* Circular button */
+.runbook-toggle-btn {
+    color: white;
+    border: 0;
+    position: absolute;
+    top: 50%;
+    left: -50px;
+    transform: translateY(-50%);
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0,0,0,.3);
+    cursor: pointer;
+    z-index: 1060;
+    transition: all 0.3s;
+}
+
+.runbook-toggle-btn:hover {
+    background-color: rgba(0,0,0,.5);
+}
+
+@media (max-width: 991px) {
+    #runbookCard {
+        display: none;
+        
+    }
+}

@@ -9,6 +9,9 @@
 @endsection
 
 @section('content')
+    @if (isset($request) && $request->status != 'Draft' && Auth::user()->isStaff)
+        @include('character.design._runbook_modal', ['request' => $request])
+    @endif
     @yield('design-content')
 @endsection
 

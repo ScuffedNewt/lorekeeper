@@ -293,6 +293,17 @@ Route::group(['prefix' => 'pages', 'middleware' => 'power:edit_pages'], function
     Route::post('regen/{id}', 'PageController@postRegenPage');
 });
 
+// RUNBOOKS
+Route::group(['prefix' => 'runbooks', 'middleware' => 'power:edit_pages'], function () {
+    Route::get('/', 'RunbookController@getIndex');
+    Route::get('create', 'RunbookController@getCreateRunbook');
+    Route::get('edit/{id}', 'RunbookController@getEditRunbook');
+    Route::get('delete/{id}', 'RunbookController@getDeleteRunbook');
+    Route::post('create', 'RunbookController@postCreateEditRunbook');
+    Route::post('edit/{id?}', 'RunbookController@postCreateEditRunbook');
+    Route::post('delete/{id}', 'RunbookController@postDeleteRunbook');
+});
+
 // NEWS
 Route::group(['prefix' => 'news', 'middleware' => 'power:manage_news'], function () {
     Route::get('/', 'NewsController@getIndex');
