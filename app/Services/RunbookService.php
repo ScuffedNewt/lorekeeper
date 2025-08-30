@@ -94,7 +94,6 @@ class RunbookService extends Service {
         DB::beginTransaction();
 
         try {
-
             if (Runbook::where('parent_id', $runbook->id)->exists()) {
                 throw new \Exception('This runbook has child runbooks and cannot be deleted.');
             }

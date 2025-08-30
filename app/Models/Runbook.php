@@ -2,16 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\Currency\Currency;
-use App\Models\Model;
-use App\Models\Rarity;
-use App\Models\Species\Species;
-use App\Models\Species\Subtype;
-use App\Models\User\User;
-use Illuminate\Database\Eloquent\SoftDeletes;
-
 class Runbook extends Model {
-
     /**
      * The attributes that are mass assignable.
      *
@@ -51,7 +42,7 @@ class Runbook extends Model {
      */
     public static $createRules = [
         'title'   => 'required|unique:runbooks|between:3,25|alpha_dash',
-        'text'  => 'nullable',
+        'text'    => 'nullable',
     ];
 
     /**
@@ -61,7 +52,7 @@ class Runbook extends Model {
      */
     public static $updateRules = [
         'title'   => 'required|between:3,25|alpha_dash',
-        'text'  => 'nullable',
+        'text'    => 'nullable',
     ];
 
     /**********************************************************************************************
@@ -74,7 +65,7 @@ class Runbook extends Model {
      * Get the children associated with the runbook.
      */
     public function children() {
-        return $this->hasMany(Runbook::class, 'parent_id');
+        return $this->hasMany(self::class, 'parent_id');
     }
 
     /**********************************************************************************************
@@ -87,6 +78,7 @@ class Runbook extends Model {
      * Scope a query to only include active (Open or Pending) update requests.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param mixed|null                            $user
      *
      * @return \Illuminate\Database\Eloquent\Builder
      */

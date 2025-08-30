@@ -53,7 +53,7 @@ class RunbookController extends Controller {
      * Creates or edits a runbook.
      *
      * @param App\Services\RunbookService $service
-     * @param int|null                 $id
+     * @param int|null                    $id
      *
      * @return \Illuminate\Http\RedirectResponse
      */
@@ -96,7 +96,7 @@ class RunbookController extends Controller {
      * Deletes a runbook.
      *
      * @param App\Services\RunbookService $service
-     * @param int                      $id
+     * @param int                         $id
      *
      * @return \Illuminate\Http\RedirectResponse
      */
@@ -131,7 +131,7 @@ class RunbookController extends Controller {
      * Regenerates a runbook.
      *
      * @param App\Services\RunbookService $service
-     * @param int                      $id
+     * @param int                         $id
      *
      * @return \Illuminate\Http\RedirectResponse
      */

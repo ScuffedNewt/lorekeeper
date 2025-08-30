@@ -176,7 +176,7 @@ function parseRunbooks($text) {
 
 /**
  * Parses traits into rendered views for runbooks.
- * 
+ *
  * @param string $text
  *
  * @return string|null
