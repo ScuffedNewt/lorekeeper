@@ -40,18 +40,22 @@
         btn.html(card.hasClass('hidden') ? '&lt;&lt;' : '&gt;&gt;');
     });
 
-    (function () {
+    (function() {
         const $container = $('#runbookCard .card-text');
-        const $cards     = () => $container.children('.card');
-        const $input     = $('#runbookSearch');
-        const $clearBtn  = $('#runbookClear');
+        const $cards = () => $container.children('.card');
+        const $input = $('#runbookSearch');
+        const $clearBtn = $('#runbookClear');
 
-        const debounce = (fn, ms=150) => {
-            let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn.apply(this,args), ms); };
+        const debounce = (fn, ms = 150) => {
+            let t;
+            return (...args) => {
+                clearTimeout(t);
+                t = setTimeout(() => fn.apply(this, args), ms);
+            };
         };
 
         function primeOriginalHtml($elList) {
-            $elList.each(function () {
+            $elList.each(function() {
                 const $el = $(this);
                 if (!$el.data('orig-html')) {
                     $el.data('orig-html', this.innerHTML);
@@ -60,7 +64,7 @@
         }
 
         function clearHighlights($scope) {
-            $scope.find('mark.runbook-highlight').each(function () {
+            $scope.find('mark.runbook-highlight').each(function() {
                 const parent = this.parentNode;
                 parent.replaceChild(document.createTextNode(this.textContent), this);
                 parent.normalize();
@@ -85,7 +89,7 @@
                     if (!node.nodeValue || !node.nodeValue.trim()) {
                         return NodeFilter.FILTER_REJECT;
                     }
-                    if (['SCRIPT','STYLE'].includes(node.parentNode.nodeName)) {
+                    if (['SCRIPT', 'STYLE'].includes(node.parentNode.nodeName)) {
                         return NodeFilter.FILTER_REJECT;
                     }
                     return NodeFilter.FILTER_ACCEPT;
@@ -114,7 +118,7 @@
                     mark.textContent = match;
                     frag.appendChild(mark);
                     lastIndex = idx + match.length;
-                    
+
                     return match;
                 });
                 if (lastIndex < original.length) {
@@ -139,7 +143,7 @@
             };
             const ql = q.toLowerCase();
 
-            $scope.find('.collapse').each(function () {
+            $scope.find('.collapse').each(function() {
                 const $col = $(this);
                 const id = $col.attr('id');
 
@@ -154,8 +158,8 @@
 
                 if (innerText.includes(ql) || headerText.includes(ql)) {
                     $col.collapse('show');
-                    $col.parents('.collapse').each(function () { 
-                        $(this).collapse('show'); 
+                    $col.parents('.collapse').each(function() {
+                        $(this).collapse('show');
                     });
                 }
             });
@@ -172,17 +176,17 @@
                 return;
             }
 
-            $cards().each(function () {
-                const $subCard   = $(this);
-                const $header    = $subCard.children('.card-header');
-                const $collapse  = $subCard.find('.collapse').first();
+            $cards().each(function() {
+                const $subCard = $(this);
+                const $header = $subCard.children('.card-header');
+                const $collapse = $subCard.find('.collapse').first();
                 const $bodyScope = $subCard.find('.card-body').first();
 
                 const headerText = $header.text();
-                const bodyText   = $bodyScope.text();
+                const bodyText = $bodyScope.text();
 
                 const matchesHeader = headerText.toLowerCase().includes(q.toLowerCase());
-                const matchesBody   = bodyText.toLowerCase().includes(q.toLowerCase());
+                const matchesBody = bodyText.toLowerCase().includes(q.toLowerCase());
                 const matches = matchesHeader || matchesBody;
 
                 if (matches) {
@@ -206,18 +210,18 @@
         const debouncedSearch = debounce(runSearch, 120);
         primeOriginalHtml($('#runbookCard .card-header, #runbookCard .card-body'));
         $input.on('input', debouncedSearch);
-        $clearBtn.on('click', function () {
+        $clearBtn.on('click', function() {
             $input.val('');
             clearHighlights($container);
             $cards().show();
             $input.trigger('focus');
         });
-        $input.on('keydown', function (e) {
-            if (e.key === 'Escape') { 
-                $clearBtn.click(); 
+        $input.on('keydown', function(e) {
+            if (e.key === 'Escape') {
+                $clearBtn.click();
             }
         });
-        $(document).on('keydown', function (e) {
+        $(document).on('keydown', function(e) {
             if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f') {
                 e.preventDefault();
                 $input.trigger('focus').select();
