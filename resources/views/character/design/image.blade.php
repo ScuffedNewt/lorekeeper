@@ -17,16 +17,49 @@
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <h3 class="text-center">Main Image</h3>
+                        <div class="d-flex justify-content-center gap-2 mb-2">
+                            <div class="btn-group" role="group" aria-label="Annotator mode">
+                                <button id="mode-measure" type="button" class="btn btn-primary active">Measure</button>
+                                <button id="mode-colour" type="button" class="btn btn-outline-primary">Colour Pick</button>
+                            </div>
+                        </div>
                         <div class="text-center">
-                            <a href="{{ $request->imageUrl }}?v={{ $request->updated_at->timestamp }}" data-lightbox="entry" data-title="Request #{{ $request->id }}"><img src="{{ $request->imageUrl }}?v={{ $request->updated_at->timestamp }}" class="mw-100"
-                                    alt="Request {{ $request->id }}" /></a>
+                            <div class="img-annotator" id="annotator" style="display:inline-block; position:relative;">
+                                <img id="request-image" src="{{ $request->imageUrl }}?v={{ $request->updated_at->timestamp }}" class="mw-100" alt="Request {{ $request->id }}"
+                                    style="display:block; max-width:100%; height:auto;"
+                                />
+
+                                {{-- measurement --}}
+                                <svg id="measure-svg" class="overlay" 
+                                    style="position:absolute; inset:0; width:100%; height:100%; touch-action:none; cursor:crosshair; z-index:2;"
+                                    xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+                                </svg>
+
+                                {{-- values --}}
+                                <canvas id="request-canvas"
+                                    style="position:absolute; inset:0; z-index:3; display:none; cursor:crosshair;">
+                                </canvas>
+
+                                <small class="d-block my-2 text-center">
+                                    Measurement Controls: Click-drag to draw. Click a line to select. Drag line to move. Drag end dots to resize.
+                                    Press Delete/Backspace to remove selection. Esc will remove all measurements.
+                                </small>
+                            </div>
+                            <div class="text-center">
+                                <a href="{{ $request->imageUrl }}?v={{ $request->updated_at->timestamp }}" class="btn btn-primary btn-sm" data-lightbox="entry" data-title="Request #{{ $request->id }}">
+                                    View Image
+                                </a>
+                            </div>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <h3 class="text-center">Thumbnail Image</h3>
                         <div class="text-center">
-                            <a href="{{ $request->thumbnailUrl }}?v={{ $request->updated_at->timestamp }}" data-lightbox="entry" data-title="Request #{{ $request->id }} thumbnail"><img
-                                    src="{{ $request->thumbnailUrl }}?v={{ $request->updated_at->timestamp }}" class="mw-100" alt="Thumbnail for request {{ $request->id }}" /></a>
+                            <a href="{{ $request->thumbnailUrl }}?v={{ $request->updated_at->timestamp }}" data-lightbox="entry" data-title="Request #{{ $request->id }} thumbnail">
+                                <img src="{{ $request->thumbnailUrl }}?v={{ $request->updated_at->timestamp }}" class="mw-100" alt="Thumbnail for request {{ $request->id }}" />
+                            </a>
+                            <h5 class="text-center mt-2">Check Values</h5>
+                            <p id="values"></p>
                         </div>
                     </div>
                 </div>
@@ -197,4 +230,89 @@
 
 @section('scripts')
     @include('widgets._image_upload_js', ['useUploaded' => $request->status == 'Pending' && Auth::user()->hasPower('manage_characters')])
+        @if ($request->status == 'Pending' && Auth::user()->hasPower('manage_characters'))
+        @include('widgets._design_update_measurements_js')
+        @include('widgets._design_update_values_js')
+        {{-- MODE TOGGLE --}}
+        <script>
+            $(function () {
+                const $img        = $('#request-image');
+                const $svg        = $('#measure-svg');
+                const $canvas     = $('#request-canvas');
+                const canvas      = $canvas[0];
+                const ctx         = canvas.getContext('2d');
+                const $btnMeasure = $('#mode-measure');
+                const $btnColour  = $('#mode-colour');
+                const $values     = $('#values');
+
+                function setActive($on, $off) {
+                    $on.addClass('btn-primary active').removeClass('btn-outline-primary').attr('aria-pressed','true');
+                    $off.removeClass('btn-primary active').addClass('btn-outline-primary').attr('aria-pressed','false');
+                }
+
+                  function sizeSvgToImage(){
+                    $svg.css({
+                        position:'absolute',
+                        left:0, top:0,
+                        width:  $img.width()  + 'px',
+                        height: $img.height() + 'px'
+                    });
+                }
+
+                function ensureCanvasSizeAndDraw() {
+                    const iwNat = $img[0].naturalWidth;
+                    const ihNat = $img[0].naturalHeight;
+                    if (!iwNat || !ihNat) {
+                        return;
+                    }
+                    if (canvas.width !== iwNat || canvas.height !== ihNat) {
+                        canvas.width = iwNat;
+                        canvas.height = ihNat;
+                    }
+
+                    const iwCSS = $img.width();
+                    const ihCSS = $img.height();
+                    $canvas.css({
+                        position: 'absolute',
+                        left: 0, top: 0,
+                        width: iwCSS + 'px',
+                        height: ihCSS + 'px',
+                        zIndex: 3
+                    });
+
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage($img[0], 0, 0, canvas.width, canvas.height);
+                }
+
+                let mode = 'measure';
+                function setMode(next) {
+                    mode = next;
+                    if (mode == 'measure') {
+                        sizeSvgToImage();
+                        $svg.show().css({'pointer-events':'auto', zIndex: 4, cursor:'crosshair'});
+                        $canvas.hide().css({'pointer-events':'none', zIndex: 3});
+                        setActive($btnMeasure, $btnColour);
+                    } else {
+                        ensureCanvasSizeAndDraw();
+                        sizeSvgToImage();
+                        $svg.show().css({'pointer-events':'none', zIndex: 4});
+                        $canvas.show().css({'pointer-events':'auto', zIndex: 3, cursor:'crosshair'});
+                        setActive($btnColour, $btnMeasure);
+                    }
+                }
+
+                $btnMeasure.on('click', function() {
+                    setMode('measure');
+                });
+                $btnColour.on('click',  function() {
+                    setMode('colour');
+                });
+
+                $img.on('load', () => { if (mode !== 'measure') ensureCanvasSizeAndDraw(); });
+                $(window).on('resize', () => { if ($canvas.is(':visible')) ensureCanvasSizeAndDraw(); });
+
+                setMode('measure');
+            });
+        </script>
+    @endif
 @endsection

@@ -786,6 +786,7 @@ tr.accountbound {
     background: buttonface;
 }
 
+/* RUNBOOK *************************************************************************************/
 .runbook-slide-card {
     transition: transform 0.4s ease-in-out;
 }
@@ -831,3 +832,10 @@ mark.runbook-highlight {
 #runbookSearchWrapper {
     margin-bottom: .75rem;
 }
+
+/* DESIGN UPDATE MEASUREMENT LINES */
+.measure-line { stroke:#0d6efd; stroke-width:2.5; vector-effect:non-scaling-stroke; cursor:move; }
+.measure-handle { fill:#fff; stroke:#0d6efd; stroke-width:2; r:5; vector-effect:non-scaling-stroke; cursor:pointer; }
+.measure-label { font: 12px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; fill:#000; paint-order:stroke; stroke:#fff; stroke-width:3; }
+.selected .measure-line { stroke:#dc3545; }
+.selected .measure-handle { stroke:#dc3545; }

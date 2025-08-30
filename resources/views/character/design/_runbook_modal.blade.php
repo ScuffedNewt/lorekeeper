@@ -34,11 +34,19 @@
 </div>
 
 <script>
+
     const card = $('#runbookCard');
     const btn = $('#toggleBtn');
+    let isRunbookHidden = localStorage.getItem('isRunbookHidden') === 'true';
+    if (isRunbookHidden) {
+        $('#runbookCard').addClass('hidden');
+        btn.html('&laquo;&laquo;');
+    }
 
     btn.on('click', () => {
         card.toggleClass('hidden');
+        isRunbookHidden = card.hasClass('hidden');
+        localStorage.setItem('isRunbookHidden', isRunbookHidden);
         btn.html(card.hasClass('hidden') ? '&laquo;&laquo;' : '&raquo;&raquo;');
     });
 
