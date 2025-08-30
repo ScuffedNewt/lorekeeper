@@ -68,7 +68,7 @@ return [
             [
                 'name' => 'Runbooks',
                 'url'  => 'admin/runbooks',
-            ]
+            ],
         ],
     ],
     'Users'      => [
