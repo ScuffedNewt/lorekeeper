@@ -34,7 +34,6 @@
 </div>
 
 <script>
-
     const card = $('#runbookCard');
     const btn = $('#toggleBtn');
     let isRunbookHidden = localStorage.getItem('isRunbookHidden') === 'true';
