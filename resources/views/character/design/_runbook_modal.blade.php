@@ -2,9 +2,11 @@
     $runbooks = \App\Models\Runbook::where('type', 'Design Update')->get();
 @endphp
 
-<div class="card runbook-slide-card" id="runbookCard" style="width: 40vw; position: fixed; top: 20px; right: 20px; z-index: 1050; overflow-y: scroll; max-height: 95vh;">
-    <button id="toggleBtn" class="runbook-toggle-btn">&gt;&gt;</button>
-    <div class="card-body">
+<div class="card runbook-slide-card" id="runbookCard" style="width: 40vw; position: fixed; top: 20px; right: 20px; z-index: 1050;">
+    <button id="toggleBtn" type="button" class="runbook-toggle-btn">
+        &raquo;&raquo;
+    </button>
+    <div class="card-body" style="overflow-y: scroll; max-height: 95vh;">
         <h5 class="card-title">
             Design Update Runbooks
         </h5>
@@ -37,7 +39,7 @@
 
     btn.on('click', () => {
         card.toggleClass('hidden');
-        btn.html(card.hasClass('hidden') ? '&lt;&lt;' : '&gt;&gt;');
+        btn.html(card.hasClass('hidden') ? '&laquo;&laquo;' : '&raquo;&raquo;');
     });
 
     (function () {
