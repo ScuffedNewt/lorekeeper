@@ -786,7 +786,6 @@ tr.accountbound {
     background: buttonface;
 }
 
-/* Transition effect for sliding */
 .runbook-slide-card {
     transition: transform 0.4s ease-in-out;
 }
@@ -794,7 +793,6 @@ tr.accountbound {
     transform: translateX(100%);
 }
 
-/* Circular button */
 .runbook-toggle-btn {
     color: white;
     border: 0;
@@ -823,4 +821,13 @@ tr.accountbound {
         display: none;
         
     }
+}
+
+mark.runbook-highlight {
+    padding: 0 .15em;
+    border-radius: .2rem;
+    background: #fff3cd;
+}
+#runbookSearchWrapper {
+    margin-bottom: .75rem;
 }

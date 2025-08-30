@@ -11,7 +11,7 @@
         @if ($runbook->id && !config('lorekeeper.text_runbooks.' . $runbook->key))
             <a href="#" class="btn btn-danger float-right delete-runbook-button">Delete Runbook</a>
         @endif
-        @if ($runbook->id)
+        @if ($runbook->id && $runbook->type != 'Subsection')
             <a href="{{ $runbook->url }}" class="btn btn-info float-right mr-md-2">View Runbook</a>
         @endif
     </h1>
@@ -29,6 +29,14 @@
             <code>[runbook:{{ $runbook->id }}]</code>
         </div>
     @endif
+
+    <div class="alert alert-secondary">
+        You can reference traits using:
+        <br />
+        <code>[trait:id]</code>
+        <br />
+        Referenced traits will appear as their image and name with a clickable link to the trait page.
+    </div>
 
     <div class="row">
         <div class="col-md-6 form-group">

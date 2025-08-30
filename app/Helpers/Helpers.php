@@ -169,6 +169,37 @@ function parseRunbooks($text) {
         }
     }
 
+    $text = parseRunbookFeatures($text);
+
+    return $text;
+}
+
+/**
+ * Parses traits into rendered views for runbooks.
+ * 
+ * @param string $text
+ *
+ * @return string|null
+ */
+function parseRunbookFeatures($text) {
+    if (!$text) {
+        return null;
+    }
+
+    $matches = null;
+    $count = preg_match_all('/\[trait:([^\[\]&<>?"\']+)\]/', $text, $matches, PREG_SET_ORDER, 0);
+    if ($count) {
+        foreach ($matches as $match) {
+            if (isset($match[1])) {
+                $feature = App\Models\Feature\Feature::find($match[1]);
+                if ($feature) {
+                    $rendered = view('runbooks._feature', ['feature' => $feature])->render();
+                    $text = preg_replace('/\[trait:'.$match[1].'\]/', $rendered, $text);
+                }
+            }
+        }
+    }
+
     return $text;
 }
 
