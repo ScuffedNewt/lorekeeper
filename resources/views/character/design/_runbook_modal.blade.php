@@ -153,7 +153,7 @@
                 const $header = $scope.find(
                     `[data-toggle="collapse"][aria-controls="${id}"],` +
                     `[data-target="#${id}"],` +
-                    `a[href="#${id}"],`
+                    `a[href="#${id}"]`
                 ).first();
 
                 const headerText = ($header.text() || '').toLowerCase();

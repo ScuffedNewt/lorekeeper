@@ -41,7 +41,7 @@ class Runbook extends Model {
      * @var array
      */
     public static $createRules = [
-        'title'   => 'required|unique:runbooks|between:3,25|alpha_dash',
+        'title'   => 'required|unique:runbooks|between:3,25',
         'text'    => 'nullable',
     ];
 
@@ -51,7 +51,7 @@ class Runbook extends Model {
      * @var array
      */
     public static $updateRules = [
-        'title'   => 'required|between:3,25|alpha_dash',
+        'title'   => 'required|between:3,25',
         'text'    => 'nullable',
     ];
 
