@@ -11,7 +11,7 @@ class UserRecipeSlot extends Model {
      * @var array
      */
     protected $fillable = [
-        'slot_id', 'user_id', 'recipe_id', 'started_at',
+        'slot_id', 'user_id', 'recipe_id', 'started_at', 'choice_reward_data',
     ];
 
     /**

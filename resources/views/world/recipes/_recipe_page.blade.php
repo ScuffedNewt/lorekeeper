@@ -74,6 +74,16 @@
                                     </div>
                                 </div>
                             @endif
+                            @if ($recipe->is_choice)
+                                <div class="alert alert-info row no-gutters align-items-center my-2">
+                                    <div class="col-auto pr-2">
+                                        <i class="fas fa-info-circle" aria-hidden="true"></i>
+                                    </div>
+                                    <div class="col text-center text-md-left">
+                                        This recipe is a choice recipe, allowing you to select which reward to receive from the list of possible rewards.
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                         @if (isset($recipe->description) && $recipe->description)
                             <div class="card card-body world-entry-text">
@@ -81,7 +91,7 @@
                             </div>
                         @endif
                         <hr class="mb-0">
-                        <div class="row no-gutters">
+                        <div class="row no-gutters pt-2">
                             @if (hasLimits($recipe))
                                 <div class="col-12 mb-2">
                                     @include('widgets._limits', [
@@ -100,7 +110,7 @@
                             </div>
 
                             <div class="col-md-6 pl-md-1">
-                                <h5 class="mb-0">Rewards</h5>
+                                <h5 class="mb-0">{{ $recipe->is_choice ? 'Reward Choices' : 'Rewards' }}</h5>
                                 @foreach (parseAssetData($recipe->output) as $type)
                                     @foreach ($type as $item)
                                         <div class="alert alert-secondary mb-1">

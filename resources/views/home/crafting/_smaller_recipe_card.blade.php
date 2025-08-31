@@ -1,4 +1,4 @@
-<div class="col-md-4 p-1 mb-2">
+<div class="col-md-6 col-xl-4 p-1 mb-2">
     <div class="card alert-secondary rounded-0 p-2 col-form-label h-100" data-id="{{ $recipe->id }}" data-name="{{ $recipe->name }}">
         <div class="row no-gutters align-items-center">
             @if (isset($recipe->image_url))

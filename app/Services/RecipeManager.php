@@ -30,6 +30,10 @@ class RecipeManager extends Service {
         DB::beginTransaction();
 
         try {
+            if ($recipe->is_choice && !isset($data['choice_reward'])) {
+                throw new \Exception('Please select a reward to craft.');
+            }
+
             // Check user has all limits
             if (hasLimits($recipe)) {
                 $limitService = new LimitManager;
@@ -38,7 +42,6 @@ class RecipeManager extends Service {
                 }
             }
 
-            dd('test');
             // Check for sufficient currencies
             $user_currencies = $user->getCurrencies(true);
             $currency_ingredients = $recipe->ingredients->where('ingredient_type', 'Currency');
@@ -99,6 +102,9 @@ class RecipeManager extends Service {
                 $userSlot->recipe_id = $recipe->id;
                 $userSlot->started_at = Carbon::now();
                 $userSlot->end_at = Carbon::now()->addMinutes($recipe->time);
+                if ($recipe->is_choice) {
+                    $userSlot->choice_reward_data = $data['choice_reward'];
+                }
                 $userSlot->save();
             } else {
                 // Credit rewards
@@ -107,8 +113,24 @@ class RecipeManager extends Service {
                     'data' => 'Received rewards from '.$recipe->displayName.' recipe',
                 ];
 
-                if (!fillUserAssets(parseAssetData($recipe->output), null, $user, $logType, $craftingData)) {
-                    throw new \Exception('Failed to distribute rewards to user.');
+                if ($recipe->is_choice) {
+                    $matchReward = [];
+                    preg_match('/([a-z\_]+)-([0-9]+)/', $data['choice_reward'], $matchReward);
+                    if ($matchReward == [] || !isset($matchReward[1]) || !isset($matchReward[2])) {
+                        throw new \Exception('Unable to get reward information.');
+                    }
+                    if (!isset($recipe->output[$matchReward[1]]) || !isset($recipe->output[$matchReward[1]][$matchReward[2]])) {
+                        throw new \Exception('Unable to find reward in recipe\'s output.');
+                    }
+
+                    $choiceReward[$matchReward[1]] = [$matchReward[2] => $recipe->output[$matchReward[1]][$matchReward[2]]];
+                    if (!fillUserAssets(parseAssetData($choiceReward), null, $user, $logType, $craftingData)) {
+                        throw new \Exception('Failed to distribute chosen reward to user.');
+                    }
+                } else {
+                    if (!fillUserAssets(parseAssetData($recipe->output), null, $user, $logType, $craftingData)) {
+                        throw new \Exception('Failed to distribute rewards to user.');
+                    }
                 }
             }
 
@@ -221,13 +243,30 @@ class RecipeManager extends Service {
                 'data' => 'Received rewards from '.$recipe->displayName.' recipe',
             ];
 
-            if (!fillUserAssets(parseAssetData($recipe->output), null, $user, $logType, $craftingData)) {
-                throw new \Exception('Failed to distribute rewards to user.');
+            if ($recipe->is_choice) {
+                $matchReward = [];
+                preg_match('/([a-z\_]+)-([0-9]+)/', $userSlot->choice_reward_data, $matchReward);
+                if ($matchReward == [] || !isset($matchReward[1]) || !isset($matchReward[2])) {
+                    throw new \Exception('Unable to get reward information.');
+                }
+                if (!isset($recipe->output[$matchReward[1]]) || !isset($recipe->output[$matchReward[1]][$matchReward[2]])) {
+                    throw new \Exception('Unable to find reward in recipe\'s output.');
+                }
+
+                $choiceReward[$matchReward[1]] = [$matchReward[2] => $recipe->output[$matchReward[1]][$matchReward[2]]];
+                if (!fillUserAssets(parseAssetData($choiceReward), null, $user, $logType, $craftingData)) {
+                    throw new \Exception('Failed to distribute chosen reward to user.');
+                }
+            } else {
+                if (!fillUserAssets(parseAssetData($recipe->output), null, $user, $logType, $craftingData)) {
+                    throw new \Exception('Failed to distribute rewards to user.');
+                }
             }
 
             $userSlot->recipe_id = null;
             $userSlot->started_at = null;
             $userSlot->end_at = null;
+            $userSlot->choice_reward_data = null;
             $userSlot->save();
 
             return $this->commitReturn(true);

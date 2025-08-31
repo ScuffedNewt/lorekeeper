@@ -642,6 +642,12 @@ class RecipeService extends Service {
             $data['needs_unlocking'] = 0;
         }
 
+        if (isset($data['is_choice']) && $data['is_choice']) {
+            $data['is_choice'] = 1;
+        } else {
+            $data['is_choice'] = 0;
+        }
+
         if (!isset($data['is_visible'])) {
             $data['is_visible'] = 0;
         }

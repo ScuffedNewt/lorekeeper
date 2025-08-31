@@ -5,6 +5,10 @@ namespace App\Models\Recipe;
 use App\Models\Model;
 use App\Models\User\UserCurrency;
 use Carbon\Carbon;
+use App\Models\Item\Item;
+use App\Models\Currency\Currency;
+use App\Models\Loot\LootTable;
+use App\Models\Raffle\Raffle;
 
 class Recipe extends Model {
     /**
@@ -14,7 +18,7 @@ class Recipe extends Model {
      */
     protected $fillable = [
         'name', 'has_image', 'needs_unlocking', 'description', 'parsed_description', 'reference_url', 'artist_alias', 'artist_url',
-        'open_at', 'close_at', 'time', 'is_visible', 'required_slot_id', 'recipe_category_id',
+        'open_at', 'close_at', 'time', 'is_visible', 'required_slot_id', 'recipe_category_id', 'is_choice',
     ];
 
     protected $appends = ['image_url'];
@@ -380,5 +384,51 @@ class Recipe extends Model {
         }
 
         return false;
+    }
+
+    /**
+     * Interprets the json output and retrieves the corresponding items.
+     *
+     * @return array
+     */
+    public function getChoiceRewardsAttribute() {
+        $rewardOptions = [];
+
+        foreach ($this->rewards as $reward) {
+            switch ($reward->rewardable_type) {
+                case 'Item':
+                    $item = Item::find($reward->rewardable_id);
+                    if (!$item || !$item->is_released) {
+                        continue 2;
+                    }
+                    $rewardOptions['Items']['items-' . $reward->rewardable_id] = $item->name . ' x' . $reward->quantity;
+                    break;
+                case 'Currency':
+                    $currency = Currency::find($reward->rewardable_id);
+                    if (!$currency || !$currency->is_visible) {
+                        continue 2;
+                    }
+                    $rewardOptions['Currencies']['currencies-' . $reward->rewardable_id ] = $currency->name . ' x' . $reward->quantity;
+                    break;
+                case 'Raffle':
+                    $raffle = Raffle::find($reward->rewardable_id);
+                    if (!$raffle || !$raffle->is_active) {
+                        continue 2;
+                    }
+                    $rewardOptions['Raffle Tickets']['"raffle_tickets-' . $reward->rewardable_id] = nl2br(htmlentities($raffle->name)) . ' x' . $reward->quantity . ' (Automatic Entry)';
+                    break;
+                case 'LootTable':
+                    $lootTable = LootTable::find($reward->rewardable_id);
+                    if (!$lootTable) {
+                        continue 2;
+                    }
+                    $rewardOptions['Loot Tables']['loot_tables-' . $reward->rewardable_id] = $lootTable->getRawOriginal('display_name') . ' x' . $reward->quantity . ' (This reward is randomized)';
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        return $rewardOptions;
     }
 }

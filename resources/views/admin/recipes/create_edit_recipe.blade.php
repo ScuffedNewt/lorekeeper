@@ -41,12 +41,18 @@
     </div>
 
     <div class="row">
-        <div class="col-md-4 form-group">
-            {!! Form::checkbox('needs_unlocking', 1, $recipe->needs_unlocking, ['class' => 'form-check-input', 'data-toggle' => 'toggle', 'data-on' => 'Needs to be Unlocked', 'data-off' => 'Automatically Unlocked']) !!}
+        <div class="col-md-4">
+            <div class="form-group mb-2">
+                {!! Form::checkbox('needs_unlocking', 1, $recipe->needs_unlocking, ['class' => 'form-check-input', 'data-toggle' => 'toggle', 'data-on' => 'Needs to be Unlocked', 'data-off' => 'Automatically Unlocked']) !!}
+            </div>
+            <div class="form-group mb-2">
+                {!! Form::checkbox('is_choice', 1, $recipe->is_choice, ['class' => 'form-check-input', 'data-toggle' => 'toggle']) !!}
+                {!! Form::label('is_choice', 'Is Choice?', ['class' => 'form-check-label ml-2']) !!} {!! add_help('If this toggle is on, users <b>will be able to choose one reward</b> to craft that they will receive out of the list of all rewards added to this recipe below.') !!}
+            </div>
         </div>
         <div class="col-md-4 form-group">
             {!! Form::label('Time to Craft (Optional)') !!}
-            <p>The amount of time (in minutes, e.g 1 hour -> 60) that a recipe will take to craft</p>
+            <p>The amount of time (in minutes, e.g 1 hour -> 60) that a recipe will take to craft. If left blank, the recipe will craft instantly.</p>
             {!! Form::number('time', $recipe->time, ['class' => 'form-control']) !!}
         </div>
         <div class="col-md-4 form-group">

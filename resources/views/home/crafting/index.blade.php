@@ -66,8 +66,8 @@
             <hr />
             <div class="row ml-2">
                 @foreach ($slots as $slot)
-                    <div class="col-md-3">
-                        <div class="card bg-secondary text-center d-flex justify-content-center align-items-center" style="width: 200px; height: 200px;">
+                    <div class="col-sm-6 col-md-4 col-lg-3 h-100 p-1">
+                        <div class="card bg-secondary text-center d-flex justify-content-center align-items-center mx-auto" style="height: 200px; max-width: 200px;">
                             <div class="h5 text-white mb-0">
                                 <i class="fas fa-tools"></i>
                                 {{ $slot->displayName }}

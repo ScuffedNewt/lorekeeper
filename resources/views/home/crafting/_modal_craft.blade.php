@@ -3,7 +3,8 @@
         Invalid recipe selected.
     </div>
 @else
-    <div class="float-right">
+    <div class="row px-lg-3 justify-content-end">
+        {{-- it's in a row div so it stops weding itself onto the right of the recipe details box when the recipe lacks an image --}}
         <x-admin-edit title="Recipe" :object="$recipe" />
     </div>
     @if ($recipe->imageUrl)
@@ -21,7 +22,13 @@
             </a>
         </div>
         <div class="collapse show" id="recipeDetails">
-            <div class="card-body py-0 row no-gutters">
+            <div class="card-body pb-0 row no-gutters">
+                @if ($recipe->is_choice)
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> This recipe is a choice recipe, meaning you must select which specific reward you would like to receive from the list of possible rewards.
+                    </div>
+                @endif
+
                 @if (hasLimits($recipe))
                     <div class="col-12 mb-2">
                         @include('widgets._limits', [
@@ -41,7 +48,7 @@
                     @endforeach
                 </div>
                 <div class="col-md-6 pl-md-1">
-                    <h5 class="mb-0">Rewards</h5>
+                    <h5 class="mb-0">{{ $recipe->is_choice ? 'Reward Choices' : 'Rewards' }}</h5>
                     @foreach (parseAssetData($recipe->output) as $type)
                         @foreach ($type as $item)
                             <div class="alert alert-secondary mb-1">
@@ -75,6 +82,17 @@
                             'selected' => $selected,
                             'page' => $page,
                         ])
+
+                        @if ($recipe->is_choice)
+                            <h5 class="mb-0">Choose Reward</h5>
+                            <p class="mb-1">
+                                This recipe allows you to choose a reward from the following options. Please choose a reward from the dropdown below.
+                            </p>
+                            <div class="form-group">
+                                {!! Form::select('choice_reward_id', $recipe->choiceRewards, null, ['class' => 'form-control choose-reward', 'placeholder' => 'Select Reward']) !!}
+                            </div>
+                        @endif
+
                         <div class="text-right">
                             {!! Form::submit('Craft', ['class' => 'btn btn-primary']) !!}
                         </div>
@@ -88,6 +106,17 @@
                         'selected' => $selected,
                         'page' => $page,
                     ])
+
+                    @if ($recipe->is_choice)
+                        <h5 class="mb-0">Choose Reward</h5>
+                        <p class="mb-1">
+                            This recipe allows you to choose a reward from the following options. Please choose a reward from the dropdown below.
+                        </p>
+                        <div class="form-group">
+                            {!! Form::select('choice_reward', $recipe->choiceRewards, null, ['class' => 'form-control choose-reward', 'placeholder' => 'Select Reward']) !!}
+                        </div>
+                    @endif
+
                     <div class="text-right">
                         {!! Form::submit('Craft', ['class' => 'btn btn-primary']) !!}
                     </div>
@@ -109,4 +138,8 @@
         if (code == 13)
             return false;
     });
+
+    @if ($recipe->is_choice)
+        $('.choose-reward').selectize();
+    @endif
 </script>
