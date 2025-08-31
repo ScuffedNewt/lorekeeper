@@ -41,6 +41,7 @@
             </div>
             @include('widgets._limits', [
                 'object' => $recipe,
+                'hideUnlock' => true,
             ])
         </div>
         <a class="btn btn-primary btn-block btn-craft" href="">Craft</a>

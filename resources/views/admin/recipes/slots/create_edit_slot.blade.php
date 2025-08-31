@@ -32,7 +32,10 @@
     {!! Form::close() !!}
 
     @if ($slot->id)
-        @include('widgets._add_limits', ['object' => $slot])
+        @include('widgets._add_limits', [
+            'object' => $slot,
+            'hideAutoUnlock' => true
+        ])
     @endif
 @endsection
 

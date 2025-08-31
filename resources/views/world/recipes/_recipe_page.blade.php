@@ -96,6 +96,7 @@
                                 <div class="col-12 mb-2">
                                     @include('widgets._limits', [
                                         'object' => $recipe,
+                                        'hideUnlock' => true,
                                     ])
                                     <hr />
                                 </div>

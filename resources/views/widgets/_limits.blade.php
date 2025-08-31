@@ -21,6 +21,11 @@
             <div class="alert alert-success">
                 You previously have met these requirements and have unlocked access to this {{ $object->assetType ? (substr($object->assetType, -1) === 's' ? substr($object->assetType, 0, -1) : $object->assetType) : '' }}.
             </div>
+        @else
+            <div class="alert alert-warning">
+                You must meet the following requirements to access this {{ $object->assetType ? (substr($object->assetType, -1) === 's' ? substr($object->assetType, 0, -1) : $object->assetType) : '' }} 
+                {{ $limits->first()->is_unlocked ? 'once.' : 'every time you interact with it.' }}
+            </div>
         @endif
         <div class="mb-2 logs-table">
             <div class="logs-table-header">
@@ -98,7 +103,8 @@
                     $limits->map(function ($limit) use ($limitTypes) {
                             return ($limit->quantity ? $limit->quantity . ' ' : '') . $limit->limit->displayName;
                         })->toArray(),
-                ) !!})
+                ) !!}
+                {{ $limits->first()->is_unlocked ? 'once' : 'every time you interact with it' }}.)
                 @if (!$hideUnlock && !$limits->first()->isUnlocked(Auth::user() ?? null) && !$limits->first()->is_auto_unlocked)
                     <div class="alert alert-secondary text-center p-0 mb-0">
                         <small>

@@ -3,6 +3,8 @@
 namespace App\Models\User;
 
 use App\Models\Model;
+use App\Models\Recipe\Recipe;
+use App\Models\Recipe\RecipeSlot;
 
 class UserRecipeSlot extends Model {
 
@@ -46,16 +48,29 @@ class UserRecipeSlot extends Model {
     }
 
     /**
-     * Get the item associated with this item stack.
+     * Get the slot object associated with this slot record.
      */
     public function slot() {
         return $this->belongsTo(RecipeSlot::class, 'slot_id');
     }
 
     /**
-     * Get the item associated with this item stack.
+     * Get the recipe currently being crafted in this slot.
      */
     public function recipe() {
         return $this->belongsTo(Recipe::class, 'recipe_id');
+    }
+
+    /**********************************************************************************************
+
+        ATTRIBUTES
+
+    **********************************************************************************************/
+
+    /**
+     * Returns if the slot is currently crafting or not
+     */
+    public function getIsCraftingAttribute() {
+        return $this->recipe && $this->started_at && !$this->end_at;
     }
 }

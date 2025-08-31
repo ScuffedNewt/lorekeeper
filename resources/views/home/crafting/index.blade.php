@@ -73,7 +73,14 @@
                                 {{ $slot->displayName }}
                             </div>
                             @if ($slot->hasUserUnlocked(Auth::user()))
-                                <img src="{{ $slot->recipe->imageUrl }}" class="my-auto" style="width: 150px; height:150px;">
+                                @if ($slot->userSlot(Auth::user())->isCrafting)
+
+                                @else
+                                    <div class="text-white">
+                                        It's idle...
+                                    </div>
+                                @endif
+                                {{-- <img src="{{ $slot->recipe->imageUrl }}" class="my-auto" style="width: 150px; height:150px;">
                                 @php
                                     $now = Carbon\Carbon::now();
                                     $diff = $now->diffInMinutes($slot->end_at, false);
@@ -91,13 +98,13 @@
                                         {!! Form::open(['url' => 'crafting/claim/' . $slot->id]) !!}
                                         {!! Form::submit('Claim!', ['class' => 'btn btn-sm btn-primary']) !!}
                                         {!! Form::close() !!}
-                                @endif
+                                @endif --}}
                             @else
                                 <div class="text-white">
                                     This slot is not unlocked.
                                 </div>
                                 @if (hasLimits($slot))
-                                    <div class="mb-2" style="width: 75%;">
+                                    <div style="width: 75%;">
                                         @include('widgets._limits', [
                                             'object' => $slot,
                                             'compact' => true,

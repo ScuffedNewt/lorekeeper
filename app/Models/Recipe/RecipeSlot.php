@@ -69,4 +69,11 @@ class RecipeSlot extends Model {
     public function hasUserUnlocked($user) {
         return UserRecipeSlot::where('slot_id', $this->id)->where('user_id', $user->id)->exists();
     }
+
+    /**
+     * Returns the user's slot for this recipe slot.
+     */
+    public function userSlot($user) {
+        return UserRecipeSlot::where('slot_id', $this->id)->where('user_id', $user->id)->first();    
+    }
 }
