@@ -23,7 +23,7 @@
             </div>
         @else
             <div class="alert alert-warning">
-                You must meet the following requirements to access this {{ $object->assetType ? (substr($object->assetType, -1) === 's' ? substr($object->assetType, 0, -1) : $object->assetType) : '' }} 
+                You must meet the following requirements to access this {{ $object->assetType ? (substr($object->assetType, -1) === 's' ? substr($object->assetType, 0, -1) : $object->assetType) : '' }}
                 {{ $limits->first()->is_unlocked ? 'once.' : 'every time you interact with it.' }}
             </div>
         @endif

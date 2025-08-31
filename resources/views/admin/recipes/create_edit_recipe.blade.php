@@ -125,7 +125,7 @@
         </div>
         @include('widgets._add_limits', [
             'object' => $recipe,
-            'hideAutoUnlock' => true
+            'hideAutoUnlock' => true,
         ])
 
         <h3>Preview</h3>

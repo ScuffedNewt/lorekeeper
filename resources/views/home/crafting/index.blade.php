@@ -90,10 +90,10 @@
                                             @endif
                                         </div>
                                         <p>Started {!! pretty_date($slot->userSlot(Auth::user())->started_at) !!}
-                                    @else
-                                        {!! Form::open(['url' => 'crafting/claim/' . $slot->userSlot(Auth::user())->id]) !!}
-                                        {!! Form::submit('Claim!', ['class' => 'btn btn-sm btn-primary mb-2']) !!}
-                                        {!! Form::close() !!}
+                                        @else
+                                            {!! Form::open(['url' => 'crafting/claim/' . $slot->userSlot(Auth::user())->id]) !!}
+                                            {!! Form::submit('Claim!', ['class' => 'btn btn-sm btn-primary mb-2']) !!}
+                                            {!! Form::close() !!}
                                     @endif
                                 @else
                                     <div class="text-white">
@@ -118,7 +118,7 @@
                                     </div>
                                 @endif
                                 {!! Form::open(['url' => 'crafting/slot/unlock/' . $slot->id]) !!}
-                                    {!! Form::submit('Unlock!', ['class' => 'btn btn-sm btn-primary']) !!}
+                                {!! Form::submit('Unlock!', ['class' => 'btn btn-sm btn-primary']) !!}
                                 {!! Form::close() !!}
                             @endif
                         </div>

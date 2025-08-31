@@ -34,7 +34,7 @@
     @if ($slot->id)
         @include('widgets._add_limits', [
             'object' => $slot,
-            'hideAutoUnlock' => true
+            'hideAutoUnlock' => true,
         ])
     @endif
 @endsection

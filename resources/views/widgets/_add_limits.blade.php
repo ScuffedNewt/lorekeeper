@@ -61,16 +61,16 @@
                         {!! Form::label('is_auto_unlocked', 'Automatically Unlock?', ['class' => 'form-label font-weight-bold']) !!} {!! add_help("This only affects objects with 'Is Unlocked?' set to 'Yes'.") !!}
                         <p>
                             If this is set to "No", the user must manually unlock the object by interacting with it - ex. clicking on the "Unlock" button.
-                            <div class="text-warning">
-                                This will prevent the limits from being used as part of a series of actions, ex. prompt submissions.
-                            </div>
-                            <br />
-                            If this is set to "Yes", the object will be automatically unlocked when the user attempts to access them - ex. when a user enters a shop.
-                            <br />
-                            This setting is good for preventing users from being debited before being certain they want to interact with the object.
-                            <div class="text-danger">
-                                This option is not suitable for objects that should have limits as part of an action workflow, ex. prompt submissions.
-                            </div>
+                        <div class="text-warning">
+                            This will prevent the limits from being used as part of a series of actions, ex. prompt submissions.
+                        </div>
+                        <br />
+                        If this is set to "Yes", the object will be automatically unlocked when the user attempts to access them - ex. when a user enters a shop.
+                        <br />
+                        This setting is good for preventing users from being debited before being certain they want to interact with the object.
+                        <div class="text-danger">
+                            This option is not suitable for objects that should have limits as part of an action workflow, ex. prompt submissions.
+                        </div>
                         </p>
                         {!! Form::select('is_auto_unlocked', ['yes' => 'Yes', 'no' => 'No'], $limits?->first()->is_auto_unlocked ? 'yes' : 'no', ['class' => 'form-control']) !!}
                     </div>
