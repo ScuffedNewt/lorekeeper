@@ -23,9 +23,20 @@
         </div>
         <div class="collapse show" id="recipeDetails">
             <div class="card-body pb-0 row no-gutters">
-                @if ($recipe->is_choice)
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i> This recipe is a choice recipe, meaning you must select which specific reward you would like to receive from the list of possible rewards.
+                @if ($recipe->is_choice || $recipe->time || $recipe->required_slot_id)
+                    <div class="alert alert-info w-100 mb-0">
+                        @if ($recipe->is_choice)
+                            <p class="mb-0">
+                                <i class="fas fa-info-circle"></i>
+                                This recipe is a choice recipe, meaning you must select which specific reward you would like to receive from the list of possible rewards.
+                            </p>
+                        @endif
+                        @if ($recipe->time)
+                            <p class="mb-0"><i class="fas fa-clock"></i> This recipe takes {{ $recipe->time }} minutes to craft.</p>
+                        @endif
+                        @if ($recipe->required_slot_id)
+                            <p class="mb-0"><i class="fas fa-cogs"></i> This recipe requires the {{ $recipe->requiredSlot->name }} slot to craft.</p>
+                        @endif
                     </div>
                 @endif
 
@@ -66,14 +77,14 @@
             @if ($recipe->checkRecipe(Auth::user()))
                 <hr>
                 {!! Form::open(['url' => 'crafting/craft/' . $recipe->id]) !!}
-                @if ($recipe->time)
+                @if ($recipe->time || $recipe->required_slot_id)
                     @if (!$slots->count())
                         <p class="alert alert-danger">
-                            This recipe requires time to craft! However, you do not have any slots available right now.
+                            This recipe requires a slot to craft! However, you do not have any slots available right now.
                         </p>
                     @else
                         <p class="alert alert-info">
-                            This recipe requires time to craft! Please select the slot # you'd like to use.
+                            This recipe requires a slot to craft! Please select the slot you'd like to use.
                         </p>
                         {!! Form::select('slot_id', $slots, null, ['class' => 'form-control mb-2']) !!}
                         @include('widgets._inventory_select', [
@@ -90,7 +101,7 @@
                                 This recipe allows you to choose a reward from the following options. Please choose a reward from the dropdown below.
                             </p>
                             <div class="form-group">
-                                {!! Form::select('choice_reward_id', $recipe->choiceRewards, null, ['class' => 'form-control choose-reward', 'placeholder' => 'Select Reward']) !!}
+                                {!! Form::select('choice_reward', $recipe->choiceRewards, null, ['class' => 'form-control choose-reward', 'placeholder' => 'Select Reward']) !!}
                             </div>
                         @endif
 

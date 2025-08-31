@@ -86,7 +86,7 @@ class Recipe extends Model {
      * Gets the recipe's required slot type.
      */
     public function requiredSlot() {
-        return $this->belongsTo(RecipeSlot::class, 'required_slot_id');
+        return $this->belongsTo(RecipeSlot::class, 'required_slot_id', 'id');
     }
 
     /**
@@ -372,19 +372,11 @@ class Recipe extends Model {
      * @param mixed $user
      */
     public function hasUserUnlocked($user) {
-        if (!$this->needs_unlocking && !hasLimits($this)) {
+        if (!$this->needs_unlocking) {
             return true;
         }
 
-        if ($this->needs_unlocking && hasLimits($this)) {
-            return Auth::user()->hasRecipe($this->id) && hasUnlockedLimits($this);
-        } elseif (!$this->needs_unlocking && hasLimits($this)) {
-            return hasUnlockedLimits($this);
-        } elseif ($this->needs_unlocking && !hasLimits($this)) {
-            return Auth::user()->hasRecipe($this->id);
-        }
-
-        return false;
+        return Auth::user()->hasRecipe($this->id);
     }
 
     /**

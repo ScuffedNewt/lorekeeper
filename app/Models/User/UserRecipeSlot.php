@@ -58,7 +58,7 @@ class UserRecipeSlot extends Model {
      * Get the recipe currently being crafted in this slot.
      */
     public function recipe() {
-        return $this->belongsTo(Recipe::class, 'recipe_id');
+        return $this->belongsTo(Recipe::class, 'recipe_id', 'id');
     }
 
     /**********************************************************************************************
@@ -71,6 +71,6 @@ class UserRecipeSlot extends Model {
      * Returns if the slot is currently crafting or not
      */
     public function getIsCraftingAttribute() {
-        return $this->recipe && $this->started_at && !$this->end_at;
+        return $this->recipe && $this->started_at && $this->end_at;
     }
 }

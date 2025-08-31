@@ -118,7 +118,7 @@
     @include('widgets._recipe_reward_select_row', ['items' => $items, 'currencies' => $currencies, 'tables' => $tables, 'raffles' => $raffles])
 
     @if ($recipe->id)
-        <div class="alert alert-warning">
+        <div class="alert alert-warning mt-2">
             Recipe limits are in addition to the unlocking requirement.
             <br />
             A recipe can be automatically unlocked, but also require limits on every craft (or first craft, depending on if "Is Unlocked?" is set to true or false)

@@ -68,48 +68,53 @@
                 @foreach ($slots as $slot)
                     <div class="col-sm-6 col-md-4 col-lg-3 h-100 p-1">
                         <div class="card bg-secondary text-center d-flex justify-content-center align-items-center mx-auto" style="height: 200px; max-width: 200px;">
-                            <div class="h5 text-white mb-0">
+                            <div class="h5 text-white mb-0 mt-2">
                                 <i class="fas fa-tools"></i>
                                 {{ $slot->displayName }}
                             </div>
                             @if ($slot->hasUserUnlocked(Auth::user()))
                                 @if ($slot->userSlot(Auth::user())->isCrafting)
-
+                                    @if ($slot->userSlot(Auth::user())->recipe->has_image)
+                                        <img src="{{ $slot->userSlot(Auth::user())->recipe->imageUrl }}" class="my-auto" style="max-width: 75px; max-height:75px;">
+                                    @endif
+                                    @php
+                                        $now = Carbon\Carbon::now();
+                                        $diff = $now->diffInMinutes($slot->userSlot(Auth::user())->end_at, false);
+                                    @endphp
+                                    @if ($slot->userSlot(Auth::user())->end_at >= $now)
+                                        <div class="text-white">
+                                            @if ($diff >= 0 && $diff < 1)
+                                                1> minute till you finish crafting!
+                                            @else
+                                                {{ $diff }} minutes till you finish crafting!
+                                            @endif
+                                        </div>
+                                        <p>Started {!! pretty_date($slot->userSlot(Auth::user())->started_at) !!}
+                                    @else
+                                        {!! Form::open(['url' => 'crafting/claim/' . $slot->userSlot(Auth::user())->id]) !!}
+                                        {!! Form::submit('Claim!', ['class' => 'btn btn-sm btn-primary mb-2']) !!}
+                                        {!! Form::close() !!}
+                                    @endif
                                 @else
                                     <div class="text-white">
                                         It's idle...
                                     </div>
                                 @endif
-                                {{-- <img src="{{ $slot->recipe->imageUrl }}" class="my-auto" style="width: 150px; height:150px;">
-                                @php
-                                    $now = Carbon\Carbon::now();
-                                    $diff = $now->diffInMinutes($slot->end_at, false);
-                                @endphp
-                                @if ($slot->end_at >= $now)
-                                    <div class="text-white">
-                                        @if ($diff >= 0 && $diff < 1)
-                                            1> minute till you finish crafting!
-                                        @else
-                                            {{ $diff }} minutes till you finish crafting!
-                                        @endif
-                                    </div>
-                                    <p>Started {!! pretty_date($slot->started_at) !!}
-                                    @else
-                                        {!! Form::open(['url' => 'crafting/claim/' . $slot->id]) !!}
-                                        {!! Form::submit('Claim!', ['class' => 'btn btn-sm btn-primary']) !!}
-                                        {!! Form::close() !!}
-                                @endif --}}
                             @else
-                                <div class="text-white">
-                                    This slot is not unlocked.
-                                </div>
                                 @if (hasLimits($slot))
-                                    <div style="width: 75%;">
+                                    <div class="mb-0" style="width: 75%;">
                                         @include('widgets._limits', [
                                             'object' => $slot,
                                             'compact' => true,
                                             'hideUnlock' => true,
                                         ])
+                                    </div>
+                                    <div class="text-white mt-0" style="font-size: 0.7rem;">
+                                        @if (getLimits($slot)->first()->is_unlocked)
+                                            You will only have to have the limits when unlocking this slot.
+                                        @else
+                                            You do not need to meet the limits to unlock this slot, but will have to meet them to use the slot.
+                                        @endif
                                     </div>
                                 @endif
                                 {!! Form::open(['url' => 'crafting/slot/unlock/' . $slot->id]) !!}

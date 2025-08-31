@@ -62,8 +62,13 @@ class CraftingController extends Controller {
         // foreach ingredient, search for a qualifying item in the users inv, and select items up to the quantity, if insufficient continue onto the next entry
         // until there are no more eligible items, then proceed to the next item
         $selected = $service->pluckIngredients(Auth::user(), $recipe);
-
         $inventory = UserItem::with('item')->whereNull('deleted_at')->where('count', '>', '0')->where('user_id', Auth::user()->id)->get();
+
+        $userSlots = Auth::user()->craftingslots->where('recipe_id', null)->where('started_at', null)->where('end_at', null);
+        // map userSlots to the RecipeSlot name
+        $slots = $userSlots->mapWithKeys(function ($slot) {
+            return [$slot->id => $slot->slot->name];
+        });
 
         return view('home.crafting._modal_craft', [
             'recipe'            => $recipe,
@@ -72,7 +77,7 @@ class CraftingController extends Controller {
             'inventory'         => $inventory,
             'page'              => 'crafting',
             'selected'          => $selected,
-            'slots'             => Auth::user()->craftingslots->where('recipe_id', null)->where('started_at', null)->where('end_at', null)->pluck('slot_id', 'id'),
+            'slots'             => $slots,
         ]);
     }
 
@@ -90,7 +95,7 @@ class CraftingController extends Controller {
         }
 
         if ($service->craftRecipe($request->only(['stack_id', 'stack_quantity', 'slot_id', 'choice_reward']), $recipe, Auth::user())) {
-            flash('Recipe crafted successfully.')->success();
+            flash('Recipe ' . ($recipe->time ? 'started crafting' : 'crafted') . ' successfully.')->success();
         } else {
             foreach ($service->errors()->getMessages()['error'] as $error) {
                 flash($error)->error();
