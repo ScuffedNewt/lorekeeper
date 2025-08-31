@@ -83,7 +83,7 @@ class ShopManager extends Service {
                 // finding the users tag
                 $couponUserItem = UserItem::find($data['coupon']);
                 // check if the item id is inside allowed_coupons
-                if ($shop->allowed_coupons && count(json_decode($shop->allowed_coupons, 1)) > 0 && !in_array($couponUserItem->item_id, json_decode($shop->allowed_coupons, 1))) {
+                if ($shop->allowed_coupons && count($shop->allowed_coupons) > 0 && !in_array($couponUserItem->item_id, $shop->allowed_coupons)) {
                     throw new \Exception('Sorry! You can\'t use this coupon.');
                 }
                 // finding bought item

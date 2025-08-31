@@ -403,6 +403,7 @@ class ShopService extends Service {
         $data['is_active'] = isset($data['is_active']);
         $data['is_hidden'] = isset($data['is_hidden']);
         $data['is_staff'] = isset($data['is_staff']);
+        $data['is_fto'] = isset($data['is_fto']);
         $data['use_coupons'] = isset($data['use_coupons']);
         $data['allowed_coupons'] ??= null;
         $data['data'] = [

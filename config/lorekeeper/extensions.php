@@ -27,12 +27,14 @@ return [
      *  Species Trait Index - Mercury
      *  Subtype Trait Index - Speedy
      *  Universal Trait Index - CHERVB
+     *  All Traits Index (Kitchen Sink Index) - Speedy
      *  Trait Modals addition - Moif
      */
     'visual_trait_index' => [
         'enable_species_index'   => 0, // Enables the Species Trait Index
         'enable_subtype_index'   => 0, // Enables the Subtype Trait Index
         'enable_universal_index' => 0, // Enables the Universal Trait Index
+        'enable_all_trait_index' => 0, // Enables the All Traits Index
         'trait_modals'           => 0, // Enables modals when you click on a trait for more info instead of linking to the traits page
     ],
 

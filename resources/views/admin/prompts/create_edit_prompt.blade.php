@@ -109,7 +109,7 @@
     @if ($prompt->id)
         @include('widgets._add_limits', [
             'object' => $prompt,
-            'hideAutoUnlock' => true
+            'hideAutoUnlock' => true,
         ])
 
         <h3>Preview</h3>

@@ -14,10 +14,14 @@
 @if ($limits)
     @if (!isset($compact) || !$compact)
         <h4 class="my-3">{!! $object->displayName !!}'s Requirements</h4>
-
         <p>
             You must obtain or complete all of the following in order to access this {{ $object->assetType ? (substr($object->assetType, -1) === 's' ? substr($object->assetType, 0, -1) : $object->assetType) : '' }}.
         </p>
+        @if ($limits->first()->is_unlocked && $limits->first()->isUnlocked(Auth::user() ?? null))
+            <div class="alert alert-success">
+                You previously have met these requirements and have unlocked access to this {{ $object->assetType ? (substr($object->assetType, -1) === 's' ? substr($object->assetType, 0, -1) : $object->assetType) : '' }}.
+            </div>
+        @endif
         <div class="mb-2 logs-table">
             <div class="logs-table-header">
                 <div class="row no-gutters">
@@ -87,7 +91,7 @@
             @endif
         @endif
     @else
-        <div class="alert alert-{{ $limits->first()->isUnlocked(Auth::user() ?? null) ? 'info' : 'danger' }} p-0 mb-0">
+        <div class="alert alert-{{ $limits->first()->is_unlocked && $limits->first()->isUnlocked(Auth::user() ?? null) ? 'info' : 'danger' }} p-0 mt-2">
             <small>
                 (Requires {!! implode(
                     ', ',
