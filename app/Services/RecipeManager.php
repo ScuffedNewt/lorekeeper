@@ -92,12 +92,14 @@ class RecipeManager extends Service {
             }
 
             // if the recipe has a cook time we need to use a different function
-            if ($recipe->time != null) {
+            if ($recipe->time) {
                 // create a log in the pending_recipes
                 if (!isset($data['slot_id'])) {
                     throw new \Exception('Invalid slot selected');
                 }
                 $userSlot = UserRecipeSlot::find($data['slot_id']);
+                // check if its the required slot
+                dd($recipe);
                 // save things
                 $userSlot->recipe_id = $recipe->id;
                 $userSlot->started_at = Carbon::now();
@@ -268,6 +270,91 @@ class RecipeManager extends Service {
             $userSlot->end_at = null;
             $userSlot->choice_reward_data = null;
             $userSlot->save();
+
+            return $this->commitReturn(true);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
+    }
+
+    /**********************************************************************************************
+
+        RECIPE UNLOCKING
+
+    **********************************************************************************************/
+
+    /**
+     * Unlocks a recipe.
+     */
+    public function unlockRecipe($recipe, $user) {
+        DB::beginTransaction();
+
+        try {
+            if (!$recipe || !$user) {
+                throw new \Exception('Invalid recipe or user.');
+            }
+
+            // Check if the user can unlock the recipe
+            $service = new LimitManager;
+            if (!$service->checkLimits($recipe, true)) {
+                throw new \Exception($service->errors()->getMessages()['error'][0]);
+            }
+
+            // $sender, $recipient, $character, $type, $data, $recipe
+            $service = new RecipeService;
+            if (!$service->creditRecipe(
+                null, 
+                $user, 
+                null,
+                'Recipe Unlock', 
+                $data = [
+                    'data' => 'Used in '.($limit->object->displayName ?? $limit->object->name).'\'s limit requirements.',
+                ],
+                $recipe
+            )) {
+                throw new \Exception('Failed to credit recipe to user.');
+            }
+
+            return $this->commitReturn(true);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
+    }
+
+    /**
+     * Unlocks a recipe slot.
+     *
+     * @param RecipeSlot $slot
+     * @param User $user
+     *
+     * @return bool
+     */
+    public function unlockRecipeSlot($slot, $user) {
+        DB::beginTransaction();
+
+        try {
+            if (!$slot || !$user) {
+                throw new \Exception('Invalid slot or user.');
+            }
+
+            // check if user has already unlocked the slot
+            if (UserRecipeSlot::where('slot_id', $slot->id)->where('user_id', $user->id)->exists()) {
+                throw new \Exception('Recipe slot is already unlocked.');
+            }
+
+            $service = new LimitManager;
+            if (!$service->checkLimits($slot, true)) {
+                throw new \Exception($service->errors()->getMessages()['error'][0]);
+            }
+
+            $slot = UserRecipeSlot::create([
+                'slot_id' => $slot->id,
+                'user_id' => $user->id,
+            ]);
 
             return $this->commitReturn(true);
         } catch (\Exception $e) {

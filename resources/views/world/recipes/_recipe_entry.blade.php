@@ -44,7 +44,7 @@
                                 <i class="fas fa-lock" aria-hidden="true"></i>
                             </div>
                             <div class="col text-center text-md-left">
-                                You have <b>not yet unlocked</b> and do not have this recipe.
+                                You have <b>not yet unlocked</b> this recipe.
                             </div>
                         </div>
                     @endif
@@ -85,6 +85,7 @@
                 <div class="col-12 mb-2">
                     @include('widgets._limits', [
                         'object' => $recipe,
+                        'hideUnlock' => true
                     ])
                     <hr />
                 </div>

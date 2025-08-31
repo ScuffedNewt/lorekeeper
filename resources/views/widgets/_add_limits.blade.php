@@ -11,6 +11,10 @@
     $items = \App\Models\Item\Item::orderBy('name')->pluck('name', 'id')->toArray();
     $currencies = \App\Models\Currency\Currency::orderBy('name')->pluck('name', 'id')->toArray();
     $dynamics = \App\Models\Limit\DynamicLimit::orderBy('name')->pluck('name', 'id')->toArray();
+
+    if (!isset($hideAutoUnlock)) {
+        $hideAutoUnlock = false;
+    }
 @endphp
 
 <div class="card p-4 mb-3 mt-3" id="limit-card">
@@ -43,17 +47,19 @@
                     </p>
                     {!! Form::select('is_unlocked', ['yes' => 'Yes', 'no' => 'No'], $limits?->first()->is_unlocked ? 'yes' : 'no', ['class' => 'form-control']) !!}
                 </div>
-                <div class="col-md form-group border-left">
-                    {!! Form::label('is_auto_unlocked', 'Automatically Unlock?', ['class' => 'form-label font-weight-bold']) !!} {!! add_help("This only affects objects with 'Is Unlocked?' set to 'Yes'.") !!}
-                    <p>
-                        If this is set to "No", the user must manually unlock the object by interacting with it - ex. clicking on the "Unlock" button.
-                        <br />
-                        If this is set to "Yes", the object will be automatically unlocked when the user attempts to access them - ex. when a user enters a shop.
-                        <br />
-                        This setting is good for preventing users from being debited before being certain they want to interact with the object.
-                    </p>
-                    {!! Form::select('is_auto_unlocked', ['yes' => 'Yes', 'no' => 'No'], $limits?->first()->is_auto_unlocked ? 'yes' : 'no', ['class' => 'form-control']) !!}
-                </div>
+                @if (!$hideAutoUnlock)
+                    <div class="col-md form-group border-left">
+                        {!! Form::label('is_auto_unlocked', 'Automatically Unlock?', ['class' => 'form-label font-weight-bold']) !!} {!! add_help("This only affects objects with 'Is Unlocked?' set to 'Yes'.") !!}
+                        <p>
+                            If this is set to "No", the user must manually unlock the object by interacting with it - ex. clicking on the "Unlock" button.
+                            <br />
+                            If this is set to "Yes", the object will be automatically unlocked when the user attempts to access them - ex. when a user enters a shop.
+                            <br />
+                            This setting is good for preventing users from being debited before being certain they want to interact with the object.
+                        </p>
+                        {!! Form::select('is_auto_unlocked', ['yes' => 'Yes', 'no' => 'No'], $limits?->first()->is_auto_unlocked ? 'yes' : 'no', ['class' => 'form-control']) !!}
+                    </div>
+                @endif
             </div>
             @if ($limits)
                 @foreach ($limits as $limit)

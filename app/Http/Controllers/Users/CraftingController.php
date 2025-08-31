@@ -120,4 +120,25 @@ class CraftingController extends Controller {
 
         return redirect()->back();
     }
+
+    /**
+     * Unlocks a recipe slot.
+     *
+     * @param int $id
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function postUnlockRecipeSlot(Request $request, RecipeManager $service, $id) {
+        $slot = RecipeSlot::findOrFail($id);
+
+        if ($service->unlockRecipeSlot($slot, Auth::user())) {
+            flash('Recipe slot unlocked successfully!')->success();
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
+        }
+
+        return redirect()->back();
+    }
 }

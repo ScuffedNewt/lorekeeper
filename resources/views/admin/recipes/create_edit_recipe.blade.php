@@ -43,22 +43,20 @@
     <div class="row">
         <div class="col-md-4">
             <div class="form-group mb-2">
+                <p>Set this to "true" if the recipe should not be freely available.</p>
+                <p>Turning this on will allow you to set dynamic limits on the recipe, or have it as a prompt reward.</p>
                 {!! Form::checkbox('needs_unlocking', 1, $recipe->needs_unlocking, ['class' => 'form-check-input', 'data-toggle' => 'toggle', 'data-on' => 'Needs to be Unlocked', 'data-off' => 'Automatically Unlocked']) !!}
-            </div>
-            <div class="form-group mb-2">
-                {!! Form::checkbox('is_choice', 1, $recipe->is_choice, ['class' => 'form-check-input', 'data-toggle' => 'toggle']) !!}
-                {!! Form::label('is_choice', 'Is Choice?', ['class' => 'form-check-label ml-2']) !!} {!! add_help('If this toggle is on, users <b>will be able to choose one reward</b> to craft that they will receive out of the list of all rewards added to this recipe below.') !!}
             </div>
         </div>
         <div class="col-md-4 form-group">
             {!! Form::label('Time to Craft (Optional)') !!}
             <p>The amount of time (in minutes, e.g 1 hour -> 60) that a recipe will take to craft. If left blank, the recipe will craft instantly.</p>
+            <p>If you set a time to craft, but not a required slot, the recipe can use any available slot.</p>
             {!! Form::number('time', $recipe->time, ['class' => 'form-control']) !!}
         </div>
         <div class="col-md-4 form-group">
-            {{-- required slot --}}
             {!! Form::label('Required Slot (Optional)') !!}
-            <p>The recipe slot that is required to craft this recipe. If left blank, no slot is required.</p>
+            <p>The recipe slot that is required to craft this recipe. If left blank, no specific slot is required.</p>
             {!! Form::select('required_slot_id', $slots, $recipe->required_slot_id, ['class' => 'form-control', 'placeholder' => 'No Slot Required']) !!}
         </div>
     </div>
@@ -80,9 +78,15 @@
         {!! Form::textarea('description', $recipe->description, ['class' => 'form-control wysiwyg']) !!}
     </div>
 
-    <div class="form-group">
-        {!! Form::checkbox('is_visible', 1, $recipe->id ? $recipe->is_visible : 1, ['class' => 'form-check-input', 'data-toggle' => 'toggle']) !!}
-        {!! Form::label('is_visible', 'Is Visible', ['class' => 'form-check-label ml-3']) !!} {!! add_help('If turned off, the trait will not be visible in the trait list or available for selection in search and design updates. Permissioned staff will still be able to add them to characters, however.') !!}
+    <div class="row">
+        <div class="col-md-6 form-group">
+            {!! Form::checkbox('is_visible', 1, $recipe->id ? $recipe->is_visible : 1, ['class' => 'form-check-input', 'data-toggle' => 'toggle']) !!}
+            {!! Form::label('is_visible', 'Is Visible', ['class' => 'form-check-label ml-3']) !!} {!! add_help('If turned off, the trait will not be visible in the trait list or available for selection in search and design updates. Permissioned staff will still be able to add them to characters, however.') !!}
+        </div>
+        <div class="col-md-6 form-group">
+            {!! Form::checkbox('is_choice', 1, $recipe->is_choice, ['class' => 'form-check-input', 'data-toggle' => 'toggle']) !!}
+            {!! Form::label('is_choice', 'Is Choice?', ['class' => 'form-check-label ml-2']) !!} {!! add_help('If this toggle is on, users <b>will be able to choose one reward</b> to craft that they will receive out of the list of all rewards added to this recipe below.') !!}
+        </div>
     </div>
 
     <div class="row">
@@ -114,7 +118,15 @@
     @include('widgets._recipe_reward_select_row', ['items' => $items, 'currencies' => $currencies, 'tables' => $tables, 'raffles' => $raffles])
 
     @if ($recipe->id)
-        @include('widgets._add_limits', ['object' => $recipe])
+        <div class="alert alert-warning">
+            Recipe limits are in addition to the unlocking requirement.
+            <br />
+            A recipe can be automatically unlocked, but also require limits on every craft (or first craft, depending on if "Is Unlocked?" is set to true or false)
+        </div>
+        @include('widgets._add_limits', [
+            'object' => $recipe,
+            'hideAutoUnlock' => true
+        ])
 
         <h3>Preview</h3>
         <div class="card mb-3">

@@ -54,4 +54,19 @@ class RecipeSlot extends Model {
     public function getAssetTypeAttribute() {
         return 'recipe_slot';
     }
+
+    /**********************************************************************************************
+
+        OTHER FUNCTIONS
+
+    **********************************************************************************************/
+
+    /**
+     * Checks if user has the slot unlocked.
+     * 
+     * @return bool
+     */
+    public function hasUserUnlocked($user) {
+        return UserRecipeSlot::where('slot_id', $this->id)->where('user_id', $user->id)->exists();
+    }
 }

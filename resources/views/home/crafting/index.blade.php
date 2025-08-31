@@ -72,25 +72,43 @@
                                 <i class="fas fa-tools"></i>
                                 {{ $slot->displayName }}
                             </div>
-                            {{-- <img src="{{ $slot->recipe->imageUrl }}" class="my-auto" style="width: 150px; height:150px;">
-                            @php
-                                $now = Carbon\Carbon::now();
-                                $diff = $now->diffInMinutes($slot->end_at, false);
-                            @endphp
-                            @if ($slot->end_at >= $now)
-                                <div class="text-white">
-                                    @if ($diff >= 0 && $diff < 1)
-                                        1> minute till you finish crafting!
+                            @if ($slot->hasUserUnlocked(Auth::user()))
+                                <img src="{{ $slot->recipe->imageUrl }}" class="my-auto" style="width: 150px; height:150px;">
+                                @php
+                                    $now = Carbon\Carbon::now();
+                                    $diff = $now->diffInMinutes($slot->end_at, false);
+                                @endphp
+                                @if ($slot->end_at >= $now)
+                                    <div class="text-white">
+                                        @if ($diff >= 0 && $diff < 1)
+                                            1> minute till you finish crafting!
+                                        @else
+                                            {{ $diff }} minutes till you finish crafting!
+                                        @endif
+                                    </div>
+                                    <p>Started {!! pretty_date($slot->started_at) !!}
                                     @else
-                                        {{ $diff }} minutes till you finish crafting!
-                                    @endif
+                                        {!! Form::open(['url' => 'crafting/claim/' . $slot->id]) !!}
+                                        {!! Form::submit('Claim!', ['class' => 'btn btn-sm btn-primary']) !!}
+                                        {!! Form::close() !!}
+                                @endif
+                            @else
+                                <div class="text-white">
+                                    This slot is not unlocked.
                                 </div>
-                                <p>Started {!! pretty_date($slot->started_at) !!}
-                                @else
-                                    {!! Form::open(['url' => 'crafting/claim/' . $slot->id]) !!}
-                                    {!! Form::submit('Claim!', ['class' => 'btn btn-sm btn-primary']) !!}
-                                    {!! Form::close() !!}
-                            @endif --}}
+                                @if (hasLimits($slot))
+                                    <div class="mb-2" style="width: 75%;">
+                                        @include('widgets._limits', [
+                                            'object' => $slot,
+                                            'compact' => true,
+                                            'hideUnlock' => true,
+                                        ])
+                                    </div>
+                                @endif
+                                {!! Form::open(['url' => 'crafting/slot/unlock/' . $slot->id]) !!}
+                                    {!! Form::submit('Unlock!', ['class' => 'btn btn-sm btn-primary']) !!}
+                                {!! Form::close() !!}
+                            @endif
                         </div>
                     </div>
                 @endforeach

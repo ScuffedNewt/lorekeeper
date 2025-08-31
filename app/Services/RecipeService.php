@@ -446,7 +446,6 @@ class RecipeService extends Service {
                 $recipe = Recipe::find($recipe);
             }
 
-            // if($recipient->recipes->contains($recipe)) throw new \Exception($recipient->name." already has the recipe ".$recipe->displayName);
             if ($recipient->recipes->contains($recipe)) {
                 flash($recipient->name.' already has the recipe '.$recipe->displayName, 'warning');
 
@@ -454,10 +453,7 @@ class RecipeService extends Service {
             }
 
             $record = UserRecipe::where('user_id', $recipient->id)->where('recipe_id', $recipe->id)->first();
-            if ($record) {
-                // Laravel doesn't support composite primary keys, so directly updating the DB row here
-                DB::table('user_recipes')->where('user_id', $recipient->id)->where('recipe_id', $recipe->id);
-            } else {
+            if (!$record) {
                 $record = UserRecipe::create(['user_id' => $recipient->id, 'recipe_id' => $recipe->id]);
             }
 

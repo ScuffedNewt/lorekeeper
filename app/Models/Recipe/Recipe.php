@@ -9,6 +9,7 @@ use App\Models\Model;
 use App\Models\Raffle\Raffle;
 use App\Models\User\UserCurrency;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class Recipe extends Model {
     /**

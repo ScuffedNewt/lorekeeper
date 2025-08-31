@@ -5,6 +5,7 @@ namespace App\Models\User;
 use App\Models\Model;
 
 class UserRecipeSlot extends Model {
+
     /**
      * The attributes that are mass assignable.
      *

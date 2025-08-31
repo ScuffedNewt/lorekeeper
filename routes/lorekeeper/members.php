@@ -107,7 +107,10 @@ Route::group(['prefix' => 'crafting', 'namespace' => 'Users'], function () {
     Route::get('/', 'CraftingController@getIndex');
     Route::get('craft/{id}', 'CraftingController@getCraftRecipe');
     Route::post('craft/{id}', 'CraftingController@postCraftRecipe');
-    Route::post('claim/{id}', 'CraftingController@postClaimRecipe');
+
+    Route::post('claim/{id}', 'CraftingController@postClaimRecipe'); // timed recipes
+
+    Route::post('slot/unlock/{id}', 'CraftingController@postUnlockRecipeSlot');
 });
 
 /**************************************************************************************************
