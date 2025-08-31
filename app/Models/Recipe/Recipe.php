@@ -2,13 +2,13 @@
 
 namespace App\Models\Recipe;
 
+use App\Models\Currency\Currency;
+use App\Models\Item\Item;
+use App\Models\Loot\LootTable;
 use App\Models\Model;
+use App\Models\Raffle\Raffle;
 use App\Models\User\UserCurrency;
 use Carbon\Carbon;
-use App\Models\Item\Item;
-use App\Models\Currency\Currency;
-use App\Models\Loot\LootTable;
-use App\Models\Raffle\Raffle;
 
 class Recipe extends Model {
     /**
@@ -401,28 +401,28 @@ class Recipe extends Model {
                     if (!$item || !$item->is_released) {
                         continue 2;
                     }
-                    $rewardOptions['Items']['items-' . $reward->rewardable_id] = $item->name . ' x' . $reward->quantity;
+                    $rewardOptions['Items']['items-'.$reward->rewardable_id] = $item->name.' x'.$reward->quantity;
                     break;
                 case 'Currency':
                     $currency = Currency::find($reward->rewardable_id);
                     if (!$currency || !$currency->is_visible) {
                         continue 2;
                     }
-                    $rewardOptions['Currencies']['currencies-' . $reward->rewardable_id ] = $currency->name . ' x' . $reward->quantity;
+                    $rewardOptions['Currencies']['currencies-'.$reward->rewardable_id] = $currency->name.' x'.$reward->quantity;
                     break;
                 case 'Raffle':
                     $raffle = Raffle::find($reward->rewardable_id);
                     if (!$raffle || !$raffle->is_active) {
                         continue 2;
                     }
-                    $rewardOptions['Raffle Tickets']['"raffle_tickets-' . $reward->rewardable_id] = nl2br(htmlentities($raffle->name)) . ' x' . $reward->quantity . ' (Automatic Entry)';
+                    $rewardOptions['Raffle Tickets']['"raffle_tickets-'.$reward->rewardable_id] = nl2br(htmlentities($raffle->name)).' x'.$reward->quantity.' (Automatic Entry)';
                     break;
                 case 'LootTable':
                     $lootTable = LootTable::find($reward->rewardable_id);
                     if (!$lootTable) {
                         continue 2;
                     }
-                    $rewardOptions['Loot Tables']['loot_tables-' . $reward->rewardable_id] = $lootTable->getRawOriginal('display_name') . ' x' . $reward->quantity . ' (This reward is randomized)';
+                    $rewardOptions['Loot Tables']['loot_tables-'.$reward->rewardable_id] = $lootTable->getRawOriginal('display_name').' x'.$reward->quantity.' (This reward is randomized)';
                     break;
                 default:
                     break;
