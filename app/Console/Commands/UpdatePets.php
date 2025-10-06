@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use File;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class UpdatePets extends Command {
@@ -78,15 +79,30 @@ class UpdatePets extends Command {
         }
 
         // update variant images to use ID instead of name
-        $variants = \App\Models\Pet\PetVariant::all();
-        foreach ($variants as $variant) {
-            $this->line('Updating variant image for variant: '.$variant->variant_name.'...');
-            // rename image
-            $old_image = $variant->imageDirectory.'/'.$variant->pet_id.'-'.$variant->variant_name.'-image.png';
-            // rename
-            if (File::exists(public_path($old_image))) {
-                $new_image = $variant->imageDirectory.'/'.$variant->pet_id.'-variant-'.$variant->id.'-image.png';
-                File::move(public_path($old_image), public_path($new_image));
+        if (class_exists('\App\Models\Pet\PetVariant')) {
+            $variants = \App\Models\Pet\PetVariant::all();
+            foreach ($variants as $variant) {
+                $this->line('Updating variant image for variant: '.$variant->variant_name.'...');
+                // rename image
+                $old_image = $variant->imageDirectory.'/'.$variant->pet_id.'-'.$variant->variant_name.'-image.png';
+                // rename
+                if (File::exists(public_path($old_image))) {
+                    $new_image = $variant->imageDirectory.'/'.$variant->pet_id.'-variant-'.$variant->id.'-image.png';
+                    File::move(public_path($old_image), public_path($new_image));
+                }
+            }
+        } else {
+            $variants = DB::table('pet_variants')->get();
+            // need to manually define the image directory
+            foreach ($variants as $variant) {
+                $this->line('Updating variant image for variant: '.$variant->variant_name.'...');
+                // rename image
+                $old_image = 'images/data/pets/'.$variant->pet_id.'-'.$variant->variant_name.'-image.png';
+                // rename
+                if (File::exists(public_path($old_image))) {
+                    $new_image = 'images/data/pets/'.$variant->pet_id.'-variant-'.$variant->id.'-image.png';
+                    File::move(public_path($old_image), public_path($new_image));
+                }
             }
         }
     }
