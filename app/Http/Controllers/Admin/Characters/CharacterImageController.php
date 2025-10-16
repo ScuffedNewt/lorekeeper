@@ -158,7 +158,7 @@ class CharacterImageController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getEditImageNotes($id) {
-        return view('character.admin._edit_notes_modal', [
+        return view('character.admin._edit_notes', [
             'image' => CharacterImage::find($id),
         ]);
     }

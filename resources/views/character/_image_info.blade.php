@@ -15,7 +15,7 @@
                 <div>{!! implode(', ', $image->content_warnings) !!}</div>
             </div>
         @endif
-        <div class="card character-bio w-100">
+        <div class="card character-bio w-100 h-100">
             <div class="card-header">
                 <ul class="nav nav-tabs card-header-tabs">
                     <li class="nav-item">

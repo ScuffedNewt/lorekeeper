@@ -43,4 +43,13 @@ class PageController extends Controller {
             'extensions' => DB::table('site_extensions')->get(),
         ]);
     }
+
+    /**
+     * Shows the RSS feeds page.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getFeedsPage() {
+        return view('pages.feeds');
+    }
 }

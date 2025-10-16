@@ -5,7 +5,10 @@
         <br />
         Submitting to: {!! $prompt->displayName !!}
     </div>
-    @include('widgets._limits', ['object' => $prompt])
+    @include('widgets._limits', [
+        'object' => $prompt,
+        'hideUnlock' => true,
+    ])
     <div class="form-group float-right">
         {!! Form::label('confirm', 'I understand that I will not be able to edit this submission after it has been made.', ['class' => 'alert alert-info']) !!}
         {!! Form::checkbox('confirm', '1', false, ['class' => 'form-check-input', 'id' => 'confirm', 'required', 'data-on' => 'Yes', 'data-off' => 'No']) !!}

@@ -10,7 +10,7 @@ use App\Models\Gallery\GallerySubmission;
 use App\Models\Invitation;
 use App\Models\Rank\Rank;
 use App\Models\Submission\Submission;
-use App\Models\Trade;
+use App\Models\Trade\Trade;
 use App\Models\User\User;
 use App\Models\User\UserUpdateLog;
 use Carbon\Carbon;
@@ -279,12 +279,37 @@ class UserService extends Service {
      *
      * @param mixed $data
      * @param mixed $user
+     *
+     * @return bool
      */
     public function updateContentWarningVisibility($data, $user) {
         DB::beginTransaction();
 
         try {
             $user->settings->content_warning_visibility = $data;
+            $user->settings->save();
+
+            return $this->commitReturn(true);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
+    }
+
+    /**
+     * Updates user's profile comment setting.
+     *
+     * @param mixed $data
+     * @param mixed $user
+     *
+     * @return bool
+     */
+    public function updateProfileCommentSetting($data, $user) {
+        DB::beginTransaction();
+
+        try {
+            $user->settings->allow_profile_comments = $data ?? 0;
             $user->settings->save();
 
             return $this->commitReturn(true);

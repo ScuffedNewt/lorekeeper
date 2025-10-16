@@ -42,7 +42,7 @@ class Shop extends Model {
      * @var array
      */
     public static $createRules = [
-        'name'        => 'required|unique:item_categories|between:3,100',
+        'name'        => 'required|unique:shops|between:3,100',
         'description' => 'nullable',
         'image'       => 'mimes:png',
     ];

@@ -336,6 +336,14 @@ Route::group(['prefix' => 'grants', 'namespace' => 'Users', 'middleware' => 'pow
     Route::get('item-search', 'GrantController@getItemSearch');
 });
 
+// TRADES
+Route::group(['prefix' => 'trades', 'middleware' => 'power:manage_submissions'], function () {
+    Route::get('{type}', 'TradeController@getTradeQueue');
+    Route::get('{id}', 'TradeController@getTradeInfo');
+    Route::get('act/{id}/{action}', 'TradeController@getTradeModal');
+    Route::post('{id}', 'TradeController@postTradeQueue');
+});
+
 // MASTERLIST
 Route::group(['prefix' => 'masterlist', 'namespace' => 'Characters', 'middleware' => 'power:manage_characters'], function () {
     Route::get('create-character', 'CharacterController@getCreateCharacter');
@@ -347,11 +355,6 @@ Route::group(['prefix' => 'masterlist', 'namespace' => 'Characters', 'middleware
     Route::get('transfer/{id}', 'CharacterController@getTransferInfo');
     Route::get('transfer/act/{id}/{type}', 'CharacterController@getTransferModal');
     Route::post('transfer/{id}', 'CharacterController@postTransferQueue');
-
-    Route::get('trades/{type}', 'CharacterController@getTradeQueue');
-    Route::get('trade/{id}', 'CharacterController@getTradeInfo');
-    Route::get('trade/act/{id}/{type}', 'CharacterController@getTradeModal');
-    Route::post('trade/{id}', 'CharacterController@postTradeQueue');
 
     Route::get('create-myo', 'CharacterController@getCreateMyo');
     Route::post('create-myo', 'CharacterController@postCreateMyo');
@@ -493,6 +496,11 @@ Route::group(['prefix' => 'limits', 'middleware' => 'power:manage_data'], functi
     Route::post('/', 'LimitController@postCreateEditLimits');
 });
 
+// REWARDS
+Route::group(['prefix' => 'rewards', 'middleware' => 'power:manage_data'], function () {
+    Route::post('/', 'RewardController@postPopulateRewards');
+});
+
 // GARDENS
 Route::group(['prefix' => 'gardens', 'middleware' => 'power:manage_gardens'], function () {
     Route::get('/', 'GardenController@getGardenIndex');
@@ -523,3 +531,4 @@ Route::group(['prefix' => 'gardens', 'middleware' => 'power:manage_gardens'], fu
     Route::get('objects/type-options/{type?}', 'GardenController@getTypeOptions');
     Route::get('objects/get-objects/{type?}', 'GardenController@getObjects');
 });
+

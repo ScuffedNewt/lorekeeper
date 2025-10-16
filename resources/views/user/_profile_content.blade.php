@@ -56,7 +56,7 @@
                 <div class="col-lg-3 col-md-3 col-4">
                     <h5>Rank</h5>
                 </div>
-                <div class="col-lg-9 col-md-9 col-8">{!! $user->rank->displayName !!} {!! add_help($user->rank->parsed_description) !!}</div>
+                <div class="col-lg-9 col-md-9 col-8">{!! $user->rank->displayName !!} {!! $user->rank->parsed_description ? add_help($user->rank->parsed_description) : '' !!}</div>
             </div>
             @if ($user->birthdayDisplay && isset($user->birthday))
                 <div class="row no-gutters col-sm-7">
@@ -156,17 +156,17 @@
 <hr class="mb-5" />
 
 <div class="row col-12">
-    <div class="col-md-8">
-
-        @comments(['model' => $user->profile, 'perPage' => 5])
-
-    </div>
-    <div class="col-md-4">
+    @if ($user->settings->allow_profile_comments)
+        <div class="col-md-8">
+            @comments(['model' => $user->profile, 'perPage' => 5])
+        </div>
+    @endif
+    <div class="col-md-{{ $user->settings->allow_profile_comments ? 4 : 12 }}">
         <div class="card mb-4">
-            <div class="card-header">
+            <div class="card-header" data-toggle="collapse" data-target="#mentionHelp" aria-expanded="{{ $user->settings->allow_profile_comments ? 'true' : 'false' }}">
                 <h5>Mention This User</h5>
             </div>
-            <div class="card-body">
+            <div class="card-body collapse {{ $user->settings->allow_profile_comments ? 'show' : '' }}" id="mentionHelp">
                 In the rich text editor:
                 <div class="alert alert-secondary">
                     {{ '@' . $user->name }}

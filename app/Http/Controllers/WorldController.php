@@ -95,7 +95,7 @@ class WorldController extends Controller {
                     $query->sortNewest();
                     break;
                 case 'oldest':
-                    $query->sortOldest();
+                    $query->sortNewest(true);
                     break;
             }
         } else {
@@ -133,19 +133,44 @@ class WorldController extends Controller {
     public function getSpecieses(Request $request) {
         $query = Species::query();
 
-        if (config('lorekeeper.extensions.species_trait_index.enable')) {
+        if (config('lorekeeper.extensions.visual_trait_index.enable_species_index')) {
             $query->withCount('features');
         }
 
-        $name = $request->get('name');
-        if ($name) {
-            $query->where('name', 'LIKE', '%'.$name.'%');
+        $data = $request->only(['name', 'sort']);
+
+        if (isset($data['name'])) {
+            $query->where('name', 'LIKE', '%'.$data['name'].'%');
+        }
+        if (isset($data['sort'])) {
+            switch ($data['sort']) {
+                case 'standard':
+                    $query->sortStandard();
+                    break;
+                case 'standard-reverse':
+                    $query->sortStandard(true);
+                    break;
+                case 'alpha':
+                    $query->sortAlphabetical();
+                    break;
+                case 'alpha-reverse':
+                    $query->sortAlphabetical(true);
+                    break;
+                case 'newest':
+                    $query->sortNewest();
+                    break;
+                case 'oldest':
+                    $query->sortNewest(true);
+                    break;
+            }
+        } else {
+            $query->sortStandard();
         }
 
         return view('world.specieses', [
             'specieses' => $query->with(['subtypes' => function ($query) {
-                $query->visible(Auth::user() ?? null)->orderBy('sort', 'DESC');
-            }])->visible(Auth::user() ?? null)->orderBy('sort', 'DESC')->orderBy('id')->paginate(20)->appends($request->query()),
+                $query->visible(Auth::user() ?? null)->sortStandard();
+            }])->visible(Auth::user() ?? null)->paginate(20)->appends($request->query()),
         ]);
     }
 
@@ -156,13 +181,46 @@ class WorldController extends Controller {
      */
     public function getSubtypes(Request $request) {
         $query = Subtype::query()->with('species');
-        $name = $request->get('name');
-        if ($name) {
-            $query->where('name', 'LIKE', '%'.$name.'%');
+        $data = $request->only(['species_id', 'name', 'sort']);
+
+        if (isset($data['species_id']) && $data['species_id'] != 'none') {
+            $query->where('species_id', $data['species_id']);
+        }
+        if (isset($data['name'])) {
+            $query->where('name', 'LIKE', '%'.$data['name'].'%');
+        }
+
+        if (isset($data['sort'])) {
+            switch ($data['sort']) {
+                case 'standard':
+                    $query->sortStandard();
+                    break;
+                case 'standard-reverse':
+                    $query->sortStandard(true);
+                    break;
+                case 'alpha':
+                    $query->sortAlphabetical();
+                    break;
+                case 'alpha-reverse':
+                    $query->sortAlphabetical(true);
+                    break;
+                case 'species':
+                    $query->sortSpecies();
+                    break;
+                case 'newest':
+                    $query->sortNewest();
+                    break;
+                case 'oldest':
+                    $query->sortNewest(true);
+                    break;
+            }
+        } else {
+            $query->sortStandard();
         }
 
         return view('world.subtypes', [
-            'subtypes' => $query->visible(Auth::user() ?? null)->orderBy('sort', 'DESC')->orderBy('id')->paginate(20)->appends($request->query()),
+            'subtypes'   => $query->visible(Auth::user() ?? null)->paginate(20)->appends($request->query()),
+            'specieses'  => ['none' => 'Any Species'] + Species::visible(Auth::user() ?? null)->orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
         ]);
     }
 
@@ -265,7 +323,7 @@ class WorldController extends Controller {
                     $query->sortNewest();
                     break;
                 case 'oldest':
-                    $query->sortOldest();
+                    $query->sortNewest(true);
                     break;
             }
         } else {
@@ -418,6 +476,35 @@ class WorldController extends Controller {
     }
 
     /**
+     * Shows the visual trait list for all traits.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getKitchenSinkFeatures(Request $request) {
+        $categories = FeatureCategory::orderBy('sort', 'DESC')->get();
+        $rarities = Rarity::orderBy('sort', 'ASC')->get();
+
+        $features = count($categories) ?
+        $query = Feature::visible(Auth::user() ?? null)->orderByRaw('FIELD(feature_category_id,'.implode(',', $categories->pluck('id')->toArray()).')')
+            ->orderByRaw('FIELD(rarity_id,'.implode(',', $rarities->pluck('id')->toArray()).')')
+            ->orderBy('has_image', 'DESC')
+            ->orderBy('name')
+            ->get()
+            ->groupBy(['feature_category_id', 'id']) :
+        $query = Feature::visible(Auth::user() ?? null)->orderByRaw('FIELD(rarity_id,'.implode(',', $rarities->pluck('id')->toArray()).')')
+            ->orderBy('has_image', 'DESC')
+            ->orderBy('name')
+            ->get()
+            ->groupBy(['feature_category_id', 'id']);
+
+        return view('world.kitchensink_features', [
+            'categories' => $categories->keyBy('id'),
+            'rarities'   => $rarities->keyBy('id'),
+            'features'   => $features,
+        ]);
+    }
+
+    /**
      * Shows the items page.
      *
      * @return \Illuminate\Contracts\Support\Renderable
@@ -471,7 +558,7 @@ class WorldController extends Controller {
                     $query->sortNewest();
                     break;
                 case 'oldest':
-                    $query->sortOldest();
+                    $query->sortNewest(true);
                     break;
             }
         } else {
@@ -514,9 +601,6 @@ class WorldController extends Controller {
 
         return view('world.item_page', [
             'item'        => $item,
-            'imageUrl'    => $item->imageUrl,
-            'name'        => $item->displayName,
-            'description' => $item->parsed_description,
         ]);
     }
 

@@ -34,6 +34,20 @@
     </div>
 
     <div class="form-group">
+        {!! Form::label('Header Image (Optional)') !!} {!! add_help('This image will show up above the page content and on the meta-image.') !!}
+        <div class="custom-file">
+            {!! Form::label('image', 'Choose file...', ['class' => 'custom-file-label']) !!}
+            {!! Form::file('image', ['class' => 'custom-file-input']) !!}
+        </div>
+        @if ($page->has_image)
+            <div class="form-check">
+                {!! Form::checkbox('remove_image', 1, false, ['class' => 'form-check-input']) !!}
+                {!! Form::label('remove_image', 'Remove current image', ['class' => 'form-check-label']) !!}
+            </div>
+        @endif
+    </div>
+
+    <div class="form-group">
         {!! Form::label('Page Content') !!}
         {!! Form::textarea('text', $page->text, ['class' => 'form-control wysiwyg']) !!}
     </div>
@@ -65,6 +79,7 @@
 
 @section('scripts')
     @parent
+    @include('js._tinymce_wysiwyg')
     <script>
         $(document).ready(function() {
             $('.delete-page-button').on('click', function(e) {

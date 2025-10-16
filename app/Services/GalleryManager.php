@@ -107,7 +107,6 @@ class GalleryManager extends Service {
             if (isset($currencyFormData) && $currencyFormData) {
                 $data['data']['currencyData'] = $currencyFormData;
                 $data['data']['total'] = calculateGroupCurrency($currencyFormData);
-                $data['data'] = collect($data['data'])->toJson();
             }
 
             $submission->update($data);
@@ -431,7 +430,7 @@ class GalleryManager extends Service {
             $voteData = (isset($submission->vote_data) ? collect($submission->vote_data, true) : collect([]));
             $voteData->get($user->id) ? $voteData->pull($user->id) : null;
             $voteData->put($user->id, $vote);
-            $submission->vote_data = $voteData->toJson();
+            $submission->vote_data = $voteData;
 
             $submission->save();
 
@@ -626,9 +625,9 @@ class GalleryManager extends Service {
                         'total'        => $submission->data['total'],
                         'value'        => $data['value'],
                         'staff'        => $user->id,
-                    ])->toJson();
+                    ]);
                 } else {
-                    $valueData = collect(['value' => $data['value'], 'staff' => $user->id])->toJson();
+                    $valueData = ['value' => $data['value'], 'staff' => $user->id];
                 }
 
                 // Update the submission with the new data and mark it as processed
@@ -658,9 +657,9 @@ class GalleryManager extends Service {
                         'total'        => $submission->data['total'],
                         'ineligible'   => 1,
                         'staff'        => $user->id,
-                    ])->toJson();
+                    ]);
                 } else {
-                    $valueData = collect(['ineligible' => 1, 'staff' => $user->id])->toJson();
+                    $valueData = ['ineligible' => 1, 'staff' => $user->id];
                 }
 
                 // Update the submission, including marking it as processed
@@ -878,7 +877,7 @@ class GalleryManager extends Service {
                 // Send a notification to included characters' owners now that the submission is accepted
                 // but not for the submitting user's own characters
                 foreach ($submission->characters as $character) {
-                    if ($character->user && $character->character->user->id != $submission->user->id) {
+                    if ($character->character->user && $character->character->user->id != $submission->user->id) {
                         Notifications::create('GALLERY_SUBMISSION_CHARACTER', $character->character->user, [
                             'sender'        => $submission->user->name,
                             'sender_url'    => $submission->user->url,

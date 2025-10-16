@@ -4,6 +4,12 @@
     {{ $page->title }}
 @endsection
 
+@if ($page->has_image)
+    @section('meta-img')
+        {{ $page->imageUrl }}
+    @endsection
+@endif
+
 @section('content')
     <x-admin-edit title="Page" :object="$page" />
     {!! breadcrumbs([$page->title => $page->url]) !!}
@@ -18,6 +24,11 @@
         <div><strong>Last updated:</strong> {!! format_date($page->updated_at) !!}</div>
     </div>
 
+    @if ($page->has_image)
+        <div class="page-image">
+            <img src="{{ $page->imageUrl }}" alt="{{ $page->name }}" class="w-100" />
+        </div>
+    @endif
     <div class="site-page-content parsed-text">
         {!! $page->parsed_text !!}
     </div>

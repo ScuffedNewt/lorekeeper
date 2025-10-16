@@ -12,7 +12,7 @@ use App\Models\Model;
 use App\Models\Rarity;
 use App\Models\Submission\Submission;
 use App\Models\Submission\SubmissionCharacter;
-use App\Models\Trade;
+use App\Models\Trade\Trade;
 use App\Models\User\User;
 use App\Models\User\UserCharacterLog;
 use Carbon\Carbon;
@@ -473,6 +473,7 @@ class Character extends Model {
         })->orWhere(function ($query) use ($character) {
             $query->with('recipient.rank')->where('recipient_type', 'Character')->where('recipient_id', $character->id)->where('log_type', '!=', 'Staff Removal');
         })->orderBy('id', 'DESC');
+
         if ($limit) {
             return $query->take($limit)->get();
         } else {

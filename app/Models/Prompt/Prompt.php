@@ -3,6 +3,7 @@
 namespace App\Models\Prompt;
 
 use App\Models\Model;
+use App\Models\Reward\Reward;
 use Carbon\Carbon;
 
 class Prompt extends Model {
@@ -79,7 +80,7 @@ class Prompt extends Model {
      * Get the rewards attached to this prompt.
      */
     public function rewards() {
-        return $this->hasMany(PromptReward::class, 'prompt_id');
+        return $this->morphMany(Reward::class, 'object', 'object_model', 'object_id');
     }
 
     /**********************************************************************************************
@@ -183,22 +184,12 @@ class Prompt extends Model {
      * Scope a query to sort features by newest first.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param mixed                                 $reverse
      *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeSortNewest($query) {
-        return $query->orderBy('id', 'DESC');
-    }
-
-    /**
-     * Scope a query to sort features oldest first.
-     *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     *
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeSortOldest($query) {
-        return $query->orderBy('id');
+    public function scopeSortNewest($query, $reverse = false) {
+        return $query->orderBy('id', $reverse ? 'ASC' : 'DESC');
     }
 
     /**

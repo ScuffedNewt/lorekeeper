@@ -93,7 +93,7 @@ class PromptsController extends Controller {
                     $query->sortNewest();
                     break;
                 case 'oldest':
-                    $query->sortOldest();
+                    $query->sortNewest(true);
                     break;
                 case 'start':
                     $query->sortStart();

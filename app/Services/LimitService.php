@@ -27,9 +27,10 @@ class LimitService extends Service {
      * edits an limits on an object.
      *
      * @param mixed     $data
-     * @param bool|true $log
      * @param mixed     $object_model
      * @param mixed     $object_id
+     * @param mixed     $data
+     * @param bool|true $log
      */
     public function editLimits($object_model, $object_id, $data, $log = true) {
         DB::beginTransaction();
@@ -41,7 +42,7 @@ class LimitService extends Service {
                 throw new \Exception('Object not found.');
             }
 
-            $limits = Limit::hasLimits($object) ? Limit::getLimits($object) : [];
+            $limits = hasLimits($object) ? getLimits($object) : [];
             if (count($limits) > 0) {
                 $limits->each(function ($limit) {
                     $limit->delete();

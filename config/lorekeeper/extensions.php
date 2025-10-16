@@ -27,12 +27,14 @@ return [
      *  Species Trait Index - Mercury
      *  Subtype Trait Index - Speedy
      *  Universal Trait Index - CHERVB
+     *  All Traits Index (Kitchen Sink Index) - Speedy
      *  Trait Modals addition - Moif
      */
     'visual_trait_index' => [
         'enable_species_index'   => 0, // Enables the Species Trait Index
         'enable_subtype_index'   => 0, // Enables the Subtype Trait Index
         'enable_universal_index' => 0, // Enables the Universal Trait Index
+        'enable_all_trait_index' => 0, // Enables the All Traits Index
         'trait_modals'           => 0, // Enables modals when you click on a trait for more info instead of linking to the traits page
     ],
 
@@ -124,4 +126,10 @@ return [
     // Multiple Subtypes - Newt
     'exclusionary_search'    => 0, // If enabled, searching for multiple subtypes will only return results that have all of the subtypes specified. If disabled, it will return results that have any of the subtypes specified.
     'multiple_subtype_limit' => 10, // The maximum number of subtypes a character can have.
+
+    // TinyMCE Code Editor - Moif
+    'tinymce_code_editor'   => 1, // If enabled, uses the more advanced code editor instead of TinyMCE's default.
+
+    // Unmerge Item Page and Item Entry - Speedy
+    'unmerge_item_page_and_entry' => 0, // If enabled, uses the html on world/item_page.blade.php instead of the include that links to world/_item_entry.blade.php
 ];

@@ -149,7 +149,11 @@ class ShopController extends Controller {
                 $type.'Category' => $categories->toArray(),
             ];
         } else {
-            $items = $model::orderBy('name')->pluck('name', 'id')->toArray();
+            if ($model == '\App\Models\Raffle\Raffle') {
+                $items = $model::orderBy('name')->where('is_active', '!=', 2)->pluck('name', 'id')->toArray();
+            } else {
+                $items = $model::orderBy('name')->pluck('name', 'id')->toArray();
+            }
         }
 
         return view('admin.shops._stock_modal', [
@@ -182,7 +186,11 @@ class ShopController extends Controller {
                 $type.'Category' => $categories->toArray(),
             ];
         } else {
-            $items = $model::orderBy('name')->pluck('name', 'id')->toArray();
+            if ($model == '\App\Models\Raffle\Raffle') {
+                $items = $model::orderBy('name')->where('is_active', '!=', 2)->pluck('name', 'id')->toArray();
+            } else {
+                $items = $model::orderBy('name')->pluck('name', 'id')->toArray();
+            }
         }
 
         return view('admin.shops._stock_item', [

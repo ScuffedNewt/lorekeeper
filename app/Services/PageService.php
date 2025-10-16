@@ -39,7 +39,30 @@ class PageService extends Service {
                 $data['allow_dislikes'] = 0;
             }
 
+            $image = null;
+            if (isset($data['image']) && $data['image']) {
+                $data['has_image'] = 1;
+                $data['hash'] = randomString(10);
+                $image = $data['image'];
+                unset($data['image']);
+            } else {
+                $data['has_image'] = 0;
+            }
+
             $page = SitePage::create($data);
+
+            if (isset($data['remove_image'])) {
+                if ($page && $page->has_image && $data['remove_image']) {
+                    $data['has_image'] = 0;
+                    $image = null;
+                    $this->deleteImage($page->imagePath, $page->imageFileName);
+                }
+                unset($data['remove_image']);
+            }
+
+            if ($image) {
+                $this->handleImage($image, $page->imagePath, $page->imageFileName);
+            }
 
             return $this->commitReturn($page);
         } catch (\Exception $e) {
@@ -79,7 +102,28 @@ class PageService extends Service {
                 $data['allow_dislikes'] = 0;
             }
 
+            $image = null;
+            if (isset($data['image']) && $data['image']) {
+                $data['has_image'] = 1;
+                $data['hash'] = randomString(10);
+                $image = $data['image'];
+                unset($data['image']);
+            }
+
             $page->update($data);
+
+            if (isset($data['remove_image'])) {
+                if ($page && $page->has_image && $data['remove_image']) {
+                    $data['has_image'] = 0;
+                    $image = null;
+                    $this->deleteImage($page->imagePath, $page->imageFileName);
+                }
+                unset($data['remove_image']);
+            }
+
+            if ($page) {
+                $this->handleImage($image, $page->imagePath, $page->imageFileName);
+            }
 
             return $this->commitReturn($page);
         } catch (\Exception $e) {
@@ -103,6 +147,10 @@ class PageService extends Service {
             // Specific pages such as the TOS/privacy policy cannot be deleted from the admin panel.
             if (config('lorekeeper.text_pages.'.$page->key)) {
                 throw new \Exception('You cannot delete this page.');
+            }
+
+            if ($page->has_image) {
+                $this->deleteImage($page->imagePath, $page->imageFileName);
             }
 
             $page->delete();
