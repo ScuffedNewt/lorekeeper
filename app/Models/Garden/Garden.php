@@ -12,7 +12,7 @@ class Garden extends Model {
      * @var array
      */
     protected $fillable = [
-        'name', 'description', 'has_image', 'has_background_image', 'has_plot_image', 'is_active', 'can_perish', 'can_use_modifiers',
+        'name', 'description', 'has_image', 'has_background_image', 'has_plot_image', 'is_active', 'can_perish',
         'allowed_object_types',
     ];
 

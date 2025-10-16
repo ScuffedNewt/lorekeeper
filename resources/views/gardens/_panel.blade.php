@@ -1,9 +1,4 @@
-    @if ($garden->can_use_modifiers)
-        <div class="card w-100">
-            {{-- TODO --}}
-        </div>
-    @endif
-    <div class="row">
+<div class="row">
         {{-- @if ($garden->plots->count())
             ACTIONS HERE
             @include('gardens._actions', ['type' => 'seed'])
@@ -13,7 +8,8 @@
                 @if ($garden->plots->count())
                     @foreach ($garden->plots as $plot)
                         <div class="col-md-3 mb-3 text-center">
-                            <div class="card text-center justify-content-center text-light" style="max-width: 200px; max-height: 200px; aspect-ratio: 1/1; background-color: rgb(88, 54, 54); background-image: url({{ asset($plot->backgroundImage) }});">
+                            <div class="card text-center justify-content-center text-light"
+                                style="max-width: 200px; max-height: 200px; aspect-ratio: 1/1; background-color: rgb(88, 54, 54); {{ $plot->has_image ? 'background-image: url('.asset($plot->imageUrl).'); background-size: cover; background-position: center; background-repeat: no-repeat;' : '' }}">
                                 {{-- if user owns plot --}}
                                 @if (Auth::user()->gardenPlots->contains('plot_id', $plot->id) || !\App\Models\Limit\Limit::hasLimits($plot))
                                     @php
@@ -48,7 +44,9 @@
                                                     <p class="text-white"><i class="fas fa-star"></i> Fertiliser Quality: {{ $userPlot?->modifiers['fertiliser']['quality'] }}</p>
                                                 @endif
                                             @endif
-                                            <i class="fas fa-seedling text-white m-1"></i>
+                                            @if (!$plot->has_image)
+                                                <i class="fas fa-seedling text-white m-1"></i>
+                                            @endif
                                             <div class="action-button btn btn-success hide mx-2 mt-2" data-plot-id="{{ $userPlot ? $userPlot->id : 'unowned-' . $plot->id }}">
                                                 Place
                                             </div>

@@ -76,19 +76,19 @@ class GardenManager extends Service {
             $check = false;
             switch ($object->type) {
                 case 'seed':
-                    $check = $this->placeSeed($user, $userPlot, $garden, $object);
+                    $check = $this->placeSeed($user, $userPlot, $garden, $object, $data);
                     break;
                 case 'animal':
-                    $check = $this->placeAnimal($user, $userPlot, $garden, $object);
+                    $check = $this->placeAnimal($user, $userPlot, $garden, $object, $data);
                     break;
                 case 'fertiliser':
-                    $check = $this->useFertiliser($user, $userPlot, $garden, $object);
+                    $check = $this->useFertiliser($user, $userPlot, $garden, $object, $data);
                     break;
                 case 'tool':
-                    $check = $this->useTool($user, $userPlot, $garden, $object);
+                    $check = $this->useTool($user, $userPlot, $garden, $object, $data);
                     break;
                 case 'food':
-                    $check = $this->useFood($user, $userPlot, $garden, $object);
+                    $check = $this->useFood($user, $userPlot, $garden, $object, $data);
                     break;
             }
 
@@ -220,6 +220,12 @@ class GardenManager extends Service {
 
     **********************************************************************************************/
 
+    /**********************************************************************************************
+
+        PLACEMENT FUNCTIONS
+
+    **********************************************************************************************/
+
     /**
      * Plants a seed in a plot.
      *
@@ -280,6 +286,61 @@ class GardenManager extends Service {
 
         return $this->rollbackReturn(false);
     }
+
+    /**
+     * Places an animal in a plot.
+     *
+     * @param User           $user
+     * @param UserGardenPlot $userPlot
+     * @param Garden         $garden
+     * @param GardenObject   $object
+     *
+     * @return bool
+     */
+    private function placeAnimal($user, $userPlot, $garden, $object, $data) {
+        DB::beginTransaction();
+
+        try {
+            $logType = 'Used in Garden';
+            $data = [
+                'data' => 'Used to place an animal in the '.$garden->displayName.' garden.',
+            ];
+
+            $objectItem = $object->object_model::find($object->object_id);
+            if (!$objectItem) {
+                throw new \Exception('Invalid object.');
+            }
+
+            // TODO: FIND USER MODEL FOR $DATA['STACK_ID']
+
+            \Log::info('GardenManager::placeAnimal', $objectItem->toArray());
+
+            // increase garden_count
+            // $user->update([
+            //     'garden_count' => $user->garden_count + 1,
+            // ]);
+
+            // $userPlot->update([
+            //     'started_at' => Carbon::now(),
+            //     'data'       => [
+            //         'object_id' => $object->id,
+            //     ],
+            // ]);
+
+            return $this->commitReturn(true);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
+    }
+
+    
+    /**********************************************************************************************
+
+        PLOT FUNCTIONS
+
+    **********************************************************************************************/
 
     /**
      * Creates a user plot for a specified plot.

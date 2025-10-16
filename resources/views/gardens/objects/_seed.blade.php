@@ -1,7 +1,11 @@
 @if ($object->object->has_image)
-    <img class="img-fluid my-auto mx-auto" src="{{ asset($object->object->imageUrl) }}" data-toggle="tooltip" title="{{ $object->object->name }}">
+    <img class="rounded img-fluid my-auto mx-auto" src="{{ asset($object->object->imageUrl) }}" data-toggle="tooltip" title="{{ $object->object->name }}"
+        style="max-width: 100px; min-width: 50px;"
+    />
 @else
-    <p class="text-light mb-0">Currently Growing: {!! $object->object->displayName !!}</p>
+    <p class="text-light mb-0">
+        Currently Growing: {!! $object->object->displayName !!}
+    </p>
 @endif
 @if ($userPlot->canCollect)
     {!! Form::open(['url' => 'gardens/collect/' . $userPlot->id]) !!}
@@ -10,10 +14,18 @@
 @else
     @if ($userPlot->actionReady)
         <p class="mb-1">{{ $userPlot->interactedCount }}/{{ $object->data['waterings'] }} Waterings</p>
-        {!! Form::open(['url' => 'gardens/interact/' . $userPlot->id]) !!}
-        {!! Form::button('<i class="fas fa-tint"></i> Water', ['class' => 'btn btn-primary mb-2', 'type' => 'submit']) !!}
-        {!! Form::close() !!}
+        @if ($userPlot->interactedCount >= $object->data['waterings'])
+            <p class="mb-1">
+                Ready to Harvest in:
+                <br />
+                {!! pretty_date($userPlot->timeUntilReady) !!}
+            </p>
+        @else
+            {!! Form::open(['url' => 'gardens/interact/' . $userPlot->id]) !!}
+            {!! Form::button('<i class="fas fa-tint"></i> Water', ['class' => 'btn btn-primary mb-2', 'type' => 'submit']) !!}
+            {!! Form::close() !!}
+        @endif
     @else
-        <p class="mb-1">Can be watered in {{ $userPlot->timeUntilReady }}</p>
+        <p class="mb-1">Can be watered in {!! pretty_date($userPlot->timeUntilReady) !!}</p>
     @endif
 @endif

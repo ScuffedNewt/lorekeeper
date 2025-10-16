@@ -26,6 +26,18 @@
                 ]) !!}</td>
                 <td class="{{ $prefix }}loot-row-select"></td>
                 <td>{!! Form::text($prefix . 'quantity[]', 1, ['class' => 'form-control']) !!}</td>
+                @if (isset($extra_fields))
+                    @foreach ($extra_fields as $field => $data)
+                        <td>
+                            @php
+                                $field_name = $prefix . $field . '[]';
+                                $value = $data['default'] ?? null;
+                                $attributes = $data['attributes'] ?? [];
+                            @endphp
+                            {!! Form::{$data['type']}($field_name, $value, array_merge(['class' => 'form-control', 'placeholder' => $data['label']], $attributes)) !!}
+                        </td>
+                    @endforeach
+                @endif
                 <td class="text-right"><a href="#" class="btn btn-danger {{ $prefix }}remove-loot-button">Remove</a></td>
             </tr>
         </tbody>

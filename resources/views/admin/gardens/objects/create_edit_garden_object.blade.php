@@ -53,7 +53,19 @@
     {!! Form::close() !!}
 
     @include('widgets._loot_select_row', ['showLootTables' => true, 'showRaffles' => true])
-    @include('widgets._loot_select_row', ['showLootTables' => true, 'showRaffles' => true, 'prefix' => 'potential_'])
+    @include('widgets._loot_select_row', [
+        'showLootTables' => true,
+        'showRaffles' => true,
+        'prefix' => 'potential_',
+        'extra_fields' => [
+            'chance' => [
+                'type' => 'number',
+                'label' => 'Chance (%)',
+                'attributes' => ['step' => '0.01', 'min' => '0', 'max' => '100'],
+                'default' => 100,
+            ],
+        ]
+    ])
 @endsection
 @section('scripts')
     @parent

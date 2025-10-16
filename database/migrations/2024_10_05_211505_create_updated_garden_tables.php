@@ -29,7 +29,6 @@ return new class extends Migration {
 
             $table->boolean('is_active')->default(1);
             $table->boolean('can_perish')->default(0); // Can the garden plot contents perish?
-            $table->boolean('can_use_modifiers')->default(0);
 
             $table->boolean('has_image')->default(0);
             $table->boolean('has_background_image')->default(0);

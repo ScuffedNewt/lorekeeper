@@ -109,10 +109,6 @@
                     {!! Form::label('Can Perish?') !!} {!! add_help('Can the plot contents perish if not maintained?') !!}
                     {!! Form::checkbox('can_perish', 1, $garden->can_perish, ['class' => 'form-check-input', 'data-toggle' => 'toggle', 'data-on' => 'Yes', 'data-off' => 'No']) !!}
                 </div>
-                <div class="col-md form-group">
-                    {!! Form::label('Can Use Modifiers?') !!} {!! add_help('Modifiers are items that can be used on plots to change their properties.') !!}
-                    {!! Form::checkbox('can_use_modifiers', 1, $garden->can_use_modifiers, ['class' => 'form-check-input', 'data-toggle' => 'toggle', 'data-on' => 'Yes', 'data-off' => 'No']) !!}
-                </div>
             </div>
         </div>
     </div>

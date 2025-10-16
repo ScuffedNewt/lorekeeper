@@ -43,9 +43,21 @@
                 </div>
             </div>
             <div class="row">
+                @php
+                    // get only the types on the garden from config('lorekeeper.garden.garden_object_types')
+                    $availableTypes = array_intersect_key(
+                        config('lorekeeper.garden.garden_object_types'),
+                        array_flip($plot->garden->allowed_object_types)
+                    );
+                @endphp
                 <div class="form-group col-md">
-                    {!! Form::checkbox('can_use_modifiers', 1, $plot->can_use_modifiers, ['class' => 'form-control', 'data-toggle' => 'toggle']) !!}
-                    {!! Form::label('can_use_modifiers', 'Can Use Modifiers?', ['class' => 'ml-3 form-check-label']) !!}
+                    {!! Form::label('Allowed Objects') !!} {!! add_help('What types of objects can be placed or used on plots in this garden? You can have more granular control on plots, but the types should be enabled here.') !!}
+                    <p class="mb-0">By default, all object types are allowed.</p>
+                    {!! Form::select('allowed_object_types[]', $availableTypes, $plot->data['allowed_object_types'] ?? null, ['class' => 'form-control selectize', 'multiple', 'placeholder' => 'Select Object Types']) !!}
+                </div>
+                <div class="col-md form-group">
+                    {!! Form::label('Can Perish?') !!} {!! add_help('Can the plot contents perish if not maintained?') !!}
+                    {!! Form::checkbox('can_perish', 1, $plot->data['can_perish'] ?? null, ['class' => 'form-check-input', 'data-toggle' => 'toggle', 'data-on' => 'Yes', 'data-off' => 'No']) !!}
                 </div>
             </div>
         </div>
@@ -75,6 +87,7 @@
     @parent
     <script>
         $(document).ready(function() {
+            $('.selectize').selectize();
             $('.delete-plot-button').on('click', function(e) {
                 e.preventDefault();
                 loadModal("{{ url('admin/gardens/edit/' . $garden->id . '/plots/delete') }}/{{ $plot->id }}", 'Delete Garden Plot');

@@ -22,9 +22,14 @@
 <table class="table table-sm" id="{{ $prefix }}lootTable">
     <thead>
         <tr>
-            <th width="35%">Reward Type</th>
-            <th width="35%">Reward</th>
-            <th width="20%">Quantity</th>
+            <th width="{{ isset($extra_fields) ? '25%' : '35%' }}">Reward Type</th>
+            <th width="{{ isset($extra_fields) ? '25%' : '35%' }}">Reward</th>
+            <th width="{{ isset($extra_fields) ? '15%' : '20%' }}">Quantity</th>
+            @if (isset($extra_fields))
+                @foreach ($extra_fields as $field => $data)
+                    <th>{{ $data['label'] }}</th>
+                @endforeach
+            @endif
             <th width="10%"></th>
         </tr>
     </thead>
@@ -48,6 +53,18 @@
                         @endif
                     </td>
                     <td>{!! Form::text($prefix . 'quantity[]', $loot->quantity, ['class' => 'form-control']) !!}</td>
+                    @if (isset($extra_fields))
+                        @foreach ($extra_fields as $field => $data)
+                            <td>
+                                @php
+                                    $field_name = $prefix . $field . '[]';
+                                    $value = $loot->$field ?? ($data['default'] ?? null);
+                                    $attributes = $data['attributes'] ?? [];
+                                @endphp
+                                {!! Form::{$data['type']}($field_name, $value, array_merge(['class' => 'form-control', 'placeholder' => $data['label']], $attributes)) !!}
+                            </td>
+                        @endforeach
+                    @endif
                     <td class="text-right"><a href="#" class="btn btn-danger {{ $prefix }}remove-loot-button">Remove</a></td>
                 </tr>
             @endforeach

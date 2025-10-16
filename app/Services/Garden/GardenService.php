@@ -242,10 +242,10 @@ class GardenService extends Service {
         DB::beginTransaction();
 
         try {
-            if (!isset($data['can_use_modifiers'])) {
-                $data['can_use_modifiers'] = 0;
+            if (!isset($data['can_perish'])) {
+                $data['can_perish'] = 0;
             }
-
+            
             if (isset($data['remove_image'])) {
                 if ($plot && $plot->has_image && $data['remove_image']) {
                     $data['has_image'] = 0;
@@ -263,7 +263,7 @@ class GardenService extends Service {
             }
 
             $plot->update([
-                'data'      => Arr::only($data, ['can_use_modifiers']),
+                'data'      => Arr::only($data, ['allowed_object_types', 'can_perish']),
                 'has_image' => $data['has_image'],
             ]);
 

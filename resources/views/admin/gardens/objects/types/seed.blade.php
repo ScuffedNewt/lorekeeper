@@ -100,10 +100,19 @@
             <div class="card-body">
                 <p>This reward has the potential to be obtained if the bonus chance below succeeds.</p>
                 <p><strong>Note: this is planned to use loot weighting in the future to allow different percent chances.</strong></p>
-                @include('widgets._loot_select', ['loots' => isset($object) ? $object->potentialRewards : [], 'showLootTables' => true, 'showRaffles' => true, 'prefix' => 'potential_'])
-
-                {!! Form::label('Bonus Chance Percentage') !!}
-                {!! Form::number('bonus_chance', $object?->data['bonus_chance'] ?? 0, ['class' => 'form-control mb-1', 'min' => 0, 'max' => 100]) !!}
+                @include('widgets._loot_select', [
+                    'loots' => isset($object) ? $object->potentialRewards : [],
+                    'showLootTables' => true, 'showRaffles' => true,
+                    'prefix' => 'potential_',
+                    'extra_fields' => [
+                        'chance' => [
+                            'type' => 'number',
+                            'label' => 'Chance (%)',
+                            'attributes' => ['step' => '0.01', 'min' => '0', 'max' => '100'],
+                            'default' => 100,
+                        ],
+                    ]
+                ])
             </div>
         </div>
     </div>
