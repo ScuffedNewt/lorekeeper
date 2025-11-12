@@ -21,12 +21,15 @@
 @foreach ($tag->getEditData()['activities'] as $activity)
     <div class="row">
         <div class="col-md-6 form-group">
-            {!! Form::label('usage_rate['.$activity.']', 'Usage Rate for ' . $activity, ['class' => 'control-label font-weight-bold']) !!}
-            {!! Form::number('usage_rate['.$activity.']', $tag->getData()['usage_rate'][$activity], ['class' => 'form-control', 'placeholder' => 'Input Usage Rate', 'min' => 0]) !!}
+            {!! Form::label('usage_rate[' . $activity . ']', 'Usage Rate for ' . $activity, ['class' => 'control-label font-weight-bold']) !!}
+            {!! Form::number('usage_rate[' . $activity . ']', $tag->getData()['usage_rate'][$activity], ['class' => 'form-control', 'placeholder' => 'Input Usage Rate', 'min' => 0]) !!}
         </div>
         <div class="col-md-6 form-group">
-            {!! Form::label('consumption_type['.$activity.']', 'Consumption Type', ['class' => 'control-label font-weight-bold']) !!}
-            {!! Form::select('consumption_type['.$activity.']', ['consume' => 'Consume After Use', 'none' => 'Do Not Degrade'], $tag->getData()['consumption_type'][$activity], ['class' => 'form-control', 'placeholder' => 'This option only applies if a usage rate is NOT set']) !!}
+            {!! Form::label('consumption_type[' . $activity . ']', 'Consumption Type', ['class' => 'control-label font-weight-bold']) !!}
+            {!! Form::select('consumption_type[' . $activity . ']', ['consume' => 'Consume After Use', 'none' => 'Do Not Degrade'], $tag->getData()['consumption_type'][$activity], [
+                'class' => 'form-control',
+                'placeholder' => 'This option only applies if a usage rate is NOT set',
+            ]) !!}
         </div>
     </div>
 @endforeach

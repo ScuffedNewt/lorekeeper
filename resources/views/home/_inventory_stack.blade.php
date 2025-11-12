@@ -69,12 +69,12 @@
                                     @if ($itemRow->item->tag('degradable'))
                                         ({{ isset($itemRow->data['uses']) ? $itemRow->data['uses'] : $itemRow->item->tag('degradable')->data['uses'] }}
                                         /
-                                        {{ $itemRow->item->tag('degradable')->data['uses']}} uses remaining)
+                                        {{ $itemRow->item->tag('degradable')->data['uses'] }} uses remaining)
                                     @endif
                                 </td>
                             @else
                                 <td class="col-3">
-                                    {!! Form::selectRange('', 0, 0, 0, ['class' => 'quantity-select', 'type' => 'number', 'style' => 'min-width:40px;', 'disabled']) !!} 
+                                    {!! Form::selectRange('', 0, 0, 0, ['class' => 'quantity-select', 'type' => 'number', 'style' => 'min-width:40px;', 'disabled']) !!}
                                     /
                                     {{ $itemRow->availableQuantity }}
                                     @if ($itemRow->getOthers())
@@ -83,7 +83,7 @@
                                     @if ($itemRow->item->tag('degradable'))
                                         ({{ isset($itemRow->data['uses']) ? $itemRow->data['uses'] : $itemRow->item->tag('degradable')->data['uses'] }}
                                         /
-                                        {{ $itemRow->item->tag('degradable')->data['uses']}} uses remaining)
+                                        {{ $itemRow->item->tag('degradable')->data['uses'] }} uses remaining)
                                     @endif
                                 </td>
                             @endif
@@ -93,7 +93,7 @@
                                 @if ($itemRow->item->tag('degradable'))
                                     ({{ isset($itemRow->data['uses']) ? $itemRow->data['uses'] : $itemRow->item->tag('degradable')->data['uses'] }}
                                     /
-                                    {{ $itemRow->item->tag('degradable')->data['uses']}} uses remaining)
+                                    {{ $itemRow->item->tag('degradable')->data['uses'] }} uses remaining)
                                 @endif
                             </td>
                         @endif
