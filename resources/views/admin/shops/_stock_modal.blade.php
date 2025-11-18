@@ -16,7 +16,7 @@
     <div class="row">
         <div class="col-md-6 form-group">
             {!! Form::label('stock_type', 'Type') !!}
-            {!! Form::select('stock_type', ['Item' => 'Item'], $stock->stock_type ?? null, ['class' => 'form-control stock-field', 'placeholder' => 'Select Stock Type', 'id' => 'type']) !!}
+            {!! Form::select('stock_type', ['Item' => 'Item', 'Pet' => 'Pet'], $stock->stock_type ?? null, ['class' => 'form-control stock-field', 'placeholder' => 'Select Stock Type', 'id' => 'type']) !!}
         </div>
         <div class="col-md-6 form-group" id="stock">
             @if ($stock->id)

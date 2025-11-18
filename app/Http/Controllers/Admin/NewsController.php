@@ -60,7 +60,7 @@ class NewsController extends Controller {
     public function postCreateEditNews(Request $request, NewsService $service, $id = null) {
         $id ? $request->validate(News::$updateRules) : $request->validate(News::$createRules);
         $data = $request->only([
-            'title', 'text', 'post_at', 'is_visible', 'bump',
+            'title', 'text', 'post_at', 'is_visible', 'bump', 'image', 'remove_image',
         ]);
         if ($id && $service->updateNews(News::find($id), $data, Auth::user())) {
             flash('News updated successfully.')->success();

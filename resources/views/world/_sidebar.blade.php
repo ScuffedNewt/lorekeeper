@@ -11,6 +11,9 @@
         @if (config('lorekeeper.extensions.visual_trait_index.enable_universal_index'))
             <div class="sidebar-item"><a href="{{ url('world/universaltraits') }}" class="{{ set_active('world/universaltraits*') }}">Universal Trait Index</a></div>
         @endif
+        @if (config('lorekeeper.extensions.visual_trait_index.enable_all_trait_index'))
+            <div class="sidebar-item"><a href="{{ url('world/all-traits-index') }}" class="{{ set_active('world/all-traits-index*') }}">All Traits Index</a></div>
+        @endif
         <div class="sidebar-item"><a href="{{ url('world/character-categories') }}" class="{{ set_active('world/character-categories*') }}">Character Categories</a></div>
         <div class="sidebar-item"><a href="{{ url('world/character-classes') }}" class="{{ set_active('world/character-classes*') }}">Character Classes</a></div>
         <div class="sidebar-item"><a href="{{ url('world/elements') }}" class="{{ set_active('world/elements*') }}">All Elements</a></div>

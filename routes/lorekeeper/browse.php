@@ -134,6 +134,7 @@ Route::group(['prefix' => 'world'], function () {
     Route::get('status-effects', 'WorldController@getStatusEffects');
     Route::get('subtypes/{id}/traits', 'WorldController@getSubtypeFeatures');
     Route::get('universaltraits', 'WorldController@getUniversalFeatures');
+    Route::get('all-traits-index', 'WorldController@getKitchenSinkFeatures');
     Route::get('item-categories', 'WorldController@getItemCategories');
     Route::get('items', 'WorldController@getItems');
     Route::get('items/{id}', 'WorldController@getItem');

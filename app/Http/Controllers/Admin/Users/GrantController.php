@@ -14,7 +14,7 @@ use App\Models\Pet\Pet;
 use App\Models\Skill\Skill;
 use App\Models\Stat\Stat;
 use App\Models\Submission\Submission;
-use App\Models\Trade;
+use App\Models\Trade\Trade;
 use App\Models\User\User;
 use App\Models\User\UserItem;
 use App\Services\Claymore\GearManager;

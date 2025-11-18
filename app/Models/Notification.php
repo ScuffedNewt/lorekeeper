@@ -64,10 +64,10 @@ class Notification extends Model {
     public function getMessageAttribute() {
         $notification = config('lorekeeper.notifications.'.$this->notification_type_id);
 
-        $message = $notification['message'];
+        $message = $notification['message'] ?? 'Unknown Notification';
 
         // Replace the URL...
-        $message = str_replace('{url}', url($notification['url']), $message);
+        $message = isset($notification['url']) ? str_replace('{url}', url($notification['url']), $message) : $message;
 
         // Replace any variables in data...
         $data = $this->data;
@@ -159,6 +159,10 @@ class Notification extends Model {
     public const GEAR_TRANSFER = 256;
     public const FORCED_GEAR_TRANSFER = 257;
     public const SKILL_GRANT = 258;
+    public const TRADE_PROPOSAL_RECEIVED = 280;
+    public const TRADE_PROPOSAL_UPDATED = 281;
+    public const TRADE_PROPOSAL_ACCEPTED = 282;
+    public const TRADE_PROPOSAL_REJECTED = 283;
     public const CHARACTER_ITEM_GRANT = 501;
     public const CHARACTER_ITEM_REMOVAL = 502;
     public const GALLERY_SUBMISSION_COLLABORATOR = 505;

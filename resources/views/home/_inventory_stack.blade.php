@@ -21,6 +21,17 @@
         @endif
     </div>
 
+    @if ($item->parsed_description)
+        <div class="mb-2">
+            <a data-toggle="collapse" href="#itemDescription" class="h5">Description <i class="fas fa-caret-down"></i></a>
+            <div class="card collapse mt-1" id="itemDescription">
+                <div class="card-body">
+                    {!! $item->parsed_description !!}
+                </div>
+            </div>
+        </div>
+    @endif
+
     <h5>Item Variations</h5>
     @if ($user && $user->hasPower('edit_inventories'))
         <p class="alert alert-warning my-2">Note: Your rank allows you to transfer account-bound items to another user.</p>

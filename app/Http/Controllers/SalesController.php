@@ -56,7 +56,7 @@ class SalesController extends Controller {
                     $query->sortNewest();
                     break;
                 case 'oldest':
-                    $query->sortOldest();
+                    $query->sortNewest(true);
                     break;
                 case 'bump':
                     $query->sortBump();

@@ -1,22 +1,158 @@
 @php
-    // This file represents a common source and definition for assets used in loot_select
+    // This represents a common source and definition for assets used in loot_select
     // While it is not per se as tidy as defining these in the controller(s),
     // doing so this way enables better compatibility across disparate extensions
-    $characterCurrencies = \App\Models\Currency\Currency::where('is_character_owned', 1)->orderBy('sort_character', 'DESC')->pluck('name', 'id');
-    $items = \App\Models\Item\Item::orderBy('name')->pluck('name', 'id');
-    $gears = \App\Models\Claymore\Gear::orderBy('name')->pluck('name', 'id');
-    $weapons = \App\Models\Claymore\Weapon::orderBy('name')->pluck('name', 'id');
-    $stats = ['none' => 'General Point'] + \App\Models\Stat\Stat::orderBy('name')->pluck('name', 'id')->toArray();
-    $pets = \App\Models\Pet\Pet::orderBy('name')->get()->pluck('fullName', 'id');
-    $currencies = \App\Models\Currency\Currency::where('is_user_owned', 1)->orderBy('name')->pluck('name', 'id');
-    if ($showLootTables) {
-        $tables = \App\Models\Loot\LootTable::orderBy('name')->pluck('name', 'id');
-    }
-    if ($showRaffles) {
-        $raffles = \App\Models\Raffle\Raffle::where('rolled_at', null)->where('is_active', 1)->orderBy('name')->pluck('name', 'id');
+    $type = isset($type) ? $type : 'Reward';
+    $isTradeable = isset($isTradeable) ? $isTradeable : false;
+    if (isset($useCustomSelectize) && $useCustomSelectize) {
+        $characterCurrencies = \App\Models\Currency\Currency::where('is_character_owned', 1)
+            ->where(function ($query) use ($isTradeable) {
+                if ($isTradeable) {
+                    $query->where('allow_user_to_user', 1);
+                }
+            })
+            ->orderBy('sort_character', 'DESC')
+            ->get()
+            ->mapWithKeys(function ($currency) {
+                return [
+                    $currency->id => json_encode([
+                        'name' => $currency->name,
+                        'image_url' => $currency->currencyIconUrl,
+                    ]),
+                ];
+            });
+        $items = \App\Models\Item\Item::orderBy('name')
+            ->where(function ($query) use ($isTradeable) {
+                if ($isTradeable) {
+                    $query->where('allow_transfer', 1);
+                }
+            })
+            ->get()
+            ->mapWithKeys(function ($item) {
+                return [
+                    $item->id => json_encode([
+                        'name' => $item->name,
+                        'image_url' => $item->imageUrl,
+                    ]),
+                ];
+            });
+        $currencies = \App\Models\Currency\Currency::where('is_user_owned', 1)
+            ->where(function ($query) use ($isTradeable) {
+                if ($isTradeable) {
+                    $query->where('allow_user_to_user', 1);
+                }
+            })
+            ->orderBy('name')
+            ->get()
+            ->mapWithKeys(function ($currency) {
+                return [
+                    $currency->id => json_encode([
+                        'name' => $currency->name,
+                        'image_url' => $currency->currencyIconUrl,
+                    ]),
+                ];
+            });
+        $pets = \App\Models\Pet\Pet::orderBy('name')
+            ->get()
+            ->mapWithKeys(function ($pet) {
+                return [
+                    $pet->id => json_encode([
+                        'name' => $pet->name,
+                        'image_url' => $pet->imageUrl,
+                    ]),
+                ];
+            });
+        $weapons = \App\Models\Item\Weapon::orderBy('name')
+            ->get()
+            ->mapWithKeys(function ($weapon) {
+                return [
+                    $weapon->id => json_encode([
+                        'name' => $weapon->name,
+                        'image_url' => $weapon->imageUrl,
+                    ]),
+                ];
+            });
+        $gears = \App\Models\Item\Gear::orderBy('name')
+            ->get()
+            ->mapWithKeys(function ($gear) {
+                return [
+                    $gear->id => json_encode([
+                        'name' => $gear->name,
+                        'image_url' => $gear->imageUrl,
+                    ]),
+                ];
+            });
+        $stats = \App\Models\Character\CharacterStat::all()
+            ->mapWithKeys(function ($stat) {
+                return [
+                    $stat->id => json_encode([
+                        'name' => $stat->name,
+                        // 'image_url' => $stat->imageUrl,
+                    ]),
+                ];
+            });
+            
+        if ($showLootTables) {
+            $tables = \App\Models\Loot\LootTable::orderBy('name')
+                ->get()
+                ->mapWithKeys(function ($table) {
+                    return [
+                        $table->id => json_encode([
+                            'name' => $table->name,
+                        ]),
+                    ];
+                });
+        }
+        if ($showRaffles) {
+            $raffles = \App\Models\Raffle\Raffle::where('rolled_at', null)
+                ->where('is_active', 1)
+                ->orderBy('name')
+                ->get()
+                ->mapWithKeys(function ($raffle) {
+                    return [
+                        $raffle->id => json_encode([
+                            'name' => $raffle->name,
+                        ]),
+                    ];
+                });
+        }
+    } else {
+        $characterCurrencies = \App\Models\Currency\Currency::where('is_character_owned', 1)
+            ->where(function ($query) use ($isTradeable) {
+                if ($isTradeable) {
+                    $query->where('allow_user_to_user', 1);
+                }
+            })
+            ->orderBy('sort_character', 'DESC')
+            ->pluck('name', 'id');
+        $items = \App\Models\Item\Item::where(function ($query) use ($isTradeable) {
+            if ($isTradeable) {
+                $query->where('allow_transfer', 1);
+            }
+        })
+            ->orderBy('name')
+            ->pluck('name', 'id');
+        $currencies = \App\Models\Currency\Currency::where('is_user_owned', 1)
+            ->where(function ($query) use ($isTradeable) {
+                if ($isTradeable) {
+                    $query->where('allow_user_to_user', 1);
+                }
+            })
+            ->orderBy('name')
+            ->pluck('name', 'id');
+        $pets = \App\Models\Pet\Pet::orderBy('name')->pluck('name', 'id');
+        $gears = \App\Models\Claymore\Gear::orderBy('name')->pluck('name', 'id');
+        $weapons = \App\Models\Claymore\Weapon::orderBy('name')->pluck('name', 'id');
+        $stats = ['none' => 'General Point'] + \App\Models\Stat\Stat::orderBy('name')->pluck('name', 'id')->toArray();
+        $pets = \App\Models\Pet\Pet::orderBy('name')->get()->pluck('fullName', 'id');
+        if ($showLootTables) {
+            $tables = \App\Models\Loot\LootTable::orderBy('name')->pluck('name', 'id');
+        }
+        if ($showRaffles) {
+            $raffles = \App\Models\Raffle\Raffle::where('rolled_at', null)->where('is_active', 1)->orderBy('name')->pluck('name', 'id');
+        }
     }
 @endphp
-
 <div id="lootRowData" class="hide">
     <table class="table table-sm">
         <tbody id="lootRow">
@@ -27,7 +163,7 @@
                         ($showLootTables ? ['LootTable' => 'Loot Table'] : []) +
                         ($showRaffles ? ['Raffle' => 'Raffle Ticket'] : []),
                     null,
-                    ['class' => 'form-control reward-type', 'placeholder' => 'Select Reward Type'],
+                    ['class' => 'form-control reward-type', 'placeholder' => 'Select ' . $type . ' Type'],
                 ) !!}</td>
                 <td class="loot-row-select"></td>
                 <td>{!! Form::text('quantity[]', 1, ['class' => 'form-control']) !!}</td>

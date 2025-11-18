@@ -40,7 +40,7 @@ class Shop extends Model {
      * Validation rules for creation.
      */
     public static $createRules = [
-        'name'        => 'required|unique:item_categories|between:3,100',
+        'name'        => 'required|unique:shops|between:3,100',
         'description' => 'nullable',
         'image'       => 'mimes:png',
     ];
@@ -109,7 +109,7 @@ class Shop extends Model {
      * @return string
      */
     public function getDisplayNameAttribute() {
-        return '<a href="'.$this->url.'" class="display-shop">'.(!$this->isActive ? '<i class="fas fa-eye-slash"></i> ' : '').$this->name.'</a>';
+        return '<a href="'.$this->url.'" class="display-shop">'.(!$this->isActiveCheck ? '<i class="fas fa-eye-slash"></i> ' : '').$this->name.'</a>';
     }
 
     /**
@@ -197,7 +197,7 @@ class Shop extends Model {
      * Returns if this shop should be active or not.
      * We dont account for is_visible here, as this is used for checking both visible and invisible shop.
      */
-    public function getIsActiveAttribute() {
+    public function getIsActiveCheckAttribute() {
         if ($this->start_at && $this->start_at > Carbon::now()) {
             return false;
         }
@@ -214,26 +214,11 @@ class Shop extends Model {
             return false;
         }
 
-        return true;
-    }
-
-    /**********************************************************************************************
-
-        OTHER FUNCTIONS
-
-    **********************************************************************************************/
-
-    /**
-     * Gets all the coupons useable in the shop.
-     */
-    public function getAllAllowedCouponsAttribute() {
-        if (!$this->use_coupons || !$this->allowed_coupons) {
-            return;
+        if (!$this->is_timed_shop && !$this->is_active) {
+            return false;
         }
-        // Get the coupons from the id in allowed_coupons
-        $coupons = Item::whereIn('id', $this->allowed_coupons)->get();
 
-        return $coupons;
+        return true;
     }
 
     /**

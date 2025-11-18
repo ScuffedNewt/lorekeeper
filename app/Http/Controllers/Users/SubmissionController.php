@@ -99,6 +99,15 @@ class SubmissionController extends Controller {
             $gallerySubmissions = [];
         }
 
+        $item_filter = Item::released()->orderBy('name')->get()->mapWithKeys(function ($item) {
+            return [
+                $item->id => json_encode([
+                    'name'      => $item->name,
+                    'image_url' => $item->image_url,
+                ]),
+            ];
+        });
+
         return view('home.create_submission', [
             'closed'  => $closed,
             'isClaim' => false,
@@ -106,7 +115,10 @@ class SubmissionController extends Controller {
             'submission'             => new Submission,
             'prompts'                => Prompt::active()->sortAlphabetical()->pluck('name', 'id')->toArray(),
             'categories'             => ItemCategory::visible(Auth::user() ?? null)->orderBy('sort', 'DESC')->get(),
-            'item_filter'            => Item::orderBy('name')->released()->get()->keyBy('id'),
+            'item_filter'            => $item_filter,
+            'items'                  => Item::orderBy('name')->released()->pluck('name', 'id'),
+            'character_items'        => Item::whereIn('item_category_id', ItemCategory::where('is_character_owned', 1)->pluck('id')->toArray())->orderBy('name')->released()->pluck('name', 'id'),
+            'currencies'             => Currency::where('is_user_owned', 1)->orderBy('name')->pluck('name', 'id'),
             'inventory'              => $inventory,
             'page'                   => 'submission',
             'elements'               => Element::orderBy('name')->pluck('name', 'id'),
@@ -139,6 +151,15 @@ class SubmissionController extends Controller {
             $gallerySubmissions = [];
         }
 
+        $item_filter = Item::released()->orderBy('name')->get()->mapWithKeys(function ($item) {
+            return [
+                $item->id => json_encode([
+                    'name'      => $item->name,
+                    'image_url' => $item->image_url,
+                ]),
+            ];
+        });
+
         return view('home.edit_submission', [
             'closed'              => $closed,
             'isClaim'             => false,
@@ -146,7 +167,10 @@ class SubmissionController extends Controller {
             'submission'             => $submission,
             'prompts'                => Prompt::active()->sortAlphabetical()->pluck('name', 'id')->toArray(),
             'categories'             => ItemCategory::orderBy('sort', 'DESC')->get(),
-            'item_filter'            => Item::orderBy('name')->released()->get()->keyBy('id'),
+            'item_filter'            => $item_filter,
+            'items'                  => Item::orderBy('name')->released()->pluck('name', 'id'),
+            'character_items'        => Item::whereIn('item_category_id', ItemCategory::where('is_character_owned', 1)->pluck('id')->toArray())->orderBy('name')->released()->pluck('name', 'id'),
+            'currencies'             => Currency::where('is_user_owned', 1)->orderBy('name')->pluck('name', 'id'),
             'inventory'              => $inventory,
             'page'                   => 'submission',
             'elements'               => Element::orderBy('name')->pluck('name', 'id'),
@@ -403,6 +427,15 @@ class SubmissionController extends Controller {
         $closed = !Settings::get('is_claims_open');
         $inventory = UserItem::with('item')->whereNull('deleted_at')->where('count', '>', '0')->where('user_id', Auth::user()->id)->get();
 
+        $item_filter = Item::released()->orderBy('name')->get()->mapWithKeys(function ($item) {
+            return [
+                $item->id => json_encode([
+                    'name'      => $item->name,
+                    'image_url' => $item->image_url,
+                ]),
+            ];
+        });
+
         return view('home.create_submission', [
             'closed'  => $closed,
             'isClaim' => true,
@@ -410,7 +443,10 @@ class SubmissionController extends Controller {
             'submission'             => new Submission,
             'categories'             => ItemCategory::visible(Auth::user() ?? null)->orderBy('sort', 'DESC')->get(),
             'inventory'              => $inventory,
-            'item_filter'            => Item::orderBy('name')->released()->get()->keyBy('id'),
+            'item_filter'            => $item_filter,
+            'items'                  => Item::orderBy('name')->released()->pluck('name', 'id'),
+            'currencies'             => Currency::where('is_user_owned', 1)->orderBy('name')->pluck('name', 'id'),
+            'raffles'                => Raffle::where('rolled_at', null)->where('is_active', 1)->orderBy('name')->pluck('name', 'id'),
             'page'                   => 'submission',
             'expanded_rewards'       => config('lorekeeper.extensions.character_reward_expansion.expanded'),
             'userGallerySubmissions' => [],
@@ -432,13 +468,24 @@ class SubmissionController extends Controller {
             abort(404);
         }
 
+        $item_filter = Item::released()->orderBy('name')->get()->mapWithKeys(function ($item) {
+            return [
+                $item->id => json_encode([
+                    'name'      => $item->name,
+                    'image_url' => $item->image_url,
+                ]),
+            ];
+        });
+
         return view('home.edit_submission', [
             'closed'                => $closed,
             'isClaim'               => true,
         ] + ($closed ? [] : [
             'submission'             => $submission,
             'categories'             => ItemCategory::orderBy('sort', 'DESC')->get(),
-            'item_filter'            => Item::orderBy('name')->released()->get()->keyBy('id'),
+            'currencies'             => Currency::where('is_user_owned', 1)->orderBy('name')->pluck('name', 'id'),
+            'item_filter'            => $item_filter,
+            'items'                  => Item::orderBy('name')->released()->pluck('name', 'id'),
             'inventory'              => $inventory,
             'page'                   => 'submission',
             'expanded_rewards'       => config('lorekeeper.extensions.character_reward_expansion.expanded'),

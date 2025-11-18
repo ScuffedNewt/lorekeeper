@@ -39,6 +39,11 @@
     @endif
 
     <div class="card-body">
+        @if ($sales->has_image)
+            <div class="sales-image">
+                <img src="{{ $sales->imageUrl }}" alt="{{ $sales->name }}" class="w-100" />
+            </div>
+        @endif
         <div class="parsed-text">
             {!! $sales->parsed_text !!}
         </div>
