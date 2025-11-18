@@ -96,10 +96,10 @@
             ->orderBy('sort_character', 'DESC')
             ->pluck('name', 'id');
         $items = \App\Models\Item\Item::where(function ($query) use ($isTradeable) {
-                if ($isTradeable) {
-                    $query->where('allow_transfer', 1);
-                }
-            })
+            if ($isTradeable) {
+                $query->where('allow_transfer', 1);
+            }
+        })
             ->orderBy('name')
             ->pluck('name', 'id');
         $currencies = \App\Models\Currency\Currency::where('is_user_owned', 1)
