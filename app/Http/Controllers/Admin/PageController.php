@@ -60,7 +60,7 @@ class PageController extends Controller {
     public function postCreateEditPage(Request $request, PageService $service, $id = null) {
         $id ? $request->validate(SitePage::$updateRules) : $request->validate(SitePage::$createRules);
         $data = $request->only([
-            'key', 'title', 'text', 'is_visible', 'can_comment', 'allow_dislikes',
+            'key', 'title', 'text', 'is_visible', 'can_comment', 'allow_dislikes', 'image', 'remove_image',
         ]);
         if ($id && $service->updatePage(SitePage::find($id), $data, Auth::user())) {
             flash('Page updated successfully.')->success();

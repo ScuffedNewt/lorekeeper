@@ -119,7 +119,7 @@ class ShopController extends Controller {
         return view('shops.shop', [
             'shop'       => $shop,
             'stocks'     => $stocks,
-            'shops'      => Shop::where('is_active', 1)->orderBy('sort', 'DESC')->get(),
+            'shops'      => Shop::where('is_active', 1)->where('is_hidden', 0)->orderBy('sort', 'DESC')->get(),
         ]);
     }
 
@@ -159,13 +159,13 @@ class ShopController extends Controller {
             $userOwned = $service->getUserOwned($stock, Auth::user());
         }
 
-        if ($shop->use_coupons) {
+        if (Auth::check() && $shop->use_coupons) {
             $couponId = ItemTag::where('tag', 'coupon')->where('is_active', 1); // Removed get()
             $itemIds = $couponId->pluck('item_id'); // Could be combined with above
             // get rid of any itemIds that are not in allowed_coupons
-            if ($shop->allowed_coupons && count(json_decode($shop->allowed_coupons, 1))) {
+            if ($shop->allowed_coupons && count($shop->allowed_coupons)) {
                 $itemIds = $itemIds->filter(function ($itemId) use ($shop) {
-                    return in_array($itemId, json_decode($shop->allowed_coupons, 1));
+                    return in_array($itemId, $shop->allowed_coupons);
                 });
             }
             $check = UserItem::with('item')->whereIn('item_id', $itemIds)->where('user_id', Auth::user()->id)->where('count', '>', 0)->get()->pluck('item.name', 'id');
@@ -181,6 +181,7 @@ class ShopController extends Controller {
             'userPurchaseCount'    => $userPurchaseCount,
             'purchaseLimitReached' => $purchaseLimitReached,
             'userOwned'            => $user ? $userOwned : null,
+            'inventory'            => $user ? UserItem::with('item')->whereNull('deleted_at')->where('count', '>', '0')->where('user_id', Auth::user()->id)->get() : null,
         ]);
     }
 
@@ -193,7 +194,7 @@ class ShopController extends Controller {
      */
     public function postBuy(Request $request, ShopManager $service) {
         $request->validate(ShopLog::$createRules);
-        if ($service->buyStock($request->only(['stock_id', 'shop_id', 'slug', 'bank', 'quantity', 'use_coupon', 'coupon', 'cost_group']), Auth::user())) {
+        if ($service->buyStock($request->only(['stock_id', 'shop_id', 'slug', 'bank', 'quantity', 'use_coupon', 'coupon', 'cost_group', 'stack_id', 'stack_quantity']), Auth::user())) {
             flash('Successfully purchased item.')->success();
         } else {
             foreach ($service->errors()->getMessages()['error'] as $error) {

@@ -998,7 +998,7 @@ class DesignUpdateManager extends Service {
             $voteData = (isset($request->vote_data) ? collect($request->vote_data, true) : collect([]));
             $voteData->get($user->id) ? $voteData->pull($user->id) : null;
             $voteData->put($user->id, $vote);
-            $request->vote_data = $voteData->toJson();
+            $request->vote_data = $voteData;
 
             $request->save();
 

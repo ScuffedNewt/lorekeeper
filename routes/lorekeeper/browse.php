@@ -116,6 +116,7 @@ Route::group(['prefix' => 'world'], function () {
     Route::get('species/{id}/traits', 'WorldController@getSpeciesFeatures');
     Route::get('subtypes/{id}/traits', 'WorldController@getSubtypeFeatures');
     Route::get('universaltraits', 'WorldController@getUniversalFeatures');
+    Route::get('all-traits-index', 'WorldController@getKitchenSinkFeatures');
     Route::get('item-categories', 'WorldController@getItemCategories');
     Route::get('items', 'WorldController@getItems');
     Route::get('items/{id}', 'WorldController@getItem');
@@ -146,6 +147,7 @@ Route::group(['prefix' => 'shops'], function () {
 **************************************************************************************************/
 Route::get('credits', 'PageController@getCreditsPage');
 Route::get('info/{key}', 'PageController@getPage');
+Route::get('feeds', 'PageController@getFeedsPage');
 
 /**************************************************************************************************
     Raffles

@@ -657,6 +657,15 @@ class CharacterManager extends Service {
                 }
             }
 
+            // Check that species & rarity are selected
+            if (!(isset($data['species_id']) && $data['species_id'])) {
+                throw new \Exception('Characters require a species.');
+            }
+
+            if (!(isset($data['rarity_id']) && $data['rarity_id'])) {
+                throw new \Exception('Characters require a rarity.');
+            }
+
             if (!$this->logAdminAction($user, 'Updated Image', 'Updated character image features on <a href="'.$image->character->url.'">#'.$image->id.'</a>')) {
                 throw new \Exception('Failed to log admin action.');
             }
@@ -1601,7 +1610,7 @@ class CharacterManager extends Service {
             if ($sender) {
                 Notifications::create('CHARACTER_SENT', $sender, [
                     'character_name' => $character->slug,
-                    'character_slug' => $character->slug,
+                    'character_url'  => $character->is_myo_slot ? 'myo/'.$character->id : 'character/'.$character->slug,
                     'sender_name'    => $user->name,
                     'sender_url'     => $user->url,
                     'recipient_name' => is_object($recipient) ? $recipient->name : prettyProfileName($recipient),
@@ -1611,7 +1620,7 @@ class CharacterManager extends Service {
             if (is_object($recipient)) {
                 Notifications::create('CHARACTER_RECEIVED', $recipient, [
                     'character_name' => $character->slug,
-                    'character_slug' => $character->slug,
+                    'character_url'  => $character->is_myo_slot ? 'myo/'.$character->id : 'character/'.$character->slug,
                     'sender_name'    => $user->name,
                     'sender_url'     => $user->url,
                 ]);
@@ -1667,6 +1676,14 @@ class CharacterManager extends Service {
                         'character_url'  => $transfer->character->url,
                         'sender_name'    => $transfer->recipient->name,
                         'sender_url'     => $transfer->recipient->url,
+                    ]);
+
+                    // Notify recipient of the successful transfer
+                    Notifications::create('CHARACTER_TRANSFER_ACCEPTED', $transfer->recipient, [
+                        'character_name' => $transfer->character->slug,
+                        'character_url'  => $transfer->character->url,
+                        'sender_name'    => $transfer->sender->name,
+                        'sender_url'     => $transfer->sender->url,
                     ]);
                 }
             } else {

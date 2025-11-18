@@ -4,6 +4,12 @@
     {{ $news->title }}
 @endsection
 
+@if ($news->has_image)
+    @section('meta-img')
+        {{ $news->imageUrl }}
+    @endsection
+@endif
+
 @section('news-content')
     {!! breadcrumbs(['Site News' => 'news', $news->title => $news->url]) !!}
     @include('news._news', ['news' => $news, 'page' => true])

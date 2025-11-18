@@ -23,7 +23,7 @@
         @endif
     </h1>
 
-    @if (!$submission->id && ($closed || !$gallery->canSubmit(Auth::user())))
+    @if (!$submission->id && ($closed || !$gallery->canSubmit(Settings::get('gallery_submissions_open'), Auth::user())))
         <div class="alert alert-danger">
             @if ($closed)
                 Gallery submissions are currently closed.
@@ -340,7 +340,7 @@
     @parent
     @if (!$closed || ($submission->id && $submission->status != 'Rejected'))
         @include('galleries._character_select_js')
-
+        @include('js._tinymce_wysiwyg')
         <script>
             $(document).ready(function() {
                 var $submitButton = $('#submitButton');

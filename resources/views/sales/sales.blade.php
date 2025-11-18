@@ -4,6 +4,12 @@
     {{ $sales->title }}
 @endsection
 
+@if ($sales->has_image)
+    @section('meta-img')
+        {{ $sales->imageUrl }}
+    @endsection
+@endif
+
 @section('sales-content')
     {!! breadcrumbs(['Site Sales' => 'sales', $sales->title => $sales->url]) !!}
     @include('sales._sales', ['sales' => $sales, 'page' => true])

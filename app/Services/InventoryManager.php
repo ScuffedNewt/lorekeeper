@@ -475,7 +475,7 @@ class InventoryManager extends Service {
                 $recipient_stack = UserItem::where([
                     ['user_id', '=', $recipient->id],
                     ['item_id', '=', $item->id],
-                    ['data', '=', $data],
+                    ['data', '=', json_encode($data)], // this must be encoded since eloquent hasn't casted it yet
                 ])->first();
 
                 if (!$recipient_stack) {
@@ -487,7 +487,7 @@ class InventoryManager extends Service {
                 $recipient_stack = CharacterItem::where([
                     ['character_id', '=', $recipient->id],
                     ['item_id', '=', $item->id],
-                    ['data', '=', $data],
+                    ['data', '=', json_encode($data)],
                 ])->first();
 
                 if (!$recipient_stack) {

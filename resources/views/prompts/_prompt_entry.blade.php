@@ -58,7 +58,10 @@
             @endif
             @if (count(getLimits($prompt)))
                 <hr />
-                @include('widgets._limits', ['object' => $prompt])
+                @include('widgets._limits', [
+                    'object' => $prompt,
+                    'hideUnlock' => true,
+                ])
             @endif
         </div>
         <div class="text-right">

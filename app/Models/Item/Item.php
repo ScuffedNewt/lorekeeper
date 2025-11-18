@@ -118,7 +118,7 @@ class Item extends Model {
      * Get shop stock for this item.
      */
     public function shopStock() {
-        return $this->hasMany(ShopStock::class, 'item_id')->where('is_visible', 1);
+        return $this->hasMany(ShopStock::class, 'item_id')->where('stock_type', 'Item')->where('is_visible', 1);
     }
 
     /**********************************************************************************************
@@ -158,22 +158,12 @@ class Item extends Model {
      * Scope a query to sort items by newest first.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param mixed                                 $reverse
      *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeSortNewest($query) {
-        return $query->orderBy('id', 'DESC');
-    }
-
-    /**
-     * Scope a query to sort features oldest first.
-     *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     *
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeSortOldest($query) {
-        return $query->orderBy('id');
+    public function scopeSortNewest($query, $reverse = false) {
+        return $query->orderBy('id', $reverse ? 'ASC' : 'DESC');
     }
 
     /**
