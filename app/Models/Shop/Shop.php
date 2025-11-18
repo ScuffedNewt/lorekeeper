@@ -240,25 +240,6 @@ class Shop extends Model {
         return true;
     }
 
-    /**********************************************************************************************
-
-        OTHER FUNCTIONS
-
-    **********************************************************************************************/
-
-    /**
-     * Gets all the coupons useable in the shop.
-     */
-    public function getAllAllowedCouponsAttribute() {
-        if (!$this->use_coupons || !$this->allowed_coupons) {
-            return;
-        }
-        // Get the coupons from the id in allowed_coupons
-        $coupons = Item::whereIn('id', $this->allowed_coupons)->get();
-
-        return $coupons;
-    }
-
     /**
      * Gets the shop's stock costs.
      *
