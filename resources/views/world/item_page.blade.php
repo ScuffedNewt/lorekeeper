@@ -24,8 +24,7 @@
                     @if (config('lorekeeper.extensions.unmerge_item_page_and_entry'))
                         <div class="row world-entry">
                             @if ($item->imageUrl)
-                                <div class="col-md-3 world-entry-image"><a href="{{ $item->imageUrl }}" data-lightbox="entry" data-title="{{ $item->displayName }}"><img src="{{ $item->imageUrl }}" class="world-entry-image"
-                                            alt="{{ $item->displayName }}" /></a></div>
+                                <div class="col-md-3 world-entry-image"><a href="{{ $item->imageUrl }}" data-lightbox="entry" data-title="{{ $item->name }}"><img src="{{ $item->imageUrl }}" class="world-entry-image" alt="{{ $item->name }}" /></a></div>
                             @endif
                             <div class="{{ $item->imageUrl ? 'col-md-9' : 'col-12' }}">
                                 <x-admin-edit title="Item" :object="$item" />
@@ -34,7 +33,7 @@
                                         <i class="fas fa-eye-slash mr-1"></i>
                                     @endif
                                     <a href="{{ $item->idUrl }}">
-                                        {!! $item->displayName !!}
+                                        {!! $item->name !!}
                                     </a>
                                 </h1>
                                 <div class="row">

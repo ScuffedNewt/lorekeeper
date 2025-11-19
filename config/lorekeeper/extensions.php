@@ -83,8 +83,16 @@ return [
         'currency_id' => 1,
     ],
 
-    // Organised Traits Dropdown - Draginraptor
-    'organised_traits_dropdown' => 0,
+    // Organised Traits Dropdown - Draginraptor, ScuffedNewt
+    'organised_traits_dropdown' => [
+        'enable'           => 1,
+        'display_species'  => 0, // displays species
+        'display_subtype'  => 0, // displays subtype
+        'rarity'           => [
+            'enable'         => 1, // If enabled, displays trait rarity in the dropdown.
+            'sort_by_rarity' => 1, // If enabled, sorts traits by rarity in the dropdown. Rarity display does not need to be enabled for this to function.
+        ],
+    ],
 
     // Previous & Next buttons on Character pages - Speedy
     // Adds buttons linking to the previous character as well as the next character on all character pages.

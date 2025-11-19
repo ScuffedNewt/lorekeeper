@@ -164,8 +164,9 @@
             ({{ config('lorekeeper.extensions.navbar_news_notif') ? 'Enabled' : 'Disabled' }})
         </p>
         <p class="mb-0 col-md-4">
-            <a href="http://wiki.lorekeeper.me/index.php?title=Extensions:Organised_Traits_Dropdown"><strong>Organised Traits Dropdown</strong></a> by <a href="https://github.com/draginraptor">Draginraptor</a>
-            ({{ config('lorekeeper.extensions.organised_traits_dropdown') ? 'Enabled' : 'Disabled' }})
+            <a href="http://wiki.lorekeeper.me/index.php?title=Extensions:Organised_Traits_Dropdown"><strong>Organised Traits Dropdown</strong></a> by <a href="https://github.com/draginraptor">Draginraptor</a> and <a
+                href="https://github.com/ScuffedNewt">ScuffedNewt</a>
+            ({{ config('lorekeeper.extensions.organised_traits_dropdown.enable') ? 'Enabled' : 'Disabled' }})
         </p>
         <p class="mb-0 col-md-4">
             <a href="http://wiki.lorekeeper.me/index.php?title=Extensions:Scroll_To_Top"><strong>Scroll to Top</strong></a> by <a href="https://github.com/preimpression">Preimpression</a>
