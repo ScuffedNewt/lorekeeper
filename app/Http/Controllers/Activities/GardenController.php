@@ -34,25 +34,6 @@ class GardenController extends Controller {
     }
 
     /**
-     * Shows the garden page.
-     *
-     * @param mixed $name
-     *
-     * @return \Illuminate\Contracts\Support\Renderable
-     */
-    public function getGarden($name) {
-        $garden = Garden::visible()->where('name', str_replace('-', ' ', $name))->first();
-        if (!$garden) {
-            abort(404);
-        }
-
-        return view('gardens.garden', [
-            'user'   => Auth::user(),
-            'garden' => $garden,
-        ]);
-    }
-
-    /**
      * Places item / object in the plot.
      *
      * @return \Illuminate\Http\JsonResponse

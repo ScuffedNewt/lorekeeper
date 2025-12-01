@@ -2,9 +2,6 @@
 
 return [
 
-    // nav or grid
-    'garden_view' => 'grid',
-
     'garden_object_types' => [
         'seed'       => 'Seed',
         'animal'     => 'Animal',

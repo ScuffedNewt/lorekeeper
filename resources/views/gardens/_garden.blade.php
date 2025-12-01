@@ -1,18 +1,5 @@
-@if (Settings::get('garden_view'))
-    <div class="text-right mb-3">
-        <div class="btn-group">
-            <button type="button" class="btn btn-secondary active nav-view-button" data-toggle="tooltip" title="Nav View" alt="Nav View">
-                <i class="fas fa-bars"></i>
-            </button>
-            <button type="button" class="btn btn-secondary grid-view-button" data-toggle="tooltip" title="Grid View" alt="Grid View">
-                <i class="fas fa-th"></i>
-            </button>
-        </div>
-    </div>
-@endif
-
-@if ($readOnly)
-    @if (config('lorekeeper.garden.allow_users_to_water_gardens'))
+@if ($readOnly && !$user->id == (Auth::check() ? Auth::user()->id : null))
+    @if (Auth::check() && config('lorekeeper.garden.allow_users_to_water_gardens'))
         <div class="alert alert-info">
             You can water plants in gardens you visit to help them grow!
             @if (config('lorekeeper.garden.user_guest_water_limit'))
@@ -20,21 +7,47 @@
             @endif
         </div>
     @endif
-    @include('gardens._nav', [
-        'readOnly'           => $readOnly,
-        'user'               => $user,
-        'groups'             => $groups,
-        'is_garden_unlocked' => $is_garden_unlocked,
-    ])
-@else
-    {{-- Only non-readonly has grid view --}}
-    @include('gardens._nav', [
-        'user'               => $user,
-        'groups'             => $groups,
-        'is_garden_unlocked' => $is_garden_unlocked,
-    ])
-    @include('gardens._grid', [
-        'groups'             => $groups,
-    ])
 @endif
 
+<div>
+    <div class="card character-bio">
+        <div class="card-header">
+            <ul class="nav nav-tabs card-header-tabs">
+                @foreach ($groups as $group => $gardens)
+                    @foreach ($gardens as $garden)
+                        <li class="nav-item">
+                            <a class="nav-link {{ $loop->first && $group == 'unlocked' ? 'active' : '' }}" id="gardenTab-{{ $garden->id }}" data-toggle="tab" href="#{{ strtolower(str_replace(' ', '-', $garden->name)) }}" role="tab">
+                                {!! $is_garden_unlocked[$garden->id] ? '' : '<i class="fas fa-lock"></i> ' !!}
+                                @if ($garden->has_image)
+                                    <img src="{{ $garden->imageUrl }}" class="img-fluid" style="max-height: 3em;">
+                                @endif
+                                {{ $garden->name }}
+                            </a>
+                        </li>
+                    @endforeach
+                @endforeach
+            </ul>
+        </div>
+        <div class="card-body tab-content">
+            @foreach ($groups as $group => $gardens)
+                @foreach ($gardens as $garden)
+                    <div class="tab-pane fade {{ $loop->first && $group == 'unlocked' ? 'show active' : '' }}" id="{{ strtolower(str_replace(' ', '-', $garden->name)) }}">
+                        @if ($is_garden_unlocked[$garden->id])
+                            @include('gardens._panel', [
+                                'garden'              => $garden,
+                                'user_garden_objects' => $readOnly ? [] : $garden->getUserGardenObjects($user),
+                                'user'                => $user,
+                                'readOnly'            => $readOnly,
+                            ])
+                        @else
+                            <div class="alert alert-danger">This garden is locked.</div>
+                            @if (!$readOnly)
+                                @include('widgets._limits', ['object' => $garden])
+                            @endif
+                        @endif
+                    </div>
+                @endforeach
+            @endforeach
+        </div>
+    </div>
+</div>

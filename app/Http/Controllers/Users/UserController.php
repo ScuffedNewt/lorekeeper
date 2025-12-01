@@ -492,7 +492,7 @@ class UserController extends Controller {
             'user'                => $user,
             'groups'              => $groups,
             'is_garden_unlocked'  => $is_garden_unlocked,
-            'readonly'            => $user->id !== (Auth::check() ? Auth::user()->id : null),
+            'readOnly'            => true,
         ]);
     }
 }

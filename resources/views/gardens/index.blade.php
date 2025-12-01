@@ -28,14 +28,10 @@
 @endsection
 @section('scripts')
     @parent
-    @if (Settings::get('garden_view'))
-        @include('gardens.js._view_js')
-    @endif
     @include('gardens.js._garden_js')
     <script>
         $(document).ready(function() {
             $('.userselectize').selectize();
-            // vvv
             if (location.hash) {
                 $("a[href='" + location.hash + "']").tab("show");
             }

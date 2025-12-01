@@ -11,10 +11,14 @@
         {!! $user->displayName !!}'s Garden
     </h1>
 
+    @if (Auth::check() && Auth::user()->id == $user->id)
+        <div class="alert alert-info">This is your garden! You can manage it <a href="{{ url('gardens') }}">on the gardens page</a>.</div>
+    @endif
+
     <div>
         @include('gardens._garden', [
             'user'     => $user,
-            'readOnly' => $readonly,
+            'readOnly' => $readOnly,
             'groups'   => $groups,
             'is_garden_unlocked' => $is_garden_unlocked,
         ])
@@ -22,9 +26,6 @@
 @endsection
 @section('scripts')
     @parent
-    @if (Settings::get('garden_view'))
-        @include('gardens.js._view_js')
-    @endif
     @include('gardens.js._garden_js')
     <script>
         $(document).ready(function() {
