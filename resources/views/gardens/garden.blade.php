@@ -19,4 +19,11 @@
     <div>
         {!! $garden->description !!}
     </div>
+
+    @include('gardens._panel', [
+        'garden'              => $garden,
+        'user_garden_objects' => $readOnly ? [] : $garden->getUserGardenObjects($user),
+        'user'                => $user,
+        'readOnly'            => $readOnly,
+    ])
 @endsection

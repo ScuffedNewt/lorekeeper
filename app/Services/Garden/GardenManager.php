@@ -67,12 +67,16 @@ class GardenManager extends Service {
                 ->where('object_model', $model)
                 ->where('object_id', $data['stack_id'])->first();
             if (!$object) {
-                throw new \Exception('Object not found.');
+                throw new \Exception('Garden object not found.');
             }
 
-            // function naming:
-            // place -> Objects that actually go into the garden
-            // use -> Objects that are used on plots or to interact with objects
+            /**
+             * WHEN INTRODUCING A NEW TYPE.
+             *
+             * Naming Convention:
+             * place -> Objects that actually go into the garden
+             * use -> Objects that are used on plots or to interact with objects, aka tools, fertilisers, food
+             */
             $check = false;
             switch ($object->type) {
                 case 'seed':
@@ -90,6 +94,8 @@ class GardenManager extends Service {
                 case 'food':
                     $check = $this->useFood($user, $userPlot, $garden, $object, $data);
                     break;
+                default:
+                    throw new \Exception('Invalid object type.');
             }
 
             if (!$check) {
@@ -129,7 +135,7 @@ class GardenManager extends Service {
 
             $object = $plot->object;
             if (!$object) {
-                throw new \Exception('Object not found.');
+                throw new \Exception('Garden object not found.');
             }
 
             // todo: debits etc if needed
@@ -172,7 +178,7 @@ class GardenManager extends Service {
 
             $object = $plot->object;
             if (!$object) {
-                throw new \Exception('Object not found.');
+                throw new \Exception('Garden object not found.');
             }
 
             $definiteRewards = parseAssetData($object->data['rewards']);
@@ -257,7 +263,7 @@ class GardenManager extends Service {
 
             $requiredQuality = $object->data['quality'] ?? 0;
             if ($requiredQuality > 0) {
-                // make sure fertiliser is used
+                // TODO: make sure fertiliser is used
             }
 
             // Debit the seed. Because we don't know what type the object is (variable) we can use the assets array
@@ -294,6 +300,7 @@ class GardenManager extends Service {
      * @param UserGardenPlot $userPlot
      * @param Garden         $garden
      * @param GardenObject   $object
+     * @param mixed          $data
      *
      * @return bool
      */
@@ -335,7 +342,6 @@ class GardenManager extends Service {
         return $this->rollbackReturn(false);
     }
 
-    
     /**********************************************************************************************
 
         PLOT FUNCTIONS

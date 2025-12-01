@@ -33,6 +33,8 @@ class Kernel extends ConsoleKernel {
             ->daily();
         $schedule->command('update-timed-stock')
             ->everyMinute();
+        $schedule->command('app:reset-user-activities')
+            ->daily();
     }
 
     /**

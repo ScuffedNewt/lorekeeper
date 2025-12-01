@@ -222,6 +222,13 @@ class User extends Authenticatable implements MustVerifyEmail {
         return $this->hasMany(UserUnlockedLimit::class);
     }
 
+    /**
+     * Get the user's activity information.
+     */
+    public function activity() {
+        return $this->hasOne(UserActivity::class, 'user_id', 'id');
+    }
+
     /**********************************************************************************************
 
         SCOPES

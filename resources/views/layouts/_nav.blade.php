@@ -73,6 +73,10 @@
                             <a class="dropdown-item" href="{{ url('trades/open') }}">
                                 Trades
                             </a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="{{ url('gardens') }}">
+                                Gardens
+                            </a>
                         </div>
                     </li>
                 @endif
@@ -115,10 +119,6 @@
                         </a>
                         <a class="dropdown-item" href="{{ url('shops') }}">
                             Shops
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="{{ url('gardens') }}">
-                            Gardens
                         </a>
                     </div>
                 </li>

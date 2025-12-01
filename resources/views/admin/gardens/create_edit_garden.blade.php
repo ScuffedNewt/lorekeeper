@@ -147,6 +147,11 @@
                                         @else
                                             <div class="alert alert-info">No plot image set.</div>
                                         @endif
+                                        @include('widgets._limits', [
+                                            'object' => $plot,
+                                            'compact' => true,
+                                            'hideUnlock' => true,
+                                        ])
                                         <div class="text-center">
                                             <a class="btn btn-primary" href="{{ url('admin/gardens/edit/' . $garden->id . '/plots/edit/' . $plot->id) }}">Edit Plot</a>
                                         </div>

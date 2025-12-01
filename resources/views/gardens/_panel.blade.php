@@ -3,20 +3,23 @@
             ACTIONS HERE
             @include('gardens._actions', ['type' => 'seed'])
         @endif --}}
-        <div class="{{ $garden->plots->count() ? 'col-9 col-md-9 col-sm-12' : 'col-12' }} justify-content-center">
+        <div class="{{ !$readOnly ? ($garden->plots->count() ? 'col-9 col-md-9 col-sm-12' : 'col-12') : 'col-12' }} justify-content-center">
             <div class="row justify-content-center">
                 @if ($garden->plots->count())
                     @foreach ($garden->plots as $plot)
+                        @php
+                            $isPlotUnlocked = $user->gardenPlots->contains('plot_id', $plot->id) || !hasLimits($plot) || hasUnlockedLimits($user, $plot);
+                            if ($readOnly && !$isPlotUnlocked) {
+                                continue;
+                            }
+                        @endphp
                         <div class="col-md-3 mb-3 text-center">
                             <div class="card text-center justify-content-center text-light"
                                 style="max-width: 200px; max-height: 200px; aspect-ratio: 1/1; background-color: rgb(88, 54, 54); {{ $plot->has_image ? 'background-image: url('.asset($plot->imageUrl).'); background-size: cover; background-position: center; background-repeat: no-repeat;' : '' }}">
                                 {{-- if user owns plot --}}
-                                @if (Auth::user()->gardenPlots->contains('plot_id', $plot->id) || !\App\Models\Limit\Limit::hasLimits($plot))
+                                @if ($isPlotUnlocked)
                                     @php
-                                        $userPlot = Auth::user()
-                                            ->gardenPlots()
-                                            ->where('plot_id', $plot->id)
-                                            ->first();
+                                        $userPlot = $user->gardenPlots()->where('plot_id', $plot->id)->first();
                                     @endphp
                                     {{-- If plant is dead show dead thing --}}
                                     @if ($userPlot?->is_dead)
@@ -53,9 +56,13 @@
                                         @endif
                                     @endif
                                 @else
+                                    {{-- if user does not own plot --}}
                                     <div class="container text-white">
                                         <i class="fas fa-lock text-white m-1"></i>
-                                        {{-- TODO MAKE UNLOCKABLE --}}
+                                        @include('widgets._limits', [
+                                            'object' => $plot,
+                                            'compact' => true,
+                                        ])
                                     </div>
                                 @endif
                             </div>
@@ -68,7 +75,7 @@
                 @endif
             </div>
         </div>
-        @if ($garden->plots->count())
+        @if (!$readOnly && $garden->plots->count())
             <div class="col-3 col-md-3 col-sm-12">
                 @include('gardens._selector', [
                     'plots' => $garden->plots,

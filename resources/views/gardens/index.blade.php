@@ -19,83 +19,12 @@
         </div>
     </noscript>
 
-    @if (Settings::get('garden_view'))
-        <div class="text-right mb-3">
-            <div class="btn-group">
-                <button type="button" class="btn btn-secondary active nav-view-button" data-toggle="tooltip" title="Nav View" alt="Nav View">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <button type="button" class="btn btn-secondary grid-view-button" data-toggle="tooltip" title="Grid View" alt="Grid View">
-                    <i class="fas fa-th"></i>
-                </button>
-            </div>
-        </div>
-    @endif
-
-    <div id="navView" class="{{ Settings::get('garden_view') ? 'hide' : (config('lorekeeper.garden.garden_view') == 'nav' ? '' : 'hide') }}">
-        <div class="card character-bio">
-            <div class="card-header">
-                <ul class="nav nav-tabs card-header-tabs">
-                    @foreach ($groups as $group => $gardens)
-                        @foreach ($gardens as $garden)
-                            <li class="nav-item">
-                                <a class="nav-link {{ $loop->first && $group == 'unlocked' ? 'active' : '' }}" id="gardenTab-{{ $garden->id }}" data-toggle="tab" href="#{{ strtolower(str_replace(' ', '-', $garden->name)) }}" role="tab">
-                                    {!! $is_garden_unlocked[$garden->id] ? '' : '<i class="fas fa-lock"></i> ' !!}
-                                    @if ($garden->has_image)
-                                        <img src="{{ $garden->imageUrl }}" class="img-fluid" style="max-height: 3em;">
-                                    @endif
-                                    {{ $garden->name }}
-                                </a>
-                            </li>
-                        @endforeach
-                    @endforeach
-                </ul>
-            </div>
-            <div class="card-body tab-content">
-                @foreach ($groups as $group => $gardens)
-                    @foreach ($gardens as $garden)
-                        <div class="tab-pane fade {{ $loop->first && $group == 'unlocked' ? 'show active' : '' }}" id="{{ strtolower(str_replace(' ', '-', $garden->name)) }}">
-                            @if ($is_garden_unlocked[$garden->id])
-                                @include('gardens._panel', [
-                                    'garden' => $garden,
-                                    'user_garden_objects' => $garden->getUserGardenObjects(Auth::user()),
-                                ])
-                            @else
-                                <div class="alert alert-danger">This garden is locked.</div>
-                                @include('widgets._limits', ['object' => $garden])
-                            @endif
-                        </div>
-                    @endforeach
-                @endforeach
-            </div>
-        </div>
-    </div>
-    <div id="gridView" class="{{ Settings::get('garden_view') ? (config('lorekeeper.garden.garden_view') == 'grid' ? '' : 'hide') : 'hide' }}">
-        @foreach ($groups as $group => $gardens)
-            <div class="card text-center h-100">
-                <div class="card-header">
-                    <h3>{{ $group }}</h3>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        @foreach ($gardens as $garden)
-                            <div class="col-md-6 mb-3">
-                                @if ($garden->has_image)
-                                    <a href="{{ $garden->imageUrl }}" data-lightbox="entry" data-title="{{ $garden->name }}">
-                                        <img src="{{ $garden->imageUrl }}" class="img-fluid">
-                                    </a>
-                                @else
-                                    <div class="alert alert-info">No image set.</div>
-                                @endif
-                                <h2>{{ $garden->name }}</h2>
-                                <a href="{{ url('gardens/' . str_replace(' ', '-', strtolower($garden->name))) }}" class="btn btn-primary">Enter {{ $garden->name }}</a>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-        @endforeach
-    </div>
+    @include('gardens._garden', [
+        'user'               => Auth::user(),
+        'readOnly'           => $readOnly,
+        'groups'             => $groups,
+        'is_garden_unlocked' => $is_garden_unlocked,
+    ])
 @endsection
 @section('scripts')
     @parent

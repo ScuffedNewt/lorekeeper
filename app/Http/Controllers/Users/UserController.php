@@ -11,6 +11,7 @@ use App\Models\Currency\CurrencyCategory;
 use App\Models\Gallery\Gallery;
 use App\Models\Gallery\GalleryCharacter;
 use App\Models\Gallery\GallerySubmission;
+use App\Models\Garden\Garden;
 use App\Models\Item\Item;
 use App\Models\Item\ItemCategory;
 use App\Models\Prompt\Prompt;
@@ -470,6 +471,28 @@ class UserController extends Controller {
             'user'       => $this->user,
             'characters' => true,
             'favorites'  => $this->user->characters->count() ? GallerySubmission::whereIn('id', $userFavorites)->whereIn('id', GalleryCharacter::whereIn('character_id', $userCharacters)->pluck('gallery_submission_id')->toArray())->visible(Auth::user() ?? null)->orderBy('created_at', 'DESC')->paginate(20)->appends($request->query()) : null,
+        ]);
+    }
+
+    /**
+     * Gets the user's garden.
+     *
+     * @param mixed $name
+     */
+    public function getUserGarden($name) {
+        $user = $this->user;
+        $is_garden_unlocked = Garden::visible($user ?? null)->get()->mapWithKeys(function ($garden) use ($user) {
+            return [$garden->id => hasUnlockedLimits($user, $garden)];
+        });
+        $groups = Garden::visible($user ?? null)->get()->groupBy(function ($garden) use ($is_garden_unlocked) {
+            return $is_garden_unlocked[$garden->id] ? 'unlocked' : 'locked';
+        })->reverse();
+
+        return view('user.garden', [
+            'user'                => $user,
+            'groups'              => $groups,
+            'is_garden_unlocked'  => $is_garden_unlocked,
+            'readonly'            => $user->id !== (Auth::check() ? Auth::user()->id : null),
         ]);
     }
 }
