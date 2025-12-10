@@ -21,6 +21,8 @@
         <div class="col-md-6 form-group" id="stock">
             @if ($stock->id)
                 @include('admin.shops._stock_item', ['items' => $items, 'stock' => $stock])
+            @elseif($stock->stock_type == 'Pet')
+                @include('admin.shops.stock._stock_pet', ['pets' => $items, 'stock' => $stock])
             @endif
         </div>
     </div>
