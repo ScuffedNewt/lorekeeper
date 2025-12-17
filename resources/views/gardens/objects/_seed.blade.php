@@ -4,7 +4,9 @@
     />
 @else
     <p class="text-light mb-0">
-        Currently Growing: {!! $object->object->displayName !!}
+        Currently Growing: 
+        <br/>
+        {!! $object->object->displayName !!}
     </p>
 @endif
 @if ($userPlot->canCollect)

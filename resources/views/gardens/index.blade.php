@@ -21,7 +21,7 @@
 
     @include('gardens._garden', [
         'user'               => Auth::user(),
-        'readOnly'           => $readOnly,
+        'readOnly'           => false,
         'groups'             => $groups,
         'is_garden_unlocked' => $is_garden_unlocked,
     ])

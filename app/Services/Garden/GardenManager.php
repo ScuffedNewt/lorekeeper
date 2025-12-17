@@ -46,7 +46,7 @@ class GardenManager extends Service {
                 if (!$plot) {
                     throw new \Exception('Plot not found.');
                 }
-                if (Limit::hasLimits($plot)) {
+                if (Limit::hasLimits($plot) && !hasUnlockedLimits($user, $plot)) {
                     throw new \Exception('You must purchase this plot before you can place anything in it.');
                 }
                 // Create a user plot
@@ -70,36 +70,41 @@ class GardenManager extends Service {
                 throw new \Exception('Garden object not found.');
             }
 
-            /**
+            /*
              * WHEN INTRODUCING A NEW TYPE.
              *
              * Naming Convention:
              * place -> Objects that actually go into the garden
              * use -> Objects that are used on plots or to interact with objects, aka tools, fertilisers, food
              */
-            $check = false;
             switch ($object->type) {
                 case 'seed':
-                    $check = $this->placeSeed($user, $userPlot, $garden, $object, $data);
+                    if (!$this->placeSeed($user, $userPlot, $garden, $object, $data)) {
+                        throw new \Exception('Failed to plant seed.');
+                    }
                     break;
                 case 'animal':
-                    $check = $this->placeAnimal($user, $userPlot, $garden, $object, $data);
+                    if (!$this->placeAnimal($user, $userPlot, $garden, $object, $data)) {
+                        throw new \Exception('Failed to place animal.');
+                    }
                     break;
                 case 'fertiliser':
-                    $check = $this->useFertiliser($user, $userPlot, $garden, $object, $data);
+                    if (!$this->useFertiliser($user, $userPlot, $garden, $object, $data)) {
+                        throw new \Exception('Failed to use fertiliser.');
+                    }
                     break;
                 case 'tool':
-                    $check = $this->useTool($user, $userPlot, $garden, $object, $data);
+                    if (!$this->useTool($user, $userPlot, $garden, $object, $data)) {
+                        throw new \Exception('Failed to use tool.');
+                    }
                     break;
                 case 'food':
-                    $check = $this->useFood($user, $userPlot, $garden, $object, $data);
+                    if (!$this->useFood($user, $userPlot, $garden, $object, $data)) {
+                        throw new \Exception('Failed to use food.');
+                    }
                     break;
                 default:
                     throw new \Exception('Invalid object type.');
-            }
-
-            if (!$check) {
-                throw new \Exception('Failed to use object.');
             }
 
             return $this->commitReturn(true);
@@ -239,13 +244,22 @@ class GardenManager extends Service {
      * @param UserGardenPlot $userPlot
      * @param Garden         $garden
      * @param GardenObject   $object
+     * @param mixed          $data
      *
      * @return bool
      */
-    private function placeSeed($user, $userPlot, $garden, $object) {
+    private function placeSeed($user, $userPlot, $garden, $object, $data) {
         DB::beginTransaction();
 
         try {
+            \Log::info('GardenManager::placeSeed', [
+                'user_id'       => $user->id,
+                'user_plot_id'  => $userPlot->id,
+                'garden_id'     => $garden->id,
+                'object_id'     => $object->id,
+                'data'          => $data,
+            ]);
+
             $logType = 'Used in Garden';
             $data = [
                 'data' => 'Used to plant a seed in the '.$garden->displayName.' garden.',
@@ -272,8 +286,8 @@ class GardenManager extends Service {
             if (!$objectItem) {
                 throw new \Exception('Invalid object.');
             }
-            addAsset($debitAssets, $objectItem->asset_id, -1);
-            if (!$debitAssets = fillUserAssets($debitAssets, $user, null, $logType, $data)) {
+            addAsset($debitAssets, $objectItem, 1);
+            if (!takeUserAssets($debitAssets, $user, null, $logType, $data, null, true)) {
                 \Log::error('Failed to debit from user.');
                 throw new \Exception('Failed to debit from user.');
             }

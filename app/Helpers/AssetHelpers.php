@@ -463,18 +463,27 @@ function fillUserAssets($assets, $sender, $recipient, $logType, $data) {
  * @param string               $logType
  * @param string               $data
  * @param mixed|null           $selected
+ * @param mixed                $grabSelected
  *
  * @return array
  */
-function takeUserAssets($assets, $sender, $recipient, $logType, $data, $selected = null) {
+function takeUserAssets($assets, $sender, $recipient, $logType, $data, $selected = null, $grabSelected = false) {
     foreach ($assets as $key => $contents) {
         if ($key == 'items' && count($contents)) {
             $service = new App\Services\InventoryManager;
             // do not loop the assets here, just the stackdata. otherwise it will deduct stacks multiple times
-            if (!$selected) {
+            if (!$selected && !$grabSelected) {
                 flash('No selected item found for debiting.')->error();
 
                 return false;
+            } elseif (!$selected && $grabSelected) {
+                // TODO
+                $totalQuantity = 0;
+                if (!$selected = $service->getDebitableStacks($recipient, $contents)) {
+                    flash('No debitable stacks found for the selected items.')->error();
+
+                    return false;
+                }
             }
 
             // Comparing unique item ids in $contents to unique item ids in $selected
