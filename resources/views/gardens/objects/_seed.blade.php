@@ -1,5 +1,5 @@
 @if ($object->object->has_image)
-    <img class="rounded img-fluid my-auto mx-auto" src="{{ asset($object->object->imageUrl) }}" data-toggle="tooltip" title="{{ $object->object->name }}"
+    <img class="rounded img-fluid my-auto mx-auto" src="{{ asset($object->stageImage($userPlot->interactedCount) ?? $object->object->imageUrl) }}" data-toggle="tooltip" title="{{ $object->object->name }}"
         style="max-width: 100px; min-width: 50px;"
     />
 @else
@@ -15,8 +15,8 @@
     {!! Form::close() !!}
 @else
     @if ($userPlot->actionReady)
-        <p class="mb-1">{{ $userPlot->interactedCount }}/{{ $object->data['waterings'] }} Waterings</p>
-        @if ($userPlot->interactedCount >= $object->data['waterings'])
+        <p class="mb-1">{{ $userPlot->interactedCount }}/{{ $object->data['interactions'] }} Waterings</p>
+        @if ($userPlot->interactedCount >= $object->data['interactions'])
             <p class="mb-1">
                 Ready to Harvest in:
                 <br />

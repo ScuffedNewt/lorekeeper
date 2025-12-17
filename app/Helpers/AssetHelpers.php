@@ -239,12 +239,11 @@ function removeAsset(&$array, $asset, $quantity = 1) {
  *
  * @param array      $data
  * @param mixed      $isStaff
- * @param mixed      $extraChecks
  * @param mixed|null $prefix
  *
  * @return array
  */
-function processRewardableData($data, $isStaff = false, $extraChecks = false, $prefix = null) {
+function processRewardableData($data, $isStaff = false, $prefix = null) {
     $assets = createAssetsArray();
     if (isset($data[$prefix.'rewardable_type'])) {
         $assets = createAssetsArray();
@@ -267,7 +266,7 @@ function processRewardableData($data, $isStaff = false, $extraChecks = false, $p
                     $reward = App\Models\Loot\LootTable::find($data[$prefix.'rewardable_id'][$key]);
                     break;
                 case 'Raffle':
-                    if (!$isStaff && !$extraChecks) {
+                    if (!$isStaff) {
                         break;
                     }
                     $reward = App\Models\Raffle\Raffle::find($data[$prefix.'rewardable_id'][$key]);
@@ -276,6 +275,7 @@ function processRewardableData($data, $isStaff = false, $extraChecks = false, $p
             if (!$reward) {
                 continue;
             }
+
             addAsset($assets, $reward, $data[$prefix.'quantity'][$key]);
         }
     }
@@ -477,12 +477,15 @@ function takeUserAssets($assets, $sender, $recipient, $logType, $data, $selected
 
                 return false;
             } elseif (!$selected && $grabSelected) {
-                // TODO
                 $totalQuantity = 0;
-                if (!$selected = $service->getDebitableStacks($recipient, $contents)) {
-                    flash('No debitable stacks found for the selected items.')->error();
+                $selected = [];
+                foreach ($contents as $asset) {
+                    if (!$chosenStack = $service->getDebitableStacks($sender, $asset['asset']->id, abs($asset['quantity']))) {
+                        flash('No debitable stacks found for the selected items.')->error();
 
-                    return false;
+                        return false;
+                    }
+                    $selected = array_merge($selected, $chosenStack);
                 }
             }
 

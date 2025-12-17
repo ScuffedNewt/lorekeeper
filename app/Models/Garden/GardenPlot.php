@@ -79,4 +79,11 @@ class GardenPlot extends Model {
 
         return asset($this->imageDirectory.'/'.$this->imageFileName);
     }
+
+    /**
+     * Returns a name for unlocking purposes.
+     */
+    public function getnameAttribute() {
+        return 'Garden plot';
+    }
 }

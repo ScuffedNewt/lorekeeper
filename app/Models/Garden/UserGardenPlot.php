@@ -95,7 +95,7 @@ class UserGardenPlot extends Model {
      * Returns the actions required to be ready.
      */
     public function getActionsRequiredAttribute() {
-        return $this->data['actions_required'] ?? 1;
+        return $this->object->data['interactions'] ?? 1;
     }
 
     /**
@@ -110,7 +110,7 @@ class UserGardenPlot extends Model {
             return true;
         }
 
-        return $this->timeUntilReady < Carbon::now() && $this->interactedCount < $this->actionsRequired || $this->interactedCount >= $this->actionsRequired;
+        return ($this->timeUntilReady < Carbon::now() && $this->interactedCount < $this->actionsRequired) || $this->interactedCount >= $this->actionsRequired;
     }
 
     /**

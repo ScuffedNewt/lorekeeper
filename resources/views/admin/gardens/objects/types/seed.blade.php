@@ -21,7 +21,7 @@
         <div class="row">
             <div class="col-md form-group">
                 {!! Form::label('Number of Waterings?') !!} {!! add_help('The number of times this seed needs to be watered before it can be harvested.') !!}
-                {!! Form::number('waterings', isset($object) ? $object->data['waterings'] : 1, ['class' => 'form-control']) !!}
+                {!! Form::number('interactions', isset($object->data['interactions']) ? $object->data['interactions'] : 1, ['class' => 'form-control']) !!}
             </div>
             <div class="col-md form-group">
                 {!! Form::label('Growth Time') !!} {!! add_help('The number of hours it takes for this seed to grow / be able to be watered again.') !!}
@@ -69,7 +69,7 @@
                     <p>Leave image form blank to keep old image.</p>
                     @foreach ($object->data['stages'] as $stage)
                         <div class="d-flex mb-2">
-                            <img src="{{ asset('images/data/gardens/objects/' . $object->id . '-' . $stage . '-image.png') }}" alt="Stage {{ $stage }}" class="mr-2" style="height: 50px;">
+                            <img src="{{ asset($object->stageImage($stage)) }}" alt="Stage {{ $stage }}" class="mr-2" style="height: 50px;">
                             {!! Form::file('stage_image[]') !!} {!! add_help('Leave empty to keep old image.') !!}
                             {!! Form::number('stage_number[]', $stage, ['class' => 'form-control mr-2', 'placeholder' => 'When Does the Stage Appear?']) !!}
                             <a href="#" class="remove-stage btn btn-danger mb-2">×</a>
@@ -95,11 +95,13 @@
             </div>
         </div>
 
-        <div class="card">
+        {{-- TODO --}}
+        {{-- <div class="card">
             <div class="card-header h5">Potential Rewards</div>
             <div class="card-body">
                 <p>This reward has the potential to be obtained if the bonus chance below succeeds.</p>
-                <p><strong>Note: this is planned to use loot weighting in the future to allow different percent chances.</strong></p>
+                <p>To have the chance of "nothing" being rewarded for this seed, use a loot table.</p>
+
                 @include('widgets._loot_select', [
                     'loots' => isset($object) ? $object->potentialRewards : [],
                     'showLootTables' => true, 'showRaffles' => true,
@@ -113,8 +115,13 @@
                         ],
                     ]
                 ])
+                <hr />
+                <div class="form-group">
+                    {!! Form::label('Bonus Chance Percentage') !!}
+                    {!! Form::number('bonus_chance', $object?->data['bonus_chance'] ?? 0, ['class' => 'form-control mb-1', 'min' => 0, 'max' => 100]) !!}
+                </div>
             </div>
-        </div>
+        </div> --}}
     </div>
 </div>
 

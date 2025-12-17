@@ -8,14 +8,16 @@
             {{-- Add more types here --}}
             @foreach ($objects as $object_type => $stacks)
                 @if (count($stacks))
-                    @if (get_class($stacks->first()) == 'App\Models\User\UserItem')
-                        @include('gardens.selectors._user_item', [
-                            'object_type' => $object_type,
-                            'stack_type' => $type,
-                            'stacks' => $stacks,
-                            'garden' => $garden,
-                        ])
-                    @endif
+                    @foreach ($stacks as $stack)
+                        @if (get_class($stack) == 'App\Models\User\UserItem')
+                            @include('gardens.selectors._user_item', [
+                                'object_type' => $object_type,
+                                'stack_type' => $type,
+                                'stack' => $stack,
+                                'garden' => $garden,
+                            ])
+                        @endif
+                    @endforeach
                 @endif
             @endforeach
         @endforeach

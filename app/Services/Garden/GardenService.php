@@ -245,7 +245,7 @@ class GardenService extends Service {
             if (!isset($data['can_perish'])) {
                 $data['can_perish'] = 0;
             }
-            
+
             if (isset($data['remove_image'])) {
                 if ($plot && $plot->has_image && $data['remove_image']) {
                     $data['has_image'] = 0;
@@ -415,12 +415,12 @@ class GardenService extends Service {
             $data['stages'] = $this->handleStageImages($data, $object);
         }
 
-        $data['rewards'] = getDataReadyAssets(processRewardableData($data, true, true));
-        $data['potential_rewards'] = getDataReadyAssets(processRewardableData($data, true, true, 'potential_'));
+        $data['rewards'] = getDataReadyAssets(processRewardableData($data, true));
+        // $data['potential_rewards'] = getDataReadyAssets(processRewardableData($data, true, 'potential_', ['chance']));
 
         return Arr::except($data, [
             '_token', 'type', 'object_model', 'object_id', 'rewardable_type', 'rewardable_id', 'quantity',
-            'potential_rewardable_type', 'potential_rewardable_id', 'potential_quantity',
+            'potential_rewardable_type', 'potential_rewardable_id', 'potential_quantity', 'potential_chance',
         ]);
     }
 
@@ -435,7 +435,10 @@ class GardenService extends Service {
      */
     private function handleStageImages($data, $object) {
         if (isset($data['stage_number'])) {
-            $data['stage_number'] = array_filter($data['stage_number']);
+            // filter null values, but not zeroes
+            $data['stage_number'] = array_filter($data['stage_number'], function ($value) {
+                return $value !== null && $value !== '';
+            });
         }
         if (isset($data['stage_image'])) {
             $data['stage_image'] = array_filter($data['stage_image']);

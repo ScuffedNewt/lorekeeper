@@ -159,7 +159,7 @@
                         'placeholder' => 'Select ' . $type . ' Type',
                     ]) !!}
                 </td>
-                <td class="loot-row-select"></td>
+                <td class="{{ $prefix }}loot-row-select"></td>
                 <td>{!! Form::text($prefix . 'quantity[]', 1, ['class' => 'form-control']) !!}</td>
                 @if (isset($extra_fields))
                     @foreach ($extra_fields as $field => $data)

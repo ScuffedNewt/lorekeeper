@@ -194,7 +194,7 @@
                             'placeholder' => 'Select ' . $type . ' Type',
                         ]) !!}
                     </td>
-                    <td class="loot-row-select">
+                    <td class="{{ $prefix }}loot-row-select">
                         @if ($loot->rewardable_type == 'Item')
                             {!! Form::select($prefix . 'rewardable_id[]', $items, $loot->rewardable_id, ['class' => 'form-control item-select selectize', 'placeholder' => 'Select Item']) !!}
                         @elseif($loot->rewardable_type == 'Currency')

@@ -33,7 +33,6 @@ class GardenManager extends Service {
         DB::beginTransaction();
 
         try {
-            \Log::info('GardenManager::place', $data);
             $garden = Garden::find($data['current_garden_id']);
             if (!$garden) {
                 throw new \Exception('Garden not found.');
@@ -189,14 +188,14 @@ class GardenManager extends Service {
             $definiteRewards = parseAssetData($object->data['rewards']);
 
             // TODO: use loot weighting on each reward
-            $bonusChance = $object->data['bonus_chance'] ?? 0;
-            if ($bonusChance > 0) {
-                $bonus = rand(1, 100);
-                if ($bonus <= $bonusChance) {
-                    $bonusRewards = parseAssetData($object->data['potential_rewards']);
-                    $definiteRewards = array_merge($definiteRewards, $bonusRewards);
-                }
-            }
+            // $bonusChance = $object->data['bonus_chance'] ?? 0;
+            // if ($bonusChance > 0) {
+            //     $bonus = rand(1, 100);
+            //     if ($bonus <= $bonusChance) {
+            //         $bonusRewards = parseAssetData($object->data['potential_rewards']);
+            //         $definiteRewards = array_merge($definiteRewards, $bonusRewards);
+            //     }
+            // }
 
             // Logging data
             $logType = 'Collected from Gardens';
@@ -252,14 +251,6 @@ class GardenManager extends Service {
         DB::beginTransaction();
 
         try {
-            \Log::info('GardenManager::placeSeed', [
-                'user_id'       => $user->id,
-                'user_plot_id'  => $userPlot->id,
-                'garden_id'     => $garden->id,
-                'object_id'     => $object->id,
-                'data'          => $data,
-            ]);
-
             $logType = 'Used in Garden';
             $data = [
                 'data' => 'Used to plant a seed in the '.$garden->displayName.' garden.',
@@ -277,9 +268,10 @@ class GardenManager extends Service {
 
             $requiredQuality = $object->data['quality'] ?? 0;
             if ($requiredQuality > 0) {
-                // TODO: make sure fertiliser is used
+                // Check the plot has the required quality
+                $plotQuality = $userPlot->data['quality'] ?? 0;
             }
-
+            throw new \Exception('Seed quality requirement not implemented yet.');
             // Debit the seed. Because we don't know what type the object is (variable) we can use the assets array
             $debitAssets = createAssetsArray();
             $objectItem = $object->object_model::find($object->object_id);
@@ -288,7 +280,6 @@ class GardenManager extends Service {
             }
             addAsset($debitAssets, $objectItem, 1);
             if (!takeUserAssets($debitAssets, $user, null, $logType, $data, null, true)) {
-                \Log::error('Failed to debit from user.');
                 throw new \Exception('Failed to debit from user.');
             }
 
@@ -347,6 +338,62 @@ class GardenManager extends Service {
             //         'object_id' => $object->id,
             //     ],
             // ]);
+
+            return $this->commitReturn(true);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
+    }
+
+    /**********************************************************************************************
+
+        USE FUNCTIONS
+
+    **********************************************************************************************/
+
+    /**
+     * Uses fertiliser on a plot.
+     *
+     * @param User           $user
+     * @param UserGardenPlot $userPlot
+     * @param Garden         $garden
+     * @param GardenObject   $object
+     * @param mixed          $data
+     */
+    private function useFertiliser($user, $userPlot, $garden, $object, $data) {
+        DB::beginTransaction();
+
+        try {
+            $logType = 'Used in Garden';
+            $data = [
+                'data' => 'Used to fertilise a plot in the '.$garden->displayName.' garden.',
+            ];
+
+            $userModifierData = $userPlot->data['modifiers'] ?? [];
+            if (!isset($userModifierData['fertiliser'])) {
+                $userModifierData['fertiliser'] = $object->id;
+            } else {
+                throw new \Exception('This plot has already been fertilised.');
+            }
+
+            $userPlot->update([
+                'data' => array_merge($userPlot->data ?? [], [
+                    'modifiers' => $userModifierData,
+                ]),
+            ]);
+
+            // Debit the fertiliser. Because we don't know what type the object is (variable) we can use the assets array
+            $debitAssets = createAssetsArray();
+            $objectItem = $object->object_model::find($object->object_id);
+            if (!$objectItem) {
+                throw new \Exception('Invalid object.');
+            }
+            addAsset($debitAssets, $objectItem, 1);
+            if (!takeUserAssets($debitAssets, $user, null, $logType, $data, null, true)) {
+                throw new \Exception('Failed to debit from user.');
+            }
 
             return $this->commitReturn(true);
         } catch (\Exception $e) {

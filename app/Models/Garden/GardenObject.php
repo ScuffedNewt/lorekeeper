@@ -50,7 +50,7 @@ class GardenObject extends Model {
     **********************************************************************************************/
 
     /**
-     * Displays the model's name, linked to its encyclopedia page.
+     * Displays the objects's rewards.
      *
      * @return string
      */
@@ -73,5 +73,68 @@ class GardenObject extends Model {
         }
 
         return $rewards;
+    }
+
+    // TODO: Potential rewards implementation
+    // /**
+    //  * Displays the object's potential rewards.
+    //  *
+    //  * @return string
+    //  */
+    // public function getPotentialRewardsAttribute() {
+    //     if (!isset($this->data['potential_rewards'])) {
+    //         return [];
+    //     }
+
+    //     $assets = parseAssetData($this->data['potential_rewards']);
+    //     $rewards = [];
+    //     foreach ($assets as $type => $a) {
+    //         $class = getAssetModelString($type, false);
+    //         foreach ($a as $id => $asset) {
+    //             $rewards[] = (object) [
+    //                 'rewardable_type' => $class,
+    //                 'rewardable_id'   => $id,
+    //                 'quantity'        => $asset['quantity'],
+    //                 'chance'          => $asset['data']['chance'] ?? 0,
+    //             ];
+    //         }
+    //     }
+
+    //     return $rewards;
+    // }
+
+    /**********************************************************************************************
+
+        OTHER FUNCTIONS
+
+    **********************************************************************************************/
+
+    /**
+     * Displays the object's stage images.
+     *
+     * @param mixed $interactions
+     */
+    public function stageImage($interactions) {
+        // find closest stage image less than or equal to current stage
+        // stage's that have images are stored in data['stages']
+        if (!isset($this->data['stages']) || !is_array($this->data['stages'])) {
+            return null;
+        }
+
+        if (isset($this->data['stages'][$interactions])) {
+            return asset('images/data/gardens/objects/'.$this->id.'-'.$interactions.'-image.png');
+        }
+
+        $stages = collect($this->data['stages'])->filter(function ($value, $key) use ($interactions) {
+            return $key < $interactions;
+        })->sortKeysDesc();
+
+        if ($stages->isNotEmpty()) {
+            $closestStage = $stages->keys()->first();
+
+            return asset('images/data/gardens/objects/'.$this->id.'-'.$closestStage.'-image.png');
+        }
+
+        return null;
     }
 }
