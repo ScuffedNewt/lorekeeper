@@ -531,4 +531,3 @@ Route::group(['prefix' => 'gardens', 'middleware' => 'power:manage_gardens'], fu
     Route::get('objects/type-options/{type?}', 'GardenController@getTypeOptions');
     Route::get('objects/get-objects/{type?}', 'GardenController@getObjects');
 });
-
