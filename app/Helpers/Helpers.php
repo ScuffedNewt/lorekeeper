@@ -529,3 +529,31 @@ function getRewards($object) {
 function hasRewards($object) {
     return App\Models\Reward\Reward::where('object_model', get_class($object))->where('object_id', $object->id)->exists();
 }
+
+/**
+ * Returns the garden object types from config.
+ *
+ * @param mixed|null $type
+ */
+function getGardenObjectTypes($type = null) {
+    $types = config('lorekeeper.garden.garden_object_types');
+
+    if ($type !== null) {
+        $types = array_filter($types, function ($objectType) use ($type) {
+            return isset($objectType['type']) && $objectType['type'] === $type;
+        });
+    }
+
+    return array_map(function ($objectType) {
+        return $objectType['displayName'];
+    }, $types);
+}
+
+/**
+ * Returns a garden object type's config by its asset.
+ *
+ * @param mixed $asset
+ */
+function getGardenObjectByAsset($asset) {
+    return App\Models\Garden\GardenObject::where('object_model', get_class($asset))->where('object_id', $asset->id)->first();
+}

@@ -26,7 +26,7 @@
                 <div class="form-group col-md">
                     {!! Form::label('Allowed Objects') !!} {!! add_help('What types of objects can be placed or used on plots in this garden? You can have more granular control on plots, but the types should be enabled here.') !!}
                     <p class="mb-0">By default, all object types are allowed.</p>
-                    {!! Form::select('allowed_object_types[]', config('lorekeeper.garden.garden_object_types'), $garden->allowed_object_types, ['class' => 'form-control selectize', 'multiple', 'placeholder' => 'Select Object Types']) !!}
+                    {!! Form::select('allowed_object_types[]', getGardenObjectTypes(), $garden->allowed_object_types, ['class' => 'form-control selectize', 'multiple', 'placeholder' => 'Select Object Types']) !!}
                 </div>
             </div>
         </div>
@@ -166,6 +166,7 @@
     @endif
 @endsection
 @section('scripts')
+    @include('js._tinymce_wysiwyg')
     @parent
     <script>
         $(document).ready(function() {

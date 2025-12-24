@@ -50,6 +50,13 @@ class GardenObject extends Model {
     **********************************************************************************************/
 
     /**
+     * Get the required quality attribute.
+     */
+    public function getRequiredQualityAttribute() {
+        return $this->data['quality'] ?? null;
+    }
+
+    /**
      * Displays the objects's rewards.
      *
      * @return string

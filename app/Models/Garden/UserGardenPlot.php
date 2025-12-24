@@ -74,6 +74,13 @@ class UserGardenPlot extends Model {
     **********************************************************************************************/
 
     /**
+     * Return the modifiers from the data attribute as an array.
+     */
+    public function getModifiersAttribute() {
+        return $this->data['modifiers'] ?? [];
+    }
+
+    /**
      * Get the object that is currently in the plot.
      */
     public function getObjectAttribute() {

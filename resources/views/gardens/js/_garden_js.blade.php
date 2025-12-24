@@ -45,6 +45,7 @@
             // hide all action buttons
             $('.action-button').each(function() {
                 $(this).addClass('hide');
+                $(this).parent().find('.plot-info').removeClass('hide');
             });
             return;
         }
@@ -52,6 +53,7 @@
         // unhide all action buttons
         $('.action-button').each(function() {
             $(this).removeClass('hide');
+            $(this).parent().find('.plot-info').addClass('hide');
         });
     }
 </script>

@@ -211,6 +211,8 @@ class GardenManager extends Service {
             flash('You have collected: '.createRewardsString($rewards))->success();
 
             // Reset the plot
+            $oldData = $plot->data;
+            dd($oldData);
             $plot->update([
                 'started_at' => null,
                 'data'       => null,
@@ -266,10 +268,14 @@ class GardenManager extends Service {
                 }
             }
 
-            $requiredQuality = $object->data['quality'] ?? 0;
+            $requiredQuality = $object->requiredQuality ?? 0;
             if ($requiredQuality > 0) {
                 // Check the plot has the required quality
-                $plotQuality = $userPlot->data['quality'] ?? 0;
+                $plotQuality = $userPlot->modifiers['quality'] ?? 0;
+                $plotQuality = 0;
+                if ($plotQuality < $requiredQuality) {
+                    throw new \Exception('This seed requires a fertiliser of quality '.$requiredQuality.' or higher to be planted.');
+                }
             }
             throw new \Exception('Seed quality requirement not implemented yet.');
             // Debit the seed. Because we don't know what type the object is (variable) we can use the assets array
@@ -323,9 +329,19 @@ class GardenManager extends Service {
                 throw new \Exception('Invalid object.');
             }
 
-            // TODO: FIND USER MODEL FOR $DATA['STACK_ID']
-
             \Log::info('GardenManager::placeAnimal', $objectItem->toArray());
+
+            switch ($object->object_model) {
+                case 'App\Models\Item\Item':
+                    $chosenStack = (new InventoryManager)->getDebitableStack($user, $object->object_id, 1);
+                    if (!$chosenStack) {
+                        throw new \Exception('You do not have the required animal to place.');
+                    }
+                    break;
+                    // Add more cases here for other animal models as needed, such as pets, characters, etc.
+                default:
+                    throw new \Exception('Invalid object model for animal placement.');
+            }
 
             // increase garden_count
             // $user->update([

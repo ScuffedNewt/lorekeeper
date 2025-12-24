@@ -44,9 +44,9 @@
             </div>
             <div class="row">
                 @php
-                    // get only the types on the garden from config('lorekeeper.garden.garden_object_types')
+                    // get only the types on the garden from getGardenObjectTypes()
                     $availableTypes = array_intersect_key(
-                        config('lorekeeper.garden.garden_object_types'),
+                        getGardenObjectTypes(),
                         array_flip($plot->garden->allowed_object_types)
                     );
                 @endphp

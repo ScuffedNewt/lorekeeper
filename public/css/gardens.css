@@ -5,15 +5,16 @@
 }
 
 .btn:active, .garden-button.active {
-  outline: .5em solid rgba(255, 0, 0, 0.3) !important;
+  outline: .5em solid rgb(255, 217, 0) !important;
   outline-offset: -4px;
+  filter: saturate(100%) !important;
 }
 
 .btn {
   border-radius: .5em !important;
 }
 
-.image-zoom{
+.image-zoom {
   transform: scale(0.8);
   transition: transform .2s;
 }
@@ -55,32 +56,7 @@
   background-color: var(--garden-button-color) !important;
 }
 
-.animal-button {
-  filter: grayscale(40%);
-  background-color: var(--animal-button-color) !important;
-}
-
-.animal-button,.garden-button:hover {
-  filter: saturate(120%)
-}
-
-.animal-button,.garden-button:active {
-  filter: saturate(150%)
-}
-
-.animal-button,.garden-button:not(:disabled):not(.disabled).active {
-  filter: saturate(130%)
-}
-
-.animal-button,.garden-button:active img {
-  filter: grayscale(0%);
-}
-
-.animal-button,.garden-button:not(:disabled):not(.disabled).active img {
-  filter: grayscale(0%);
-}
-
-.skull-button-garden{
+.skull-button-garden {
   position: absolute;
   top: 13.5em;
   right: 0;
@@ -95,51 +71,56 @@
   font-size: 1em;
 }
 
-.skull-button-garden:hover{
+.skull-button-garden:hover {
   opacity: 1;
 }
 
-.skull-button-coop{
-  position: absolute;
-  top: 13.5em;
-  right: 0;
-  width: 2em;
-  height: 2em;
-  text-align:"center";
-  padding: 0;
-  opacity: 0.5;
-  border: none;
-  background: none;
-  transition: .3s;
-  font-size: 1em;
+.garden-scroll {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: .5rem;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+
+  padding: .25rem;
 }
 
-.skull-button-coop:hover{
-  opacity: 1;
+.garden-tile {
+  flex: 0 0 auto;
+  width: 8.5vw;
 }
 
-.skull-button-barn{
-  position: absolute;
-  top: 13.5em;
-  right: 0;
-  width: 2em;
-  height: 2em;
-  text-align:"center";
-  padding: 0;
-  opacity: 0.5;
-  border: none;
-  background: none;
-  transition: .3s;
-  font-size: 1em;
+.garden-tile .btn {
+  width: 100%;
+  height: 8vw;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
-.skull-button-barn:hover{
-  opacity: 1;
+.bounce {
+  animation: bounce 1s infinite;
 }
 
-.plotid {
-  color: #ddd;
-  position: absolute;
-  top: 0;
-  left: 0.25em;
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-15px);
+  }
+  60% {
+    transform: translateY(-8px);
+  }
+}
+
+.plot {
+  max-width: 200px;
+  max-height: 200px;
+  aspect-ratio: 1/1;
+  background-color: rgb(88, 54, 54);
 }

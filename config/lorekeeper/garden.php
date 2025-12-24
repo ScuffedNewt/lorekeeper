@@ -3,11 +3,36 @@
 return [
 
     'garden_object_types' => [
-        'seed'       => 'Seed',
-        'animal'     => 'Animal',
-        'fertiliser' => 'Fertiliser',
-        'tool'       => 'Tool',
-        'food'       => 'Food',
+        /*
+         * do not modify the keys here, as they are used in the code to identify object types
+         * you can modify the display names as needed
+         * Utilised values:
+         *
+         * 'displayName' - The name displayed in the admin and user interfaces.
+         * 'removed' - Whether the object is removed on harvest, true by default.
+         */
+
+        'seed'       => [
+            'displayName' => 'Seed',
+            'type'        => 'placeable',
+        ],
+        'animal'     => [
+            'displayName' => 'Animal',
+            'removed'     => false,
+            'type'        => 'placeable',
+        ],
+        'fertiliser' => [
+            'displayName' => 'Fertiliser',
+            'type'        => 'modifier',
+        ],
+        'tool'       => [
+            'displayName' => 'Tool',
+            'type'        => 'modifier',
+        ],
+        'food'       => [
+            'displayName' => 'Food',
+            'type'        => 'modifier',
+        ],
         // You can add more object types here with custom interactions, just be sure to create the relevant views and logic.
     ],
 

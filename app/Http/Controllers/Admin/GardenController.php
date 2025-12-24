@@ -261,7 +261,7 @@ class GardenController extends Controller {
     public function getCreateGardenObject() {
         return view('admin.gardens.objects.create_edit_garden_object', [
             'object'        => new GardenObject,
-            'object_types'  => config('lorekeeper.garden.garden_object_types'),
+            'object_types'  => getGardenObjectTypes(),
             'object_models' => [
                 // if you want to add more object types, add them here
                 get_class(new Item) => 'Item',
@@ -285,7 +285,7 @@ class GardenController extends Controller {
 
         return view('admin.gardens.objects.create_edit_garden_object', [
             'object'        => $object,
-            'object_types'  => config('lorekeeper.garden.garden_object_types'),
+            'object_types'  => getGardenObjectTypes(),
             'object_models' => [
                 // if you want to add more object types, add them here
                 get_class(new Item) => 'Item',
