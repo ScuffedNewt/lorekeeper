@@ -1,11 +1,9 @@
 @if ($object->object->has_image)
-    <img class="rounded img-fluid my-auto mx-auto" src="{{ asset($object->stageImage($userPlot->interactedCount) ?? $object->object->imageUrl) }}" data-toggle="tooltip" title="{{ $object->object->name }}"
-        style="max-width: 100px; min-width: 50px;"
-    />
+    <img class="rounded img-fluid my-auto mx-auto" src="{{ asset($object->stageImage($userPlot->interactedCount) ?? $object->object->imageUrl) }}" data-toggle="tooltip" title="{{ $object->object->name }}" style="max-width: 100px; min-width: 50px;" />
 @else
     <p class="text-light mb-0">
-        Currently Growing: 
-        <br/>
+        Currently Growing:
+        <br />
         {!! $object->object->displayName !!}
     </p>
 @endif

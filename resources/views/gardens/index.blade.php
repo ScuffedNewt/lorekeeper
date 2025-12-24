@@ -20,9 +20,9 @@
     </noscript>
 
     @include('gardens._garden', [
-        'user'               => Auth::user(),
-        'readOnly'           => false,
-        'groups'             => $groups,
+        'user' => Auth::user(),
+        'readOnly' => false,
+        'groups' => $groups,
         'is_garden_unlocked' => $is_garden_unlocked,
     ])
 @endsection

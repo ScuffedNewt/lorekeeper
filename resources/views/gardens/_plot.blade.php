@@ -7,7 +7,7 @@
 @endphp
 <div class="col-md-3 mb-3 text-center">
     <div class="plot card text-center justify-content-center text-light" data-plot-id="{{ $userPlot ? $userPlot->id : 'unowned-' . $plot->id }}"
-        style="{{ $plot->has_image ? 'background-image: url('.asset($plot->imageUrl).'); background-size: cover; background-position: center; background-repeat: no-repeat;' : '' }}">
+        style="{{ $plot->has_image ? 'background-image: url(' . asset($plot->imageUrl) . '); background-size: cover; background-position: center; background-repeat: no-repeat;' : '' }}">
         {{-- if user owns plot --}}
         @if ($isPlotUnlocked)
             {{-- If plant is dead show dead thing --}}

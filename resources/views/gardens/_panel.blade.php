@@ -21,9 +21,9 @@
                                 }
                             @endphp
                             @include('gardens._plot', [
-                                'plot'           => $plot,
-                                'readOnly'       => $readOnly,
-                                'user'           => $user,
+                                'plot' => $plot,
+                                'readOnly' => $readOnly,
+                                'user' => $user,
                                 'isPlotUnlocked' => $isPlotUnlocked,
                             ])
                         @endforeach

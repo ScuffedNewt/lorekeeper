@@ -34,10 +34,10 @@
                     <div class="tab-pane fade {{ $loop->first && $group == 'unlocked' ? 'show active' : '' }}" id="{{ strtolower(str_replace(' ', '-', $garden->name)) }}">
                         @if ($is_garden_unlocked[$garden->id])
                             @include('gardens._panel', [
-                                'garden'              => $garden,
+                                'garden' => $garden,
                                 'user_garden_objects' => $readOnly ? [] : $garden->getUserGardenObjects($user),
-                                'user'                => $user,
-                                'readOnly'            => $readOnly,
+                                'user' => $user,
+                                'readOnly' => $readOnly,
                             ])
                         @else
                             <div class="alert alert-danger">This garden is locked.</div>

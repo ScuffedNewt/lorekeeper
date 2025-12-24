@@ -45,10 +45,7 @@
             <div class="row">
                 @php
                     // get only the types on the garden from getGardenObjectTypes()
-                    $availableTypes = array_intersect_key(
-                        getGardenObjectTypes(),
-                        array_flip($plot->garden->allowed_object_types)
-                    );
+                    $availableTypes = array_intersect_key(getGardenObjectTypes(), array_flip($plot->garden->allowed_object_types));
                 @endphp
                 <div class="form-group col-md">
                     {!! Form::label('Allowed Objects') !!} {!! add_help('What types of objects can be placed or used on plots in this garden? You can have more granular control on plots, but the types should be enabled here.') !!}

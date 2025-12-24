@@ -17,9 +17,9 @@
 
     <div>
         @include('gardens._garden', [
-            'user'     => $user,
+            'user' => $user,
             'readOnly' => $readOnly,
-            'groups'   => $groups,
+            'groups' => $groups,
             'is_garden_unlocked' => $is_garden_unlocked,
         ])
     </div>
