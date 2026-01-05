@@ -2,8 +2,6 @@
 
 namespace App\Models\Gallery;
 
-use App\Facades\Settings;
-use App\Models\Currency\Currency;
 use App\Models\Model;
 use App\Models\User\User;
 

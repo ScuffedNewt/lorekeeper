@@ -2,7 +2,6 @@
 
 namespace App\Models\Criteria;
 
-use Config;
 use App\Models\Model;
 
 class Criterion extends Model {
@@ -12,7 +11,7 @@ class Criterion extends Model {
      * @var array
      */
     protected $fillable = [
-        'name', 'currency_id', 'is_active', 'summary', 'is_guide_active', 'base_value', 'rounding', 'round_precision'
+        'name', 'currency_id', 'is_active', 'summary', 'is_guide_active', 'base_value', 'rounding', 'round_precision',
     ];
 
     /**
@@ -28,8 +27,8 @@ class Criterion extends Model {
      * @var array
      */
     public static $createRules = [
-        'name' => 'required|unique:character_categories|between:3,100',
-        'currency_id' => 'required'
+        'name'        => 'required|unique:character_categories|between:3,100',
+        'currency_id' => 'required',
     ];
 
     /**
@@ -42,7 +41,7 @@ class Criterion extends Model {
     ];
 
     /**********************************************************************************************
-    
+
         RELATIONS
 
      **********************************************************************************************/
@@ -62,7 +61,7 @@ class Criterion extends Model {
     }
 
     /**********************************************************************************************
-    
+
         ACCESSORS
 
      **********************************************************************************************/
@@ -73,9 +72,8 @@ class Criterion extends Model {
      * @return string
      */
     public function getDisplayNameAttribute() {
-        return $this->is_guide_active ? '<a href="' . url('criteria/guide/' . $this->id) . '" class="display-species">' . $this->name . '</a>' : $this->name;
+        return $this->is_guide_active ? '<a href="'.url('criteria/guide/'.$this->id).'" class="display-species">'.$this->name.'</a>' : $this->name;
     }
-
 
     /**********************************************************************************************
 
@@ -86,13 +84,13 @@ class Criterion extends Model {
     /**
      * Scope a query to only include visible criteria.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeActive($query) {
         return $query->where('is_active', 1);
     }
-
 
     /**********************************************************************************************
 
@@ -101,7 +99,6 @@ class Criterion extends Model {
      **********************************************************************************************/
 
     public function calculateReward($stepResults) {
-
         $total = $this->base_value ?? 0;
 
         if (isset($stepResults)) {
@@ -110,19 +107,23 @@ class Criterion extends Model {
                 // Get our subtotal from the step type and options
                 if ($step->type === 'boolean' && isset($stepResults[$step->id])) {
                     $subTotal = $step->options->first()->amount;
-                } else if ($step->type === 'input') {
+                } elseif ($step->type === 'input') {
                     $subTotal = $step->options->first()->amount;
                     $input = floatval($stepResults[$step->id] ?? 0);
                     if ($step->input_calc_type === 'additive') {
                         $subTotal += $input;
-                    } else if ($step->input_calc_type === 'multiplicative') {
+                    } elseif ($step->input_calc_type === 'multiplicative') {
                         $isDivision = $subTotal < 0;
 
-                        if (!$isDivision) $subTotal *= $input;
-                        elseif ($input === 0 && $isDivision) throw new \Exception("Criterion attempted to divide by zero.");
-                        else $subTotal = $input / -$subTotal;
+                        if (!$isDivision) {
+                            $subTotal *= $input;
+                        } elseif ($input === 0 && $isDivision) {
+                            throw new \Exception('Criterion attempted to divide by zero.');
+                        } else {
+                            $subTotal = $input / -$subTotal;
+                        }
                     }
-                } else if ($step->type === 'options') {
+                } elseif ($step->type === 'options') {
                     $optionId = $stepResults[$step->id] ?? null;
                     $option = $step->options()->where('id', $optionId)->first();
                     $subTotal = isset($option) ? $option->amount : 0;
@@ -131,12 +132,16 @@ class Criterion extends Model {
                 // Apply subtotal to running total based on calc type
                 if ($step->calc_type === 'additive') {
                     $total += $subTotal;
-                } else if ($step->calc_type === 'multiplicative') {
+                } elseif ($step->calc_type === 'multiplicative') {
                     $isDivision = $subTotal < 0;
                     // makes sure we don't zero out the equation if we have an unset multiplicative boolean
-                    if (!$isDivision) $total *= max($subTotal, 1);
-                    elseif ($subTotal === 0 && $isDivision) throw new \Exception("Criterion attempted to divide by zero.");
-                    else $total /= -$subTotal;
+                    if (!$isDivision) {
+                        $total *= max($subTotal, 1);
+                    } elseif ($subTotal === 0 && $isDivision) {
+                        throw new \Exception('Criterion attempted to divide by zero.');
+                    } else {
+                        $total /= -$subTotal;
+                    }
                 }
             }
         }
@@ -144,9 +149,9 @@ class Criterion extends Model {
         $precision = $this->round_precision - 1;
         if ($this->rounding === 'Traditional Rounding') {
             $total = round($total, -$precision);
-        } else if ($this->rounding === 'Always Rounds Up') {
+        } elseif ($this->rounding === 'Always Rounds Up') {
             $total = $this->ceil_plus($total, -$precision);
-        } else if ($this->rounding === 'Always Rounds Down') {
+        } elseif ($this->rounding === 'Always Rounds Down') {
             $total = $this->floor_plus($total, -$precision);
         }
 
@@ -154,20 +159,22 @@ class Criterion extends Model {
     }
 
     private function ceil_plus(float $value, ?int $precision = null): float {
-        if (null === $precision) {
+        if ($precision === null) {
             return (float) ceil($value);
         }
 
         $reg = $value + 0.5 / (10 ** $precision);
+
         return round($reg, $precision, $reg > 0 ? PHP_ROUND_HALF_DOWN : PHP_ROUND_HALF_UP);
     }
 
     private function floor_plus(float $value, ?int $precision = null): float {
-        if (null === $precision) {
-            return (float)floor($value);
+        if ($precision === null) {
+            return (float) floor($value);
         }
 
         $reg = $value - 0.5 / (10 ** $precision);
+
         return round($reg, $precision, $reg > 0 ? PHP_ROUND_HALF_UP : PHP_ROUND_HALF_DOWN);
     }
 }

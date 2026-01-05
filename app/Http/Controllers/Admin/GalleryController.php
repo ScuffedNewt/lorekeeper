@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Facades\Settings;
 use App\Http\Controllers\Controller;
 use App\Models\Currency\Currency;
 use App\Models\Gallery\Gallery;

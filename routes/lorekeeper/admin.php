@@ -279,7 +279,7 @@ Route::group(['prefix' => 'data', 'namespace' => 'Data', 'middleware' => 'power:
     Route::post('limits/edit/{id?}', 'LimitController@postCreateEditLimit');
     Route::post('limits/delete/{id}', 'LimitController@postDeleteLimit');
 
-    # Criteria
+    // Criteria
     Route::get('criteria', 'CriterionController@getIndex');
     Route::get('criteria/create', 'CriterionController@getCreateEditCriterion');
     Route::post('criteria/create', 'CriterionController@postCreateEditCriterion');

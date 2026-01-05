@@ -639,30 +639,34 @@ class WorldController extends Controller {
         ]);
     }
 
-     /**
-     * returns a criterion's guide page
+    /**
+     * returns a criterion's guide page.
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getCriterionGuides(Request $request) {
         $criterions = Criterion::orderBy('name')->where('is_guide_active', 1)->get();
 
-        return view('world.criteria_guides',[
+        return view('world.criteria_guides', [
             'criterions' => $criterions,
         ]);
     }
 
-     /**
-     * returns a criterion's guide page
+    /**
+     * returns a criterion's guide page.
+     *
+     * @param mixed $id
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getCriterionGuide($id) {
         $criterion = Criterion::where('id', $id)->first();
 
-        if(!$criterion->is_guide_active) abort(404);
+        if (!$criterion->is_guide_active) {
+            abort(404);
+        }
 
-        return view('world.criteria_guide',[
+        return view('world.criteria_guide', [
             'criterion' => $criterion,
         ]);
     }

@@ -4,15 +4,11 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateCalculators extends Migration
-{
+class CreateCalculators extends Migration {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
-    {
+    public function up() {
         Schema::create('criteria', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->increments('id');
@@ -23,10 +19,10 @@ class CreateCalculators extends Migration
             $table->string('summary', 256)->nullable()->default(null);
             $table->boolean('is_guide_active')->default(0);
             $table->integer('base_value')->nullable()->default(null);
-            
+
             $table->foreign('currency_id')->references('id')->on('currencies');
         });
-        
+
         Schema::create('criterion_steps', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->increments('id');
@@ -45,10 +41,10 @@ class CreateCalculators extends Migration
             $table->integer('order')->unsigned()->default(1);
             // For a default example image for the guide
             $table->boolean('has_image')->default(0);
-            
+
             $table->foreign('criterion_id')->references('id')->on('criteria');
         });
-        
+
         Schema::create('criterion_step_options', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->increments('id');
@@ -63,18 +59,15 @@ class CreateCalculators extends Migration
             $table->text('parsed_description')->nullable()->default(null);
             $table->float('amount')->nullable()->default(null);
             $table->integer('order')->unsigned()->default(1);
-            
+
             $table->foreign('criterion_step_id')->references('id')->on('criterion_steps');
         });
     }
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
-    {
+    public function down() {
         Schema::dropIfExists('criterion_step_options');
         Schema::dropIfExists('criterion_steps');
         Schema::dropIfExists('criteria');

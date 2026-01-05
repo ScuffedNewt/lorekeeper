@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Users;
 use App\Facades\Settings;
 use App\Http\Controllers\Controller;
 use App\Models\Character\Character;
-use App\Models\Currency\Currency;
 use App\Models\Criteria\Criterion;
+use App\Models\Currency\Currency;
 use App\Models\Gallery\GalleryCollaborator;
 use App\Models\Gallery\GallerySubmission;
 use App\Models\Item\Item;
@@ -22,7 +22,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class SubmissionController extends Controller {
-
     /*
     |--------------------------------------------------------------------------
     | Submission Controller
@@ -114,6 +113,7 @@ class SubmissionController extends Controller {
 
         $prompt = $request->get('prompt_id');
         $promptCriteria = $prompt ? PromptCriterion::where('prompt_id', $prompt)->pluck('criterion_id')->toArray() : null;
+
         return view('home.create_submission', [
             'closed'  => $closed,
             'isClaim' => false,
@@ -130,7 +130,7 @@ class SubmissionController extends Controller {
             'page'                   => 'submission',
             'expanded_rewards'       => config('lorekeeper.extensions.character_reward_expansion.expanded'),
             'userGallerySubmissions' => $gallerySubmissions,
-            'criteria' => $prompt ? Criterion::active()->whereIn('id', $promptCriteria)->orderBy('name')->pluck('name', 'id') : null,
+            'criteria'               => $prompt ? Criterion::active()->whereIn('id', $promptCriteria)->orderBy('name')->pluck('name', 'id') : null,
         ]));
     }
 
@@ -188,7 +188,7 @@ class SubmissionController extends Controller {
             'selectedInventory'      => isset($submission->data['user']) ? parseAssetData($submission->data['user']) : null,
             'count'                  => Submission::where('prompt_id', $submission->prompt_id)->where('status', 'Approved')->where('user_id', $submission->user_id)->count(),
             'userGallerySubmissions' => $gallerySubmissions,
-            'criteria' => $prompt ? Criterion::active()->whereIn('id', $promptCriteria)->orderBy('name')->pluck('name', 'id') : null,
+            'criteria'               => $prompt ? Criterion::active()->whereIn('id', $promptCriteria)->orderBy('name')->pluck('name', 'id') : null,
         ]));
     }
 

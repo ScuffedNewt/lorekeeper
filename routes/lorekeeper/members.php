@@ -271,7 +271,7 @@ Route::group(['prefix' => 'rewards'], function () {
 /**************************************************************************************************
     Criteria
 **************************************************************************************************/
-Route::group(['prefix' => 'criteria'], function() {
+Route::group(['prefix' => 'criteria'], function () {
     Route::get('{entity}/{id}', 'CriterionController@getCriterionSelector')->where('entity', 'prompt|gallery');
     Route::get('{entity}/{id}/{entity_id}/{form_id}', 'CriterionController@getCriterionForm')->where('entity', 'prompt|gallery');
     Route::get('{id}', 'CriterionController@getCriterionFormLimited');

@@ -7,8 +7,6 @@ use Illuminate\Support\Facades\Schema;
 class AddRoundingToCriteria extends Migration {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
     public function up() {
         Schema::table('criteria', function (Blueprint $table) {
@@ -19,8 +17,6 @@ class AddRoundingToCriteria extends Migration {
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
     public function down() {
         Schema::table('criteria', function (Blueprint $table) {

@@ -221,7 +221,7 @@ class PromptService extends Service {
                 throw new \Exception('Failed to create rewards.');
             }
 
-            (new CriterionService)->populateCriteria(Arr::only($data, ['criterion_id', 'criterion','criterion_currency_id', 'default_criteria']), $prompt, PromptCriterion::class);
+            (new CriterionService)->populateCriteria(Arr::only($data, ['criterion_id', 'criterion', 'criterion_currency_id', 'default_criteria']), $prompt, PromptCriterion::class);
 
             return $this->commitReturn($prompt);
         } catch (\Exception $e) {
@@ -292,7 +292,7 @@ class PromptService extends Service {
                 throw new \Exception('Failed to create rewards.');
             }
 
-            (new CriterionService)->populateCriteria(Arr::only($data, ['criterion_id', 'criterion','criterion_currency_id', 'default_criteria']), $prompt, PromptCriterion::class);
+            (new CriterionService)->populateCriteria(Arr::only($data, ['criterion_id', 'criterion', 'criterion_currency_id', 'default_criteria']), $prompt, PromptCriterion::class);
 
             return $this->commitReturn($prompt);
         } catch (\Exception $e) {

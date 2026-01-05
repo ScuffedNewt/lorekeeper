@@ -2,11 +2,9 @@
 
 namespace App\Models\Criteria;
 
-use Config;
 use App\Models\Model;
 
-class DefaultCriteria extends Model
-{
+class DefaultCriteria extends Model {
     /**
      * The attributes that are mass assignable.
      *
@@ -56,18 +54,16 @@ class DefaultCriteria extends Model
     **********************************************************************************************/
 
     /**
-     * Get the prompt attached to this criterion
+     * Get the prompt attached to this criterion.
      */
-    public function default()
-    {
-       return $this->belongsTo(CriterionDefault::class, 'criteriondefault_id');
+    public function default() {
+        return $this->belongsTo(CriterionDefault::class, 'criteriondefault_id');
     }
 
     /**
-     * Get the criterion attached to this prompt
+     * Get the criterion attached to this prompt.
      */
-    public function criterion()
-    {
-       return $this->belongsTo(Criterion::class, 'criterion_id');
+    public function criterion() {
+        return $this->belongsTo(Criterion::class, 'criterion_id');
     }
 }

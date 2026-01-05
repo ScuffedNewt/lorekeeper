@@ -2,7 +2,6 @@
 
 namespace App\Models\Criteria;
 
-use Config;
 use App\Models\Model;
 
 class CriterionDefault extends Model {
@@ -12,7 +11,7 @@ class CriterionDefault extends Model {
      * @var array
      */
     protected $fillable = [
-        'name', 'summary'
+        'name', 'summary',
     ];
 
     /**
@@ -40,20 +39,15 @@ class CriterionDefault extends Model {
         'name' => 'required|between:3,100',
     ];
 
-
-
     /**********************************************************************************************
-    
+
         ACCESSORS
 
      **********************************************************************************************/
     /**
      * Get the criteria attached to this prompt.
      */
-    public function criteria()
-    {
+    public function criteria() {
         return $this->hasMany('App\Models\Criteria\DefaultCriteria', 'criteriondefault_id');
     }
-
-
 }

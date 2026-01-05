@@ -48,12 +48,8 @@ class ParsePostRequestFields {
 
     /**
      * Recursively parse array values.
-     *
-     * @param  array  $array
-     * @param  array  $strippedFields
-     * @return array
      */
-    private function parseArray(array $array, array $strippedFields) : array {
+    private function parseArray(array $array, array $strippedFields): array {
         foreach ($array as $key => $value) {
             if (is_numeric($value)) {
                 continue;

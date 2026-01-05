@@ -2,12 +2,10 @@
 
 namespace App\Models\Gallery;
 
-use Config;
-use App\Models\Model;
 use App\Models\Criteria\Criterion;
+use App\Models\Model;
 
-class GalleryCriterion extends Model
-{
+class GalleryCriterion extends Model {
     /**
      * The attributes that are mass assignable.
      *
@@ -58,25 +56,22 @@ class GalleryCriterion extends Model
     **********************************************************************************************/
 
     /**
-     * Get the gallery attached to this criterion
+     * Get the gallery attached to this criterion.
      */
-    public function gallery()
-    {
-       return $this->belongsTo(Gallery::class, 'gallery_id');
+    public function gallery() {
+        return $this->belongsTo(Gallery::class, 'gallery_id');
     }
 
     /**
-     * Get the criterion attached to this prompt
+     * Get the criterion attached to this prompt.
      */
-    public function criterion()
-    {
-       return $this->belongsTo(Criterion::class, 'criterion_id');
+    public function criterion() {
+        return $this->belongsTo(Criterion::class, 'criterion_id');
     }
 
+    /**********************************************************************************************
 
-   /**********************************************************************************************
+         ACCESSORS
 
-        ACCESSORS
-
-    **********************************************************************************************/
+     **********************************************************************************************/
 }

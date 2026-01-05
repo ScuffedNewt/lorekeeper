@@ -198,7 +198,7 @@ class PromptController extends Controller {
         return view('admin.prompts.create_edit_prompt', [
             'prompt'     => $prompt,
             'categories' => ['none' => 'No category'] + PromptCategory::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
-            'criteria' => Criterion::active()->orderBy('name')->pluck('name', 'id'),
+            'criteria'   => Criterion::active()->orderBy('name')->pluck('name', 'id'),
         ]);
     }
 
@@ -215,7 +215,7 @@ class PromptController extends Controller {
         $data = $request->only([
             'name', 'prompt_category_id', 'summary', 'description', 'start_at', 'end_at', 'hide_before_start', 'hide_after_end', 'is_active', 'image', 'remove_image', 'prefix', 'hide_submissions', 'staff_only',
             'rewardable_type', 'rewardable_id', 'quantity', 'rewardable_recipient',
-            'criterion_id', 'criterion','criterion_currency_id', 'default_criteria',
+            'criterion_id', 'criterion', 'criterion_currency_id', 'default_criteria',
         ]);
         if ($id && $service->updatePrompt(Prompt::find($id), $data, Auth::user())) {
             flash('Prompt updated successfully.')->success();

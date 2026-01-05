@@ -2,12 +2,10 @@
 
 namespace App\Models\Prompt;
 
-use Config;
-use App\Models\Model;
 use App\Models\Criteria\Criterion;
+use App\Models\Model;
 
-class PromptCriterion extends Model
-{
+class PromptCriterion extends Model {
     /**
      * The attributes that are mass assignable.
      *
@@ -58,18 +56,16 @@ class PromptCriterion extends Model
     **********************************************************************************************/
 
     /**
-     * Get the prompt attached to this criterion
+     * Get the prompt attached to this criterion.
      */
-    public function prompt()
-    {
-       return $this->belongsTo(Prompt::class, 'prompt_id');
+    public function prompt() {
+        return $this->belongsTo(Prompt::class, 'prompt_id');
     }
 
     /**
-     * Get the criterion attached to this prompt
+     * Get the criterion attached to this prompt.
      */
-    public function criterion()
-    {
-       return $this->belongsTo(Criterion::class, 'criterion_id');
+    public function criterion() {
+        return $this->belongsTo(Criterion::class, 'criterion_id');
     }
 }
