@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Prompt\Prompt;
 use App\Models\Prompt\PromptCategory;
+use App\Models\Prompt\PromptCriterion;
 use App\Models\Submission\Submission;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -220,6 +221,8 @@ class PromptService extends Service {
                 throw new \Exception('Failed to create rewards.');
             }
 
+            (new CriterionService)->populateCriteria(Arr::only($data, ['criterion_id', 'criterion','criterion_currency_id', 'default_criteria']), $prompt, PromptCriterion::class);
+
             return $this->commitReturn($prompt);
         } catch (\Exception $e) {
             $this->setError('error', $e->getMessage());
@@ -288,6 +291,8 @@ class PromptService extends Service {
                 }
                 throw new \Exception('Failed to create rewards.');
             }
+
+            (new CriterionService)->populateCriteria(Arr::only($data, ['criterion_id', 'criterion','criterion_currency_id', 'default_criteria']), $prompt, PromptCriterion::class);
 
             return $this->commitReturn($prompt);
         } catch (\Exception $e) {

@@ -87,7 +87,6 @@ class GalleryController extends Controller {
         return view('admin.galleries.submissions_currency_index', [
             'submissions' => $submissions->paginate(10)->appends($request->query()),
             'galleries'   => ['' => 'Any Gallery'] + Gallery::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
-            'currency'    => Currency::find(Settings::get('group_currency')),
         ]);
     }
 
@@ -120,7 +119,7 @@ class GalleryController extends Controller {
                     return $this->postStaffComments($id, $request->only(['staff_comments', 'alert_user']), $service);
                     break;
                 case 'value':
-                    return $this->postValue($id, $request->only(['value', 'ineligible']), $service);
+                    return $this->postValue($id, $request->only(['criterion', 'ineligible']), $service);
                     break;
             }
         }

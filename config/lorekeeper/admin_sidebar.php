@@ -202,7 +202,11 @@ return [
                 'name' => 'Dynamic Limits',
                 'url'  => 'admin/data/limits',
             ],
-        ],
+            [
+                'name' => 'Criteria Rewards',
+                'url' => 'admin/data/criteria'
+            ],
+        ]
     ],
     'Raffles'    => [
         'power' => 'manage_raffles',

@@ -6,6 +6,7 @@ use App\Facades\Notifications;
 use App\Facades\Settings;
 use App\Models\Character\Character;
 use App\Models\Currency\Currency;
+use App\Models\Criteria\Criterion;
 use App\Models\Item\Item;
 use App\Models\Loot\LootTable;
 use App\Models\Prompt\Prompt;
@@ -66,6 +67,13 @@ class SubmissionManager extends Service {
                 $prompt = null;
             }
 
+            $withCriteriaSelected = isset($data['criterion']) ? array_filter($data['criterion'], function($obj){
+                return isset($obj['id']);
+            }) : [];
+            if(count($withCriteriaSelected) > 0) $data['criterion'] = $withCriteriaSelected;
+            else $data['criterion'] = null;
+
+
             // Create the submission itself.
             $submission = Submission::create([
                 'user_id'   => $user->id,
@@ -88,6 +96,7 @@ class SubmissionManager extends Service {
                     'user'              => Arr::only(getDataReadyAssets($userAssets), ['user_items', 'currencies']),
                     'rewards'           => getDataReadyAssets($promptRewards),
                     'character_rewards' => getDataReadyAssets($characterRewards),
+                    'criterion'         => isset($data['criterion']) ? $data['criterion'] : null,
                 ] + (config('lorekeeper.settings.allow_gallery_submissions_on_prompts') ? ['gallery_submission_id' => $data['gallery_submission_id'] ?? null] : []),
             ]);
 
@@ -413,6 +422,23 @@ class SubmissionManager extends Service {
                 throw new \Exception('Failed to distribute rewards to user.');
             }
 
+            // Distribute currency from criteria
+            $service = new CurrencyManager;
+
+            if(isset($data['criterion'])) {
+                foreach($data['criterion'] as $key => $criterionData) {
+                    $criterion = Criterion::where('id', $criterionData['id'])->first();
+                    if(isset($criterionData['criterion_currency_id'])){
+                        $criterion_currency = Currency::find($criterionData['criterion_currency_id']);
+                    }else{
+                        $criterion_currency = $criterion->currency;
+                    }
+
+                    if(!$service->creditCurrency($user, $submission->user, $promptLogType, $promptData['data'], $criterion_currency, $criterion->calculateReward($criterionData))) throw new \Exception("Failed to distribute criterion rewards to user.");
+                }
+            }
+
+
             // Retrieve all reward IDs for characters
             $currencyIds = [];
             $itemIds = [];
@@ -490,6 +516,7 @@ class SubmissionManager extends Service {
                     'user'                  => $addonData,
                     'rewards'               => getDataReadyAssets($rewards),
                     'gallery_submission_id' => $submission->data['gallery_submission_id'] ?? null,
+                    'criterion' => isset($data['criterion']) ? $data['criterion'] : null,
                 ], // list of rewards
             ]);
 

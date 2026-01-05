@@ -6,11 +6,13 @@ use App\Facades\Settings;
 use App\Http\Controllers\Controller;
 use App\Models\Character\Character;
 use App\Models\Currency\Currency;
+use App\Models\Criteria\Criterion;
 use App\Models\Gallery\GalleryCollaborator;
 use App\Models\Gallery\GallerySubmission;
 use App\Models\Item\Item;
 use App\Models\Item\ItemCategory;
 use App\Models\Prompt\Prompt;
+use App\Models\Prompt\PromptCriterion;
 use App\Models\Raffle\Raffle;
 use App\Models\Submission\Submission;
 use App\Models\User\User;
@@ -20,6 +22,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class SubmissionController extends Controller {
+
     /*
     |--------------------------------------------------------------------------
     | Submission Controller
@@ -109,6 +112,8 @@ class SubmissionController extends Controller {
             ];
         });
 
+        $prompt = $request->get('prompt_id');
+        $promptCriteria = $prompt ? PromptCriterion::where('prompt_id', $prompt)->pluck('criterion_id')->toArray() : null;
         return view('home.create_submission', [
             'closed'  => $closed,
             'isClaim' => false,
@@ -125,6 +130,7 @@ class SubmissionController extends Controller {
             'page'                   => 'submission',
             'expanded_rewards'       => config('lorekeeper.extensions.character_reward_expansion.expanded'),
             'userGallerySubmissions' => $gallerySubmissions,
+            'criteria' => $prompt ? Criterion::active()->whereIn('id', $promptCriteria)->orderBy('name')->pluck('name', 'id') : null,
         ]));
     }
 
@@ -161,6 +167,9 @@ class SubmissionController extends Controller {
             ];
         });
 
+        $prompt = $submission->prompt;
+        $promptCriteria = $prompt ? PromptCriterion::where('prompt_id', $prompt->id)->pluck('criterion_id')->toArray() : null;
+
         return view('home.edit_submission', [
             'closed'              => $closed,
             'isClaim'             => false,
@@ -179,6 +188,7 @@ class SubmissionController extends Controller {
             'selectedInventory'      => isset($submission->data['user']) ? parseAssetData($submission->data['user']) : null,
             'count'                  => Submission::where('prompt_id', $submission->prompt_id)->where('status', 'Approved')->where('user_id', $submission->user_id)->count(),
             'userGallerySubmissions' => $gallerySubmissions,
+            'criteria' => $prompt ? Criterion::active()->whereIn('id', $promptCriteria)->orderBy('name')->pluck('name', 'id') : null,
         ]));
     }
 
@@ -248,7 +258,7 @@ class SubmissionController extends Controller {
             $request->only([
                 'url', 'prompt_id', 'comments', 'slug', 'character_rewardable_type', 'character_rewardable_id', 'character_rewardable_quantity',
                 'rewardable_type', 'rewardable_id', 'quantity', 'stack_id', 'stack_quantity', 'currency_id', 'currency_quantity',
-                'gallery_submission_id',
+                'gallery_submission_id', 'criterion_id', 'criterion',
             ]),
             Auth::user(),
             false,
