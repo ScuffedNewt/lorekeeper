@@ -34,7 +34,7 @@ class LimitManager extends Service {
         try {
             $user = Auth::user();
 
-            $limits = Limit::hasLimits($object) ? Limit::getLimits($object) : [];
+            $limits = hasLimits($object) ? getLimits($object) : [];
             if (!count($limits)) {
                 return true;
             }

@@ -1643,6 +1643,14 @@ class CharacterManager extends Service {
                         'sender_name'    => $transfer->recipient->name,
                         'sender_url'     => $transfer->recipient->url,
                     ]);
+
+                    // Notify recipient of the successful transfer
+                    Notifications::create('CHARACTER_TRANSFER_ACCEPTED', $transfer->recipient, [
+                        'character_name' => $transfer->character->slug,
+                        'character_url'  => $transfer->character->url,
+                        'sender_name'    => $transfer->sender->name,
+                        'sender_url'     => $transfer->sender->url,
+                    ]);
                 }
             } else {
                 $transfer->status = 'Rejected';

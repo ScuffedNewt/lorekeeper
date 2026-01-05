@@ -83,8 +83,16 @@ return [
         'currency_id' => 1,
     ],
 
-    // Organised Traits Dropdown - Draginraptor
-    'organised_traits_dropdown' => 0,
+    // Organised Traits Dropdown - Draginraptor, ScuffedNewt
+    'organised_traits_dropdown' => [
+        'enable'           => 1,
+        'display_species'  => 0, // displays species
+        'display_subtype'  => 0, // displays subtype
+        'rarity'           => [
+            'enable'         => 1, // If enabled, displays trait rarity in the dropdown.
+            'sort_by_rarity' => 1, // If enabled, sorts traits by rarity in the dropdown. Rarity display does not need to be enabled for this to function.
+        ],
+    ],
 
     // Previous & Next buttons on Character pages - Speedy
     // Adds buttons linking to the previous character as well as the next character on all character pages.
@@ -129,4 +137,10 @@ return [
 
     // TinyMCE Code Editor - Moif
     'tinymce_code_editor'   => 1, // If enabled, uses the more advanced code editor instead of TinyMCE's default.
+
+    // Unmerge Item Page and Item Entry - Speedy
+    'unmerge_item_page_and_entry' => 0, // If enabled, uses the html on world/item_page.blade.php instead of the include that links to world/_item_entry.blade.php
+
+    // Show Species-only traits in dropdown - Speedy
+    'show_exlusively_species_traits_in_dropdown' => 0, // If enabled, will only show traits from the associated species as well as traits that aren't species-limited in the dropdown menus.
 ];

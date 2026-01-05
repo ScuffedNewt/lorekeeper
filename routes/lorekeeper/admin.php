@@ -367,6 +367,17 @@ Route::group(['prefix' => 'grants', 'namespace' => 'Users', 'middleware' => 'pow
 
     Route::get('recipes', 'GrantController@getRecipes');
     Route::post('recipes', 'GrantController@postRecipes');
+
+    Route::get('loot-tables', 'GrantController@getLootTables');
+    Route::post('loot-tables', 'GrantController@postLootTables');
+});
+
+// TRADES
+Route::group(['prefix' => 'trades', 'middleware' => 'power:manage_submissions'], function () {
+    Route::get('{type}', 'TradeController@getTradeQueue');
+    Route::get('{id}', 'TradeController@getTradeInfo');
+    Route::get('act/{id}/{action}', 'TradeController@getTradeModal');
+    Route::post('{id}', 'TradeController@postTradeQueue');
 });
 
 // MASTERLIST
@@ -380,11 +391,6 @@ Route::group(['prefix' => 'masterlist', 'namespace' => 'Characters', 'middleware
     Route::get('transfer/{id}', 'CharacterController@getTransferInfo');
     Route::get('transfer/act/{id}/{type}', 'CharacterController@getTransferModal');
     Route::post('transfer/{id}', 'CharacterController@postTransferQueue');
-
-    Route::get('trades/{type}', 'CharacterController@getTradeQueue');
-    Route::get('trade/{id}', 'CharacterController@getTradeInfo');
-    Route::get('trade/act/{id}/{type}', 'CharacterController@getTradeModal');
-    Route::post('trade/{id}', 'CharacterController@postTradeQueue');
 
     Route::get('create-myo', 'CharacterController@getCreateMyo');
     Route::post('create-myo', 'CharacterController@postCreateMyo');
@@ -524,4 +530,9 @@ Route::get('{type}/{status}', 'DesignController@getDesignIndex')->where('type', 
 // LIMITS
 Route::group(['prefix' => 'limits', 'middleware' => 'power:manage_data'], function () {
     Route::post('/', 'LimitController@postCreateEditLimits');
+});
+
+// REWARDS
+Route::group(['prefix' => 'rewards', 'middleware' => 'power:manage_data'], function () {
+    Route::post('/', 'RewardController@postPopulateRewards');
 });
