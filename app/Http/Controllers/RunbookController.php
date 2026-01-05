@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Runbook;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class RunbookController extends Controller {
     /*
