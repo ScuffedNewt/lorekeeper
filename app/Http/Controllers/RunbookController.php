@@ -33,25 +33,4 @@ class RunbookController extends Controller {
 
         return view('runbooks.runbook', ['runbook' => $runbook]);
     }
-
-    /**
-     * Shows the credits runbook.
-     *
-     * @return \Illuminate\Contracts\Support\Renderable
-     */
-    public function getCreditsRunbook() {
-        return view('runbooks.credits', [
-            'credits'    => Runbook::where('title', 'credits')->first(),
-            'extensions' => DB::table('site_extensions')->get(),
-        ]);
-    }
-
-    /**
-     * Shows the RSS feeds runbook.
-     *
-     * @return \Illuminate\Contracts\Support\Renderable
-     */
-    public function getFeedsRunbook() {
-        return view('runbooks.feeds');
-    }
 }
