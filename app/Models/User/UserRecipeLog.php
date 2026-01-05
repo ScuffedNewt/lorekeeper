@@ -5,7 +5,6 @@ namespace App\Models\User;
 use App\Models\Model;
 
 class UserRecipeLog extends Model {
-
     /**
      * The attributes that are mass assignable.
      *

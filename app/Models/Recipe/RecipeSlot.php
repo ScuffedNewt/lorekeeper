@@ -63,7 +63,9 @@ class RecipeSlot extends Model {
 
     /**
      * Checks if user has the slot unlocked.
-     * 
+     *
+     * @param mixed $user
+     *
      * @return bool
      */
     public function hasUserUnlocked($user) {
@@ -72,8 +74,10 @@ class RecipeSlot extends Model {
 
     /**
      * Returns the user's slot for this recipe slot.
+     *
+     * @param mixed $user
      */
     public function userSlot($user) {
-        return UserRecipeSlot::where('slot_id', $this->id)->where('user_id', $user->id)->first();    
+        return UserRecipeSlot::where('slot_id', $this->id)->where('user_id', $user->id)->first();
     }
 }

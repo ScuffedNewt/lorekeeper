@@ -306,7 +306,7 @@ class RecipeManager extends Service {
      * Unlocks a recipe slot.
      *
      * @param RecipeSlot $slot
-     * @param User $user
+     * @param User       $user
      *
      * @return bool
      */

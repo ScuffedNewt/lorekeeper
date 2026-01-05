@@ -7,7 +7,6 @@ use App\Models\Recipe\Recipe;
 use App\Models\Recipe\RecipeSlot;
 
 class UserRecipeSlot extends Model {
-
     /**
      * The attributes that are mass assignable.
      *
@@ -68,7 +67,7 @@ class UserRecipeSlot extends Model {
     **********************************************************************************************/
 
     /**
-     * Returns if the slot is currently crafting or not
+     * Returns if the slot is currently crafting or not.
      */
     public function getIsCraftingAttribute() {
         return $this->recipe && $this->started_at && $this->end_at;

@@ -95,7 +95,7 @@ class CraftingController extends Controller {
         }
 
         if ($service->craftRecipe($request->only(['stack_id', 'stack_quantity', 'slot_id', 'choice_reward']), $recipe, Auth::user())) {
-            flash('Recipe ' . ($recipe->time ? 'started crafting' : 'crafted') . ' successfully.')->success();
+            flash('Recipe '.($recipe->time ? 'started crafting' : 'crafted').' successfully.')->success();
         } else {
             foreach ($service->errors()->getMessages()['error'] as $error) {
                 flash($error)->error();
