@@ -163,25 +163,27 @@
 
             $('.delete-calc').on('click', deleteCriterion);
 
-            function deleteCriterion (e) {
+            function deleteCriterion(e) {
                 e.preventDefault();
                 var toDelete = $(this).closest('.card');
                 toDelete.remove();
             }
 
-            function loadForm (e) {
+            function loadForm(e) {
                 var id = $(this).val();
                 var promptId = $prompt.val();
                 var formId = $(this).attr('name').split('[')[1].replace(']', '');
 
-                if(id) {
+                if (id) {
                     var form = $(this).closest('.card').find('.form');
-                    form.load("{{ url('criteria/prompt') }}/" + id + "/" + promptId + "/" + formId,( response, status, xhr ) => {
-                        if ( status == "error" ) {
+                    form.load("{{ url('criteria/prompt') }}/" + id + "/" + promptId + "/" + formId, (response, status, xhr) => {
+                        if (status == "error") {
                             var msg = "Error: ";
-                            console.error( msg + xhr.status + " " + xhr.statusText );
+                            console.error(msg + xhr.status + " " + xhr.statusText);
                         } else {
-                            form.find('[data-toggle=tooltip]').tooltip({html: true});
+                            form.find('[data-toggle=tooltip]').tooltip({
+                                html: true
+                            });
                             form.find('[data-toggle=toggle]').bootstrapToggle();
                         }
                     });

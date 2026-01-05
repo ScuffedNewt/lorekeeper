@@ -52,7 +52,13 @@
                     </div>
                 </div>
                 <div id="collapsable-{{ $criterion->id }}" class="form collapse">
-                    @include('criteria._minimum_requirements', ['criterion' => $criterion->criterion, 'minRequirements' => $criterion->minRequirements, 'id' => $criterion->criterion_id,'isAdmin' => true, 'criterion_currency' => isset($criterion->criterion_currency_id) ? $criterion->criterion_currency_id : $criterion->criterion->currency_id])
+                    @include('criteria._minimum_requirements', [
+                        'criterion' => $criterion->criterion,
+                        'minRequirements' => $criterion->minRequirements,
+                        'id' => $criterion->criterion_id,
+                        'isAdmin' => true,
+                        'criterion_currency' => isset($criterion->criterion_currency_id) ? $criterion->criterion_currency_id : $criterion->criterion->currency_id,
+                    ])
                 </div>
             </div>
         @endforeach

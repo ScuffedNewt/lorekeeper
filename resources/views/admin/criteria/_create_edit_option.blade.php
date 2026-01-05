@@ -1,4 +1,4 @@
-{!! Form::open(['url' => $option->id ? 'admin/data/criteria/step/'.$stepId.'/option/'.$option->id : 'admin/data/criteria/step/'.$stepId.'/option', 'files' => true]) !!}
+{!! Form::open(['url' => $option->id ? 'admin/data/criteria/step/' . $stepId . '/option/' . $option->id : 'admin/data/criteria/step/' . $stepId . '/option', 'files' => true]) !!}
 
 <div class="row">
     <div class="form-group col-6">
@@ -14,7 +14,7 @@
 <div class="form-group">
     {!! Form::label('description') !!} {!! add_help('This is used for the criterion\'s guide.') !!}
     {{-- uniqid helps keep tinymce from being upset that we keep adding the same id'd textarea to it --}}
-    {!! Form::textarea('description', $option->description, ['class' => 'form-control wysiwyg', 'id' => uniqid("description-", true)]) !!}
+    {!! Form::textarea('description', $option->description, ['class' => 'form-control wysiwyg', 'id' => uniqid('description-', true)]) !!}
 </div>
 
 <div class="row align-items-end">

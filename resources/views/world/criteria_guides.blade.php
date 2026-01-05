@@ -1,6 +1,8 @@
 @extends('world.layout')
 
-@section('world-title') Criteria Guides @endsection
+@section('world-title')
+    Criteria Guides
+@endsection
 
 @section('world-content')
     {!! breadcrumbs(['World' => 'world', 'Criteria Guides' => 'world/criteria-guides']) !!}
@@ -14,7 +16,7 @@
             <div class="card-body">
                 @include('criteria._guide', [
                     'criterion' => $criterion,
-                    'isPage' => false
+                    'isPage' => false,
                 ])
             </div>
         </div>

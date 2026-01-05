@@ -121,14 +121,15 @@
                             <h5>Collaborators</h5>
                         </div>
                         <div class="card-body">
-                            <p>If this piece is a collaboration, add collaborators and their roles here, including yourself. <strong>Otherwise, leave this blank</strong>. You <strong>will not</strong> be able to edit this once the submission has been accepted, but will while it is still pending.</p>
-                            @if(!$submission->id || $submission->status == 'Pending')
+                            <p>If this piece is a collaboration, add collaborators and their roles here, including yourself. <strong>Otherwise, leave this blank</strong>. You <strong>will not</strong> be able to edit this once the submission has been
+                                accepted, but will while it is still pending.</p>
+                            @if (!$submission->id || $submission->status == 'Pending')
                                 <div class="text-right mb-3">
                                     <a href="#" class="btn btn-outline-info" id="add-collaborator">Add Collaborator</a>
                                 </div>
                                 <div id="collaboratorList">
-                                    @if($submission->id)
-                                        @foreach($submission->collaborators as $collaborator)
+                                    @if ($submission->id)
+                                        @foreach ($submission->collaborators as $collaborator)
                                             <div class="mb-2">
                                                 <div class="d-flex">{!! $collaborator->has_approved ? '<div class="btn btn-success mb-2 mr-2" data-toggle="tooltip" title="Has Approved"><i class="fas fa-check"></i></div>' : '' !!}{!! Form::select('collaborator_id[]', $users, $collaborator->user_id, ['class' => 'form-control mr-2 collaborator-select original', 'placeholder' => 'Select User']) !!}</div>
                                                 <div class="d-flex">
@@ -152,9 +153,9 @@
                                 </div>
                             @else
                                 <p>
-                                    @if($submission->collaborators->count())
-                                        @foreach($submission->collaborators as $collaborator)
-                                            {!! $collaborator->user->displayName !!}: {{ $collaborator->data }}<br/>
+                                    @if ($submission->collaborators->count())
+                                        @foreach ($submission->collaborators as $collaborator)
+                                            {!! $collaborator->user->displayName !!}: {{ $collaborator->data }}<br />
                                         @endforeach
                                     @endif
                                 </p>
@@ -166,14 +167,15 @@
                             <h5>Other Participants</h5>
                         </div>
                         <div class="card-body">
-                            <p>If this piece is gift, part of a trade, or was commissioned, specify the related user(s) here and select their role. <strong>Otherwise, leave this blank</strong>. You <strong>will not</strong> be able to edit this once the submission has been accepted, but will while it is still pending.</p>
-                            @if(!$submission->id || $submission->status == 'Pending')
+                            <p>If this piece is gift, part of a trade, or was commissioned, specify the related user(s) here and select their role. <strong>Otherwise, leave this blank</strong>. You <strong>will not</strong> be able to edit this once the
+                                submission has been accepted, but will while it is still pending.</p>
+                            @if (!$submission->id || $submission->status == 'Pending')
                                 <div class="text-right mb-3">
                                     <a href="#" class="btn btn-outline-info" id="add-participant">Add Participant</a>
                                 </div>
                                 <div id="participantList">
-                                    @if($submission->id)
-                                        @foreach($submission->participants as $participant)
+                                    @if ($submission->id)
+                                        @foreach ($submission->participants as $participant)
                                             <div class="mb-2">
                                                 <div class="d-flex">{!! Form::select('participant_id[]', $users, $participant->user_id, ['class' => 'form-control mr-2 participant-select original', 'placeholder' => 'Select User']) !!}</div>
                                                 <div class="d-flex">
@@ -197,9 +199,9 @@
                                 </div>
                             @else
                                 <p>
-                                    @if($submission->participants->count())
-                                        @foreach($submission->participants as $participant)
-                                            {!! $participant->user->displayName !!}: {{ $participant->displayType }}<br/>
+                                    @if ($submission->participants->count())
+                                        @foreach ($submission->participants as $participant)
+                                            {!! $participant->user->displayName !!}: {{ $participant->displayType }}<br />
                                         @endforeach
                                     @endif
                                 </p>
@@ -213,13 +215,13 @@
         <h3>Characters</h3>
         <p>
             Add the characters included in this piece.
-            @if($gallery->criteria)
+            @if ($gallery->criteria)
                 This helps the staff processing your submission award currency for it, so be sure to add every character.
             @endif
         </p>
         <div id="characters" class="mb-3">
-            @if($submission->id)
-                @foreach($submission->characters as $character)
+            @if ($submission->id)
+                @foreach ($submission->characters as $character)
                     @include('galleries._character_select_entry', ['character' => $character])
                 @endforeach
             @endif
@@ -228,7 +230,7 @@
             <a href="#" class="btn btn-outline-info" id="addCharacter">Add Character</a>
         </div>
 
-       @if($gallery->criteria->count() > 0 && !$submission->id)
+        @if ($gallery->criteria->count() > 0 && !$submission->id)
             <h2 id="criterion-section" class="mt-5">Criteria Rewards <button class="btn  btn-outline-info float-right add-calc" type="button">Add Criterion</a></h2>
             <p>Criteria can be used in addition to or in replacement of rewards. They take input on what you are turning in for the prompt in order to calculate your final reward.</p>
             <p>Criteria may populate in with pre-selected minimum requirements for this prompt. </p>
@@ -249,7 +251,7 @@
         {!! Form::close() !!}
 
         <div id="copy-calc" class="card p-3 mb-2 pl-0 hide">
-            @if(isset($criteria))
+            @if (isset($criteria))
                 @include('criteria._criterion_selector', ['criteria' => $criteria])
             @endif
         </div>
@@ -428,24 +430,26 @@
 
                 $('.delete-calc').on('click', deleteCriterion);
 
-                function deleteCriterion (e) {
+                function deleteCriterion(e) {
                     e.preventDefault();
                     var toDelete = $(this).closest('.card');
                     toDelete.remove();
                 }
 
-                function loadForm (e) {
+                function loadForm(e) {
                     var id = $(this).val();
                     var formId = $(this).attr('name').split('[')[1].replace(']', '');
 
-                    if(id) {
+                    if (id) {
                         var form = $(this).closest('.card').find('.form');
-                        form.load("{{ url('criteria/gallery') }}/" + id + "/{{ $gallery->id }}/" + formId, ( response, status, xhr ) => {
-                            if ( status == "error" ) {
+                        form.load("{{ url('criteria/gallery') }}/" + id + "/{{ $gallery->id }}/" + formId, (response, status, xhr) => {
+                            if (status == "error") {
                                 var msg = "Error: ";
-                                console.error( msg + xhr.status + " " + xhr.statusText );
+                                console.error(msg + xhr.status + " " + xhr.statusText);
                             } else {
-                                form.find('[data-toggle=tooltip]').tooltip({html: true});
+                                form.find('[data-toggle=tooltip]').tooltip({
+                                    html: true
+                                });
                                 form.find('[data-toggle=toggle]').bootstrapToggle();
                             }
                         });

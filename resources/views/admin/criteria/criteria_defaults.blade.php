@@ -14,7 +14,8 @@
 
     <h2>Default Criteria</h2>
     <p>
-        These are default criteria groups that you can auto-populate into prompts and galleries. When a group is toggled on, it will be added to the prompt or gallery with the pre-determined values that you set. You can have as many default groups as you want, and they can even contain the same criteria as another group-- just with different preset values. 
+        These are default criteria groups that you can auto-populate into prompts and galleries. When a group is toggled on, it will be added to the prompt or gallery with the pre-determined values that you set. You can have as many default groups as you
+        want, and they can even contain the same criteria as another group-- just with different preset values.
     </p>
 
     <div>

@@ -3,7 +3,7 @@
         {!! Form::select('criterion[#][id]', $criteria, null, ['class' => 'form-control criterion-select', 'placeholder' => 'Select a Criterion to set options']) !!}
     </div>
     <div>
-    <button class="btn btn-danger delete-calc" type="button"><i class="fas fa-trash"></i></button>
+        <button class="btn btn-danger delete-calc" type="button"><i class="fas fa-trash"></i></button>
     </div>
 </div>
 <div class="form">Select a criterion to populate this area.</div>

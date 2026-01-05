@@ -8,12 +8,12 @@
     <div id="calc-{{ isset($id) ? $id : $criterion->id }}" class="ml-5 steps">
         <h5>
             {{ isset($title) ? $title : 'Minimum Requirements' }}
-            <span class="mr-2 text-secondary"> - will reward <span class="reward">{!! isset($criterion_currency) ? ( \App\Models\Currency\Currency::find($criterion_currency)->display($criterion->calculateReward($finalValues)) ?? 0) : ($criterion->currency->display($criterion->calculateReward($finalValues)) ?? 0) !!}</span>
+            <span class="mr-2 text-secondary"> - will reward <span class="reward">{!! isset($criterion_currency) ? \App\Models\Currency\Currency::find($criterion_currency)->display($criterion->calculateReward($finalValues)) ?? 0 : $criterion->currency->display($criterion->calculateReward($finalValues)) ?? 0 !!}</span>
         </h5>
         @if (isset($isAdmin) && $isAdmin)
-        @php
-            $reward_currencies = \App\Models\Currency\Currency::where('is_user_owned', 1)->orderBy('name')->pluck('name', 'id');
-        @endphp
+            @php
+                $reward_currencies = \App\Models\Currency\Currency::where('is_user_owned', 1)->orderBy('name')->pluck('name', 'id');
+            @endphp
             <div class="text-right mb-3 row align-items-end">
                 <div class="col" style="min-width:15em;">
                     {!! Form::select('criterion_currency_id[' . (isset($id) ? $id : $criterion->id) . ']', $reward_currencies, isset($criterion_currency) ? $criterion_currency : $criterion->currency_id, [
@@ -65,7 +65,7 @@
             let formData = $('#calc-' + calcId).closest('form').serializeArray();
             disabledInputs.prop('disabled', true);
             formObj['_token'] = formData[0].value;
-            formObj['criterion_currency'] = {{ isset($criterion_currency) ? $criterion_currency : $criterion->currency_id}};
+            formObj['criterion_currency'] = {{ isset($criterion_currency) ? $criterion_currency : $criterion->currency_id }};
             formData = formData.filter((item) => item.name.includes('criterion[' + calcId + ']'));
             formData.forEach((item) => formObj[item.name.split('[')[2].replace(']', '')] = item.value);
             $(`#calc-${calcId} .reward`).load('{{ url('criteria/rewards/' . $criterion->id) }}', formObj);
