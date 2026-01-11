@@ -121,8 +121,8 @@
                     </div>
                     <div class="data-fields">
                         <div class="form-group">
-                            {!! Form::label("data[__INDEX__][description]", 'Description') !!}
-                            {!! Form::text("data[__INDEX__][description]", null, [
+                            {!! Form::label('data[__INDEX__][description]', 'Description') !!}
+                            {!! Form::text('data[__INDEX__][description]', null, [
                                 'class' => 'form-control data-field attachment-text',
                                 'data-name-template' => 'data[__INDEX__][description]',
                                 'placeholder' => 'Optional Description',
@@ -138,10 +138,10 @@
         <div class="form-group data-field-row">
             <div class="row">
                 <div class="col-md-4">
-                    {!! Form::text("data[__INDEX__][key]", null, ['class' => 'form-control data-key', 'placeholder' => 'Field name (e.g. notes)', 'data-name-template' => 'data[__INDEX__][key]']) !!}
+                    {!! Form::text('data[__INDEX__][key]', null, ['class' => 'form-control data-key', 'placeholder' => 'Field name (e.g. notes)', 'data-name-template' => 'data[__INDEX__][key]']) !!}
                 </div>
                 <div class="col-md-7">
-                    {!! Form::text("data[__INDEX__][value]", null, ['class' => 'form-control data-value', 'placeholder' => 'Field value', 'data-name-template' => 'data[__INDEX__][value]']) !!}
+                    {!! Form::text('data[__INDEX__][value]', null, ['class' => 'form-control data-value', 'placeholder' => 'Field value', 'data-name-template' => 'data[__INDEX__][value]']) !!}
                 </div>
                 <div class="col-md-1 d-flex align-items-center">
                     <div class="btn btn-danger btn-sm remove-data-field w-100 p-2">X</div>
@@ -152,7 +152,7 @@
 </fieldset>
 
 <script>
-    $(document).ready(function () {
+    $(document).ready(function() {
         let nextIndex = {{ $attachments ? $attachments->count() : 0 }};
 
         $('#attachments .attachment-selectize').selectize({
@@ -163,17 +163,17 @@
         });
 
         function bindAttachmentCard($card) {
-            $card.find('.remove-attachment').on('click', function (e) {
+            $card.find('.remove-attachment').on('click', function(e) {
                 e.preventDefault();
                 $(this).closest('.attachment-entry').remove();
             });
 
-            $card.find('.remove-data-field').on('click', function (e) {
+            $card.find('.remove-data-field').on('click', function(e) {
                 e.preventDefault();
                 $(this).closest('.data-field').remove();
             });
 
-            $card.find('.add-data-field').on('click', function (e) {
+            $card.find('.add-data-field').on('click', function(e) {
                 e.preventDefault();
                 const index = $(this).attr('data-index');
                 const $row = $('#data-field-template').children().first().clone();
@@ -189,7 +189,7 @@
                     }
                 });
 
-                $row.find('.remove-data-field').on('click', function (e) {
+                $row.find('.remove-data-field').on('click', function(e) {
                     e.preventDefault();
                     $(this).closest('.data-field-row').remove();
                 });
@@ -197,7 +197,7 @@
                 $(this).closest('.attachment-entry').find('.data-fields').append($row);
             });
 
-            $card.find('.attachment-type').on('change', function (e) {
+            $card.find('.attachment-type').on('change', function(e) {
                 var val = $(this).val();
                 var $cell = $(this).closest('.attachment-entry').find('.attachment-select');
 
@@ -215,11 +215,11 @@
             });
         }
 
-        $('#attachments .attachment-entry').each(function () {
+        $('#attachments .attachment-entry').each(function() {
             bindAttachmentCard($(this));
         });
 
-        $('#add-attachment').on('click', function (e) {
+        $('#add-attachment').on('click', function(e) {
             e.preventDefault();
             let $template = $('#attachment-template').children().first().clone();
             $template.attr('data-index', nextIndex);
