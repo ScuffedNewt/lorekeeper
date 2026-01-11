@@ -1,5 +1,5 @@
-@if($batch)
-    {!! Form::open(['url' => 'admin/data/batches/trigger/'.$batch->id]) !!}
+@if ($batch)
+    {!! Form::open(['url' => 'admin/data/batches/trigger/' . $batch->id]) !!}
 
     <p>
         You are about to manually trigger the batch <strong>{{ $batch->name }}</strong>.
@@ -7,16 +7,16 @@
     </p>
 
     <h5>Targets</h5>
-    @foreach($batch->targets->groupBy('target_type') as $type => $target)
+    @foreach ($batch->targets->groupBy('target_type') as $type => $target)
         <div class="card p-2 d-block mb-2">
             <strong>{!! $type !!}</strong> :
             {{ $target->count() }}
             <div class="row">
-            @foreach($target as $tar)
-                <div class="col-4 col-md-3">
-                    {!! $tar->target->displayName ? $tar->target->displayName : ($tar->target->name ? $tar->target->name : ($tar->target->title ? $tar->target->title : 'Huh')) !!}
-                </div>
-            @endforeach
+                @foreach ($target as $tar)
+                    <div class="col-4 col-md-3">
+                        {!! $tar->target->displayName ? $tar->target->displayName : ($tar->target->name ? $tar->target->name : ($tar->target->title ? $tar->target->title : 'Huh')) !!}
+                    </div>
+                @endforeach
             </div>
         </div>
     @endforeach

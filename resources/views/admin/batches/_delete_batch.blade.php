@@ -1,5 +1,5 @@
-@if($batch)
-    {!! Form::open(['url' => 'admin/data/batches/delete/'.$batch->id]) !!}
+@if ($batch)
+    {!! Form::open(['url' => 'admin/data/batches/delete/' . $batch->id]) !!}
 
     <p>
         You are about to delete the batch <strong>{{ $batch->name }}</strong>.
