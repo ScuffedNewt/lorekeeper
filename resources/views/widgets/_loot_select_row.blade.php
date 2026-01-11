@@ -91,14 +91,10 @@
         @foreach ($rewardableRecipients as $recipient)
             <div class="rewardable-ids-{{ strtolower($recipient) }}">
                 @foreach (getRewardTypes($showData, $recipient) as $rewardKey => $rewardType)
-                    {!! Form::select($prefix . 'rewardable_id[]',
-                        $rewardLootData[$recipient][$rewardKey] ?? [],
-                        null,
-                        [
-                            'class' => 'form-control object-select ' . strtolower($rewardKey) . '-select',
-                            'placeholder' => 'Select ' . $rewardType
-                        ]
-                    ) !!}
+                    {!! Form::select($prefix . 'rewardable_id[]', $rewardLootData[$recipient][$rewardKey] ?? [], null, [
+                        'class' => 'form-control object-select ' . strtolower($rewardKey) . '-select',
+                        'placeholder' => 'Select ' . $rewardType,
+                    ]) !!}
                 @endforeach
             </div>
         @endforeach
