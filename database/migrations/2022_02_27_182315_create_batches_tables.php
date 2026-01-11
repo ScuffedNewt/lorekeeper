@@ -4,15 +4,11 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateBatchesTables extends Migration
-{
+class CreateBatchesTables extends Migration {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
-    {
+    public function up() {
         Schema::create('batches', function (Blueprint $table) {
             $table->id();
             $table->string('name');
@@ -41,11 +37,8 @@ class CreateBatchesTables extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
-    {
+    public function down() {
         Schema::dropIfExists('batches');
         Schema::dropIfExists('batch_targets');
         Schema::dropIfExists('batch_logs');

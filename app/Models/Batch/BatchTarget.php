@@ -2,11 +2,9 @@
 
 namespace App\Models\Batch;
 
-use Config;
 use App\Models\Model;
 
-class BatchTarget extends Model
-{
+class BatchTarget extends Model {
     /**
      * The attributes that are mass assignable.
      *
@@ -30,8 +28,8 @@ class BatchTarget extends Model
      */
     public static $createRules = [
         'target_type' => 'required',
-        'target_id' => 'required',
-        'batch_id' => 'required',
+        'target_id'   => 'required',
+        'batch_id'    => 'required',
     ];
 
     /**
@@ -41,8 +39,8 @@ class BatchTarget extends Model
      */
     public static $updateRules = [
         'target_type' => 'required',
-        'target_id' => 'required',
-        'batch_id' => 'required',
+        'target_id'   => 'required',
+        'batch_id'    => 'required',
     ];
 
     /**********************************************************************************************
@@ -54,10 +52,8 @@ class BatchTarget extends Model
     /**
      * Get the reward attached to the loot entry.
      */
-    public function target()
-    {
-        switch ($this->target_type)
-        {
+    public function target() {
+        switch ($this->target_type) {
             case 'Item':
                 return $this->belongsTo('App\Models\Item\Item', 'target_id');
             case 'Shop':
@@ -75,7 +71,7 @@ class BatchTarget extends Model
             case 'Character':
                 return $this->belongsTo('App\Models\Character\Character', 'target_id');
 
-            // World Expansion - Uncomment these if you have this extension and want them to be included.
+                // World Expansion - Uncomment these if you have this extension and want them to be included.
             case 'Location':
                 return $this->belongsTo('App\Models\WorldExpansion\Location', 'target_id');
             case 'Event':
@@ -91,11 +87,11 @@ class BatchTarget extends Model
             case 'Figure':
                 return $this->belongsTo('App\Models\WorldExpansion\Figure', 'target_id');
 
-
             case 'None':
                 // Laravel requires a relationship instance to be returned (cannot return null), so returning one that doesn't exist here.
                 return $this->belongsTo('App\Models\Batch\BatchTarget', 'target_id', 'batch_id')->whereNull('batch_id');
         }
+
         return null;
     }
 
@@ -104,7 +100,4 @@ class BatchTarget extends Model
         ACCESSORS
 
     **********************************************************************************************/
-
-
-
 }

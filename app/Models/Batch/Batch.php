@@ -2,15 +2,11 @@
 
 namespace App\Models\Batch;
 
-use Config;
-
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Carbon\Carbon;
-
 use App\Models\Model;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Batch extends Model
-{
+class Batch extends Model {
     use SoftDeletes;
 
     /**
@@ -19,7 +15,7 @@ class Batch extends Model
      * @var array
      */
     protected $fillable = [
-        'name', 'trigger_at'
+        'name', 'trigger_at',
     ];
 
     /**
@@ -70,8 +66,7 @@ class Batch extends Model
     /**
      * Get the targets for this batch.
      */
-    public function targets()
-    {
+    public function targets() {
         return $this->hasMany('App\Models\Batch\BatchTarget', 'batch_id');
     }
 
@@ -81,15 +76,14 @@ class Batch extends Model
 
     **********************************************************************************************/
 
-
     /**
      * Scope a query to only include batches that should be triggered.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeShouldBeTriggered($query)
-    {
+    public function scopeShouldBeTriggered($query) {
         return $query->whereNotNull('trigger_at')->where('trigger_at', '<', Carbon::now());
     }
 
@@ -104,9 +98,8 @@ class Batch extends Model
      *
      * @return string
      */
-    public function getDisplayNameAttribute()
-    {
-        return '<span class="display-batch">'.$this->name.'</span> '.add_help('This batch will trigger available or visibility of '.$this->targets->count().' target' . ($this->targets->count() == 1 ? '' : 's') . '.' );
+    public function getDisplayNameAttribute() {
+        return '<span class="display-batch">'.$this->name.'</span> '.add_help('This batch will trigger available or visibility of '.$this->targets->count().' target'.($this->targets->count() == 1 ? '' : 's').'.');
     }
 
     /**
@@ -114,10 +107,7 @@ class Batch extends Model
      *
      * @return string
      */
-    public function getAssetTypeAttribute()
-    {
+    public function getAssetTypeAttribute() {
         return 'batches';
     }
-
-
 }

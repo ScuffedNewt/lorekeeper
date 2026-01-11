@@ -1,4 +1,5 @@
 <?php
+
 return [
 
     // FORMAT EXAMPLE.
@@ -13,13 +14,12 @@ return [
     // ],
 
     'batch-visibility' => [
-        'key' => 'batch-visibility',
+        'key'      => 'batch-visibility',
         'wiki_key' => 'Batch_Visibility',
         'creators' => json_encode([
             'Uri' => 'https://github.com/preimpression/',
         ]),
         'version' => '1.0.0',
     ],
-
 
 ];

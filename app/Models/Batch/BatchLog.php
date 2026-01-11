@@ -2,22 +2,16 @@
 
 namespace App\Models\Batch;
 
-use Config;
-
-use Carbon\Carbon;
-
 use App\Models\Model;
 
-class BatchLog extends Model
-{
-
+class BatchLog extends Model {
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'batch_name', 'batch_id', 'data', 'staff_id', 'created_at', 'updated_at'
+        'batch_name', 'batch_id', 'data', 'staff_id', 'created_at', 'updated_at',
     ];
 
     /**
@@ -52,11 +46,9 @@ class BatchLog extends Model
     /**
      * Get the staff member who manually triggered this batch.
      */
-    public function staff()
-    {
+    public function staff() {
         return $this->belongsTo('App\Models\User\User', 'staff_id');
     }
-
 
     /**********************************************************************************************
 
@@ -69,10 +61,7 @@ class BatchLog extends Model
      *
      * @return array
      */
-    public function getDataAttribute()
-    {
+    public function getDataAttribute() {
         return json_decode($this->attributes['data'], true);
     }
-
-
 }

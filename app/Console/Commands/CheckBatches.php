@@ -2,11 +2,10 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Services\BatchService;
+use Illuminate\Console\Command;
 
-class CheckBatches extends Command
-{
+class CheckBatches extends Command {
     /**
      * The name and signature of the console command.
      *
@@ -23,11 +22,8 @@ class CheckBatches extends Command
 
     /**
      * Create a new command instance.
-     *
-     * @return void
      */
-    public function __construct()
-    {
+    public function __construct() {
         parent::__construct();
     }
 
@@ -36,8 +32,7 @@ class CheckBatches extends Command
      *
      * @return mixed
      */
-    public function handle()
-    {
+    public function handle() {
         //
         (new BatchService)->updateQueue();
     }
