@@ -10,6 +10,7 @@ use App\Models\Claymore\Gear;
 use App\Models\Claymore\Weapon;
 use App\Models\Currency\Currency;
 use App\Models\Item\Item;
+use App\Models\Loot\LootTable;
 use App\Models\Pet\Pet;
 use App\Models\Skill\Skill;
 use App\Models\Stat\Stat;
@@ -21,6 +22,7 @@ use App\Services\Claymore\GearManager;
 use App\Services\Claymore\WeaponManager;
 use App\Services\CurrencyManager;
 use App\Services\InventoryManager;
+use App\Services\LootManager;
 use App\Services\PetManager;
 use App\Services\SkillManager;
 use App\Services\Stat\ExperienceManager;
@@ -355,5 +357,37 @@ class GrantController extends Controller {
             'trades'         => $item ? $trades : null,
             'submissions'    => $item ? $submissions : null,
         ]);
+    }
+
+    /**
+     * Show the loot table grant page.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getLootTables() {
+        return view('admin.grants.loot_tables', [
+            'users'       => User::orderBy('id')->pluck('name', 'id'),
+            'loot_tables' => LootTable::orderBy('name')->pluck('name', 'id'),
+        ]);
+    }
+
+    /**
+     * Grants or removes loot tables from multiple users.
+     *
+     * @param App\Services\LootManager $service
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function postLootTables(Request $request, LootManager $service) {
+        $data = $request->only(['names', 'loot_table_ids', 'quantities', 'data', 'disallow_transfer', 'notes']);
+        if ($service->grantLootTables($data, Auth::user())) {
+            flash('Loot tables granted successfully.')->success();
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
+        }
+
+        return redirect()->back();
     }
 }

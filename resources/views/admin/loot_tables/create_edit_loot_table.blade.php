@@ -239,8 +239,9 @@
             var $noneSelect = $('#lootRowData').find('.none-select');
 
             refreshChances();
-            $('.lootTableBody .selectize').selectize();
-            attachRemoveListener($('.lootTableBody .remove-loot-button'));
+            $('#lootTableBody .selectize').selectize();
+            attachRemoveListener($('#lootTableBody .remove-loot-button'));
+            attachWeightListener(($('#lootTableBody .loot-weight')));
 
             $('.delete-table-button').on('click', function(e) {
                 e.preventDefault();

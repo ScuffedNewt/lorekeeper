@@ -43,6 +43,9 @@
             <a href="http://wiki.lorekeeper.me/index.php?title=Extensions:Dynamic_Limits"><strong>Dynamic Limits</strong></a> by <a href="https://github.com/ScuffedNewt">ScuffedNewt</a>
         </p>
         <p class="mb-0 col-md-4">
+            <a href="http://wiki.lorekeeper.me/index.php?title=Extensions:Dynamic_Rewards"><strong>Dynamic Rewards</strong></a> by <a href="https://github.com/ScuffedNewt">ScuffedNewt</a>
+        </p>
+        <p class="mb-0 col-md-4">
             <a href="http://wiki.lorekeeper.me/index.php?title=Extensions:Extended_Mentions"><strong>Extended Mentions</strong></a> by <a href="https://github.com/SpeedyD">Speedy</a>
         </p>
         <p class="mb-0 col-md-4">
@@ -56,6 +59,9 @@
         </p>
         <p class="mb-0 col-md-4">
             <a href="http://wiki.lorekeeper.me/index.php?title=Extensions:Masterlist_Sublists"><strong>Masterlist Sublists</strong></a> by <a href="https://github.com/junijwi">Junijwi</a>
+        </p>
+        <p class="mb-0 col-md-4">
+            <a href="https://wiki.lorekeeper.me/index.php?title=Extensions:Multiple_Trait_Subtypes"><strong>Multiple Trait Subtypes</strong></a> by <a href="https://github.com/Draconizations">Fulmine</a>
         </p>
         <p class="mb-0 col-md-4">
             <a href="http://wiki.lorekeeper.me/index.php?title=Extensions:MYO_Item_Tag"><strong>MYO Item Tag</strong></a> by <a href="https://github.com/junijwi">Junijwi</a>

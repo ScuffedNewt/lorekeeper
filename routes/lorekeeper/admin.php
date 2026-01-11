@@ -453,6 +453,9 @@ Route::group(['prefix' => 'grants', 'namespace' => 'Users', 'middleware' => 'pow
     Route::post('skills', 'GrantController@postSkills');
 
     Route::get('item-search', 'GrantController@getItemSearch');
+
+    Route::get('loot-tables', 'GrantController@getLootTables');
+    Route::post('loot-tables', 'GrantController@postLootTables');
 });
 
 // PETS
@@ -717,4 +720,9 @@ Route::group(['prefix' => 'typing', 'middleware' => 'power:edit_data', 'namespac
 // LIMITS
 Route::group(['prefix' => 'limits', 'middleware' => 'power:manage_data'], function () {
     Route::post('/', 'LimitController@postCreateEditLimits');
+});
+
+// REWARDS
+Route::group(['prefix' => 'rewards', 'middleware' => 'power:manage_data'], function () {
+    Route::post('/', 'RewardController@postPopulateRewards');
 });

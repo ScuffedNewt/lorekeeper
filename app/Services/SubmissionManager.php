@@ -84,16 +84,18 @@ class SubmissionManager extends Service {
             $assets = $this->createUserAttachments($submission, $data, $user);
             $userAssets = $assets['userAssets'];
             $promptRewards = $assets['promptRewards'];
+            $characterRewards = $assets['characterRewards'];
 
             $submission->update([
                 'data' => [
-                    'user'    => Arr::only(getDataReadyAssets($userAssets), ['user_items', 'currencies']),
-                    'rewards' => getDataReadyAssets($promptRewards),
+                    'user'              => Arr::only(getDataReadyAssets($userAssets), ['user_items', 'currencies']),
+                    'rewards'           => getDataReadyAssets($promptRewards),
+                    'character_rewards' => getDataReadyAssets($characterRewards),
                 ] + (config('lorekeeper.settings.allow_gallery_submissions_on_prompts') ? ['gallery_submission_id' => $data['gallery_submission_id'] ?? null] : []),
             ]);
 
             // Set characters that have been attached.
-            $this->createCharacterAttachments($submission, $data);
+            $this->createCharacterAttachments($submission, $data, $characterRewards);
 
             return $this->commitReturn($submission);
         } catch (\Exception $e) {
@@ -151,7 +153,8 @@ class SubmissionManager extends Service {
             $assets = $this->createUserAttachments($submission, $data, $user);
             $userAssets = $assets['userAssets'];
             $promptRewards = $assets['promptRewards'];
-            $this->createCharacterAttachments($submission, $data);
+            $characterRewards = $assets['characterRewards'];
+            $this->createCharacterAttachments($submission, $data, $characterRewards);
 
             // Modify submission
             $submission->update([
@@ -159,8 +162,9 @@ class SubmissionManager extends Service {
                 'updated_at'    => Carbon::now(),
                 'comments'      => $data['comments'],
                 'data'          => [
-                    'user'          => Arr::only(getDataReadyAssets($userAssets), ['user_items', 'currencies']),
-                    'rewards'       => getDataReadyAssets($promptRewards),
+                    'user'              => Arr::only(getDataReadyAssets($userAssets), ['user_items', 'currencies']),
+                    'rewards'           => getDataReadyAssets($promptRewards),
+                    'character_rewards' => getDataReadyAssets($characterRewards),
                 ] + (config('lorekeeper.settings.allow_gallery_submissions_on_prompts') ? ['gallery_submission_id' => $data['gallery_submission_id'] ?? null] : []),
             ] + ($isClaim ? [] : ['prompt_id' => $prompt->id]));
 
@@ -771,16 +775,30 @@ class SubmissionManager extends Service {
 
         // Get a list of rewards, then create the submission itself
         $promptRewards = createAssetsArray();
+        $characterRewards = createAssetsArray();
         if ($submission->status == 'Pending' && isset($submission->prompt_id) && $submission->prompt_id) {
             foreach ($submission->prompt->rewards as $reward) {
-                addAsset($promptRewards, $reward->reward, $reward->quantity);
+                if ($reward->rewardable_recipient == 'User') {
+                    if ($reward->rewardable_type == 'Exp' || $reward->rewardable_type == 'Points') {
+                        addAsset($promptRewards, $reward->rewardable_type, $reward->quantity);
+                    } else {
+                        addAsset($promptRewards, $reward->reward, $reward->quantity);
+                    }
+                } elseif ($reward->rewardable_recipient == 'Character') {
+                    if ($reward->rewardable_type == 'Exp' || $reward->rewardable_type == 'Points') {
+                        addAsset($characterRewards, $reward->rewardable_type, $reward->quantity);
+                    } else {
+                        addAsset($characterRewards, $reward->reward, $reward->quantity);
+                    }
+                }
             }
         }
         $promptRewards = mergeAssetsArrays($promptRewards, $this->processRewards($data, false));
 
         return [
-            'userAssets'    => $userAssets,
-            'promptRewards' => $promptRewards,
+            'userAssets'       => $userAssets,
+            'promptRewards'    => $promptRewards,
+            'characterRewards' => $characterRewards,
         ];
     }
 
@@ -796,7 +814,22 @@ class SubmissionManager extends Service {
         $promptRewards = mergeAssetsArrays($promptRewards, parseAssetData($assets['rewards']));
         if (isset($submission->prompt_id) && $submission->prompt_id) {
             foreach ($submission->prompt->rewards as $reward) {
+                if ($reward->rewardable_recipient != 'User') {
+                    continue;
+                }
                 removeAsset($promptRewards, $reward->reward, $reward->quantity);
+            }
+
+            // Remove character default rewards
+            foreach ($submission->characters as $c) {
+                $cRewards = parseAssetData($c->data);
+                foreach ($submission->prompt->rewards as $reward) {
+                    if ($reward->rewardable_recipient != 'Character') {
+                        continue;
+                    }
+                    removeAsset($cRewards, $reward->reward, $reward->quantity);
+                }
+                $c->update(['data' => getDataReadyAssets($cRewards)]);
             }
         }
 
@@ -806,10 +839,11 @@ class SubmissionManager extends Service {
     /**
      * Creates character attachments for a submission.
      *
-     * @param mixed $submission the submission object
-     * @param mixed $data       the data for creating character attachments
+     * @param mixed      $submission     the submission object
+     * @param mixed      $data           the data for creating character attachments
+     * @param mixed|null $defaultRewards
      */
-    private function createCharacterAttachments($submission, $data) {
+    private function createCharacterAttachments($submission, $data, $defaultRewards = null) {
         // The character identification comes in both the slug field and as character IDs
         // that key the reward ID/quantity arrays.
         // We'll need to match characters to the rewards for them.
@@ -884,6 +918,10 @@ class SubmissionManager extends Service {
                 'skills'       => $skills,
                 'elements'     => $elements,
             ], true);
+
+            if ($defaultRewards) {
+                $assets = mergeAssetsArrays($assets, $defaultRewards);
+            }
 
             // Now we have a clean set of assets (redundant data is gone, duplicate entries are merged)
             // so we can attach the character to the submission

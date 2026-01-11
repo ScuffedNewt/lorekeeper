@@ -140,6 +140,10 @@ return [
                 'name' => 'Skill Grants',
                 'url'  => 'admin/grants/skills',
             ],
+            [
+                'name' => 'Loot Table Grants',
+                'url'  => 'admin/grants/loot-tables',
+            ],
         ],
     ],
     'Masterlist' => [

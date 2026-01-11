@@ -5,12 +5,14 @@ namespace App\Http\Controllers\Users;
 use App\Facades\Settings;
 use App\Http\Controllers\Controller;
 use App\Models\Character\Character;
+use App\Models\Currency\Currency;
 use App\Models\Element\Element;
 use App\Models\Gallery\GalleryCollaborator;
 use App\Models\Gallery\GallerySubmission;
 use App\Models\Item\Item;
 use App\Models\Item\ItemCategory;
 use App\Models\Prompt\Prompt;
+use App\Models\Raffle\Raffle;
 use App\Models\Submission\Submission;
 use App\Models\User\User;
 use App\Models\User\UserItem;
@@ -114,6 +116,7 @@ class SubmissionController extends Controller {
         ] + ($closed ? [] : [
             'submission'             => new Submission,
             'prompts'                => Prompt::active()->sortAlphabetical()->pluck('name', 'id')->toArray(),
+            'characterCurrencies'    => Currency::where('is_character_owned', 1)->orderBy('sort_character', 'DESC')->pluck('name', 'id'),
             'categories'             => ItemCategory::visible(Auth::user() ?? null)->orderBy('sort', 'DESC')->get(),
             'item_filter'            => $item_filter,
             'items'                  => Item::orderBy('name')->released()->pluck('name', 'id'),
