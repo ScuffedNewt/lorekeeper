@@ -111,6 +111,9 @@
     {!! Form::close() !!}
 
     @if ($prompt->id)
+        @include('widgets._add_attachments', [
+            'object' => $prompt,
+        ])
         @include('widgets._add_limits', [
             'object' => $prompt,
             'hideAutoUnlock' => true,
