@@ -4,16 +4,14 @@ namespace App\Models\Adoption;
 
 use App\Models\Model;
 
-class AdoptionLog extends Model
-{
-
+class AdoptionLog extends Model {
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'adoption_id', 'character_id', 'user_id', 'currency_id', 'cost', 'adopt_id', 'quantity'
+        'adoption_id', 'character_id', 'user_id', 'currency_id', 'cost', 'adopt_id', 'quantity',
     ];
 
     /**
@@ -29,66 +27,61 @@ class AdoptionLog extends Model
      * @var string
      */
     public $timestamps = true;
-    
+
     /**
      * Validation rules for creation.
      *
      * @var array
      */
     public static $createRules = [
-        'stock_id' => 'required',
+        'stock_id'    => 'required',
         'adoption_id' => 'required',
-        'bank' => 'required|in:user,character'
+        'bank'        => 'required|in:user,character',
     ];
 
     /**********************************************************************************************
-    
+
         RELATIONS
 
     **********************************************************************************************/
-    
+
     /**
      * Get the user who purchased the item.
      */
-    public function user() 
-    {
+    public function user() {
         return $this->belongsTo('App\Models\User\User');
     }
-    
+
     /**
      * Get the character who purchased the item.
      */
-    public function character() 
-    {
+    public function character() {
         return $this->belongsTo('App\Models\Character\Character');
     }
 
-      /**
+    /**
      * Get the purchased character.
      */
-    public function adopt() 
-    {
+    public function adopt() {
         return $this->belongsTo('App\Models\Character\Character', 'adopt_id');
     }
 
     /**
      * Get the adoption the item was purchased from.
      */
-    public function adoption() 
-    {
+    public function adoption() {
         return $this->belongsTo('App\Models\Adoption\Adoption');
     }
 
     /**
      * Get the currency used to purchase the item.
      */
-    public function currency() 
-    {
+    public function currency() {
         return $this->belongsTo('App\Models\Currency\Currency');
     }
 
     /**********************************************************************************************
-    
+
         ACCESSORS
 
     **********************************************************************************************/
@@ -98,8 +91,7 @@ class AdoptionLog extends Model
      *
      * @return string
      */
-    public function getItemDataAttribute()
-    {
-        return 'Purchased from '.$this->adoption->name.' by '.($this->character_id ? $this->character->slug . ' (owned by ' . $this->user->name . ')' : $this->user->displayName) . ' for ' . $this->cost . ' ' . $this->currency->name . '.';
+    public function getItemDataAttribute() {
+        return 'Purchased from '.$this->adoption->name.' by '.($this->character_id ? $this->character->slug.' (owned by '.$this->user->name.')' : $this->user->displayName).' for '.$this->cost.' '.$this->currency->name.'.';
     }
 }

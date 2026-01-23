@@ -4,16 +4,14 @@ namespace App\Models\Adoption;
 
 use App\Models\Model;
 
-class AdoptionCurrency extends Model
-{
-
+class AdoptionCurrency extends Model {
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'stock_id', 'currency_id', 'cost'
+        'stock_id', 'currency_id', 'cost',
     ];
 
     /**
@@ -22,11 +20,11 @@ class AdoptionCurrency extends Model
      * @var string
      */
     protected $table = 'adoption_currency';
-    
+
     public $timestamps = false;
 
     /**********************************************************************************************
-    
+
         RELATIONS
 
     **********************************************************************************************/
@@ -34,17 +32,14 @@ class AdoptionCurrency extends Model
     /**
      * Get the adopt attached to this.
      */
-    public function adopt() 
-    {
+    public function adopt() {
         return $this->belongsTo('App\Models\Adoption\AdoptionStock', 'stock_id');
     }
 
     /**
      * Get the currency attached to this.
      */
-    public function currency() 
-    {
+    public function currency() {
         return $this->belongsTo('App\Models\Currency\Currency', 'currency_id');
     }
-
 }

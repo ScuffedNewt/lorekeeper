@@ -183,7 +183,7 @@ Route::group(['prefix' => 'data', 'namespace' => 'Data', 'middleware' => 'power:
     Route::post('stock/{id}', 'AdoptionController@postEditAdoptionStock');
     Route::post('stock/create/new', 'AdoptionController@postCreateStock');
     Route::post('stock/delete/{id}', 'AdoptionController@postDeleteStock');
-    
+
     // FEATURES (TRAITS)
     Route::get('trait-categories', 'FeatureController@getIndex');
     Route::get('trait-categories/create', 'FeatureController@getCreateFeatureCategory');
@@ -431,7 +431,7 @@ Route::group(['prefix' => 'claims', 'middleware' => 'power:manage_submissions'],
 });
 
 // SURRENDERS
-Route::group(['prefix' => 'surrenders', 'middleware' => ['power:manage_submissions', 'power:manage_characters']], function() {
+Route::group(['prefix' => 'surrenders', 'middleware' => ['power:manage_submissions', 'power:manage_characters']], function () {
     Route::get('/', 'SurrenderController@getSurrenderIndex');
     Route::get('/{status}', 'SurrenderController@getSurrenderIndex')->where('status', 'pending|approved|rejected');
     Route::get('edit/{id}', 'SurrenderController@getSurrender');

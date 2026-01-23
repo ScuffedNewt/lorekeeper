@@ -2,18 +2,16 @@
 
 namespace App\Models\Adoption;
 
-use Config;
 use App\Models\Model;
 
-class Adoption extends Model
-{
+class Adoption extends Model {
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'name', 'has_image', 'description', 'parsed_description', 'is_active'
+        'name', 'has_image', 'description', 'parsed_description', 'is_active',
     ];
 
     /**
@@ -22,31 +20,31 @@ class Adoption extends Model
      * @var string
      */
     protected $table = 'adoptions';
-    
+
     /**
      * Validation rules for creation.
      *
      * @var array
      */
     public static $createRules = [
-        'name' => 'required|unique:item_categories|between:3,25',
+        'name'        => 'required|unique:item_categories|between:3,25',
         'description' => 'nullable',
-        'image' => 'mimes:png',
+        'image'       => 'mimes:png',
     ];
-    
+
     /**
      * Validation rules for updating.
      *
      * @var array
      */
     public static $updateRules = [
-        'name' => 'required|between:3,25',
+        'name'        => 'required|between:3,25',
         'description' => 'nullable',
-        'image' => 'mimes:png',
+        'image'       => 'mimes:png',
     ];
 
     /**********************************************************************************************
-    
+
         RELATIONS
 
     **********************************************************************************************/
@@ -54,32 +52,29 @@ class Adoption extends Model
     /**
      * Get the adoption stock.
      */
-    public function stock() 
-    {
+    public function stock() {
         return $this->hasMany('App\Models\Adoption\AdoptionStock');
     }
-    
+
     /**
      * Get the adoption stock as items for display purposes.
      */
-    public function displayStock()
-    {
-        return $this->belongsToMany('App\Models\Character\Character', 'adoption_stock')->withPivot('character_id', 'use_user_bank', 'use_character_bank', 'is_limited_stock', 'quantity',  'id');
+    public function displayStock() {
+        return $this->belongsToMany('App\Models\Character\Character', 'adoption_stock')->withPivot('character_id', 'use_user_bank', 'use_character_bank', 'is_limited_stock', 'quantity', 'id');
     }
 
     /**********************************************************************************************
-    
+
         ACCESSORS
 
     **********************************************************************************************/
-    
+
     /**
      * Displays the adoption's name, linked to its purchase page.
      *
      * @return string
      */
-    public function getDisplayNameAttribute()
-    {
+    public function getDisplayNameAttribute() {
         return '<a href="'.$this->url.'" class="display-adoption">'.$this->name.'</a>';
     }
 
@@ -88,8 +83,7 @@ class Adoption extends Model
      *
      * @return string
      */
-    public function getImageDirectoryAttribute()
-    {
+    public function getImageDirectoryAttribute() {
         return 'images/data/adoptions';
     }
 
@@ -98,9 +92,8 @@ class Adoption extends Model
      *
      * @return string
      */
-    public function getAdoptionImageFileNameAttribute()
-    {
-        return $this->id . '-image.png';
+    public function getAdoptionImageFileNameAttribute() {
+        return $this->id.'-image.png';
     }
 
     /**
@@ -108,20 +101,21 @@ class Adoption extends Model
      *
      * @return string
      */
-    public function getAdoptionImagePathAttribute()
-    {
+    public function getAdoptionImagePathAttribute() {
         return public_path($this->imageDirectory);
     }
-    
+
     /**
      * Gets the URL of the model's image.
      *
      * @return string
      */
-    public function getAdoptionImageUrlAttribute()
-    {
-        if (!$this->has_image) return null;
-        return asset($this->imageDirectory . '/' . $this->adoptionImageFileName);
+    public function getAdoptionImageUrlAttribute() {
+        if (!$this->has_image) {
+            return null;
+        }
+
+        return asset($this->imageDirectory.'/'.$this->adoptionImageFileName);
     }
 
     /**
@@ -129,8 +123,7 @@ class Adoption extends Model
      *
      * @return string
      */
-    public function getUrlAttribute()
-    {
+    public function getUrlAttribute() {
         return url('adoptions');
     }
 }

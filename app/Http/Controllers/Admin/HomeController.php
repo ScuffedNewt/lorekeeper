@@ -43,7 +43,7 @@ class HomeController extends Controller {
             'galleryCurrencyAwards'  => $galleryCurrencyAwards,
             'gallerySubmissionCount' => GallerySubmission::collaboratorApproved()->where('status', 'Pending')->count(),
             'galleryAwardCount'      => GallerySubmission::requiresAward()->where('is_valued', 0)->count(),
-            'surrenderCount' => Surrender::where('status', 'Pending')->count(),
+            'surrenderCount'         => Surrender::where('status', 'Pending')->count(),
         ]);
     }
 

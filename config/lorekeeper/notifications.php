@@ -286,18 +286,18 @@ return [
     ],
     // SURRENDER_ACCEPTED
     218 => [
-        'name' => 'Surrender Approved',
+        'name'    => 'Surrender Approved',
         'message' => 'Your surrender (#{surrender_id}) was approved by <a href="{staff_url}">{staff_name}</a>. (<a href="{url}">View Surrender</a>)',
-        'url' => 'surrender/view/{surrender_id}'
+        'url'     => 'surrender/view/{surrender_id}',
     ],
 
     // surrenders_REJECTED
     219 => [
-        'name' => 'Surrender Rejected',
+        'name'    => 'Surrender Rejected',
         'message' => 'Your surrender (#{surrender_id}) was rejected by <a href="{staff_url}">{staff_name}</a>. (<a href="{url}">View Surrender</a>)',
-        'url' => 'surrender/view/{surrender_id}'
+        'url'     => 'surrender/view/{surrender_id}',
     ],
-    
+
     // BOOKMARK_GIFT_WRITING
     39  => [
         'message' => 'A character you have bookmarked (<a href="{character_url}">{character_name}</a>) has had its Gift Writing Allowed status changed. (<a href="{url}">View Bookmarks</a>)',

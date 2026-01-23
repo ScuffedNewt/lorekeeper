@@ -68,7 +68,7 @@ class AddSiteSettings extends Command {
         $this->addSiteSetting('design_votes_needed', 3, 'Number of approval votes needed for a design update or MYO submission to be considered as having approval.');
 
         $this->addSiteSetting('admin_user', 1, 'ID of the site\'s admin user.');
-		
+
         $this->addSiteSetting('adopts_user', 1, 'ID of the site\'s adoption center user.');
 
         $this->addSiteSetting('gallery_submissions_open', 1, '0: Gallery submissions closed, 1: Gallery submissions open.');

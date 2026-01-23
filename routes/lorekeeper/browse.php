@@ -126,7 +126,7 @@ Route::group(['prefix' => 'shops'], function () {
     Route::get('{id}/{stockId}', 'ShopController@getShopStock')->where(['id' => '[0-9]+', 'stockId' => '[0-9]+']);
 });
 
-Route::group(['prefix' => 'adoptions'], function() {
+Route::group(['prefix' => 'adoptions'], function () {
     Route::get('/', 'AdoptionController@getAdoption');
     Route::get('{id}/{stockId}', 'AdoptionController@getAdoptionStock')->where(['id' => '[0-9]+', 'stockId' => '[0-9]+']);
 });
@@ -154,7 +154,7 @@ Route::group(['prefix' => 'submissions', 'namespace' => 'Users'], function () {
 Route::group(['prefix' => 'claims', 'namespace' => 'Users'], function () {
     Route::get('view/{id}', 'SubmissionController@getClaim');
 });
-Route::group(['prefix' => 'surrender'], function() {
+Route::group(['prefix' => 'surrender'], function () {
     Route::get('view/{id}', 'SurrenderController@getPublicSurrender');
 });
 

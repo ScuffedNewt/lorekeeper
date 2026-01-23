@@ -1,18 +1,14 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-class AddSurrenderCurrency extends Migration
-{
+class AddSurrenderCurrency extends Migration {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
-    {
+    public function up() {
         //
         Schema::table('surrenders', function (Blueprint $table) {
             $table->integer('currency_id')->nullable();
@@ -21,11 +17,8 @@ class AddSurrenderCurrency extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
-    {
+    public function down() {
         //
         schema::table('surrenders', function (Blueprint $table) {
             $table->dropColumn('currency_id');

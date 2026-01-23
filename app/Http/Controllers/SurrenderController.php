@@ -2,37 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use Auth;
-use Settings;
-
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-
-use App\Services\SurrenderManager;
-
-use App\Models\Rarity;
 use App\Models\Adoption\Adoption;
 use App\Models\Adoption\Surrender;
-use App\Models\Adoption\AdoptionStock;
-use App\Models\Adoption\AdoptionLog;
-use App\Models\Adoption\AdoptionCurrency;
 use App\Models\Character\Character;
-use App\Models\Character\CharacterCategory;
 use App\Models\Currency\Currency;
+use App\Models\Rarity;
+use App\Services\SurrenderManager;
+use Auth;
+use Illuminate\Http\Request;
 
-class SurrenderController extends Controller
-{
+class SurrenderController extends Controller {
     /**
      * Shows the user's surrender log.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function getIndex(Request $request)
-    {
+    public function getIndex(Request $request) {
         $surrenders = Surrender::where('user_id', Auth::user()->id);
         $type = $request->get('type');
-        if(!$type) $type = 'Pending';
+        if (!$type) {
+            $type = 'Pending';
+        }
 
         $surrenders = $surrenders->where('status', ucfirst($type));
 
@@ -43,55 +33,59 @@ class SurrenderController extends Controller
 
     //
     /**
-     * Shows surrender form
+     * Shows surrender form.
      *
-     * @param  int  $id
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function getSurrender()
-    {
+    public function getSurrender() {
         $characters = Character::orderBy('id')->where('user_id', Auth::user()->id)->where(function ($query) {
             return $query->where('is_sellable', 1)->orWhere('is_tradeable', 1)->orwhere('is_giftable', 1);
         })->get()->pluck('fullName', 'id');
         $adoption = Adoption::where('id', 1)->where('is_active', 1)->first();
-        if(!$adoption) abort(404);
+        if (!$adoption) {
+            abort(404);
+        }
+
         return view('adoptions.surrender_form', [
-            'adoption' => $adoption,
+            'adoption'   => $adoption,
             'characters' => $characters,
-            'adoptions' => Adoption::where('is_active', 1)->get(),
+            'adoptions'  => Adoption::where('is_active', 1)->get(),
             'currencies' => Currency::orderBy('name')->pluck('name', 'id'),
         ]);
     }
+
     /**
-     * posts surrender form
+     * posts surrender form.
      *
-     * @param  int  $id
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function postSurrender(Request $request, SurrenderManager $service) {
-
         $request->validate(Surrender::$createRules);
         $data = $request->only(['character_id', 'notes', 'worth', 'currency_id']);
 
-        if($service->createSurrender($data, Auth::user())) {
+        if ($service->createSurrender($data, Auth::user())) {
             flash('Surrender submitted successfully.')->success();
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
         }
-        else {
-            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
-        }
+
         return redirect()->to('surrenders');
     }
 
     /**
      * Shows the surrender page.
      *
-     * @param  int  $id
+     * @param int $id
+     *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function getPublicSurrender($id)
-    {
+    public function getPublicSurrender($id) {
         $surrender = Surrender::viewable(Auth::user())->where('id', $id)->first();
-        if(!$surrender) abort(404);
+        if (!$surrender) {
+            abort(404);
+        }
         $features = $surrender->character->image->features()->get();
 
         $totalcost = 0;
@@ -99,24 +93,23 @@ class SurrenderController extends Controller
             $rarity = Rarity::where('id', $traits->rarity_id)->first();
 
             switch ($rarity->name) {
-
                 case 'common':
                     $totalcost += 10;
-                break;
+                    break;
                 case 'uncommon':
                     $totalcost += 50;
-                break;
+                    break;
                 case 'rare':
                     $totalcost += 100;
-                break;
-                }
+                    break;
             }
+        }
+
         return view('home.surrender', [
-            'estimate' => $totalcost,
+            'estimate'  => $totalcost,
             'surrender' => $surrender,
-            'user' => $surrender->user,
-            'worth' => Currency::find($surrender->currency_id),
+            'user'      => $surrender->user,
+            'worth'     => Currency::find($surrender->currency_id),
         ]);
     }
-
 }
