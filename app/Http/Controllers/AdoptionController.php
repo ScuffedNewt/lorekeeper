@@ -36,8 +36,10 @@ class AdoptionController extends Controller
      */
     public function getAdoption()
     {
-        $adoption = Adoption::where('id', 1)->where('is_active', 1)->first();
+        $adoption = Adoption::orderBy('id', 'ASC')->first();
         if(!$adoption) abort(404);
+        //check if the adoption center is active
+        if(!$adoption->is_active) abort(404);
         return view('adoptions.adoption', [
             'adoption' => $adoption,
             'adoptions' => Adoption::where('is_active', 1)->get(),
@@ -56,7 +58,9 @@ class AdoptionController extends Controller
      */
     public function getAdoptionStock(AdoptionManager $service, $id, $stockId)
     {
-        $adoption = Adoption::where('id', $id)->where('is_active', 1)->first();
+        $adoption = Adoption::orderBy('id', 'ASC')->first();
+        //check if the adoption center is active
+        if(!$adoption->is_active) abort(404);
         $stock = AdoptionStock::with('character')->where('character_id', $stockId)->where('adoption_id', $id)->first();
         if(!$adoption) abort(404);
         return view('adoptions._stock_modal', [
@@ -93,8 +97,7 @@ class AdoptionController extends Controller
     {
         return view('adoptions.purchase_history', [
             'logs' => Auth::user()->getAdoptionLogs(0),
-            'adoptions' => Adoption::where('is_active', 1)->get(),
-            'adoption' => Adoption::find(1)
+            'adoption' => Adoption::orderBy('id', 'ASC')->first()
         ]);
     }
 }

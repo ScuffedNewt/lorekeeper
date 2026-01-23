@@ -184,7 +184,7 @@ return [
             ],
             [
                 'name' => 'Adoption Center',
-                'url' => 'admin/data/adoptions/edit/1'
+                'url' => 'admin/data/adoptions'
             ],
             [
                 'name' => 'Adopts',

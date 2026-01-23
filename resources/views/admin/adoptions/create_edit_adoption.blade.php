@@ -9,7 +9,7 @@
     Edit Adoption
 </h1>
 
-{!! Form::open(['url' => 'admin/data/adoptions/edit/'.$adoption->id, 'files' => true]) !!}
+{!! Form::open(['url' => 'admin/data/adoptions/edit', 'files' => true]) !!}
 
 <h3>Basic Information</h3>
 

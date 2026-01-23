@@ -1,14 +1,10 @@
 <?php namespace App\Services;
 
 use App\Services\Service;
-
-use DB;
-use Config;
-use Settings;
-
 use App\Models\Adoption\Adoption;
 use App\Models\Adoption\AdoptionStock;
 use App\Models\Adoption\AdoptionCurrency;
+use Illuminate\Support\Facades\DB;
 
 class AdoptionService extends Service
 {
@@ -71,15 +67,18 @@ class AdoptionService extends Service
      * @param  \App\Models\User\User  $user
      * @return bool|\App\Models\Adoption\Adoption
      */
-    public function createAdoptionStock($adoption, $data)
+    public function createAdoptionStock($data)
     {
         DB::beginTransaction();
 
         try {
 
-            if(!$data['cost']) throw new \Exception("The character is missing a cost.");
+            $adoption = Adoption::orderBy('id', 'ASC')->first();
+
+            if(!isset($data['cost'])) throw new \Exception("The character is missing a cost.");
+            if(!isset($data['currency_id'])) throw new \Exception("The character is missing a currency type.");
             // Validation
-            $data['adoption_id'] = 1;
+            $data['adoption_id'] = $adoption->id;
             if(!isset($data['use_user_bank'])) $data['use_user_bank'] = 0;
             if(!isset($data['use_character_bank'])) $data['use_character_bank'] = 0;
             if(!isset($data['is_visible'])) $data['is_visible'] = 0;
@@ -110,8 +109,8 @@ class AdoptionService extends Service
         DB::beginTransaction();
 
         try {
-            if(!$data['cost']) throw new \Exception("The character is missing a cost.");
-            if(!$data['currency_id']) throw new \Exception("The character is missing a currency type.");
+            if(!isset($data['cost'])) throw new \Exception("The character is missing a cost.");
+            if(!isset($data['currency_id'])) throw new \Exception("The character is missing a currency type.");
             if(AdoptionStock::where('character_id', $data['character_id'])->where('id', '!=', $id)->exists()) throw new \Exception("This character is already in another stock!");
 
             if(!isset($data['is_visible'])) $data['is_visible'] = 0;
@@ -119,8 +118,9 @@ class AdoptionService extends Service
             $this->populateCosts(array_only($data, ['currency_id', 'cost']), $id);
 
             $stock = AdoptionStock::find($id);
+            $adoption = Adoption::orderBy('id', 'ASC')->first();
 
-            $stock->adoption_id = 1;
+            $stock->adoption_id = $adoption->id;
             $stock->character_id = $data['character_id'];
             $stock->use_user_bank = isset($data['use_user_bank']);
             $stock->use_character_bank = isset($data['use_character_bank']);

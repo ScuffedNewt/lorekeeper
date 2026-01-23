@@ -1,18 +1,17 @@
 <?php namespace App\Services;
 
+use App\Facades\Settings;
 use App\Services\Service;
-
-use DB;
-use Config;
-use Settings;
 
 use App\Models\Character\Character;
 use App\Models\Adoption\Adoption;
 use App\Models\Adoption\AdoptionStock;
 use App\Models\Adoption\AdoptionLog;
 use App\Models\Adoption\AdoptionCurrency;
+use App\Models\Rank\Rank;
 use App\Models\User\User;
 use App\Services\CharacterManager;
+use Illuminate\Support\Facades\DB;
 
 class AdoptionManager extends Service
 {
@@ -97,7 +96,10 @@ class AdoptionManager extends Service
             $data['recipient_id'] = $user->id;
             $data['reason'] = 'Bought from adoption center';
             $adopt = Character::find($adoptionStock->character_id);
-            $admin = User::find(1);
+            //there's a chance the adoption center user isn't an admin, so
+            //using the same logic as SetupAdminUser instead
+            $adminRank = Rank::orderBy('sort', 'DESC')->first();
+            $admin = User::where('rank_id', $adminRank->id)->first();
             
             if(!(new CharacterManager)->adminTransfer($data, $adopt, $admin)) {
                 throw new \Exception("Failed to transfer character.");

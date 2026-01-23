@@ -2,11 +2,8 @@
 
 namespace App\Http\Controllers\Admin\Data;
 
+use App\Facades\Settings;
 use Illuminate\Http\Request;
-
-use Settings;
-use Auth;
-
 use App\Models\Adoption\Adoption;
 use App\Models\Adoption\AdoptionStock;
 use App\Models\Character\Character;
@@ -16,6 +13,7 @@ use App\Models\User\User;
 use App\Services\AdoptionService;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class AdoptionController extends Controller
 {
@@ -27,19 +25,6 @@ class AdoptionController extends Controller
     | Handles creation/editing of adoptions and adoption stock.
     |
     */
-
-    /**
-     * Shows the adoption index.
-     *
-     * @return \Illuminate\Contracts\Support\Renderable
-     */
-    public function getIndex()
-    {
-        return view('admin.adoptions.adoptions', [
-            'adoptions' => Adoption::get(),
-            'adoptioncenter' => User::find(intval(Settings::get('adopts_user'))),
-        ]);
-    }
 
     /**
      * Gets adopt stock index
@@ -95,9 +80,9 @@ class AdoptionController extends Controller
      * @param  int  $id
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function getEditAdoption($id)
+    public function getEditAdoption()
     {
-        $adoption = Adoption::find($id);
+        $adoption = Adoption::orderBy('id', 'ASC')->first();
         if(!$adoption) abort(404);
         return view('admin.adoptions.create_edit_adoption', [
             'adoption' => $adoption,
@@ -114,17 +99,19 @@ class AdoptionController extends Controller
      * @param  int|null                  $id
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function postCreateEditAdoption(Request $request, AdoptionService $service, $id = null)
+    public function postCreateEditAdoption(Request $request, AdoptionService $service)
     {
-        $id ? $request->validate(Adoption::$updateRules) : $request->validate(Adoption::$createRules);
+        $adoption = Adoption::orderBy('id', 'ASC')->first();
+        $adoption->id ? $request->validate(Adoption::$updateRules) : $request->validate(Adoption::$createRules);
         $data = $request->only([
             'name', 'description', 'image', 'remove_image', 'is_active'
         ]);
-        if($id && $service->updateAdoption(Adoption::find($id), $data, Auth::user())) {
+        if($service->updateAdoption($adoption, $data, Auth::user())) {
             flash('Adoption updated successfully.')->success();
-        }
-        else {
-            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
         }
         return redirect()->back();
     }
@@ -143,12 +130,13 @@ class AdoptionController extends Controller
             'adoption_id', 'character_id', 'currency_id', 'cost', 'use_user_bank', 'use_character_bank', 'is_visible'
         ]);
 
-        if($service->createAdoptionStock(Adoption::find(1), $data)) {
+        if($service->createAdoptionStock($data)) {
             flash('Adoption stock updated successfully.')->success();
             return redirect()->to('admin/data/stock');
-        }
-        else {
-            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
         }
         return redirect()->back();
     }
@@ -167,9 +155,10 @@ class AdoptionController extends Controller
         if($service->deleteStock($id)) {
             flash('Adoption stock deleted successfully.')->success();
             return redirect()->to('admin/data/stock');
-        }
-        else {
-            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
         }
         return redirect()->back();
     }
@@ -190,10 +179,10 @@ class AdoptionController extends Controller
 
         if($service->updateAdoptionStock(Adoption::find(1), $data, $id)) {
             flash('Adoption stock updated successfully.')->success();
-            return redirect()->back();
-        }
-        else {
-            foreach($service->errors()->getMessages()['error'] as $error) flash($error)->error();
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
         }
         return redirect()->back();
     }
