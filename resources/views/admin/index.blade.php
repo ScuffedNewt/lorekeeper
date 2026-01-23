@@ -200,6 +200,25 @@
                     </div>
                 </div>
             @endif
+            @if(Auth::user()->hasPower('manage_characters') && Auth::user()->hasPower('manage_submissions'))
+            <div class="col-sm-6">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Surrender Submissions @if($surrenderCount)<span class="badge badge-primary">{{ $surrenderCount }}</span>@endif</h5>
+                        <p class="card-text">
+                            @if($surrenderCount)
+                                {{ $surrenderCount }} surrender{{ $surrenderCount == 1 ? '' : 's' }} awaiting processing.
+                            @else
+                                The surrender queue is clear. Hooray!
+                            @endif
+                        </p>
+                        <div class="text-right">
+                            <a href="{{ url('admin/surrenders/pending') }}" class="card-link">View Queue <span class="fas fa-caret-right ml-1"></span></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endif
         @endif
     </div>
 @endsection

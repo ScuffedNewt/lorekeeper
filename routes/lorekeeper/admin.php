@@ -172,6 +172,17 @@ Route::group(['prefix' => 'data', 'namespace' => 'Data', 'middleware' => 'power:
     Route::post('shops/delete/{id}', 'ShopController@postDeleteShop');
     Route::post('shops/sort', 'ShopController@postSortShop');
 
+    // ADOPTIONS
+    Route::get('adoptions', 'AdoptionController@getIndex');
+    Route::get('stock', 'AdoptionController@getStockIndex');
+    Route::get('adoptions/edit/{id}', 'AdoptionController@getEditAdoption');
+    Route::get('stock/create', 'AdoptionController@getCreateStock');
+    Route::get('stock/edit/{id}', 'AdoptionController@getEditStock');
+    Route::post('adoptions/edit/{id?}', 'AdoptionController@postCreateEditAdoption');
+    Route::post('stock/{id}', 'AdoptionController@postEditAdoptionStock');
+    Route::post('stock/create/new', 'AdoptionController@postCreateStock');
+    Route::post('stock/delete/{id}', 'AdoptionController@postDeleteStock');
+    
     // FEATURES (TRAITS)
     Route::get('trait-categories', 'FeatureController@getIndex');
     Route::get('trait-categories/create', 'FeatureController@getCreateFeatureCategory');
@@ -416,6 +427,14 @@ Route::group(['prefix' => 'claims', 'middleware' => 'power:manage_submissions'],
     Route::get('/{status}', 'SubmissionController@getClaimIndex')->where('status', 'pending|approved|rejected');
     Route::get('edit/{id}', 'SubmissionController@getClaim');
     Route::post('edit/{id}/{action}', 'SubmissionController@postSubmission')->where('action', 'approve|reject|cancel');
+});
+
+// SURRENDERS
+Route::group(['prefix' => 'surrenders', 'middleware' => ['power:manage_submissions', 'power:manage_characters']], function() {
+    Route::get('/', 'SurrenderController@getSurrenderIndex');
+    Route::get('/{status}', 'SurrenderController@getSurrenderIndex')->where('status', 'pending|approved|rejected');
+    Route::get('edit/{id}', 'SurrenderController@getSurrender');
+    Route::post('edit/{id}/{action}', 'SurrenderController@postSurrender')->where('action', 'approve|reject');
 });
 
 // SUBMISSIONS

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Facades\Settings;
 use App\Http\Controllers\Controller;
 use App\Models\AdminLog;
+use App\Models\Adoption\Surrender;
 use App\Models\Character\CharacterDesignUpdate;
 use App\Models\Character\CharacterTransfer;
 use App\Models\Currency\Currency;
@@ -42,6 +43,7 @@ class HomeController extends Controller {
             'galleryCurrencyAwards'  => $galleryCurrencyAwards,
             'gallerySubmissionCount' => GallerySubmission::collaboratorApproved()->where('status', 'Pending')->count(),
             'galleryAwardCount'      => GallerySubmission::requiresAward()->where('is_valued', 0)->count(),
+            'surrenderCount' => Surrender::where('status', 'Pending')->count(),
         ]);
     }
 

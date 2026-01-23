@@ -53,6 +53,10 @@ class AddSiteSettings extends Command {
 
         $this->addSiteSetting('is_myos_open', 1, '0: MYO slots cannot be submitted for design approval, 1: MYO slots can be submitted for approval.');
 
+        $this->addSiteSetting('is_surrenders_open', 1, '0: Characters can not be surrendered by users to the adoption center, 1: Characters can be submitted to surrender queue.');
+
+        $this->addSiteSetting('calculate_by_traits', 0, '0: Characters must have currency be added manually, 1: Characters are valued automaticall by traits. THIS MUST BE HARDCODED. The controller has been commented for ease.');
+
         $this->addSiteSetting('is_design_updates_open', 1, '0: Characters cannot be submitted for design update approval, 1: Characters can be submitted for design update approval.');
 
         $this->addSiteSetting('blacklist_privacy', 0, 'Who can view the blacklist? 0: Admin only, 1: Staff only, 2: Members only, 3: Public.');
@@ -64,6 +68,8 @@ class AddSiteSettings extends Command {
         $this->addSiteSetting('design_votes_needed', 3, 'Number of approval votes needed for a design update or MYO submission to be considered as having approval.');
 
         $this->addSiteSetting('admin_user', 1, 'ID of the site\'s admin user.');
+		
+        $this->addSiteSetting('adopts_user', 1, 'ID of the site\'s adoption center user.');
 
         $this->addSiteSetting('gallery_submissions_open', 1, '0: Gallery submissions closed, 1: Gallery submissions open.');
 

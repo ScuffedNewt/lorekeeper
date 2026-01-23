@@ -213,9 +213,9 @@ Route::group(['prefix' => 'shops'], function () {
     Route::get('history', 'ShopController@getPurchaseHistory');
 });
 
-/**************************************************************************************************
+/**************************************************************************************************	
     Comments
-**************************************************************************************************/
+**************************************************************************************************/	
 Route::group(['prefix' => 'comments', 'namespace' => 'Comments'], function () {
     Route::post('make/{model}/{id}', 'CommentController@store');
     Route::delete('/{comment}', 'CommentController@destroy')->name('comments.destroy');
@@ -224,4 +224,19 @@ Route::group(['prefix' => 'comments', 'namespace' => 'Comments'], function () {
     Route::post('/{id}/feature', 'CommentController@feature')->name('comments.feature');
     Route::post('/{id}/like/{action}', 'CommentController@like')->name('comments.like');
     Route::get('/liked', 'CommentController@getLikedComments');
+});
+
+/**************************************************************************************************
+    Adoptions
+**************************************************************************************************/
+
+Route::group(['prefix' => 'adoptions'], function() {
+    Route::post('buy', 'AdoptionController@postBuy');
+    Route::get('history', 'AdoptionController@getPurchaseHistory');
+});
+
+Route::group(['prefix' => 'surrenders'], function() {
+Route::get('new', 'SurrenderController@getSurrender');
+Route::get('/', 'SurrenderController@getIndex')->where('status', 'pending|approved|rejected');
+Route::post('new/post', 'SurrenderController@postSurrender');
 });
