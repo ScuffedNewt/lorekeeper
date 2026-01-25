@@ -49,7 +49,7 @@
                                 <p>No rewards.</p>
                             @else
                                 @foreach ($level->rewards as $reward)
-                                    {!! $reward->reward ? $reward->reward->displayName : $reward->rewardable_type !!} 
+                                    {!! $reward->reward ? $reward->reward->displayName : $reward->rewardable_type !!}
                                     x{{ $reward->quantity }} <br>
                                 @endforeach
                             @endif
