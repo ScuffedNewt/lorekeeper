@@ -41,14 +41,19 @@
         {!! Form::text('description', $level->description, ['class' => 'form-control wysiwyg']) !!}
     </div>
 
-    <h3>Rewards</h3>
-    <p>
-        Rewards are awarded when the {{ $type }} levels up.
-        @if ($type == 'character')
-            Character rewards are currently set to be awarded to {{ config('lorekeeper.extensions.character_reward_expansion.default_recipient') ? 'the character' : 'the user' }}.
-        @endif
-    </p>
-    @include('widgets._loot_select', ['loots' => $level->rewards, 'showLootTables' => true, 'showRaffles' => true])
+    {{-- blade-formatter-disable --}}
+    @include('widgets._add_rewards', [
+        'object' => $level,
+        'useForm' => false,
+        'showRaffles' => true,
+        'showLootTables' => true,
+        'showRecipient' => true,
+        'info' => $type == 'character' ?
+            'Character rewards are currently set to be awarded to ' . (config('lorekeeper.extensions.character_reward_expansion.default_recipient') ? 'the character' : 'the user') . '.'
+            : null,
+        'type' => 'Reward',
+    ])
+    {{-- blade-formatter-enable --}}
 
     <div class="text-right">
         {!! Form::submit($level->id ? 'Edit' : 'Create', ['class' => 'btn btn-primary']) !!}
@@ -74,8 +79,8 @@
 @endsection
 
 @section('scripts')
+    @include('js._tinymce_wysiwyg')
     @parent
-    @include('js._loot_js', ['showLootTables' => true, 'showRaffles' => true])
     <script>
         $(document).ready(function() {
 

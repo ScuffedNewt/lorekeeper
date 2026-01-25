@@ -3,7 +3,7 @@
 namespace App\Services\Stat;
 
 use App\Models\Level\Level;
-use App\Models\Level\LevelReward;
+use App\Services\RewardService;
 use App\Services\Service;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -27,7 +27,18 @@ class LevelService extends Service {
                 'description'  => $data['description'],
             ]);
 
-            $this->populateRewards(Arr::only($data, ['rewardable_type', 'rewardable_id', 'quantity']), $level);
+            $rewardService = new RewardService;
+            if (!$rewardService->populateRewards(
+                get_class($level),
+                $level->id,
+                Arr::only($data, ['rewardable_type', 'rewardable_id', 'quantity', 'rewardable_recipient']),
+                false
+            )) {
+                foreach ($rewardService->errors()->getMessages()['error'] as $error) {
+                    flash($error)->error();
+                }
+                throw new \Exception('Failed to create rewards.');
+            }
 
             return $this->commitReturn($level);
         } catch (\Exception $e) {
@@ -53,7 +64,18 @@ class LevelService extends Service {
                 'description'  => $data['description'],
             ]);
 
-            $this->populateRewards(Arr::only($data, ['rewardable_type', 'rewardable_id', 'quantity']), $level);
+            $rewardService = new RewardService;
+            if (!$rewardService->populateRewards(
+                get_class($level),
+                $level->id,
+                Arr::only($data, ['rewardable_type', 'rewardable_id', 'quantity', 'rewardable_recipient']),
+                false
+            )) {
+                foreach ($rewardService->errors()->getMessages()['error'] as $error) {
+                    flash($error)->error();
+                }
+                throw new \Exception('Failed to create rewards.');
+            }
 
             return $this->commitReturn($level);
         } catch (\Exception $e) {
@@ -83,10 +105,6 @@ class LevelService extends Service {
                     throw new \Exception('At least one user has already reached this level.');
                 }
             }
-            // TODO
-            // if (DB::table('prompts')->where('level_req', '>=', $level->level)->exists()) {
-            //     throw new \Exception('A prompt currently has this level as a requirement.');
-            // }
             $level->rewards()->delete();
             $level->delete();
 
@@ -96,35 +114,5 @@ class LevelService extends Service {
         }
 
         return $this->rollbackReturn(false);
-    }
-
-    /*******************************************************************************
-     *
-     *  OTHER FUNCTIONS
-     *
-     ******************************************************************************/
-
-    /**
-     * Processes user input for creating/updating level rewards.
-     *
-     * @param array $data
-     * @param Level $level
-     */
-    private function populateRewards($data, $level) {
-        // Clear the old rewards...
-        $level->rewards()->delete();
-        if (isset($data['rewardable_type'])) {
-            foreach ($data['rewardable_type'] as $key => $type) {
-                if ($data['rewardable_id'][$key] == 'none') {
-                    $data['rewardable_id'][$key] = null;
-                }
-                LevelReward::create([
-                    'level_id'        => $level->id,
-                    'rewardable_type' => $type,
-                    'rewardable_id'   => $data['rewardable_id'][$key],
-                    'quantity'        => $data['quantity'][$key],
-                ]);
-            }
-        }
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Models\Level;
 
 use App\Models\Model;
+use App\Models\Reward\Reward;
 
 class Level extends Model {
     /**
@@ -49,7 +50,7 @@ class Level extends Model {
      * Get the rewards attached to this level.
      */
     public function rewards() {
-        return $this->hasMany(LevelReward::class, 'level_id');
+        return $this->morphMany(Reward::class, 'object', 'object_model', 'object_id');
     }
 
     /**

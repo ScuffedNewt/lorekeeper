@@ -20,26 +20,26 @@
                     </div>
                     <div class="col-6">
                         <h4>Rewards</h4>
-                        <p>{{ $level->stat_points ? $level->stat_point : '0' }} Stat points reward </p>
-                        @if (!count($level->rewards))
-                            No rewards.
-                        @else
+                        @if ($level->rewards->count())
+                            <p>You will receive the following rewards when you reach this level:</p>
                             <table class="table table-sm">
                                 <thead>
                                     <tr>
-                                        <th width="70%">Reward</th>
+                                        <th width="70%">Requires</th>
                                         <th width="30%">Amount</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($level->rewards as $reward)
+                                    @foreach ($level->rewards as $limit)
                                         <tr>
-                                            <td>{!! $reward->reward->displayName !!}</td>
-                                            <td>{{ $reward->quantity }}</td>
+                                            <td>{!! $limit->reward ? $limit->reward->displayName : $limit->rewardable_type !!}</td>
+                                            <td>{{ $limit->quantity }}</td>
                                         </tr>
                                     @endforeach
                                 </tbody>
                             </table>
+                        @else
+                            <p>No rewards.</p>
                         @endif
                     </div>
                 </div>

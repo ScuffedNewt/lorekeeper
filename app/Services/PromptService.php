@@ -223,8 +223,6 @@ class PromptService extends Service {
                 throw new \Exception('Failed to create rewards.');
             }
 
-            // $this->populateSkills(Arr::only($data, ['skill_id', 'skill_quantity']), $prompt);
-
             return $this->commitReturn($prompt);
         } catch (\Exception $e) {
             $this->setError('error', $e->getMessage());
@@ -296,8 +294,6 @@ class PromptService extends Service {
                 }
                 throw new \Exception('Failed to create rewards.');
             }
-
-            // $this->populateSkills(Arr::only($data, ['skill_id', 'skill_quantity']), $prompt);
 
             return $this->commitReturn($prompt);
         } catch (\Exception $e) {

@@ -3,15 +3,8 @@
 namespace App\Http\Controllers\Admin\Stats;
 
 use App\Http\Controllers\Controller;
-use App\Models\Claymore\Gear;
-use App\Models\Claymore\Weapon;
-use App\Models\Currency\Currency;
 use App\Models\Item\Item;
-use App\Models\Item\ItemCategory;
 use App\Models\Level\Level;
-use App\Models\Loot\LootTable;
-use App\Models\Pet\Pet;
-use App\Models\Raffle\Raffle;
 use App\Services\Stat\LevelService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -45,24 +38,9 @@ class LevelController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getCreateLevel($type = 'Character') {
-        if ($type == 'Character') {
-            $categories = ItemCategory::where('is_character_owned', '1')->orderBy('sort', 'DESC')->get();
-            $itemOptions = Item::whereIn('item_category_id', $categories->pluck('id'));
-            $items = Item::whereIn('id', $itemOptions->pluck('id'))->pluck('name', 'id');
-        } else {
-            $items = Item::orderBy('name')->pluck('name', 'id');
-        }
-
         return view('admin.levels.create_edit_level', [
             'type'       => $type,
             'level'      => new Level,
-            'items'      => $items,
-            'currencies' => Currency::where('is_user_owned', 1)->orderBy('name')->pluck('name', 'id'),
-            'tables'     => LootTable::orderBy('name')->pluck('name', 'id'),
-            'raffles'    => Raffle::where('rolled_at', null)->where('is_active', 1)->orderBy('name')->pluck('name', 'id'),
-            'pets'       => Pet::orderBy('name')->pluck('name', 'id'),
-            'gears'      => Gear::orderBy('name')->pluck('name', 'id'),
-            'weapons'    => Weapon::orderBy('name')->pluck('name', 'id'),
         ]);
     }
 
@@ -80,24 +58,9 @@ class LevelController extends Controller {
             abort(404);
         }
 
-        if (strtolower($level->level_type) == 'character') {
-            $categories = ItemCategory::where('is_character_owned', '1')->orderBy('sort', 'DESC')->get();
-            $itemOptions = Item::whereIn('item_category_id', $categories->pluck('id'));
-            $items = Item::whereIn('id', $itemOptions->pluck('id'))->pluck('name', 'id');
-        } else {
-            $items = Item::orderBy('name')->pluck('name', 'id');
-        }
-
         return view('admin.levels.create_edit_level', [
             'type'       => strtolower($level->level_type),
             'level'      => $level,
-            'items'      => $items,
-            'currencies' => Currency::where('is_user_owned', 1)->orderBy('name')->pluck('name', 'id'),
-            'tables'     => LootTable::orderBy('name')->pluck('name', 'id'),
-            'raffles'    => Raffle::where('rolled_at', null)->where('is_active', 1)->orderBy('name')->pluck('name', 'id'),
-            'pets'       => Pet::orderBy('name')->pluck('name', 'id'),
-            'gears'      => Gear::orderBy('name')->pluck('name', 'id'),
-            'weapons'    => Weapon::orderBy('name')->pluck('name', 'id'),
         ]);
     }
 

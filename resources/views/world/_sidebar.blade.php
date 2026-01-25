@@ -29,7 +29,8 @@
     </li>
     <li class="sidebar-section">
         <div class="sidebar-section-header">Levels</div>
-        <div class="sidebar-item"><a href="{{ url('world/levels') }}" class="{{ set_active('world/levels*') }}">Levels</a></div>
+        <div class="sidebar-item"><a href="{{ url('world/levels') }}" class="{{ set_active('world/levels/user*') }}">User Levels</a></div>
+        <div class="sidebar-item"><a href="{{ url('world/levels') }}" class="{{ set_active('world/levels/character*') }}">Character Levels</a></div>
         <div class="sidebar-item"><a href="{{ url('world/stats') }}" class="{{ set_active('world/stats*') }}">Stats</a></div>
     </li>
     <li class="sidebar-section">

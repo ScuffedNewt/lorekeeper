@@ -45,12 +45,14 @@
                         <td>{{ $level->level }}</td>
                         <td>{{ $level->exp_required }}</td>
                         <td>
-                            {!! $level->rewards->map(function ($reward) {
-                                    if ($reward->rewardable_type == 'Exp' || $reward->rewardable_type == 'Points') {
-                                        return $reward->rewardable_type . ' (' . $reward->quantity . ')';
-                                    }
-                                    return $reward->reward->displayName . ' (' . $reward->quantity . ')';
-                                })->implode(', ') !!}
+                            @if (!count($level->rewards))
+                                <p>No rewards.</p>
+                            @else
+                                @foreach ($level->rewards as $reward)
+                                    {!! $reward->reward ? $reward->reward->displayName : $reward->rewardable_type !!} 
+                                    x{{ $reward->quantity }} <br>
+                                @endforeach
+                            @endif
                         </td>
                         <td class="text-right">
                             <a href="{{ url('admin/levels/' . strtolower($level->level_type) . '/edit/' . $level->id) }}" class="btn btn-primary">Edit</a>
