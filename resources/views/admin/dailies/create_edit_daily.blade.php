@@ -162,6 +162,7 @@
 
         @include('widgets._add_limits', [
             'object' => $daily,
+            'hideAutoUnlock' => true,
         ])
     @endif
 

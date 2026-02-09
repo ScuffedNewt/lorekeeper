@@ -176,8 +176,8 @@
                                 // the current animation. The user will have to reset before spinning again.
                                 wheelSpinning = true;
                             }
-                        }).fail(function(jqXHR, textStatus, errorThrown) {
-                            alert("Woops- something went wrong! Please refresh the page and try again. If the error persists, please report it to the site owners!");
+                        }).fail(function(res) {
+                            alert('Whoops- something went wrong! Please refresh the page and try again. If the error persists, please report it to the site owners!\n\n' + res.responseJSON.error);
                         });
                     }
                 }
