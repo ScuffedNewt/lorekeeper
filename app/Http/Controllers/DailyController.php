@@ -90,7 +90,7 @@ class DailyController extends Controller {
             $limitService = new LimitManager;
             if (!$limitService->checkLimits($daily)) {
                 if ($request->ajax()) {
-                    return response()->json(['error' => $limitService->errors()->getMessages()['error'][0]], 403);
+                    return response()->json(['error' => strip_tags($limitService->errors()->getMessages()['error'][0])], 403);
                 }
                 flash($limitService->errors()->getMessages()['error'][0])->error();
 
@@ -105,7 +105,7 @@ class DailyController extends Controller {
 
         if (!$rewards = $service->rollDaily($daily, Auth::user(), $wheelSegment)) {
             if ($request->ajax()) {
-                return response()->json(['error' => $service->errors()->getMessages()['error'][0]], 500);
+                return response()->json(['error' => strip_tags($service->errors()->getMessages()['error'][0])], 500);
             }
             foreach ($service->errors()->getMessages()['error'] as $error) {
                 flash($error)->error();
