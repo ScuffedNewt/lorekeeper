@@ -40,6 +40,9 @@ class PetDropService extends Service {
             }
 
             // Collect parameter data and encode it
+            if (!isset($data['label'])) {
+                throw new \Exception('At least one drop parameter is required.');
+            }
             $paramData = [];
             foreach ($data['label'] as $key => $param) {
                 $paramData[$param] = $data['weight'][$key];
@@ -48,8 +51,8 @@ class PetDropService extends Service {
             $drop = PetDropData::create([
                 'pet_id'     => $data['pet_id'],
                 'parameters' => $paramData,
-                'frequency'  => $data['drop_frequency'],
-                'interval'   => $data['drop_interval'],
+                'frequency'  => $data['drop_frequency'] ?? 1,
+                'interval'   => $data['drop_interval'] ?? 'Hour',
                 'is_active'  => $data['is_active'] ?? 0,
                 'cap'        => $data['cap'] ?? 0,
                 'name'       => $data['drop_name'] ?? 'drop',
@@ -84,6 +87,9 @@ class PetDropService extends Service {
             // if(PetDropData::where('pet_id', $data['pet_id'])->where('id', '!=', $drop->id)->exists()) throw new \Exception('This pet already has drop data. Consider editing the existing data instead.');
 
             // Collect parameter data and encode it
+            if (!isset($data['label'])) {
+                throw new \Exception('At least one drop parameter is required.');
+            }
             $paramData = [];
             foreach ($data['label'] as $key => $param) {
                 $paramData[$param] = $data['weight'][$key];
@@ -96,8 +102,8 @@ class PetDropService extends Service {
 
             $drop->update([
                 'parameters' => $paramData,
-                'frequency'  => $data['drop_frequency'],
-                'interval'   => $data['drop_interval'],
+                'frequency'  => $data['drop_frequency'] ?? 1,
+                'interval'   => $data['drop_interval'] ?? 'Hour',
                 'is_active'  => $data['is_active'] ?? 0,
                 'name'       => $data['drop_name'] ?? 'drop',
                 'cap'        => $data['cap'] ?? null,
