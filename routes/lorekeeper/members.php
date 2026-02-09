@@ -88,11 +88,26 @@ Route::group(['prefix' => 'bank', 'namespace' => 'Users'], function () {
 });
 
 Route::group(['prefix' => 'trades', 'namespace' => 'Users'], function () {
-    Route::get('{status}', 'TradeController@getIndex')->where('status', 'open|pending|completed|rejected|canceled');
+    // LISTINGS
+    Route::get('listings', 'TradeController@getListingIndex');
+    Route::get('listings/expired', 'TradeController@getExpiredListings');
+    Route::get('listings/create', 'TradeController@getCreateListing');
+    Route::get('listings/{id}', 'TradeController@getListing')->where('id', '[0-9]+');
+    Route::get('listings/{id}/edit', 'TradeController@getEditListing')->where('id', '[0-9]+');
+    Route::post('listings/create', 'TradeController@postCreateEditListing');
+    Route::post('listings/{id}/edit', 'TradeController@postCreateEditListing')->where('id', '[0-9]+');
+    Route::post('listings/{id}/expire', 'TradeController@postExpireListing')->where('id', '[0-9]+');
+
+    // TRADES
+    Route::get('{status}', 'TradeController@getIndex')->where('status', 'proposals|open|pending|completed|rejected|canceled');
     Route::get('create', 'TradeController@getCreateTrade');
     Route::get('{id}/edit', 'TradeController@getEditTrade')->where('id', '[0-9]+');
+    Route::get('proposal/{id?}', 'TradeController@getCreateEditTradeProposal')->where('id', '[0-9]+');
+    Route::get('proposal/user/{id}', 'TradeController@getUserTradeProposal')->where('id', '[0-9]+');
     Route::post('create', 'TradeController@postCreateTrade');
     Route::post('{id}/edit', 'TradeController@postEditTrade')->where('id', '[0-9]+');
+    Route::post('propose/{id?}', 'TradeController@postCreateEditTradeProposal')->where('id', '[0-9]+');
+    Route::post('proposal/{id}/{action}', 'TradeController@postRespondToTradeProposal')->where('id', '[0-9]+')->where('action', 'accept|reject');
     Route::get('{id}', 'TradeController@getTrade')->where('id', '[0-9]+');
 
     Route::get('{id}/confirm-offer', 'TradeController@getConfirmOffer');
@@ -204,6 +219,7 @@ Route::group(['prefix' => 'designs', 'namespace' => 'Characters'], function () {
     Route::get('{id}/traits', 'DesignController@getFeatures');
     Route::post('{id}/traits', 'DesignController@postFeatures');
     Route::get('traits/subtype', 'DesignController@getFeaturesSubtype');
+    Route::get('traits/feature', 'DesignController@getFeaturesTrait');
 
     Route::get('{id}/confirm', 'DesignController@getConfirm');
     Route::post('{id}/submit', 'DesignController@postSubmit');
@@ -252,4 +268,11 @@ Route::group(['prefix' => 'comments', 'namespace' => 'Comments'], function () {
 **************************************************************************************************/
 Route::group(['prefix' => 'limits'], function () {
     Route::post('unlock/{id}', 'Admin\LimitController@postUnlockLimits');
+});
+
+/**************************************************************************************************
+    Rewards
+**************************************************************************************************/
+Route::group(['prefix' => 'rewards'], function () {
+    Route::post('/types', 'RewardController@postRewardTypes');
 });

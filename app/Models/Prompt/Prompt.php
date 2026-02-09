@@ -3,6 +3,7 @@
 namespace App\Models\Prompt;
 
 use App\Models\Model;
+use App\Models\Reward\Reward;
 use Carbon\Carbon;
 
 class Prompt extends Model {
@@ -15,6 +16,7 @@ class Prompt extends Model {
         'prompt_category_id', 'name', 'summary', 'description', 'parsed_description', 'is_active',
         'start_at', 'end_at', 'hide_before_start', 'hide_after_end', 'has_image', 'prefix',
         'hide_submissions', 'staff_only', 'hash',
+        'limit', 'limit_period', 'limit_character',
     ];
 
     /**
@@ -79,7 +81,7 @@ class Prompt extends Model {
      * Get the rewards attached to this prompt.
      */
     public function rewards() {
-        return $this->hasMany(PromptReward::class, 'prompt_id');
+        return $this->morphMany(Reward::class, 'object', 'object_model', 'object_id');
     }
 
     /**********************************************************************************************
@@ -227,7 +229,7 @@ class Prompt extends Model {
      * @return string
      */
     public function getDisplayNameAttribute() {
-        return '<a href="'.$this->url.'" class="display-prompt">'.$this->name.'</a>';
+        return '<a href="'.$this->idUrl.'" class="display-prompt">'.$this->name.'</a>';
     }
 
     /**

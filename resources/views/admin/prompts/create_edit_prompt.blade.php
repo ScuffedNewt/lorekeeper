@@ -93,10 +93,40 @@
         {!! Form::select('hide_submissions', [0 => 'Submissions Visible After Approval', 1 => 'Hide Submissions Until Prompt Ends', 2 => 'Hide Submissions Always'], $prompt->hide_submissions, ['class' => 'form-control']) !!}
     </div>
 
-    <h3>Rewards</h3>
-    <p>Rewards are credited on a per-user basis. Mods are able to modify the specific rewards granted at approval time.</p>
-    <p>You can add loot tables containing any kind of currencies (both user- and character-attached), but be sure to keep track of which are being distributed! Character-only currencies cannot be given to users.</p>
-    @include('widgets._loot_select', ['loots' => $prompt->rewards, 'showLootTables' => true, 'showRaffles' => true])
+    <div class="card">
+        <div class="card-body">
+            <h3>Submission Limits</h3>
+            <p>Limit the number of times a user can submit. Leave blank to allow endless submissions.</p>
+            <p>Set a number into number of submissions. This will be applied for all time if you leave period blank, or per time period (ex: once a month, twice a week) if selected.</p>
+            <p>If you turn 'per character' on, then the number of submissions multiplies per character (ex: if you can submit twice a month per character and you own three characters, that's 6 submissions) HOWEVER it will not keep track of which
+                characters are being submitted due to conflicts arising in character cameos. A user will be able to submit those full 6 times with just one character...!</p>
+            <div class="row">
+                <div class="col-md-6 form-group">
+                    {!! Form::label('limit', 'Number of Submissions (Optional)') !!} {!! add_help('Enter a number to limit how many times a user can submit. Leave blank to allow endless submissions.') !!}
+                    {!! Form::text('limit', $prompt->limit, ['class' => 'form-control']) !!}
+                </div>
+                <div class="col-md-6 form-group">
+                    {!! Form::label('limit_period', 'Limit Period') !!} {!! add_help('The time period that the limit is set for.') !!}
+                    {!! Form::select('limit_period', $limit_periods, $prompt->limit_period, ['class' => 'form-control', 'data-name' => 'limit_period']) !!}
+                </div>
+            </div>
+            <div class="form-group">
+                {!! Form::checkbox('limit_character', 1, $prompt->limit_character, ['class' => 'form-check-input', 'data-toggle' => 'toggle']) !!}
+                {!! Form::label('limit_character', 'Per Character', ['class' => 'form-check-label ml-3']) !!} {!! add_help('If turned on, they can submit once per character they own on the masterlist.') !!}
+            </div>
+        </div>
+    </div>
+
+    {{-- blade-formatter-disable --}}
+    @include('widgets._add_rewards', [
+        'object' => $prompt,
+        'useForm' => false,
+        'showRaffles' => true,
+        'showLootTables' => true,
+        'showRecipient' => true,
+        'info' => '<p>User rewards are credited on a per-user basis, character rewards are rewarded to all characters attached. Mods are able to modify the specific rewards granted at approval time.</p><p class="mb-0">You can add loot tables containing any kind of currencies (both user- and character-attached), but be sure to keep track of which are being distributed! <strong>Character-only currencies cannot be given to users.</strong></p>',
+    ])
+    {{-- blade-formatter-enable --}}
 
     <div class="text-right">
         {!! Form::submit($prompt->id ? 'Edit' : 'Create', ['class' => 'btn btn-primary']) !!}
@@ -104,10 +134,11 @@
 
     {!! Form::close() !!}
 
-    @include('widgets._loot_select_row', ['showLootTables' => true, 'showRaffles' => true])
-
     @if ($prompt->id)
-        @include('widgets._add_limits', ['object' => $prompt])
+        @include('widgets._add_limits', [
+            'object' => $prompt,
+            'hideAutoUnlock' => true,
+        ])
 
         <h3>Preview</h3>
         <div class="card mb-3">
@@ -120,7 +151,6 @@
 
 @section('scripts')
     @parent
-    @include('js._loot_js', ['showLootTables' => true, 'showRaffles' => true])
     @include('widgets._datetimepicker_js')
     @include('js._tinymce_wysiwyg')
     <script>

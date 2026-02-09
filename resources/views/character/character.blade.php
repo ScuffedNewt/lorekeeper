@@ -4,10 +4,6 @@
     {{ $character->fullName }}
 @endsection
 
-@section('meta-img')
-    {{ $character->image->content_warnings ? asset('images/content-warning.png') : $character->image->thumbnailUrl }}
-@endsection
-
 @section('profile-content')
     @if ($character->is_myo_slot)
         {!! breadcrumbs(['MYO Slot Masterlist' => 'myos', $character->fullName => $character->url]) !!}
@@ -74,7 +70,7 @@
                     {!! Form::close() !!}
                     <hr />
                     <div class="text-right">
-                        <a href="#" class="btn btn-outline-danger btn-sm delete-character" data-slug="{{ $character->slug }}">Delete</a>
+                        <a href="#" class="btn btn-outline-danger btn-sm delete-character" data-slug="{{ $character->slug }}">Delete Character</a>
                     </div>
                 </div>
             @endif

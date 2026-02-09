@@ -105,7 +105,7 @@ function getAssetModelString($type, $namespaced = true) {
             }
             break;
 
-        case 'raffle_tickets':
+        case 'raffle_tickets': case 'raffle':
             if ($namespaced) {
                 return '\App\Models\Raffle\Raffle';
             } else {
@@ -113,7 +113,7 @@ function getAssetModelString($type, $namespaced = true) {
             }
             break;
 
-        case 'loot_tables':
+        case 'loot_tables': case 'loottable':
             if ($namespaced) {
                 return '\App\Models\Loot\LootTable';
             } else {
@@ -142,6 +142,14 @@ function getAssetModelString($type, $namespaced = true) {
                 return '\App\Models\Character\CharacterItem';
             } else {
                 return 'CharacterItem';
+            }
+            break;
+
+        case 'prompts': case 'prompt':
+            if ($namespaced) {
+                return '\App\Models\Prompt\Prompt';
+            } else {
+                return 'Prompt';
             }
             break;
     }
@@ -200,7 +208,10 @@ function addAsset(&$array, $asset, $quantity = 1) {
     if (isset($array[$asset->assetType][$asset->id])) {
         $array[$asset->assetType][$asset->id]['quantity'] += $quantity;
     } else {
-        $array[$asset->assetType][$asset->id] = ['asset' => $asset, 'quantity' => $quantity];
+        $array[$asset->assetType][$asset->id] = [
+            'asset'    => $asset,
+            'quantity' => $quantity,
+        ];
     }
 }
 
@@ -316,11 +327,10 @@ function compareAssetArrays($first, $second, $isCharacter = false, $absQuantitie
  * @param App\Models\User\User $recipient
  * @param string               $logType
  * @param string               $data
- * @param mixed|null           $selected
  *
  * @return array
  */
-function fillUserAssets($assets, $sender, $recipient, $logType, $data, $selected = null) {
+function fillUserAssets($assets, $sender, $recipient, $logType, $data) {
     // Roll on any loot tables
     if (isset($assets['loot_tables'])) {
         foreach ($assets['loot_tables'] as $table) {
@@ -333,51 +343,23 @@ function fillUserAssets($assets, $sender, $recipient, $logType, $data, $selected
         if ($key == 'items' && count($contents)) {
             $service = new App\Services\InventoryManager;
             foreach ($contents as $asset) {
-                if ($asset['quantity'] < 0) {
-                    if (!$selected) {
-                        flash('No selected item found for debiting.')->error();
-
-                        return false;
+                if (!$service->creditItem($sender, $recipient, $logType, $data, $asset['asset'], $asset['quantity'])) {
+                    foreach ($service->errors()->getMessages()['error'] as $error) {
+                        flash($error)->error();
                     }
 
-                    foreach ($selected as $stackData) {
-                        if (!$service->debitStack($sender, $logType, $data, $stackData['stack'], $stackData['quantity'])) {
-                            foreach ($service->errors()->getMessages()['error'] as $error) {
-                                flash($error)->error();
-                            }
-
-                            return false;
-                        }
-                    }
-                } else {
-                    if (!$service->creditItem($sender, $recipient, $logType, $data, $asset['asset'], $asset['quantity'])) {
-                        foreach ($service->errors()->getMessages()['error'] as $error) {
-                            flash($error)->error();
-                        }
-
-                        return false;
-                    }
+                    return false;
                 }
             }
         } elseif ($key == 'currencies' && count($contents)) {
             $service = new App\Services\CurrencyManager;
             foreach ($contents as $asset) {
-                if ($asset['quantity'] < 0) {
-                    if (!$service->debitCurrency($sender, $recipient, $logType, $data['data'], $asset['asset'], abs($asset['quantity']))) {
-                        foreach ($service->errors()->getMessages()['error'] as $error) {
-                            flash($error)->error();
-                        }
-
-                        return false;
+                if (!$service->creditCurrency($sender, $recipient, $logType, $data['data'], $asset['asset'], $asset['quantity'])) {
+                    foreach ($service->errors()->getMessages()['error'] as $error) {
+                        flash($error)->error();
                     }
-                } else {
-                    if (!$service->creditCurrency($sender, $recipient, $logType, $data['data'], $asset['asset'], $asset['quantity'])) {
-                        foreach ($service->errors()->getMessages()['error'] as $error) {
-                            flash($error)->error();
-                        }
 
-                        return false;
-                    }
+                    return false;
                 }
             }
         } elseif ($key == 'raffle_tickets' && count($contents)) {
@@ -420,6 +402,66 @@ function fillUserAssets($assets, $sender, $recipient, $logType, $data, $selected
 }
 
 /**
+ * Removes the assets in an assets array from the given recipient (user).
+ *
+ * This does not validate the quantities between $assets and $selected.
+ * This is due to extracting quantities from $selected being a complicated and expensive operation.
+ * Quantity validation should be performed in the containing function.
+ *
+ * @param array                $assets
+ * @param App\Models\User\User $sender
+ * @param App\Models\User\User $recipient
+ * @param string               $logType
+ * @param string               $data
+ * @param mixed|null           $selected
+ *
+ * @return array
+ */
+function takeUserAssets($assets, $sender, $recipient, $logType, $data, $selected = null) {
+    foreach ($assets as $key => $contents) {
+        if ($key == 'items' && count($contents)) {
+            $service = new App\Services\InventoryManager;
+            // do not loop the assets here, just the stackdata. otherwise it will deduct stacks multiple times
+            if (!$selected) {
+                flash('No selected item found for debiting.')->error();
+
+                return false;
+            }
+
+            // Comparing unique item ids in $contents to unique item ids in $selected
+            if (!(collect($contents)->pluck('asset')->pluck('id')->diff(collect($selected)->pluck('stack')->pluck('item_id')->unique())->isEmpty())) {
+                flash('Assets do not match selected stacks.');
+
+                return false;
+            }
+
+            foreach ($selected as $stackData) {
+                if (!$service->debitStack($sender, $logType, $data, $stackData['stack'], abs($stackData['quantity']))) {
+                    foreach ($service->errors()->getMessages()['error'] as $error) {
+                        flash($error)->error();
+                    }
+
+                    return false;
+                }
+            }
+        } elseif ($key == 'currencies' && count($contents)) {
+            $service = new App\Services\CurrencyManager;
+            foreach ($contents as $asset) {
+                if (!$service->debitCurrency($sender, $recipient, $logType, $data['data'], $asset['asset'], abs($asset['quantity']))) {
+                    foreach ($service->errors()->getMessages()['error'] as $error) {
+                        flash($error)->error();
+                    }
+
+                    return false;
+                }
+            }
+        }
+    }
+
+    return $assets;
+}
+
+/**
  * Returns the total count of all assets in an asset array.
  *
  * @param array $array
@@ -435,6 +477,31 @@ function countAssets($array) {
     }
 
     return $count;
+}
+
+/**
+ * Returns whether or not an asset can be traded based on its type.
+ *
+ * @param mixed $type
+ * @param mixed $asset
+ *
+ * @return bool
+ */
+function canTradeAsset($type, $asset) {
+    switch ($type) {
+        case 'Item':
+            return $asset->allow_transfer;
+            break;
+        case 'Currency':
+            // we don't have to worry about character->user or user->character transfers here
+            // technically you can loophole by transferring to a character and then transferring to a user
+            // but that is a process issue, not a code issue
+            return $asset->is_user_owned && $asset->allow_user_to_user;
+            break;
+        default:
+            return false;
+            break;
+    }
 }
 
 /**
@@ -522,4 +589,113 @@ function createRewardsString($array, $useDisplayName = true, $absQuantities = fa
     }
 
     return implode(', ', array_slice($string, 0, count($string) - 1)).(count($string) > 2 ? ', and ' : ' and ').end($string);
+}
+
+/**
+ * Gets the valid reward types, based on an array of "showXYZ" values and $isCharacter boolean.
+ * For example, raffle tickets can not be given to characters.
+ *
+ * @param array $showData
+ * @param mixed $recipient
+ *
+ * @return array
+ */
+function getRewardTypes($showData, $recipient) {
+    if ($recipient == 'User') {
+        return ['Item' => 'Item', 'Currency' => 'Currency'] +
+            ($showData['showLootTables'] ? ['LootTable' => 'Loot Table'] : []) +
+            ($showData['showRaffles'] ? ['Raffle' => 'Raffle Ticket'] : []);
+    } elseif ($recipient == 'Character') {
+        return ['Item' => 'Item', 'Currency' => 'Currency'] +
+            ($showData['showLootTables'] ? ['LootTable' => 'Loot Table'] : []);
+    } else {
+        throw new Exception('No recipient given.');
+    }
+}
+
+/**
+ * Gets the reward data needed for loot/reward selection blades.
+ *
+ * Builds an array structured to match keys with the above getRewardTypes.
+ * For example:
+ * [ 'Item' => $items, 'Currency' => $currencies]
+ *
+ * $useCustomSelectize is utilized when rendering within the trade listing blades.
+ *
+ * @param array $showData
+ * @param bool  $useCustomSelectize
+ * @param mixed $recipient
+ *
+ * @return array
+ */
+function getRewardLootData($showData, $recipient = 'User', $useCustomSelectize = false) {
+    // We call getRewardTypes here, rather than as a parameter, to prevent accidentally getting mismatched arrays.
+    $rewardTypes = getRewardTypes($showData, $recipient);
+
+    $rewardLootData = [];
+
+    // Iterate through each valid key in $rewardTypes and get the data associated with it
+    foreach ($rewardTypes as $rewardKey => $rewardType) {
+        $query = null;
+
+        switch ($rewardKey) {
+            case 'Item':
+                $query = App\Models\Item\Item::orderBy('name')
+                    ->where(function ($query) use ($showData) {
+                        if ($showData['isTradeable']) {
+                            $query->where('allow_transfer', 1);
+                        }
+                    })->where(function ($query) use ($recipient) {
+                        if ($recipient == 'Character') {
+                            $query->whereRelation('category', 'is_character_owned', 1);
+                        }
+                    });
+                break;
+            case 'Currency':
+                $query = App\Models\Currency\Currency::query();
+                if ($recipient == 'Character') {
+                    $query->where('is_character_owned', 1);
+                } elseif ($recipient == 'User') {
+                    $query->where('is_user_owned', 1);
+                }
+                $query->where(function ($query) use ($showData) {
+                    if ($showData['isTradeable']) {
+                        $query->where('allow_user_to_user', 1);
+                    }
+                })
+                    ->orderBy('sort_character', 'DESC');
+                break;
+            case 'LootTable':
+                $query = App\Models\Loot\LootTable::orderBy('name');
+                break;
+            case 'Raffle':
+                $query = App\Models\Raffle\Raffle::where('rolled_at', null)->where('is_active', 1)->orderBy('name');
+                break;
+                // Add the query builder for your other assets here, set with the matching key in getRewardTypes
+                // If your asset type does not have a model, you may need to add special handling here.
+                //
+                // case 'Example':
+                //  $query = \App\Models\Example::orderby('name');
+                //  break;
+        }
+
+        // If your asset type does not have a model with an id and name value, then you may need to add special handling here.
+        if ($useCustomSelectize) {
+            $data = $query->get()->mapWithKeys(function ($item) {
+                return [
+                    $item->id => json_encode([
+                        'name'      => $item->name,
+                        'image_url' => $item->imageUrl ?? null,
+                    ]),
+                ];
+            });
+        } else {
+            $data = $query->pluck('name', 'id')->toArray();
+        }
+
+        // Finally, add the data to the array.
+        $rewardLootData[$rewardKey] = $data;
+    }
+
+    return $rewardLootData;
 }
