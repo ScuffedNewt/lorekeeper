@@ -69,6 +69,9 @@ class DailyController extends Controller {
     public function postRoll(Request $request, DailyManager $service, $id) {
         $daily = Daily::where('id', $id)->where('is_active', 1)->first();
         if (!$daily) {
+            if ($request->ajax()) {
+                return response()->json(['error' => 'Invalid '.__('dailies.daily').' selected.'], 404);
+            }
             flash('Invalid '.__('dailies.daily').' selected.')->error();
 
             return redirect()->back();
@@ -76,6 +79,9 @@ class DailyController extends Controller {
 
         if (count(getLimits($daily))) {
             if (!Auth::check()) {
+                if ($request->ajax()) {
+                    return response()->json(['error' => 'You must be logged in to claim this daily.'], 403);
+                }
                 flash('You must be logged in to claim this daily.')->error();
 
                 return redirect()->to('dailies');
@@ -83,6 +89,9 @@ class DailyController extends Controller {
 
             $limitService = new LimitManager;
             if (!$limitService->checkLimits($daily)) {
+                if ($request->ajax()) {
+                    return response()->json(['error' => $limitService->errors()->getMessages()['error'][0]], 403);
+                }
                 flash($limitService->errors()->getMessages()['error'][0])->error();
 
                 return redirect()->to('dailies');
@@ -95,6 +104,9 @@ class DailyController extends Controller {
         }
 
         if (!$rewards = $service->rollDaily($daily, Auth::user(), $wheelSegment)) {
+            if ($request->ajax()) {
+                return response()->json(['error' => $service->errors()->getMessages()['error'][0]], 500);
+            }
             foreach ($service->errors()->getMessages()['error'] as $error) {
                 flash($error)->error();
             }
