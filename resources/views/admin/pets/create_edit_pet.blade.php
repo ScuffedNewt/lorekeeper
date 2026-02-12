@@ -184,6 +184,7 @@
 @endsection
 
 @section('scripts')
+    @include('js._tinymce_wysiwyg')
     @parent
     <script>
         $(document).ready(function() {

@@ -181,3 +181,7 @@
         {!! Form::close() !!}
     </li>
 @endif
+@section('scripts')
+    @include('js._tinymce_wysiwyg')
+    @parent
+@endsection

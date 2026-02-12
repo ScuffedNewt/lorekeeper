@@ -27,7 +27,7 @@ class PetDropService extends Service {
      *
      * @param array $data
      *
-     * @return \App\Models\Pet\PetDropData|bool
+     * @return bool|PetDropData
      */
     public function createPetDrop($data) {
         DB::beginTransaction();
@@ -37,6 +37,9 @@ class PetDropService extends Service {
             $pet = Pet::find($data['pet_id']);
             if (!$pet) {
                 throw new \Exception('The selected pet is invalid.');
+            }
+            if (!isset($data['label']) || !isset($data['weight']) || count($data['label']) != count($data['weight'])) {
+                throw new \Exception('Invalid parameters provided.');
             }
 
             // Collect parameter data and encode it
@@ -67,10 +70,10 @@ class PetDropService extends Service {
     /**
      * Updates pet drop data.
      *
-     * @param \App\Models\Pet\PetDropData $drop
-     * @param array                       $data
+     * @param PetDropData $drop
+     * @param array       $data
      *
-     * @return \App\Models\Pet\PetDropData|bool
+     * @return bool|PetDropData
      */
     public function updatePetDrop($drop, $data) {
         DB::beginTransaction();
@@ -85,8 +88,10 @@ class PetDropService extends Service {
 
             // Collect parameter data and encode it
             $paramData = [];
-            foreach ($data['label'] as $key => $param) {
-                $paramData[$param] = $data['weight'][$key];
+            if (isset($data['label'])) {
+                foreach ($data['label'] as $key => $param) {
+                    $paramData[$param] = $data['weight'][$key];
+                }
             }
 
             $data['rewardable_type'] ??= null;
@@ -116,7 +121,7 @@ class PetDropService extends Service {
     /**
      * Deletes pet drop data.
      *
-     * @param \App\Models\Pet\PetDropData $drop
+     * @param PetDropData $drop
      *
      * @return bool
      */
@@ -169,31 +174,30 @@ class PetDropService extends Service {
             $rewards = createAssetsArray();
             // these are handled like prompt rewards
             for ($i = 0; $i < $pet->drops->drops_available; $i++) {
-                foreach ($pet->availableDrops as $drops) {
-                    if (isset($drops->rewards(false)[strtolower($pet->drops->parameters)])) {
-                        foreach ($drops->rewards(false)[strtolower($pet->drops->parameters)] as $data) {
-                            // get object
-                            switch ($data->rewardable_type) {
-                                case 'Item':
-                                    $reward = Item::find($data->rewardable_id);
-                                    break;
-                                case 'Currency':
-                                    $reward = Currency::find($data->rewardable_id);
-                                    if (!$reward->is_user_owned) {
-                                        throw new \Exception('Invalid currency selected.');
-                                    }
-                                    break;
-                                case 'LootTable':
-                                    $reward = LootTable::find($data->rewardable_id);
-                                    break;
-                            }
-                            if (!$reward) {
-                                continue;
-                            }
-                            // get quantity
-                            $quantity = mt_rand($data->min_quantity, $data->max_quantity);
-                            addAsset($rewards, $reward, $quantity);
+                $drops = $pet->availableDrops;
+                if (isset($drops->rewards(false)[strtolower($pet->drops->parameters)])) {
+                    foreach ($drops->rewards(false)[strtolower($pet->drops->parameters)] as $data) {
+                        // get object
+                        switch ($data->rewardable_type) {
+                            case 'Item':
+                                $reward = Item::find($data->rewardable_id);
+                                break;
+                            case 'Currency':
+                                $reward = Currency::find($data->rewardable_id);
+                                if (!$reward->is_user_owned) {
+                                    throw new \Exception('Invalid currency selected.');
+                                }
+                                break;
+                            case 'LootTable':
+                                $reward = LootTable::find($data->rewardable_id);
+                                break;
                         }
+                        if (!$reward) {
+                            continue;
+                        }
+                        // get quantity
+                        $quantity = mt_rand($data->min_quantity, $data->max_quantity);
+                        addAsset($rewards, $reward, $quantity);
                     }
                 }
             }

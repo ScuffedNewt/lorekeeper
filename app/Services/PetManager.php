@@ -8,10 +8,10 @@ use App\Models\Pet\PetDrop;
 use App\Models\User\User;
 use App\Models\User\UserItem;
 use App\Models\User\UserPet;
-use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Notifications;
 
 class PetManager extends Service {
@@ -27,8 +27,8 @@ class PetManager extends Service {
     /**
      * Grants an pet to multiple users.
      *
-     * @param array                 $data
-     * @param \App\Models\User\User $staff
+     * @param array $data
+     * @param User  $staff
      *
      * @return bool
      */
@@ -101,9 +101,9 @@ class PetManager extends Service {
     /**
      * Transfers an pet stack between users.
      *
-     * @param \App\Models\User\User    $sender
-     * @param \App\Models\User\User    $recipient
-     * @param \App\Models\User\UserPet $stack
+     * @param User    $sender
+     * @param User    $recipient
+     * @param UserPet $stack
      *
      * @return bool
      */
@@ -165,8 +165,8 @@ class PetManager extends Service {
     /**
      * Deletes an pet stack.
      *
-     * @param \App\Models\User\User    $user
-     * @param \App\Models\User\UserPet $stack
+     * @param User    $user
+     * @param UserPet $stack
      *
      * @return bool
      */
@@ -208,7 +208,7 @@ class PetManager extends Service {
     /**
      * Names a pet stack.
      *
-     * @param  \App\Models\User\UserPet
+     * @param  UserPet
      * @param mixed $pet
      * @param mixed $name
      *
@@ -320,7 +320,7 @@ class PetManager extends Service {
             if (!$pet->level && config('lorekeeper.pet_bonding_enabled')) {
                 $pet->level()->create([
                     'bonding_level'   => 0,
-                    'bonding' => 0,
+                    'bonding'         => 0,
                 ]);
             }
 
@@ -365,12 +365,14 @@ class PetManager extends Service {
 
     /**
      * Bonds with a pet.
+     *
+     * @param mixed $pet
+     * @param mixed $user
      */
     public function bondPet($pet, $user) {
         DB::beginTransaction();
 
         try {
-
             if (!config('lorekeeper.pets.pet_bonding_enabled')) {
                 throw new \Exception('Pet bonding is not enabled.');
             }
@@ -389,7 +391,7 @@ class PetManager extends Service {
             if (!$pet->level) {
                 $pet->level()->create([
                     'bonding_level'   => 0,
-                    'bonding' => 0,
+                    'bonding'         => 0,
                 ]);
                 $pet = $pet->fresh();
             }
@@ -423,7 +425,7 @@ class PetManager extends Service {
                     // function fillUserAssets($assets, $sender, $recipient, $logType, $data) {
                     fillUserAssets($assets, null, $pet->user, 'Pet Level Up', ['data' => 'Received rewards from leveling up '.$pet->pet->name]);
 
-                    flash('You received: '. createRewardsString($assets))->success();
+                    flash('You received: '.createRewardsString($assets))->success();
                 }
 
                 // level up
@@ -486,9 +488,8 @@ class PetManager extends Service {
                     }
                     throw new \Exception('Could not debit item.');
                 }
-            }
-            else {
-                $this->logAdminAction($pet->user, 'Pet Variant Changed', ['pet' => $pet->id, 'variant' => $id]);
+            } else {
+                $this->logAdminAction($pet->user, 'Pet Variant Changed', 'Changed pet id #'.$pet->id.'/'.$pet->pet->name.' to variant '.Pet::find($id)->name);
             }
 
             $pet->pet_id = $id == 'default' ? null : $id;
@@ -529,8 +530,7 @@ class PetManager extends Service {
 
                     throw new \Exception('Could not debit item.');
                 }
-            }
-            else {
+            } else {
                 $this->logAdminAction($pet->user, 'Pet Evolution Changed', ['pet' => $pet->id, 'evolution' => $id]);
             }
 
@@ -616,13 +616,14 @@ class PetManager extends Service {
     /**
      * Credits an pet to a user.
      *
-     * @param \App\Models\User\User $sender
-     * @param \App\Models\User\User $recipient
-     * @param string                $type
-     * @param array                 $data
-     * @param \App\Models\Pet\Pet   $pet
-     * @param int                   $quantity
-     * @param mixed                 $variant_id
+     * @param User       $sender
+     * @param User       $recipient
+     * @param string     $type
+     * @param array      $data
+     * @param Pet        $pet
+     * @param int        $quantity
+     * @param mixed      $variant_id
+     * @param mixed|null $evolution_id
      *
      * @return bool
      */
@@ -696,11 +697,11 @@ class PetManager extends Service {
     /**
      * Moves an pet stack from one user to another.
      *
-     * @param \App\Models\User\User $sender
-     * @param \App\Models\User\User $recipient
-     * @param string                $type
-     * @param array                 $data
-     * @param mixed                 $stack
+     * @param User   $sender
+     * @param User   $recipient
+     * @param string $type
+     * @param array  $data
+     * @param mixed  $stack
      *
      * @return bool
      */
@@ -726,7 +727,7 @@ class PetManager extends Service {
     /**
      * Debits an pet from a user.
      *
-     * @param \App\Models\User\User   $user
+     * @param User                    $user
      * @param string                  $type
      * @param array                   $data
      * @param \App\Models\Pet\UserPet $stack
