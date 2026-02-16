@@ -9,7 +9,7 @@ class AddSeasonWeathers extends Migration {
      * Run the migrations.
      */
     public function up() {
-        //types of weather, like sun, cloudy, anything else really
+        // types of weather, like sun, cloudy, anything else really
         Schema::create('weather', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->increments('id');
@@ -37,7 +37,7 @@ class AddSeasonWeathers extends Migration {
             $table->boolean('has_image')->default(0);
         });
 
-        //table for outputs to roll on for the seasons
+        // table for outputs to roll on for the seasons
         Schema::create('season_weathers', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->increments('id');
