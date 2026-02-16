@@ -121,7 +121,7 @@ class CycleWeather extends Command {
             $finalweather = $randomWeather->id;
         }
 
-        //change the weather
+        // change the weather
         if (!Settings::get('cycle_site_weather')) {
             // no reset setting
             $this->info('Not set to cycle weather currently. Adjust the settings if this is an error.');
