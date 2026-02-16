@@ -30,7 +30,10 @@
 
     <div class="form-group">
         {!! Form::label('World Page Image (Optional)') !!} {!! add_help('This image is used only on the world information pages.') !!}
-        <div>{!! Form::file('image') !!}</div>
+        <div class="custom-file">
+            {!! Form::label('image', 'Choose file...', ['class' => 'custom-file-label']) !!}
+            {!! Form::file('image', ['class' => 'custom-file-input']) !!}
+        </div>
         <div class="text-muted">Recommended size: 200px x 200px</div>
         @if ($feature->has_image)
             <div class="form-check">
@@ -50,8 +53,8 @@
             {!! Form::select('species_id', $specieses, $feature->species_id, ['class' => 'form-control', 'id' => 'species']) !!}
         </div>
         <div class="col-md-4 form-group" id="subtypes">
-            {!! Form::label('Subtype (Optional)') !!} {!! add_help('This is cosmetic and does not limit choice of traits in selections.') !!}
-            {!! Form::select('subtype_id', $subtypes, $feature->subtype_id, ['class' => 'form-control', 'id' => 'subtype']) !!}
+            {!! Form::label('Subtypes (Optional)') !!} {!! add_help('This is cosmetic and does not limit choice of traits in selections.') !!}
+            {!! Form::select('subtype_ids[]', $subtypes, $feature->subtypes, ['class' => 'form-control', 'id' => 'subtype', 'multiple', 'placeholder' => 'Pick a species first.']) !!}
         </div>
     </div>
     <div class="form-group">
@@ -82,6 +85,7 @@
 
 @section('scripts')
     @parent
+    @include('js._tinymce_wysiwyg')
     <script>
         $(document).ready(function() {
             $('.delete-feature-button').on('click', function(e) {
@@ -97,16 +101,19 @@
 
         function refreshSubtype() {
             var species = $('#species').val();
-            var subtype_id = {{ $feature->subtype_id ?: 'null' }};
+            var subtype_ids = @json($feature->subtypes->pluck('id')->toArray());
             $.ajax({
                 type: "GET",
-                url: "{{ url('admin/data/traits/check-subtype') }}?species=" + species + "&subtype_id=" + subtype_id,
+                url: "{{ url('admin/data/traits/check-subtype') }}?species=" + species + "&subtype_ids=" + subtype_ids,
                 dataType: "text"
             }).done(function(res) {
                 $("#subtypes").html(res);
+                $("#subtype").selectize();
             }).fail(function(jqXHR, textStatus, errorThrown) {
                 alert("AJAX call failed: " + textStatus + ", " + errorThrown);
             });
         };
+
+        $('#subtype').selectize();
     </script>
 @endsection

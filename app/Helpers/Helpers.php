@@ -450,6 +450,30 @@ function prettyProfileName($url) {
 }
 
 /**
+ * Checks the site setting and returns the appropriate FontAwesome version.
+ *
+ * @return string
+ */
+function faVersion() {
+    $setting = config('lorekeeper.settings.fa_version');
+    $directory = 'css';
+
+    switch ($setting) {
+        case 0:
+            $version = 'allv5';
+            break;
+        case 1:
+            $version = 'allv6';
+            break;
+        case 2:
+            $version = 'allvmix';
+            break;
+    }
+
+    return asset($directory.'/'.$version.'.min.css');
+}
+
+/**
  * Returns the site's current season and weather.
  *
  * @return array
@@ -468,4 +492,61 @@ function getSiteWeather() {
  */
 function getObjectWeather($object) {
     return App\Models\Weather\ObjectWeather::where('object_model', get_class($object))->where('object_id', $object->id)->first();
+}
+
+/**
+ * Returns the given objects limits, if any.
+ *
+ * @param mixed $object
+ *
+ * @return bool
+ */
+function getLimits($object) {
+    return App\Models\Limit\Limit::where('object_model', get_class($object))->where('object_id', $object->id)->get();
+}
+
+/**
+ * checks if a certain object has any limits.
+ *
+ * @param mixed $object
+ */
+function hasLimits($object) {
+    return App\Models\Limit\Limit::where('object_model', get_class($object))->where('object_id', $object->id)->exists();
+}
+
+/**
+ * Checks if a user has a limit unlocked.
+ *
+ * @param mixed $object
+ * @param mixed $user
+ */
+function hasUnlockedLimits($user, $object) {
+    if (!hasLimits($object)) {
+        return true;
+    }
+
+    return App\Models\Limit\UserUnlockedLimit::where('user_id', $user->id)
+        ->where('object_model', get_class($object))
+        ->where('object_id', $object->id)
+        ->exists();
+}
+
+/**
+ * Returns the given objects rewards, if any.
+ *
+ * @param mixed $object
+ *
+ * @return bool
+ */
+function getRewards($object) {
+    return App\Models\Reward\Reward::where('object_model', get_class($object))->where('object_id', $object->id)->get();
+}
+
+/**
+ * checks if a certain object has any rewards.
+ *
+ * @param mixed $object
+ */
+function hasRewards($object) {
+    return App\Models\Reward\Reward::where('object_model', get_class($object))->where('object_id', $object->id)->exists();
 }

@@ -10,6 +10,7 @@ use App\Models\News;
 use App\Models\Report\Report;
 use App\Models\Sales\Sales;
 use App\Models\SitePage;
+use App\Models\Trade\TradeListing;
 use App\Models\User\User;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -91,7 +92,7 @@ class CommentController extends Controller {
         $recipient = null;
         $post = null;
         $model_type = $comment->commentable_type;
-        //getting user who commented
+        // getting user who commented
         $sender = User::find($comment->commenter_id);
         $type = $comment->type;
 
@@ -129,6 +130,12 @@ class CommentController extends Controller {
                 $recipient = User::find(Settings::get('admin_user'));
                 $post = 'your site page';
                 $link = $page->url.'/#comment-'.$comment->getKey();
+                break;
+            case 'App\Models\Trade\TradeListing':
+                $listing = TradeListing::find($comment->commentable_id);
+                $recipient = $listing->user;
+                $post = 'your trade listing';
+                $link = $listing->url.'/#comment-'.$comment->getKey();
                 break;
             case 'App\Models\Gallery\GallerySubmission':
                 $submission = GallerySubmission::find($comment->commentable_id);
@@ -171,11 +178,11 @@ class CommentController extends Controller {
         $comment->edits()->create([
             'user_id'    => Auth::user()->id,
             'comment_id' => $comment->id,
-            'data'       => json_encode([
+            'data'       => [
                 'action'      => 'edit',
                 'old_comment' => config('lorekeeper.settings.wysiwyg_comments') ? parse($comment->comment) : $comment->comment,
                 'new_comment' => config('lorekeeper.settings.wysiwyg_comments') ? parse($request->message) : $request->message,
-            ]),
+            ],
         ]);
 
         $comment->update([

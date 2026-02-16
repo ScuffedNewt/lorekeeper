@@ -31,6 +31,30 @@
         </div>
     </div>
 
+    <div>
+        {!! Form::open(['method' => 'GET', 'class' => '']) !!}
+        <div class="form-inline justify-content-end">
+            <div class="form-group ml-3 mb-3">
+                {!! Form::text('name', Request::get('name'), ['class' => 'form-control', 'placeholder' => 'Name']) !!}
+            </div>
+            <div class="form-group ml-3 mb-3">
+                {!! Form::select('item_category_id', $categories->pluck('name', 'id'), Request::get('item_category_id'), ['class' => 'form-control', 'placeholder' => 'Any Category']) !!}
+            </div>
+            @if (config('lorekeeper.extensions.item_entry_expansion.extra_fields'))
+                <div class="form-group ml-3 mb-3">
+                    {!! Form::select('rarity_id', $rarities, Request::get('rarity_id'), ['class' => 'form-control', 'placeholder' => 'Any Rarity']) !!}
+                </div>
+                <div class="form-group ml-3 mb-3">
+                    {!! Form::select('artist', $artists, Request::get('artist'), ['class' => 'form-control', 'placeholder' => 'Any Artist']) !!}
+                </div>
+            @endif
+            <div class="form-group ml-3 mb-3">
+                {!! Form::submit('Search', ['class' => 'btn btn-primary']) !!}
+            </div>
+        </div>
+        {!! Form::close() !!}
+    </div>
+
     <div id="defView" class="hide">
         @foreach ($items as $categoryId => $categoryItems)
             <div class="card mb-3 inventory-category">
@@ -44,26 +68,21 @@
                     @foreach ($categoryItems->chunk(4) as $chunk)
                         <div class="row mb-3">
                             @foreach ($chunk as $itemId => $stack)
-                                <?php
-                                $canName = $stack->first()->category->can_name;
-                                $stackName = $stack->first()->pivot->pluck('stack_name', 'id')->toArray()[$stack->first()->pivot->id];
-                                $stackNameClean = htmlentities($stackName);
-                                ?>
                                 <div class="col-sm-3 col-6 text-center inventory-item" data-id="{{ $stack->first()->pivot->id }}"
-                                    data-name="{!! $canName && $stackName ? htmlentities($stackNameClean) . ' [' : null !!}{{ $character->name ? $character->name : $character->slug }}'s {{ $stack->first()->name }}{!! $canName && $stackName ? ']' : null !!}">
+                                    data-name="{!! $stack->first()->category->can_name && $stack->first()->pivot->stack_name ? htmlentities($stack->first()->pivot->stack_name) . ' [' : null !!}{{ $character->name ? $character->name : $character->slug }}'s {{ $stack->first()->name }}{!! $stack->first()->category->can_name && $stack->first()->pivot->stack_name ? ']' : null !!}">
                                     <div class="mb-1">
                                         <a href="#" class="inventory-stack">
                                             <img src="{{ $stack->first()->imageUrl }}" alt="{{ $stack->first()->name }}" />
                                         </a>
                                     </div>
-                                    <div class="{{ $canName ? 'text-muted' : '' }}">
+                                    <div class="{{ $stack->first()->category->can_name ? 'text-muted' : '' }}">
                                         <a href="#" class="inventory-stack inventory-stack-name">
                                             {{ $stack->first()->name }} x{{ $stack->sum('pivot.count') }}
                                         </a>
                                     </div>
-                                    @if ($canName && $stackName)
+                                    @if ($stack->first()->category->can_name && $stack->first()->pivot->stack_name)
                                         <div>
-                                            <span class="inventory-stack inventory-stack-name badge badge-info" style="font-size:95%; margin:5px;">"{{ $stackName }}"</span>
+                                            <span class="inventory-stack inventory-stack-name badge badge-info" style="font-size:95%; margin:5px;">"{{ $stack->first()->pivot->stack_name }}"</span>
                                         </div>
                                     @endif
                                 </div>
@@ -93,18 +112,12 @@
                             <a href="{{ $itemtype->first()->idUrl }}">{{ $itemtype->first()->name }}</a>
                             <ul class="mb-0">
                                 @foreach ($itemtype as $item)
-                                    <?php
-                                    $canName = $item->category->can_name;
-                                    $itemNames = $item->pivot->pluck('stack_name', 'id');
-                                    $stackName = $itemNames[$item->pivot->id];
-                                    $stackNameClean = htmlentities($stackName);
-                                    ?>
-                                    <div data-id="{{ $item->pivot->id }}" data-name="{!! $canName && $stackName ? htmlentities($stackNameClean) . ' [' : null !!}{{ $character->name ? $character->name : $character->slug }}'s {{ $item->name }}{!! $canName && $stackName ? ']' : null !!}">
+                                    <div data-id="{{ $item->pivot->id }}" data-name="{!! $item->category->can_name && $item->pivot->stack_name ? htmlentities($item->pivot->stack_name) . ' [' : null !!}{{ $character->name ? $character->name : $character->slug }}'s {{ $item->name }}{!! $item->category->can_name && $item->pivot->stack_name ? ']' : null !!}">
                                         <li>
                                             <a class="inventory-stack" href="#">
                                                 Stack of x{{ $item->pivot->count }}.
-                                                @if ($canName && $stackName)
-                                                    <span class="text-info m-0" style="font-size:95%; margin:5px;" data-toggle="tooltip" data-placement="top" title='Named stack:<br />"{{ $stackName }}"'>
+                                                @if ($item->category->can_name && $item->pivot->stack_name)
+                                                    <span class="text-info m-0" style="font-size:95%; margin:5px;" data-toggle="tooltip" data-placement="top" title='Named stack:<br />"{{ $item->pivot->stack_name }}"'>
                                                         &nbsp;<i class="fas fa-tag"></i>
                                                     </span>
                                                 @endif
@@ -174,7 +187,7 @@
                                     <a href="#" class="remove-item btn btn-danger mb-2 disabled">×</a>
                                 </div>
                             </div>
-                            <div><a href="#" class="btn btn-primary" id="add-item">Add Item</a></div>
+                            <div class="mb-2"><a href="#" class="btn btn-primary" id="add-item">Add Item</a></div>
                             <div class="item-row hide mb-2">
                                 {!! Form::select('item_ids[]', $itemOptions, null, ['class' => 'form-control mr-2 item-select', 'placeholder' => 'Select Item']) !!}
                                 {!! Form::text('quantities[]', 1, ['class' => 'form-control mr-2', 'placeholder' => 'Quantity']) !!}
@@ -212,7 +225,7 @@
 @endsection
 
 @section('scripts')
-    @include('widgets._inventory_select_js', ['readOnly' => true])
+    @include('widgets._inventory_select_js')
     @include('widgets._inventory_view_js')
     <script>
         $(document).ready(function() {

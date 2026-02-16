@@ -10,6 +10,7 @@
     <h1>{{ $sales->id ? 'Edit' : 'Create' }} Sales Post
         @if ($sales->id)
             <a href="#" class="btn btn-danger float-right delete-sales-button">Delete Post</a>
+            <a href="{{ $sales->url }}" class="btn btn-info float-right mr-md-2">View Post</a>
         @endif
     </h1>
 
@@ -27,6 +28,20 @@
             {!! Form::label('Post Time (Optional)') !!} {!! add_help('This is the time that the sales post should be posted. Make sure the Is Viewable switch is off.') !!}
             {!! Form::text('post_at', $sales->post_at, ['class' => 'form-control datepicker']) !!}
         </div>
+    </div>
+
+    <div class="form-group">
+        {!! Form::label('Header Image (Optional)') !!} {!! add_help('This image will show up above the sales content and on the meta-image.') !!}
+        <div class="custom-file">
+            {!! Form::label('image', 'Choose file...', ['class' => 'custom-file-label']) !!}
+            {!! Form::file('image', ['class' => 'custom-file-input']) !!}
+        </div>
+        @if ($sales->has_image)
+            <div class="form-check">
+                {!! Form::checkbox('remove_image', 1, false, ['class' => 'form-check-input']) !!}
+                {!! Form::label('remove_image', 'Remove current image', ['class' => 'form-check-label']) !!}
+            </div>
+        @endif
     </div>
 
     <div class="form-group">
@@ -88,10 +103,9 @@
 
 @section('scripts')
     @parent
-
     @include('admin.sales._character_select_js')
     @include('widgets._datetimepicker_js')
-
+    @include('js._tinymce_wysiwyg')
     <script>
         $(document).ready(function() {
             $('.delete-sales-button').on('click', function(e) {

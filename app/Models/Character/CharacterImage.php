@@ -18,11 +18,11 @@ class CharacterImage extends Model {
      * @var array
      */
     protected $fillable = [
-        'character_id', 'user_id', 'species_id', 'subtype_id', 'rarity_id', 'url',
+        'character_id', 'user_id', 'species_id', 'rarity_id', 'url',
         'extension', 'use_cropper', 'hash', 'fullsize_hash', 'fullsize_extension', 'sort',
         'x0', 'x1', 'y0', 'y1',
         'description', 'parsed_description',
-        'is_valid',
+        'is_valid', 'content_warnings',
     ];
 
     /**
@@ -31,6 +31,15 @@ class CharacterImage extends Model {
      * @var string
      */
     protected $table = 'character_images';
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'content_warnings' => 'array',
+    ];
 
     /**
      * Whether the model contains timestamps to be saved and updated.
@@ -47,8 +56,8 @@ class CharacterImage extends Model {
     public static $createRules = [
         'species_id' => 'required',
         'rarity_id'  => 'required',
-        'image'      => 'required|mimes:jpeg,jpg,gif,png,webp|max:20000',
-        'thumbnail'  => 'nullable|mimes:jpeg,jpg,gif,png,webp|max:20000',
+        'image'      => 'required|mimes:jpeg,jpg,gif,png,webp|max:2048',
+        'thumbnail'  => 'nullable|mimes:jpeg,jpg,gif,png,webp|max:2048',
     ];
 
     /**
@@ -62,6 +71,8 @@ class CharacterImage extends Model {
         'species_id'   => 'required',
         'rarity_id'    => 'required',
         'description'  => 'nullable',
+        'image'        => 'mimes:jpeg,jpg,gif,png,webp|max:2048',
+        'thumbnail'    => 'nullable|mimes:jpeg,jpg,gif,png,webp|max:2048',
     ];
 
     /**********************************************************************************************
@@ -94,8 +105,8 @@ class CharacterImage extends Model {
     /**
      * Get the subtype of the character image.
      */
-    public function subtype() {
-        return $this->belongsTo(Subtype::class, 'subtype_id');
+    public function subtypes() {
+        return $this->hasMany(CharacterImageSubtype::class, 'character_image_id');
     }
 
     /**
@@ -263,5 +274,59 @@ class CharacterImage extends Model {
      */
     public function getThumbnailUrlAttribute() {
         return asset($this->imageDirectory.'/'.$this->thumbnailFileName);
+    }
+
+    /**
+     * Formats existing content warnings for editing.
+     *
+     * @return string
+     */
+    public function getEditWarningsAttribute() {
+        $contentWarnings = collect($this->content_warnings)->unique()->map(function ($warnings) {
+            return collect($warnings)->map(function ($warning) {
+                $lower = strtolower(trim($warning));
+
+                return ['warning' => ucwords($lower)];
+            });
+        })->sort()->flatten(1)->values()->toJson();
+
+        return $contentWarnings;
+    }
+
+    /**********************************************************************************************
+
+        OTHER FUNCTIONS
+
+    **********************************************************************************************/
+
+    /**
+     * Displays the image's subtypes as an imploded string.
+     */
+    public function displaySubtypes() {
+        if (!count($this->subtypes)) {
+            return 'None';
+        }
+        $subtypes = [];
+        foreach ($this->subtypes as $subtype) {
+            $subtypes[] = $subtype->subtype->displayName;
+        }
+
+        return implode(', ', $subtypes);
+    }
+
+    /**
+     * Determines if the character has content warning display.
+     *
+     * @param  User
+     * @param mixed|null $user
+     *
+     * @return bool
+     */
+    public function showContentWarnings($user = null) {
+        if ($user) {
+            return $user->settings->content_warning_visibility < 1 && $this->content_warnings;
+        }
+
+        return count($this->content_warnings ?? []) > 0;
     }
 }

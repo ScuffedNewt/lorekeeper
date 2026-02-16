@@ -10,6 +10,8 @@
     <h1>{{ $news->id ? 'Edit' : 'Create' }} News Post
         @if ($news->id)
             <a href="#" class="btn btn-danger float-right delete-news-button">Delete Post</a>
+            <a href="#" class="btn btn-secondary float-right regen-news-button mr-md-2">Regenerate Post</a>
+            <a href="{{ $news->url }}" class="btn btn-info float-right mr-md-2">View Post</a>
         @endif
     </h1>
 
@@ -27,6 +29,20 @@
             {!! Form::label('Post Time (Optional)') !!} {!! add_help('This is the time that the news post should be posted. Make sure the Is Viewable switch is off.') !!}
             {!! Form::text('post_at', $news->post_at, ['class' => 'form-control datepicker']) !!}
         </div>
+    </div>
+
+    <div class="form-group">
+        {!! Form::label('Header Image (Optional)') !!} {!! add_help('This image will show up above the news content and on the meta-image.') !!}
+        <div class="custom-file">
+            {!! Form::label('image', 'Choose file...', ['class' => 'custom-file-label']) !!}
+            {!! Form::file('image', ['class' => 'custom-file-input']) !!}
+        </div>
+        @if ($news->has_image)
+            <div class="form-check">
+                {!! Form::checkbox('remove_image', 1, false, ['class' => 'form-check-input']) !!}
+                {!! Form::label('remove_image', 'Remove current image', ['class' => 'form-check-label']) !!}
+            </div>
+        @endif
     </div>
 
     <div class="form-group">
@@ -57,11 +73,16 @@
 @section('scripts')
     @parent
     @include('widgets._datetimepicker_js')
+    @include('js._tinymce_wysiwyg')
     <script>
         $(document).ready(function() {
             $('.delete-news-button').on('click', function(e) {
                 e.preventDefault();
                 loadModal("{{ url('admin/news/delete') }}/{{ $news->id }}", 'Delete Post');
+            });
+            $('.regen-news-button').on('click', function(e) {
+                e.preventDefault();
+                loadModal("{{ url('admin/news/regen') }}/{{ $news->id }}", 'Regenerate Post');
             });
         });
     </script>

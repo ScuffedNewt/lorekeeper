@@ -13,14 +13,18 @@ class PostRequestThrottleMiddleware {
     /**
      * Handle an incoming request.
      *
-     * @param \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response) $next
+     * @param Closure(Request): (Response) $next
      */
     public function handle(Request $request, Closure $next): Response {
-        if ($request->isMethod('get')) {
+        $allowedRoutes = [
+            'admin/*',
+        ];
+        if ($request->isMethod('get') || $request->is(...$allowedRoutes) || app()->environment('local')) {
             return $next($request);
         }
 
         $key = $request->user()?->id ?: $request->ip();
+        $key .= $request->fullUrl(); // add current url to key to prevent rate limiting on different pages
         $maxAttempts = 1;
         $decaySeconds = 10;
 
@@ -39,7 +43,10 @@ class PostRequestThrottleMiddleware {
                 Log::channel('throttle')->info('Rate limited user', ['url' => $request->fullUrl(), 'user' => $request->user()?->name ?: $request->ip()]);
             }
 
-            return redirect()->back();
+            // If the response is from ajax it's not expecting a full redirect with the entire site bundled in as a response
+            return $request->ajax() ?
+                response("<div class='alert alert-danger mb-2'>Too many requests - please try again later.</div><div class='alert alert-success'>Your initial action has likely been performed successfully. Please check to ensure this is the case before trying again.</div>")
+                : redirect()->back();
         }
 
         RateLimiter::hit($key, $decaySeconds);

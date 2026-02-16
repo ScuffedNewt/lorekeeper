@@ -2,7 +2,6 @@
 
 namespace App\Models\Gallery;
 
-use App\Facades\Settings;
 use App\Models\Model;
 use Carbon\Carbon;
 
@@ -202,12 +201,13 @@ class Gallery extends Model {
     /**
      * Gets whether or not the user can submit to the gallery.
      *
+     * @param bool       $submissionsOpen
      * @param mixed|null $user
      *
      * @return string
      */
-    public function canSubmit($user = null) {
-        if (Settings::get('gallery_submissions_open')) {
+    public function canSubmit($submissionsOpen, $user = null) {
+        if ($submissionsOpen) {
             if ((isset($this->start_at) && $this->start_at->isFuture()) || (isset($this->end_at) && $this->end_at->isPast())) {
                 return false;
             } elseif ($user && $user->hasPower('manage_submissions')) {

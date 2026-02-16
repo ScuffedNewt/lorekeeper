@@ -215,13 +215,13 @@ class ItemService extends Service {
             }
 
             $item->update([
-                'data' => json_encode([
-                    'rarity'  => isset($data['rarity']) && $data['rarity'] ? $data['rarity'] : null,
-                    'uses'    => isset($data['uses']) && $data['uses'] ? $data['uses'] : null,
-                    'release' => isset($data['release']) && $data['release'] ? $data['release'] : null,
-                    'prompts' => isset($data['prompts']) && $data['prompts'] ? $data['prompts'] : null,
-                    'resell'  => isset($data['currency_quantity']) ? [$data['currency_id'] => $data['currency_quantity']] : null,
-                ]), // rarity, availability info (original source, purchase locations, drop locations)
+                'data' => [
+                    'uses'      => isset($data['uses']) && $data['uses'] ? $data['uses'] : null,
+                    'release'   => isset($data['release']) && $data['release'] ? $data['release'] : null,
+                    'prompts'   => isset($data['prompts']) && $data['prompts'] ? $data['prompts'] : null,
+                    'resell'    => isset($data['currency_quantity']) ? [$data['currency_id'] => $data['currency_quantity']] : null,
+                    'rarity_id' => isset($data['rarity_id']) && $data['rarity_id'] ? $data['rarity_id'] : null,
+                ], // rarity, availability info (original source, purchase locations, drop locations)
             ]);
 
             if ($image) {
@@ -278,13 +278,13 @@ class ItemService extends Service {
             }
 
             $item->update([
-                'data' => json_encode([
-                    'rarity'  => isset($data['rarity']) && $data['rarity'] ? $data['rarity'] : null,
-                    'uses'    => isset($data['uses']) && $data['uses'] ? $data['uses'] : null,
-                    'release' => isset($data['release']) && $data['release'] ? $data['release'] : null,
-                    'prompts' => isset($data['prompts']) && $data['prompts'] ? $data['prompts'] : null,
-                    'resell'  => isset($data['currency_quantity']) ? [$data['currency_id'] => $data['currency_quantity']] : null,
-                ]), // rarity, availability info (original source, purchase locations, drop locations)
+                'data' => [
+                    'uses'      => isset($data['uses']) && $data['uses'] ? $data['uses'] : null,
+                    'release'   => isset($data['release']) && $data['release'] ? $data['release'] : null,
+                    'prompts'   => isset($data['prompts']) && $data['prompts'] ? $data['prompts'] : null,
+                    'resell'    => isset($data['currency_quantity']) ? [$data['currency_id'] => $data['currency_quantity']] : null,
+                    'rarity_id' => isset($data['rarity_id']) && $data['rarity_id'] ? $data['rarity_id'] : null,
+                ], // rarity, availability info (original source, purchase locations, drop locations)
             ]);
 
             if ($item) {
@@ -321,8 +321,8 @@ class ItemService extends Service {
             if (DB::table('loots')->where('rewardable_type', 'Item')->where('rewardable_id', $item->id)->exists()) {
                 throw new \Exception('A loot table currently distributes this item as a potential reward. Please remove the item before deleting it.');
             }
-            if (DB::table('prompt_rewards')->where('rewardable_type', 'Item')->where('rewardable_id', $item->id)->exists()) {
-                throw new \Exception('A prompt currently distributes this item as a reward. Please remove the item before deleting it.');
+            if (DB::table('rewards')->where('rewardable_type', 'Item')->where('rewardable_id', $item->id)->exists()) {
+                throw new \Exception('An object currently distributes this item as a reward. Please remove the item before deleting it.');
             }
             if (DB::table('shop_stock')->where('item_id', $item->id)->exists()) {
                 throw new \Exception('A shop currently stocks this item. Please remove the item before deleting it.');
