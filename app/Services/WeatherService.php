@@ -287,7 +287,7 @@ class WeatherService extends Service {
                 'weathers'           => $weather_ids,
                 'active_weathers'    => $active_weather,
                 'reset_period'       => $data['reset_period'] ?? null,
-                'use_season_weather' => $data['use_season_weather'],
+                'use_season_weather' => $data['use_season_weather'] ?? 0,
                 'data'               => [
                     'min_selected_weather' => $data['min_selected_weather'] ?? 1,
                     'max_selected_weather' => $data['max_selected_weather'] ?? 1,

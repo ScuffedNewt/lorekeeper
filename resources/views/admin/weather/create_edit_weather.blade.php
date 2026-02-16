@@ -23,9 +23,12 @@
     </div>
 
     <div class="form-group">
-        {!! Form::label('World Page Image (Optional)') !!} {!! add_help('This image is used on the world information pages and side widget.') !!}
-        <div>{!! Form::file('image') !!}</div>
-        <div class="text-muted">Recommended size: 200px x 200px</div>
+        {!! Form::label('World Page Image (Optional)') !!} {!! add_help('This image is used only on the world information pages.') !!}
+        <div class="custom-file">
+            {!! Form::label('image', 'Choose file...', ['class' => 'custom-file-label']) !!}
+            {!! Form::file('image', ['class' => 'custom-file-input']) !!}
+        </div>
+        <div class="text-muted">Recommended size: 100px x 100px</div>
         @if ($weather->has_image)
             <div class="form-check">
                 {!! Form::checkbox('remove_image', 1, false, ['class' => 'form-check-input']) !!}
@@ -66,6 +69,7 @@
 @endsection
 
 @section('scripts')
+    @include('js._tinymce_wysiwyg')
     @parent
     <script>
         $(document).ready(function() {

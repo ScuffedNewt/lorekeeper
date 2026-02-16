@@ -132,7 +132,7 @@ class ObjectWeather extends Model {
         $availableWeathers = [];
         $totalWeight = 0;
         foreach ($this->weathers as $id=>$weight) {
-            $availableWeathers[$id] = $weight;
+            $availableWeathers[] = ['id' => $id, 'weight' => $weight];
             $totalWeight += $weight;
         }
 
@@ -140,7 +140,7 @@ class ObjectWeather extends Model {
             $season = getSiteWeather()['season'];
             if ($season) {
                 foreach ($season->weather as $weather) {
-                    $availableWeathers[$weather->id] = $weather->weight;
+                    $availableWeathers[] = ['id' => $weather->id, 'weight' => $weather->weight];
                     $totalWeight += $weather->weight;
                 }
             }
@@ -161,7 +161,9 @@ class ObjectWeather extends Model {
             $result = null;
             $prev = null;
             $count = 0;
-            foreach ($availableWeathers as $id=>$weight) {
+            foreach ($availableWeathers as $weather) {
+                $id = $weather['id'];
+                $weight = $weather['weight'];
                 $count += $weight;
 
                 if ($roll < $count) {

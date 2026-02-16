@@ -128,8 +128,6 @@
     ])
     {{-- blade-formatter-enable --}}
 
-    @include('widgets._add_weather', ['object' => $prompt])
-
     <div class="text-right">
         {!! Form::submit($prompt->id ? 'Edit' : 'Create', ['class' => 'btn btn-primary']) !!}
     </div>
@@ -137,10 +135,15 @@
     {!! Form::close() !!}
 
     @if ($prompt->id)
+        <hr />
+        @include('widgets._add_weather', ['object' => $prompt])
+
         @include('widgets._add_limits', [
             'object' => $prompt,
             'hideAutoUnlock' => true,
         ])
+
+        <hr />
 
         <h3>Preview</h3>
         <div class="card mb-3">

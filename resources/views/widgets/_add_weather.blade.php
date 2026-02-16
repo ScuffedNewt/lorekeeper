@@ -18,7 +18,7 @@
     </ul>
     </p>
     <p>
-        If you want this object to only be accessible during certain weathers, simply enable the "Hidden" option. This means the object will only be visible if <em>The site's weather</em> matches the set weather.
+        If you want this object to only be accessible during certain weathers, simply enable the "Hidden" option. This means the object will only be visible if <em>the site's weather</em> matches the set weather.
         <br />To make more objects hideable aside from the default provided, refer to the scopes in the <code>PromptController::getPrompts</code> function.
     </p>
     <p><strong>By default, the current season's weather will also be included in the available weather for this object, UNLESS it is a hidden object.</strong></p>
@@ -225,7 +225,8 @@
                     location.reload();
                 },
                 error: function(data) {
-                    location.reload();
+                    console.log(data);
+                    alert('An error occurred while saving the object\'s weather. Please try again.');
                 }
             });
         });
