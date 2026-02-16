@@ -1,8 +1,6 @@
 @php
     $weathers = \App\Models\Weather\Weather::orderBy('name')->pluck('name', 'id');
-    $objectWeather = \App\Models\Weather\ObjectWeather::where('object_id', $object->id)
-        ->where('object_model', get_class($object))
-        ->first();
+    $objectWeather = \App\Models\Weather\ObjectWeather::where('object_id', $object->id)->where('object_model', get_class($object))->first();
     $resetPeriods = [null => 'None', 'Hour' => 'Hourly', 'Day' => 'Daily', 'Week' => 'Weekly', 'Month' => 'Month', 'Year' => 'Year'];
 @endphp
 
