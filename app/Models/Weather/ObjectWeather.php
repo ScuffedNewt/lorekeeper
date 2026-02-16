@@ -150,8 +150,8 @@ class ObjectWeather extends Model {
         shuffle($availableWeathers);
 
         $chosen_weather = [];
-        $min_selected = $this->data['min_weather_selected'] ?? 1;
-        $max_selected = $this->data['max_weather_selected'] ?? 1;
+        $min_selected = $this->data['min_selected_weather'] ?? 1;
+        $max_selected = $this->data['max_selected_weather'] ?? 1;
         $selected = mt_rand($min_selected, $max_selected);
         for ($i = 0; $i < $selected; $i++) {
             if ($totalWeight == 0) {
