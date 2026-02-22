@@ -475,7 +475,7 @@ class UserController extends Controller {
                     break;
             }
         } else {
-            $query->select('ip', DB::raw('MAX(updated_at)'))->groupBy('ip')->orderBy(DB::raw('MAX(updated_at)'), 'DESC');
+            $query->select('ip', DB::raw('MAX(updated_at) as updated_at'))->groupBy('ip')->orderBy('updated_at', 'DESC');
         }
 
         return view('admin.users.user_ips', [
