@@ -265,3 +265,7 @@
         </div>
     @endif
 @endif
+@section('scripts')
+    @include('js._tinymce_wysiwyg')
+    @parent
+@endsection

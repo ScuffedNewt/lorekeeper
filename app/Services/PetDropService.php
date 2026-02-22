@@ -38,6 +38,9 @@ class PetDropService extends Service {
             if (!$pet) {
                 throw new \Exception('The selected pet is invalid.');
             }
+            if (!isset($data['label']) || !isset($data['weight']) || count($data['label']) != count($data['weight'])) {
+                throw new \Exception('Invalid parameters provided.');
+            }
 
             // Collect parameter data and encode it
             if (!isset($data['label'])) {
@@ -91,8 +94,10 @@ class PetDropService extends Service {
                 throw new \Exception('At least one drop parameter is required.');
             }
             $paramData = [];
-            foreach ($data['label'] as $key => $param) {
-                $paramData[$param] = $data['weight'][$key];
+            if (isset($data['label'])) {
+                foreach ($data['label'] as $key => $param) {
+                    $paramData[$param] = $data['weight'][$key];
+                }
             }
 
             $data['rewardable_type'] ??= null;
@@ -175,31 +180,30 @@ class PetDropService extends Service {
             $rewards = createAssetsArray();
             // these are handled like prompt rewards
             for ($i = 0; $i < $pet->drops->drops_available; $i++) {
-                foreach ($pet->availableDrops as $drops) {
-                    if (isset($drops->rewards(false)[strtolower($pet->drops->parameters)])) {
-                        foreach ($drops->rewards(false)[strtolower($pet->drops->parameters)] as $data) {
-                            // get object
-                            switch ($data->rewardable_type) {
-                                case 'Item':
-                                    $reward = Item::find($data->rewardable_id);
-                                    break;
-                                case 'Currency':
-                                    $reward = Currency::find($data->rewardable_id);
-                                    if (!$reward->is_user_owned) {
-                                        throw new \Exception('Invalid currency selected.');
-                                    }
-                                    break;
-                                case 'LootTable':
-                                    $reward = LootTable::find($data->rewardable_id);
-                                    break;
-                            }
-                            if (!$reward) {
-                                continue;
-                            }
-                            // get quantity
-                            $quantity = mt_rand($data->min_quantity, $data->max_quantity);
-                            addAsset($rewards, $reward, $quantity);
+                $drops = $pet->availableDrops;
+                if (isset($drops->rewards(false)[strtolower($pet->drops->parameters)])) {
+                    foreach ($drops->rewards(false)[strtolower($pet->drops->parameters)] as $data) {
+                        // get object
+                        switch ($data->rewardable_type) {
+                            case 'Item':
+                                $reward = Item::find($data->rewardable_id);
+                                break;
+                            case 'Currency':
+                                $reward = Currency::find($data->rewardable_id);
+                                if (!$reward->is_user_owned) {
+                                    throw new \Exception('Invalid currency selected.');
+                                }
+                                break;
+                            case 'LootTable':
+                                $reward = LootTable::find($data->rewardable_id);
+                                break;
                         }
+                        if (!$reward) {
+                            continue;
+                        }
+                        // get quantity
+                        $quantity = mt_rand($data->min_quantity, $data->max_quantity);
+                        addAsset($rewards, $reward, $quantity);
                     }
                 }
             }

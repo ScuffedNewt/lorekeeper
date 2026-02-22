@@ -12,9 +12,8 @@ use App\Models\User\UserPet;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\DB;
+use Notifications;
 
 class PetManager extends Service {
     /*
@@ -491,7 +490,7 @@ class PetManager extends Service {
                     throw new \Exception('Could not debit item.');
                 }
             } else {
-                $this->logAdminAction($pet->user, 'Pet Variant Changed', ['pet' => $pet->id, 'variant' => $id]);
+                $this->logAdminAction($pet->user, 'Pet Variant Changed', 'Changed pet id #'.$pet->id.'/'.$pet->pet->name.' to variant '.Pet::find($id)->name);
             }
 
             $pet->pet_id = $id == 'default' ? null : $id;

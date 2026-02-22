@@ -123,6 +123,10 @@
                         </tbody>
                     </table>
                 </div>
+            @else
+                <div class="card card-body my-2">
+                    No variants with drops found.
+                </div>
             @endif
         @endif
     @endif
