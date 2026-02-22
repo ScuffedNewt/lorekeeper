@@ -29,19 +29,49 @@ class ArmouryController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getArmoury() {
-        $gear_categories = GearCategory::orderBy('sort', 'DESC')->get();
-        $gears = count($gear_categories) ? Auth::user()->gears()->orderByRaw('FIELD(gear_category_id,'.implode(',', $gear_categories->pluck('id')->toArray()).')')->orderBy('name')->orderBy('updated_at')->get()->groupBy('gear_category_id') : Auth::user()->gears()->orderBy('name')->orderBy('updated_at')->get()->groupBy('gear_category_id');
+        if (!config('lorekeeper.claymores_and_companions.visibility_settings.gear') && !config('lorekeeper.claymores_and_companions.visibility_settings.weapons')) {
+            abort(404);
+        }
 
-        $weapon_categories = WeaponCategory::orderBy('sort', 'DESC')->get();
-        $weapons = count($weapon_categories) ? Auth::user()->weapons()->orderByRaw('FIELD(weapon_category_id,'.implode(',', $weapon_categories->pluck('id')->toArray()).')')->orderBy('name')->orderBy('updated_at')->get()->groupBy('weapon_category_id') : Auth::user()->weapons()->orderBy('name')->orderBy('updated_at')->get()->groupBy('weapon_category_id');
+        if (config('lorekeeper.claymores_and_companions.visibility_settings.gear')) {
+            $gearCategories = GearCategory::orderBy('sort', 'DESC')->get();
+            $gears = count($gearCategories) ?
+                Auth::user()->gears()
+                    ->orderByRaw('FIELD(gear_category_id,'.implode(',', $gearCategories->pluck('id')->toArray()).')')
+                    ->orderBy('name')
+                    ->orderBy('updated_at')
+                    ->get()
+                    ->groupBy('gear_category_id') :
+                Auth::user()->gears()
+                    ->orderBy('name')
+                    ->orderBy('updated_at')
+                    ->get()
+                    ->groupBy('gear_category_id');
+        }
+
+        if (config('lorekeeper.claymores_and_companions.visibility_settings.weapons')) {
+            $weaponCategories = WeaponCategory::orderBy('sort', 'DESC')->get();
+            $weapons = count($weaponCategories) ?
+                Auth::user()->weapons()
+                    ->orderByRaw('FIELD(weapon_category_id,'.implode(',', $weaponCategories->pluck('id')->toArray()).')')
+                    ->orderBy('name')
+                    ->orderBy('updated_at')
+                    ->get()
+                    ->groupBy('weapon_category_id') :
+                Auth::user()->weapons()
+                    ->orderBy('name')
+                    ->orderBy('updated_at')
+                    ->get()
+                    ->groupBy('weapon_category_id');
+        }
 
         return view('home.armoury', [
             'user'              => Auth::user(),
-            'gears'             => $gears,
-            'weapons'           => $weapons,
+            'gears'             => $gears ?? null,
+            'weapons'           => $weapons ?? null,
             'userOptions'       => User::visible()->where('id', '!=', Auth::user()->id)->orderBy('name')->pluck('name', 'id')->toArray(),
-            'gear_categories'   => $gear_categories->keyBy('id'),
-            'weapon_categories' => $weapon_categories->keyBy('id'),
+            'gearCategories'    => isset($gearCategories) ? $gearCategories->keyBy('id') : null,
+            'weaponCategories'  => isset($weaponCategories) ? $weaponCategories->keyBy('id') : null,
         ]);
     }
 

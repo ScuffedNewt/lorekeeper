@@ -9,6 +9,12 @@
 
     <h1>Character Class</h1>
 
+    @if (!config('lorekeeper.claymores_and_companions.visibility_settings.character_classes'))
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle"></i> Character classes are currently set to be hidden. To change this, update the visibility settings in the config.
+        </div>
+    @endif
+
     <p>This is a list of character class that will be used to classify characters. Creating character class is entirely optional, but recommended for organisational purposes.</p>
     <p>The sorting order reflects the order in which the character class will be displayed on the world pages.</p>
 

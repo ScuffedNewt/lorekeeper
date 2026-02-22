@@ -7,8 +7,12 @@
         <div class="sidebar-item"><a href="{{ url('pets') }}" class="{{ set_active('pets*') }}">My Pets</a></div>
         <div class="sidebar-item"><a href="{{ url('inventory') }}" class="{{ set_active('inventory*') }}">Inventory</a></div>
         <div class="sidebar-item"><a href="{{ url('bank') }}" class="{{ set_active('bank*') }}">Bank</a></div>
-        <div class="sidebar-item"><a href="{{ url('armoury') }}" class="{{ set_active('armoury*') }}">Armoury</a></div>
-        <div class="sidebar-item"><a href="{{ url('user-stats') }}" class="{{ set_active('user-stats*') }}">Stat Information</a></div>
+        @if (config('lorekeeper.claymores_and_companions.visibility_settings.gear') || config('lorekeeper.claymores_and_companions.visibility_settings.weapons'))
+            <div class="sidebar-item"><a href="{{ url('armoury') }}" class="{{ set_active('armoury*') }}">Armoury</a></div>
+        @endif
+        @if (config('lorekeeper.claymores_and_companions.visibility_settings.user_levels') || config('lorekeeper.claymores_and_companions.visibility_settings.character_stats'))
+            <div class="sidebar-item"><a href="{{ url('user-stats') }}" class="{{ set_active('user-stats*') }}">Stat Information</a></div>
+        @endif
     </li>
     <li class="sidebar-section">
         <div class="sidebar-section-header">Activity</div>

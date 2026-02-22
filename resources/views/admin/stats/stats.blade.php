@@ -7,7 +7,13 @@
 @section('admin-content')
     {!! breadcrumbs(['Admin Panel' => 'admin', 'Stats' => 'admin/stats']) !!}
 
-    <h1>Stats</h1>
+    <h1>Character Stats</h1>
+
+    @if (!config('lorekeeper.claymores_and_companions.visibility_settings.character_stats'))
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle"></i> Character stats are currently set to be hidden. To change this, update the visibility settings in the config.
+        </div>
+    @endif
 
     <p>This is a list of stats in the game. Stats ONLY apply to characters.</p>
 

@@ -462,6 +462,9 @@ class CharacterController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getCharacterExpLogs($slug) {
+        if (!config('lorekeeper.claymores_and_companions.visibility_settings.character_levels')) {
+            abort(404);
+        }
         $character = $this->character;
 
         return view('character.stats.exp_logs', [
@@ -494,6 +497,9 @@ class CharacterController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getCharacterStatLogs($slug) {
+        if (!config('lorekeeper.claymores_and_companions.visibility_settings.character_stats')) {
+            abort(404);
+        }
         $character = $this->character;
 
         return view('character.stats.character_stat_logs', [
@@ -512,6 +518,9 @@ class CharacterController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getCharacterStatPointLogs($slug) {
+        if (!config('lorekeeper.claymores_and_companions.visibility_settings.character_stats')) {
+            abort(404);
+        }
         $character = $this->character;
 
         return view('character.stats.stat_logs', [
@@ -530,6 +539,9 @@ class CharacterController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getCharacterLevelLogs($slug) {
+        if (!config('lorekeeper.claymores_and_companions.visibility_settings.character_levels')) {
+            abort(404);
+        }
         $character = $this->character;
 
         return view('character.stats.level_logs', [
@@ -547,6 +559,9 @@ class CharacterController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getCharacterCountLogs($slug) {
+        if (!config('lorekeeper.claymores_and_companions.visibility_settings.character_stats')) {
+            abort(404);
+        }
         $character = $this->character;
 
         return view('character.stats.count_logs', [

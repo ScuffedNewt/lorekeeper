@@ -49,6 +49,9 @@ class CharacterStatController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getStats($slug) {
+        if (!config('lorekeeper.claymores_and_companions.visibility_settings.character_stats')) {
+            abort(404);
+        }
         $character = $this->character;
 
         $character->propagateStats();
@@ -67,6 +70,9 @@ class CharacterStatController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getStat($slug, $id) {
+        if (!config('lorekeeper.claymores_and_companions.visibility_settings.character_stats')) {
+            abort(404);
+        }
         $character = $this->character;
 
         $stat = CharacterStat::find($id);
@@ -85,6 +91,10 @@ class CharacterStatController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getStatLogs($slug) {
+        if (!config('lorekeeper.claymores_and_companions.visibility_settings.character_stats')) {
+            abort(404);
+        }
+
         return view('character.stats.character_stat_logs', [
             'character'       => $this->character,
             'exps'            => $this->character->getExpLogs(),

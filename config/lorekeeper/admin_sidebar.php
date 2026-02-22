@@ -234,6 +234,10 @@ return [
                 'name' => 'Dynamic Limits',
                 'url'  => 'admin/data/limits',
             ],
+            [
+                'name' => 'Elements',
+                'url'  => 'admin/data/elements',
+            ],
         ],
     ],
     'Claymores' => [
@@ -256,7 +260,7 @@ return [
                 'url'  => 'admin/data/skills',
             ],
             [
-                'name' => 'Stats',
+                'name' => 'Character Stats',
                 'url'  => 'admin/stats',
             ],
             [
@@ -266,11 +270,6 @@ return [
             [
                 'name' => 'User Levels',
                 'url'  => 'admin/levels/user',
-            ],
-            [
-                'name' => 'Elements',
-                'url'  => 'admin/data/elements',
-
             ],
         ],
     ],

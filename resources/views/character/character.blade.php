@@ -43,9 +43,11 @@
                 <li class="nav-item">
                     <a class="nav-link" id="notesTab" data-toggle="tab" href="#notes" role="tab">Description</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" id="skillsTab" data-toggle="tab" href="#skills" role="tab">Skills</a>
-                </li>
+                @if (config('lorekeeper.claymores_and_companions.visibility_settings.character_skills'))
+                    <li class="nav-item">
+                        <a class="nav-link" id="skillsTab" data-toggle="tab" href="#skills" role="tab">Skills</a>
+                    </li>
+                @endif
                 @if (Auth::check() && Auth::user()->hasPower('manage_characters'))
                     <li class="nav-item">
                         <a class="nav-link" id="settingsTab" data-toggle="tab" href="#settings-{{ $character->slug }}" role="tab"><i class="fas fa-cog"></i></a>
@@ -60,9 +62,11 @@
             <div class="tab-pane fade" id="notes">
                 @include('character._tab_notes', ['character' => $character])
             </div>
-            <div class="tab-pane fade" id="skills">
-                @include('character._tab_skills', ['character' => $character, 'skills' => $skills])
-            </div>
+            @if (config('lorekeeper.claymores_and_companions.visibility_settings.character_skills'))
+                <div class="tab-pane fade" id="skills">
+                    @include('character._tab_skills', ['character' => $character, 'skills' => $skills])
+                </div>
+            @endif
             @if (Auth::check() && Auth::user()->hasPower('manage_characters'))
                 <div class="tab-pane fade" id="settings-{{ $character->slug }}">
                     {!! Form::open(['url' => $character->is_myo_slot ? 'admin/myo/' . $character->id . '/settings' : 'admin/character/' . $character->slug . '/settings']) !!}

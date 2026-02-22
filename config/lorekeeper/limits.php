@@ -19,25 +19,33 @@ return [
             'name'        => 'Dynamic',
             'description' => 'Dynamic limits require a user to meet a certain condition. The condition is evaluated at runtime.',
         ],
-        'stat' => [
-            'name'        => 'Stats',
-            'description' => 'Stat limits require a character to have a certain amount of a specific stat.',
-        ],
-        'character_level' => [
-            'name'        => 'Character Levels',
-            'description' => 'Level limits require a character to have a certain level.',
-        ],
-        'user_level' => [
-            'name'        => 'User Levels',
-            'description' => 'Level limits require a user to have a certain level.',
-        ],
-        'class' => [
-            'name'        => 'Classes',
-            'description' => 'Class limits require a character to have a certain class.',
-        ],
         'element' => [
             'name'        => 'Elements',
             'description' => 'Element limits require a character to have a certain elemental typing.',
         ],
-    ],
+    ] +
+    (config('lorekeeper.claymores_and_companions.visibility_settings.character_classes') ? [
+        'class' => [
+            'name'        => 'Classes',
+            'description' => 'Class limits require a character to have a certain class.',
+        ],
+    ] : []) +
+    (config('lorekeeper.claymores_and_companions.visibility_settings.character_levels') ? [
+        'character_level' => [
+            'name'        => 'Character Levels',
+            'description' => 'Level limits require a character to have a certain level.',
+        ],
+    ] : []) +
+    (config('lorekeeper.claymores_and_companions.visibility_settings.user_levels') ? [
+        'user_level' => [
+            'name'        => 'User Levels',
+            'description' => 'Level limits require a user to have a certain level.',
+        ],
+    ] : []) +
+    (config('lorekeeper.claymores_and_companions.visibility_settings.character_stats') ? [
+        'stat' => [
+            'name'        => 'Stats',
+            'description' => 'Stat limits require a character to have a certain amount of a specific stat.',
+        ],
+    ] : []),
 ];

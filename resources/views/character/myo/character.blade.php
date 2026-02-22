@@ -37,9 +37,11 @@
             </ul>
         </div>
         <div class="card-body tab-content">
-            <div class="tab-pane fade show active" id="stats">
-                @include('character._tab_stats', ['character' => $character])
-            </div>
+            @if (config('lorekeeper.claymores_and_companions.visibility_settings.character_stats'))
+                <div class="tab-pane fade show active" id="stats">
+                    @include('character._tab_stats', ['character' => $character])
+                </div>
+            @endif
             <div class="tab-pane fade" id="notes">
                 @include('character._tab_notes', ['character' => $character])
             </div>

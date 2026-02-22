@@ -10,6 +10,12 @@
 
     <p>This is a list of levels in the game.</p>
 
+    @if (!config('lorekeeper.claymores_and_companions.visibility_settings.'.$type.'_levels'))
+         <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle"></i> {{ ucfirst($type) }} levels are currently set to be hidden. To change this, update the visibility settings in the config.
+        </div>
+    @endif
+
     <div class="text-right mb-3">
         <a class="btn btn-primary" href="{{ url('admin/levels/' . $type . '/create') }}"><i class="fas fa-plus"></i> Create New {{ ucfirst($type) }} Level</a>
     </div>

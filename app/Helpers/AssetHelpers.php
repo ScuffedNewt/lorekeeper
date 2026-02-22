@@ -72,9 +72,17 @@ function calculateGroupCurrency($data) {
  */
 function getAssetKeys($isCharacter = false) {
     if (!$isCharacter) {
-        return ['items', 'currencies', 'pets', 'weapons', 'gears', 'raffle_tickets', 'loot_tables', 'user_items', 'characters', 'exp', 'points'];
+        return ['items', 'currencies', 'pets', 'weapons', 'gears', 'raffle_tickets', 'loot_tables', 'user_items', 'characters'] +
+            (config('lorekeeper.claymores_and_companions.visibility_settings.user_levels') ? ['exp'] : []) +
+            (config('lorekeeper.claymores_and_companions.visibility_settings.weapons') ? ['weapons'] : []) +
+            (config('lorekeeper.claymores_and_companions.visibility_settings.gear') ? ['gears'] : []) +
+            (config('lorekeeper.claymores_and_companions.visibility_settings.character_stats') ? ['points'] : []);
     } else {
-        return ['currencies', 'items', 'character_items', 'loot_tables', 'elements', 'exp', 'points', 'statuses', 'character_skills'];
+        return ['currencies', 'items', 'character_items', 'loot_tables', 'elements', 'statuses', 'character_skills'] +
+            (config('lorekeeper.claymores_and_companions.visibility_settings.character_classes') ? ['classes'] : []) +
+            (config('lorekeeper.claymores_and_companions.visibility_settings.character_stats') ? ['points'] : []) +
+            (config('lorekeeper.claymores_and_companions.visibility_settings.character_levels') ? ['exp'] : []) +
+            (config('lorekeeper.claymores_and_companions.visibility_settings.character_skills') ? ['character_skills'] : []);
     }
 }
 
@@ -842,24 +850,24 @@ function getRewardTypes($showData, $recipient) {
             'Item'     => 'Item',
             'Currency' => 'Currency',
             'Pet'      => 'Pet',
-            'Weapon'   => 'Weapon',
-            'Gear'     => 'Gear',
-            'Exp'      => 'Experience',
-            'Points'   => 'Points',
         ] +
         ($showData['showLootTables'] ? ['LootTable' => 'Loot Table'] : []) +
-        ($showData['showRaffles'] ? ['Raffle' => 'Raffle Ticket'] : []);
+        ($showData['showRaffles'] ? ['Raffle' => 'Raffle Ticket'] : []) +
+        (config('lorekeeper.claymores_and_companions.visibility_settings.character_stats') ? ['Points'   => 'Points'] : []) +
+        (config('lorekeeper.claymores_and_companions.visibility_settings.weapons') ? ['Weapon' => 'Weapon'] : []) +
+        (config('lorekeeper.claymores_and_companions.visibility_settings.gear') ? ['Gear' => 'Gear'] : []);
+        (config('lorekeeper.claymores_and_companions.visibility_settings.user_levels') ? ['Exp' => 'Experience'] : []);
     } elseif ($recipient == 'Character') {
         return [
             'Item'     => 'Item',
             'Currency' => 'Currency',
             'Element'  => 'Element',
-            'Exp'      => 'Experience',
-            'Points'   => 'Points',
-            'Status'   => 'Status Effect',
-            'Skill'    => 'Skill',
         ] +
-            ($showData['showLootTables'] ? ['LootTable' => 'Loot Table'] : []);
+            ($showData['showLootTables'] ? ['LootTable' => 'Loot Table'] : []) +
+            (config('lorekeeper.claymores_and_companions.visibility_settings.character_classes') ? ['Class' => 'Class'] : []) +
+            (config('lorekeeper.claymores_and_companions.visibility_settings.character_levels') ? ['Exp' => 'Experience'] : []) +
+            (config('lorekeeper.claymores_and_companions.visibility_settings.character_stats') ? ['Points' => 'Points'] : []) +
+            (config('lorekeeper.claymores_and_companions.visibility_settings.character_skills') ? ['Skill' => 'Skill'] : []);
     } else {
         throw new Exception('No recipient given.');
     }

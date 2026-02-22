@@ -28,10 +28,16 @@
                         <li class="list-group-item"><a href="{{ url('world/all-traits-index') }}">All Traits Index</a></li>
                     @endif
                     <li class="list-group-item"><a href="{{ url('world/character-categories') }}">Character Categories</a></li>
-                    <li class="list-group-item"><a href="{{ url('world/character-classes') }}">Character Classes</a></li>
-                    <li class="list-group-item"><a href="{{ url('world/levels') }}">Levels</a></li>
-                    <li class="list-group-item"><a href="{{ url('world/stats') }}">Stats</a></li>
                     <li class="list-group-item"><a href="{{ url('world/elements') }}">All Elements</a></li>
+                    @if (config('lorekeeper.claymores_and_companions.visibility_settings.character_classes'))
+                        <li class="list-group-item"><a href="{{ url('world/character-classes') }}">Character Classes</a></li>
+                    @endif
+                    @if (config('lorekeeper.claymores_and_companions.visibility_settings.levels'))
+                         <li class="list-group-item"><a href="{{ url('world/levels') }}">Levels</a></li>
+                    @endif
+                    @if (config('lorekeeper.claymores_and_companions.visibility_settings.character_stats'))
+                         <li class="list-group-item"><a href="{{ url('world/character-stats') }}">Character Stats</a></li>
+                    @endif
                 </ul>
             </div>
         </div>
@@ -44,16 +50,22 @@
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item"><a href="{{ url('world/item-categories') }}">Item Categories</a></li>
                     <li class="list-group-item"><a href="{{ url('world/items') }}">All Items</a></li>
-                    <li class="list-group-item"><a href="{{ url('world/skill-categories') }}">Skill Categories</a></li>
-                    <li class="list-group-item"><a href="{{ url('world/skills') }}">All Skills</a></li>
                     <li class="list-group-item"><a href="{{ url('world/currency-categories') }}">Currency Categories</a></li>
                     <li class="list-group-item"><a href="{{ url('world/currencies') }}">All Currencies</a></li>
                     <li class="list-group-item"><a href="{{ url('world/pet-categories') }}">Pet Categories</a></li>
                     <li class="list-group-item"><a href="{{ url('world/pets') }}">All Pets</a></li>
-                    <li class="list-group-item"><a href="{{ url('world/weapon-categories') }}">Weapon Categories</a></li>
-                    <li class="list-group-item"><a href="{{ url('world/weapons') }}">All Weapons</a></li>
-                    <li class="list-group-item"><a href="{{ url('world/gear-categories') }}">Gear Categories</a></li>
-                    <li class="list-group-item"><a href="{{ url('world/gear') }}">All Gear</a></li>
+                    @if (config('lorekeeper.claymores_and_companions.visibility_settings.skills'))
+                        <li class="list-group-item"><a href="{{ url('world/skill-categories') }}">Character Skill Categories</a></li>
+                        <li class="list-group-item"><a href="{{ url('world/skills') }}">All Character Skills</a></li>
+                    @endif
+                    @if (config('lorekeeper.claymores_and_companions.visibility_settings.weapons'))
+                        <li class="list-group-item"><a href="{{ url('world/weapon-categories') }}">Weapon Categories</a></li>
+                        <li class="list-group-item"><a href="{{ url('world/weapons') }}">All Weapons</a></li>
+                    @endif
+                    @if (config('lorekeeper.claymores_and_companions.visibility_settings.gear'))
+                        <li class="list-group-item"><a href="{{ url('world/gear-categories') }}">Gear Categories</a></li>
+                        <li class="list-group-item"><a href="{{ url('world/gear') }}">All Gear</a></li>
+                    @endif
                 </ul>
             </div>
         </div>

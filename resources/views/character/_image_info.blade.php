@@ -51,19 +51,23 @@
 
                 {{-- Basic info --}}
                 <div class="tab-pane fade show active" id="info-{{ $image->id }}">
-                    <div class="row no-gutters">
-                        <div class="col-lg-4 col-5">
-                            <h5>Class</h5>
-                        </div>
-                        <div class="col-lg-8 col-7 pl-1">
-                            {!! $image->character->class_id ? $image->character->class->displayName : 'None' !!}
-                            @if (Auth::check())
-                                @if (Auth::user()->isStaff || (Auth::user()->id == $image->character->user_id && $image->character->class_id == null))
-                                    <a href="#" class="btn btn-outline-info btn-sm edit-class ml-1" data-id="{{ $image->character->id }}"><i class="fas fa-cog"></i></a>
+                    @if (config('lorekeeper.claymores_and_companions.visibility_settings.character_classes'))
+                        <div class="row no-gutters">
+                            <div class="col-lg-4 col-5">
+                                <h5>Class</h5>
+                            </div>
+                            <div class="col-lg-8 col-7 pl-1">
+                                {!! $image->character->class_id ? $image->character->class->displayName : 'None' !!}
+                                @if (Auth::check())
+                                    @if (Auth::user()->isStaff || (Auth::user()->id == $image->character->user_id && $image->character->class_id == null))
+                                        <a href="#" class="btn btn-outline-info btn-sm edit-class ml-1" data-id="{{ $image->character->id }}">
+                                            <i class="fas fa-cog"></i>
+                                        </a>
+                                    @endif
                                 @endif
-                            @endif
+                            </div>
                         </div>
-                    </div>
+                    @endif
                     <div class="row no-gutters">
                         <div class="col-lg-4 col-5">
                             <h5>Species</h5>
@@ -194,7 +198,10 @@
                             </div>
                         </div>
                     @endif
-                    @if (count($image->character->equipment()))
+                    @if (
+                        (config('lorekeeper.claymores_and_companions.visibility_settings.gear') || config('lorekeeper.claymores_and_companions.visibility_settings.weapons')) &&
+                        count($image->character->equipment())
+                    )
                         <div class="mb-1 mt-4">
                             <div class="mb-0">
                                 <h5>Equipment</h5>

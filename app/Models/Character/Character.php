@@ -230,7 +230,17 @@ class Character extends Model {
      * Technically not a relation.
      */
     public function equipment() {
-        return $this->hasMany(UserGear::class, 'character_id')->get()->concat($this->hasMany(UserWeapon::class, 'character_id')->get());
+        if (config('lorekeeper.claymores_and_companions.visibility_settings.gear') && !config('lorekeeper.claymores_and_companions.visibility_settings.weapons')) {
+            return $this->hasMany(UserGear::class, 'character_id');
+        }
+
+        if (!config('lorekeeper.claymores_and_companions.visibility_settings.gear') && config('lorekeeper.claymores_and_companions.visibility_settings.weapons')) {
+            return $this->hasMany(UserWeapon::class, 'character_id');
+        }
+
+        return $this->hasMany(UserGear::class, 'character_id')
+            ->union($this->hasMany(UserWeapon::class, 'character_id')->toBase())
+            ->get();
     }
 
     /**

@@ -9,8 +9,16 @@
 
     <h1>Gear</h1>
 
-    <p>This is a list of gear in the game. Specific details about gear can be added when they are granted to users (e.g. reason for grant). By default, gear are merely collectibles and any additional functionality must be manually processed, or custom
-        coded in for the specific gear.</p>
+    @if (!config('lorekeeper.claymores_and_companions.visibility_settings.gear'))
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle"></i> Gear is currently set to be hidden. To change this, update the visibility settings in the config.
+        </div>
+    @endif
+
+    <p>
+        This is a list of gear in the game.Specific details about gear can be added when they are granted to users (e.g. reason for grant).
+        By default, gear are merely collectibles and any additional functionality must be manually processed, or custom coded in for the specific gear.
+    </p>
 
     <div class="text-right mb-3">
         <a class="btn btn-primary" href="{{ url('admin/gear/gear-categories') }}"><i class="fas fa-folder"></i> Gear Categories</a>

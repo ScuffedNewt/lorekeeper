@@ -24,6 +24,13 @@
                     <span class="btn badge-success float-md-right" data-toggle="tooltip" title="This user has not owned any characters from this world before.">FTO</span>
                 </div>
             @endif
+            @if (config('lorekeeper.claymores_and_companions.visibility_settings.user_levels'))
+                <div class="col-md-1 text-center">
+                    <span class="btn badge-primary float-md-right" data-toggle="tooltip" title="Current user level. Checkout the level area for more information.">
+                        Lvl. {{ $user->level->current_level }}
+                    </span>
+                </div>
+            @endif
         </div>
 
         <!-- User Information -->
@@ -146,29 +153,31 @@
             <div class="text-right"><a href="{{ $user->url . '/pets' }}">View all...</a></div>
         </div>
     </div>
-    <div class="card profile-inventory profile-assets-card">
-        <div class="card-body text-center">
-            <h5 class="card-title">Armoury</h5>
-            <div class="card-body">
-                @if (count($armours))
-                    <div class="row">
-                        @foreach ($armours as $armour)
-                            <div class="col-md-3 col-6 profile-inventory-item">
-                                @if ($armour->imageUrl)
-                                    <img class="img-fluid" src="{{ $armour->imageUrl }}" data-toggle="tooltip" title="{{ $armour->name }}" alt="{{ $armour->name }}" />
-                                @else
-                                    <p>{{ $armour->name }}</p>
-                                @endif
-                            </div>
-                        @endforeach
-                    </div>
-                @else
-                    <div>No weapons or gear owned.</div>
-                @endif
+    @if (config('lorekeeper.claymores_and_companions.visibility_settings.gear') || config('lorekeeper.claymores_and_companions.visibility_settings.weapons'))
+        <div class="card profile-inventory profile-assets-card">
+            <div class="card-body text-center">
+                <h5 class="card-title">Armoury</h5>
+                <div class="card-body">
+                    @if (count($armours))
+                        <div class="row">
+                            @foreach ($armours as $armour)
+                                <div class="col-md-3 col-6 profile-inventory-item">
+                                    @if ($armour->imageUrl)
+                                        <img class="img-fluid" src="{{ $armour->imageUrl }}" data-toggle="tooltip" title="{{ $armour->name }}" alt="{{ $armour->name }}" />
+                                    @else
+                                        <p>{{ $armour->name }}</p>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div>No weapons or gear owned.</div>
+                    @endif
+                </div>
+                <div class="text-right"><a href="{{ $user->url . '/armoury' }}">View all...</a></div>
             </div>
-            <div class="text-right"><a href="{{ $user->url . '/armoury' }}">View all...</a></div>
         </div>
-    </div>
+    @endif
 </div>
 
 <h2>

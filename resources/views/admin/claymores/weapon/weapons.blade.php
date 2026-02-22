@@ -9,8 +9,17 @@
 
     <h1>Weapons</h1>
 
-    <p>This is a list of weapons in the game. Specific details about weapons can be added when they are granted to users (e.g. reason for grant). By default, weapons are merely collectibles and any additional functionality must be manually processed, or
-        custom coded in for the specific weapon.</p>
+    @if (!config('lorekeeper.claymores_and_companions.visibility_settings.weapons'))
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle"></i> Weapons are currently set to be hidden. To change this, update the visibility settings in the config.
+        </div>
+    @endif
+
+    <p>
+        This is a list of weapons in the game. Specific details about weapons can be added when they are granted to users (e.g. reason for grant).
+        By default, weapons are merely collectibles and any additional functionality must be manually processed, or
+        custom coded in for the specific weapon.
+    </p>
 
     <div class="text-right mb-3">
         <a class="btn btn-primary" href="{{ url('admin/weapons/weapon-categories') }}"><i class="fas fa-folder"></i> Weapon Categories</a>

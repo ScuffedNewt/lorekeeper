@@ -47,9 +47,11 @@
                             <a class="dropdown-item" href="{{ url('bank') }}">
                                 Bank
                             </a>
-                            <a class="dropdown-item" href="{{ url('user-stats') }}">
-                                Stat Information
-                            </a>
+                            @if (config('lorekeeper.claymores_and_companions.visibility_settings.user_levels') || config('lorekeeper.claymores_and_companions.visibility_settings.character_stats'))
+                                <a class="dropdown-item" href="{{ url('user-stats') }}">
+                                    Stat Information
+                                </a>
+                            @endif
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="{{ url('comments/liked') }}">
                                 Liked Comments

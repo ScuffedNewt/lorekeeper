@@ -336,6 +336,10 @@ class UserController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getUserStats($name) {
+        if (!config('lorekeeper.claymores_and_companions.visibility_settings.user_levels') && !config('lorekeeper.claymores_and_companions.visibility_settings.character_stats')) {
+            abort(404);
+        }
+
         return view('user.stats', [
             'user'     => $this->user,
             'exps'     => $this->user->getExpLogs(),

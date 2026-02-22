@@ -669,18 +669,26 @@ class WorldController extends Controller {
     }
 
     /**
-     *  LEVELS.
+     *  Shows the level index page.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getLevels() {
         return view('world.level_index');
     }
 
     /**
-     * Level types.
+     * Shows the index of the specific level type.
      *
      * @param mixed $type
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getLevelTypes($type) {
+        if (!config('lorekeeper.claymores_and_companions.visibility_settings.'.$type.'_levels')) {
+            abort(404);
+        }
+
         if ($type == 'user') {
             $levels = Level::where('level_type', 'User')->get();
         } elseif ($type == 'character') {
@@ -701,10 +709,12 @@ class WorldController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getStats(Request $request) {
+        if (!config('lorekeeper.claymores_and_companions.visibility_settings.character_stats')) {
+            abort(404);
+        }
         $query = Stat::query();
-
         if ($request->has('name')) {
-            $squery->where('name', 'LIKE', '%'.$request->get('name').'%');
+            $query->where('name', 'LIKE', '%'.$request->get('name').'%');
         }
 
         return view('world.stats', [
@@ -720,6 +730,9 @@ class WorldController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getStat($abbreviation) {
+        if (!config('lorekeeper.claymores_and_companions.visibility_settings.character_stats')) {
+            abort(404);
+        }
         $stat = Stat::where('abbreviation', $abbreviation)->first();
 
         return view('world.stat', [
@@ -733,6 +746,9 @@ class WorldController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getSkillCategories(Request $request) {
+        if (!config('lorekeeper.claymores_and_companions.visibility_settings.character_stats')) {
+            abort(404);
+        }
         $query = SkillCategory::query()->visible(Auth::check() ? Auth::user() : null);
         $name = $request->get('name');
         if ($name) {
@@ -750,8 +766,11 @@ class WorldController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getSkills(Request $request) {
-        $query = Skill::with('category')->visible(Auth::check() ? Auth::user() : null);
+        if (!config('lorekeeper.claymores_and_companions.visibility_settings.character_skills')) {
+            abort(404);
+        }
 
+        $query = Skill::with('category')->visible(Auth::check() ? Auth::user() : null);
         $categoryVisibleCheck = SkillCategory::visible(Auth::check() ? Auth::user() : null)->pluck('id', 'name')->toArray();
         // query where category is visible, or, no category and visible
         $query->where(function ($query) use ($categoryVisibleCheck) {
@@ -780,6 +799,10 @@ class WorldController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getSkill($id) {
+        if (!config('lorekeeper.claymores_and_companions.visibility_settings.character_skills')) {
+            abort(404);
+        }
+
         $categories = SkillCategory::get();
         $skill = Skill::where('id', $id)->first();
         if (!$skill) {
@@ -896,6 +919,9 @@ class WorldController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getWeaponCategories(Request $request) {
+        if (!config('lorekeeper.claymores_and_companions.visibility_settings.weapons')) {
+            abort(404);
+        }
         $query = WeaponCategory::query()->visible(Auth::check() ? Auth::user() : null);
         $name = $request->get('name');
         if ($name) {
@@ -913,6 +939,9 @@ class WorldController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getWeapons(Request $request) {
+        if (!config('lorekeeper.claymores_and_companions.visibility_settings.weapons')) {
+            abort(404);
+        }
         $query = Weapon::with('category')->visible(Auth::check() ? Auth::user() : null);
 
         $categoryVisibleCheck = WeaponCategory::visible(Auth::check() ? Auth::user() : null)->pluck('id', 'name')->toArray();
@@ -965,6 +994,9 @@ class WorldController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getWeapon($id) {
+        if (!config('lorekeeper.claymores_and_companions.visibility_settings.weapons')) {
+            abort(404);
+        }
         $categories = WeaponCategory::orderBy('sort', 'DESC')->get();
         $weapon = Weapon::where('id', $id)->first();
         if (!$weapon) {
@@ -992,6 +1024,9 @@ class WorldController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getGearCategories(Request $request) {
+        if (!config('lorekeeper.claymores_and_companions.visibility_settings.gear')) {
+            abort(404);
+        }
         $query = GearCategory::query()->visible(Auth::check() ? Auth::user() : null);
         $name = $request->get('name');
         if ($name) {
@@ -1009,8 +1044,11 @@ class WorldController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getGears(Request $request) {
-        $query = Gear::with('category')->visible(Auth::check() ? Auth::user() : null);
+        if (!config('lorekeeper.claymores_and_companions.visibility_settings.gear')) {
+            abort(404);
+        }
 
+        $query = Gear::with('category')->visible(Auth::check() ? Auth::user() : null);
         $categoryVisibleCheck = GearCategory::visible(Auth::check() ? Auth::user() : null)->pluck('id', 'name')->toArray();
         // query where category is visible, or, no category and visible
         $query->where(function ($query) use ($categoryVisibleCheck) {
@@ -1061,6 +1099,10 @@ class WorldController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getGear($id) {
+        if (!config('lorekeeper.claymores_and_companions.visibility_settings.gear')) {
+            abort(404);
+        }
+
         $categories = GearCategory::orderBy('sort', 'DESC')->get();
         $gear = Gear::where('id', $id)->first();
         if (!$gear) {
@@ -1088,6 +1130,10 @@ class WorldController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getCharacterClasses(Request $request) {
+        if (!config('lorekeeper.claymores_and_companions.visibility_settings.character_classes')) {
+            abort(404);
+        }
+
         $query = CharacterClass::query()->visible(Auth::check() ? Auth::user() : null);
         $name = $request->get('name');
         if ($name) {

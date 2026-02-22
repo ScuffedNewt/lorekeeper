@@ -15,6 +15,10 @@ class UserStatController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getIndex() {
+        if (!config('lorekeeper.claymores_and_companions.visibility_settings.user_levels') && !config('lorekeeper.claymores_and_companions.visibility_settings.character_stats')) {
+            abort(404);
+        }
+
         $user = Auth::user();
         // create a user level if one doesn't exist
         if (!$user->level) {
