@@ -6,12 +6,12 @@
             </h4>
         </div>
         <div class="col p-1 text-right">
-            <a href="{{ url('admin/users/ips')}}" class="btn btn-primary btn-sm">
+            <a href="{{ url('admin/users/ips') }}" class="btn btn-primary btn-sm">
                 User IP Index
             </a>
         </div>
     </div>
-    
+
     <div class="logs-table">
         <div class="logs-table-header">
             <div class="row no-gutters">
@@ -58,7 +58,15 @@
                         </div>
                         <div class="col-12 col-md">
                             <div class="logs-table-cell">
-                                {!! $user->ips()->first() && count($user->ips()->first()->users->where('id', '!=', $user->id)->pluck('displayName')->toArray()) ? implode(', ', $user->ips()->first()->users->where('id', '!=', $user->id)->pluck('displayName')->toArray()) : '<span class="text-muted">---</span>' !!}
+                                {!! $user->ips()->first() &&
+                                count(
+                                    $user->ips()->first()->users->where('id', '!=', $user->id)->pluck('displayName')->toArray(),
+                                )
+                                    ? implode(
+                                        ', ',
+                                        $user->ips()->first()->users->where('id', '!=', $user->id)->pluck('displayName')->toArray(),
+                                    )
+                                    : '<span class="text-muted">---</span>' !!}
                             </div>
                         </div>
                     </div>
