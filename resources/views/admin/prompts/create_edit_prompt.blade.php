@@ -1,7 +1,7 @@
 @extends('admin.layout')
 
 @section('admin-title')
-    Prompts
+    {{ $prompt->id ? 'Edit' : 'Create' }} Prompts
 @endsection
 
 @section('admin-content')
@@ -34,7 +34,10 @@
 
     <div class="form-group">
         {!! Form::label('World Page Image (Optional)') !!} {!! add_help('This image is used only on the world information pages.') !!}
-        <div>{!! Form::file('image') !!}</div>
+        <div class="custom-file">
+            {!! Form::label('image', 'Choose file...', ['class' => 'custom-file-label']) !!}
+            {!! Form::file('image', ['class' => 'custom-file-input']) !!}
+        </div>
         <div class="text-muted">Recommended size: 100px x 100px</div>
         @if ($prompt->has_image)
             <div class="form-check">
@@ -132,16 +135,12 @@
 @section('scripts')
     @parent
     @include('js._loot_js', ['showLootTables' => true, 'showRaffles' => true])
+    @include('widgets._datetimepicker_js')
     <script>
         $(document).ready(function() {
             $('.delete-prompt-button').on('click', function(e) {
                 e.preventDefault();
                 loadModal("{{ url('admin/data/prompts/delete') }}/{{ $prompt->id }}", 'Delete Prompt');
-            });
-
-            $(".datepicker").datetimepicker({
-                dateFormat: "yy-mm-dd",
-                timeFormat: 'HH:mm:ss',
             });
         });
     </script>

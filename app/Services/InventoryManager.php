@@ -2,15 +2,14 @@
 
 namespace App\Services;
 
+use App\Facades\Notifications;
 use App\Models\Character\CharacterItem;
 use App\Models\Item\Item;
 use App\Models\User\User;
 use App\Models\User\UserItem;
 use Carbon\Carbon;
-use Config;
-use DB;
 use Illuminate\Support\Arr;
-use Notifications;
+use Illuminate\Support\Facades\DB;
 
 class InventoryManager extends Service {
     /*
@@ -166,7 +165,7 @@ class InventoryManager extends Service {
         DB::beginTransaction();
 
         try {
-            foreach ($stacks as $key=>$stack) {
+            foreach ($stacks as $key=> $stack) {
                 $quantity = $quantities[$key];
 
                 if (!$stack) {
@@ -251,7 +250,7 @@ class InventoryManager extends Service {
         DB::beginTransaction();
 
         try {
-            foreach ($stacks as $key=>$stack) {
+            foreach ($stacks as $key=> $stack) {
                 $quantity = $quantities[$key];
                 if (!$sender->hasAlias) {
                     throw new \Exception('You need to have a linked social media account before you can perform this action.');
@@ -323,7 +322,7 @@ class InventoryManager extends Service {
 
         try {
             if ($owner->logType == 'User') {
-                foreach ($stacks as $key=>$stack) {
+                foreach ($stacks as $key=> $stack) {
                     $quantity = $quantities[$key];
                     if (!$owner->hasAlias) {
                         throw new \Exception('You need to have a linked social media account before you can perform this action.');
@@ -352,7 +351,7 @@ class InventoryManager extends Service {
                     }
                 }
             } else {
-                foreach ($stacks as $key=>$stack) {
+                foreach ($stacks as $key=> $stack) {
                     $quantity = $quantities[$key];
                     if (!$user->hasAlias) {
                         throw new \Exception('You need to have a linked social media account before you can perform this action.');
@@ -403,7 +402,7 @@ class InventoryManager extends Service {
         DB::beginTransaction();
 
         try {
-            foreach ($stacks as $key=>$stack) {
+            foreach ($stacks as $key=> $stack) {
                 $quantity = $quantities[$key];
                 if (!$user->hasAlias) {
                     throw new \Exception('You need to have a linked social media account before you can perform this action.');
@@ -420,7 +419,7 @@ class InventoryManager extends Service {
                 if (!isset($stack->item->data['resell'])) {
                     throw new \Exception('This item cannot be sold.');
                 }
-                if (!Config::get('lorekeeper.extensions.item_entry_expansion.resale_function')) {
+                if (!config('lorekeeper.extensions.item_entry_expansion.resale_function')) {
                     throw new \Exception('This function is not currently enabled.');
                 }
 
@@ -499,6 +498,13 @@ class InventoryManager extends Service {
                 $recipient_stack->count += $quantity;
                 $recipient_stack->save();
             }
+
+            if (!$item->is_released) {
+                $item->update([
+                    'is_released' => 1,
+                ]);
+            }
+
             if ($type && !$this->createLog($sender ? $sender->id : null, $sender ? $sender->logType : null, $recipient ? $recipient->id : null, $recipient ? $recipient->logType : null, null, $type, $data['data'], $item->id, $quantity)) {
                 throw new \Exception('Failed to create log.');
             }
@@ -598,7 +604,7 @@ class InventoryManager extends Service {
         DB::beginTransaction();
 
         try {
-            foreach ($stacks as $key=>$stack) {
+            foreach ($stacks as $key=> $stack) {
                 if (!$user->hasAlias) {
                     throw new \Exception('You need to have a linked social media account before you can perform this action.');
                 }
@@ -676,13 +682,13 @@ class InventoryManager extends Service {
             // Group owned items by ID.
             // We'll exclude stacks that are partially contained in trades, updates and submissions.
             $items = UserItem::where('user_id', $user->id)->whereNull('deleted_at')
-                             ->where(function ($query) {
-                                 $query->where('trade_count', 0)->orWhereNull('trade_count');
-                             })->where(function ($query) {
-                                 $query->where('update_count', 0)->orWhereNull('update_count');
-                             })->where(function ($query) {
-                                 $query->where('submission_count', 0)->orWhereNull('submission_count');
-                             })->get()->groupBy('item_id');
+                ->where(function ($query) {
+                    $query->where('trade_count', 0)->orWhereNull('trade_count');
+                })->where(function ($query) {
+                    $query->where('update_count', 0)->orWhereNull('update_count');
+                })->where(function ($query) {
+                    $query->where('submission_count', 0)->orWhereNull('submission_count');
+                })->get()->groupBy('item_id');
 
             foreach ($items as $itemId => $itemVariations) {
                 $variations = [];

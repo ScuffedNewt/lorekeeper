@@ -5,23 +5,29 @@ namespace App\Models\User;
 use App\Models\Character\Character;
 use App\Models\Character\CharacterBookmark;
 use App\Models\Character\CharacterImageCreator;
+use App\Models\Comment\CommentLike;
 use App\Models\Currency\Currency;
 use App\Models\Currency\CurrencyLog;
 use App\Models\Gallery\GalleryCollaborator;
+use App\Models\Gallery\GalleryFavorite;
+use App\Models\Gallery\GallerySubmission;
+use App\Models\Item\Item;
 use App\Models\Item\ItemLog;
+use App\Models\Notification;
+use App\Models\Rank\Rank;
 use App\Models\Rank\RankPower;
 use App\Models\Shop\ShopLog;
 use App\Models\Submission\Submission;
 use App\Traits\Commenter;
-use Auth;
 use Carbon\Carbon;
-use Config;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Auth;
+use Laravel\Fortify\TwoFactorAuthenticatable;
 
 class User extends Authenticatable implements MustVerifyEmail {
-    use Commenter, Notifiable;
+    use Commenter, Notifiable, TwoFactorAuthenticatable;
 
     /**
      * The attributes that are mass assignable.
@@ -29,7 +35,7 @@ class User extends Authenticatable implements MustVerifyEmail {
      * @var array
      */
     protected $fillable = [
-        'name', 'alias', 'rank_id', 'email', 'password', 'is_news_unread', 'is_banned', 'has_alias', 'avatar', 'is_sales_unread', 'birthday',
+        'name', 'alias', 'rank_id', 'email', 'email_verified_at', 'password', 'is_news_unread', 'is_banned', 'has_alias', 'avatar', 'is_sales_unread', 'birthday',
         'is_deactivated', 'deactivater_id',
     ];
 
@@ -49,14 +55,8 @@ class User extends Authenticatable implements MustVerifyEmail {
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'birthday'          => 'datetime',
     ];
-
-    /**
-     * Dates on the model to convert to Carbon instances.
-     *
-     * @var array
-     */
-    protected $dates = ['birthday'];
 
     /**
      * Accessors to append to the model.
@@ -65,6 +65,15 @@ class User extends Authenticatable implements MustVerifyEmail {
      */
     protected $appends = [
         'verified_name',
+    ];
+
+    /**
+     * The relationships that should always be loaded.
+     *
+     * @var array
+     */
+    protected $with = [
+        'rank',
     ];
 
     /**
@@ -78,118 +87,129 @@ class User extends Authenticatable implements MustVerifyEmail {
 
         RELATIONS
 
-    **********************************************************************************************/
+     **********************************************************************************************/
+
+    /**
+     * Get all of the user's update logs.
+     */
+    public function logs() {
+        return $this->hasMany('App\Models\User\UserUpdateLog');
+    }
 
     /**
      * Get user settings.
      */
     public function settings() {
-        return $this->hasOne('App\Models\User\UserSettings');
+        return $this->hasOne(UserSettings::class);
     }
 
     /**
      * Get user-editable profile data.
      */
     public function profile() {
-        return $this->hasOne('App\Models\User\UserProfile');
+        return $this->hasOne(UserProfile::class);
     }
 
     /**
      * Gets the account that deactivated this account.
      */
     public function deactivater() {
-        return $this->belongsTo('App\Models\User\User', 'deactivater_id');
+        return $this->belongsTo(self::class, 'deactivater_id');
     }
 
     /**
      * Get the user's aliases.
      */
     public function aliases() {
-        return $this->hasMany('App\Models\User\UserAlias');
+        return $this->hasMany(UserAlias::class);
     }
 
     /**
      * Get the user's primary alias.
      */
     public function primaryAlias() {
-        return $this->hasOne('App\Models\User\UserAlias')->where('is_primary_alias', 1);
+        return $this->hasOne(UserAlias::class)->where('is_primary_alias', 1);
     }
 
     /**
      * Get the user's notifications.
      */
     public function notifications() {
-        return $this->hasMany('App\Models\Notification');
+        return $this->hasMany(Notification::class);
     }
 
     /**
      * Get all the user's characters, regardless of whether they are full characters of myo slots.
      */
     public function allCharacters() {
-        return $this->hasMany('App\Models\Character\Character')->orderBy('sort', 'DESC');
+        return $this->hasMany(Character::class)->orderBy('sort', 'DESC');
     }
 
     /**
      * Get the user's characters.
      */
     public function characters() {
-        return $this->hasMany('App\Models\Character\Character')->where('is_myo_slot', 0)->orderBy('sort', 'DESC');
+        return $this->hasMany(Character::class)->where('is_myo_slot', 0)->orderBy('sort', 'DESC');
     }
 
     /**
      * Get the user's MYO slots.
      */
     public function myoSlots() {
-        return $this->hasMany('App\Models\Character\Character')->where('is_myo_slot', 1)->orderBy('id', 'DESC');
+        return $this->hasMany(Character::class)->where('is_myo_slot', 1)->orderBy('id', 'DESC');
     }
 
     /**
      * Get the user's rank data.
      */
     public function rank() {
-        return $this->belongsTo('App\Models\Rank\Rank');
+        return $this->belongsTo(Rank::class);
     }
 
     /**
      * Get the user's items.
      */
     public function items() {
-        return $this->belongsToMany('App\Models\Item\Item', 'user_items')->withPivot('count', 'data', 'updated_at', 'id')->whereNull('user_items.deleted_at');
+        return $this->belongsToMany(Item::class, 'user_items')->withPivot('count', 'data', 'updated_at', 'id')->whereNull('user_items.deleted_at');
     }
 
     /**
      * Get all of the user's gallery submissions.
      */
     public function gallerySubmissions() {
-        return $this->hasMany('App\Models\Gallery\GallerySubmission')->where('user_id', $this->id)->orWhereIn('id', GalleryCollaborator::where('user_id', $this->id)->where('type', 'Collab')->pluck('gallery_submission_id')->toArray())->visible($this)->accepted()->orderBy('created_at', 'DESC');
+        return $this->hasMany(GallerySubmission::class)
+            ->where('user_id', $this->id)
+            ->orWhereIn('id', GalleryCollaborator::where('user_id', $this->id)
+                ->where('type', 'Collab')->pluck('gallery_submission_id')->toArray())
+            ->orderBy('created_at', 'DESC');
     }
 
     /**
      * Get all of the user's favorited gallery submissions.
      */
     public function galleryFavorites() {
-        return $this->hasMany('App\Models\Gallery\GalleryFavorite')->where('user_id', $this->id);
+        return $this->hasMany(GalleryFavorite::class)->where('user_id', $this->id);
     }
 
     /**
      * Get all of the user's character bookmarks.
      */
     public function bookmarks() {
-        return $this->hasMany('App\Models\Character\CharacterBookmark')->where('user_id', $this->id);
+        return $this->hasMany(CharacterBookmark::class)->where('user_id', $this->id);
     }
 
     /**
      * Gets all of a user's liked / disliked comments.
      */
     public function commentLikes() {
-        return $this->hasMany('App\Models\CommentLike');
+        return $this->hasMany(CommentLike::class);
     }
 
     /**********************************************************************************************
 
         SCOPES
 
-    **********************************************************************************************/
+     **********************************************************************************************/
 
     /**
      * Scope a query to only include visible (non-banned) users.
@@ -213,11 +233,24 @@ class User extends Authenticatable implements MustVerifyEmail {
         return $query->where('is_deactivated', 1);
     }
 
+    /**
+     * Scope a query based on the user's primary alias.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param mixed                                 $reverse
+     *
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeAliasSort($query, $reverse = false) {
+        return $query->leftJoin('user_aliases', 'users.id', '=', 'user_aliases.user_id')
+            ->orderByRaw('user_aliases.alias IS NULL ASC, user_aliases.alias '.($reverse ? 'DESC' : 'ASC'));
+    }
+
     /**********************************************************************************************
 
         ACCESSORS
 
-    **********************************************************************************************/
+     **********************************************************************************************/
 
     /**
      * Get the user's alias.
@@ -234,6 +267,10 @@ class User extends Authenticatable implements MustVerifyEmail {
      * @return bool
      */
     public function getHasAliasAttribute() {
+        if (!config('lorekeeper.settings.require_alias')) {
+            return true;
+        }
+
         return $this->attributes['has_alias'];
     }
 
@@ -299,7 +336,22 @@ class User extends Authenticatable implements MustVerifyEmail {
      * @return string
      */
     public function getDisplayNameAttribute() {
-        return ($this->is_banned ? '<strike>' : '').'<a href="'.$this->url.'" class="display-user" style="'.($this->rank->color ? 'color: #'.$this->rank->color.';' : '').($this->is_deactivated ? 'opacity: 0.5;' : '').'">'.$this->name.'</a>'.($this->is_banned ? '</strike>' : '');
+        return ($this->is_banned ? '<strike>' : '').'<a href="'.$this->url.'" class="display-user" style="'.($this->rank->color ? 'color: #'.$this->rank->color.';' : '').($this->is_deactivated ? 'opacity: 0.5;' : '').'"><i class="'.($this->rank->icon ? $this->rank->icon : 'fas fa-user').' mr-1" style="opacity: 50%;"></i>'.$this->name.'</a>'.($this->is_banned ? '</strike>' : '');
+    }
+
+    /**
+     * Gets the user's last username change.
+     *
+     * @return string
+     */
+    public function getPreviousUsernameAttribute() {
+        // get highest id
+        $log = $this->logs()->whereIn('type', ['Username Changed', 'Name/Rank Change'])->orderBy('id', 'DESC')->first();
+        if (!$log) {
+            return null;
+        }
+
+        return $log->data['old_name'];
     }
 
     /**
@@ -308,7 +360,7 @@ class User extends Authenticatable implements MustVerifyEmail {
      * @return string
      */
     public function getCommentDisplayNameAttribute() {
-        return '<small><a href="'.$this->url.'" class="btn btn-primary btn-sm"'.($this->rank->color ? 'style="background-color: #'.$this->rank->color.'!important;color:#000!important;"' : '').'><i class="'.($this->rank->icon ? $this->rank->icon : 'fas fa-user').' mr-1" style="opacity: 50%;"></i>'.$this->name.'</a></small>';
+        return ($this->is_banned ? '<strike>' : '').'<small><a href="'.$this->url.'" class="btn btn-primary btn-sm"'.($this->rank->color ? 'style="background-color: #'.$this->rank->color.'!important;color:#000!important;' : '').($this->is_deactivated ? 'opacity: 0.5;' : '').'"><i class="'.($this->rank->icon ? $this->rank->icon : 'fas fa-user').' mr-1" style="opacity: 50%;"></i>'.$this->name.'</a></small>'.($this->is_banned ? '</strike>' : '');
     }
 
     /**
@@ -317,11 +369,14 @@ class User extends Authenticatable implements MustVerifyEmail {
      * @return string
      */
     public function getDisplayAliasAttribute() {
+        if (!config('lorekeeper.settings.require_alias') && !$this->attributes['has_alias']) {
+            return '(No Alias)';
+        }
         if (!$this->hasAlias) {
             return '(Unverified)';
         }
 
-        return $this->primaryAlias->displayAlias;
+        return $this->primaryAlias?->displayAlias ?? '(No Alias)';
     }
 
     /**
@@ -331,6 +386,28 @@ class User extends Authenticatable implements MustVerifyEmail {
      */
     public function getAvatar() {
         return $this->avatar;
+    }
+
+    /**
+     * Gets the display URL for a user's avatar, or the default avatar if they don't have one.
+     *
+     * @return url
+     */
+    public function getAvatarUrlAttribute() {
+        if ($this->avatar == 'default.jpg' && config('lorekeeper.extensions.use_gravatar')) {
+            // check if a gravatar exists
+            $hash = md5(strtolower(trim($this->email)));
+            $url = 'https://www.gravatar.com/avatar/'.$hash.'??d=mm&s=200';
+            $headers = @get_headers($url);
+
+            if (!preg_match('|200|', $headers[0])) {
+                return url('images/avatars/default.jpg');
+            } else {
+                return 'https://www.gravatar.com/avatar/'.$hash.'?d=mm&s=200';
+            }
+        }
+
+        return url('images/avatars/'.$this->avatar.'?v='.filemtime(public_path('images/avatars/'.$this->avatar)));
     }
 
     /**
@@ -390,7 +467,7 @@ class User extends Authenticatable implements MustVerifyEmail {
 
         OTHER FUNCTIONS
 
-    **********************************************************************************************/
+     **********************************************************************************************/
 
     /**
      * Checks if the user can edit the given rank.
@@ -530,7 +607,7 @@ class User extends Authenticatable implements MustVerifyEmail {
      * Checks if there are characters credited to the user's alias and updates ownership to their account accordingly.
      */
     public function updateCharacters() {
-        if (!$this->hasAlias) {
+        if (!$this->attributes['has_alias']) {
             return;
         }
 
@@ -540,11 +617,11 @@ class User extends Authenticatable implements MustVerifyEmail {
         $count = 0;
         foreach ($this->aliases as $alias) {
             // Find all urls from the same site as this alias
-            foreach ($urlCharacters as $key=>$character) {
-                preg_match_all(Config::get('lorekeeper.sites.'.$alias->site.'.regex'), $character, $matches[$key]);
+            foreach ($urlCharacters as $key=> $character) {
+                preg_match_all(config('lorekeeper.sites.'.$alias->site.'.regex'), $character, $matches[$key]);
             }
             // Find all alias matches within those, and update the character's owner
-            foreach ($matches as $key=>$match) {
+            foreach ($matches as $key=> $match) {
                 if ($match[1] != [] && strtolower($match[1][0]) == strtolower($alias->alias)) {
                     Character::find($key)->update(['owner_url' => null, 'user_id' => $this->id]);
                     $count += 1;
@@ -563,7 +640,7 @@ class User extends Authenticatable implements MustVerifyEmail {
      * Checks if there are art or design credits credited to the user's alias and credits them to their account accordingly.
      */
     public function updateArtDesignCredits() {
-        if (!$this->hasAlias) {
+        if (!$this->attributes['has_alias']) {
             return;
         }
 
@@ -572,11 +649,11 @@ class User extends Authenticatable implements MustVerifyEmail {
         $matches = [];
         foreach ($this->aliases as $alias) {
             // Find all urls from the same site as this alias
-            foreach ($urlCreators as $key=>$creator) {
-                preg_match_all(Config::get('lorekeeper.sites.'.$alias->site.'.regex'), $creator, $matches[$key]);
+            foreach ($urlCreators as $key=> $creator) {
+                preg_match_all(config('lorekeeper.sites.'.$alias->site.'.regex'), $creator, $matches[$key]);
             }
             // Find all alias matches within those, and update the relevant CharacterImageCreator
-            foreach ($matches as $key=>$match) {
+            foreach ($matches as $key=> $match) {
                 if ($match[1] != [] && strtolower($match[1][0]) == strtolower($alias->alias)) {
                     CharacterImageCreator::find($key)->update(['url' => null, 'user_id' => $this->id]);
                 }

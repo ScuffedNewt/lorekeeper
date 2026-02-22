@@ -28,7 +28,9 @@
                 @endif
                 @if ($submission->user->id == Auth::user()->id || Auth::user()->hasPower('manage_submissions'))
                     <a class="btn btn-outline-primary" href="/gallery/queue/{{ $submission->id }}" data-toggle="tooltip" title="View Log Details"><i class="fas fa-clipboard-list"></i></a>
-                    <a class="btn btn-outline-primary" href="/gallery/edit/{{ $submission->id }}"><i class="fas fa-edit"></i> Edit</a>
+                    @if ($submission->status != 'Rejected')
+                        <a class="btn btn-outline-primary" href="/gallery/edit/{{ $submission->id }}"><i class="fas fa-edit"></i> Edit</a>
+                    @endif
                 @endif
                 {!! Form::close() !!}
             @endif
@@ -41,7 +43,8 @@
                 By {!! $submission->credits !!}
             </div>
             <div class="col-md text-right">
-                {{ $submission->favorites->count() }} Favorite{{ $submission->favorites->count() != 1 ? 's' : '' }} ・ {{ $commentCount }} Comment{{ $commentCount != 1 ? 's' : '' }}
+                {{ $submission->favorites_count }} Favorite{{ $submission->favorites_count != 1 ? 's' : '' }} ・ {{ $submission->comments->where('type', 'User-User')->count() }}
+                Comment{{ $submission->comments->where('type', 'User-User')->count() != 1 ? 's' : '' }}
             </div>
         </diV>
     </div>
@@ -72,8 +75,8 @@
         <div class="col-md mb-4">
             <div class="row mb-4 no-gutters">
                 <div class="col-md-2 mb-4 mobile-hide text-center">
-                    <a href="/user/{{ $submission->user->name }}"><img src="/images/avatars/{{ $submission->user->avatar }}" style="border-radius:50%; margin-right:25px; max-width:100%;" data-toggle="tooltip"
-                            title="{{ $submission->user->name }}" alt="{{ $submission->user->name }}" /></a>
+                    <a href="/user/{{ $submission->user->name }}"><img src="{{ $submission->user->avatarUrl }}" style="border-radius:50%; margin-right:25px; max-width:100%;" data-toggle="tooltip" title="{{ $submission->user->name }}"
+                            alt="{{ $submission->user->name }}'s Avatar" /></a>
                 </div>
                 <div class="col-md ml-md-2">
                     <div class="card">
@@ -90,10 +93,11 @@
                                         'data-toggle' => 'tooltip',
                                         'title' => ($submission->favorites->where('user_id', Auth::user()->id)->first() == null ? 'Add to' : 'Remove from') . ' your Favorites',
                                         'type' => 'submit',
-                                    ]) !!} ・ {{ $commentCount }} <i class="fas fa-comment"></i>
+                                    ]) !!} ・ {{ $submission->comments->where('type', 'User-User')->count() }} <i class="fas fa-comment"></i>
                                     {!! Form::close() !!}
                                 @else
-                                    {{ $submission->favorites->count() }} <i class="fas fa-star" data-toggle="tooltip" title="Favorites"></i> ・ {{ $commentCount }} <i class="fas fa-comment" data-toggle="tooltip" title="Comments"></i>
+                                    {{ $submission->favorites->count() }} <i class="fas fa-star" data-toggle="tooltip" title="Favorites"></i> ・ {{ $submission->comments->where('type', 'User-User')->count() }} <i class="fas fa-comment"
+                                        data-toggle="tooltip" title="Comments"></i>
                                 @endif
                             </div>
                             In {!! $submission->gallery->displayName !!} ・ By {!! $submission->credits !!}
@@ -217,15 +221,17 @@
                     <div class="alert alert-secondary">
                         [thumb={{ $submission->id }}]
                     </div>
-                    In a comment:
-                    <div class="alert alert-secondary">
-                        @if (isset($submission->hash) && !isset($submission->content_warning))
-                            [![Image]({{ $submission->thumbnailUrl }})]({{ $submission->url }})
-                        @else
-                            [{{ $submission->displayTitle }} by {{ $submission->creditsPlain }}
-                            {{ isset($submission->hash) ? '(Art)' : '(Literature)' }}{{ isset($submission->content_warning) ? ' ・ **Content Warning:** ' . nl2br(htmlentities($submission->content_warning)) : '' }}]({{ $submission->url }})
-                        @endif
-                    </div>
+                    @if (!config('lorekeeper.settings.wysiwyg_comments'))
+                        In a comment:
+                        <div class="alert alert-secondary">
+                            @if (isset($submission->hash) && !isset($submission->content_warning))
+                                [![Image]({{ $submission->thumbnailUrl }})]({{ $submission->url }})
+                            @else
+                                [{{ $submission->displayTitle }} by {{ $submission->creditsPlain }}
+                                {{ isset($submission->hash) ? '(Art)' : '(Literature)' }}{{ isset($submission->content_warning) ? ' ・ **Content Warning:** ' . nl2br(htmlentities($submission->content_warning)) : '' }}]({{ $submission->url }})
+                            @endif
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

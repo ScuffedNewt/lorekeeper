@@ -3,6 +3,7 @@
 namespace App\Models\Raffle;
 
 use App\Models\Model;
+use App\Models\User\User;
 
 class RaffleLog extends Model {
     /**
@@ -38,20 +39,20 @@ class RaffleLog extends Model {
      * Get the raffle this log is for.
      */
     public function raffle() {
-        return $this->belongsTo('App\Models\Raffle\Raffle');
+        return $this->belongsTo(Raffle::class);
     }
 
     /**
      * Get the user who made the raffle log.
      */
     public function user() {
-        return $this->belongsTo('App\Models\User\User');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     /**
      * Get the ticket this log is for.
      */
     public function ticket() {
-        return $this->belongsTo('App\Models\Raffle\RaffleTicket');
+        return $this->belongsTo(RaffleTicket::class, 'ticket_id');
     }
 }

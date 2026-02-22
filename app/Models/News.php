@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\User\User;
 use App\Traits\Commentable;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
@@ -27,18 +28,20 @@ class News extends Model implements Feedable {
     protected $table = 'news';
 
     /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'post_at' => 'datetime',
+    ];
+
+    /**
      * Whether the model contains timestamps to be saved and updated.
      *
      * @var string
      */
     public $timestamps = true;
-
-    /**
-     * Dates on the model to convert to Carbon instances.
-     *
-     * @var array
-     */
-    public $dates = ['post_at'];
 
     /**
      * Validation rules for creation.
@@ -70,7 +73,7 @@ class News extends Model implements Feedable {
      * Get the user who created the news post.
      */
     public function user() {
-        return $this->belongsTo('App\Models\User\User');
+        return $this->belongsTo(User::class);
     }
 
     /**********************************************************************************************
@@ -132,6 +135,24 @@ class News extends Model implements Feedable {
      */
     public function getUrlAttribute() {
         return url('news/'.$this->slug);
+    }
+
+    /**
+     * Gets the admin edit URL.
+     *
+     * @return string
+     */
+    public function getAdminUrlAttribute() {
+        return url('admin/news/edit/'.$this->id);
+    }
+
+    /**
+     * Gets the power required to edit this model.
+     *
+     * @return string
+     */
+    public function getAdminPowerAttribute() {
+        return 'manage_news';
     }
 
     /**********************************************************************************************

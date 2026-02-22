@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Comments;
 
-use App\Models\Comment;
+use App\Facades\Notifications;
+use App\Facades\Settings;
+use App\Models\Comment\Comment;
 use App\Models\Gallery\GallerySubmission;
 use App\Models\News;
 use App\Models\Report\Report;
@@ -12,20 +14,17 @@ use App\Models\User\User;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
-use Notifications;
-use Settings;
 use Spatie\Honeypot\ProtectAgainstSpam;
 
-class CommentController extends Controller implements CommentControllerInterface {
+class CommentController extends Controller {
     public function __construct() {
         $this->middleware('web');
 
-        if (Config::get('comments.guest_commenting') == true) {
+        if (config('comments.guest_commenting') == true) {
             $this->middleware('auth')->except('store');
             $this->middleware(ProtectAgainstSpam::class)->only('store');
         } else {
@@ -35,11 +34,26 @@ class CommentController extends Controller implements CommentControllerInterface
 
     /**
      * Creates a new comment for given model.
+     *
+     * @param mixed $model
+     * @param mixed $id
      */
-    public function store(Request $request) {
+    public function store(Request $request, $model, $id) {
+        $model = urldecode(base64_decode($model));
+
+        $accepted_models = config('lorekeeper.allowed_comment_models');
+        if (!count($accepted_models)) {
+            flash('Invalid Models')->error();
+
+            return redirect()->back();
+        }
+
+        if (!in_array($model, $accepted_models)) {
+            abort(404);
+        }
 
         // If guest commenting is turned off, authorize this action.
-        if (Config::get('comments.guest_commenting') == false) {
+        if (config('comments.guest_commenting') == false) {
             Gate::authorize('create-comment', Comment::class);
         }
 
@@ -53,14 +67,17 @@ class CommentController extends Controller implements CommentControllerInterface
 
         // Merge guest rules, if any, with normal validation rules.
         Validator::make($request->all(), array_merge($guest_rules ?? [], [
-            'commentable_type' => 'required|string',
-            'commentable_id'   => 'required|string|min:1',
             'message'          => 'required|string',
         ]))->validate();
 
-        $model = $request->commentable_type::findOrFail($request->commentable_id);
+        $base = $model::findOrFail($id);
+        if (isset($base->is_visible) && !$base->is_visible) {
+            flash('Invalid Model')->error();
 
-        $commentClass = Config::get('comments.model');
+            return redirect()->back();
+        }
+
+        $commentClass = config('comments.model');
         $comment = new $commentClass;
 
         if (!Auth::check()) {
@@ -70,9 +87,11 @@ class CommentController extends Controller implements CommentControllerInterface
             $comment->commenter()->associate(Auth::user());
         }
 
-        $comment->commentable()->associate($model);
-        $comment->comment = $request->message;
-        $comment->approved = !Config::get('comments.approval_required');
+        $comment->commentable()->associate($base);
+
+        $comment->comment = config('lorekeeper.settings.wysiwyg_comments') ? parse($request->message) : $request->message;
+        $comment->approved = !config('comments.approval_required');
+
         $comment->type = isset($request['type']) && $request['type'] ? $request['type'] : 'User-User';
         $comment->save();
 
@@ -83,7 +102,7 @@ class CommentController extends Controller implements CommentControllerInterface
         $sender = User::find($comment->commenter_id);
         $type = $comment->type;
 
-        switch ($model_type) {
+        switch ($model) {
             case 'App\Models\User\UserProfile':
                 $recipient = User::find($comment->commentable_id);
                 $post = 'your profile';
@@ -128,6 +147,9 @@ class CommentController extends Controller implements CommentControllerInterface
                 $post = (($type != 'User-User') ? 'your gallery submission\'s staff comments' : 'your gallery submission');
                 $link = (($type != 'User-User') ? $submission->queueUrl.'/#comment-'.$comment->getKey() : $submission->url.'/#comment-'.$comment->getKey());
                 break;
+            default:
+                throw new \Exception('Comment type not supported.');
+                break;
         }
 
         if ($recipient != $sender) {
@@ -152,8 +174,19 @@ class CommentController extends Controller implements CommentControllerInterface
             'message' => 'required|string',
         ])->validate();
 
+        // add history
+        $comment->edits()->create([
+            'user_id'    => Auth::user()->id,
+            'comment_id' => $comment->id,
+            'data'       => json_encode([
+                'action'      => 'edit',
+                'old_comment' => config('lorekeeper.settings.wysiwyg_comments') ? parse($comment->comment) : $comment->comment,
+                'new_comment' => config('lorekeeper.settings.wysiwyg_comments') ? parse($request->message) : $request->message,
+            ]),
+        ]);
+
         $comment->update([
-            'comment' => $request->message,
+            'comment' => config('lorekeeper.settings.wysiwyg_comments') ? parse($request->message) : $request->message,
         ]);
 
         return Redirect::to(URL::previous().'#comment-'.$comment->getKey());
@@ -165,7 +198,7 @@ class CommentController extends Controller implements CommentControllerInterface
     public function destroy(Comment $comment) {
         Gate::authorize('delete-comment', $comment);
 
-        if (Config::get('comments.soft_deletes') == true) {
+        if (config('comments.soft_deletes') == true) {
             $comment->delete();
         } else {
             $comment->forceDelete();
@@ -184,14 +217,14 @@ class CommentController extends Controller implements CommentControllerInterface
             'message' => 'required|string',
         ])->validate();
 
-        $commentClass = Config::get('comments.model');
+        $commentClass = config('comments.model');
         $reply = new $commentClass;
         $reply->commenter()->associate(Auth::user());
         $reply->commentable()->associate($comment->commentable);
         $reply->parent()->associate($comment);
-        $reply->comment = $request->message;
+        $reply->comment = config('lorekeeper.settings.wysiwyg_comments') ? parse($request->message) : $request->message;
         $reply->type = $comment->type;
-        $reply->approved = !Config::get('comments.approval_required');
+        $reply->approved = !config('comments.approval_required');
         $reply->save();
 
         // url = url('comments/32')

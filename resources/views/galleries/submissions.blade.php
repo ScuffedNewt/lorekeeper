@@ -26,7 +26,7 @@
         </li>
     </ul>
 
-    @if (count($submissions))
+    @if ($submissions->count())
         {!! $submissions->render() !!}
 
         @foreach ($submissions as $key => $submission)

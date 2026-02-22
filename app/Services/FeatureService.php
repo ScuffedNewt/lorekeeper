@@ -6,7 +6,7 @@ use App\Models\Feature\Feature;
 use App\Models\Feature\FeatureCategory;
 use App\Models\Species\Species;
 use App\Models\Species\Subtype;
-use DB;
+use Illuminate\Support\Facades\DB;
 
 class FeatureService extends Service {
     /*
@@ -41,6 +41,7 @@ class FeatureService extends Service {
             $image = null;
             if (isset($data['image']) && $data['image']) {
                 $data['has_image'] = 1;
+                $data['hash'] = randomString(10);
                 $image = $data['image'];
                 unset($data['image']);
             } else {
@@ -88,6 +89,7 @@ class FeatureService extends Service {
             $image = null;
             if (isset($data['image']) && $data['image']) {
                 $data['has_image'] = 1;
+                $data['hash'] = randomString(10);
                 $image = $data['image'];
                 unset($data['image']);
             }
@@ -223,6 +225,7 @@ class FeatureService extends Service {
             $image = null;
             if (isset($data['image']) && $data['image']) {
                 $data['has_image'] = 1;
+                $data['hash'] = randomString(10);
                 $image = $data['image'];
                 unset($data['image']);
             } else {
@@ -295,6 +298,7 @@ class FeatureService extends Service {
             $image = null;
             if (isset($data['image']) && $data['image']) {
                 $data['has_image'] = 1;
+                $data['hash'] = randomString(10);
                 $image = $data['image'];
                 unset($data['image']);
             }
@@ -364,6 +368,10 @@ class FeatureService extends Service {
             $data['parsed_description'] = parse($data['description']);
         }
 
+        if (!isset($data['is_visible'])) {
+            $data['is_visible'] = 0;
+        }
+
         if (isset($data['remove_image'])) {
             if ($category && $category->has_image && $data['remove_image']) {
                 $data['has_image'] = 0;
@@ -392,6 +400,9 @@ class FeatureService extends Service {
         }
         if (isset($data['feature_category_id']) && $data['feature_category_id'] == 'none') {
             $data['feature_category_id'] = null;
+        }
+        if (!isset($data['is_visible'])) {
+            $data['is_visible'] = 0;
         }
         if (isset($data['remove_image'])) {
             if ($feature && $feature->has_image && $data['remove_image']) {

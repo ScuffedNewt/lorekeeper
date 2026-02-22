@@ -1,7 +1,7 @@
 @extends('admin.layout')
 
 @section('admin-title')
-    Prompt Categories
+    {{ $category->id ? 'Edit' : 'Create' }} Prompt Category
 @endsection
 
 @section('admin-content')
@@ -11,7 +11,7 @@
         ($category->id ? 'Edit' : 'Create') . ' Category' => $category->id ? 'admin/data/prompt-categories/edit/' . $category->id : 'admin/data/prompt-categories/create',
     ]) !!}
 
-    <h1>{{ $category->id ? 'Edit' : 'Create' }} Category
+    <h1>{{ $category->id ? 'Edit' : 'Create' }} Prompt Category
         @if ($category->id)
             <a href="#" class="btn btn-danger float-right delete-category-button">Delete Category</a>
         @endif
@@ -28,7 +28,10 @@
 
     <div class="form-group">
         {!! Form::label('World Page Image (Optional)') !!} {!! add_help('This image is used only on the world information pages.') !!}
-        <div>{!! Form::file('image') !!}</div>
+        <div class="custom-file">
+            {!! Form::label('image', 'Choose file...', ['class' => 'custom-file-label']) !!}
+            {!! Form::file('image', ['class' => 'custom-file-input']) !!}
+        </div>
         <div class="text-muted">Recommended size: 200px x 200px</div>
         @if ($category->has_image)
             <div class="form-check">

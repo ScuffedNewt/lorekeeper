@@ -1,7 +1,7 @@
 @extends('admin.layout')
 
 @section('admin-title')
-    Rarities
+    {{ $rarity->id ? 'Edit' : 'Create' }} Rarity
 @endsection
 
 @section('admin-content')
@@ -34,7 +34,10 @@
 
     <div class="form-group">
         {!! Form::label('World Page Image (Optional)') !!} {!! add_help('This image is used only on the world information pages.') !!}
-        <div>{!! Form::file('image') !!}</div>
+        <div class="custom-file">
+            {!! Form::label('image', 'Choose file...', ['class' => 'custom-file-label']) !!}
+            {!! Form::file('image', ['class' => 'custom-file-input']) !!}
+        </div>
         <div class="text-muted">Recommended size: 200px x 200px</div>
         @if ($rarity->has_image)
             <div class="form-check">
@@ -59,7 +62,17 @@
         <h3>Preview</h3>
         <div class="card mb-3">
             <div class="card-body">
-                @include('world._entry', ['imageUrl' => $rarity->rarityImageUrl, 'name' => $rarity->displayName, 'description' => $rarity->parsed_description])
+                @include('world._rarity_entry', [
+                    'imageUrl' => $rarity->rarityImageUrl,
+                    'name' => $rarity->displayName,
+                    'description' => $rarity->parsed_description,
+                    'searchFeaturesUrl' => $rarity->searchFeaturesUrl,
+                    'searchCharactersUrl' => $rarity->searchCharactersUrl,
+                    'edit' => [
+                        'title' => 'Edit Rarity',
+                        'object' => $rarity,
+                    ],
+                ])
             </div>
         </div>
     @endif

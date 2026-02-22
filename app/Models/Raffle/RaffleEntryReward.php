@@ -2,6 +2,8 @@
 
 namespace App\Models\Raffle;
 
+use App\Models\Currency\Currency;
+use App\Models\Item\Item;
 use App\Models\Model;
 
 class RaffleEntryReward extends Model {
@@ -55,10 +57,10 @@ class RaffleEntryReward extends Model {
     public function reward() {
         switch ($this->rewardable_type) {
             case 'Item':
-                return $this->belongsTo('App\Models\Item\Item', 'rewardable_id');
+                return $this->belongsTo(Item::class, 'rewardable_id');
                 break;
             case 'Currency':
-                return $this->belongsTo('App\Models\Currency\Currency', 'rewardable_id');
+                return $this->belongsTo(Currency::class, 'rewardable_id');
                 break;
         }
 

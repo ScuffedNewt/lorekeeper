@@ -1,5 +1,6 @@
 <div class="card mb-3">
     <div class="card-header">
+        <x-admin-edit title="News Post" :object="$news" />
         <h2 class="card-title mb-0">{!! $news->displayName !!}</h2>
         <small>
             Posted {!! $news->post_at ? pretty_date($news->post_at) : pretty_date($news->created_at) !!} :: Last edited {!! pretty_date($news->updated_at) !!} by {!! $news->user->displayName !!}
@@ -10,7 +11,7 @@
             {!! $news->parsed_text !!}
         </div>
     </div>
-    <?php $commentCount = App\Models\Comment::where('commentable_type', 'App\Models\News')
+    <?php $commentCount = App\Models\Comment\Comment::where('commentable_type', 'App\Models\News')
         ->where('commentable_id', $news->id)
         ->count(); ?>
     @if (!$page)

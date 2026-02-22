@@ -12,6 +12,11 @@
                 <li class="nav-item">
                     <a class="nav-link" id="creditsTab-{{ $image->id }}" data-toggle="tab" href="#credits-{{ $image->id }}" role="tab">Credits</a>
                 </li>
+                @if (isset($showMention) && $showMention)
+                    <li class="nav-item">
+                        <a class="nav-link" id="mentionTab-{{ $image->id }}" data-toggle="tab" href="#mention-{{ $image->id }}" role="tab">Mention</a>
+                    </li>
+                @endif
                 @if (Auth::check() && Auth::user()->hasPower('manage_characters'))
                     <li class="nav-item">
                         <a class="nav-link" id="settingsTab-{{ $image->id }}" data-toggle="tab" href="#settings-{{ $image->id }}" role="tab"><i class="fas fa-cog"></i></a>
@@ -31,32 +36,32 @@
 
             {{-- Basic info --}}
             <div class="tab-pane fade show active" id="info-{{ $image->id }}">
-                <div class="row">
-                    <div class="col-lg-4 col-md-6 col-4">
+                <div class="row no-gutters">
+                    <div class="col-lg-4 col-5">
                         <h5>Species</h5>
                     </div>
-                    <div class="col-lg-8 col-md-6 col-8">{!! $image->species_id ? $image->species->displayName : 'None' !!}</div>
+                    <div class="col-lg-8 col-7 pl-1">{!! $image->species_id ? $image->species->displayName : 'None' !!}</div>
                 </div>
                 @if ($image->subtype_id)
-                    <div class="row">
-                        <div class="col-lg-4 col-md-6 col-4">
+                    <div class="row no-gutters">
+                        <div class="col-lg-4 col-5">
                             <h5>Subtype</h5>
                         </div>
-                        <div class="col-lg-8 col-md-6 col-8">{!! $image->subtype_id ? $image->subtype->displayName : 'None' !!}</div>
+                        <div class="col-lg-8 col-7 pl-1">{!! $image->subtype_id ? $image->subtype->displayName : 'None' !!}</div>
                     </div>
                 @endif
-                <div class="row">
-                    <div class="col-lg-4 col-md-6 col-4">
+                <div class="row no-gutters">
+                    <div class="col-lg-4 col-5">
                         <h5>Rarity</h5>
                     </div>
-                    <div class="col-lg-8 col-md-6 col-8">{!! $image->rarity_id ? $image->rarity->displayName : 'None' !!}</div>
+                    <div class="col-lg-8 col-7 pl-1">{!! $image->rarity_id ? $image->rarity->displayName : 'None' !!}</div>
                 </div>
 
                 <div class="mb-3">
                     <div>
                         <h5>Traits</h5>
                     </div>
-                    @if (Config::get('lorekeeper.extensions.traits_by_category'))
+                    @if (config('lorekeeper.extensions.traits_by_category'))
                         <div>
                             @php
                                 $traitgroup = $image
@@ -137,21 +142,21 @@
             {{-- Image credits --}}
             <div class="tab-pane fade" id="credits-{{ $image->id }}">
 
-                <div class="row mb-2">
-                    <div class="col-lg-4 col-md-6 col-4">
+                <div class="row no-gutters mb-2">
+                    <div class="col-lg-4 col-4">
                         <h5>Design</h5>
                     </div>
-                    <div class="col-lg-8 col-md-6 col-8">
+                    <div class="col-lg-8 col-8">
                         @foreach ($image->designers as $designer)
                             <div>{!! $designer->displayLink() !!}</div>
                         @endforeach
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-lg-4 col-md-6 col-4">
+                <div class="row no-gutters">
+                    <div class="col-lg-4 col-4">
                         <h5>Art</h5>
                     </div>
-                    <div class="col-lg-8 col-md-6 col-8">
+                    <div class="col-lg-8 col-8">
                         @foreach ($image->artists as $artist)
                             <div>{!! $artist->displayLink() !!}</div>
                         @endforeach
@@ -164,6 +169,36 @@
                     </div>
                 @endif
             </div>
+
+            @if (isset($showMention) && $showMention)
+                {{-- Mention This tab --}}
+                <div class="tab-pane fade" id="mention-{{ $image->id }}">
+                    In the rich text editor:
+                    <div class="alert alert-secondary">
+                        [character={{ $character->slug }}]
+                    </div>
+                    @if (!config('lorekeeper.settings.wysiwyg_comments'))
+                        In a comment:
+                        <div class="alert alert-secondary">
+                            [{{ $character->fullName }}]({{ $character->url }})
+                        </div>
+                    @endif
+                    <hr>
+                    <div class="my-2">
+                        <strong>For Thumbnails:</strong>
+                    </div>
+                    In the rich text editor:
+                    <div class="alert alert-secondary">
+                        [charthumb={{ $character->slug }}]
+                    </div>
+                    @if (!config('lorekeeper.settings.wysiwyg_comments'))
+                        In a comment:
+                        <div class="alert alert-secondary">
+                            [![Thumbnail of {{ $character->fullName }}]({{ $character->image->thumbnailUrl }})]({{ $character->url }})
+                        </div>
+                    @endif
+                </div>
+            @endif
 
             @if (Auth::check() && Auth::user()->hasPower('manage_characters'))
                 <div class="tab-pane fade" id="settings-{{ $image->id }}">

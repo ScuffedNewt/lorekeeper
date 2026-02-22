@@ -20,12 +20,16 @@ class Raffle extends Model {
      * @var string
      */
     protected $table = 'raffles';
+
     /**
-     * Dates on the model to convert to Carbon instances.
+     * The attributes that should be cast to native types.
      *
      * @var array
      */
-    public $dates = ['rolled_at', 'end_at'];
+    protected $casts = [
+        'rolled_at' => 'datetime',
+        'end_at'    => 'datetime',
+    ];
 
     /**
      * Accessors to append to the model.
@@ -51,28 +55,28 @@ class Raffle extends Model {
      * Get the raffle tickets attached to this raffle.
      */
     public function tickets() {
-        return $this->hasMany('App\Models\Raffle\RaffleTicket');
+        return $this->hasMany(RaffleTicket::class);
     }
 
     /**
      * Get the group that this raffle belongs to.
      */
     public function group() {
-        return $this->belongsTo('App\Models\Raffle\RaffleGroup', 'group_id');
+        return $this->belongsTo(RaffleGroup::class, 'group_id');
     }
 
     /**
      * Gets the logs associated with this raffle.
      */
     public function logs() {
-        return $this->hasMany('App\Models\Raffle\RaffleLog');
+        return $this->hasMany(RaffleLog::class);
     }
 
     /**
      * Get the rewards attached to this raffle.
      */
     public function rewards() {
-        return $this->hasMany('App\Models\Raffle\RaffleEntryReward', 'raffle_id');
+        return $this->hasMany(RaffleEntryReward::class, 'raffle_id');
     }
 
     /**********************************************************************************************
@@ -115,6 +119,24 @@ class Raffle extends Model {
      */
     public function getUrlAttribute() {
         return url('raffles/view/'.$this->id);
+    }
+
+    /**
+     * Gets the admin edit URL.
+     *
+     * @return string
+     */
+    public function getAdminUrlAttribute() {
+        return url('admin/raffles'); // Raffles are edited via a modal so don't have a unique raffle edit page
+    }
+
+    /**
+     * Gets the power required to edit this model.
+     *
+     * @return string
+     */
+    public function getAdminPowerAttribute() {
+        return 'manage_raffles';
     }
 
     /**********************************************************************************************

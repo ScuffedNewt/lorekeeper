@@ -1,17 +1,17 @@
 @php
-if (isset($approved) and $approved == true) {
-    if (isset($type) && $type != null) {
-        $comments = $model->approvedComments->where('type', $type);
+    if (isset($approved) and $approved == true) {
+        if (isset($type) && $type != null) {
+            $comments = $model->approvedComments->where('type', $type);
+        } else {
+            $comments = $model->approvedComments->where('type', 'User-User');
+        }
     } else {
-        $comments = $model->approvedComments->where('type', 'User-User');
+        if (isset($type) && $type != null) {
+            $comments = $model->commentz->where('type', $type);
+        } else {
+            $comments = $model->commentz->where('type', 'User-User');
+        }
     }
-} else {
-    if (isset($type) && $type != null) {
-        $comments = $model->commentz->where('type', $type);
-    } else {
-        $comments = $model->commentz->where('type', 'User-User');
-    }
-}
 @endphp
 
 @if (!isset($type) || $type == 'User-User')
@@ -20,24 +20,24 @@ if (isset($approved) and $approved == true) {
 <div class="d-flex mw-100 row mx-0" style="overflow:hidden;">
     @php
         $comments = $comments->sortByDesc('created_at');
-        
+
         if (isset($perPage)) {
             $page = request()->query('page', 1) - 1;
-        
+
             $parentComments = $comments->where('child_id', '');
-        
+
             $slicedParentComments = $parentComments->slice($page * $perPage, $perPage);
-        
-            $m = Config::get('comments.model'); // This has to be done like this, otherwise it will complain.
+
+            $m = config('comments.model'); // This has to be done like this, otherwise it will complain.
             $modelKeyName = (new $m())->getKeyName(); // This defaults to 'id' if not changed.
-        
+
             $slicedParentCommentsIds = $slicedParentComments->pluck($modelKeyName)->toArray();
-        
+
             // Remove parent Comments from comments.
             $comments = $comments->where('child_id', '!=', '');
-        
+
             $grouped_comments = new \Illuminate\Pagination\LengthAwarePaginator($slicedParentComments->merge($comments)->groupBy('child_id'), $parentComments->count(), $perPage);
-        
+
             $grouped_comments->withPath(request()->url());
         } else {
             $grouped_comments = $comments->groupBy('child_id');
@@ -68,7 +68,9 @@ if (isset($approved) and $approved == true) {
 @endisset
 
 @auth
-    @include('comments._form')
+    @include('comments._form', [
+        'compact' => isset($type) && $type == 'Staff-Staff' && config('lorekeeper.settings.wysiwyg_comments') ? true : false,
+    ])
 @else
     <div class="card mt-3">
         <div class="card-body">
@@ -78,3 +80,29 @@ if (isset($approved) and $approved == true) {
         </div>
     </div>
 @endauth
+
+@section('scripts')
+    @parent
+    <script>
+        $(document).ready(function() {
+            tinymce.init({
+                selector: '.comment-wysiwyg',
+                height: 250,
+                menubar: false,
+                convert_urls: false,
+                plugins: [
+                    'advlist autolink lists link image charmap print preview anchor',
+                    'searchreplace visualblocks code fullscreen spoiler',
+                    'insertdatetime media table paste code help wordcount'
+                ],
+                toolbar: 'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | spoiler-add spoiler-remove | removeformat | code',
+                content_css: [
+                    '{{ asset('css/app.css') }}',
+                    '{{ asset('css/lorekeeper.css') }}'
+                ],
+                spoiler_caption: 'Toggle Spoiler',
+                target_list: false
+            });
+        });
+    </script>
+@endsection

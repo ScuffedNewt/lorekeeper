@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Facades\Notifications;
 use App\Models\Character\Character;
 use App\Models\Character\CharacterDesignUpdate;
 use App\Models\Character\CharacterFeature;
@@ -14,12 +15,10 @@ use App\Models\Species\Subtype;
 use App\Models\User\User;
 use App\Models\User\UserItem;
 use Carbon\Carbon;
-use Config;
-use DB;
-use File;
 use Illuminate\Support\Arr;
-use Image;
-use Notifications;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
+use Intervention\Image\Facades\Image;
 
 class DesignUpdateManager extends Service {
     /*
@@ -62,9 +61,9 @@ class DesignUpdateManager extends Service {
                 'update_type'   => $character->is_myo_slot ? 'MYO' : 'Character',
 
                 // Set some data based on the character's existing stats
-                'rarity_id'  => $character->image->rarity_id,
-                'species_id' => $character->image->species_id,
-                'subtype_id' => $character->image->subtype_id,
+                'rarity_id'     => $character->image->rarity_id,
+                'species_id'    => $character->image->species_id,
+                'subtype_id'    => $character->image->subtype_id,
             ];
 
             $request = CharacterDesignUpdate::create($data);
@@ -158,7 +157,17 @@ class DesignUpdateManager extends Service {
                     $imageData['use_cropper'] = isset($data['use_cropper']);
                 }
                 if (!$isAdmin && isset($data['image'])) {
-                    $imageData['extension'] = (Config::get('lorekeeper.settings.masterlist_image_format') ? Config::get('lorekeeper.settings.masterlist_image_format') : ($data['extension'] ?? $data['image']->getClientOriginalExtension()));
+                    if (config('lorekeeper.settings.store_masterlist_fullsizes')) {
+                        if (config('lorekeeper.settings.masterlist_fullsizes_format') != null) {
+                            $imageData['extension'] = config('lorekeeper.settings.masterlist_fullsizes_format');
+                        } else {
+                            $imageData['extension'] = $data['image']->getClientOriginalExtension();
+                        }
+                    } elseif (config('lorekeeper.settings.masterlist_image_format') != null) {
+                        $imageData['extension'] = config('lorekeeper.settings.masterlist_image_format');
+                    } else {
+                        $imageData['extension'] = $data['image']->getClientOriginalExtension();
+                    }
                     $imageData['has_image'] = true;
                 }
                 $request->update($imageData);
@@ -214,9 +223,9 @@ class DesignUpdateManager extends Service {
                 $this->handleImage($data['image'], $request->imageDirectory, $request->imageFileName, null, isset($data['default_image']));
             }
 
-            // Save thumbnail
-            if (!$isAdmin || ($isAdmin && isset($data['modify_thumbnail']))) {
-                if (isset($data['use_cropper'])) {
+            // Save thumbnail, if we have an image set
+            if ((!$isAdmin) || ($isAdmin && isset($data['modify_thumbnail']))) {
+                if (isset($data['use_cropper']) && (isset($data['image']) || ($isAdmin && isset($data['modify_thumbnail'])))) {
                     (new CharacterManager)->cropThumbnail(Arr::only($data, ['x0', 'x1', 'y0', 'y1']), $request);
                 } elseif (isset($data['thumbnail'])) {
                     $this->handleImage($data['thumbnail'], $request->imageDirectory, $request->thumbnailFileName);
@@ -246,7 +255,7 @@ class DesignUpdateManager extends Service {
             $requestData = $request->data;
             // First return any item stacks associated with this request
             if (isset($requestData['user']) && isset($requestData['user']['user_items'])) {
-                foreach ($requestData['user']['user_items'] as $userItemId=>$quantity) {
+                foreach ($requestData['user']['user_items'] as $userItemId=> $quantity) {
                     $userItemRow = UserItem::find($userItemId);
                     if (!$userItemRow) {
                         throw new \Exception('Cannot return an invalid item. ('.$userItemId.')');
@@ -263,12 +272,12 @@ class DesignUpdateManager extends Service {
             // This is stored in the data attribute
             $currencyManager = new CurrencyManager;
             if (isset($requestData['user']) && isset($requestData['user']['currencies'])) {
-                foreach ($requestData['user']['currencies'] as $currencyId=>$quantity) {
+                foreach ($requestData['user']['currencies'] as $currencyId=> $quantity) {
                     $currencyManager->creditCurrency(null, $request->user, null, null, $currencyId, $quantity);
                 }
             }
             if (isset($requestData['character']) && isset($requestData['character']['currencies'])) {
-                foreach ($requestData['character']['currencies'] as $currencyId=>$quantity) {
+                foreach ($requestData['character']['currencies'] as $currencyId=> $quantity) {
                     $currencyManager->creditCurrency(null, $request->character, null, null, $currencyId, $quantity);
                 }
             }
@@ -297,7 +306,7 @@ class DesignUpdateManager extends Service {
 
             // Attach currencies.
             if (isset($data['currency_id'])) {
-                foreach ($data['currency_id'] as $holderKey=>$currencyIds) {
+                foreach ($data['currency_id'] as $holderKey=> $currencyIds) {
                     $holder = explode('-', $holderKey);
                     $holderType = $holder[0];
                     $holderId = $holder[1];
@@ -310,7 +319,7 @@ class DesignUpdateManager extends Service {
                         throw new \Exception('Error attaching currencies to this request. (2)');
                     }
 
-                    foreach ($currencyIds as $key=>$currencyId) {
+                    foreach ($currencyIds as $key=> $currencyId) {
                         $currency = Currency::find($currencyId);
                         if (!$currency) {
                             throw new \Exception('Invalid currency selected.');
@@ -493,7 +502,7 @@ class DesignUpdateManager extends Service {
             $inventoryManager = new InventoryManager;
             if (isset($requestData['user']) && isset($requestData['user']['user_items'])) {
                 $stacks = $requestData['user']['user_items'];
-                foreach ($requestData['user']['user_items'] as $userItemId=>$quantity) {
+                foreach ($requestData['user']['user_items'] as $userItemId=> $quantity) {
                     $userItemRow = UserItem::find($userItemId);
                     if (!$userItemRow) {
                         throw new \Exception('Cannot return an invalid item. ('.$userItemId.')');
@@ -506,7 +515,7 @@ class DesignUpdateManager extends Service {
                 }
 
                 $staff = $user;
-                foreach ($stacks as $stackId=>$quantity) {
+                foreach ($stacks as $stackId=> $quantity) {
                     $stack = UserItem::find($stackId);
                     $user = User::find($request->user_id);
                     if (!$inventoryManager->debitStack($user, $request->character->is_myo_slot ? 'MYO Design Approved' : 'Character Design Updated', ['data' => 'Item used in '.($request->character->is_myo_slot ? 'MYO design approval' : 'Character design update').' (<a href="'.$request->url.'">#'.$request->id.'</a>)'], $stack, $quantity)) {
@@ -517,7 +526,7 @@ class DesignUpdateManager extends Service {
             }
             $currencyManager = new CurrencyManager;
             if (isset($requestData['user']['currencies']) && $requestData['user']['currencies']) {
-                foreach ($requestData['user']['currencies'] as $currencyId=>$quantity) {
+                foreach ($requestData['user']['currencies'] as $currencyId=> $quantity) {
                     $currency = Currency::find($currencyId);
                     if (!$currencyManager->createLog(
                         $request->user_id,
@@ -534,7 +543,7 @@ class DesignUpdateManager extends Service {
                 }
             }
             if (isset($requestData['character']['currencies']) && $requestData['character']['currencies']) {
-                foreach ($requestData['character']['currencies'] as $currencyId=>$quantity) {
+                foreach ($requestData['character']['currencies'] as $currencyId=> $quantity) {
                     $currency = Currency::find($currencyId);
                     if (!$currencyManager->createLog(
                         $request->character_id,
@@ -551,24 +560,23 @@ class DesignUpdateManager extends Service {
                 }
             }
 
-            $extension = Config::get('lorekeeper.settings.masterlist_image_format') != null ? Config::get('lorekeeper.settings.masterlist_image_format') : $request->extension;
-
             // Create a new image with the request data
             $image = CharacterImage::create([
-                'character_id'  => $request->character_id,
-                'is_visible'    => 1,
-                'hash'          => $request->hash,
-                'fullsize_hash' => $request->fullsize_hash ? $request->fullsize_hash : randomString(15),
-                'extension'     => $extension,
-                'use_cropper'   => $request->use_cropper,
-                'x0'            => $request->x0,
-                'x1'            => $request->x1,
-                'y0'            => $request->y0,
-                'y1'            => $request->y1,
-                'species_id'    => $request->species_id,
-                'subtype_id'    => ($request->character->is_myo_slot && isset($request->character->image->subtype_id)) ? $request->character->image->subtype_id : $request->subtype_id,
-                'rarity_id'     => $request->rarity_id,
-                'sort'          => 0,
+                'character_id'       => $request->character_id,
+                'is_visible'         => 1,
+                'hash'               => $request->hash,
+                'fullsize_hash'      => $request->fullsize_hash ? $request->fullsize_hash : randomString(15),
+                'extension'          => config('lorekeeper.settings.masterlist_image_format') != null ? config('lorekeeper.settings.masterlist_image_format') : $request->extension,
+                'fullsize_extension' => config('lorekeeper.settings.masterlist_fullsizes_format') != null ? config('lorekeeper.settings.masterlist_fullsizes_format') : $request->extension,
+                'use_cropper'        => $request->use_cropper,
+                'x0'                 => $request->x0,
+                'x1'                 => $request->x1,
+                'y0'                 => $request->y0,
+                'y1'                 => $request->y1,
+                'species_id'         => $request->species_id,
+                'subtype_id'         => ($request->character->is_myo_slot && isset($request->character->image->subtype_id)) ? $request->character->image->subtype_id : $request->subtype_id,
+                'rarity_id'          => $request->rarity_id,
+                'sort'               => 0,
             ]);
 
             // Shift the image credits over to the new image
@@ -629,12 +637,12 @@ class DesignUpdateManager extends Service {
             }
 
             // Note old image to delete it
-            if (Config::get('lorekeeper.extensions.remove_myo_image') && $request->character->is_myo_slot && $data['remove_myo_image'] == 2) {
+            if (config('lorekeeper.extensions.remove_myo_image') && $request->character->is_myo_slot && $data['remove_myo_image'] == 2) {
                 $oldImage = $request->character->image;
             }
 
             // Hide the MYO placeholder image if desired
-            if (Config::get('lorekeeper.extensions.remove_myo_image') && $request->character->is_myo_slot && $data['remove_myo_image'] == 1) {
+            if (config('lorekeeper.extensions.remove_myo_image') && $request->character->is_myo_slot && $data['remove_myo_image'] == 1) {
                 $request->character->image->is_visible = 0;
                 $request->character->image->save();
             }
@@ -659,7 +667,7 @@ class DesignUpdateManager extends Service {
             // If this is for a MYO, set user's FTO status and the MYO status of the slot
             // and clear the character's name
             if ($request->character->is_myo_slot) {
-                if (Config::get('lorekeeper.settings.clear_myo_slot_name_on_approval')) {
+                if (config('lorekeeper.settings.clear_myo_slot_name_on_approval')) {
                     $request->character->name = null;
                 }
                 $request->character->is_myo_slot = 0;
@@ -667,7 +675,7 @@ class DesignUpdateManager extends Service {
                 $request->user->settings->save();
 
                 // Delete the MYO placeholder image if desired
-                if (Config::get('lorekeeper.extensions.remove_myo_image') && $data['remove_myo_image'] == 2) {
+                if (config('lorekeeper.extensions.remove_myo_image') && $data['remove_myo_image'] == 2) {
                     $characterManager = new CharacterManager;
                     if (!$characterManager->deleteImage($oldImage, $user, true)) {
                         foreach ($characterManager->errors()->getMessages()['error'] as $error) {
@@ -734,7 +742,7 @@ class DesignUpdateManager extends Service {
             $requestData = $request->data;
             // Return all added items/currency
             if (isset($requestData['user']) && isset($requestData['user']['user_items'])) {
-                foreach ($requestData['user']['user_items'] as $userItemId=>$quantity) {
+                foreach ($requestData['user']['user_items'] as $userItemId=> $quantity) {
                     $userItemRow = UserItem::find($userItemId);
                     if (!$userItemRow) {
                         throw new \Exception('Cannot return an invalid item. ('.$userItemId.')');
@@ -749,7 +757,7 @@ class DesignUpdateManager extends Service {
 
             $currencyManager = new CurrencyManager;
             if (isset($requestData['user']['currencies']) && $requestData['user']['currencies']) {
-                foreach ($requestData['user']['currencies'] as $currencyId=>$quantity) {
+                foreach ($requestData['user']['currencies'] as $currencyId=> $quantity) {
                     $currency = Currency::find($currencyId);
                     if (!$currency) {
                         throw new \Exception('Cannot return an invalid currency. ('.$currencyId.')');
@@ -760,7 +768,7 @@ class DesignUpdateManager extends Service {
                 }
             }
             if (isset($requestData['character']['currencies']) && $requestData['character']['currencies']) {
-                foreach ($requestData['character']['currencies'] as $currencyId=>$quantity) {
+                foreach ($requestData['character']['currencies'] as $currencyId=> $quantity) {
                     $currency = Currency::find($currencyId);
                     if (!$currency) {
                         throw new \Exception('Cannot return an invalid currency. ('.$currencyId.')');
@@ -867,7 +875,7 @@ class DesignUpdateManager extends Service {
             $requestData = $request->data;
             // Return all added items/currency
             if (isset($requestData['user']) && isset($requestData['user']['user_items'])) {
-                foreach ($requestData['user']['user_items'] as $userItemId=>$quantity) {
+                foreach ($requestData['user']['user_items'] as $userItemId=> $quantity) {
                     $userItemRow = UserItem::find($userItemId);
                     if (!$userItemRow) {
                         throw new \Exception('Cannot return an invalid item. ('.$userItemId.')');
@@ -882,7 +890,7 @@ class DesignUpdateManager extends Service {
 
             $currencyManager = new CurrencyManager;
             if (isset($requestData['user']['currencies']) && $requestData['user']['currencies']) {
-                foreach ($requestData['user']['currencies'] as $currencyId=>$quantity) {
+                foreach ($requestData['user']['currencies'] as $currencyId=> $quantity) {
                     $currency = Currency::find($currencyId);
                     if (!$currency) {
                         throw new \Exception('Cannot return an invalid currency. ('.$currencyId.')');
@@ -893,7 +901,7 @@ class DesignUpdateManager extends Service {
                 }
             }
             if (isset($requestData['character']['currencies']) && $requestData['character']['currencies']) {
-                foreach ($requestData['character']['currencies'] as $currencyId=>$quantity) {
+                foreach ($requestData['character']['currencies'] as $currencyId=> $quantity) {
                     $currency = Currency::find($currencyId);
                     if (!$currency) {
                         throw new \Exception('Cannot return an invalid currency. ('.$currencyId.')');
@@ -916,7 +924,7 @@ class DesignUpdateManager extends Service {
     }
 
     /**
-     * Votes on a a character design update request.
+     * Votes on a character design update request.
      *
      * @param string                                      $action
      * @param \App\Models\Character\CharacterDesignUpdate $request
@@ -931,7 +939,7 @@ class DesignUpdateManager extends Service {
             if ($request->status != 'Pending') {
                 throw new \Exception('This request cannot be processed.');
             }
-            if (!Config::get('lorekeeper.extensions.design_update_voting')) {
+            if (!config('lorekeeper.extensions.design_update_voting')) {
                 throw new \Exception('This extension is not currently enabled.');
             }
 

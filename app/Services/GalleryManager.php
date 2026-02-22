@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Facades\Notifications;
+use App\Facades\Settings;
 use App\Models\Character\Character;
 use App\Models\Currency\Currency;
 use App\Models\Gallery\Gallery;
@@ -11,11 +13,9 @@ use App\Models\Gallery\GalleryFavorite;
 use App\Models\Gallery\GallerySubmission;
 use App\Models\Prompt\Prompt;
 use App\Models\User\User;
-use Config;
-use DB;
-use Image;
-use Notifications;
-use Settings;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
+use Intervention\Image\Facades\Image;
 
 class GalleryManager extends Service {
     /*
@@ -119,7 +119,7 @@ class GalleryManager extends Service {
 
             if (isset($data['collaborator_id']) && $collaborators->count()) {
                 // Attach any collaborators to the submission
-                foreach ($data['collaborator_id'] as $key=>$collaborator) {
+                foreach ($data['collaborator_id'] as $key=> $collaborator) {
                     GalleryCollaborator::create([
                         'user_id'               => $collaborator,
                         'gallery_submission_id' => $submission->id,
@@ -140,7 +140,7 @@ class GalleryManager extends Service {
 
             if (isset($data['participant_id']) && $participants->count()) {
                 // Attach any participants to the submission
-                foreach ($data['participant_id'] as $key=>$participant) {
+                foreach ($data['participant_id'] as $key=> $participant) {
                     GalleryCollaborator::create([
                         'user_id'               => $participant,
                         'gallery_submission_id' => $submission->id,
@@ -189,6 +189,10 @@ class GalleryManager extends Service {
                 throw new \Exception("You can't edit this submission.");
             }
 
+            if ($submission->status == 'Rejected') {
+                throw new \Exception('This submission has been rejected and cannot be edited.');
+            }
+
             // Check that there is text and/or an image, including if there is an existing image (via the existence of a hash)
             if ((!isset($data['image']) && !isset($submission->hash)) && !$data['text']) {
                 throw new \Exception('Please submit either text or an image.');
@@ -219,7 +223,7 @@ class GalleryManager extends Service {
 
                 if (isset($data['collaborator_id']) && $collaborators->count()) {
                     // Attach any collaborators to the submission
-                    foreach ($data['collaborator_id'] as $key=>$collaborator) {
+                    foreach ($data['collaborator_id'] as $key=> $collaborator) {
                         GalleryCollaborator::create([
                             'user_id'               => $collaborator,
                             'gallery_submission_id' => $submission->id,
@@ -244,7 +248,7 @@ class GalleryManager extends Service {
 
                 if (isset($data['participant_id']) && $participants->count()) {
                     // Attach any participants to the submission
-                    foreach ($data['participant_id'] as $key=>$participant) {
+                    foreach ($data['participant_id'] as $key=> $participant) {
                         GalleryCollaborator::create([
                             'user_id'               => $participant,
                             'gallery_submission_id' => $submission->id,
@@ -368,7 +372,7 @@ class GalleryManager extends Service {
 
                 // Check if all collaborators have approved, and if so send a notification to the
                 // submitting user (unless they are the last to approve-- which shouldn't happen, but)
-                if ($submission->collaboratorApproved) {
+                if ($submission->collaboratorApproval) {
                     if (Settings::get('gallery_submissions_require_approval') && $submission->gallery->votes_required > 0) {
                         if ($submission->user->id != $user->id) {
                             Notifications::create('GALLERY_COLLABORATORS_APPROVED', $submission->user, [
@@ -406,7 +410,7 @@ class GalleryManager extends Service {
             if ($submission->status != 'Pending') {
                 throw new \Exception('This request cannot be processed.');
             }
-            if (!$submission->collaboratorApproved) {
+            if (!$submission->collaboratorApproval) {
                 throw new \Exception("This submission's collaborators have not all approved yet.");
             }
 
@@ -424,30 +428,18 @@ class GalleryManager extends Service {
 
             // Get existing vote data if it exists, remove any existing vote data for the user,
             // add the new vote data, and json encode it
-            $voteData = (isset($submission->vote_data) ? collect(json_decode($submission->vote_data, true)) : collect([]));
+            $voteData = (isset($submission->attributes['vote_data']) ? collect(json_decode($submission->attributes['vote_data'], true)) : collect([]));
             $voteData->get($user->id) ? $voteData->pull($user->id) : null;
             $voteData->put($user->id, $vote);
             $submission->vote_data = $voteData->toJson();
 
             $submission->save();
 
-            // Count up the existing votes to see if the required number has been reached
-            $rejectSum = 0;
-            $approveSum = 0;
-            foreach ($submission->voteData as $voter=>$vote) {
-                if ($vote == 1) {
-                    $rejectSum += 1;
-                }
-                if ($vote == 2) {
-                    $approveSum += 1;
-                }
-            }
-
-            // And if so, process the submission
-            if ($action == 'reject' && $rejectSum >= $submission->gallery->votes_required) {
+            // Process the submission if the required number of votes has been reached
+            if ($action == 'reject' && $submission->getVoteData()['reject'] >= $submission->gallery->votes_required) {
                 $this->rejectSubmission($submission, $user);
             }
-            if ($action == 'accept' && $approveSum >= $submission->gallery->votes_required) {
+            if ($action == 'accept' && $submission->getVoteData()['approve'] >= $submission->gallery->votes_required) {
                 $this->acceptSubmission($submission);
             }
 
@@ -650,7 +642,7 @@ class GalleryManager extends Service {
                 }
 
                 // Send a notification to each user that received a currency award
-                foreach ($grantedList as $key=>$grantedUser) {
+                foreach ($grantedList as $key=> $grantedUser) {
                     Notifications::create('GALLERY_SUBMISSION_VALUED', $grantedUser, [
                         'currency_quantity' => $awardQuantity[$key],
                         'currency_name'     => $currency->name,
@@ -806,21 +798,49 @@ class GalleryManager extends Service {
             unlink($submission->imagePath.'/'.$submission->thumbnailFileName);
         }
         $submission->hash = randomString(10);
-        $submission->extension = $data['image']->getClientOriginalExtension();
+        $submission->extension = config('lorekeeper.settings.gallery_images_format') ?? $data['image']->getClientOriginalExtension();
 
         // Save image itself
-        $this->handleImage($data['image'], $submission->imageDirectory, $submission->imageFileName);
+        $this->handleImage($data['image'], $submission->imagePath, $submission->imageFileName);
+
+        $imageProperties = getimagesize($submission->imagePath.'/'.$submission->imageFileName);
+        if ($imageProperties[0] > 2000 || $imageProperties[1] > 2000) {
+            // For large images (in terms of dimensions),
+            // use imagick instead, as it's better at handling them
+            Config::set('image.driver', 'imagick');
+        }
+
+        if (config('lorekeeper.settings.gallery_images_cap') || config('lorekeeper.settings.gallery_images_format')) {
+            $image = Image::make($submission->imagePath.'/'.$submission->imageFileName);
+
+            // Scale the image if desired/necessary
+            if (config('lorekeeper.settings.gallery_images_cap') && ($imageProperties[0] > config('lorekeeper.settings.gallery_images_cap') || $imageProperties[1] > config('lorekeeper.settings.gallery_images_cap'))) {
+                if ($image->width() > $image->height()) {
+                    // Landscape
+                    $image->resize(config('lorekeeper.settings.gallery_images_cap'), null, function ($constraint) {
+                        $constraint->aspectRatio();
+                        $constraint->upsize();
+                    });
+                } else {
+                    // Portrait
+                    $image->resize(null, config('lorekeeper.settings.gallery_images_cap'), function ($constraint) {
+                        $constraint->aspectRatio();
+                        $constraint->upsize();
+                    });
+                }
+            }
+
+            // Save the processed image
+            $image->save($submission->imagePath.'/'.$submission->imageFileName, 100, config('lorekeeper.settings.gallery_images_format'));
+        }
 
         // Process thumbnail
-        $thumbnail = Image::make($submission->imagePath.'/'.$submission->imageFileName);
-        // Resize
-        $thumbnail->resize(null, Config::get('lorekeeper.settings.masterlist_thumbnails.height'), function ($constraint) {
-            $constraint->aspectRatio();
-            $constraint->upsize();
-        });
-
-        // Save thumbnail
-        $thumbnail->save($submission->thumbnailPath.'/'.$submission->thumbnailFileName);
+        Image::make($submission->imagePath.'/'.$submission->imageFileName)
+            ->resize(null, config('lorekeeper.settings.masterlist_thumbnails.height'), function ($constraint) {
+                $constraint->aspectRatio();
+                $constraint->upsize();
+            })
+            ->save($submission->thumbnailPath.'/'.$submission->thumbnailFileName);
 
         return $submission;
     }
@@ -858,7 +878,7 @@ class GalleryManager extends Service {
                 // Send a notification to included characters' owners now that the submission is accepted
                 // but not for the submitting user's own characters
                 foreach ($submission->characters as $character) {
-                    if ($character->user && $character->character->user->id != $submission->user->id) {
+                    if ($character->character->user && $character->character->user->id != $submission->user->id) {
                         Notifications::create('GALLERY_SUBMISSION_CHARACTER', $character->character->user, [
                             'sender'        => $submission->user->name,
                             'sender_url'    => $submission->user->url,

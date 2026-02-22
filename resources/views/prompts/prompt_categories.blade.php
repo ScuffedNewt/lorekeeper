@@ -1,6 +1,6 @@
 @extends('prompts.layout')
 
-@section('title')
+@section('prompts-title')
     Prompt Categories
 @endsection
 
@@ -23,7 +23,13 @@
     @foreach ($categories as $category)
         <div class="card mb-3">
             <div class="card-body">
-                @include('prompts._entry', ['imageUrl' => $category->categoryImageUrl, 'name' => $category->displayName, 'description' => $category->parsed_description, 'searchUrl' => $category->searchUrl])
+                @include('prompts._entry', [
+                    'edit' => ['object' => $category, 'title' => 'Category'],
+                    'imageUrl' => $category->categoryImageUrl,
+                    'name' => $category->displayName,
+                    'description' => $category->parsed_description,
+                    'searchUrl' => $category->searchUrl,
+                ])
             </div>
         </div>
     @endforeach

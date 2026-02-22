@@ -1,6 +1,6 @@
 @extends('world.layout')
 
-@section('title')
+@section('world-title')
     Items
 @endsection
 
@@ -17,7 +17,7 @@
             <div class="form-group ml-3 mb-3">
                 {!! Form::select('item_category_id', $categories, Request::get('item_category_id'), ['class' => 'form-control']) !!}
             </div>
-            @if (Config::get('lorekeeper.extensions.item_entry_expansion.extra_fields'))
+            @if (config('lorekeeper.extensions.item_entry_expansion.extra_fields'))
                 <div class="form-group ml-3 mb-3">
                     {!! Form::select('artist', $artists, Request::get('artist'), ['class' => 'form-control']) !!}
                 </div>
@@ -49,17 +49,7 @@
     @foreach ($items as $item)
         <div class="card mb-3">
             <div class="card-body">
-                <?php
-                $shops = App\Models\Shop\Shop::whereIn(
-                    'id',
-                    App\Models\Shop\ShopStock::where('item_id', $item->id)
-                        ->pluck('shop_id')
-                        ->toArray(),
-                )
-                    ->orderBy('sort', 'DESC')
-                    ->get();
-                ?>
-                @include('world._item_entry', ['imageUrl' => $item->imageUrl, 'name' => $item->displayName, 'description' => $item->parsed_description, 'idUrl' => $item->idUrl, 'shops' => $shops])
+                @include('world._item_entry', ['imageUrl' => $item->imageUrl, 'name' => $item->displayName, 'description' => $item->parsed_description, 'idUrl' => $item->idUrl])
             </div>
         </div>
     @endforeach

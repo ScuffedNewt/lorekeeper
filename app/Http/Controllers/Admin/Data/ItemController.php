@@ -11,8 +11,8 @@ use App\Models\Shop\Shop;
 use App\Models\Shop\ShopStock;
 use App\Models\User\User;
 use App\Services\ItemService;
-use Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ItemController extends Controller {
     /*
@@ -81,7 +81,7 @@ class ItemController extends Controller {
     public function postCreateEditItemCategory(Request $request, ItemService $service, $id = null) {
         $id ? $request->validate(ItemCategory::$updateRules) : $request->validate(ItemCategory::$createRules);
         $data = $request->only([
-            'name', 'description', 'image', 'remove_image', 'is_character_owned', 'character_limit', 'can_name',
+            'name', 'description', 'image', 'remove_image', 'is_character_owned', 'character_limit', 'can_name', 'is_visible',
         ]);
         if ($id && $service->updateItemCategory(ItemCategory::find($id), $data, Auth::user())) {
             flash('Category updated successfully.')->success();

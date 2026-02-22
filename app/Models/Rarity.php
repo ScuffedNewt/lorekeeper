@@ -9,7 +9,7 @@ class Rarity extends Model {
      * @var array
      */
     protected $fillable = [
-        'name', 'sort', 'color', 'has_image', 'description', 'parsed_description',
+        'name', 'sort', 'color', 'has_image', 'description', 'parsed_description', 'hash',
     ];
 
     /**
@@ -72,7 +72,7 @@ class Rarity extends Model {
      * @return string
      */
     public function getRarityImageFileNameAttribute() {
-        return $this->id.'-image.png';
+        return $this->hash.$this->id.'-image.png';
     }
 
     /**
@@ -122,5 +122,23 @@ class Rarity extends Model {
      */
     public function getSearchCharactersUrlAttribute() {
         return url('masterlist?rarity_id='.$this->id);
+    }
+
+    /**
+     * Gets the admin edit URL.
+     *
+     * @return string
+     */
+    public function getAdminUrlAttribute() {
+        return url('admin/data/rarities/edit/'.$this->id);
+    }
+
+    /**
+     * Gets the power required to edit this model.
+     *
+     * @return string
+     */
+    public function getAdminPowerAttribute() {
+        return 'edit_data';
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Facades\Settings;
 use App\Http\Controllers\Controller;
 use App\Models\AdminLog;
 use App\Models\Character\CharacterDesignUpdate;
@@ -11,11 +12,10 @@ use App\Models\Gallery\GallerySubmission;
 use App\Models\Report\Report;
 use App\Models\Submission\Submission;
 use App\Models\Trade;
-use Auth;
-use Config;
-use DB;
+use App\Models\User\User;
 use Illuminate\Http\Request;
-use Settings;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller {
     /**
@@ -50,9 +50,30 @@ class HomeController extends Controller {
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function getLogs() {
+    public function getLogs(Request $request) {
+        // get all staff users so we can search by them
+        // have to check rank relation
+        $staff = User::whereHas('rank', function ($query) {
+            // check rank id = 1 OR the rank has existing relation powers
+            $query->where('id', 1)->orWhereHas('powers');
+        })->get()->pluck('name', 'id');
+
+        $query = AdminLog::query();
+
+        $data = $request->only(['user_id', 'action']);
+        if (isset($data['user_id']) && $data['user_id'] != '') {
+            $query->where('user_id', $data['user_id']);
+        }
+        if (isset($data['action']) && $data['action'] != '') {
+            $query->where('action', $data['action']);
+        }
+
+        $query->orderBy('created_at', 'DESC');
+
         return view('admin.logs', [
-            'logs' => Adminlog::orderBy('created_at', 'DESC')->get()->paginate(20),
+            'logs'    => $query->paginate(20)->appends($request->query()),
+            'staff'   => $staff,
+            'actions' => AdminLog::pluck('action', 'action')->unique(),
         ]);
     }
 
@@ -63,7 +84,7 @@ class HomeController extends Controller {
      */
     public function getStaffRewardSettings() {
         return view('admin.staff_reward_settings', [
-            'currency' => Currency::find(Config::get('lorekeeper.extensions.staff_rewards.currency_id')),
+            'currency' => Currency::find(config('lorekeeper.extensions.staff_rewards.currency_id')),
             'settings' => DB::table('staff_actions')->orderBy('key')->paginate(20),
         ]);
     }

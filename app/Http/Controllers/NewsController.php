@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\News;
-use Auth;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\View;
 
 class NewsController extends Controller {
     /*
@@ -14,6 +15,13 @@ class NewsController extends Controller {
     | Displays news posts and updates the user's news read status.
     |
     */
+
+    /**
+     * Create a new controller instance.
+     */
+    public function __construct() {
+        View::share('recentnews', News::visible()->orderBy('updated_at', 'DESC')->take(10)->get());
+    }
 
     /**
      * Shows the news index.
