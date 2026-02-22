@@ -177,7 +177,7 @@ class User extends Authenticatable implements MustVerifyEmail {
      * Get the user's logged IPs.
      */
     public function ips() {
-        return $this->hasMany('App\Models\User\UserIp', 'user_id');
+        return $this->hasMany(UserIp::class, 'user_id');
     }
 
     /**
