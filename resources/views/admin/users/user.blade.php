@@ -134,33 +134,65 @@
     </div>
 
     @php
-        $ips = $user->ips()->paginate(10);
+        $ips = $user->ips()->paginate(15);
     @endphp
     <div class="card p-3 mb-2">
         <h3>Logged IPs</h3>
         {!! $ips->render() !!}
-        <table class="table">
-            <thead>
-                <tr>
-                    <th scope="col">IP</th>
-                    <th scope="col">Stored At</th>
-                    <th scope="col">Last Used At</th>
-                    <th scope="col">Shared With</th>
-                </tr>
-            </thead>
-            <tbody>
+        <div class="logs-table">
+            <div class="logs-table-header">
+                <div class="row">
+                    <div class="col-12 col-md-3">
+                        <div class="logs-table-cell">
+                            IP
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="logs-table-cell">
+                            Stored On
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="logs-table-cell">
+                            Last Used
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <div class="logs-table-cell">
+                            Shared With
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="logs-table-body">
                 @foreach ($ips as $ip)
-                    <tr>
-                        <td>{{ $ip->ip }}</td>
-                        <td>{!! $ip->created_at ? format_date($ip->created_at) : 'Unknown' !!}</td>
-                        <td>{!! $ip->updated_at ? format_date($ip->updated_at) : 'Unknown' !!}</td>
-                        <td>
-                            {!! $ip->usersString ?? 'None' !!}
-                        </td>
-                    </tr>
+                    <div class="logs-table-row">
+                        <div class="row flex-wrap">
+                            <div class="col-12 col-md-3">
+                                <div class="logs-table-cell">
+                                    {{ $ip->ip }}
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="logs-table-cell">
+                                    {!! $ip->created_at ? pretty_date($ip->created_at) : 'Unknown' !!}
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="logs-table-cell">
+                                    {!! $ip->updated_at ? pretty_date($ip->updated_at) : 'Unknown' !!}
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-3">
+                                <div class="logs-table-cell">
+                                    {!! count($ip->users->where('id', '!=', $user->id)->pluck('displayName')->toArray()) ? implode(', ',  $ip->users->where('id', '!=', $user->id)->pluck('displayName')->toArray()) : '<span class="text-muted">---</span>' !!}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 @endforeach
-            </tbody>
-        </table>
+            </div>
+        </div>
         {!! $ips->render() !!}
     </div>
 @endsection
