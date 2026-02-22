@@ -15,7 +15,7 @@ class ParsePostRequestFields {
      */
     public function handle(Request $request, Closure $next) {
         if ($request->isMethod('post')) {
-            $excludedFields = ['_token', 'password', 'email', 'description', 'text'];
+            $excludedFields = ['_token', 'password', 'email', 'description', 'text', 'criteria'];
             $strippedFields = ['name', 'title'];
 
             $parsedFields = [];
@@ -31,6 +31,11 @@ class ParsePostRequestFields {
                         $parsedFields[$key] = parse(strip_tags($value));
                     } else {
                         $parsedFields[$key] = parse($value);
+                    }
+
+                    // Decode HTML special chars
+                    if ($parsedFields[$key] != null) {
+                        $parsedFields[$key] = htmlspecialchars_decode($parsedFields[$key]);
                     }
                 }
             }
@@ -57,6 +62,11 @@ class ParsePostRequestFields {
                     $array[$key] = parse(strip_tags($value));
                 } else {
                     $array[$key] = parse($value);
+                }
+
+                // Decode HTML special chars
+                if ($array[$key] != null) {
+                    $array[$key] = htmlspecialchars_decode($array[$key]);
                 }
             }
         }

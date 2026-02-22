@@ -3,6 +3,7 @@
 namespace App\Models\Gallery;
 
 use App\Facades\Settings;
+use App\Models\Comment\Comment;
 use App\Models\Currency\Currency;
 use App\Models\Model;
 use App\Models\Prompt\Prompt;
@@ -33,6 +34,24 @@ class GallerySubmission extends Model {
      * @var string
      */
     protected $table = 'gallery_submissions';
+
+    /**
+     * The relationships that should always be loaded.
+     *
+     * @var array
+     */
+    protected $with = [
+        'user', 'collaborators', 'prompt:id,name,prefix', 'favorites', 'comments:id,commentable_type,commentable_id,type',
+    ];
+
+    /**
+     * 	The relationship counts that should be eager loaded on every query.
+     *
+     * @var array
+     */
+    protected $withCount = [
+        'favorites',
+    ];
 
     /**
      * Whether the model contains timestamps to be saved and updated.
@@ -74,7 +93,7 @@ class GallerySubmission extends Model {
      * Get the user who made the submission.
      */
     public function user() {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class);
     }
 
     /**
@@ -88,42 +107,49 @@ class GallerySubmission extends Model {
      * Get the collaborating users on the submission.
      */
     public function collaborators() {
-        return $this->hasMany(GalleryCollaborator::class, 'gallery_submission_id')->where('type', 'Collab');
+        return $this->hasMany(GalleryCollaborator::class)->where('type', 'Collab');
     }
 
     /**
      * Get the user(s) who are related to the submission in some way.
      */
     public function participants() {
-        return $this->hasMany(GalleryCollaborator::class, 'gallery_submission_id')->where('type', '!=', 'Collab');
+        return $this->hasMany(GalleryCollaborator::class)->where('type', '!=', 'Collab');
     }
 
     /**
      * Get the characters associated with the submission.
      */
     public function characters() {
-        return $this->hasMany(GalleryCharacter::class, 'gallery_submission_id');
+        return $this->hasMany(GalleryCharacter::class);
     }
 
     /**
      * Get any favorites on the submission.
      */
     public function favorites() {
-        return $this->hasMany(GalleryFavorite::class, 'gallery_submission_id');
+        return $this->hasMany(GalleryFavorite::class);
     }
 
     /**
      * Get the gallery this submission is in.
      */
     public function gallery() {
-        return $this->belongsTo(Gallery::class, 'gallery_id');
+        return $this->belongsTo(Gallery::class);
     }
 
     /**
      * Get the prompt this submission is for if relevant.
      */
     public function prompt() {
-        return $this->belongsTo(Prompt::class, 'prompt_id');
+        return $this->belongsTo(Prompt::class);
+    }
+
+    /**
+     * Get comments made on this submission.
+     */
+    public function comments() {
+        return $this->morphMany(Comment::class, 'commentable');
     }
 
     /**********************************************************************************************
@@ -151,7 +177,9 @@ class GallerySubmission extends Model {
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeCollaboratorApproved($query) {
-        return $query->whereNotIn('id', GalleryCollaborator::where('has_approved', 0)->pluck('gallery_submission_id')->toArray());
+        return $query->whereDoesntHave('collaborators', function ($query) {
+            $query->where('has_approved', 0);
+        })->orWhereDoesntHave('collaborators');
     }
 
     /**
@@ -200,7 +228,9 @@ class GallerySubmission extends Model {
      * @return \Illuminate\Database\Eloquent\Builder
      */
     public function scopeUserSubmissions($query, $user) {
-        return $query->where('user_id', $user->id)->orWhereIn('id', GalleryCollaborator::where('user_id', $user->id)->where('type', 'Collab')->pluck('gallery_submission_id')->toArray());
+        return $query->where('user_id', $user->id)->orWhereHas('collaborators', function ($query) use ($user) {
+            $query->where('user_id', $user->id)->where('type', 'Collab');
+        });
     }
 
     /**
@@ -328,15 +358,6 @@ class GallerySubmission extends Model {
     }
 
     /**
-     * Gets the voting data of the gallery submission.
-     *
-     * @return string
-     */
-    public function getVoteDataAttribute() {
-        return collect(json_decode($this->attributes['vote_data'], true));
-    }
-
-    /**
      * Get the title of the submission, with prefix.
      *
      * @return string
@@ -364,13 +385,11 @@ class GallerySubmission extends Model {
     }
 
     /**
-     * Checks if all of a submission's collaborators have approved or no.
+     * Get the prefix for a submission.
      *
      * @return string
      */
     public function getPrefixAttribute() {
-        $currencyName = Currency::find(Settings::get('group_currency'))->abbreviation ? Currency::find(Settings::get('group_currency'))->abbreviation : Currency::find(Settings::get('group_currency'))->name;
-
         $prefixList = [];
         if ($this->promptSubmissions->count()) {
             foreach ($this->prompts as $prompt) {
@@ -394,6 +413,8 @@ class GallerySubmission extends Model {
                     $prefixList[] = 'Comm';
                     break;
                 case 'Comm (Currency)':
+                    $currencyName = Currency::find(Settings::get('group_currency'))->abbreviation ? Currency::find(Settings::get('group_currency'))->abbreviation : Currency::find(Settings::get('group_currency'))->name;
+
                     $prefixList[] = 'Comm ('.$currencyName.')';
                     break;
             }
@@ -432,7 +453,7 @@ class GallerySubmission extends Model {
      */
     public function getCreditsAttribute() {
         if ($this->collaborators->count()) {
-            foreach ($this->collaborators as $count=> $collaborator) {
+            foreach ($this->collaborators as $collaborator) {
                 $collaboratorList[] = $collaborator->user->displayName;
             }
 
@@ -449,7 +470,7 @@ class GallerySubmission extends Model {
      */
     public function getCreditsPlainAttribute() {
         if ($this->collaborators->count()) {
-            foreach ($this->collaborators as $count=> $collaborator) {
+            foreach ($this->collaborators as $collaborator) {
                 $collaboratorList[] = $collaborator->user->name;
             }
 
@@ -464,7 +485,7 @@ class GallerySubmission extends Model {
      *
      * @return string
      */
-    public function getCollaboratorApprovedAttribute() {
+    public function getCollaboratorApprovalAttribute() {
         if ($this->collaborators->where('has_approved', 0)->count()) {
             return false;
         }
@@ -480,7 +501,7 @@ class GallerySubmission extends Model {
     public function getPromptSubmissionsAttribute() {
         // Only returns submissions which are viewable to everyone,
         // but given that this is for the sake of public display, that's fine
-        return Submission::viewable()->whereNotNull('prompt_id')->where('url', $this->url)->get();
+        return Submission::viewable()->whereNotNull('prompt_id')->where('url', 'like', '%'.request()->getHost().'/gallery/view/'.$this->id)->get();
     }
 
     /**
@@ -505,5 +526,51 @@ class GallerySubmission extends Model {
         } else {
             return strip_tags(substr($this->parsed_text, 0, 500)).(strlen($this->parsed_text) > 500 ? '...' : '');
         }
+    }
+
+    /**********************************************************************************************
+
+        OTHER FUNCTIONS
+
+     **********************************************************************************************/
+
+    /**
+     * Gets the voting data of the gallery submission and performs preliminary processing.
+     *
+     * @param bool $withUsers
+     *
+     * @return array
+     */
+    public function getVoteData($withUsers = 0) {
+        $voteData['raw'] = json_decode($this->attributes['vote_data'], true);
+
+        // Only query users if necessary, and condense to one query per submission
+        if ($withUsers) {
+            $users = User::whereIn('id', array_keys($voteData['raw']))->select('id', 'name', 'rank_id')->get();
+        } else {
+            $users = null;
+        }
+
+        $voteData['raw'] = collect($voteData['raw'])->mapWithKeys(function ($vote, $id) use ($users) {
+            return [$id => [
+                'vote' => $vote,
+                'user' => $users ? $users->where('id', $id)->first() : $id,
+            ]];
+        });
+
+        // Tally approve/reject sums for ease
+        $voteData['approve'] = $voteData['reject'] = 0;
+        foreach ($voteData['raw'] as $vote) {
+            switch ($vote['vote']) {
+                case 1:
+                    $voteData['reject'] += 1;
+                    break;
+                case 2:
+                    $voteData['approve'] += 1;
+                    break;
+            }
+        }
+
+        return $voteData;
     }
 }

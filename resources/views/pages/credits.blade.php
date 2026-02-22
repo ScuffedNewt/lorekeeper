@@ -100,7 +100,7 @@
             ({{ config('lorekeeper.extensions.character_TH_profile_link') ? 'Enabled' : 'Disabled' }})
         </p>
         <p class="mb-0 col-md-4">
-            <a href="http://wiki.lorekeeper.me/index.php?title=Extensions:Collapsible_Admin_Sidebar"><strong>Collapsible Admin Sidebar</strong></a> by <a href="https://github.com/ne-wt/">Newt</a>
+            <a href="http://wiki.lorekeeper.me/index.php?title=Extensions:Collapsible_Admin_Sidebar"><strong>Collapsible Admin Sidebar</strong></a> by <a href="https://github.com/ScuffedNewt">ScuffedNewt</a>
             ({{ config('lorekeeper.extensions.collapsible_admin_sidebar') ? 'Enabled' : 'Disabled' }})
         </p>
         <p class="mb-0 col-md-4">
@@ -108,7 +108,7 @@
             ({{ config('lorekeeper.extensions.design_update_voting') ? 'Enabled' : 'Disabled' }})
         </p>
         <p class="mb-0 col-md-4">
-            <a href="http://wiki.lorekeeper.me/index.php?title=Extensions:Gravatar"><strong>Gravatar</strong></a> by <a href="https://github.com/ne-wt/">Newt</a>
+            <a href="http://wiki.lorekeeper.me/index.php?title=Extensions:Gravatar"><strong>Gravatar</strong></a> by <a href="https://github.com/ScuffedNewt">ScuffedNewt</a>
             ({{ config('lorekeeper.extensions.use_gravatar') ? 'Enabled' : 'Disabled' }})
         </p>
         <p class="mb-0 col-md-4">
@@ -146,6 +146,10 @@
         <p class="mb-0 col-md-4">
             <a href="http://wiki.lorekeeper.me/index.php?title=Extensions:Staff_Rewards"><strong>Staff Rewards</strong></a> by <a href="https://github.com/itinerare">itinerare</a>
             ({{ config('lorekeeper.extensions.staff_rewards.enabled') ? 'Enabled' : 'Disabled' }})
+        </p>
+        <p class="mb-0 col-md-4">
+            <a href="http://wiki.lorekeeper.me/index.php?title=Extensions:VTI_Trait_Modals"><strong>Visual Trait Indexes Trait Modals</strong></a> by <a href="https://github.com/AW0005">Moif</a>
+            ({{ config('lorekeeper.extensions.species_trait_index.trait_modals') ? 'Enabled' : 'Disabled' }})
         </p>
         <p class="mb-0 col-md-4">
             <a href="http://wiki.lorekeeper.me/index.php?title=Extensions:Watermarking"><strong>Watermarking</strong></a> by <a href="https://github.com/itinerare">itinerare</a>

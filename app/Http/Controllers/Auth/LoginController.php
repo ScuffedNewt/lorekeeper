@@ -64,7 +64,7 @@ class LoginController extends Controller {
         $socialite->redirectUrl(str_replace('auth', 'login', url(config('services.'.$provider.'.redirect'))));
         $result = $socialite->user();
 
-        $user = UserAlias::where('user_snowflake', $result->id)->first();
+        $user = UserAlias::where('site', $provider)->where('user_snowflake', $result->id)->first();
         if (!$user) {
             return redirect('/register/'.$provider)->with(['userData' => $result]);
         }

@@ -46,14 +46,16 @@ class SetupAdminUser extends Command {
         if (!Rank::count()) {
             // These need to be created even if the seeder isn't run for the site to work correctly.
             $adminRank = Rank::create([
-                'name'        => 'Admin',
-                'description' => 'The site admin. Has the ability to view/edit any data on the site.',
-                'sort'        => 1,
+                'name'               => 'Admin',
+                'description'        => 'The site admin. Has the ability to view/edit any data on the site.',
+                'parsed_description' => 'The site admin. Has the ability to view/edit any data on the site.',
+                'sort'               => 1,
             ]);
             Rank::create([
-                'name'        => 'Member',
-                'description' => 'A regular member of the site.',
-                'sort'        => 0,
+                'name'               => 'Member',
+                'description'        => 'A regular member of the site.',
+                'parsed_description' => 'A regular member of the site.',
+                'sort'               => 0,
             ]);
 
             $this->line('User ranks not found. Default user ranks (admin and basic member) created.');

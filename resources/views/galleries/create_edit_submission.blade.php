@@ -23,7 +23,7 @@
         @endif
     </h1>
 
-    @if (!$submission->id && ($closed || !$gallery->canSubmit(Auth::user())))
+    @if (!$submission->id && ($closed || !$gallery->canSubmit(Settings::get('gallery_submissions_open'), Auth::user())))
         <div class="alert alert-danger">
             @if ($closed)
                 Gallery submissions are currently closed.
@@ -52,7 +52,10 @@
                 </div>
             </div>
             <div class="card p-2">
-                {!! Form::file('image', ['class' => 'form-control-file', 'id' => 'mainImage']) !!}
+                <div class="custom-file">
+                    {!! Form::label('image', 'Choose file...', ['class' => 'custom-file-label']) !!}
+                    {!! Form::file('image', ['class' => 'custom-file-input', 'id' => 'mainImage']) !!}
+                </div>
                 <small>Images may be PNG, GIF, JPG, or WebP and up to 3MB in size.</small>
             </div>
         </div>
