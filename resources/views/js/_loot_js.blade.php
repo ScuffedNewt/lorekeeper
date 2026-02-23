@@ -191,9 +191,9 @@
             return option_render;
         }
 
-        //The below replaces any "clone" if statements
+        // The below replaces any "clone" if statements
         function cloneRewardableId(val, recipient = null) {
-            if (val.toLowerCase() === 'exp' || val.toLowerCase() === 'points') {
+            if (val.toLowerCase() === 'exp') {
                 // Return an empty jQuery object with formfield compatibility, ex. prefix.rewardable_id[]
                 return $('<input>', {
                     type: 'hidden',

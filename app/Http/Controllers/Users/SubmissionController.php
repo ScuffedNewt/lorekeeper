@@ -163,6 +163,14 @@ class SubmissionController extends Controller {
             ];
         });
 
+        $prompt = $submission->prompt;
+        $count['all'] = Submission::submitted($prompt->id, $submission->user_id)->count();
+        $count['Hour'] = Submission::submitted($prompt->id, $submission->user_id)->where('created_at', '>=', now()->startOfHour())->count();
+        $count['Day'] = Submission::submitted($prompt->id, $submission->user_id)->where('created_at', '>=', now()->startOfDay())->count();
+        $count['Week'] = Submission::submitted($prompt->id, $submission->user_id)->where('created_at', '>=', now()->startOfWeek())->count();
+        $count['Month'] = Submission::submitted($prompt->id, $submission->user_id)->where('created_at', '>=', now()->startOfMonth())->count();
+        $count['Year'] = Submission::submitted($prompt->id, $submission->user_id)->where('created_at', '>=', now()->startOfYear())->count();
+
         return view('home.edit_submission', [
             'closed'              => $closed,
             'isClaim'             => false,
@@ -179,7 +187,7 @@ class SubmissionController extends Controller {
             'elements'               => Element::orderBy('name')->pluck('name', 'id'),
             'expanded_rewards'       => config('lorekeeper.extensions.character_reward_expansion.expanded'),
             'selectedInventory'      => isset($submission->data['user']) ? parseAssetData($submission->data['user']) : null,
-            'count'                  => Submission::where('prompt_id', $submission->prompt_id)->where('status', 'Approved')->where('user_id', $submission->user_id)->count(),
+            'count'                  => $count,
             'userGallerySubmissions' => $gallerySubmissions,
         ]));
     }

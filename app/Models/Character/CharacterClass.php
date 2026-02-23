@@ -152,4 +152,13 @@ class CharacterClass extends Model {
     public function getAdminPowerAttribute() {
         return 'edit_claymores';
     }
+
+    /**
+     * Gets the currency's asset type for asset management.
+     *
+     * @return string
+     */
+    public function getAssetTypeAttribute() {
+        return 'class';
+    }
 }

@@ -72,17 +72,20 @@ function calculateGroupCurrency($data) {
  */
 function getAssetKeys($isCharacter = false) {
     if (!$isCharacter) {
-        return ['items', 'currencies', 'pets', 'weapons', 'gears', 'raffle_tickets', 'loot_tables', 'user_items', 'characters'] +
-            (config('lorekeeper.claymores_and_companions.visibility_settings.user_levels') ? ['exp'] : []) +
-            (config('lorekeeper.claymores_and_companions.visibility_settings.weapons') ? ['weapons'] : []) +
-            (config('lorekeeper.claymores_and_companions.visibility_settings.gear') ? ['gears'] : []) +
-            (config('lorekeeper.claymores_and_companions.visibility_settings.character_stats') ? ['points'] : []);
+        return ['items', 'currencies', 'pets', 'raffle_tickets', 'loot_tables', 'user_items', 'characters',
+            ...(config('lorekeeper.claymores_and_companions.visibility_settings.user_levels') ? ['exp'] : []),
+            ...(config('lorekeeper.claymores_and_companions.visibility_settings.weapons') ? ['weapons'] : []),
+            ...(config('lorekeeper.claymores_and_companions.visibility_settings.gear') ? ['gears'] : []),
+            ...(config('lorekeeper.claymores_and_companions.visibility_settings.character_stats') ? ['points'] : []),
+        ];
     } else {
-        return ['currencies', 'items', 'character_items', 'loot_tables', 'elements', 'statuses', 'character_skills'] +
-            (config('lorekeeper.claymores_and_companions.visibility_settings.character_classes') ? ['classes'] : []) +
-            (config('lorekeeper.claymores_and_companions.visibility_settings.character_stats') ? ['points'] : []) +
-            (config('lorekeeper.claymores_and_companions.visibility_settings.character_levels') ? ['exp'] : []) +
-            (config('lorekeeper.claymores_and_companions.visibility_settings.character_skills') ? ['character_skills'] : []);
+        return [
+            'currencies', 'items', 'character_items', 'loot_tables', 'elements', 'statuses',
+            ...(config('lorekeeper.claymores_and_companions.visibility_settings.character_classes') ? ['classes'] : []),
+            ...(config('lorekeeper.claymores_and_companions.visibility_settings.character_stats') ? ['points'] : []),
+            ...(config('lorekeeper.claymores_and_companions.visibility_settings.character_levels') ? ['exp'] : []),
+            ...(config('lorekeeper.claymores_and_companions.visibility_settings.character_skills') ? ['character_skills'] : []),
+        ];
     }
 }
 
@@ -209,13 +212,24 @@ function getAssetModelString($type, $namespaced = true) {
             }
             break;
 
+        case 'point': case 'points':
+            if ($namespaced) {
+                return '\App\Models\Stat\Stat';
+            } else {
+                return 'Stat';
+            }
+            break;
+
+        case 'class': case 'classes':
+            if ($namespaced) {
+                return '\App\Models\Character\CharacterClass';
+            } else {
+                return 'CharacterClass';
+            }
+
             // these are special cases, as they do not specifically have a unique model
         case 'exp':
             return 'Exp';
-            break;
-
-        case 'points':
-            return 'Points';
             break;
     }
 
@@ -244,11 +258,12 @@ function createAssetsArray($isCharacter = false) {
  *
  * @param array $first
  * @param array $second
+ * @param mixed $isCharacter
  *
  * @return array
  */
-function mergeAssetsArrays($first, $second) {
-    $keys = getAssetKeys();
+function mergeAssetsArrays($first, $second, $isCharacter = false) {
+    $keys = getAssetKeys($isCharacter);
     foreach ($keys as $key) {
         foreach ($second[$key] as $item) {
             addAsset($first, $item['asset'], $item['quantity']);
@@ -270,12 +285,25 @@ function addAsset(&$array, $asset, $quantity = 1) {
     if (!$asset) {
         return;
     }
-    if ($asset == 'Exp' || $asset == 'Points') {
+    if ($asset == 'Exp') {
         $asset = strtolower($asset);
         if (isset($array[$asset]['quantity'])) {
             $array[$asset]['quantity'] += $quantity;
         } else {
             $array[$asset] = ['quantity' => $quantity];
+        }
+    } elseif ($asset == 'general_stat_point') {
+        if (isset($array['points']['general_stat_point'])) {
+            $array['points']['general_stat_point']['quantity'] += $quantity;
+        } else {
+            $array['points']['general_stat_point'] = [
+                'asset'    => (object) [
+                    'id'          => 'general_stat_point',
+                    'displayName' => 'General Stat Point',
+                    'assetType'   => 'points',
+                ],
+                'quantity' => $quantity,
+            ];
         }
     } elseif (isset($array[$asset->assetType][$asset->id])) {
         $array[$asset->assetType][$asset->id]['quantity'] += $quantity;
@@ -321,7 +349,7 @@ function getDataReadyAssets($array, $isCharacter = false) {
         if ($type && !isset($result[$key])) {
             $result[$key] = [];
         }
-        if ($key == 'exp' || $key == 'points') {
+        if ($key == 'exp') {
             if (isset($type['quantity']) && $type['quantity'] > 0) {
                 $result[$key] = $type;
             }
@@ -340,13 +368,14 @@ function getDataReadyAssets($array, $isCharacter = false) {
  * basically reversing the above function.
  *
  * @param array $array
+ * @param mixed $isCharacter
  *
  * @return array
  */
-function parseAssetData($array) {
-    $assets = createAssetsArray();
+function parseAssetData($array, $isCharacter = false) {
+    $assets = createAssetsArray($isCharacter);
     foreach ($array as $key => $contents) {
-        if ($key == 'exp' || $key == 'points') {
+        if ($key == 'exp') {
             if (isset($contents['quantity']) && $contents['quantity'] > 0) {
                 $assets[$key] = [
                     '0'    => [
@@ -361,7 +390,8 @@ function parseAssetData($array) {
         if ($model) {
             foreach ($contents as $id => $quantity) {
                 $assets[$key][$id] = [
-                    'asset'    => $model::find($id),
+                    // check if $id is an int
+                    'asset'    => is_int($id) ? $model::find($id) : (object) ['displayName' => ucwords(str_replace('_', ' ', $id))],
                     'quantity' => $quantity,
                 ];
             }
@@ -607,6 +637,17 @@ function fillUserAssets($assets, $sender, $recipient, $logType, $data) {
                 }
 
                 return false;
+            }
+        } elseif ($key == 'class' && count($contents)) {
+            $service = new App\Services\Claymore\CharacterClassService;
+            foreach ($contents as $asset) {
+                if (!$service->creditClass($sender, $recipient, $logType, $data, $asset['asset'], $asset['quantity'])) {
+                    foreach ($service->errors()->getMessages()['error'] as $error) {
+                        flash($error)->error();
+                    }
+
+                    return false;
+                }
             }
         }
     }
@@ -855,7 +896,7 @@ function getRewardTypes($showData, $recipient) {
         ($showData['showRaffles'] ? ['Raffle' => 'Raffle Ticket'] : []) +
         (config('lorekeeper.claymores_and_companions.visibility_settings.character_stats') ? ['Points'   => 'Points'] : []) +
         (config('lorekeeper.claymores_and_companions.visibility_settings.weapons') ? ['Weapon' => 'Weapon'] : []) +
-        (config('lorekeeper.claymores_and_companions.visibility_settings.gear') ? ['Gear' => 'Gear'] : []);
+        (config('lorekeeper.claymores_and_companions.visibility_settings.gear') ? ['Gear' => 'Gear'] : []) +
         (config('lorekeeper.claymores_and_companions.visibility_settings.user_levels') ? ['Exp' => 'Experience'] : []);
     } elseif ($recipient == 'Character') {
         return [
@@ -896,7 +937,7 @@ function getRewardLootData($showData, $recipient = 'User', $useCustomSelectize =
 
     // Iterate through each valid key in $rewardTypes and get the data associated with it
     foreach ($rewardTypes as $rewardKey => $rewardType) {
-        if ($rewardKey == 'Exp' || $rewardKey == 'Points') {
+        if ($rewardKey == 'Exp') {
             continue;
         }
         $query = null;
@@ -957,6 +998,21 @@ function getRewardLootData($showData, $recipient = 'User', $useCustomSelectize =
                 break;
             case 'Skill':
                 $query = App\Models\Skill\Skill::orderBy('name');
+                break;
+            case 'Class':
+                $query = App\Models\Character\CharacterClass::orderBy('name');
+                break;
+            case 'Points':
+                if ($recipient == 'User') {
+                    $query = collect([
+                        (object) ['id' => 0, 'name' => 'General Stat Point'],
+                    ]);
+                } else {
+                    $query = App\Models\Stat\Stat::orderBy('name')->get()->prepend((object) [
+                        'id'   => 0,
+                        'name' => 'General Stat Point',
+                    ]);
+                }
                 break;
         }
 

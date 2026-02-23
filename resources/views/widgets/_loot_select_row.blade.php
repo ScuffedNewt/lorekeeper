@@ -100,7 +100,7 @@
         @endforeach
     @else
         @foreach ($rewardTypes as $rewardKey => $rewardType)
-            @if ($rewardKey == 'Exp' || $rewardKey == 'Points')
+            @if ($rewardKey == 'Exp')
                 @continue
             @endif
             {!! Form::select($prefix . 'rewardable_id[]', $rewardLootData[$rewardKey], null, ['class' => 'form-control object-select ' . strtolower($rewardKey) . '-select', 'placeholder' => 'Select ' . $rewardType]) !!}

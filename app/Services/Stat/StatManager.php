@@ -251,6 +251,7 @@ class StatManager extends Service {
         DB::beginTransaction();
 
         try {
+            dd($type, $data);
             // for user
             if ($recipient->logType == 'User') {
                 if (!$recipient->level) {

@@ -58,12 +58,10 @@
                             </div>
                             <div class="col-lg-8 col-7 pl-1">
                                 {!! $image->character->class_id ? $image->character->class->displayName : 'None' !!}
-                                @if (Auth::check())
-                                    @if (Auth::user()->isStaff || (Auth::user()->id == $image->character->user_id && $image->character->class_id == null))
-                                        <a href="#" class="btn btn-outline-info btn-sm edit-class ml-1" data-id="{{ $image->character->id }}">
-                                            <i class="fas fa-cog"></i>
-                                        </a>
-                                    @endif
+                                @if (Auth::check() && Auth::user()->hasPower('manage_characters'))
+                                    <a href="#" class="btn btn-outline-info btn-sm edit-class ml-1" data-id="{{ $image->character->id }}">
+                                        <i class="fas fa-cog"></i>
+                                    </a>
                                 @endif
                             </div>
                         </div>

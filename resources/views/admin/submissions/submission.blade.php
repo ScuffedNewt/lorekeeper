@@ -102,7 +102,6 @@
         @include('widgets._loot_select', ['loots' => $submission->rewards, 'showLootTables' => true, 'showRaffles' => true])
 
         <h2>Characters</h2>
-        <p>Only focus characters will receive skill rewards. Exp and stat point rewards are on a per-character basis.</p>
         <div id="characters" class="mb-3">
             @if (count($submission->characters()->whereRelation('character', 'deleted_at', null)->get()) != count($submission->characters()->get()))
                 <div class="alert alert-warning">
@@ -196,6 +195,7 @@
                             </div>
                             <div class="form-group col-6">
                                 {!! Form::label('character-is-focus[]', 'Focus Character?', ['class' => 'form-check-label ']) !!}
+                                {!! add_help('Setting the focus character helps staff identify the main character(s) in a submission.') !!}
                                 {!! Form::select('character-is-focus[]', [0 => 'No', 1 => 'Yes'], 0, ['class' => 'form-control character-is-focus']) !!}
                             </div>
                             <div class="character-rewards hide">
@@ -229,7 +229,11 @@
                         <td>
                             {!! Form::select(
                                 'character_rewardable_type[]',
-                                ['Item' => 'Item', 'Currency' => 'Currency', 'LootTable' => 'Loot Table', 'Exp' => 'Exp', 'Points' => 'Stat Points', 'Element' => 'Element', 'StatusEffect' => 'Status Effect', 'Skill' => 'Skill'],
+                                ['Item' => 'Item', 'Currency' => 'Currency', 'LootTable' => 'Loot Table', 'Element' => 'Element', 'StatusEffect' => 'Status Effect'] +
+                                    (config('lorekeeper.claymores_and_companions.visibility_settings.character_levels') ? ['Exp' => 'Exp'] : []) +
+                                    (config('lorekeeper.claymores_and_companions.visibility_settings.character_stats') ? ['Points' => 'Stat Points'] : []) +
+                                    (config('lorekeeper.claymores_and_companions.visibility_settings.character_skills') ? ['Skill' => 'Skill'] : []) +
+                                    (config('lorekeeper.claymores_and_companions.visibility_settings.character_classes') ? ['Class' => 'Class'] : []),
                                 null,
                                 [
                                     'class' => 'form-control character-rewardable-type',
@@ -241,10 +245,12 @@
                             <div class="character-currencies hide">{!! Form::select('character_rewardable_id[]', $characterCurrencies, 0, ['class' => 'form-control character-currency-id', 'placeholder' => 'Select Currency']) !!}</div>
                             <div class="character-items hide">{!! Form::select('character_rewardable_id[]', $items, 0, ['class' => 'form-control character-item-id', 'placeholder' => 'Select Item']) !!}</div>
                             <div class="character-tables hide">{!! Form::select('character_rewardable_id[]', $tables, 0, ['class' => 'form-control character-table-id', 'placeholder' => 'Select Loot Table']) !!}</div>
-                            <div class="character-claymores hide">{!! Form::number('character_claymores_id[]', 1, ['class' => 'form-control character-claymores-id']) !!}</div>
+                            <div class="character-exp hide">{!! Form::select('character_rewardable_id[]', [], null, ['class' => 'form-control character-exp-id']) !!}</div>
                             <div class="character-elements hide">{!! Form::select('character_rewardable_id[]', $elements, 0, ['class' => 'form-control character-element-id', 'placeholder' => 'Select Element']) !!}</div>
                             <div class="character-statuses hide">{!! Form::select('character_rewardable_id[]', $statuses, 0, ['class' => 'form-control character-status-id', 'placeholder' => 'Select Status Effect']) !!}</div>
                             <div class="character-skills hide">{!! Form::select('character_rewardable_id[]', $skills, 0, ['class' => 'form-control character-skill-id', 'placeholder' => 'Select Skill']) !!}</div>
+                            <div class="character-classes hide">{!! Form::select('character_rewardable_id[]', $classes, 0, ['class' => 'form-control character-class-id', 'placeholder' => 'Select Class']) !!}</div>
+                            <div class="character-points hide">{!! Form::select('character_rewardable_id[]', $points, 0, ['class' => 'form-control character-point-id', 'placeholder' => 'Select Stat Point Type']) !!}</div>
                         </td>
                     @else
                         <td class="lootDivs">

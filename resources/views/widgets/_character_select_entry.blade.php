@@ -31,8 +31,11 @@
                     {!! Form::select('slug[]', $characters, $character->character ? $character->character->slug : $character->slug, ['class' => 'form-control character-code', 'placeholder' => 'Select Character']) !!}
                 </div>
                 @if (isset($submission))
-                    <div class="form-group col-6">
+                    <div class="form-group col-8">
                         {!! Form::label('character_is_focus[' . ($character->character ? $character->character->id : $character->id) . ']', 'Focus Character?', ['class' => 'mr-2']) !!}
+                        <span class="text-muted">
+                            Setting the focus character helps staff identify the main character(s) in a submission.
+                        </span>
                         {!! Form::select('character_is_focus[' . ($character->character ? $character->character->id : $character->id) . ']', [0 => 'No', 1 => 'Yes'], $character->is_focus, ['class' => 'form-control character-is-focus']) !!}
                     </div>
                 @endif
@@ -57,7 +60,11 @@
                                         <td>
                                             {!! Form::select(
                                                 'character_rewardable_type[' . $character->character_id . '][]',
-                                                ['Item' => 'Item', 'Currency' => 'Currency', 'LootTable' => 'Loot Table', 'Exp' => 'Exp', 'Points' => 'Stat Points', 'Element' => 'Element', 'StatusEffect' => 'Status Effect', 'Skill' => 'Skill'],
+                                                ['Item' => 'Item', 'Currency' => 'Currency', 'LootTable' => 'Loot Table', 'Element' => 'Element', 'StatusEffect' => 'Status Effect'] +
+                                                    (config('lorekeeper.claymores_and_companions.visibility_settings.character_levels') ? ['Exp' => 'Exp'] : []) +
+                                                    (config('lorekeeper.claymores_and_companions.visibility_settings.character_stats') ? ['Points' => 'Stat Points'] : []) +
+                                                    (config('lorekeeper.claymores_and_companions.visibility_settings.character_skills') ? ['Skill' => 'Skill'] : []) +
+                                                    (config('lorekeeper.claymores_and_companions.visibility_settings.character_classes') ? ['Class' => 'Class'] : []),
                                                 $reward->rewardable_type,
                                                 [
                                                     'class' => 'form-control character-rewardable-type',
@@ -75,7 +82,7 @@
                                                 'class' => 'form-control character-table-id',
                                                 'placeholder' => 'Select Loot Table',
                                             ]) !!}</div>
-                                            <div class="character-claymores hide">{!! Form::number('character_rewardable_id[' . $character->character_id . '][]', $reward->rewardable_type == 'Exp' || $reward->rewardable_type == 'Points' ? 1 : null, ['class' => 'form-control character-claymores-id']) !!}</div>
+                                            <div class="character-exp {{ $reward->rewardable_type == 'Exp' ? 'show' : 'hide' }}">{!! Form::number('character_rewardable_id[' . $character->character_id . '][]', $reward->rewardable_type == 'Exp' ? $reward->rewardable_id : null, ['class' => 'form-control character-exp-id']) !!}</div>
                                             <div class="character-elements {{ $reward->rewardable_type == 'Element' ? 'show' : 'hide' }}">{!! Form::select('character_rewardable_id[' . $character->character_id . '][]', $elements, $reward->rewardable_type == 'Element' ? $reward->rewardable_id : null, [
                                                 'class' => 'form-control character-element-id',
                                                 'placeholder' => 'Select Element',
@@ -88,6 +95,14 @@
                                             <div class="character-skills {{ $reward->rewardable_type == 'Skill' ? 'show' : 'hide' }}">{!! Form::select('character_rewardable_id[' . $character->character_id . '][]', $skills, $reward->rewardable_type == 'Skill' ? $reward->rewardable_id : null, [
                                                 'class' => 'form-control character-skill-id',
                                                 'placeholder' => 'Select Skill',
+                                            ]) !!}</div>
+                                            <div class="character-classes {{ $reward->rewardable_type == 'Class' ? 'show' : 'hide' }}">{!! Form::select('character_rewardable_id[' . $character->character_id . '][]', $classes, $reward->rewardable_type == 'Class' ? $reward->rewardable_id : null, [
+                                                'class' => 'form-control character-class-id',
+                                                'placeholder' => 'Select Class',
+                                            ]) !!}</div>
+                                            <div class="character-points {{ $reward->rewardable_type == 'Point' ? 'show' : 'hide' }}">{!! Form::select('character_rewardable_id[' . $character->character_id . '][]', $points, $reward->rewardable_type == 'Points' ? $reward->rewardable_id : null, [
+                                                'class' => 'form-control character-point-id',
+                                                'placeholder' => 'Select Stat Point Type',
                                             ]) !!}</div>
                                         </td>
                                     @else
@@ -115,3 +130,7 @@
         </div>
     </div>
 </div>
+
+<script>
+    $('[data-toggle="tooltip"]').tooltip();
+</script>

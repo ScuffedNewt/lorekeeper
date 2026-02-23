@@ -127,7 +127,7 @@
                                 </a>
                             </h3>
                             <div class="submission-character-info-body">
-                                @if (array_filter(parseAssetData($character->data)))
+                                @if (array_filter(parseAssetData($character->data, true)))
                                     <table class="table table-sm mb-0">
                                         <thead class="thead-light">
                                             <tr>
@@ -136,9 +136,9 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @foreach (parseAssetData($character->data) as $key => $type)
+                                            @foreach (parseAssetData($character->data, true) as $key => $type)
                                                 @foreach ($type as $asset)
-                                                    @if ($key == 'exp' || $key == 'points')
+                                                    @if ($key == 'exp')
                                                         <tr>
                                                             <td>{!! ucfirst($key) !!}</td>
                                                             <td>{{ $type['quantity'] }}</td>

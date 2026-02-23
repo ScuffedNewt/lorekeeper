@@ -58,9 +58,7 @@
                 var $cell = $(this).parent().parent().find('.lootDivs');
 
                 $cell.children().addClass('hide');
-                //  make all cell values null except exp / points
-                $cell.children().children().not('.character-claymores-id').val(null);
-                // $cell.children().children().val(null);
+                $cell.children().children().val(null);
                 $cell.parent().find('.character-rewardable-quantity').removeClass('hide');
 
                 if (val == 'Item') {
@@ -82,6 +80,17 @@
                 } else if (val == 'Skill') {
                     $cell.children('.character-skills').addClass('show');
                     $cell.children('.character-skills').removeClass('hide');
+                } else if (val == 'Class') {
+                    $cell.children('.character-classes').addClass('show');
+                    $cell.children('.character-classes').removeClass('hide');
+
+                    // hide the quantity input and set it to 1 since classes don't have quantities
+                    $cell.parent().find('.character-rewardable-quantity').addClass('hide');
+                } else if (val == 'Points') {
+                    $cell.children('.character-points').addClass('show');
+                    $cell.children('.character-points').removeClass('hide');
+                } else if (val == 'Exp') {
+                    // nothing
                 }
             });
         }
@@ -93,10 +102,12 @@
             node.find('.character-currency-id').attr('name', 'character_rewardable_id[' + id + '][]');
             node.find('.character-item-id').attr('name', 'character_rewardable_id[' + id + '][]');
             node.find('.character-table-id').attr('name', 'character_rewardable_id[' + id + '][]');
-            node.find('.character-claymores-id').attr('name', 'character_rewardable_id[' + id + '][]');
+            node.find('.character-exp-id').attr('name', 'character_rewardable_id[' + id + '][]');
             node.find('.character-element-id').attr('name', 'character_rewardable_id[' + id + '][]');
             node.find('.character-status-id').attr('name', 'character_rewardable_id[' + id + '][]');
             node.find('.character-skill-id').attr('name', 'character_rewardable_id[' + id + '][]');
+            node.find('.character-class-id').attr('name', 'character_rewardable_id[' + id + '][]');
+            node.find('.character-point-id').attr('name', 'character_rewardable_id[' + id + '][]');
         }
     });
 </script>
