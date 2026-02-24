@@ -6,7 +6,7 @@ use App\Models\Character\Character;
 use App\Models\Model;
 use App\Models\User\User;
 
-class ExpLog extends Model {
+class ExperienceLog extends Model {
     /**
      * The attributes that are mass assignable.
      *
@@ -23,7 +23,7 @@ class ExpLog extends Model {
      *
      * @var string
      */
-    protected $table = 'exp_log';
+    protected $table = 'experience_logs';
 
     /**
      * Whether the model contains timestamps to be saved and updated.

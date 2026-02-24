@@ -19,9 +19,12 @@ class StatService extends Service {
             if (!isset($data['name'])) {
                 throw new \Exception('Please provide a name for the stat.');
             }
-            if (!isset($data['base'])) {
+            if (config('lorekeeper.claymores_and_companions.stat_points.general_id') && !isset($data['base'])) {
                 throw new \Exception('Please set a base stat value.');
+            } elseif (!config('lorekeeper.claymores_and_companions.stat_points.general_id') && !isset($data['base'])) {
+                $data['base'] = 0;
             }
+
             if (isset($data['colour'])) {
                 // if colour is white, set to null
                 // use regex since there might be fewer or greater f

@@ -38,9 +38,12 @@ class UserStatController extends Controller {
      *
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function postLevel(LevelManager $service) {
-        $user = Auth::user();
-        if ($service->level($user)) {
+    public function postLevelUp(LevelManager $service) {
+        if (!config('lorekeeper.claymores_and_companions.visibility_settings.user_levels')) {
+            abort(404);
+        }
+
+        if ($service->levelUp(Auth::user())) {
             flash('Successfully leveled up!')->success();
         } else {
             foreach ($service->errors()->getMessages()['error'] as $error) {

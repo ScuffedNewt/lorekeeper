@@ -5,13 +5,13 @@
 @endsection
 
 @section('admin-content')
-    {!! breadcrumbs(['Admin Panel' => 'admin', 'Grant Stat Points' => 'admin/grants/points']) !!}
+    {!! breadcrumbs(['Admin Panel' => 'admin', 'Grant Stat Points' => 'admin/grants/stat-points']) !!}
 
     <h1>Grant Stat Points</h1>
     <p>Specific stat points can be only be granted to characters. If a user is selected while specific stat points are selected, the grant will be ignored.</p>
     <p>E.g. If you select a user and then select "Health", the user will receive no points.</p>
 
-    {!! Form::open(['url' => 'admin/grants/points']) !!}
+    {!! Form::open(['url' => 'admin/grants/stat-points']) !!}
 
     <h3>Basic Information</h3>
     <div class="form-group">

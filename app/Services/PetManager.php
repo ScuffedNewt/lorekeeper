@@ -13,7 +13,6 @@ use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Notifications;
 
 class PetManager extends Service {
     /*
@@ -318,7 +317,7 @@ class PetManager extends Service {
             $pet->attached_at = Carbon::now();
             $pet->save();
 
-            if (!$pet->level && config('lorekeeper.pet_bonding_enabled')) {
+            if (!$pet->level && config('lorekeeper.pets.pet_bonding_enabled')) {
                 $pet->level()->create([
                     'bonding_level'   => 0,
                     'bonding'         => 0,

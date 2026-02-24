@@ -27,7 +27,7 @@
             @if (config('lorekeeper.claymores_and_companions.visibility_settings.user_levels'))
                 <div class="col-md-1 text-center">
                     <span class="btn badge-primary float-md-right" data-toggle="tooltip" title="Current user level. Checkout the level area for more information.">
-                        Lvl. {{ $user->level->current_level }}
+                        {{ $user->level->name }}
                     </span>
                 </div>
             @endif

@@ -61,7 +61,7 @@
                                             {!! Form::select(
                                                 'character_rewardable_type[' . $character->character_id . '][]',
                                                 ['Item' => 'Item', 'Currency' => 'Currency', 'LootTable' => 'Loot Table', 'Element' => 'Element', 'StatusEffect' => 'Status Effect'] +
-                                                    (config('lorekeeper.claymores_and_companions.visibility_settings.character_levels') ? ['Exp' => 'Exp'] : []) +
+                                                    (config('lorekeeper.claymores_and_companions.visibility_settings.character_levels') ? ['Experience' => 'Experience'] : []) +
                                                     (config('lorekeeper.claymores_and_companions.visibility_settings.character_stats') ? ['Points' => 'Stat Points'] : []) +
                                                     (config('lorekeeper.claymores_and_companions.visibility_settings.character_skills') ? ['Skill' => 'Skill'] : []) +
                                                     (config('lorekeeper.claymores_and_companions.visibility_settings.character_classes') ? ['Class' => 'Class'] : []),
@@ -82,7 +82,10 @@
                                                 'class' => 'form-control character-table-id',
                                                 'placeholder' => 'Select Loot Table',
                                             ]) !!}</div>
-                                            <div class="character-exp {{ $reward->rewardable_type == 'Exp' ? 'show' : 'hide' }}">{!! Form::number('character_rewardable_id[' . $character->character_id . '][]', $reward->rewardable_type == 'Exp' ? $reward->rewardable_id : null, ['class' => 'form-control character-exp-id']) !!}</div>
+                                            <div class="character-experience {{ $reward->rewardable_type == 'Experience' ? 'show' : 'hide' }}">{!! Form::select('character_rewardable_id[' . $character->character_id . '][]', $experiences, $reward->rewardable_type == 'Experience' ? $reward->rewardable_id : null, [
+                                                'class' => 'form-control character-experience-id',
+                                                'placeholder' => 'Select Experience',
+                                            ]) !!}</div>
                                             <div class="character-elements {{ $reward->rewardable_type == 'Element' ? 'show' : 'hide' }}">{!! Form::select('character_rewardable_id[' . $character->character_id . '][]', $elements, $reward->rewardable_type == 'Element' ? $reward->rewardable_id : null, [
                                                 'class' => 'form-control character-element-id',
                                                 'placeholder' => 'Select Element',
@@ -100,7 +103,7 @@
                                                 'class' => 'form-control character-class-id',
                                                 'placeholder' => 'Select Class',
                                             ]) !!}</div>
-                                            <div class="character-points {{ $reward->rewardable_type == 'Point' ? 'show' : 'hide' }}">{!! Form::select('character_rewardable_id[' . $character->character_id . '][]', $points, $reward->rewardable_type == 'Points' ? $reward->rewardable_id : null, [
+                                            <div class="character-points {{ $reward->rewardable_type == 'Points' ? 'show' : 'hide' }}">{!! Form::select('character_rewardable_id[' . $character->character_id . '][]', $points, $reward->rewardable_type == 'Points' ? $reward->rewardable_id : null, [
                                                 'class' => 'form-control character-point-id',
                                                 'placeholder' => 'Select Stat Point Type',
                                             ]) !!}</div>

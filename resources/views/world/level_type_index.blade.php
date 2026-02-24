@@ -9,22 +9,19 @@
 
     <h1>{{ $type }} Levels</h1>
 
-    <div class="card mb-3">
-        <div class="card-body">
-            <div class="row world-entry">
-                <h1 class="ml-3">Level 1<h2>
-            </div>
-            <p>The beginner level!</p>
-        </div>
-    </div>
     @foreach ($levels as $level)
         <div class="card mb-3">
             <div class="card-body">
                 <h1>
-                    Level {{ $level->level }}
+                    {{ $level->name }}
                     <x-admin-edit title="Level" :object="$level" />
                 </h1>
-                {!! $level->description !!}
+                @if ($level->previousLevel)
+                    <p><strong>Previous Level:</strong> {{ $level->previousLevel?->name }}</p>
+                @else
+                    <p><strong>The beginner level!</strong></p>
+                @endif
+                {!! $level->parsed_description !!}
                 <hr class="my-3">
                 <div class="row">
                     <div class="col-md-6">

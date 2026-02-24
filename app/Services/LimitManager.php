@@ -163,17 +163,21 @@ class LimitManager extends Service {
                             throw new \Exception('A character must be selected or attached to complete this action.');
                         }
 
-                        $characters = $user->characters()->whereIn('id', $data['character_ids'])->get()->filter(function ($character) use ($limit) {
-                            return $character->level->current_level >= $limit->limit->level;
-                        });
+                        $characters = $user->characters()
+                            ->whereIn('id', $data['character_ids'])
+                            ->with(['level.previousLevel'])
+                            ->get()
+                            ->filter(fn ($character) => $character->level->meetsOrExceeds($limit->limit));
 
                         if ($characters->count() < 1) {
                             throw new \Exception('You do not have enough characters with the required level '.$limit->limit->level.' to complete this action.');
                         }
                         break;
                     case 'user_level':
-                        if ($user->level->current_level < $limit->limit->level) {
-                            throw new \Exception('You do not meet the required level '.$limit->limit->level.' to complete this action.');
+                        if (!$user->level->level->meetsOrExceeds($limit->limit)) {
+                            throw new \Exception(
+                                'You do not meet the required level '.$limit->limit->level.' to complete this action.'
+                            );
                         }
                         break;
                     case 'element':

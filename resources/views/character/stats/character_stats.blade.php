@@ -62,7 +62,7 @@
                 @endforeach
                 @if (
                     (config('lorekeeper.claymores_and_companions.visibility_settings.gear') || config('lorekeeper.claymores_and_companions.visibility_settings.weapons')) &&
-                    count($image->character->equipment())
+                    count($character->equipment())
                 )
                     <hr class="my-3">
                     <h4>Current Equipment</h4>

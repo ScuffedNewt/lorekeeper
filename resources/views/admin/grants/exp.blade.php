@@ -5,11 +5,11 @@
 @endsection
 
 @section('admin-content')
-    {!! breadcrumbs(['Admin Panel' => 'admin', 'Grant EXP' => 'admin/grants/exp']) !!}
+    {!! breadcrumbs(['Admin Panel' => 'admin', 'Grant Experience' => 'admin/grants/experience']) !!}
 
-    <h1>Grant EXP</h1>
+    <h1>Grant Experience</h1>
 
-    {!! Form::open(['url' => 'admin/grants/exp']) !!}
+    {!! Form::open(['url' => 'admin/grants/experience']) !!}
 
     <h3>Basic Information</h3>
     <div class="form-group">
@@ -17,9 +17,15 @@
         {!! Form::select('names[]', $options, null, ['id' => 'usernameList', 'class' => 'form-control', 'multiple']) !!}
     </div>
 
-    <div class="form-group">
-        {!! Form::label('Quantity') !!}
-        {!! Form::number('quantity', 1, ['class' => 'form-control mr-2', 'placeholder' => 'Quantity']) !!}
+    <div class="row">
+        <div class="col-md-6 form-group">
+            {!! Form::label('Experience') !!} {!! add_help('Must select an experience and Quantity must be at least 1.') !!}
+            {!! Form::select('experience_id', $experiences, null, ['class' => 'form-control', 'placeholder' => 'Select Experience']) !!}
+        </div>
+        <div class="col-md-6 form-group">
+            {!! Form::label('Quantity') !!}
+            {!! Form::number('quantity', 1, ['class' => 'form-control mr-2', 'placeholder' => 'Quantity']) !!}
+        </div>
     </div>
 
     <h3>Additional Data</h3>

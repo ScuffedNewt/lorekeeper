@@ -90,7 +90,8 @@
                     $cell.children('.character-points').addClass('show');
                     $cell.children('.character-points').removeClass('hide');
                 } else if (val == 'Exp') {
-                    // nothing
+                    $cell.children('.character-experience').addClass('show');
+                    $cell.children('.character-experience').removeClass('hide');
                 }
             });
         }
@@ -102,7 +103,7 @@
             node.find('.character-currency-id').attr('name', 'character_rewardable_id[' + id + '][]');
             node.find('.character-item-id').attr('name', 'character_rewardable_id[' + id + '][]');
             node.find('.character-table-id').attr('name', 'character_rewardable_id[' + id + '][]');
-            node.find('.character-exp-id').attr('name', 'character_rewardable_id[' + id + '][]');
+            node.find('.character-experience-id').attr('name', 'character_rewardable_id[' + id + '][]');
             node.find('.character-element-id').attr('name', 'character_rewardable_id[' + id + '][]');
             node.find('.character-status-id').attr('name', 'character_rewardable_id[' + id + '][]');
             node.find('.character-skill-id').attr('name', 'character_rewardable_id[' + id + '][]');

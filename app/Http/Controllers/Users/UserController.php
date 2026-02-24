@@ -342,7 +342,7 @@ class UserController extends Controller {
 
         return view('user.stats', [
             'user'     => $this->user,
-            'exps'     => $this->user->getExpLogs(),
+            'exps'     => $this->user->getExperienceLogs(),
             'levels'   => $this->user->getLevelLogs(),
             'stats'    => $this->user->getStatLogs(),
             'sublists' => Sublist::orderBy('sort', 'DESC')->get(),
@@ -468,12 +468,12 @@ class UserController extends Controller {
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function getUserExpLogs($name) {
+    public function getUserExperienceLogs($name) {
         $user = $this->user;
 
         return view('user.exp_logs', [
             'user'     => $this->user,
-            'logs'     => $this->user->getExpLogs(0),
+            'logs'     => $this->user->getExperienceLogs(0),
         ]);
     }
 

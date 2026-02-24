@@ -132,7 +132,7 @@ Route::group(['prefix' => 'bank', 'namespace' => 'Users'], function () {
 
 Route::group(['prefix' => 'user-stats', 'namespace' => 'Users'], function () {
     Route::get('/', 'UserStatController@getIndex');
-    Route::post('level', 'UserStatController@postLevel');
+    Route::post('level', 'UserStatController@postLevelUp');
     Route::post('transfer', 'UserStatController@postTransfer');
 });
 
@@ -190,7 +190,7 @@ Route::group(['prefix' => 'character', 'namespace' => 'Characters'], function ()
     Route::post('{slug}/stats/{id}/base', 'CharacterStatController@postEditBaseStat');
 
     Route::get('{slug}/stats/logs', 'CharacterStatController@getStatLogs');
-    Route::post('{slug}/stats/level', 'CharacterStatController@postLevel'); // level up
+    Route::post('{slug}/stats/level', 'CharacterStatController@postLevelUp'); // level up
 });
 
 Route::group(['prefix' => 'myo', 'namespace' => 'Characters'], function () {

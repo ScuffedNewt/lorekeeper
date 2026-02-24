@@ -3,7 +3,7 @@
 namespace App\Services\Stat;
 
 use App\Models\Character\Character;
-use App\Models\Level\Level;
+use App\Models\Stat\Experience;
 use App\Models\User\User;
 use App\Services\LimitManager;
 use App\Services\Service;
@@ -16,17 +16,14 @@ class LevelManager extends Service {
      *
      * @param mixed $recipient
      */
-    public function level($recipient) {
+    public function levelUp($recipient) {
         DB::beginTransaction();
 
         try {
             $service = new ExperienceManager;
 
             $level = $recipient->level;
-
-            // getting the next level
-            $next = Level::where('level', $level->current_level + 1)->where('level_type', $recipient->logType)->first();
-
+            $next = $level->nextLevel;
             // validation
             if (!$next) {
                 throw new \Exception('You are at the max level!');
@@ -35,8 +32,9 @@ class LevelManager extends Service {
                 throw new \Exception('You do not have enough exp to level up!');
             }
 
-            if (!$service->debitExp($recipient, 'Level Up', 'Used EXP in level up.', $level, $next->exp_required)) {
-                throw new \Exception('Error debiting exp.');
+            $experience = Experience::find(config('lorekeeper.claymores_and_companions.levels.experience_id.characters'));
+            if (!$experience) {
+                throw new \Exception('Experience required for leveling up is not set up correctly. Please contact an administrator.');
             }
 
             if (count(getLimits($next))) {
@@ -50,8 +48,11 @@ class LevelManager extends Service {
                 }
             }
 
-            // //////////////////////////////////////////////////// LEVEL REWARDS
-            $levelRewards = $this->processRewards($next);
+            if (!$service->debitExp($recipient, 'Level Up', 'Used '.$next->exp_required.' '.$experience->name.' in level up', $experience, $next->exp_required)) {
+                throw new \Exception('Error debiting exp.');
+            }
+
+            $levelRewards = $this->processRewards($next, $recipient->logType == 'Character');
 
             // Logging data
             $levelLogType = 'Level Rewards';
@@ -66,14 +67,14 @@ class LevelManager extends Service {
                 }
             } else {
                 if (!$levelRewards = fillCharacterAssets($levelRewards, null, $recipient, $levelLogType, $levelData)) {
-                    throw new \Exception('Failed to distribute rewards to user.');
+                    throw new \Exception('Failed to distribute rewards to character.');
                 }
             }
             // ///////////////////////////////////////////////
 
             // create log
-            if ($this->createlog($recipient, $recipient->logType, $level->current_level, $next->level)) {
-                $level->current_level += 1;
+            if ($this->createLog($recipient, $recipient->logType, $level->level->id, $next->id)) {
+                $level->level_id = $next->id;
                 $level->save();
             } else {
                 throw new \Exception('Could not create log :(');
@@ -112,18 +113,14 @@ class LevelManager extends Service {
      * Processes reward data into a format that can be used for distribution.
      *
      * @param mixed $level
+     * @param mixed $isCharacter
      *
      * @return array
      */
-    private function processRewards($level) {
-        $assets = createAssetsArray(false);
-        // Process the additional rewards
+    private function processRewards($level, $isCharacter = false) {
+        $assets = createAssetsArray($isCharacter);
         foreach ($level->rewards as $reward) {
-            if ($reward->rewardable_type == 'Exp' || $reward->rewardable_type == 'Points') {
-                addAsset($assets, $reward->rewardable_type, $reward->quantity);
-            } else {
-                addAsset($assets, $reward->reward, $reward->quantity);
-            }
+            addAsset($assets, $reward->reward, $reward->quantity);
         }
 
         return $assets;

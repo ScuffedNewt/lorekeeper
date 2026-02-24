@@ -51,8 +51,7 @@
                             <tr>
                                 <td>
                                     {!! $reward->rewardable_recipient == 'User' ? '<i class="fas fa-user" data-toggle="tooltip" title="User Reward"></i>' : '<i class="fas fa-paw" data-toggle="tooltip" title="Character Reward"></i>' !!}
-                                    {!! $reward->reward ? $reward->reward->displayName :
-                                        ($reward->rewardable_type == 'Points' && $reward->rewardable_id == 0 ? 'General Stat Point' : $reward->rewardable_type) !!}
+                                    {!! $reward->reward ? $reward->reward->displayName : $reward->rewardable_type !!}
                                 </td>
                                 <td>{{ $reward->quantity }}</td>
                             </tr>

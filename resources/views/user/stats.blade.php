@@ -54,7 +54,7 @@
             </div>
         </div>
         <div class="text-right">
-            <a href="{{ url($user->url . '/stats/logs/exp') }}">View all...</a>
+            <a href="{{ url($user->url . '/stats/logs/experience') }}">View all...</a>
         </div>
 
         <h3>Latest Level-Up Activity</h3>
@@ -119,7 +119,7 @@
             </div>
         </div>
         <div class="text-right">
-            <a href="{{ url($user->url . '/stats/logs/points') }}">View all...</a>
+            <a href="{{ url($user->url . '/stats/logs/stat-points') }}">View all...</a>
         </div>
     @endif
 @endsection

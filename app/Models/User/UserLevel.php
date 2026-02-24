@@ -13,7 +13,7 @@ class UserLevel extends Model {
      * @var array
      */
     protected $fillable = [
-        'user_id', 'current_level', 'current_exp', 'current_points', 'stamina', 'character_id', 'arena_wins', 'arena_losses',
+        'user_id', 'level_id', 'stat_points', 'stamina', 'character_id',
     ];
 
     /**
@@ -47,7 +47,21 @@ class UserLevel extends Model {
      * Get the current level.
      */
     public function level() {
-        return $this->belongsTo(Level::class, 'current_level', 'level')->where('level_type', 'User');
+        return $this->hasOne(Level::class, 'id', 'level_id')->where('level_type', 'User')
+            ->with('nextLevel')
+            ->withDefault(function ($level) {
+                return Level::where('level_type', 'User')
+                    ->whereNull('previous_level_id')
+                    ->first();
+            });
+    }
+
+    /**
+     * Get the experience points for the user level.
+     */
+    public function experience() {
+        return $this->hasOne(UserExperience::class, 'user_id', 'user_id')
+            ->where('experience_id', config('lorekeeper.claymores_and_companions.levels.experience_id.users'));
     }
 
     /**********************************************************************************************
@@ -60,7 +74,7 @@ class UserLevel extends Model {
      * get the next level.
      */
     public function getNextLevelAttribute() {
-        return Level::where('level_type', 'User')->where('level', $this->current_level + 1)->first();
+        return $this->level ? $this->level->nextLevel : null;
     }
 
     /**
@@ -79,6 +93,6 @@ class UserLevel extends Model {
             return 100;
         }
 
-        return ($this->current_exp / $nextLevel->exp_required) * 100;
+        return ($this->experience?->quantity / $nextLevel->exp_required) * 100;
     }
 }

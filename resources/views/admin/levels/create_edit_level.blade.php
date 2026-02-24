@@ -22,18 +22,37 @@
     <h3>Basic Information</h3>
     <p>All {{ $type }}s start at level one</p>
     <div class="row">
-        <div class="col-md">
-            <div class="form-group">
-                {!! Form::label('Level (e.g 2)') !!}
-                {!! Form::number('level', $level->level, ['class' => 'form-control', 'min' => 2]) !!}
-            </div>
+        <div class="col-md form-group">
+            {!! Form::label('Level Name') !!} 
+            <p>Can be standard like "level 1" or something unique like "Apprentice"</p>
+            {!! Form::text('name', $level->name, ['class' => 'form-control']) !!}
         </div>
-        <div class="col-md">
-            <div class="form-group">
-                {!! Form::label('EXP Required') !!}
-                {!! Form::number('exp_required', $level->exp_required, ['class' => 'form-control', 'min' => 1]) !!}
+        @if (!$level->id || $level->previous_level_id)
+            <div class="col-md form-group">
+                {!! Form::label('Previous Level') !!}
+                <p>The level that must be achieved before this level is available.</p>
+                {!! Form::select('previous_level_id', $levels, $level->previous_level_id, ['class' => 'form-control', 'placeholder' => 'Select Previous Level']) !!}
             </div>
+        @endif
+        <div class="col-md form-group">
+            {!! Form::label('EXP Required') !!}
+            {!! Form::number('exp_required', $level->exp_required, ['class' => 'form-control', 'min' => 1]) !!}
         </div>
+    </div>
+
+    <div class="form-group">
+        {!! Form::label('World Page Image (Optional)') !!} {!! add_help('This image is used only on the world information pages.') !!}
+        <div class="custom-file">
+            {!! Form::label('image', 'Choose file...', ['class' => 'custom-file-label']) !!}
+            {!! Form::file('image', ['class' => 'custom-file-input']) !!}
+        </div>
+        <div class="text-muted">Recommended size: 100px x 100px</div>
+        @if ($level->has_image)
+            <div class="form-check">
+                {!! Form::checkbox('remove_image', 1, false, ['class' => 'form-check-input']) !!}
+                {!! Form::label('remove_image', 'Remove current image', ['class' => 'form-check-label']) !!}
+            </div>
+        @endif
     </div>
 
     <div class="form-group">

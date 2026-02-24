@@ -67,8 +67,8 @@ Route::group(['prefix' => 'user', 'namespace' => 'Users'], function () {
     Route::get('{name}/bank', 'UserController@getUserBank');
     Route::get('{name}/stats', 'UserController@getUserStats');
     Route::get('{name}/stats/logs/level', 'UserController@getUserLevelLogs');
-    Route::get('{name}/stats/logs/points', 'UserController@getUserStatLogs');
-    Route::get('{name}/stats/logs/exp', 'UserController@getUserExpLogs');
+    Route::get('{name}/stats/logs/stat-points', 'UserController@getUserStatLogs');
+    Route::get('{name}/stats/logs/experience', 'UserController@getUserExperienceLogs');
     Route::get('{name}/armoury', 'UserController@getUserArmoury');
 
     Route::get('{name}/currency-logs', 'UserController@getUserCurrencyLogs');
@@ -103,8 +103,8 @@ Route::group(['prefix' => 'character', 'namespace' => 'Characters'], function ()
     Route::get('{slug}/skill-logs', 'CharacterController@getCharacterSkillLogs');
     Route::get('{slug}/submissions', 'CharacterController@getCharacterSubmissions');
     Route::get('{slug}/stats/logs', 'CharacterController@getCharacterStatLogs');
-    Route::get('{slug}/stats/logs/points', 'CharacterController@getCharacterStatPointLogs');
-    Route::get('{slug}/stats/logs/exp', 'CharacterController@getCharacterExpLogs');
+    Route::get('{slug}/stats/logs/stat-points', 'CharacterController@getCharacterStatPointLogs');
+    Route::get('{slug}/stats/logs/experience', 'CharacterController@getCharacterExperienceLogs');
     Route::get('{slug}/stats/logs/level', 'CharacterController@getCharacterLevelLogs');
     Route::get('{slug}/stats/logs/count', 'CharacterController@getCharacterCountLogs');
 

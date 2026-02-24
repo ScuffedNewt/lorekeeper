@@ -12,6 +12,7 @@ use App\Models\Loot\LootTable;
 use App\Models\Prompt\PromptCategory;
 use App\Models\Raffle\Raffle;
 use App\Models\Skill\Skill;
+use App\Models\Stat\Experience;
 use App\Models\Stat\Stat;
 use App\Models\Status\StatusEffect;
 use App\Models\Submission\Submission;
@@ -103,7 +104,8 @@ class SubmissionController extends Controller {
             'count'               => $count,
             'limit'               => $limit,
             'classes'             => CharacterClass::orderBy('name')->pluck('name', 'id'),
-            'points'              => ['general' => 'General Stat Point'] + Stat::orderBy('name')->pluck('name', 'id')->toArray(),
+            'points'              => Stat::orderBy('name')->pluck('name', 'id')->toArray(),
+            'experiences'         => Experience::orderBy('name')->pluck('name', 'id')->toArray(),
         ] : []));
     }
 
@@ -167,7 +169,8 @@ class SubmissionController extends Controller {
             'count'               => Submission::where('prompt_id', $id)->where('status', 'Approved')->where('user_id', $submission->user_id)->count(),
             'rewardsData'         => isset($submission->data['rewards']) ? parseAssetData($submission->data['rewards']) : null,
             'classes'             => CharacterClass::orderBy('name')->pluck('name', 'id'),
-            'points'              => ['general' => 'General Stat Point'] + Stat::orderBy('name')->pluck('name', 'id')->toArray(),
+            'points'              => Stat::orderBy('name')->pluck('name', 'id')->toArray(),
+            'experiences'         => Experience::orderBy('name')->pluck('name', 'id')->toArray(),
         ] : []));
     }
 

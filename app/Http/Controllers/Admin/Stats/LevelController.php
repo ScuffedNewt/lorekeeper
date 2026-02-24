@@ -17,16 +17,15 @@ class LevelController extends Controller {
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function getLevels(Request $request, $type = 'Character') {
-        $query = Level::query()->where('level_type', $type);
-        $data = $request->only(['level']);
-        if (isset($data['level'])) {
-            $query->where('level', 'LIKE', '%'.$data['level'].'%');
-        }
+    public function getLevels($type = 'Character') {
+        $levels = Level::ordered($type);
+
+        $page = (int) request('page', 1);
+        $perPage = 20;
 
         return view('admin.levels.levels', [
             'type'   => $type,
-            'levels' => $query->paginate(20)->appends($request->query()),
+            'levels' => $levels->forPage($page, $perPage),
         ]);
     }
 
@@ -39,8 +38,9 @@ class LevelController extends Controller {
      */
     public function getCreateLevel($type = 'Character') {
         return view('admin.levels.create_edit_level', [
-            'type'       => $type,
-            'level'      => new Level,
+            'type'   => $type,
+            'level'  => new Level,
+            'levels' => Level::where('level_type', $type)->pluck('name', 'id'),
         ]);
     }
 
@@ -59,8 +59,9 @@ class LevelController extends Controller {
         }
 
         return view('admin.levels.create_edit_level', [
-            'type'       => strtolower($level->level_type),
-            'level'      => $level,
+            'type'   => strtolower($level->level_type),
+            'level'  => $level,
+            'levels' => Level::where('level_type', $level->level_type)->where('id', '!=', $level->id)->pluck('name', 'id'),
         ]);
     }
 
@@ -75,7 +76,8 @@ class LevelController extends Controller {
     public function postCreateEditLevel(Request $request, LevelService $service, $type = 'Character', $id = null) {
         $id ? $request->validate(Level::$updateRules) : $request->validate(Level::$createRules);
         $data = $request->only([
-            'level', 'exp_required', 'stat_points', 'rewardable_type', 'rewardable_id', 'quantity', 'description',
+            'exp_required', 'stat_points', 'rewardable_type', 'rewardable_id', 'quantity', 'description',
+            'previous_level_id', 'name', 'image',
         ]);
         if ($id && $service->updateLevel(Level::find($id), $data)) {
             flash('Level updated successfully.')->success();

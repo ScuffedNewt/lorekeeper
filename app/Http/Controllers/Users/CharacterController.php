@@ -172,6 +172,13 @@ class CharacterController extends Controller {
         ]);
     }
 
+    /**
+     * Changes / assigns the character class.
+     *
+     * @param int $id
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function postClassModal($id, Request $request, CharacterManager $service) {
         $this->character = Character::find($id);
         if (!$this->character) {

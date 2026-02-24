@@ -4,8 +4,7 @@ namespace App\Services\Claymore;
 
 use App\Models\Character\Character;
 use App\Models\Character\CharacterClass;
-use App\Models\Claymore\GearCategory;
-use App\Models\Claymore\WeaponCategory;
+use App\Services\CharacterManager;
 use App\Services\Service;
 use Illuminate\Support\Facades\DB;
 
@@ -15,36 +14,38 @@ class CharacterClassManager extends Service {
     | Character Class Manager
     |--------------------------------------------------------------------------
     |
-    | Handles the
+    | Handles the granting and revoking of character classes to characters.
     |
     */
 
     /**
      * Create a class.
      *
-     * @param array $data
+     * @param mixed $sender
+     * @param mixed $recipient
+     * @param mixed $logType
+     * @param mixed $data
+     * @param mixed $class     CharacterClass
+     * @param mixed $quantity
      *
      * @return bool|CharacterClass
      */
-    public function createCharacterClass($data) {
+    public function creditClass($sender, $recipient, $logType, $data, $class, $quantity) {
         DB::beginTransaction();
 
         try {
-            $data = $this->populateClassData($data);
-
-            $image = null;
-            if (isset($data['image']) && $data['image']) {
-                $data['has_image'] = 1;
-                $image = $data['image'];
-                unset($data['image']);
-            } else {
-                $data['has_image'] = 0;
+            if ($recipient->logType !== 'Character') {
+                throw new \Exception('Recipient must be a character.');
+            }
+            if ($recipient->class_id == $class->id) {
+                return $this->commitReturn($class);
             }
 
-            $class = CharacterClass::create($data);
+            $recipient->class_id = $class->id;
+            $recipient->save();
 
-            if ($image) {
-                $this->handleImage($image, $class->classImagePath, $class->classImageFileName);
+            if (!(new CharacterManager)->createLog($sender->id, null, $recipient->user_id, ($recipient->user_id ? null : $recipient->owner_url), $recipient->id, 'Character Class Updated', '['.$class->displayName.']', 'character')) {
+                throw new \Exception('Failed to create log.');
             }
 
             return $this->commitReturn($class);
@@ -53,107 +54,5 @@ class CharacterClassManager extends Service {
         }
 
         return $this->rollbackReturn(false);
-    }
-
-    /**
-     * Update a class.
-     *
-     * @param CharacterClass $class
-     * @param array          $data
-     *
-     * @return bool|CharacterClass
-     */
-    public function updateCharacterClass($class, $data) {
-        DB::beginTransaction();
-
-        try {
-            if (CharacterClass::where('name', $data['name'])->where('id', '!=', $class->id)->exists()) {
-                throw new \Exception('The name has already been taken.');
-            }
-
-            $data = $this->populateClassData($data, $class);
-
-            $image = null;
-            if (isset($data['image']) && $data['image']) {
-                $data['has_image'] = 1;
-                $image = $data['image'];
-                unset($data['image']);
-            }
-
-            $class->update($data);
-
-            if ($class) {
-                $this->handleImage($image, $class->classImagePath, $class->classImageFileName);
-            }
-
-            return $this->commitReturn($class);
-        } catch (\Exception $e) {
-            $this->setError('error', $e->getMessage());
-        }
-
-        return $this->rollbackReturn(false);
-    }
-
-    /**
-     * Delete a class.
-     *
-     * @param CharacterClass $class
-     *
-     * @return bool
-     */
-    public function deleteCharacterClass($class) {
-        DB::beginTransaction();
-
-        try {
-            // Check first if the class is currently in use
-            if (GearCategory::where('class_restriction', $class->id)->exists()) {
-                throw new \Exception('A gear class with this restriction exists. Please change its class first.');
-            }
-            if (WeaponCategory::where('class_restriction', $class->id)->exists()) {
-                throw new \Exception('A weapon class with this restriction exists. Please change its class first.');
-            }
-            if (Character::where('class_id', $class->id)->exists()) {
-                throw new \Exception('An character with this class exists. Please change its class first.');
-            }
-
-            if ($class->has_image) {
-                $this->deleteImage($class->classImagePath, $class->classImageFileName);
-            }
-            $class->delete();
-
-            return $this->commitReturn(true);
-        } catch (\Exception $e) {
-            $this->setError('error', $e->getMessage());
-        }
-
-        return $this->rollbackReturn(false);
-    }
-
-    /**
-     * Handle class data.
-     *
-     * @param array               $data
-     * @param CharacterClass|null $class
-     *
-     * @return array
-     */
-    private function populateClassData($data, $class = null) {
-        if (isset($data['description']) && $data['description']) {
-            $data['parsed_description'] = parse($data['description']);
-        }
-
-        if (!isset($data['is_visible'])) {
-            $data['is_visible'] = 0;
-        }
-
-        if (isset($data['remove_image'])) {
-            if ($class && $class->has_image && $data['remove_image']) {
-                $data['has_image'] = 0;
-                $this->deleteImage($class->classImagePath, $class->classImageFileName);
-            }
-            unset($data['remove_image']);
-        }
-
-        return $data;
     }
 }

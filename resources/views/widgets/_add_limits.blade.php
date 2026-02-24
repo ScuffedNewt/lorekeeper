@@ -9,19 +9,8 @@
     $items = \App\Models\Item\Item::orderBy('name')->pluck('name', 'id')->toArray();
     $currencies = \App\Models\Currency\Currency::orderBy('name')->pluck('name', 'id')->toArray();
     $dynamics = \App\Models\Limit\DynamicLimit::orderBy('name')->pluck('name', 'id')->toArray();
-    $characterLevels = \App\Models\Level\Level::where('level_type', 'Character')
-        ->orderBy('level')
-        ->get()
-        ->mapWithKeys(function ($level) {
-            return [$level->id => 'Level ' . $level->level];
-        });
-    $userLevels = \App\Models\Level\Level::where('level_type', 'User')
-        ->orderBy('level')
-        ->get()
-        ->mapWithKeys(function ($level) {
-            return [$level->id => 'Level ' . $level->level];
-        })
-        ->toArray();
+    $characterLevels = \App\Models\Level\Level::ordered('Character')->pluck('name', 'id')->toArray();
+    $userLevels = \App\Models\Level\Level::ordered('User')->pluck('name', 'id')->toArray();
     $stats = \App\Models\Stat\Stat::orderBy('name')->pluck('name', 'id')->toArray();
     $classes = \App\Models\Character\CharacterClass::orderBy('name')->pluck('name', 'id')->toArray();
     $elements = \App\Models\Element\Element::orderBy('name')->pluck('name', 'id')->toArray();

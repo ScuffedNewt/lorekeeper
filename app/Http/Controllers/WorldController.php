@@ -689,16 +689,17 @@ class WorldController extends Controller {
             abort(404);
         }
 
-        if ($type == 'user') {
-            $levels = Level::where('level_type', 'User')->get();
-        } elseif ($type == 'character') {
-            $levels = Level::where('level_type', 'Character')->get();
-        } else {
+        if ($type !== 'user' && $type !== 'character') {
             abort(404);
         }
 
+        $levels = Level::ordered(ucfirst($type));
+
+        $page = (int) request('page', 1);
+        $perPage = 20;
+
         return view('world.level_type_index', [
-            'levels' => $levels->paginate(20),
+            'levels' => $levels->forPage($page, $perPage),
             'type'   => $type,
         ]);
     }

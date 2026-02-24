@@ -7,3 +7,4 @@
     <td> {{ $level->new_level }}</td>
     <td>{!! pretty_date($level->created_at) !!}</td>
     </td>
+</tr>

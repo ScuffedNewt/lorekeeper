@@ -20,11 +20,17 @@ class LevelService extends Service {
         DB::beginTransaction();
 
         try {
+            if (!isset($data['previous_level_id'])) {
+                throw new \Exception('Previous level is required.');
+            }
+
             $level = Level::create([
-                'level'        => $data['level'],
-                'level_type'   => $type,
-                'exp_required' => $data['exp_required'],
-                'description'  => $data['description'],
+                'previous_level_id'  => $data['previous_level_id'],
+                'level_type'         => $type,
+                'exp_required'       => $data['exp_required'],
+                'description'        => $data['description'],
+                'name'               => $data['name'],
+                'parsed_description' => $data['description'],
             ]);
 
             $rewardService = new RewardService;
@@ -58,10 +64,14 @@ class LevelService extends Service {
         DB::beginTransaction();
 
         try {
+            if (!isset($data['previous_level_id'])) {
+                throw new \Exception('Previous level is required.');
+            }
+
             $level->update([
-                'level'        => $data['level'],
-                'exp_required' => $data['exp_required'],
-                'description'  => $data['description'],
+                'previous_level_id' => $data['previous_level_id'],
+                'exp_required'      => $data['exp_required'],
+                'description'       => $data['description'],
             ]);
 
             $rewardService = new RewardService;
@@ -96,12 +106,15 @@ class LevelService extends Service {
 
         try {
             // Check first if the level is currently owned or if some other site feature uses it
+            if (DB::table('levels')->where('previous_level_id', $level->id)->where('level_type', $type)->exists()) {
+                throw new \Exception('A level is currently using this level as its previous level.');
+            }
             if ($type == 'Character') {
-                if (DB::table('character_levels')->where('current_level', '>=', $level->level)->exists()) {
+                if (DB::table('character_levels')->where('level_id', $level->id)->exists()) {
                     throw new \Exception('At least one character has already reached this level.');
                 }
             } else {
-                if (DB::table('user_levels')->where('current_level', '>=', $level->level)->exists()) {
+                if (DB::table('user_levels')->where('level_id', $level->id)->exists()) {
                     throw new \Exception('At least one user has already reached this level.');
                 }
             }

@@ -62,22 +62,22 @@ class StatManager extends Service {
             }
 
             if (!$isStaff) {
-                if ($character->level->current_points + $character->user->level->current_points < 1) {
+                if ($character->level->stat_points + $character->user->level->stat_points < 1) {
                     throw new \Exception('Not enough points to level up.');
                 }
 
                 // consume character points first
-                if ($character->level->current_points) {
-                    $character->level->current_points -= 1;
+                if ($character->level->stat_points) {
+                    $character->level->stat_points -= 1;
                     $character->level->save();
                 } else {
                     // if no character points, consume user points
-                    $character->user->level->current_points -= 1;
+                    $character->user->level->stat_points -= 1;
                     $character->user->level->save();
                 }
 
                 $type = 'Stat Level Up';
-                $data = 'Point used in stat level up.';
+                $data = 'Stat point used in stat level up';
                 if (!$this->createTransferLog($character->id, 'Character', null, null, $type, $data, -1)) {
                     throw new \Exception('Error creating log.');
                 }
@@ -196,7 +196,10 @@ class StatManager extends Service {
                 }
 
                 foreach ($data['stat_ids'] as $key=>$stat_id) {
-                    $stat = $stat_id == 'none' ? $stat_id : Stat::find($stat_id);
+                    $stat = Stat::find($stat_id);
+                    if (!$stat) {
+                        throw new \Exception('An invalid stat was selected.');
+                    }
                     if (!$this->creditStat($staff, $user, 'Staff Grant', $data['data'], $stat, $data['quantity'][$key], true)) {
                         throw new \Exception('Failed to credit points to '.$user->name.'.');
                     }
@@ -216,7 +219,10 @@ class StatManager extends Service {
                 }
 
                 foreach ($data['stat_ids'] as $key=>$stat_id) {
-                    $stat = $stat_id == 'none' ? $stat_id : Stat::find($stat_id);
+                    $stat = Stat::find($stat_id);
+                    if (!$stat) {
+                        throw new \Exception('An invalid stat was selected.');
+                    }
                     if (!$this->creditStat($staff, $character, 'Staff Grant', $data['data'], $stat, $data['quantity'][$key], true)) {
                         throw new \Exception('Failed to credit points to '.$character->fullName.'.');
                     }
@@ -243,16 +249,14 @@ class StatManager extends Service {
      * @param mixed $recipient
      * @param mixed $type
      * @param mixed $data
-     * @param mixed $stat
      * @param mixed $quantity
+     * @param Stat  $stat
      * @param mixed $isStaff
      */
     public function creditStat($sender, $recipient, $type, $data, $stat, $quantity, $isStaff = false) {
         DB::beginTransaction();
 
         try {
-            dd($type, $data);
-            // for user
             if ($recipient->logType == 'User') {
                 if (!$recipient->level) {
                     $recipient->level()->create([
@@ -260,19 +264,18 @@ class StatManager extends Service {
                     ]);
                 }
 
-                // we only grant general points to users
-                if ($stat == 'none') {
-                    // if no data is passed aka notes
+                // we only have a general stat point for users
+                if (config('lorekeeper.claymores_and_companions.stat_points.general_id') == $stat->id) {
                     if (!$data && $isStaff) {
-                        $data = 'Staff Grant of '.$quantity.' general stat points';
+                        $data = 'Staff Grant of '.$quantity.' '.$stat->name.' stat points';
                     }
 
-                    $recipient->level->current_points += $quantity;
+                    $recipient->level->stat_points += $quantity;
                     $recipient->level->save();
+                } else {
+                    flash('Tried to grant '.$stat->name.' points to user '.$recipient->displayName.' but that stat is not configured to be granted to users.')->error();
                 }
-            }
-            // for character
-            else {
+            } else {
                 if (!$recipient->level) {
                     $recipient->level()->create([
                         'character_id' => $recipient->id,
@@ -281,18 +284,17 @@ class StatManager extends Service {
 
                 // propagate stats
                 $recipient->propagateStats();
-                if ($stat == 'none') {
+                if (config('lorekeeper.claymores_and_companions.stat_points.general_id') == $stat->id) {
                     // if no data is passed aka notes
                     if (!$data && $isStaff) {
-                        $data = 'Staff Grant of '.$quantity.' general stat points';
+                        $data = 'Staff Grant of '.$quantity.' '.$stat->name.' stat points';
                     }
 
-                    $recipient->level->current_points += $quantity;
+                    $recipient->level->stat_points += $quantity;
                     $recipient->level->save();
                 } else {
                     // if we are granting a specific stat
                     $character_stat = $recipient->stats()->where('stat_id', $stat->id)->first();
-
                     if (!$character_stat) {
                         throw new \Exception('The stat '.$stat->name.' does not exist for the character '.$recipient->fullName.'. Check if the stat is allowed on this character.');
                     }
@@ -301,10 +303,10 @@ class StatManager extends Service {
                     $this->levelCharacterStat($recipient, $character_stat, true);
 
                     if (!$data) {
-                        $data = 'Staff granted stat level up on '.$stat->name.' to  lvl'.$character_stat->stat_level + 1 .'.';
+                        $data = 'Staff granted stat level up on '.$stat->name.' to level '.$character_stat->stat_level + 1;
                     }
 
-                    if (!$this->createLevelLog($recipient->id, $stat->id, 'Character', $character_stat->stat_level, $character_stat->stat_level + 1)) {
+                    if (!$this->createLevelLog($recipient->id, 'Character', $stat->id, $character_stat->stat_level, $character_stat->stat_level + 1)) {
                         throw new \Exception('Error creating log.');
                     }
                 }
@@ -341,10 +343,10 @@ class StatManager extends Service {
                 if (!$sender_stack) {
                     $sender_stack = UserLevel::create(['user_id' => $sender->id]);
                 }
-                if ($sender_stack->current_points < $quantity) {
+                if ($sender_stack->stat_points < $quantity) {
                     throw new \Exception('Not enough points to debit.');
                 }
-                $sender_stack->current_points -= $quantity;
+                $sender_stack->stat_points -= $quantity;
                 $sender_stack->save();
             }
             // for character
@@ -354,10 +356,10 @@ class StatManager extends Service {
                 if (!$sender_stack) {
                     $sender_stack = CharaLevels::create(['character_id' => $sender->id]);
                 }
-                if ($sender_stack->current_points < $quantity) {
+                if ($sender_stack->stat_points < $quantity) {
                     throw new \Exception('Not enough points to debit.');
                 }
-                $sender_stack->current_points -= $quantity;
+                $sender_stack->stat_points -= $quantity;
                 $sender_stack->save();
             }
             if ($type && !$this->createTransferLog($sender ? $sender->id : null, $sender ? $sender->logType : null, $recipient ? $recipient->id : null, $recipient ? $recipient->logType : null, $type, $data, $quantity * -1)) {
@@ -404,16 +406,16 @@ class StatManager extends Service {
      * Creates a log.
      *
      * @param mixed $recipientId
-     * @param mixed $stat
+     * @param mixed $statId
      * @param mixed $recipientType
      * @param mixed $previous
      * @param mixed $new
      */
-    public function createLevelLog($recipientId, $recipientType, $stat, $previous, $new) {
+    public function createLevelLog($recipientId, $recipientType, $statId, $previous, $new) {
         return DB::table('stat_log')->insert(
             [
                 'recipient_id'   => $recipientId,
-                'stat_id'        => $stat,
+                'stat_id'        => $statId,
                 'leveller_type'  => $recipientType,
                 'previous_level' => $previous,
                 'new_level'      => $new,

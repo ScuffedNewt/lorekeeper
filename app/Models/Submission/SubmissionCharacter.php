@@ -67,22 +67,12 @@ class SubmissionCharacter extends Model {
         $rewards = [];
         foreach ($assets as $type => $a) {
             $class = getAssetModelString($type, false);
-            if ($class == 'Exp' || $class == 'Points') {
-                if (isset($a['quantity'])) {
-                    $rewards[] = (object) [
-                        'rewardable_type' => $class,
-                        'rewardable_id'   => 1,
-                        'quantity'        => $a['quantity'],
-                    ];
-                }
-            } else {
-                foreach ($a as $id => $asset) {
-                    $rewards[] = (object) [
-                        'rewardable_type' => $class,
-                        'rewardable_id'   => $id,
-                        'quantity'        => $asset['quantity'],
-                    ];
-                }
+            foreach ($a as $id => $asset) {
+                $rewards[] = (object) [
+                    'rewardable_type' => $class,
+                    'rewardable_id'   => $id,
+                    'quantity'        => $asset['quantity'],
+                ];
             }
         }
 

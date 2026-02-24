@@ -97,7 +97,7 @@ class CharacterStatController extends Controller {
 
         return view('character.stats.character_stat_logs', [
             'character'       => $this->character,
-            'exps'            => $this->character->getExpLogs(),
+            'exps'            => $this->character->getExperienceLogs(),
             'levels'          => $this->character->getLevelLogs(),
             'stat_transfers'  => $this->character->getStatTransferLogs(),
             'stat_levels'     => $this->character->getStatLevelLogs(),
@@ -110,7 +110,10 @@ class CharacterStatController extends Controller {
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function postLevel(LevelManager $service) {
+    public function postLevelUp(LevelManager $service) {
+        if (!config('lorekeeper.claymores_and_companions.visibility_settings.character_levels')) {
+            abort(404);
+        }
         $character = $this->character;
         if (!Auth::check() || (Auth::user()->id != $character->user_id && !Auth::user()->hasPower('manage_characters'))) {
             abort(404);
@@ -119,7 +122,7 @@ class CharacterStatController extends Controller {
             abort(404);
         }
 
-        if ($service->level($character)) {
+        if ($service->levelUp($character)) {
             flash('Successfully leveled up!')->success();
         } else {
             foreach ($service->errors()->getMessages()['error'] as $error) {

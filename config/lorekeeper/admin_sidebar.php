@@ -118,11 +118,11 @@ return [
             ],
             [
                 'name' => 'EXP Grants',
-                'url'  => 'admin/grants/exp',
+                'url'  => 'admin/grants/experience',
             ],
             [
                 'name' => 'Stat Point Grants',
-                'url'  => 'admin/grants/points',
+                'url'  => 'admin/grants/stat-points',
             ],
             [
                 'name' => 'Pet Grants',

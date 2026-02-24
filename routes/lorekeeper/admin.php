@@ -432,11 +432,11 @@ Route::group(['prefix' => 'grants', 'namespace' => 'Users', 'middleware' => 'pow
     Route::get('items', 'GrantController@getItems');
     Route::post('items', 'GrantController@postItems');
 
-    Route::get('exp', 'GrantController@getExp');
-    Route::post('exp', 'GrantController@postExp');
+    Route::get('experience', 'GrantController@getExp');
+    Route::post('experience', 'GrantController@postExp');
 
-    Route::get('points', 'GrantController@getPoints');
-    Route::post('points', 'GrantController@postPoints');
+    Route::get('stat-points', 'GrantController@getStatPoints');
+    Route::post('stat-points', 'GrantController@postStatPoints');
 
     Route::get('pets', 'GrantController@getPets');
     Route::post('pets', 'GrantController@postPets');

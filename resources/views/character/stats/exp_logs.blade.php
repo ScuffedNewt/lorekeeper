@@ -5,10 +5,11 @@
 @endsection
 
 @section('profile-content')
-    {!! breadcrumbs(['Characters' => 'characters', $character->slug => $character->url, 'Stat Information' => $character->url . '/stats', 'EXP Logs' => $character->url . '/stats/logs/exp']) !!}
+    {!! breadcrumbs(['Characters' => 'characters', $character->slug => $character->url, 'Stat Information' => $character->url . '/stats',
+    'Experience Logs' => $character->url . '/stats/logs/experience']) !!}
 
     <h1>
-        {!! $character->displayName !!}'s EXP Logs
+        {!! $character->displayName !!}'s Experience Logs
     </h1>
 
     {!! $logs->render() !!}

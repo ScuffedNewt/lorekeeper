@@ -20,7 +20,7 @@
     $(document).ready(function() {
         var $lootTable = $('#{{ $prefix }}lootTableBody');
         var $lootRow = $('#{{ $prefix }}lootRow').find('.loot-row');
-        //The clone "itemSelect" etc variables here are no longer necessary, and can be deleted
+        // The clone "itemSelect" etc variables here are no longer necessary, and can be deleted
 
         @if ($useCustomSelectize)
             $('#{{ $prefix }}lootTableBody .selectize').selectize({
@@ -52,7 +52,13 @@
             var $rewardIdsCell = $(this).parent().parent().find('.{{ $prefix }}loot-row-select');
             var $recipient = $(this).val();
 
-            //Update the lootRow with the new types
+            if ($recipient === '') {
+                $rewardTypeCell.html('');
+                $rewardIdsCell.html('');
+                return;
+            }
+
+            // Update the lootRow with the new types
             $.ajax({
                 type: "POST",
                 headers: {
@@ -80,8 +86,6 @@
             var val = $(this).val();
             var $cell = $(this).parent().parent().find('.{{ $prefix }}loot-row-select');
             var $recipient = $(this).parent().parent().find('.recipient-type').val();
-
-            console.log($recipient);
 
             //All if statements here are replaced with the following line
             var $clone = cloneRewardableId(val, $recipient);
@@ -193,15 +197,6 @@
 
         // The below replaces any "clone" if statements
         function cloneRewardableId(val, recipient = null) {
-            if (val.toLowerCase() === 'exp') {
-                // Return an empty jQuery object with formfield compatibility, ex. prefix.rewardable_id[]
-                return $('<input>', {
-                    type: 'hidden',
-                    name: '{{ $prefix }}rewardable_id[]',
-                    value: '',
-                    class: 'hide'
-                });
-            }
             if (recipient != null) {
                 return $('#{{ $prefix }}lootRowData').find('.rewardable-ids-' + recipient.toLowerCase()).find('.' + val.toLowerCase() + '-select').clone();
             } else {

@@ -385,7 +385,7 @@ return [
     // EXP GRANT
     245 => [
         'name'    => 'EXP Grant',
-        'message' => 'You have received a staff grant of {quantity} EXP from <a href="{sender_url}">{sender_name}</a>. (<a href="{stat_url}">View Stat Information</a>)',
+        'message' => 'You have received a staff grant of {quantity} {experience_name} from <a href="{sender_url}">{sender_name}</a>. (<a href="{stat_url}">View Stat Information</a>)',
         'url'     => '',
     ],
 

@@ -26,7 +26,7 @@ use App\Models\Pet\PetLog;
 use App\Models\Rank\Rank;
 use App\Models\Rank\RankPower;
 use App\Models\Shop\ShopLog;
-use App\Models\Stat\ExpLog;
+use App\Models\Stat\ExperienceLog;
 use App\Models\Stat\StatTransferLog;
 use App\Models\Submission\Submission;
 use App\Traits\Commenter;
@@ -635,9 +635,9 @@ class User extends Authenticatable implements MustVerifyEmail {
      *
      * @return \Illuminate\Pagination\LengthAwarePaginator|\Illuminate\Support\Collection
      */
-    public function getExpLogs($limit = 10) {
+    public function getExperienceLogs($limit = 10) {
         $user = $this;
-        $query = ExpLog::where(function ($query) use ($user) {
+        $query = ExperienceLog::where(function ($query) use ($user) {
             $query->with('sender')->where('sender_type', 'User')->where('sender_id', $user->id)->whereNotIn('log_type', ['Staff Grant', 'Prompt Rewards', 'Claim Rewards']);
         })->orWhere(function ($query) use ($user) {
             $query->with('recipient')->where('recipient_type', 'User')->where('recipient_id', $user->id)->where('log_type', '!=', 'Staff Removal');

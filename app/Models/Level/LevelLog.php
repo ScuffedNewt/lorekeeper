@@ -46,4 +46,18 @@ class LevelLog extends Model {
 
         return $this->belongsTo(Character::class, 'leveller_type');
     }
+
+    /**
+     * Get the previous level.
+     */
+    public function previousLevel() {
+        return $this->belongsTo(Level::class, 'previous_level');
+    }
+
+    /**
+     * Get the new level.
+     */
+    public function newLevel() {
+        return $this->belongsTo(Level::class, 'new_level');
+    }
 }

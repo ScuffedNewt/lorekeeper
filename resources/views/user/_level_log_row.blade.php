@@ -7,12 +7,12 @@
     </div>
     <div class="col-6 col-md-3">
         <div class="logs-table-cell">
-            {!! $level->previous_level !!}
+            {!! $level->previousLevel ? $level->previousLevel->name : 'Unknown Level' !!}
         </div>
     </div>
     <div class="col-6 col-md-3">
         <div class="logs-table-cell">
-            {!! $level->new_level !!}
+            {!! $level->newLevel ? $level->newLevel->name : 'Unknown Level' !!}
         </div>
     </div>
     <div class="col-6 col-md-4">

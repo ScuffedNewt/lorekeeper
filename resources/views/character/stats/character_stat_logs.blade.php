@@ -31,7 +31,7 @@
         </tbody>
     </table>
     <div class="text-right">
-        <a href="{{ url($character->url . '/stats/logs/exp') }}">View all...</a>
+        <a href="{{ url($character->url . '/stats/logs/experience') }}">View all...</a>
     </div>
 
     <h3>Latest Stat Activity</h3>
@@ -65,7 +65,7 @@
         </tbody>
     </table>
     <div class="text-right">
-        <a href="{{ url($character->url . '/stats/logs/points') }}">View all...</a>
+        <a href="{{ url($character->url . '/stats/logs/stat-points') }}">View all...</a>
     </div>
 
     <h3>Latest Level-Up Activity</h3>

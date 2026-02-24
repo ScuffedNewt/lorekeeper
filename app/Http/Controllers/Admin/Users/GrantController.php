@@ -13,6 +13,7 @@ use App\Models\Item\Item;
 use App\Models\Loot\LootTable;
 use App\Models\Pet\Pet;
 use App\Models\Skill\Skill;
+use App\Models\Stat\Experience;
 use App\Models\Stat\Stat;
 use App\Models\Submission\Submission;
 use App\Models\Trade\Trade;
@@ -111,7 +112,8 @@ class GrantController extends Controller {
         ];
 
         return view('admin.grants.exp', [
-            'options' => $options,
+            'options'     => $options,
+            'experiences' => Experience::orderBy('name')->pluck('name', 'id')->toArray(),
         ]);
     }
 
@@ -121,7 +123,7 @@ class GrantController extends Controller {
      * @return \Illuminate\Http\RedirectResponse
      */
     public function postExp(Request $request, ExperienceManager $service) {
-        $data = $request->only(['names', 'quantity', 'data']);
+        $data = $request->only(['names', 'experience_id', 'quantity', 'data']);
         if ($service->grantExp($data, Auth::user())) {
             flash('EXP granted successfully.')->success();
         } else {
@@ -138,7 +140,7 @@ class GrantController extends Controller {
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function getPoints() {
+    public function getStatPoints() {
         $options = [
             'Users' => User::orderBy('id')->pluck('name', 'id')->mapWithKeys(function ($item, $key) {
                 return ['user-'.$key => $item];
@@ -148,8 +150,8 @@ class GrantController extends Controller {
             })->toArray(),
         ];
 
-        return view('admin.grants.points', [
-            'stats'   => ['none' => 'General Point'] + Stat::orderBy('name')->pluck('name', 'id')->toArray(),
+        return view('admin.grants.stat_points', [
+            'stats'   => Stat::orderBy('name')->pluck('name', 'id')->toArray(),
             'options' => $options,
         ]);
     }
@@ -159,7 +161,7 @@ class GrantController extends Controller {
      *
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function postPoints(Request $request, StatManager $service) {
+    public function postStatPoints(Request $request, StatManager $service) {
         $data = $request->only(['names', 'stat_ids', 'quantity', 'data']);
         if ($service->grantStats($data, Auth::user())) {
             flash('Stat points granted successfully.')->success();

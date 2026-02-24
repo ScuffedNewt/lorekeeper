@@ -461,16 +461,16 @@ class CharacterController extends Controller {
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function getCharacterExpLogs($slug) {
+    public function getCharacterExperienceLogs($slug) {
         if (!config('lorekeeper.claymores_and_companions.visibility_settings.character_levels')) {
             abort(404);
         }
         $character = $this->character;
 
         return view('character.stats.exp_logs', [
-            'logs'                  => $this->character->getExpLogs(0),
+            'logs'                  => $this->character->getExperienceLogs(0),
             'character'             => $this->character,
-            'extPrevAndNextBtnsUrl' => '/stats/logs/exp',
+            'extPrevAndNextBtnsUrl' => '/stats/logs/experience',
         ]);
     }
 

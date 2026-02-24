@@ -12,7 +12,7 @@ use App\Models\Level\LevelLog;
 use App\Models\Model;
 use App\Models\Rarity;
 use App\Models\Stat\CountLog;
-use App\Models\Stat\ExpLog;
+use App\Models\Stat\ExperienceLog;
 use App\Models\Stat\Stat;
 use App\Models\Stat\StatLog;
 use App\Models\Stat\StatTransferLog;
@@ -535,9 +535,9 @@ class Character extends Model {
      *
      * @return \Illuminate\Pagination\LengthAwarePaginator|\Illuminate\Support\Collection
      */
-    public function getExpLogs($limit = 10) {
+    public function getExperienceLogs($limit = 10) {
         $character = $this;
-        $query = ExpLog::where(function ($query) use ($character) {
+        $query = ExperienceLog::where(function ($query) use ($character) {
             $query->with('sender')->where('sender_type', 'Character')->where('sender_id', $character->id)->whereNotIn('log_type', ['Staff Grant', 'Prompt Rewards', 'Claim Rewards']);
         })->orWhere(function ($query) use ($character) {
             $query->with('recipient')->where('recipient_type', 'Character')->where('recipient_id', $character->id)->where('log_type', '!=', 'Staff Removal');

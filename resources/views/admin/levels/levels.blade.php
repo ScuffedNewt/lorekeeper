@@ -34,12 +34,11 @@
     @if (!count($levels))
         <p>No levels found.</p>
     @else
-        {!! $levels->render() !!}
-
         <table class="table table-sm category-table">
             <thead>
                 <tr>
-                    <th>Level</th>
+                    <th>Level Name</th>
+                    <th>Next Level</th>
                     <th>EXP required</th>
                     <th>Rewards</th>
                     <th></th>
@@ -48,7 +47,8 @@
             <tbody>
                 @foreach ($levels as $level)
                     <tr class="sort-item" data-id="{{ $level->id }}">
-                        <td>{{ $level->level }}</td>
+                        <td>{{ $level->name }}</td>
+                        <td>{{ $level->nextLevel ? $level->nextLevel->name : 'N/A' }}</td>
                         <td>{{ $level->exp_required }}</td>
                         <td>
                             @if (!count($level->rewards))
@@ -67,6 +67,5 @@
                 @endforeach
             </tbody>
         </table>
-        {!! $levels->render() !!}
     @endif
 @endsection

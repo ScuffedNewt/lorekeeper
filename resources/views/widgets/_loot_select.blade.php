@@ -94,12 +94,14 @@
                     </td>
                     <td class="{{ $prefix }}loot-row-select">
                         {{-- If statements here can be removed and replaced with the below code. They are now defined programmatically --}}
-                        @if ($loot->rewardable_type != 'Exp')
-                            {!! Form::select($prefix . 'rewardable_id[]', $showRecipient ? $rewardLootData[$loot->rewardable_recipient ?? $recipient][$loot->rewardable_type] : $rewardLootData[$loot->rewardable_type], $loot->rewardable_id, [
+                        {!! Form::select($prefix . 'rewardable_id[]',
+                            $showRecipient ? $rewardLootData[$loot->rewardable_recipient ?? $recipient][$loot->rewardable_type] : $rewardLootData[$loot->rewardable_type],
+                            $loot->rewardable_id ?? 0,
+                            [
                                 'class' => 'form-control ' . strtolower($loot->rewardable_type) . '-select',
-                                'placeholder' => 'Select ' . $rewardTypes[$loot->rewardable_recipient ?? $recipient][$loot->rewardable_type],
-                            ]) !!}
-                        @endif
+                                'placeholder' => 'Select ' . ($showRecipient ? $rewardTypes[$loot->rewardable_recipient ?? $recipient][$loot->rewardable_type] : $rewardTypes[$loot->rewardable_type]),
+                            ]
+                        ) !!}
                     </td>
                     <td>{!! Form::text($prefix . 'quantity[]', $loot->quantity, ['class' => 'form-control']) !!}</td>
                     @if (isset($extra_fields))

@@ -13,6 +13,7 @@ use App\Models\Loot\LootTable;
 use App\Models\Prompt\Prompt;
 use App\Models\Raffle\Raffle;
 use App\Models\Skill\Skill;
+use App\Models\Stat\Experience;
 use App\Models\Stat\Stat;
 use App\Models\Status\StatusEffect;
 use App\Models\Submission\Submission;
@@ -492,6 +493,7 @@ class SubmissionManager extends Service {
             $statusIds = [];
             $classIds = [];
             $pointIds = [];
+            $experienceIds = [];
             if (isset($data['character_currency_id'])) {
                 foreach ($data['character_currency_id'] as $c) {
                     foreach ($c as $currencyId) {
@@ -519,6 +521,8 @@ class SubmissionManager extends Service {
                                 break;
                             case 'Points': $pointIds[] = $id;
                                 break;
+                            case 'Experience': $experienceIds[] = $id;
+                                break;
                         }
                     }
                 } // Expanded character rewards
@@ -531,6 +535,7 @@ class SubmissionManager extends Service {
             array_unique($skillIds);
             array_unique($classIds);
             array_unique($pointIds);
+            array_unique($experienceIds);
             $currencies = Currency::whereIn('id', $currencyIds)->where('is_character_owned', 1)->get()->keyBy('id');
             $items = Item::whereIn('id', $itemIds)->get()->keyBy('id');
             $tables = LootTable::whereIn('id', $tableIds)->get()->keyBy('id');
@@ -539,6 +544,7 @@ class SubmissionManager extends Service {
             $skills = Skill::whereIn('id', $skillIds)->get()->keyBy('id');
             $classes = CharacterClass::whereIn('id', $classIds)->get()->keyBy('id');
             $points = Stat::whereIn('id', $pointIds)->get()->keyBy('id');
+            $experiences = Experience::whereIn('id', $experienceIds)->get()->keyBy('id');
 
             // We're going to remove all characters from the submission and reattach them with the updated data
             $submission->characters()->delete();
@@ -554,8 +560,9 @@ class SubmissionManager extends Service {
                     'elements'     => $elements,
                     'statuses'     => $statuses,
                     'skills'       => $skills,
-                    'classes'      => $classes,
+                    'class'        => $classes,
                     'points'       => $points,
+                    'experience'   => $experiences,
                 ], true);
 
                 if (!$assets = fillCharacterAssets($assets, $user, $c, $promptLogType, $promptData, $submission->user)) {
@@ -709,8 +716,8 @@ class SubmissionManager extends Service {
                         case 'LootTable': if ($data['character_rewardable_quantity'][$data['character_id']][$key]) {
                             addAsset($assets, $data['tables'][$reward], $data['character_rewardable_quantity'][$data['character_id']][$key]);
                         } break;
-                        case 'Exp': if ($data['character_rewardable_quantity'][$data['character_id']][$key]) {
-                            addAsset($assets, 'Exp', $data['character_rewardable_quantity'][$data['character_id']][$key]);
+                        case 'Experience': if ($data['character_rewardable_quantity'][$data['character_id']][$key]) {
+                            addAsset($assets, $data['experience'][$reward], $data['character_rewardable_quantity'][$data['character_id']][$key]);
                         } break;
                         case 'Points': if ($data['character_rewardable_quantity'][$data['character_id']][$key]) {
                             addAsset($assets, $data['points'][$reward], $data['character_rewardable_quantity'][$data['character_id']][$key]);
@@ -723,6 +730,9 @@ class SubmissionManager extends Service {
                             break;
                         case 'Skill': if ($data['character_rewardable_quantity'][$data['character_id']][$key]) {
                             addAsset($assets, $data['skills'][$reward], $data['character_rewardable_quantity'][$data['character_id']][$key]);
+                        } break;
+                        case 'Class': if ($data['character_rewardable_quantity'][$data['character_id']][$key]) {
+                            addAsset($assets, $data['class'][$reward], $data['character_rewardable_quantity'][$data['character_id']][$key]);
                         } break;
                     }
                 }
@@ -776,13 +786,13 @@ class SubmissionManager extends Service {
                             if (!$isStaff) {
                                 break;
                             }
-                            $reward = $data['rewardable_id'][$key] == 'general_stat_point' ? $data['rewardable_id'][$key] : Stat::find($data['rewardable_id'][$key]);
+                            $reward = Stat::find($data['rewardable_id'][$key]);
                             break;
-                        case 'Exp':
+                        case 'Experience':
                             if (!$isStaff) {
                                 break;
                             }
-                            $reward = $type;
+                            $reward = Experience::find($data['rewardable_id'][$key]);
                             break;
                     }
                     if (!$reward) {
@@ -863,21 +873,9 @@ class SubmissionManager extends Service {
         if ($submission->status == 'Pending' && isset($submission->prompt_id) && $submission->prompt_id) {
             foreach ($submission->prompt->rewards as $reward) {
                 if ($reward->rewardable_recipient == 'User') {
-                    if ($reward->rewardable_type == 'Exp') {
-                        addAsset($promptRewards, $reward->rewardable_type, $reward->quantity);
-                    } elseif ($reward->rewardable_type == 'Points') {
-                        addAsset($promptRewards, 'general_stat_point', $reward->quantity);
-                    } else {
-                        addAsset($promptRewards, $reward->reward, $reward->quantity);
-                    }
+                    addAsset($promptRewards, $reward->reward, $reward->quantity);
                 } elseif ($reward->rewardable_recipient == 'Character') {
-                    if ($reward->rewardable_type == 'Exp') {
-                        addAsset($characterRewards, $reward->rewardable_type, $reward->quantity);
-                    } elseif ($reward->rewardable_type == 'Points') {
-                        addAsset($characterRewards, $reward->reward ?? 'general_stat_point', $reward->quantity);
-                    } else {
-                        addAsset($characterRewards, $reward->reward, $reward->quantity);
-                    }
+                    addAsset($characterRewards, $reward->reward, $reward->quantity);
                 }
             }
         }
@@ -954,6 +952,7 @@ class SubmissionManager extends Service {
         $statusIds = [];
         $classIds = [];
         $pointIds = [];
+        $experienceIds = [];
         if (isset($data['character_currency_id'])) {
             foreach ($data['character_currency_id'] as $c) {
                 foreach ($c as $currencyId) {
@@ -984,6 +983,8 @@ class SubmissionManager extends Service {
                             break;
                         case 'Points': $pointIds[] = $id;
                             break;
+                        case 'Experience': $experienceIds[] = $id;
+                            break;
                     }
                 }
             } // Expanded character rewards
@@ -996,6 +997,7 @@ class SubmissionManager extends Service {
         array_unique($skillIds);
         array_unique($classIds);
         array_unique($pointIds);
+        array_unique($experienceIds);
         $currencies = Currency::whereIn('id', $currencyIds)->where('is_character_owned', 1)->get()->keyBy('id');
         $items = Item::whereIn('id', $itemIds)->get()->keyBy('id');
         $tables = LootTable::whereIn('id', $tableIds)->get()->keyBy('id');
@@ -1004,6 +1006,7 @@ class SubmissionManager extends Service {
         $skills = Skill::whereIn('id', $skillIds)->get()->keyBy('id');
         $classes = CharacterClass::whereIn('id', $classIds)->get()->keyBy('id');
         $points = Stat::whereIn('id', $pointIds)->get()->keyBy('id');
+        $experience = Experience::whereIn('id', $experienceIds)->get()->keyBy('id');
 
         // Attach characters
         foreach ($characters as $key => $c) {
@@ -1015,8 +1018,9 @@ class SubmissionManager extends Service {
                 'tables'       => $tables,
                 'skills'       => $skills,
                 'elements'     => $elements,
-                'classes'      => $classes,
+                'class'        => $classes,
                 'points'       => $points,
+                'experience'   => $experience,
             ], true);
 
             if ($defaultRewards) {

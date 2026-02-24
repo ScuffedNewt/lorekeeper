@@ -138,17 +138,10 @@
                                         <tbody>
                                             @foreach (parseAssetData($character->data, true) as $key => $type)
                                                 @foreach ($type as $asset)
-                                                    @if ($key == 'exp')
-                                                        <tr>
-                                                            <td>{!! ucfirst($key) !!}</td>
-                                                            <td>{{ $type['quantity'] }}</td>
-                                                        </tr>
-                                                    @else
-                                                        <tr>
-                                                            <td>{!! $asset['asset']->displayName !!} ({!! ucfirst($key) !!})</td>
-                                                            <td>{{ $asset['quantity'] }}</td>
-                                                        </tr>
-                                                    @endif
+                                                    <tr>
+                                                        <td>{!! $asset['asset']->displayName !!} ({!! ucfirst($key) !!})</td>
+                                                        <td>{{ $asset['quantity'] }}</td>
+                                                    </tr>
                                                 @endforeach
                                             @endforeach
 

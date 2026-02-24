@@ -12,7 +12,7 @@ class Level extends Model {
      * @var array
      */
     protected $fillable = [
-        'level', 'exp_required', 'stat_points', 'description', 'level_type',
+        'name', 'previous_level_id', 'exp_required', 'level_type', 'description', 'parsed_description',
     ];
 
     /**
@@ -28,7 +28,7 @@ class Level extends Model {
      * @var array
      */
     public static $createRules = [
-        'level' => 'required',
+        'name'  => 'required',
     ];
 
     /**
@@ -37,8 +37,36 @@ class Level extends Model {
      * @var array
      */
     public static $updateRules = [
-        'level' => 'required',
+        'name'  => 'required',
     ];
+
+    /**********************************************************************************************
+
+        SCOPES
+
+    **********************************************************************************************/
+
+    /**
+     * Orders levels by progression.
+     *
+     * @param mixed $query
+     * @param mixed $type
+     */
+    public function scopeOrdered($query, $type = 'Character') {
+        $levels = $query->where('level_type', $type)->get();
+        $byId = $levels->keyBy('id');
+
+        $prevIds = $levels->pluck('previous_level_id')->filter();
+        $tail = $levels->firstWhere(fn ($lvl) => !$prevIds->contains($lvl->id));
+
+        $orderedDesc = collect();
+        while ($tail) {
+            $orderedDesc->push($tail);
+            $tail = $byId->get($tail->previous_level_id);
+        }
+
+        return $orderedDesc->reverse()->values();
+    }
 
     /**********************************************************************************************
 
@@ -54,10 +82,17 @@ class Level extends Model {
     }
 
     /**
+     * Get the previous level.
+     */
+    public function previousLevel() {
+        return $this->belongsTo(self::class, 'previous_level_id');
+    }
+
+    /**
      * Get the next level.
      */
     public function nextLevel() {
-        return $this->hasOne(self::class, 'level', 'level')->where('level', $this->level + 1)->where('level_type', $this->level_type);
+        return $this->hasOne(self::class, 'previous_level_id', 'id');
     }
 
     /**********************************************************************************************
@@ -72,7 +107,7 @@ class Level extends Model {
      * @return string
      */
     public function getDisplayNameAttribute() {
-        return '<a href="'.url('world/levels').'/'.strtolower($this->level_type).'" class="display-prompt">'.ucfirst($this->level_type).' Level '.$this->level.'</a>';
+        return '<a href="'.url('world/levels').'/'.strtolower($this->level_type).'" class="display-prompt">'.ucfirst($this->level_type).' '.$this->name.'</a>';
     }
 
     /**
@@ -91,5 +126,47 @@ class Level extends Model {
      */
     public function getAdminPowerAttribute() {
         return 'edit_claymores';
+    }
+
+    /**
+     * Gets the currency's asset type for asset management.
+     *
+     * @return string
+     */
+    public function getAssetTypeAttribute() {
+        return 'levels';
+    }
+
+    /**********************************************************************************************
+
+        OTHER FUNCTIONS
+
+    **********************************************************************************************/
+
+    /**
+     * True if $this is the same as $required, or is after it in the chain.
+     *
+     * @param Level $required
+     */
+    public function meetsOrExceeds($required) {
+        if ($this->id == $required->id) {
+            return true;
+        }
+
+        $visited = [];
+        $node = $this;
+        while ($node && $node->previous_level_id) {
+            if (isset($visited[$node->id])) {
+                return false;
+            }
+            $visited[$node->id] = true;
+            $node = $node->previousLevel;
+
+            if ($node && $node->id == $required->id) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

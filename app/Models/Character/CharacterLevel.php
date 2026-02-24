@@ -12,7 +12,7 @@ class CharacterLevel extends Model {
      * @var array
      */
     protected $fillable = [
-        'character_id', 'current_level', 'current_exp', 'current_points',
+        'character_id', 'level_id', 'stat_points',
     ];
 
     /**
@@ -39,7 +39,21 @@ class CharacterLevel extends Model {
      * Get the current level for the character.
      */
     public function level() {
-        return $this->belongsTo(Level::class, 'current_level', 'level')->where('level_type', 'Character');
+        return $this->belongsTo(Level::class, 'level_id', 'id')->where('level_type', 'Character')
+            ->with('nextLevel')
+            ->withDefault(function ($level) {
+                return Level::where('level_type', 'Character')
+                    ->whereNull('previous_level_id')
+                    ->first();
+            });
+    }
+
+    /**
+     * Get the experience points for the character level.
+     */
+    public function experience() {
+        return $this->hasOne(CharacterExperience::class, 'character_id', 'character_id')
+            ->where('experience_id', config('lorekeeper.claymores_and_companions.levels.experience_id.characters'));
     }
 
     /**********************************************************************************************
@@ -52,7 +66,7 @@ class CharacterLevel extends Model {
      * get the next level.
      */
     public function getNextLevelAttribute() {
-        return Level::where('level_type', 'Character')->where('level', $this->current_level + 1)->first();
+        return $this->level ? $this->level->nextLevel : null;
     }
 
     /**
@@ -64,6 +78,6 @@ class CharacterLevel extends Model {
             return 100;
         }
 
-        return ($this->current_exp / $nextLevel->exp_required) * 100;
+        return ($this->experience?->quantity / $nextLevel->exp_required) * 100;
     }
 }

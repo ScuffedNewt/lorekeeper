@@ -230,7 +230,7 @@
                             {!! Form::select(
                                 'character_rewardable_type[]',
                                 ['Item' => 'Item', 'Currency' => 'Currency', 'LootTable' => 'Loot Table', 'Element' => 'Element', 'StatusEffect' => 'Status Effect'] +
-                                    (config('lorekeeper.claymores_and_companions.visibility_settings.character_levels') ? ['Exp' => 'Exp'] : []) +
+                                    (config('lorekeeper.claymores_and_companions.visibility_settings.character_levels') ? ['Experience' => 'Experience'] : []) +
                                     (config('lorekeeper.claymores_and_companions.visibility_settings.character_stats') ? ['Points' => 'Stat Points'] : []) +
                                     (config('lorekeeper.claymores_and_companions.visibility_settings.character_skills') ? ['Skill' => 'Skill'] : []) +
                                     (config('lorekeeper.claymores_and_companions.visibility_settings.character_classes') ? ['Class' => 'Class'] : []),
@@ -251,6 +251,7 @@
                             <div class="character-skills hide">{!! Form::select('character_rewardable_id[]', $skills, 0, ['class' => 'form-control character-skill-id', 'placeholder' => 'Select Skill']) !!}</div>
                             <div class="character-classes hide">{!! Form::select('character_rewardable_id[]', $classes, 0, ['class' => 'form-control character-class-id', 'placeholder' => 'Select Class']) !!}</div>
                             <div class="character-points hide">{!! Form::select('character_rewardable_id[]', $points, 0, ['class' => 'form-control character-point-id', 'placeholder' => 'Select Stat Point Type']) !!}</div>
+                            <div class="character-experience hide">{!! Form::select('character_rewardable_id[]', $experiences, 0, ['class' => 'form-control character-experience-id', 'placeholder' => 'Select Experience']) !!}</div>
                         </td>
                     @else
                         <td class="lootDivs">
