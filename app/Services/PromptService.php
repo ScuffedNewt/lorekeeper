@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\Prompt\Prompt;
 use App\Models\Prompt\PromptCategory;
-use App\Models\Prompt\PromptReward;
 use App\Models\Submission\Submission;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -31,7 +30,7 @@ class PromptService extends Service {
      * @param array                 $data
      * @param \App\Models\User\User $user
      *
-     * @return \App\Models\Prompt\PromptCategory|bool
+     * @return bool|PromptCategory
      */
     public function createPromptCategory($data, $user) {
         DB::beginTransaction();
@@ -66,11 +65,11 @@ class PromptService extends Service {
     /**
      * Update a category.
      *
-     * @param \App\Models\Prompt\PromptCategory $category
-     * @param array                             $data
-     * @param \App\Models\User\User             $user
+     * @param PromptCategory        $category
+     * @param array                 $data
+     * @param \App\Models\User\User $user
      *
-     * @return \App\Models\Prompt\PromptCategory|bool
+     * @return bool|PromptCategory
      */
     public function updatePromptCategory($category, $data, $user) {
         DB::beginTransaction();
@@ -108,7 +107,7 @@ class PromptService extends Service {
     /**
      * Delete a category.
      *
-     * @param \App\Models\Prompt\PromptCategory $category
+     * @param PromptCategory $category
      *
      * @return bool
      */
@@ -172,7 +171,7 @@ class PromptService extends Service {
      * @param array                 $data
      * @param \App\Models\User\User $user
      *
-     * @return \App\Models\Prompt\Prompt|bool
+     * @return bool|Prompt
      */
     public function createPrompt($data, $user) {
         DB::beginTransaction();
@@ -202,13 +201,27 @@ class PromptService extends Service {
                 $data['hide_submissions'] = 0;
             }
 
-            $prompt = Prompt::create(Arr::only($data, ['prompt_category_id', 'name', 'summary', 'description', 'parsed_description', 'is_active', 'start_at', 'end_at', 'hide_before_start', 'hide_after_end', 'has_image', 'prefix', 'hide_submissions', 'staff_only', 'hash']));
+            $prompt = Prompt::create(Arr::only($data, [
+                'prompt_category_id', 'name', 'summary', 'description', 'parsed_description', 'is_active', 'start_at', 'end_at', 'hide_before_start', 'hide_after_end', 'has_image', 'prefix', 'hide_submissions', 'staff_only', 'hash',
+                'limit', 'limit_period', 'limit_character',
+            ]));
 
             if ($image) {
                 $this->handleImage($image, $prompt->imagePath, $prompt->imageFileName);
             }
 
-            $this->populateRewards(Arr::only($data, ['rewardable_type', 'rewardable_id', 'quantity']), $prompt);
+            $rewardService = new RewardService;
+            if (!$rewardService->populateRewards(
+                get_class($prompt),
+                $prompt->id,
+                Arr::only($data, ['rewardable_type', 'rewardable_id', 'quantity', 'rewardable_recipient']),
+                false
+            )) {
+                foreach ($rewardService->errors()->getMessages()['error'] as $error) {
+                    flash($error)->error();
+                }
+                throw new \Exception('Failed to create rewards.');
+            }
 
             return $this->commitReturn($prompt);
         } catch (\Exception $e) {
@@ -221,11 +234,11 @@ class PromptService extends Service {
     /**
      * Updates a prompt.
      *
-     * @param \App\Models\Prompt\Prompt $prompt
-     * @param array                     $data
-     * @param \App\Models\User\User     $user
+     * @param Prompt                $prompt
+     * @param array                 $data
+     * @param \App\Models\User\User $user
      *
-     * @return \App\Models\Prompt\Prompt|bool
+     * @return bool|Prompt
      */
     public function updatePrompt($prompt, $data, $user) {
         DB::beginTransaction();
@@ -260,13 +273,27 @@ class PromptService extends Service {
                 $data['hide_submissions'] = 0;
             }
 
-            $prompt->update(Arr::only($data, ['prompt_category_id', 'name', 'summary', 'description', 'parsed_description', 'is_active', 'start_at', 'end_at', 'hide_before_start', 'hide_after_end', 'has_image', 'prefix', 'hide_submissions', 'staff_only', 'hash']));
+            $prompt->update(Arr::only($data, [
+                'prompt_category_id', 'name', 'summary', 'description', 'parsed_description', 'is_active', 'start_at', 'end_at', 'hide_before_start', 'hide_after_end', 'has_image', 'prefix', 'hide_submissions', 'staff_only', 'hash',
+                'limit', 'limit_period', 'limit_character',
+            ]));
 
             if ($prompt) {
                 $this->handleImage($image, $prompt->imagePath, $prompt->imageFileName);
             }
 
-            $this->populateRewards(Arr::only($data, ['rewardable_type', 'rewardable_id', 'quantity']), $prompt);
+            $rewardService = new RewardService;
+            if (!$rewardService->populateRewards(
+                get_class($prompt),
+                $prompt->id,
+                Arr::only($data, ['rewardable_type', 'rewardable_id', 'quantity', 'rewardable_recipient']),
+                false
+            )) {
+                foreach ($rewardService->errors()->getMessages()['error'] as $error) {
+                    flash($error)->error();
+                }
+                throw new \Exception('Failed to create rewards.');
+            }
 
             return $this->commitReturn($prompt);
         } catch (\Exception $e) {
@@ -279,7 +306,7 @@ class PromptService extends Service {
     /**
      * Deletes a prompt.
      *
-     * @param \App\Models\Prompt\Prompt $prompt
+     * @param Prompt $prompt
      *
      * @return bool
      */
@@ -309,8 +336,8 @@ class PromptService extends Service {
     /**
      * Handle category data.
      *
-     * @param array                                  $data
-     * @param \App\Models\Prompt\PromptCategory|null $category
+     * @param array               $data
+     * @param PromptCategory|null $category
      *
      * @return array
      */
@@ -329,14 +356,18 @@ class PromptService extends Service {
             unset($data['remove_image']);
         }
 
+        if (!isset($data['limit_character'])) {
+            $data['limit_character'] = null;
+        }
+
         return $data;
     }
 
     /**
      * Processes user input for creating/updating a prompt.
      *
-     * @param array                     $data
-     * @param \App\Models\Prompt\Prompt $prompt
+     * @param array  $data
+     * @param Prompt $prompt
      *
      * @return array
      */
@@ -367,27 +398,5 @@ class PromptService extends Service {
         }
 
         return $data;
-    }
-
-    /**
-     * Processes user input for creating/updating prompt rewards.
-     *
-     * @param array                     $data
-     * @param \App\Models\Prompt\Prompt $prompt
-     */
-    private function populateRewards($data, $prompt) {
-        // Clear the old rewards...
-        $prompt->rewards()->delete();
-
-        if (isset($data['rewardable_type'])) {
-            foreach ($data['rewardable_type'] as $key => $type) {
-                PromptReward::create([
-                    'prompt_id'       => $prompt->id,
-                    'rewardable_type' => $type,
-                    'rewardable_id'   => $data['rewardable_id'][$key],
-                    'quantity'        => $data['quantity'][$key],
-                ]);
-            }
-        }
     }
 }

@@ -30,7 +30,7 @@ class FeatureService extends Service {
      * @param array                 $data
      * @param \App\Models\User\User $user
      *
-     * @return \App\Models\Feature\FeatureCategory|bool
+     * @return bool|FeatureCategory
      */
     public function createFeatureCategory($data, $user) {
         DB::beginTransaction();
@@ -69,11 +69,11 @@ class FeatureService extends Service {
     /**
      * Update a category.
      *
-     * @param \App\Models\Feature\FeatureCategory $category
-     * @param array                               $data
-     * @param \App\Models\User\User               $user
+     * @param FeatureCategory       $category
+     * @param array                 $data
+     * @param \App\Models\User\User $user
      *
-     * @return \App\Models\Feature\FeatureCategory|bool
+     * @return bool|FeatureCategory
      */
     public function updateFeatureCategory($category, $data, $user) {
         DB::beginTransaction();
@@ -119,8 +119,8 @@ class FeatureService extends Service {
     /**
      * Delete a category.
      *
-     * @param \App\Models\Feature\FeatureCategory $category
-     * @param mixed                               $user
+     * @param FeatureCategory $category
+     * @param mixed           $user
      *
      * @return bool
      */
@@ -188,7 +188,7 @@ class FeatureService extends Service {
      * @param array                 $data
      * @param \App\Models\User\User $user
      *
-     * @return \App\Models\Feature\Feature|bool
+     * @return bool|Feature
      */
     public function createFeature($data, $user) {
         DB::beginTransaction();
@@ -200,24 +200,26 @@ class FeatureService extends Service {
             if (isset($data['species_id']) && $data['species_id'] == 'none') {
                 $data['species_id'] = null;
             }
-            if (isset($data['subtype_id']) && $data['subtype_id'] == 'none') {
-                $data['subtype_id'] = null;
-            }
-
             if ((isset($data['feature_category_id']) && $data['feature_category_id']) && !FeatureCategory::where('id', $data['feature_category_id'])->exists()) {
                 throw new \Exception('The selected trait category is invalid.');
             }
             if ((isset($data['species_id']) && $data['species_id']) && !Species::where('id', $data['species_id'])->exists()) {
                 throw new \Exception('The selected species is invalid.');
             }
-            if (isset($data['subtype_id']) && $data['subtype_id']) {
-                $subtype = Subtype::find($data['subtype_id']);
+            if (isset($data['subtype_ids']) && $data['subtype_ids']) {
+                $subtype = Subtype::find($data['subtype_ids']);
                 if (!(isset($data['species_id']) && $data['species_id'])) {
                     throw new \Exception('Species must be selected to select a subtype.');
                 }
-                if (!$subtype || $subtype->species_id != $data['species_id']) {
-                    throw new \Exception('Selected subtype invalid or does not match species.');
+
+                foreach ($data['subtype_ids'] as $subtypeId) {
+                    $subtype = Subtype::find($subtypeId);
+                    if (!$subtype || $subtype->species_id != $data['species_id']) {
+                        throw new \Exception('Selected subtype invalid or does not match species.');
+                    }
                 }
+            } else {
+                $data['subtype_ids'] = [];
             }
 
             $data = $this->populateData($data);
@@ -233,6 +235,10 @@ class FeatureService extends Service {
             }
 
             $feature = Feature::create($data);
+
+            foreach ($data['subtype_ids'] as $subtypeId) {
+                $feature->subtypes()->attach($subtypeId);
+            }
 
             if (!$this->logAdminAction($user, 'Created Feature', 'Created '.$feature->displayName)) {
                 throw new \Exception('Failed to log admin action.');
@@ -253,11 +259,11 @@ class FeatureService extends Service {
     /**
      * Updates a feature.
      *
-     * @param \App\Models\Feature\Feature $feature
-     * @param array                       $data
-     * @param \App\Models\User\User       $user
+     * @param Feature               $feature
+     * @param array                 $data
+     * @param \App\Models\User\User $user
      *
-     * @return \App\Models\Feature\Feature|bool
+     * @return bool|Feature
      */
     public function updateFeature($feature, $data, $user) {
         DB::beginTransaction();
@@ -268,9 +274,6 @@ class FeatureService extends Service {
             }
             if (isset($data['species_id']) && $data['species_id'] == 'none') {
                 $data['species_id'] = null;
-            }
-            if (isset($data['subtype_id']) && $data['subtype_id'] == 'none') {
-                $data['subtype_id'] = null;
             }
 
             // More specific validation
@@ -283,17 +286,31 @@ class FeatureService extends Service {
             if ((isset($data['species_id']) && $data['species_id']) && !Species::where('id', $data['species_id'])->exists()) {
                 throw new \Exception('The selected species is invalid.');
             }
-            if (isset($data['subtype_id']) && $data['subtype_id']) {
-                $subtype = Subtype::find($data['subtype_id']);
+            if (isset($data['subtype_ids']) && $data['subtype_ids']) {
+                $subtype = Subtype::find($data['subtype_ids']);
                 if (!(isset($data['species_id']) && $data['species_id'])) {
                     throw new \Exception('Species must be selected to select a subtype.');
                 }
-                if (!$subtype || $subtype->species_id != $data['species_id']) {
-                    throw new \Exception('Selected subtype invalid or does not match species.');
+
+                foreach ($data['subtype_ids'] as $subtypeId) {
+                    $subtype = Subtype::find($subtypeId);
+                    if (!$subtype || $subtype->species_id != $data['species_id']) {
+                        throw new \Exception('Selected subtype invalid or does not match species.');
+                    }
                 }
+            } else {
+                $data['subtype_ids'] = [];
             }
 
             $data = $this->populateData($data);
+
+            // remove old subtypes
+            $feature->subtypes()->detach();
+            if (isset($data['subtype_ids']) && $data['subtype_ids']) {
+                foreach ($data['subtype_ids'] as $subtypeId) {
+                    $feature->subtypes()->attach($subtypeId);
+                }
+            }
 
             $image = null;
             if (isset($data['image']) && $data['image']) {
@@ -324,8 +341,8 @@ class FeatureService extends Service {
     /**
      * Deletes a feature.
      *
-     * @param \App\Models\Feature\Feature $feature
-     * @param mixed                       $user
+     * @param Feature $feature
+     * @param mixed   $user
      *
      * @return bool
      */
@@ -341,6 +358,8 @@ class FeatureService extends Service {
             if (!$this->logAdminAction($user, 'Deleted Feature', 'Deleted '.$feature->name)) {
                 throw new \Exception('Failed to log admin action.');
             }
+
+            $feature->subtypes()->detach();
 
             if ($feature->has_image) {
                 $this->deleteImage($feature->imagePath, $feature->imageFileName);
@@ -358,8 +377,8 @@ class FeatureService extends Service {
     /**
      * Handle category data.
      *
-     * @param array                                    $data
-     * @param \App\Models\Feature\FeatureCategory|null $category
+     * @param array                $data
+     * @param FeatureCategory|null $category
      *
      * @return array
      */
@@ -386,8 +405,8 @@ class FeatureService extends Service {
     /**
      * Processes user input for creating/updating a feature.
      *
-     * @param array                       $data
-     * @param \App\Models\Feature\Feature $feature
+     * @param array   $data
+     * @param Feature $feature
      *
      * @return array
      */
