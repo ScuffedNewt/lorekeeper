@@ -202,4 +202,8 @@
             @endif
         @endif
     </div>
+
+    @if (Auth::user()->hasPower('edit_user_info'))
+        @include('admin._recent_registrations', ['recentUsers' => $recentUsers])
+    @endif
 @endsection

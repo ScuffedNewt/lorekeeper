@@ -157,7 +157,17 @@ class DesignUpdateManager extends Service {
                     $imageData['use_cropper'] = isset($data['use_cropper']);
                 }
                 if (!$isAdmin && isset($data['image'])) {
-                    $imageData['extension'] = (config('lorekeeper.settings.masterlist_image_format') ? config('lorekeeper.settings.masterlist_image_format') : ($data['extension'] ?? $data['image']->getClientOriginalExtension()));
+                    if (config('lorekeeper.settings.store_masterlist_fullsizes')) {
+                        if (config('lorekeeper.settings.masterlist_fullsizes_format') != null) {
+                            $imageData['extension'] = config('lorekeeper.settings.masterlist_fullsizes_format');
+                        } else {
+                            $imageData['extension'] = $data['image']->getClientOriginalExtension();
+                        }
+                    } elseif (config('lorekeeper.settings.masterlist_image_format') != null) {
+                        $imageData['extension'] = config('lorekeeper.settings.masterlist_image_format');
+                    } else {
+                        $imageData['extension'] = $data['image']->getClientOriginalExtension();
+                    }
                     $imageData['has_image'] = true;
                 }
                 $request->update($imageData);
@@ -550,24 +560,23 @@ class DesignUpdateManager extends Service {
                 }
             }
 
-            $extension = config('lorekeeper.settings.masterlist_image_format') != null ? config('lorekeeper.settings.masterlist_image_format') : $request->extension;
-
             // Create a new image with the request data
             $image = CharacterImage::create([
-                'character_id'  => $request->character_id,
-                'is_visible'    => 1,
-                'hash'          => $request->hash,
-                'fullsize_hash' => $request->fullsize_hash ? $request->fullsize_hash : randomString(15),
-                'extension'     => $extension,
-                'use_cropper'   => $request->use_cropper,
-                'x0'            => $request->x0,
-                'x1'            => $request->x1,
-                'y0'            => $request->y0,
-                'y1'            => $request->y1,
-                'species_id'    => $request->species_id,
-                'subtype_id'    => ($request->character->is_myo_slot && isset($request->character->image->subtype_id)) ? $request->character->image->subtype_id : $request->subtype_id,
-                'rarity_id'     => $request->rarity_id,
-                'sort'          => 0,
+                'character_id'       => $request->character_id,
+                'is_visible'         => 1,
+                'hash'               => $request->hash,
+                'fullsize_hash'      => $request->fullsize_hash ? $request->fullsize_hash : randomString(15),
+                'extension'          => config('lorekeeper.settings.masterlist_image_format') != null ? config('lorekeeper.settings.masterlist_image_format') : $request->extension,
+                'fullsize_extension' => config('lorekeeper.settings.masterlist_fullsizes_format') != null ? config('lorekeeper.settings.masterlist_fullsizes_format') : $request->extension,
+                'use_cropper'        => $request->use_cropper,
+                'x0'                 => $request->x0,
+                'x1'                 => $request->x1,
+                'y0'                 => $request->y0,
+                'y1'                 => $request->y1,
+                'species_id'         => $request->species_id,
+                'subtype_id'         => ($request->character->is_myo_slot && isset($request->character->image->subtype_id)) ? $request->character->image->subtype_id : $request->subtype_id,
+                'rarity_id'          => $request->rarity_id,
+                'sort'               => 0,
             ]);
 
             // Shift the image credits over to the new image

@@ -302,7 +302,13 @@ class CharacterDesignUpdate extends Model {
      * @return string
      */
     public function getThumbnailFileNameAttribute() {
-        return $this->id.'_'.$this->hash.'_th.'.$this->extension;
+        if (config('lorekeeper.settings.masterlist_image_format') != null && config('lorekeeper.settings.masterlist_image_format') != $this->extension) {
+            $extension = config('lorekeeper.settings.masterlist_image_format');
+        } else {
+            $extension = $this->extension;
+        }
+
+        return $this->id.'_'.$this->hash.'_th.'.$extension;
     }
 
     /**

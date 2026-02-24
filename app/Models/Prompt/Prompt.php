@@ -237,7 +237,7 @@ class Prompt extends Model {
      * @return string
      */
     public function getDisplayNameAttribute() {
-        return '<a href="'.$this->url.'" class="display-prompt">'.$this->name.'</a>';
+        return '<a href="'.$this->idUrl.'" class="display-prompt">'.$this->name.'</a>';
     }
 
     /**
@@ -287,6 +287,15 @@ class Prompt extends Model {
      */
     public function getUrlAttribute() {
         return url('prompts/prompts?name='.$this->name);
+    }
+
+    /**
+     * Gets the URL of the individual prompt's page, by ID.
+     *
+     * @return string
+     */
+    public function getIdUrlAttribute() {
+        return url('prompts/'.$this->id);
     }
 
     /**

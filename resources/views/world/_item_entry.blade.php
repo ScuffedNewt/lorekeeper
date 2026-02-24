@@ -68,7 +68,7 @@
                 </p>
             @endif
             {!! $description !!}
-            @if (((isset($item->uses) && $item->uses) || (isset($item->source) && $item->source) || $shops->count() || (isset($item->data['prompts']) && $item->data['prompts'])) && config('lorekeeper.extensions.item_entry_expansion.extra_fields'))
+            @if (((isset($item->uses) && $item->uses) || (isset($item->source) && $item->source) || $item->shop_stock_count || (isset($item->data['prompts']) && $item->data['prompts'])) && config('lorekeeper.extensions.item_entry_expansion.extra_fields'))
                 <div class="text-right">
                     <a data-toggle="collapse" href="#item-{{ $item->id }}" class="text-primary">
                         <strong>Show details...</strong>
@@ -80,7 +80,7 @@
                             <strong>Uses:</strong> {{ $item->uses }}
                         </p>
                     @endif
-                    @if ((isset($item->source) && $item->source) || $shops->count() || (isset($item->data['prompts']) && $item->data['prompts']))
+                    @if ((isset($item->source) && $item->source) || $item->shop_stock_count || (isset($item->data['prompts']) && $item->data['prompts']))
                         <h5>Availability</h5>
                         <div class="row">
                             @if (isset($item->source) && $item->source)
@@ -93,13 +93,13 @@
                                     </p>
                                 </div>
                             @endif
-                            @if ($shops->count())
+                            @if ($item->shop_stock_count)
                                 <div class="col">
                                     <p>
                                         <strong>Purchaseable At:</strong>
                                     </p>
                                     <div class="row">
-                                        @foreach ($shops as $shop)
+                                        @foreach ($item->shops as $shop)
                                             <div class="col">
                                                 <a href="{{ $shop->url }}">
                                                     {{ $shop->name }}

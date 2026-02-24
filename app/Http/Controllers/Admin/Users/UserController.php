@@ -460,7 +460,9 @@ class UserController extends Controller {
                     $query->orderBy('updated_at', 'ASC');
                     break;
                 case 'most_users':
-                    $query->select('ip', DB::raw('COUNT(ip) as count'))->groupBy('ip')->orderBy('count', 'DESC');
+                    $query->select('ip', DB::raw('COUNT(ip) as user_count'), DB::raw('MAX(updated_at) as updated_at'))
+                        ->groupBy('ip')
+                        ->orderBy('user_count', 'DESC');
                     break;
                 case 'closely_updated':
                     $query->whereExists(function ($query) {
@@ -472,9 +474,9 @@ class UserController extends Controller {
                     });
                     break;
             }
+        } else {
+            $query->select('ip', DB::raw('MAX(updated_at) as updated_at'))->groupBy('ip')->orderBy('updated_at', 'DESC');
         }
-
-        $query->select('ip', DB::raw('MAX(updated_at)'))->groupBy('ip')->orderBy(DB::raw('MAX(updated_at)'), 'DESC');
 
         return view('admin.users.user_ips', [
             'ips'   => $query->paginate(30)->appends($request->query()),

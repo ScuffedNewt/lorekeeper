@@ -49,17 +49,7 @@
     @foreach ($items as $item)
         <div class="card mb-3">
             <div class="card-body">
-                <?php
-                $shops = App\Models\Shop\Shop::whereIn(
-                    'id',
-                    App\Models\Shop\ShopStock::where('item_id', $item->id)
-                        ->pluck('shop_id')
-                        ->toArray(),
-                )
-                    ->orderBy('sort', 'DESC')
-                    ->get();
-                ?>
-                @include('world._item_entry', ['imageUrl' => $item->imageUrl, 'name' => $item->displayName, 'description' => $item->parsed_description, 'idUrl' => $item->idUrl, 'shops' => $shops])
+                @include('world._item_entry', ['imageUrl' => $item->imageUrl, 'name' => $item->displayName, 'description' => $item->parsed_description, 'idUrl' => $item->idUrl])
             </div>
         </div>
     @endforeach

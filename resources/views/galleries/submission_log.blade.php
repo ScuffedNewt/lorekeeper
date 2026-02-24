@@ -9,13 +9,13 @@
 
     <h1>Log Details
         <span
-            class="float-right badge badge-{{ $submission->status == 'Pending' ? 'secondary' : ($submission->status == 'Accepted' ? 'success' : 'danger') }}">{{ $submission->collaboratorApproved ? $submission->status : 'Pending Collaborator Approval' }}</span>
+            class="float-right badge badge-{{ $submission->status == 'Pending' ? 'secondary' : ($submission->status == 'Accepted' ? 'success' : 'danger') }}">{{ $submission->collaboratorApproval ? $submission->status : 'Pending Collaborator Approval' }}</span>
     </h1>
 
     @include('galleries._queue_submission', ['key' => 0])
 
     <div class="row">
-        <div class="col-md">
+        <div class="col col-md">
             @if (Settings::get('gallery_submissions_reward_currency') && $submission->gallery->currency_enabled)
                 <div class="card mb-4">
                     <div class="card-header">
@@ -124,12 +124,12 @@
                             <div class="row mb-2">
                                 @foreach ($submission->data['currencyData'] as $key => $data)
                                     <div class="col-md-3 text-center">
-                                        @if (isset($data))
+                                        @if (isset($data) && isset(config('lorekeeper.group_currency_form')[$key]))
                                             <strong>{{ config('lorekeeper.group_currency_form')[$key]['name'] }}:</strong><br />
                                             @if (config('lorekeeper.group_currency_form')[$key]['type'] == 'choice')
                                                 @if (isset(config('lorekeeper.group_currency_form')[$key]['multiple']) && config('lorekeeper.group_currency_form')[$key]['multiple'] == 'true')
                                                     @foreach ($data as $answer)
-                                                        {{ config('lorekeeper.group_currency_form')[$key]['choices'][$answer] }}<br />
+                                                        {{ config('lorekeeper.group_currency_form')[$key]['choices'][$answer] ?? '-' }}<br />
                                                     @endforeach
                                                 @else
                                                     {{ config('lorekeeper.group_currency_form')[$key]['choices'][$data] }}
@@ -182,17 +182,17 @@
                 </div>
             </div>
         </div>
-        @if (Auth::user()->hasPower('manage_submissions') && $submission->collaboratorApproved)
-            <div class="col-md-5">
+        @if (Auth::user()->hasPower('manage_submissions') && $submission->collaboratorApproval)
+            <div class="col-12 col-md-5">
                 <div class="card mb-4">
                     <div class="card-header">
                         <h5>[Admin] Vote Info</h5>
                     </div>
                     <div class="card-body">
-                        @if (isset($submission->vote_data) && $submission->voteData->count())
-                            @foreach ($submission->voteData as $voter => $vote)
+                        @if ($submission->getVoteData()['raw']->count())
+                            @foreach ($submission->getVoteData(1)['raw'] as $vote)
                                 <li>
-                                    {!! App\Models\User\User::find($voter)->displayName !!} {{ $voter == Auth::user()->id ? '(you)' : '' }}: <span {!! $vote == 2 ? 'class="text-success">Accept' : 'class="text-danger">Reject' !!}</span>
+                                    {!! $vote['user']->displayName !!} {{ $vote['user']->id == Auth::user()->id ? '(you)' : '' }}: <span {!! $vote['vote'] == 2 ? 'class="text-success">Accept' : 'class="text-danger">Reject' !!}</span>
                                 </li>
                             @endforeach
                         @else

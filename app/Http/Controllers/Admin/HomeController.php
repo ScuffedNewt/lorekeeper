@@ -42,6 +42,7 @@ class HomeController extends Controller {
             'galleryCurrencyAwards'  => $galleryCurrencyAwards,
             'gallerySubmissionCount' => GallerySubmission::collaboratorApproved()->where('status', 'Pending')->count(),
             'galleryAwardCount'      => GallerySubmission::requiresAward()->where('is_valued', 0)->count(),
+            'recentUsers'            => User::orderBy('id', 'DESC')->take(10)->get(),
         ]);
     }
 

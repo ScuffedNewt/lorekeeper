@@ -243,7 +243,7 @@ class CharacterManager extends Service {
             }
 
             // Save the processed image
-            $image->save($characterImage->imagePath.'/'.$characterImage->fullsizeFileName, 100, config('lorekeeper.settings.masterlist_fullsizes_format'));
+            $image->save($characterImage->imagePath.'/'.$characterImage->fullsizeFileName, 100, config('lorekeeper.settings.masterlist_fullsizes_format') != null ? config('lorekeeper.settings.masterlist_fullsizes_format') : $characterImage->fullsize_extension);
         } else {
             // Delete fullsize if it was previously created.
             if (isset($characterImage->fullsize_hash) ? file_exists(public_path($characterImage->imageDirectory.'/'.$characterImage->fullsizeFileName)) : false) {
@@ -255,7 +255,7 @@ class CharacterManager extends Service {
         if (config('lorekeeper.settings.masterlist_image_dimension') != 0) {
             if ($image->width() > $image->height()) {
                 // Landscape
-                if (config('lorekeeper.settings.masterlist_image_dimension_target') == 'short') {
+                if (config('lorekeeper.settings.masterlist_image_dimension_target') == 'shorter') {
                     $image->resize(null, config('lorekeeper.settings.masterlist_image_dimension'), function ($constraint) {
                         $constraint->aspectRatio();
                         $constraint->upsize();
@@ -268,7 +268,7 @@ class CharacterManager extends Service {
                 }
             } else {
                 // Portrait
-                if (config('lorekeeper.settings.masterlist_image_dimension_target') == 'short') {
+                if (config('lorekeeper.settings.masterlist_image_dimension_target') == 'shorter') {
                     $image->resize(config('lorekeeper.settings.masterlist_image_dimension'), null, function ($constraint) {
                         $constraint->aspectRatio();
                         $constraint->upsize();
@@ -623,6 +623,15 @@ class CharacterManager extends Service {
                 if (!$subtype || $subtype->species_id != $data['species_id']) {
                     throw new \Exception('Selected subtype invalid or does not match species.');
                 }
+            }
+
+            //Check that species & rarity are selected
+            if (!(isset($data['species_id']) && $data['species_id'])) {
+                throw new \Exception('Characters require a species.');
+            }
+
+            if (!(isset($data['rarity_id']) && $data['rarity_id'])) {
+                throw new \Exception('Characters require a rarity.');
             }
 
             if (!$this->logAdminAction($user, 'Updated Image', 'Updated character image features on <a href="'.$image->character->url.'">#'.$image->id.'</a>')) {
@@ -1126,7 +1135,7 @@ class CharacterManager extends Service {
                     $old['number'] = $character->number;
                     $new['number'] = $characterData['number'];
                 }
-                if ($characterData['slug'] != $character->number) {
+                if ($characterData['slug'] != $character->slug) {
                     $result[] = 'character code';
                     $old['slug'] = $character->slug;
                     $new['slug'] = $characterData['slug'];
@@ -1523,7 +1532,7 @@ class CharacterManager extends Service {
             if ($sender) {
                 Notifications::create('CHARACTER_SENT', $sender, [
                     'character_name' => $character->slug,
-                    'character_slug' => $character->slug,
+                    'character_url'  => $character->is_myo_slot ? 'myo/'.$character->id : 'character/'.$character->slug,
                     'sender_name'    => $user->name,
                     'sender_url'     => $user->url,
                     'recipient_name' => is_object($recipient) ? $recipient->name : prettyProfileName($recipient),
@@ -1533,7 +1542,7 @@ class CharacterManager extends Service {
             if (is_object($recipient)) {
                 Notifications::create('CHARACTER_RECEIVED', $recipient, [
                     'character_name' => $character->slug,
-                    'character_slug' => $character->slug,
+                    'character_url'  => $character->is_myo_slot ? 'myo/'.$character->id : 'character/'.$character->slug,
                     'sender_name'    => $user->name,
                     'sender_url'     => $user->url,
                 ]);

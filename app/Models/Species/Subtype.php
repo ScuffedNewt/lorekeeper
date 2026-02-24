@@ -29,6 +29,7 @@ class Subtype extends Model {
     protected $appends = [
         'name_with_species',
     ];
+
     /**
      * Validation rules for creation.
      *
