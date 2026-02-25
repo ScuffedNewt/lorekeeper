@@ -12,26 +12,26 @@
     </h1>
 
     @if ($raffle->parsed_description)
-        {!! $raffle->parsed_description !!} 
+        {!! $raffle->parsed_description !!}
         <hr>
     @endif
     @if (getRewards($raffle, true)->where('data->type', 'winner_reward')->count())
-        <p>A total of {{ $raffle->winner_count}} winner(s) {{ $raffle->is_active == 2 ? 'have received' : 'will receive' }} the following rewards:</p>
+        <p>A total of {{ $raffle->winner_count }} winner(s) {{ $raffle->is_active == 2 ? 'have received' : 'will receive' }} the following rewards:</p>
         @php
-            $winnerRewards = getRewards($raffle, true)
-                ->where('data->type', 'winner_reward')
-                ->get();
+            $winnerRewards = getRewards($raffle, true)->where('data->type', 'winner_reward')->get();
 
-            $grouped = $winnerRewards->groupBy(function ($reward) {
-                return data_get($reward->data, 'position', 1); // or $reward->data['position'] ?? 1
-            })->sortKeys();
+            $grouped = $winnerRewards
+                ->groupBy(function ($reward) {
+                    return data_get($reward->data, 'position', 1); // or $reward->data['position'] ?? 1
+                })
+                ->sortKeys();
         @endphp
-        @foreach($grouped as $position => $rewards)
+        @foreach ($grouped as $position => $rewards)
             <div class="card mb-3">
-                <div class="card-header h4">{{  $position ? 'Winner #'.$position : 'All Winners' }}</div>
+                <div class="card-header h4">{{ $position ? 'Winner #' . $position : 'All Winners' }}</div>
                 <div class="card-body">
                     <div class="row">
-                        @foreach($rewards as $reward)
+                        @foreach ($rewards as $reward)
                             <div class="col-md-3 mt-3 text-center">
                                 @if ($reward->reward->imageUrl)
                                     <div class="mb-2">
@@ -137,7 +137,7 @@
         <div class="card-header h2">Tickets</div>
         <div class="card-body">
             @if (Auth::check() && count($tickets))
-                <?php $chance = number_format((float) (($userCount / $count) * 100), 1, '.', ''); // Change 1 to 0 if you want no decimal place.?>
+                <?php $chance = number_format((float) (($userCount / $count) * 100), 1, '.', ''); // Change 1 to 0 if you want no decimal place. ?>
                 <p class="text-center mb-0">You {{ $raffle->is_active == 2 ? 'had' : 'have' }} <strong>{{ $userCount }}</strong> out of <strong>{{ $count }} tickets</strong> in this raffle.</p>
                 <p class="text-center"> That's a <strong>{{ $chance }}%</strong> chance! </p>
             @endif
