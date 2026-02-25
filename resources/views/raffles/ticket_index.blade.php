@@ -11,6 +11,42 @@
         Raffle: {{ $raffle->name }} {{ $raffle->is_fto ? ' (FTO / Non-Owner Only)' : '' }}
     </h1>
 
+    @if ($raffle->parsed_description)
+        {!! $raffle->parsed_description !!} 
+        <hr>
+    @endif
+    @if (getRewards($raffle, true)->where('data->type', 'winner_reward')->count())
+        <p>A total of {{ $raffle->winner_count}} winner(s) {{ $raffle->is_active == 2 ? 'have received' : 'will receive' }} the following rewards:</p>
+        @php
+            $winnerRewards = getRewards($raffle, true)
+                ->where('data->type', 'winner_reward')
+                ->get();
+
+            $grouped = $winnerRewards->groupBy(function ($reward) {
+                return data_get($reward->data, 'position', 1); // or $reward->data['position'] ?? 1
+            })->sortKeys();
+        @endphp
+        @foreach($grouped as $position => $rewards)
+            <div class="card mb-3">
+                <div class="card-header h4">{{  $position ? 'Winner #'.$position : 'All Winners' }}</div>
+                <div class="card-body">
+                    <div class="row">
+                        @foreach($rewards as $reward)
+                            <div class="col-md-3 mt-3 text-center">
+                                @if ($reward->reward->imageUrl)
+                                    <div class="mb-2">
+                                        <img class="border rounded img-fluid" src="{{ $reward->reward->imageUrl }}" alt="{{ $reward->reward->name }}" />
+                                    </div>
+                                @endif
+                                <span class="mr-1">{{ $reward->quantity }}x</span> {!! $reward->reward->displayName !!}
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    @endif
+
     @if ($raffle->is_active == 1)
         @if ($raffle->end_at)
             @if ($raffle->end_at < Carbon\Carbon::now())
@@ -26,13 +62,13 @@
                 <div class="alert alert-warning mb-2">This raffle will close {{ $raffle->end_at->format('F j, Y g:i A') }}.</div>
             @endif
         @endif
-        @if ($raffle->rewards->count())
+        @if (getRewards($raffle, true)->where('data->type', 'entry_reward')->count())
             <div class="alert alert-info mb-2">
                 This raffle gives you rewards for entering!<br>
                 <a class="card-title collapse-title" data-toggle="collapse" href="#rewards">View Rewards</a>
                 <div id="rewards" class="collapse">
-                    <ul>
-                        @foreach ($raffle->rewards as $reward)
+                    <ul class="mb-0">
+                        @foreach (getRewards($raffle, true)->where('data->type', 'entry_reward')->get() as $reward)
                             <li>{!! $reward->reward->displayName !!} x {{ $reward->quantity }}</li>
                         @endforeach
                     </ul>
@@ -97,49 +133,52 @@
         </div>
     @endif
 
-    <h3>Tickets</h3>
+    <div class="card">
+        <div class="card-header h2">Tickets</div>
+        <div class="card-body">
+            @if (Auth::check() && count($tickets))
+                <?php $chance = number_format((float) (($userCount / $count) * 100), 1, '.', ''); // Change 1 to 0 if you want no decimal place.?>
+                <p class="text-center mb-0">You {{ $raffle->is_active == 2 ? 'had' : 'have' }} <strong>{{ $userCount }}</strong> out of <strong>{{ $count }} tickets</strong> in this raffle.</p>
+                <p class="text-center"> That's a <strong>{{ $chance }}%</strong> chance! </p>
+            @endif
 
-    @if (Auth::check() && count($tickets))
-        <?php $chance = number_format((float) (($userCount / $count) * 100), 1, '.', ''); //Change 1 to 0 if you want no decimal place. ?>
-        <p class="text-center mb-0">You {{ $raffle->is_active == 2 ? 'had' : 'have' }} <strong>{{ $userCount }}</strong> out of <strong>{{ $count }} tickets</strong> in this raffle.</p>
-        <p class="text-center"> That's a <strong>{{ $chance }}%</strong> chance! </p>
-    @endif
+            <div class="text-right">{!! $tickets->render() !!}</div>
 
-    <div class="text-right">{!! $tickets->render() !!}</div>
-
-    <div class="mb-4 logs-table">
-        <div class="logs-table-header">
-            <div class="row no-gutters font-weight-bold">
-                <div class="col-2 col-md-1">
-                    <div class="logs-table-cell">#</div>
-                </div>
-                <div class="col">
-                    <div class="logs-table-cell">User</div>
-                </div>
-            </div>
-        </div>
-        <div class="logs-table-body">
-            @foreach ($tickets as $count => $ticket)
-                <div class="logs-table-row">
-                    <div class="row no-gutters flex-wrap">
+            <div class="mb-4 logs-table">
+                <div class="logs-table-header">
+                    <div class="row no-gutters font-weight-bold">
                         <div class="col-2 col-md-1">
-                            <div class="logs-table-cell">
-                                {{ $page * 100 + $count + 1 }}
-                                @if (Auth::check() && $ticket->user_id && $ticket->user->name == Auth::user()->name)
-                                    <i class="fas fa-ticket-alt ml-1"></i>
-                                @endif
-                            </div>
+                            <div class="logs-table-cell">#</div>
                         </div>
                         <div class="col">
-                            <div class="logs-table-cell">{!! $ticket->displayHolderName !!}</div>
+                            <div class="logs-table-cell">User</div>
                         </div>
                     </div>
                 </div>
-            @endforeach
+                <div class="logs-table-body">
+                    @foreach ($tickets as $count => $ticket)
+                        <div class="logs-table-row">
+                            <div class="row no-gutters flex-wrap">
+                                <div class="col-2 col-md-1">
+                                    <div class="logs-table-cell">
+                                        {{ $page * 100 + $count + 1 }}
+                                        @if (Auth::check() && $ticket->user_id && $ticket->user->name == Auth::user()->name)
+                                            <i class="fas fa-ticket-alt ml-1"></i>
+                                        @endif
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="logs-table-cell">{!! $ticket->displayHolderName !!}</div>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+            <div class="text-right">{!! $tickets->render() !!}</div>
         </div>
     </div>
-
-    <div class="text-right">{!! $tickets->render() !!}</div>
 
     @include('raffles._logs', ['raffle' => $raffle])
 @endsection

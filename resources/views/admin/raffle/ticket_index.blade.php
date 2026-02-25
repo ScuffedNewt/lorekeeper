@@ -188,7 +188,7 @@
                     <div class="ticket-row hide mb-2">
                         {!! Form::select('user_id[]', $users, null, ['class' => 'form-control mr-2 user-select', 'placeholder' => 'Select User']) !!}
                         {!! Form::text('alias[]', null, ['class' => 'form-control mr-2', 'placeholder' => 'OR Enter Alias']) !!}
-                        {!! Form::number('ticket_count[]', null, ['class' => 'form-control mr-2', 'placeholder' => 'Ticket Count']) !!}
+                        {!! Form::number('ticket_count[]', 1, ['class' => 'form-control mr-2', 'placeholder' => 'Ticket Count', 'min' => 1]) !!}
                         <a href="#" class="remove-ticket btn btn-danger mb-2">×</a>
                     </div>
                 </div>

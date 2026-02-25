@@ -2,8 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\Currency\Currency;
-use App\Models\Item\Item;
 use App\Models\Raffle\Raffle;
 use App\Models\Raffle\RaffleLog;
 use App\Models\Raffle\RaffleTicket;
@@ -75,7 +73,7 @@ class RaffleManager extends Service {
             }
             $data = ['raffle_id' => $raffle->id, 'created_at' => Carbon::now()] + (is_string($user) ? ['alias' => $user] : ['user_id' => $user->id]);
             if (is_object($user)) {
-                $this->grantRewards($raffle, $user);
+                $this->grantEntryRewards($raffle, $user);
             }
             for ($i = 0; $i < $count; $i++) {
                 RaffleTicket::create($data);
@@ -120,7 +118,7 @@ class RaffleManager extends Service {
                 'created_at' => Carbon::now(),
             ]);
 
-            $this->grantRewards($raffle, $user);
+            $this->grantEntryRewards($raffle, $user);
 
             return $this->commitReturn(true);
         } catch (\Exception $e) {
@@ -189,12 +187,34 @@ class RaffleManager extends Service {
      * @return bool
      */
     public function rollRaffle($raffle, $updateGroup = false) {
-        if (!$raffle) {
-            return null;
-        }
         DB::beginTransaction();
-        // roll winners
-        if ($winners = $this->rollWinners($raffle)) {
+
+        try {
+            if (!$raffle) {
+                throw new \Exception('Raffle not found.');
+            }
+            if ($raffle->rolled_at != null) {
+                throw new \Exception('This raffle has already been rolled.');
+            }
+
+            // roll winners
+            $winners = $this->rollWinners($raffle);
+            if (!$winners) {
+                throw new \Exception('Failed to roll winners.');
+            }
+
+            // grant rewards to winners, if there are any
+            if (getRewards($raffle, true)->where('data->type', 'winner_reward')->count()) {
+                $winnerTickets = $raffle->tickets()->whereNotNull('position')->get();
+                foreach ($winnerTickets as $ticket) {
+                    if ($ticket->user) {
+                        if (!$this->grantWinnerRewards($raffle, $ticket, $ticket->user)) {
+                            throw new \Exception('Failed to grant rewards to winners.');
+                        }
+                    }
+                }
+            }
+
             // mark raffle as finished
             $raffle->is_active = 2;
             $raffle->rolled_at = Carbon::now();
@@ -202,17 +222,15 @@ class RaffleManager extends Service {
 
             // updates the raffle group if necessary
             if ($updateGroup && !$this->afterRoll($winners, $raffle->group, $raffle)) {
-                DB::rollback();
-
-                return false;
+                throw new \Exception('Failed to update raffle group.');
             }
-            DB::commit();
 
-            return true;
+            return $this->commitReturn(true);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
         }
-        DB::rollback();
 
-        return false;
+        return $this->rollbackReturn(false);
     }
 
     /**
@@ -276,16 +294,17 @@ class RaffleManager extends Service {
      * @param mixed $raffle
      * @param mixed $user
      */
-    private function grantRewards($raffle, $user) {
-        if ($raffle->rewards->count() > 0) {
+    private function grantEntryRewards($raffle, $user) {
+        $rewards = getRewards($raffle, true)->where('data->type', 'entry_reward')->get();
+        if (count($rewards)) {
             // check user hasn't already received rewards
             if ($raffle->logs()->where('user_id', $user->id)->where('type', 'Reward')->exists()) {
-                flash('This user ('.$user->name.') has already received rewards for entering.')->info();
+                flash('The user ('.$user->name.') has already received rewards for entering.')->info();
 
                 return;
             }
             // Get the updated set of rewards
-            $rewards = $this->processRewards($raffle->rewards, false, true);
+            $rewards = processRewards($rewards, false);
 
             // Logging data
             $logType = 'Raffle Entry Rewards';
@@ -307,38 +326,6 @@ class RaffleManager extends Service {
                 'created_at' => Carbon::now(),
             ]);
         }
-    }
-
-    /**
-     * Processes reward data into a format that can be used for distribution.
-     *
-     * @param mixed $rewards
-     *
-     * @return array
-     */
-    private function processRewards($rewards) {
-        $assets = createAssetsArray(false);
-        // Process the additional rewards
-        foreach ($rewards as $reward) {
-            $asset = null;
-            switch ($reward->rewardable_type) {
-                case 'Item':
-                    $asset = Item::find($reward->rewardable_id);
-                    break;
-                case 'Currency':
-                    $asset = Currency::find($reward->rewardable_id);
-                    if (!$asset->is_user_owned) {
-                        throw new \Exception('Invalid currency selected.');
-                    }
-                    break;
-            }
-            if (!$asset) {
-                continue;
-            }
-            addAsset($assets, $asset, $reward->quantity);
-        }
-
-        return $assets;
     }
 
     /**
@@ -421,6 +408,13 @@ class RaffleManager extends Service {
         return true;
     }
 
+    /**
+     * Logs a raffle reroll.
+     *
+     * @param mixed $ticket
+     * @param mixed $reason
+     * @param mixed $user
+     */
     private function logReroll($ticket, $reason, $user) {
         DB::beginTransaction();
 
@@ -438,5 +432,34 @@ class RaffleManager extends Service {
         }
 
         return $this->rollbackReturn(false);
+    }
+
+    /**
+     * Grants the due rewards from a raffle to a winner.
+     *
+     * @param Raffle       $raffle
+     * @param RaffleTicket $ticket
+     * @param User         $user
+     *
+     * @return bool
+     */
+    private function grantWinnerRewards($raffle, $ticket, $user) {
+        // Logging data
+        $logType = 'Raffle Winner Reward';
+        $data = [
+            'data' => 'Received reward for winning the raffle '.$raffle->name.' (<a href="'.$raffle->url.'">#'.$raffle->id.'</a>)',
+        ];
+
+        $position = $ticket->position;
+        $positionRewards = getRewards($raffle, true)->where('data->type', 'winner_reward')->where('data->position', $position)->get();
+        $genericRewards = getRewards($raffle, true)->where('data->type', 'winner_reward')->whereNull('data->position')->get();
+        $rewards = processRewards($positionRewards->merge($genericRewards), false);
+
+        // Distribute user rewards
+        if (!$rewards = fillUserAssets($rewards, null, $user, $logType, $data)) {
+            throw new \Exception('Failed to distribute rewards to user.');
+        }
+
+        return true;
     }
 }

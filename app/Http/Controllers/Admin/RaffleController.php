@@ -76,24 +76,24 @@ class RaffleController extends Controller {
      * @return \Illuminate\Http\RedirectResponse
      */
     public function postCreateEditRaffle(Request $request, RaffleService $service, $id = null) {
-        $data = $request->only(['name', 'is_active', 'winner_count', 'group_id', 'order', 'allow_entry', 'is_fto', 'unordered', 'rewardable_type', 'rewardable_id', 'quantity', 'ticket_cap',
-            'end_at', 'roll_on_end',
+        $data = $request->only([
+            'name', 'is_active', 'winner_count', 'group_id', 'order', 'allow_entry', 'is_fto', 'unordered', 'rewardable_type', 'rewardable_id', 'quantity', 'ticket_cap',
+            'end_at', 'roll_on_end', 'description',
+            'entry_rewardable_type', 'entry_rewardable_id', 'entry_quantity',
+            'winner_rewardable_type', 'winner_rewardable_id', 'winner_quantity', 'winner_position',
         ]);
-        $raffle = null;
-        if (!$id) {
-            $raffle = $service->createRaffle($data);
-        } elseif ($id) {
-            $raffle = $service->updateRaffle($data, Raffle::find($id));
-        }
-        if ($raffle) {
-            flash('Raffle '.($id ? 'updated' : 'created').' successfully!')->success();
-
-            return redirect()->back();
+        if ($id && $raffle = $service->updateRaffle($data, Raffle::find($id))) {
+            flash('Raffle updated successfully!')->success();
+        } elseif (!$id && $raffle = $service->createRaffle($data)) {
+            flash('Raffle created successfully!')->success();
         } else {
-            flash('Couldn\'t create raffle.')->error();
-
-            return redirect()->back()->withInput();
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
+            flash("Couldn't ".($id ? 'update' : 'create').' raffle.')->error();
         }
+
+        return redirect()->back();
     }
 
     /**
@@ -241,6 +241,9 @@ class RaffleController extends Controller {
 
             return redirect()->back();
         } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
             flash('Error in rolling winners.')->error();
 
             return redirect()->back()->withInput();
