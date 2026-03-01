@@ -29,29 +29,23 @@
         <div class="sidebar-item"><a href="{{ url('world/pet-categories') }}" class="{{ set_active('world/pet-categories*') }}">Pet Categories</a></div>
         <div class="sidebar-item"><a href="{{ url('world/pets') }}" class="{{ set_active('world/pets*') }}">All Pets</a></div>
     </li>
-    @if (
-        config('lorekeeper.claymores_and_companions.visibility_settings.user_levels') ||
-        config('lorekeeper.claymores_and_companions.visibility_settings.character_levels') ||
-        config('lorekeeper.claymores_and_companions.visibility_settings.character_stats')
-    )
+    @if (config('lorekeeper.claymores_and_companions.visibility_settings.user_levels') ||
+            config('lorekeeper.claymores_and_companions.visibility_settings.character_levels') ||
+            config('lorekeeper.claymores_and_companions.visibility_settings.character_stats'))
         <li class="sidebar-section">
             <div class="sidebar-section-header">Levels</div>
             @if (config('lorekeeper.claymores_and_companions.visibility_settings.user_levels'))
-                 <div class="sidebar-item"><a href="{{ url('world/levels') }}" class="{{ set_active('world/levels/user*') }}">User Levels</a></div>
+                <div class="sidebar-item"><a href="{{ url('world/levels') }}" class="{{ set_active('world/levels/user*') }}">User Levels</a></div>
             @endif
             @if (config('lorekeeper.claymores_and_companions.visibility_settings.character_levels'))
-                 <div class="sidebar-item"><a href="{{ url('world/levels/character') }}" class="{{ set_active('world/levels/character*') }}">Character Levels</a></div>
+                <div class="sidebar-item"><a href="{{ url('world/levels/character') }}" class="{{ set_active('world/levels/character*') }}">Character Levels</a></div>
             @endif
             @if (config('lorekeeper.claymores_and_companions.visibility_settings.character_stats'))
-                 <div class="sidebar-item"><a href="{{ url('world/character-stats') }}" class="{{ set_active('world/character-stats*') }}">Character Stats</a></div>
+                <div class="sidebar-item"><a href="{{ url('world/character-stats') }}" class="{{ set_active('world/character-stats*') }}">Character Stats</a></div>
             @endif
         </li>
     @endif
-    @if (
-        config('lorekeeper.claymores_and_companions.visibility_settings.skills') ||
-        config('lorekeeper.claymores_and_companions.visibility_settings.weapons') ||
-        config('lorekeeper.claymores_and_companions.visibility_settings.gear')
-    )
+    @if (config('lorekeeper.claymores_and_companions.visibility_settings.skills') || config('lorekeeper.claymores_and_companions.visibility_settings.weapons') || config('lorekeeper.claymores_and_companions.visibility_settings.gear'))
         <li class="sidebar-section">
             <div class="sidebar-section-header">Claymore</div>
             @if (config('lorekeeper.claymores_and_companions.visibility_settings.skills'))

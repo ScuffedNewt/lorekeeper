@@ -196,10 +196,7 @@
                             </div>
                         </div>
                     @endif
-                    @if (
-                        (config('lorekeeper.claymores_and_companions.visibility_settings.gear') || config('lorekeeper.claymores_and_companions.visibility_settings.weapons')) &&
-                        count($image->character->equipment())
-                    )
+                    @if ((config('lorekeeper.claymores_and_companions.visibility_settings.gear') || config('lorekeeper.claymores_and_companions.visibility_settings.weapons')) && count($image->character->equipment()))
                         <div class="mb-1 mt-4">
                             <div class="mb-0">
                                 <h5>Equipment</h5>

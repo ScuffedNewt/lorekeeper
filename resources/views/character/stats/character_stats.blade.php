@@ -60,10 +60,7 @@
                         @endforeach
                     </div>
                 @endforeach
-                @if (
-                    (config('lorekeeper.claymores_and_companions.visibility_settings.gear') || config('lorekeeper.claymores_and_companions.visibility_settings.weapons')) &&
-                    count($character->equipment())
-                )
+                @if ((config('lorekeeper.claymores_and_companions.visibility_settings.gear') || config('lorekeeper.claymores_and_companions.visibility_settings.weapons')) && count($character->equipment()))
                     <hr class="my-3">
                     <h4>Current Equipment</h4>
                     <div class="row justify-content-center">

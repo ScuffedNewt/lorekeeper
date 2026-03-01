@@ -65,7 +65,7 @@
         </div>
     @endif
 
-    @if(config('lorekeeper.claymores_and_companions.visibility_settings.weapons'))
+    @if (config('lorekeeper.claymores_and_companions.visibility_settings.weapons'))
         <div class="card mb-3">
             <div class="card-header h3" data-toggle="collapse" data-target="#weapons">
                 Weapons <i class="fas fa-crosshairs"></i>

@@ -23,7 +23,7 @@
     <p>All {{ $type }}s start at level one</p>
     <div class="row">
         <div class="col-md form-group">
-            {!! Form::label('Level Name') !!} 
+            {!! Form::label('Level Name') !!}
             <p>Can be standard like "level 1" or something unique like "Apprentice"</p>
             {!! Form::text('name', $level->name, ['class' => 'form-control']) !!}
         </div>

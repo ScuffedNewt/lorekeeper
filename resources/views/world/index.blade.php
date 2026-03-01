@@ -33,10 +33,10 @@
                         <li class="list-group-item"><a href="{{ url('world/character-classes') }}">Character Classes</a></li>
                     @endif
                     @if (config('lorekeeper.claymores_and_companions.visibility_settings.levels'))
-                         <li class="list-group-item"><a href="{{ url('world/levels') }}">Levels</a></li>
+                        <li class="list-group-item"><a href="{{ url('world/levels') }}">Levels</a></li>
                     @endif
                     @if (config('lorekeeper.claymores_and_companions.visibility_settings.character_stats'))
-                         <li class="list-group-item"><a href="{{ url('world/character-stats') }}">Character Stats</a></li>
+                        <li class="list-group-item"><a href="{{ url('world/character-stats') }}">Character Stats</a></li>
                     @endif
                 </ul>
             </div>

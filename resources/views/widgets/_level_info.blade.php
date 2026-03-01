@@ -31,7 +31,8 @@
             @else
                 {{ $level->experience?->quantity ?? 0 }} Exp (Max Level)
                 <div class="progress">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="{{ $level->experience?->quantity ?? 0 }}" aria-valuemin="0" aria-valuemax="{{ $level->experience?->quantity ?? 0 }}" style="width:100%">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="{{ $level->experience?->quantity ?? 0 }}" aria-valuemin="0" aria-valuemax="{{ $level->experience?->quantity ?? 0 }}"
+                        style="width:100%">
                         {{ $level->experience?->quantity ?? 0 }}
                     </div>
                 </div>

@@ -25,7 +25,8 @@
             </div>
             <div class="card-body">
                 <p>Stat points can be spent on your character's stats. These stats are used to determine your character's strength in battle.</p>
-                <p>Each stat point spent on a stat will increase that stat by a predetermined sum. Each stat has a base value, which is the value of the stat without any stat points spent on it. The base value of a stat can be increased by equipping items
+                <p>Each stat point spent on a stat will increase that stat by a predetermined sum. Each stat has a base value, which is the value of the stat without any stat points spent on it. The base value of a stat can be increased by equipping
+                    items
                     that increase that stat.</p>
                 <p>Each stat has a maximum value, which is the maximum value that stat can be leveled to.</p>
                 <p><a href="{{ url('characters') }}" class="text-info">View Characters</a></p>
