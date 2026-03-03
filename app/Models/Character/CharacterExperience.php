@@ -2,8 +2,8 @@
 
 namespace App\Models\Character;
 
-use App\Models\Claymore\Experience;
 use App\Models\Model;
+use App\Models\Stat\Experience;
 
 class CharacterExperience extends Model {
     /**

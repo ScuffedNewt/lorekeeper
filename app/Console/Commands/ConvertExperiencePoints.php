@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Character\CharacterExperience;
 use App\Models\Character\CharacterLevel;
-use App\Models\Claymore\Experience;
+use App\Models\Stat\Experience;
 use App\Models\User\UserExperience;
 use App\Models\User\UserLevel;
 use Illuminate\Console\Command;

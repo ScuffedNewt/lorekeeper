@@ -2,8 +2,8 @@
 
 namespace App\Models\User;
 
-use App\Models\Claymore\Experience;
 use App\Models\Model;
+use App\Models\Stat\Experience;
 
 class UserExperience extends Model {
     /**
