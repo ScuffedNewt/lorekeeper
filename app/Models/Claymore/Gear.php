@@ -235,7 +235,7 @@ class Gear extends Model {
      * @return string
      */
     public function getUrlAttribute() {
-        return url('world/gear?name='.$this->name);
+        return url('world/gears?name='.$this->name);
     }
 
     /**
@@ -244,7 +244,7 @@ class Gear extends Model {
      * @return string
      */
     public function getIdUrlAttribute() {
-        return url('world/gear/'.$this->id);
+        return url('world/gears/'.$this->id);
     }
 
     /**
