@@ -507,6 +507,7 @@ class PetManager extends Service {
                 if(isset($newPet->dropData)) {
                     if($pet->drops->drop_id !== $newPet->dropData->id) {
                         $pet->drops->drop_id = $newPet->dropData->id;
+                        $pet->drops->save();
                     }
                 } else {
                     //the new variant does not have drops, so we discard the old drops row
