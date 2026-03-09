@@ -31,6 +31,7 @@
         {!! Form::close() !!}
     </div>
 
+    {!! $levels->render() !!}
     @if (!count($levels))
         <p>No levels found.</p>
     @else
@@ -68,4 +69,6 @@
             </tbody>
         </table>
     @endif
+    {!! $levels->render() !!}
+    
 @endsection

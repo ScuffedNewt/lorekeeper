@@ -66,6 +66,7 @@
 
 @section('scripts')
     @parent
+    @include('js._tinymce_wysiwyg')
     <script>
         $(document).ready(function() {
             $('.delete-category-button').on('click', function(e) {

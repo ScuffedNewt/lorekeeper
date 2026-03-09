@@ -74,7 +74,12 @@
         </div>
         <div class="col-md form-group">
             {!! Form::label('Colour') !!} {!! add_help('This is the colour that will be used to display the stat on the character page. Set it to white to disable.') !!}
-            {!! Form::color('colour', $stat->colour, ['class' => 'form-control']) !!}
+            <div class="input-group cp">
+                {!! Form::text('colour', $stat->colour, ['class' => 'form-control']) !!}
+                <span class="input-group-append">
+                    <span class="input-group-text colorpicker-input-addon"><i></i></span>
+                </span>
+            </div>
         </div>
     </div>
 

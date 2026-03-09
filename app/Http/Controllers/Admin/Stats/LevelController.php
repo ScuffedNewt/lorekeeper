@@ -17,18 +17,18 @@ class LevelController extends Controller {
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function getLevels($type = 'Character') {
+    public function getLevels(Request $request, $type = 'Character') {
         $levels = Level::ordered($type);
 
-        $page = (int) request('page', 1);
-        $perPage = 20;
+        //$page = (int) request('page', 1);
+        //$perPage = 20;
 
         return view('admin.levels.levels', [
             'type'   => $type,
-            'levels' => $levels->forPage($page, $perPage),
+            'levels' => $levels->paginate(20)->appends($request->query()),
         ]);
     }
-
+    
     /**
      * Shows the create level page.
      *

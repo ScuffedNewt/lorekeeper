@@ -153,8 +153,8 @@ Route::group(['prefix' => 'world'], function () {
     Route::get('weapons', 'WorldController@getWeapons');
     Route::get('weapons/{id}', 'WorldController@getWeapon');
     Route::get('gear-categories', 'WorldController@getGearCategories');
-    Route::get('gear', 'WorldController@getGears');
-    Route::get('gear/{id}', 'WorldController@getGear');
+    Route::get('gears', 'WorldController@getGears');
+    Route::get('gears/{id}', 'WorldController@getGear');
     Route::get('character-classes', 'WorldController@getCharacterClasses');
     Route::get('skill-categories', 'WorldController@getSkillCategories');
     Route::get('skills', 'WorldController@getSkills');

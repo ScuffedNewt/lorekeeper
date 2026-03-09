@@ -23,9 +23,9 @@
     @foreach ($categories as $category)
         <div class="card mb-3">
             <div class="card-body">
-                @include('world._claymore_entry', [
+                @include('world._entry', [
                     'edit' => ['object' => $category, 'title' => 'Gear Category'],
-                    'item' => null,
+                    'item' => $category,
                     'imageUrl' => $category->categoryImageUrl,
                     'name' => $category->displayName,
                     'description' => $category->parsed_description,
