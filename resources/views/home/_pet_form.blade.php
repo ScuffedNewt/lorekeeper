@@ -79,9 +79,9 @@
     <li class="list-group-item">
         <a class="card-title h5 collapse-title" data-toggle="collapse" href="#userVariantForm">Change Pet Variant</a>
         {!! Form::open(['url' => 'pets/variant/' . $pet->id, 'id' => 'userVariantForm', 'class' => 'collapse']) !!}
-        @if(isset($pet->drops) && $pet->drops->drops_available > 0)
+        @if (isset($pet->drops) && $pet->drops->drops_available > 0)
             <div class="alert alert-danger">
-                This pet currently has available drops. Changing its variant may alter or remove their currently available drops. 
+                This pet currently has available drops. Changing its variant may alter or remove their currently available drops.
                 <br>
                 <b>Please collect your drops before changing this pet's variant.</b>
             </div>
@@ -114,7 +114,7 @@
         <a class="card-title h5 collapse-title" data-toggle="collapse" href="#variantForm">[ADMIN] Change Pet Variant</a>
         {!! Form::open(['url' => 'pets/variant/' . $pet->id, 'id' => 'variantForm', 'class' => 'collapse']) !!}
         {!! Form::hidden('is_staff', 1) !!}
-        @if(isset($pet->drops) && $pet->drops->drops_available > 0)
+        @if (isset($pet->drops) && $pet->drops->drops_available > 0)
             <div class="alert alert-danger">
                 This pet currently has available drops. Changing its variant may alter or remove their currently available drops.
                 <br>
