@@ -495,7 +495,7 @@ class PetManager extends Service {
                     throw new \Exception('Could not debit item.');
                 }
             } else {
-                $this->logAdminAction($pet->user, 'Pet Variant Changed', 'Changed pet to '.$pet->pet->name.' variant');
+                $this->logAdminAction($pet->user, 'Pet Variant Changed', 'Changed pet id #'.$pet->id.'/'.$pet->pet->name.' to variant '.Pet::find($id)->name);
             }
 
             $pet->pet_id = $id;
