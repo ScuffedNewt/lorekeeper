@@ -70,5 +70,5 @@
         </table>
     @endif
     {!! $levels->render() !!}
-    
+
 @endsection
