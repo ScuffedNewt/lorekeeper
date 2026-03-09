@@ -32,15 +32,15 @@ class FixPetDropIds extends Command {
                         'drop_id' => $drop->user_pet->pet->dropData->id,
                     ]);
                     $this->line("Corrected pet ID #".$drop->user_pet->id."\n");
-                } elseif(!isset($drop->user_pet->pet->dropData)) {
+                } elseif (!isset($drop->user_pet->pet->dropData)) {
                     // the pet has no drop data and the PetDrop can be deleted
+                    $this->line('Deleted drop data for pet #'.$drop->user_pet_id." that has no drops\n");
                     $drop->delete();
-                    $this->line("Deleted drop data for pet #".$drop->user_pet->id." that has no drops\n");
                 }
             } else {
                 // the pet is deleted and the PetDrop is no longer needed
+                $this->line('Deleted drop data for deleted pet #'.$drop->user_pet_id."\n");
                 $drop->delete();
-                $this->line("Deleted drop data for deleted pet #".$drop->user_pet->id."\n");
             }
         }
     }
