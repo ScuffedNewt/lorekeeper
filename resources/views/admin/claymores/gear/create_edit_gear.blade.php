@@ -126,6 +126,10 @@
                     'description' => $gear->description,
                     'searchUrl' => $gear->searchUrl,
                     'visible' => $gear->is_visible,
+                    'edit' => [
+                        'title' => 'Edit Gear',
+                        'object' => $gear,
+                    ],
                 ])
             </div>
         </div>

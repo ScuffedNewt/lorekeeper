@@ -66,7 +66,7 @@ class StatService extends Service {
             if (!isset($data['name'])) {
                 throw new \Exception('Please provide a name for the stat.');
             }
-            if (!isset($data['base'])) {
+            if ($stat->id !== config('lorekeeper.claymores_and_companions.stat_points.general_id') && !isset($data['base'])) {
                 throw new \Exception('Please set a base stat value.');
             }
             if (isset($data['colour'])) {

@@ -41,7 +41,7 @@
                 <div class="sidebar-item"><a href="{{ url('world/levels/character') }}" class="{{ set_active('world/levels/character*') }}">Character Levels</a></div>
             @endif
             @if (config('lorekeeper.claymores_and_companions.visibility_settings.character_stats'))
-                <div class="sidebar-item"><a href="{{ url('world/character-stats') }}" class="{{ set_active('world/character-stats*') }}">Character Stats</a></div>
+                <div class="sidebar-item"><a href="{{ url('world/stats') }}" class="{{ set_active('world/stats*') }}">Character Stats</a></div>
             @endif
         </li>
     @endif
@@ -58,7 +58,7 @@
             @endif
             @if (config('lorekeeper.claymores_and_companions.visibility_settings.gear'))
                 <div class="sidebar-item"><a href="{{ url('world/gear-categories') }}" class="{{ set_active('world/gear-categories*') }}">Gear Categories</a></div>
-                <div class="sidebar-item"><a href="{{ url('world/gear') }}" class="{{ set_active('world/gear*') }}">All Gear</a></div>
+                <div class="sidebar-item"><a href="{{ url('world/gears') }}" class="{{ set_active('world/gears*') }}">All Gear</a></div>
             @endif
         </li>
     @endif

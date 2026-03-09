@@ -126,6 +126,10 @@
                     'description' => $weapon->description,
                     'searchUrl' => $weapon->searchUrl,
                     'visible' => $weapon->is_visible,
+                    'edit' => [
+                        'title' => 'Edit Weapon',
+                        'object' => $weapon,
+                    ],
                 ])
             </div>
         </div>
