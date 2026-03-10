@@ -105,7 +105,7 @@ class SubmissionController extends Controller {
             'classes'             => CharacterClass::orderBy('name')->pluck('name', 'id'),
             'points'              => Stat::orderBy('name')->pluck('name', 'id')->toArray(),
             'experiences'         => Experience::orderBy('name')->pluck('name', 'id')->toArray(),
-            'skills'           => Skill::pluck('name', 'id')->toArray(),
+            'skills'              => Skill::pluck('name', 'id')->toArray(),
         ] : []));
     }
 
@@ -170,7 +170,7 @@ class SubmissionController extends Controller {
             'classes'             => CharacterClass::orderBy('name')->pluck('name', 'id'),
             'points'              => Stat::orderBy('name')->pluck('name', 'id')->toArray(),
             'experiences'         => Experience::orderBy('name')->pluck('name', 'id')->toArray(),
-            'skills'           => Skill::pluck('name', 'id')->toArray(),
+            'skills'              => Skill::pluck('name', 'id')->toArray(),
         ] : []));
     }
 
