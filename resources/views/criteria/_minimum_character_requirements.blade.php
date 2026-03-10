@@ -9,9 +9,7 @@
         </h5>
         @if (isset($isAdmin) && $isAdmin)
             @php
-                $reward_currencies = \App\Models\Currency\Currency::where('is_user_owned', 1)
-                    ->orderBy('name')
-                    ->pluck('name', 'id');
+                $reward_currencies = \App\Models\Currency\Currency::where('is_user_owned', 1)->orderBy('name')->pluck('name', 'id');
             @endphp
             <div class="text-right mb-3 row align-items-end">
                 <div class="col" style="min-width:15em;">
