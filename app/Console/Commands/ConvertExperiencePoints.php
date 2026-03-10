@@ -38,7 +38,7 @@ class ConvertExperiencePoints extends Command {
         // run migration to create experience points table
         $this->call('migrate');
 
-        if(Experience::first() == null) {
+        if (Experience::first() == null) {
             $experience = Experience::create([
                 'name'        => 'Level Experience',
                 'has_image'   => false,
@@ -73,7 +73,7 @@ class ConvertExperiencePoints extends Command {
         $this->info("Converting experience points for {$characterCount} characters...");
         $bar = $this->output->createProgressBar($characterCount);
         $bar->start();
-        CharacterLevel::chunk(100, function ($characterLevels) use ($bar, $experience) {
+        CharacterLevel::chunk(100, function ($characterLevels) use ($bar) {
             foreach ($characterLevels as $characterLevel) {
                 CharacterExperience::create([
                     'character_id'  => $characterLevel->character_id,
