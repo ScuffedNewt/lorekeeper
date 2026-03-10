@@ -231,10 +231,10 @@ class PromptController extends Controller {
      */
     public function getCreatePrompt() {
         return view('admin.prompts.create_edit_prompt', [
-            'prompt'     => new Prompt,
-            'categories' => ['none' => 'No category'] + PromptCategory::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
+            'prompt'        => new Prompt,
+            'categories'    => ['none' => 'No category'] + PromptCategory::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
             'limit_periods' => config('lorekeeper.extensions.limit_periods'),
-            'criteria'   => Criterion::active()->orderBy('name')->pluck('name', 'id'),
+            'criteria'      => Criterion::active()->orderBy('name')->pluck('name', 'id'),
         ]);
     }
 
@@ -252,10 +252,10 @@ class PromptController extends Controller {
         }
 
         return view('admin.prompts.create_edit_prompt', [
-            'prompt'     => $prompt,
-            'categories' => ['none' => 'No category'] + PromptCategory::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
+            'prompt'        => $prompt,
+            'categories'    => ['none' => 'No category'] + PromptCategory::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
             'limit_periods' => config('lorekeeper.extensions.limit_periods'),
-            'criteria'   => Criterion::active()->orderBy('name')->pluck('name', 'id'),
+            'criteria'      => Criterion::active()->orderBy('name')->pluck('name', 'id'),
         ]);
     }
 
