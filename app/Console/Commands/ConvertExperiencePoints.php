@@ -77,7 +77,7 @@ class ConvertExperiencePoints extends Command {
             foreach ($characterLevels as $characterLevel) {
                 CharacterExperience::create([
                     'character_id'  => $characterLevel->character_id,
-                    'experience_id' => 1,
+                    'experience_id' => $experience->id,
                     'quantity'      => $characterLevel->current_exp,
                 ]);
                 $bar->advance();
