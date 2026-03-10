@@ -8,9 +8,11 @@
         <div class="sidebar-item"><a href="{{ $character->url . '/pets' }}" class="{{ set_active('character/' . $character->slug . '/pets') }}">Pets</a></div>
         <div class="sidebar-item"><a href="{{ $character->url . '/inventory' }}" class="{{ set_active('character/' . $character->slug . '/inventory') }}">Inventory</a></div>
         <div class="sidebar-item"><a href="{{ $character->url . '/bank' }}" class="{{ set_active('character/' . $character->slug . '/bank') }}">Bank</a></div>
+        {{-- not implemented
         @if (config('lorekeeper.claymores_and_companions.visibility_settings.gear') || config('lorekeeper.claymores_and_companions.visibility_settings.weapons'))
             <div class="sidebar-item"><a href="{{ $character->url . '/equipment' }}" class="{{ set_active('character/' . $character->slug . '/equipment') }}">Equipment</a></div>
         @endif
+        --}}
         @if (config('lorekeeper.claymores_and_companions.visibility_settings.character_levels') || config('lorekeeper.claymores_and_companions.visibility_settings.character_stats'))
             <div class="sidebar-item"><a href="{{ $character->url . '/stats' }}" class="{{ set_active('character/' . $character->slug . '/stats') }}">Stats</a></div>
         @endif

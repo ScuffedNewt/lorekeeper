@@ -5,7 +5,7 @@
 @endsection
 
 @section('profile-content')
-    {!! breadcrumbs(['Characters' => 'characters', $character->slug => $character->url, 'Level' => $character->url . '/level', 'Logs' => $character->url . '/stats/logs/count']) !!}
+    {!! breadcrumbs(['Characters' => 'characters', $character->slug => $character->url, 'Stat Information' => $character->url . '/stats', 'Stat Logs' => $character->url . '/stats/logs', 'Count Logs' => $character->url . '/stats/logs/count']) !!}
 
     <h1>
         {!! $character->displayName !!}'s Count Logs

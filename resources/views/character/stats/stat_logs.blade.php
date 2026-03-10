@@ -1,14 +1,14 @@
 @extends('character.layout', ['isMyo' => $character->is_myo_slot])
 
 @section('profile-title')
-    {{ $character->slug }}'s Stat Logs
+    {{ $character->slug }}'s Stat Activity Logs
 @endsection
 
 @section('profile-content')
-    {!! breadcrumbs(['Characters' => 'characters', $character->slug => $character->url, 'Stat Information' => $character->url . '/stats', 'Stat Logs' => $character->url . '/stats/logs']) !!}
+    {!! breadcrumbs(['Characters' => 'characters', $character->slug => $character->url, 'Stat Information' => $character->url . '/stats', 'Stat Logs' => $character->url . '/stats/logs', 'Stat Activity Logs' => $character->url . '/stats/logs/stat-points']) !!}
 
     <h1>
-        {!! $character->displayName !!}'s Stat Logs
+        {!! $character->displayName !!}'s Stat Activity Logs
     </h1>
 
     <h3>Transfers</h3>
