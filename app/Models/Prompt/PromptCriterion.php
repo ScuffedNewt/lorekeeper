@@ -68,4 +68,15 @@ class PromptCriterion extends Model {
     public function criterion() {
         return $this->belongsTo(Criterion::class, 'criterion_id');
     }
+
+    /**
+     * Returns true if this is a character criteria
+     */
+    public function getCharacterCriteriaAttribute() {
+        if($this->criterion->currency->is_character_owned == 1) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

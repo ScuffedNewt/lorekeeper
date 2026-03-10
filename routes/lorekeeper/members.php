@@ -274,6 +274,8 @@ Route::group(['prefix' => 'rewards'], function () {
 Route::group(['prefix' => 'criteria'], function () {
     Route::get('{entity}/{id}', 'CriterionController@getCriterionSelector')->where('entity', 'prompt|gallery');
     Route::get('{entity}/{id}/{entity_id}/{form_id}', 'CriterionController@getCriterionForm')->where('entity', 'prompt|gallery');
+    Route::get('/character/{entity}/{id}', 'CriterionController@getCharacterCriterionSelector')->where('entity', 'prompt|gallery');
+    Route::get('/character/{slug}/{entity}/{id}/{entity_id}/{form_id}', 'CriterionController@getCharacterCriterionForm')->where('entity', 'prompt|gallery');
     Route::get('{id}', 'CriterionController@getCriterionFormLimited');
     Route::post('rewards/{id}', 'CriterionController@postCriterionRewards');
 });

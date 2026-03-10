@@ -112,7 +112,14 @@ class SubmissionController extends Controller {
         });
 
         $prompt = $request->get('prompt_id');
-        $promptCriteria = $prompt ? PromptCriterion::where('prompt_id', $prompt)->pluck('criterion_id')->toArray() : null;
+        $criteria = $prompt ? PromptCriterion::where('prompt_id', $prompt)->get() : null;
+        if($criteria) {
+            $promptCriteria = $criteria->where('characterCriteria', '=', false)->pluck('criterion_id')->toArray();
+            $characterCriteria = $criteria->where('characterCriteria', '=', true)->pluck('criterion_id')->toArray();
+        } else {
+            $promptCriteria = [];
+            $characterCriteria = [];
+        }
 
         return view('home.create_submission', [
             'closed'  => $closed,
@@ -131,6 +138,7 @@ class SubmissionController extends Controller {
             'expanded_rewards'       => config('lorekeeper.extensions.character_reward_expansion.expanded'),
             'userGallerySubmissions' => $gallerySubmissions,
             'criteria'               => $prompt ? Criterion::active()->whereIn('id', $promptCriteria)->orderBy('name')->pluck('name', 'id') : null,
+            'characterCriteria'            => $prompt ? Criterion::active()->whereIn('id', $characterCriteria)->orderBy('name')->pluck('name', 'id') : null,
         ]));
     }
 
@@ -168,7 +176,14 @@ class SubmissionController extends Controller {
         });
 
         $prompt = $submission->prompt;
-        $promptCriteria = $prompt ? PromptCriterion::where('prompt_id', $prompt->id)->pluck('criterion_id')->toArray() : null;
+        $criteria = PromptCriterion::where('prompt_id', $submission->prompt_id)->get();
+        if($criteria) {
+            $promptCriteria = $criteria->where('characterCriteria', '=', false)->pluck('criterion_id')->toArray();
+            $characterCriteria = $criteria->where('characterCriteria', '=', true)->pluck('criterion_id')->toArray();
+        } else {
+            $promptCriteria = [];
+            $characterCriteria = [];
+        }
 
         return view('home.edit_submission', [
             'closed'              => $closed,
@@ -188,7 +203,8 @@ class SubmissionController extends Controller {
             'selectedInventory'      => isset($submission->data['user']) ? parseAssetData($submission->data['user']) : null,
             'count'                  => Submission::where('prompt_id', $submission->prompt_id)->where('status', 'Approved')->where('user_id', $submission->user_id)->count(),
             'userGallerySubmissions' => $gallerySubmissions,
-            'criteria'               => $prompt ? Criterion::active()->whereIn('id', $promptCriteria)->orderBy('name')->pluck('name', 'id') : null,
+            'criteria'            => Criterion::active()->whereIn('id', $promptCriteria)->orderBy('name')->pluck('name', 'id'),
+            'characterCriteria' => Criterion::active()->whereIn('id', $characterCriteria)->orderBy('name')->pluck('name', 'id'),
         ]));
     }
 
@@ -258,7 +274,7 @@ class SubmissionController extends Controller {
             $request->only([
                 'url', 'prompt_id', 'comments', 'slug', 'character_rewardable_type', 'character_rewardable_id', 'character_rewardable_quantity',
                 'rewardable_type', 'rewardable_id', 'quantity', 'stack_id', 'stack_quantity', 'currency_id', 'currency_quantity',
-                'gallery_submission_id', 'criterion_id', 'criterion',
+                'gallery_submission_id', 'criterion_id', 'criterion', 'character_criterion',
             ]),
             Auth::user(),
             false,
@@ -304,12 +320,14 @@ class SubmissionController extends Controller {
             'url', 'prompt_id', 'comments', 'slug', 'character_rewardable_type', 'character_rewardable_id', 'character_rewardable_quantity',
             'rewardable_type', 'rewardable_id', 'quantity', 'stack_id', 'stack_quantity', 'currency_id', 'currency_quantity',
             'gallery_submission_id',
+            'criterion_id', 'criterion', 'character_criterion',
         ]), Auth::user(), false, $submit)) {
             flash('Draft submitted successfully.')->success();
         } elseif ($service->editSubmission($submission, $request->only([
             'url', 'prompt_id', 'comments', 'slug', 'character_rewardable_type', 'character_rewardable_id', 'character_rewardable_quantity',
             'rewardable_type', 'rewardable_id', 'quantity', 'stack_id', 'stack_quantity', 'currency_id', 'currency_quantity',
             'gallery_submission_id',
+            'criterion_id', 'criterion', 'character_criterion',
         ]), Auth::user())) {
             flash('Draft saved successfully.')->success();
 

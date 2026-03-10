@@ -82,5 +82,34 @@
             node.find('.character-item-id').attr('name', 'character_rewardable_id[' + id + '][]');
             node.find('.character-table-id').attr('name', 'character_rewardable_id[' + id + '][]');
         }
+
+        //start criteria
+        function loadForm(e) {
+            var id = $(this).val();
+            var promptId = $('#prompt').val();
+            var formId = $(this).attr('name').split('[')[2].replace(']', '');
+
+            if (id) {
+                var form = $(this).closest('.card').find('.form');
+                form.load("{{ url('criteria/character/') }}/" + $(this).closest('.submission-character').find('.character-code').val() + "/prompt/" + id + "/" + promptId + "/" + formId, (response, status, xhr) => {
+                    if (status == "error") {
+                        var msg = "Error: ";
+                        console.error(msg + xhr.status + " " + xhr.statusText);
+                    } else {
+                        form.find('[data-toggle=tooltip]').tooltip({
+                            html: true
+                        });
+                        form.find('[data-toggle=toggle]').bootstrapToggle();
+                    }
+                });
+            }
+        }
+
+        function deleteCriterion(e) {
+            e.preventDefault();
+            var toDelete = $(this).closest('.card');
+            toDelete.remove();
+        }
+        //end criteria
     });
 </script>

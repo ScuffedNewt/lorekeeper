@@ -482,6 +482,18 @@ class SubmissionManager extends Service {
                 // Users might not pass in clean arrays (may contain redundant data) so we need to clean that up
                 $assets = $this->processRewards($data + ['character_id' => $c->id, 'currencies' => $currencies, 'items' => $items, 'tables' => $tables], true);
 
+                // Distribute character currency from character criteria
+                if (isset($data['character_criterion'])) {
+                    foreach ($data['character_criterion'] as $slug => $criterions) {
+                        if ($c->slug === $slug) {
+                            foreach ($criterions as $key => $criterionData) {
+                                $criterion = Criterion::where('id', $criterionData['id'])->first();
+                                addAsset($assets, $criterion->currency, $criterion->calculateReward($criterionData));
+                            }
+                        }
+                    }
+                }
+
                 if (!$assets = fillCharacterAssets($assets, $user, $c, $promptLogType, $promptData, $submission->user)) {
                     throw new \Exception('Failed to distribute rewards to character.');
                 }
@@ -859,6 +871,7 @@ class SubmissionManager extends Service {
                 'character_id'  => $c->id,
                 'submission_id' => $submission->id,
                 'data'          => getDataReadyAssets($assets),
+                'criterion' => $data['character_criterion'][$c->slug],
             ]);
         }
 
