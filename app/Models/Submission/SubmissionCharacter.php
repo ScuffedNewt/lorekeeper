@@ -28,7 +28,7 @@ class SubmissionCharacter extends Model {
      * @var array
      */
     protected $casts = [
-        'data' => 'array',
+        'data'      => 'array',
         'criterion' => 'array',
     ];
 

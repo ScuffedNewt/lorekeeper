@@ -70,10 +70,10 @@ class PromptCriterion extends Model {
     }
 
     /**
-     * Returns true if this is a character criteria
+     * Returns true if this is a character criteria.
      */
     public function getCharacterCriteriaAttribute() {
-        if($this->criterion->currency->is_character_owned == 1) {
+        if ($this->criterion->currency->is_character_owned == 1) {
             return true;
         } else {
             return false;
