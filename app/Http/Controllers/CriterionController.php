@@ -59,6 +59,7 @@ class CriterionController extends Controller {
      * @param mixed      $id
      * @param mixed|null $entity_id
      * @param mixed|null $form_id
+     * @param mixed      $slug
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
@@ -92,7 +93,7 @@ class CriterionController extends Controller {
      */
     public function getCriterionSelector($entity, $id) {
         if ($entity === 'prompt') {
-           $entityCriteria = PromptCriterion::where('prompt_id', $id)->get()->where('characterCriteria', '=', false)->pluck('criterion_id')->toArray();
+            $entityCriteria = PromptCriterion::where('prompt_id', $id)->get()->where('characterCriteria', '=', false)->pluck('criterion_id')->toArray();
         } elseif ($entity === 'gallery') {
             $entityCriteria = GalleryCriterion::where('gallery_id', $id)->pluck('criterion_id')->toArray();
         }

@@ -871,7 +871,7 @@ class SubmissionManager extends Service {
                 'character_id'  => $c->id,
                 'submission_id' => $submission->id,
                 'data'          => getDataReadyAssets($assets),
-                'criterion' => $data['character_criterion'][$c->slug],
+                'criterion'     => $data['character_criterion'][$c->slug],
             ]);
         }
 
