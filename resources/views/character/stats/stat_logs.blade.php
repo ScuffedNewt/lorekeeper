@@ -5,7 +5,13 @@
 @endsection
 
 @section('profile-content')
-    {!! breadcrumbs(['Characters' => 'characters', $character->slug => $character->url, 'Stat Information' => $character->url . '/stats', 'Stat Logs' => $character->url . '/stats/logs', 'Stat Activity Logs' => $character->url . '/stats/logs/stat-points']) !!}
+    {!! breadcrumbs([
+        'Characters' => 'characters',
+        $character->slug => $character->url,
+        'Stat Information' => $character->url . '/stats',
+        'Stat Logs' => $character->url . '/stats/logs',
+        'Stat Activity Logs' => $character->url . '/stats/logs/stat-points',
+    ]) !!}
 
     <h1>
         {!! $character->displayName !!}'s Stat Activity Logs
