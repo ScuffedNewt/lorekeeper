@@ -73,7 +73,7 @@ class ConvertExperiencePoints extends Command {
         $this->info("Converting experience points for {$characterCount} characters...");
         $bar = $this->output->createProgressBar($characterCount);
         $bar->start();
-        CharacterLevel::chunk(100, function ($characterLevels) use ($bar) {
+        CharacterLevel::chunk(100, function ($characterLevels) use ($bar, $experience) {
             foreach ($characterLevels as $characterLevel) {
                 CharacterExperience::create([
                     'character_id'  => $characterLevel->character_id,
