@@ -1,7 +1,6 @@
-
-
 <div class="scene">
-    <div class="{{ $garden->has_background_image ? 'garden-background' : 'garden-no-background' }}" style="{{ $garden->has_background_image ? 'background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(0, 0, 0, 0.04)), url(\'' . $garden->backgroundImageUrl . '\') center/cover no-repeat;' : '' }}">
+    <div class="{{ $garden->has_background_image ? 'garden-background' : 'garden-no-background' }}"
+        style="{{ $garden->has_background_image ? 'background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(0, 0, 0, 0.04)), url(\'' . $garden->backgroundImageUrl . '\') center/cover no-repeat;' : '' }}">
         <div class="chip">{!! $garden->name !!}</div>
         <div class="chip" id="modeHint">
             Plant mode: drag seeds onto soil plots
@@ -19,9 +18,9 @@
                         }
                     @endphp
                     @include('gardens._plot', [
-                        'plot'           => $plot,
-                        'readOnly'       => $readOnly,
-                        'user'           => $user,
+                        'plot' => $plot,
+                        'readOnly' => $readOnly,
+                        'user' => $user,
                         'isPlotUnlocked' => $isPlotUnlocked ?? false,
                     ])
                 @endforeach
@@ -61,10 +60,10 @@
                             @foreach ($objectModel as $model => $object)
                                 @foreach ($object as $id => $quantity)
                                     @include('gardens.selectors._placeable_selector', [
-                                        'id'               => $id,
-                                        'object'           => $object,
-                                        'quantity'         => $quantity,
-                                        'gardenObjectType' => $gardenObjectType
+                                        'id' => $id,
+                                        'object' => $object,
+                                        'quantity' => $quantity,
+                                        'gardenObjectType' => $gardenObjectType,
                                     ])
                                 @endforeach
                             @endforeach

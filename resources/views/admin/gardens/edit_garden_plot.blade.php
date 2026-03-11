@@ -77,7 +77,8 @@
     <hr />
 
     <div class="alert alert-info">
-        <b>Note</b>: plot unlocks are handled differently than other limits. The limits are not automatically unlocked, the user must click the "Unlock" button on the plot to unlock it, which will check if they meet the requirements and then unlock it for them if they do. This is to allow users to choose when to unlock the plot rather than it being forced on them when they meet the requirements.
+        <b>Note</b>: plot unlocks are handled differently than other limits. The limits are not automatically unlocked, the user must click the "Unlock" button on the plot to unlock it, which will check if they meet the requirements and then unlock it
+        for them if they do. This is to allow users to choose when to unlock the plot rather than it being forced on them when they meet the requirements.
     </div>
     @include('widgets._add_limits', [
         'object' => $plot,

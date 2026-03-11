@@ -12,7 +12,7 @@
     let selectedTool = 'None';
     let draggedItem = null;
     let currentMode = 'place';
-    emptyDragImage.src ='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxIiBoZWlnaHQ9IjEiPjwvc3ZnPg==';
+    emptyDragImage.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxIiBoZWlnaHQ9IjEiPjwvc3ZnPg==';
 
 
     const modeConfig = {
@@ -41,7 +41,7 @@
     function setMode(mode) {
         currentMode = mode;
 
-        modeButtons.each(function () {
+        modeButtons.each(function() {
             const $button = $(this);
             $button.toggleClass('active', $button.data('mode') === mode);
         });
@@ -87,7 +87,7 @@
         });
     }
 
-    $(document).on('dragover', function (e) {
+    $(document).on('dragover', function(e) {
         if (ghost.is(':visible')) {
             ghost.css({
                 left: `${e.clientX}px`,
@@ -96,18 +96,18 @@
         }
     });
 
-    toolSlots.on('click', function () {
+    toolSlots.on('click', function() {
         toolSlots.removeClass('active');
         $(this).addClass('active');
         selectedTool = $(this).data('name');
         statusElement.text(`Mode: ${capitalize(currentMode)}. Selected tool: ${selectedTool}`);
     });
 
-    modeButtons.on('click', function () {
+    modeButtons.on('click', function() {
         setMode($(this).data('mode'));
     });
 
-    seedSlots.on('dragstart', function (e) {
+    seedSlots.on('dragstart', function(e) {
         if (currentMode !== 'place') {
             e.preventDefault();
             statusElement.text(`Mode: ${capitalize(currentMode)}. Switch to Place mode to drag seeds.`);
@@ -134,13 +134,13 @@
         e.originalEvent.dataTransfer.setData('text/plain', draggedItem.name);
         e.originalEvent.dataTransfer.setDragImage(emptyDragImage, 0, 0);
     });
-    seedSlots.on('dragend', function () {
+    seedSlots.on('dragend', function() {
         $(this).removeClass('dragging');
         ghost.hide();
         plots.removeClass('drop-hover');
     });
 
-    plots.each(function () {
+    plots.each(function() {
         const $plot = $(this);
         const plotId = String($plot.data('plotId') || '');
 
@@ -148,7 +148,7 @@
             return;
         }
 
-        $plot.on('dragover', function (e) {
+        $plot.on('dragover', function(e) {
             e.preventDefault();
 
             if (currentMode !== 'place') {
@@ -159,12 +159,12 @@
             $plot.find('.plot-center .icon').addClass('bounce')
         });
 
-        $plot.on('dragleave', function () {
+        $plot.on('dragleave', function() {
             $plot.removeClass('drop-hover');
             $plot.find('.plot-center .icon').removeClass('bounce');
         });
 
-        $plot.on('drop', async function (e) {
+        $plot.on('drop', async function(e) {
             e.preventDefault();
 
             if (currentMode !== 'place') {
@@ -205,7 +205,7 @@
             }
         });
 
-        $plot.on('click', async function () {
+        $plot.on('click', async function() {
             if (currentMode === 'action') {
                 statusElement.text(`Watering ${plotId.replace('plot-', 'Plot ')}...`);
 

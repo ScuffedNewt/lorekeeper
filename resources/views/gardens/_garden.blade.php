@@ -18,7 +18,7 @@
                         <li class="nav-item">
                             <a class="nav-link {{ $loop->first && $group == 'unlocked' ? 'active' : '' }}" id="gardenTab-{{ $garden->id }}" data-toggle="tab" href="#garden-{{ $garden->id }}" role="tab">
                                 @if ($garden->has_image)
-                                    <img src="{{  $garden->imageUrl }}" style="max-height: 30px;">
+                                    <img src="{{ $garden->imageUrl }}" style="max-height: 30px;">
                                 @endif
                                 {!! $isGardenUnlocked[$garden->id] ? '' : '<i class="fas fa-lock"></i> ' !!}
                                 {{ $garden->name }}
@@ -45,10 +45,10 @@
                     <div class="tab-pane fade {{ $loop->first && $group == 'unlocked' ? 'show active' : '' }}" id="garden-{{ $garden->id }}" role="tabpanel">
                         @if ($isGardenUnlocked[$garden->id])
                             @include('gardens._panel', [
-                                'user'                 => $user,
-                                'garden'               => $garden,
-                                'readOnly'             => $readOnly,
-                                'placeableUserObjects' => $readOnly ? [] : ($placeableUserObjects[$garden->id] ?? []),
+                                'user' => $user,
+                                'garden' => $garden,
+                                'readOnly' => $readOnly,
+                                'placeableUserObjects' => $readOnly ? [] : $placeableUserObjects[$garden->id] ?? [],
                             ])
                         @else
                             <div class="alert alert-danger">This garden is locked.</div>

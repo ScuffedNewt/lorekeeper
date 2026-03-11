@@ -13,7 +13,7 @@
     <div class="plot-center">
         @if ($isPlotUnlocked)
             @if ($userPlot?->is_dead)
-            {{-- TODO --}}
+                {{-- TODO --}}
                 <div class="btn btn-dark" style="width: 100%; height: 100%;">
                     {!! Form::open(['url' => 'garden/clear/' . $plot->id]) !!}
                     <img class="img-fluid my-auto mx-auto pt-2" src="{{ asset('images/garden/dead_seed.png') }}" style="width: 7em; height:7em;">
@@ -23,7 +23,7 @@
                     {!! Form::close() !!}
                 </div>
             @else
-            {{-- TODO --}}
+                {{-- TODO --}}
                 @if ($userPlot?->started_at && $userPlot?->object)
                     {{-- SOMETHING IN PLOT --}}
                     @include('gardens.objects._' . $userPlot->object?->type, [

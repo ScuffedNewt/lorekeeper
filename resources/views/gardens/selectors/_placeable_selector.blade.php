@@ -13,7 +13,7 @@
             $garden->id,
             $asset->assetType,
             $gardenObjectType,
-            $icon
+            $icon,
         );
     }
 @endphp
@@ -35,4 +35,4 @@
 </button>
 
 
-    {{--{{ $stack->availableQuantity > 0 ? 'data-garden-id="' . $stack->item->id . '" data-current-garden-id="' . $garden->id . '" data-stack-type="' . $stack_type . '" data-object-type="' . $object_type . '"' : '' }}> --}}
+{{-- {{ $stack->availableQuantity > 0 ? 'data-garden-id="' . $stack->item->id . '" data-current-garden-id="' . $garden->id . '" data-stack-type="' . $stack_type . '" data-object-type="' . $object_type . '"' : '' }}> --}}
