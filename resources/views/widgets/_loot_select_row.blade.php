@@ -6,137 +6,43 @@
     if (!isset($type)) {
         $type = 'Reward';
     }
-    if (!isset($isTradeable)) {
-        $isTradeable = false;
-    }
     if (!isset($prefix)) {
         $prefix = '';
     }
-
-    // View options
     if (!isset($showRecipient)) {
         $showRecipient = false;
     }
-    if (!isset($showLootTables)) {
-        $showLootTables = false;
+    if (!isset($isCharacter)) {
+        $isCharacter = false;
     }
-    if (!isset($showRaffles)) {
-        $showRaffles = false;
+    if (!isset($useCustomSelectize)) {
+        $useCustomSelectize = false;
     }
 
-    // Reward types, should reduce friction of merge conflicts
-    $rewardTypes =
-        [
-            'Item' => 'Item',
-            'Currency' => 'Currency',
-        ] +
-        ($showLootTables ? ['LootTable' => 'Loot Table'] : []) +
-        ($showRaffles ? ['Raffle' => 'Raffle Ticket'] : []);
+    $rewardableRecipients = ['Character' => 'Character', 'User' => 'User'];
+    $recipient = $isCharacter ? 'Character' : 'User';
 
-    // Custom Selectize
-    if (isset($useCustomSelectize) && $useCustomSelectize) {
-        $characterCurrencies = \App\Models\Currency\Currency::where('is_character_owned', 1)
-            ->where(function ($query) use ($isTradeable) {
-                if ($isTradeable) {
-                    $query->where('allow_user_to_user', 1);
-                }
-            })
-            ->orderBy('sort_character', 'DESC')
-            ->get()
-            ->mapWithKeys(function ($currency) {
-                return [
-                    $currency->id => json_encode([
-                        'name' => $currency->name,
-                        'image_url' => $currency->currencyIconUrl,
-                    ]),
-                ];
-            });
-        $items = \App\Models\Item\Item::orderBy('name')
-            ->where(function ($query) use ($isTradeable) {
-                if ($isTradeable) {
-                    $query->where('allow_transfer', 1);
-                }
-            })
-            ->get()
-            ->mapWithKeys(function ($item) {
-                return [
-                    $item->id => json_encode([
-                        'name' => $item->name,
-                        'image_url' => $item->imageUrl,
-                    ]),
-                ];
-            });
-        $currencies = \App\Models\Currency\Currency::where('is_user_owned', 1)
-            ->where(function ($query) use ($isTradeable) {
-                if ($isTradeable) {
-                    $query->where('allow_user_to_user', 1);
-                }
-            })
-            ->orderBy('name')
-            ->get()
-            ->mapWithKeys(function ($currency) {
-                return [
-                    $currency->id => json_encode([
-                        'name' => $currency->name,
-                        'image_url' => $currency->currencyIconUrl,
-                    ]),
-                ];
-            });
+    // Put any logic for handling 'showXYZ' variables in this array
+    $showData = isset($showData)
+        ? $showData
+        : [
+            'isTradeable' => isset($isTradeable) && $isTradeable ? $isTradeable : false,
+            'showLootTables' => isset($showLootTables) && $showLootTables ? $showLootTables : false,
+            'showRaffles' => isset($showRaffles) && $showRaffles ? $showRaffles : false,
+        ];
 
-        if ($showLootTables) {
-            $tables = \App\Models\Loot\LootTable::orderBy('name')
-                ->get()
-                ->mapWithKeys(function ($table) {
-                    return [
-                        $table->id => json_encode([
-                            'name' => $table->name,
-                        ]),
-                    ];
-                });
-        }
-        if ($showRaffles) {
-            $raffles = \App\Models\Raffle\Raffle::where('rolled_at', null)
-                ->where('is_active', 1)
-                ->orderBy('name')
-                ->get()
-                ->mapWithKeys(function ($raffle) {
-                    return [
-                        $raffle->id => json_encode([
-                            'name' => $raffle->name,
-                        ]),
-                    ];
-                });
+    // Fetch reward data, defined in AssetHelpers
+    // All previous code that defines available asset IDs should now be moved to getRewardLootData
+    // Get the character specific loot availability if the recipient is being shown
+    if ($showRecipient) {
+        foreach ($rewardableRecipients as $recipient) {
+            $rewardLootData[$recipient] = getRewardLootData($showData, $recipient, $useCustomSelectize);
+            // Fetch valid reward types, defined in AssetHelpers
+            $rewardTypes[$recipient] = getRewardTypes($showData, $recipient);
         }
     } else {
-        $characterCurrencies = \App\Models\Currency\Currency::where('is_character_owned', 1)
-            ->where(function ($query) use ($isTradeable) {
-                if ($isTradeable) {
-                    $query->where('allow_user_to_user', 1);
-                }
-            })
-            ->orderBy('sort_character', 'DESC')
-            ->pluck('name', 'id');
-        $items = \App\Models\Item\Item::where(function ($query) use ($isTradeable) {
-            if ($isTradeable) {
-                $query->where('allow_transfer', 1);
-            }
-        })
-            ->orderBy('name')
-            ->pluck('name', 'id');
-        $currencies = \App\Models\Currency\Currency::where('is_user_owned', 1)
-            ->where(function ($query) use ($isTradeable) {
-                if ($isTradeable) {
-                    $query->where('allow_user_to_user', 1);
-                }
-            })
-            ->orderBy('name')
-            ->pluck('name', 'id');
-        if ($showLootTables) {
-            $tables = \App\Models\Loot\LootTable::orderBy('name')->pluck('name', 'id');
-        }
-        if ($showRaffles) {
-            $raffles = \App\Models\Raffle\Raffle::where('rolled_at', null)->where('is_active', 1)->orderBy('name')->pluck('name', 'id');
-        }
+        $rewardLootData = getRewardLootData($showData, $recipient, $useCustomSelectize);
+        $rewardTypes = getRewardTypes($showData, $recipient);
     }
     if (!isset($prefix)) {
         $prefix = '';
@@ -149,14 +55,15 @@
             <tr class="loot-row">
                 @if ($showRecipient)
                     <td>
-                        {!! Form::select($prefix . 'rewardable_recipient[]', ['Character' => 'Character', 'User' => 'User'], 'User', [
-                            'class' => 'form-control',
+                        {!! Form::select($prefix . 'rewardable_recipient[]', $rewardableRecipients, null, [
+                            'class' => 'form-control recipient-type',
                             'placeholder' => 'Select Recipient Type',
                         ]) !!}
                     </td>
                 @endif
-                <td>
-                    {!! Form::select($prefix . 'rewardable_type[]', $rewardTypes, null, [
+                <td class="{{ $prefix }}loot-row-type">
+                    {{-- The long array of key value pairs is now defined in getRewardTypes and data should be moved there --}}
+                    {!! Form::select($prefix . 'rewardable_type[]', $showRecipient ? [] : $rewardTypes, null, [
                         'class' => 'form-control reward-type',
                         'placeholder' => 'Select ' . $type . ' Type',
                     ]) !!}
@@ -182,12 +89,18 @@
             </tr>
         </tbody>
     </table>
-    {!! Form::select($prefix . 'rewardable_id[]', $items, null, ['class' => 'form-control item-select', 'placeholder' => 'Select Item']) !!}
-    {!! Form::select($prefix . 'rewardable_id[]', $currencies, null, ['class' => 'form-control currency-select', 'placeholder' => 'Select Currency']) !!}
-    @if ($showLootTables)
-        {!! Form::select($prefix . 'rewardable_id[]', $tables, null, ['class' => 'form-control table-select', 'placeholder' => 'Select Loot Table']) !!}
-    @endif
-    @if ($showRaffles)
-        {!! Form::select($prefix . 'rewardable_id[]', $raffles, null, ['class' => 'form-control raffle-select', 'placeholder' => 'Select Raffle']) !!}
+    {{-- If statements here can be removed and replaced with the below code. They are now defined programmatically --}}
+    @if ($showRecipient)
+        @foreach ($rewardableRecipients as $recipient)
+            <div class="rewardable-ids-{{ strtolower($recipient) }}">
+                @foreach (getRewardTypes($showData, $recipient) as $rewardKey => $rewardType)
+                    {!! Form::select($prefix . 'rewardable_id[]', $rewardLootData[$recipient][$rewardKey], null, ['class' => 'form-control object-select ' . strtolower($rewardKey) . '-select', 'placeholder' => 'Select ' . $rewardType]) !!}
+                @endforeach
+            </div>
+        @endforeach
+    @else
+        @foreach ($rewardTypes as $rewardKey => $rewardType)
+            {!! Form::select($prefix . 'rewardable_id[]', $rewardLootData[$rewardKey], null, ['class' => 'form-control object-select ' . strtolower($rewardKey) . '-select', 'placeholder' => 'Select ' . $rewardType]) !!}
+        @endforeach
     @endif
 </div>
