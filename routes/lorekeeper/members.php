@@ -265,8 +265,5 @@ Route::group(['prefix' => 'limits'], function () {
 **************************************************************************************************/
 Route::group(['prefix' => 'gardens', 'namespace' => 'Activities'], function () {
     Route::get('/', 'GardenController@getIndex');
-
-    Route::post('place', 'GardenController@postPlace');
-    Route::post('interact/{id}', 'GardenController@postInteract');
-    Route::post('collect/{id}', 'GardenController@postCollect');
+    Route::post('action', 'GardenController@postAction');
 });

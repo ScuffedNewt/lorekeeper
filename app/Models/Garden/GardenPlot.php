@@ -46,7 +46,7 @@ class GardenPlot extends Model {
      * @return string
      */
     public function getImageDirectoryAttribute() {
-        return 'images/data/gardens';
+        return 'images/data/gardens/plots';
     }
 
     /**
@@ -84,6 +84,6 @@ class GardenPlot extends Model {
      * Returns a name for unlocking purposes.
      */
     public function getnameAttribute() {
-        return 'Garden plot';
+        return $this->data['name'] ?? 'Garden Plot';
     }
 }

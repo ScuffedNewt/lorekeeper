@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('gardens.layout')
 
 @section('title')
     Gardens
@@ -9,22 +9,26 @@
 @endsection
 
 @section('content')
-    {!! breadcrumbs(['Home' => '/', 'Gardens' => 'gardens']) !!}
+    {!! breadcrumbs(['Gardens' => 'gardens']) !!}
 
     <h1>Gardens</h1>
-    <p>The gardens are a rich place full of life. In it, several species of plants and animals can be found...</p>
+
     <noscript>
         <div class="alert alert-danger">
             <strong>Warning!</strong> You need to enable JavaScript to use this minigame.
         </div>
     </noscript>
 
-    @include('gardens._garden', [
-        'user' => Auth::user(),
-        'readOnly' => false,
-        'groups' => $groups,
-        'is_garden_unlocked' => $is_garden_unlocked,
-    ])
+    @if (!count($groups))
+        <p>There are no gardens yet.</p>
+    @else
+        @include('gardens._garden', [
+            'user' => Auth::user(),
+            'readOnly' => false,
+            'groups' => $groups,
+            'isGardenUnlocked' => $isGardenUnlocked,
+        ])
+    @endif
 @endsection
 @section('scripts')
     @parent

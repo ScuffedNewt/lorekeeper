@@ -9,35 +9,46 @@
     @endif
 @endif
 
-<div>
-    <div class="card character-bio">
-        <div class="card-header">
-            <ul class="nav nav-tabs card-header-tabs">
+<div class="container">
+    <div class="garden-card">
+        <div class="garden-header">
+            <ul class="nav nav-tabs card-header-tabs garden-tabs" id="gardenTabs">
                 @foreach ($groups as $group => $gardens)
                     @foreach ($gardens as $garden)
                         <li class="nav-item">
-                            <a class="nav-link {{ $loop->first && $group == 'unlocked' ? 'active' : '' }}" id="gardenTab-{{ $garden->id }}" data-toggle="tab" href="#{{ strtolower(str_replace(' ', '-', $garden->name)) }}" role="tab">
-                                {!! $is_garden_unlocked[$garden->id] ? '' : '<i class="fas fa-lock"></i> ' !!}
+                            <a class="nav-link {{ $loop->first && $group == 'unlocked' ? 'active' : '' }}" id="gardenTab-{{ $garden->id }}" data-toggle="tab" href="#garden-{{ $garden->id }}" role="tab">
                                 @if ($garden->has_image)
-                                    <img src="{{ $garden->imageUrl }}" class="img-fluid" style="max-height: 3em;">
+                                    <img src="{{  $garden->imageUrl }}" style="max-height: 30px;">
                                 @endif
+                                {!! $isGardenUnlocked[$garden->id] ? '' : '<i class="fas fa-lock"></i> ' !!}
                                 {{ $garden->name }}
                             </a>
                         </li>
                     @endforeach
                 @endforeach
             </ul>
+            <div class="mode-pills btn-group btn-group-toggle" data-toggle="buttons" role="group" aria-label="Garden modes">
+                <label class="pill btn active" data-mode="place">
+                    <input type="radio" name="mode" autocomplete="off" checked> Place
+                </label>
+                <label class="pill btn" data-mode="tend">
+                    <input type="radio" name="mode" autocomplete="off"> Tend
+                </label>
+                <label class="pill btn" data-mode="collect">
+                    <input type="radio" name="mode" autocomplete="off"> Collect
+                </label>
+            </div>
         </div>
         <div class="card-body tab-content">
             @foreach ($groups as $group => $gardens)
                 @foreach ($gardens as $garden)
-                    <div class="tab-pane fade {{ $loop->first && $group == 'unlocked' ? 'show active' : '' }}" id="{{ strtolower(str_replace(' ', '-', $garden->name)) }}">
-                        @if ($is_garden_unlocked[$garden->id])
+                    <div class="tab-pane fade {{ $loop->first && $group == 'unlocked' ? 'show active' : '' }}" id="garden-{{ $garden->id }}" role="tabpanel">
+                        @if ($isGardenUnlocked[$garden->id])
                             @include('gardens._panel', [
-                                'garden' => $garden,
-                                'user_garden_objects' => $readOnly ? [] : $garden->getUserGardenObjects($user),
-                                'user' => $user,
-                                'readOnly' => $readOnly,
+                                'user'                 => $user,
+                                'garden'               => $garden,
+                                'readOnly'             => $readOnly,
+                                'placeableUserObjects' => $readOnly ? [] : ($placeableUserObjects[$garden->id] ?? []),
                             ])
                         @else
                             <div class="alert alert-danger">This garden is locked.</div>

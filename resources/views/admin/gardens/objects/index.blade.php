@@ -19,6 +19,9 @@
             <div class="form-group ml-3 mb-3">
                 {!! Form::text('name', Request::get('name'), ['class' => 'form-control', 'placeholder' => 'Name']) !!}
             </div>
+            <div class="form-group ml-3 mb-3">
+                {!! Form::select('allowed_object_types', getGardenObjectTypes(), Request::get('allowed_object_types'), ['class' => 'form-control', 'placeholder' => 'Select Allowed Object Type']) !!}
+            </div>
         </div>
         <div class="form-inline justify-content-end">
             <div class="form-group ml-3 mb-3">

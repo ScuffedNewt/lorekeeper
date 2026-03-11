@@ -63,6 +63,16 @@ function calculateGroupCurrency($data) {
 }
 
 /**
+ * Returns an asset from it's namespaced model and id.
+ *
+ * @param mixed $model
+ * @param mixed $id
+ */
+function getAsset($model, $id) {
+    return $model::find($id);
+}
+
+/**
  * Gets the asset keys for an array depending on whether the
  * assets being managed are owned by a user or character.
  *
@@ -463,30 +473,18 @@ function fillUserAssets($assets, $sender, $recipient, $logType, $data) {
  * @param string               $logType
  * @param string               $data
  * @param mixed|null           $selected
- * @param mixed                $grabSelected
  *
  * @return array
  */
-function takeUserAssets($assets, $sender, $recipient, $logType, $data, $selected = null, $grabSelected = false) {
+function takeUserAssets($assets, $sender, $recipient, $logType, $data, $selected = null) {
     foreach ($assets as $key => $contents) {
         if ($key == 'items' && count($contents)) {
             $service = new App\Services\InventoryManager;
             // do not loop the assets here, just the stackdata. otherwise it will deduct stacks multiple times
-            if (!$selected && !$grabSelected) {
+            if (!$selected) {
                 flash('No selected item found for debiting.')->error();
 
                 return false;
-            } elseif (!$selected && $grabSelected) {
-                $totalQuantity = 0;
-                $selected = [];
-                foreach ($contents as $asset) {
-                    if (!$chosenStack = $service->getDebitableStacks($sender, $asset['asset']->id, abs($asset['quantity']))) {
-                        flash('No debitable stacks found for the selected items.')->error();
-
-                        return false;
-                    }
-                    $selected = array_merge($selected, $chosenStack);
-                }
             }
 
             // Comparing unique item ids in $contents to unique item ids in $selected

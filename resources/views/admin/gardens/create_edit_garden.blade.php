@@ -36,47 +36,72 @@
         <div class="card-header h3">Images</div>
         <div class="card-body">
             <div class="row">
-                <div class="col-md form-group">
+                <div class="col-md form-group d-flex flex-column">
                     @if ($garden->has_image)
-                        <a href="{{ $garden->imageUrl }}" data-lightbox="entry" data-title="{{ $garden->name }}">
-                            <img src="{{ $garden->imageUrl }}" class="float-left mr-2" style="max-height: 100px;" />
-                        </a>
+                        <div class="mx-auto w-100 text-center">
+                            <a href="{{ $garden->imageUrl }}" data-lightbox="entry" data-title="{{ $garden->name }}">
+                                <img src="{{ $garden->imageUrl }}" class="img-fluid mw-100" />
+                            </a>
+                        </div>
                     @endif
-                    {!! Form::label('World Page Image (Optional)') !!} {!! add_help('This image is used only on the world information pages.') !!}
-                    <div>{!! Form::file('image') !!}</div>
-                    <div class="text-muted">Recommended size: 200px x 200px</div>
+                    <div>
+                        {!! Form::label('World Page Image (Optional)') !!} {!! add_help('This image is used only on the world information pages.') !!}
+                    </div>
+                    <div class="custom-file">
+                        {!! Form::label('image', 'Choose file...', ['class' => 'custom-file-label']) !!}
+                        {!! Form::file('image', ['class' => 'custom-file-input']) !!}
+                    </div>
+                    <div class="text-muted">Recommended size: 100px x 100px</div>
                     @if ($garden->has_image)
-                        {!! Form::checkbox('remove_image', 1, false) !!}
-                        {!! Form::label('remove_image', 'Remove current image', ['class' => 'form-check-label']) !!}
+                        <div class="form-check">
+                            {!! Form::checkbox('remove_image', 1, false, ['class' => 'form-check-input']) !!}
+                            {!! Form::label('remove_image', 'Remove current image', ['class' => 'form-check-label']) !!}
+                        </div>
                     @endif
                 </div>
-                <div class="col-md form-group">
+                <div class="col-md form-group d-flex flex-column">
                     @if ($garden->has_background_image)
-                        <a href="{{ $garden->backgroundImageUrl }}" data-lightbox="entry" data-title="{{ $garden->name }}">
-                            <img src="{{ $garden->backgroundImageUrl }}" class="mw-100 float-left mr-3">
-                        </a>
+                        <div class="mx-auto w-100 text-center">
+                            <a href="{{ $garden->backgroundImageUrl }}" data-lightbox="entry" data-title="{{ $garden->name }}">
+                                <img src="{{ $garden->backgroundImageUrl }}" class="img-fluid mw-100" />
+                            </a>
+                        </div>
                     @endif
-                    {!! Form::label('Background Image (Optional)') !!} {!! add_help('This image will serve as the background to the garden which plots will be rendered on to.') !!}
-                    <div>{!! Form::file('background_image') !!}</div>
+                    <div>
+                        {!! Form::label('Background Image (Optional)') !!} {!! add_help('This image will serve as the background to the garden which plots will be rendered on to.') !!}
+                    </div>
+                    <div class="custom-file">
+                        {!! Form::label('background_image', 'Choose file...', ['class' => 'custom-file-label']) !!}
+                        {!! Form::file('background_image', ['class' => 'custom-file-input']) !!}
+                    </div>
                     <div class="text-muted">Recommended size: 16:9 ratio.</div>
                     @if ($garden->has_background_image)
                         <div class="form-check">
                             {!! Form::checkbox('remove_background_image', 1, false, ['class' => 'form-check-input']) !!}
+                            {!! Form::label('remove_background_image', 'Remove current image', ['class' => 'form-check-label']) !!}
                         </div>
                     @endif
                 </div>
-                <div class="col-md form-group">
+                <div class="col-md form-group d-flex flex-column">
                     @if ($garden->has_plot_image)
-                        <a href="{{ $garden->plotImageUrl }}" data-lightbox="entry" data-title="{{ $garden->name }}">
-                            <img src="{{ $garden->plotImageUrl }}" class="mw-100 float-left mr-3">
-                        </a>
+                        <div class="mx-auto w-100 text-center">
+                            <a href="{{ $garden->plotImageUrl }}" data-lightbox="entry" data-title="{{ $garden->name }}">
+                                <img src="{{ $garden->plotImageUrl }}" class="img-fluid mw-100" />
+                            </a>
+                        </div>
                     @endif
-                    {!! Form::label('Default Plot Image (Optional)') !!} {!! add_help('This image is for plots that are not yet ready for planting.') !!}
-                    <div>{!! Form::file('plot_image') !!}</div>
+                    <div>
+                        {!! Form::label('Default Plot Image (Optional)') !!} {!! add_help('This image is used for the default plot display.') !!}
+                    </div>
+                    <div class="custom-file">
+                        {!! Form::label('plot_image', 'Choose file...', ['class' => 'custom-file-label']) !!}
+                        {!! Form::file('plot_image', ['class' => 'custom-file-input']) !!}
+                    </div>
                     <div class="text-muted">Recommended size: 1:1 ratio.</div>
                     @if ($garden->has_plot_image)
                         <div class="form-check">
                             {!! Form::checkbox('remove_plot_image', 1, false, ['class' => 'form-check-input']) !!}
+                            {!! Form::label('remove_plot_image', 'Remove current image', ['class' => 'form-check-label']) !!}
                         </div>
                     @endif
                 </div>
@@ -131,7 +156,7 @@
                 @if (!$garden->plots->count())
                     <p>No plots found.</p>
                 @else
-                    <div class="row no-gutters">
+                    <div class="row no-gutters justify-content-center text-center">
                         @foreach ($garden->plots as $plot)
                             <div class="col-md-4 justify-content-center text-center mb-3">
                                 <div class="card h-100 mx-2">

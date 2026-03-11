@@ -101,6 +101,24 @@ class Garden extends Model {
     }
 
     /**
+     * Gets the file name of the model's image.
+     *
+     * @return string
+     */
+    public function getBackgroundImageFileNameAttribute() {
+        return $this->id.'-background-image.png';
+    }
+
+    /**
+     * Gets the file name of the model's image.
+     *
+     * @return string
+     */
+    public function getPlotImageFileNameAttribute() {
+        return $this->id.'-plot-image.png';
+    }
+
+    /**
      * Gets the path to the file directory containing the model's image.
      *
      * @return string
@@ -120,6 +138,32 @@ class Garden extends Model {
         }
 
         return asset($this->imageDirectory.'/'.$this->imageFileName);
+    }
+
+    /**
+     * Gets the URL of the model's background image.
+     *
+     * @return string
+     */
+    public function getBackgroundImageUrlAttribute() {
+        if (!$this->has_background_image) {
+            return null;
+        }
+
+        return asset($this->imageDirectory.'/'.$this->backgroundImageFileName);
+    }
+
+    /**
+     * Gets the URL of the model's background image.
+     *
+     * @return string
+     */
+    public function getPlotImageUrlAttribute() {
+        if (!$this->has_plot_image) {
+            return null;
+        }
+
+        return asset($this->imageDirectory.'/'.$this->plotImageFileName);
     }
 
     /**
@@ -149,38 +193,55 @@ class Garden extends Model {
     /**
      * Get the user's garden objects.
      *
-     * @param User $user
+     * @param User       $user
+     * @param mixed|null $type
      *
      * @return array
      */
-    public function getUserGardenObjects($user) {
-        $gardenObjects = $this->allowed_object_types ? GardenObject::whereIn('type', $this->allowed_object_types)->get() : GardenObject::all();
-        $user_garden_objects = [];
-        foreach ($gardenObjects as $gardenObject) {
-            switch ($gardenObject->object_model) {
+    public function getUserGardenObjects($user, $type = null) {
+        $gardenObjects = $this->allowed_object_types
+            ? GardenObject::whereIn('type', $this->allowed_object_types)->get()
+            : GardenObject::all();
+        $userGardenObjects = array_fill_keys($this->allowed_object_types ?? array_keys(getGardenObjectTypes($type)), []);
+        $groupedObjects = $gardenObjects->groupBy('object_model');
+        foreach ($groupedObjects as $objectModel => $objects) {
+            /*
+             * Returns in the format:
+             * (array) userGardenObjects => [
+             *     objectType => [
+             *         objectModel => [
+             *             objectId: quantity
+             *        ]
+             *     ]
+             * ]
+             */
+            switch ($objectModel) {
                 case 'App\Models\Item\Item':
-                    if (!isset($user_garden_objects['items'][$gardenObject->type])) {
-                        $user_garden_objects['items'][$gardenObject->type] = collect();
+                    $itemIds = $objects->pluck('object_id')->unique();
+                    $itemSums = UserItem::where('user_id', $user->id)
+                        ->where('count', '>', 0)
+                        ->whereIn('item_id', $itemIds)
+                        ->get()
+                        ->groupBy('item_id')
+                        ->map->sum('available_quantity');
+
+                    foreach ($objects as $gardenObject) {
+                        $userGardenObjects[$gardenObject->type][$gardenObject->object_model][$gardenObject->object_id] =
+                            (int) ($itemSums[$gardenObject->object_id] ?? 0);
                     }
-                    $user_garden_objects['items'][$gardenObject->type]->push(
-                        // merge them all into one collection
-                        UserItem::where('user_id', $user->id)->where('item_id', $gardenObject->object_id)->where('count', '>', 0)->get()
-                    );
                     break;
+
+                    // case 'App\Models\Pet\Pet':
+                    //     similar logic here
+                    //     break;
 
                 default:
-                    flash('Unknown garden object type: '.$gardenObject->object_model)->error();
+                    flash('Unknown garden object type: '.$objectModel)->error();
 
-                    return redirect()->to('/');
-                    break;
-            }
-        }
-        foreach ($user_garden_objects as $key => $objects) {
-            foreach ($objects as $type=>$user_garden_object) {
-                $user_garden_objects[$key][$type] = $user_garden_object->flatten();
+                    return redirect()->to('gardens');
             }
         }
 
-        return $user_garden_objects;
+        return $userGardenObjects;
     }
 }

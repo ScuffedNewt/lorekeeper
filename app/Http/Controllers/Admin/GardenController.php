@@ -68,7 +68,7 @@ class GardenController extends Controller {
      */
     public function postCreateEditGarden(Request $request, GardenService $service, $id = null) {
         $data = $request->only([
-            'name', 'description', 'image', 'remove_image', 'background_image', 'remove_background_image', 'garden_image', 'remove_garden_image',
+            'name', 'description', 'image', 'remove_image', 'background_image', 'remove_background_image', 'plot_image', 'remove_plot_image',
             'can_perish', 'is_active', 'allowed_object_types',
         ]);
         if ($id && $service->updateGarden(Garden::find($id), $data, Auth::user())) {
@@ -113,7 +113,7 @@ class GardenController extends Controller {
      * @return \Illuminate\Http\RedirectResponse
      */
     public function postDeleteGarden(Request $request, GardenService $service, $id) {
-        if ($id && $service->deleteGarden(Garden::find($id))) {
+        if ($id && $service->deleteGarden(Garden::find($id), Auth::user())) {
             flash('Garden deleted successfully.')->success();
         } else {
             foreach ($service->errors()->getMessages()['error'] as $error) {
@@ -180,7 +180,7 @@ class GardenController extends Controller {
      */
     public function postCreateEditGardenPlot(Request $request, GardenService $service, $gardenId, $id = null) {
         $data = $request->only([
-            'can_perish', 'image', 'remove_image',
+            'can_perish', 'image', 'remove_image', 'name',
         ]);
         if ($id && $service->updateGardenPlot(GardenPlot::find($id), $data, Auth::user())) {
             flash('Garden plot updated successfully.')->success();
@@ -225,7 +225,9 @@ class GardenController extends Controller {
      * @return \Illuminate\Http\RedirectResponse
      */
     public function postDeleteGardenPlot(Request $request, GardenService $service, $id) {
-        if ($id && $service->deleteGardenPlot(GardenPlot::find($id))) {
+        $plot = GardenPlot::find($id);
+        $garden = $plot->garden;
+        if ($id && $service->deleteGardenPlot($plot)) {
             flash('Garden plot deleted successfully.')->success();
         } else {
             foreach ($service->errors()->getMessages()['error'] as $error) {
@@ -233,7 +235,7 @@ class GardenController extends Controller {
             }
         }
 
-        return redirect()->to('admin/gardens');
+        return redirect()->to('admin/gardens/edit/'.$garden->id);
     }
 
     /**********************************************************************************************
@@ -247,7 +249,16 @@ class GardenController extends Controller {
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function getGardenObjectsIndex() {
+    public function getGardenObjectsIndex(Request $request) {
+        $query = GardenObject::query();
+        $data = $request->only(['name', 'type']);
+        if (isset($data['name'])) {
+            $query->where('name', 'like', '%'.$data['name'].'%');
+        }
+        if (isset($data['type'])) {
+            $query->where('type', $data['type']);
+        }
+
         return view('admin.gardens.objects.index', [
             'objects' => GardenObject::all(),
         ]);

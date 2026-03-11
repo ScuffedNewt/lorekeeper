@@ -6,7 +6,7 @@ use App\Models\Garden\Garden;
 use App\Models\Garden\GardenObject;
 use App\Models\Garden\GardenPlot;
 use App\Models\Garden\UserGardenPlot;
-use App\Models\Limit\Limit;
+use App\Services\InventoryManager;
 use App\Services\Service;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -39,13 +39,13 @@ class GardenManager extends Service {
             }
 
             $userPlot = null;
-            if (strpos($data['plot_id'], 'unowned') !== false) {
+            if (strpos($data['plot_id'], 'unowned') !== false || strpos($data['plot_id'], 'plot') !== false) {
                 $plotId = explode('-', $data['plot_id'])[1];
                 $plot = GardenPlot::find($plotId);
                 if (!$plot) {
                     throw new \Exception('Plot not found.');
                 }
-                if (Limit::hasLimits($plot) && !hasUnlockedLimits($user, $plot)) {
+                if (!hasUnlockedLimits($user, $plot)) {
                     throw new \Exception('You must purchase this plot before you can place anything in it.');
                 }
                 // Create a user plot
@@ -57,14 +57,14 @@ class GardenManager extends Service {
                 }
             }
 
-            $model = getAssetModelString($data['stack_type']);
+            $model = getAssetModelString($data['asset_type']);
             // if the first character is a \ remove it
             if (substr($model, 0, 1) == '\\') {
                 $model = substr($model, 1);
             }
             $object = GardenObject::where('type', $data['object_type'])
                 ->where('object_model', $model)
-                ->where('object_id', $data['stack_id'])->first();
+                ->where('object_id', $data['asset_id'])->first();
             if (!$object) {
                 throw new \Exception('Garden object not found.');
             }
@@ -277,15 +277,28 @@ class GardenManager extends Service {
                     throw new \Exception('This seed requires a fertiliser of quality '.$requiredQuality.' or higher to be planted.');
                 }
             }
-            throw new \Exception('Seed quality requirement not implemented yet.');
+            // throw new \Exception('Seed quality requirement not implemented yet.');
+
             // Debit the seed. Because we don't know what type the object is (variable) we can use the assets array
             $debitAssets = createAssetsArray();
-            $objectItem = $object->object_model::find($object->object_id);
-            if (!$objectItem) {
-                throw new \Exception('Invalid object.');
+            $asset = $object->object_model::find($object->object_id);
+            if (!$asset) {
+                throw new \Exception('Invalid asset.');
             }
-            addAsset($debitAssets, $objectItem, 1);
-            if (!takeUserAssets($debitAssets, $user, null, $logType, $data, null, true)) {
+            addAsset($debitAssets, $asset, 1);
+            $chosenStack = null;
+            switch ($object->object_model) {
+                case 'App\Models\Item\Item':
+                    $chosenStack = (new InventoryManager)->getDebitableStack($user, $object->object_id, 1);
+                    if (!$chosenStack) {
+                        throw new \Exception('You do not have the required animal to place.');
+                    }
+                    break;
+                    // Add more cases here for other models as needed, such as pets, characters, etc.
+                default:
+                    throw new \Exception('Invalid object model.');
+            }
+            if (!takeUserAssets($debitAssets, $user, null, $logType, $data, $chosenStack)) {
                 throw new \Exception('Failed to debit from user.');
             }
 

@@ -22,4 +22,8 @@
         <div class="sidebar-item"><a href="{{ url('world/currency-categories') }}" class="{{ set_active('world/currency-categories*') }}">Currency Categories</a></div>
         <div class="sidebar-item"><a href="{{ url('world/currencies') }}" class="{{ set_active('world/currencies*') }}">All Currencies</a></div>
     </li>
+    <li class="sidebar-section">
+        <div class="sidebar-section-header">Activities</div>
+        <div class="sidebar-item"><a href="{{ url('world/gardens') }}" class="{{ set_active('world/gardens*') }}">Gardens</a></div>
+    </li>
 </ul>

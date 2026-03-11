@@ -24,7 +24,7 @@
                 {!! Form::number('interactions', isset($object->data['interactions']) ? $object->data['interactions'] : 1, ['class' => 'form-control']) !!}
             </div>
             <div class="col-md form-group">
-                {!! Form::label('Growth Time') !!} {!! add_help('The number of hours it takes for this seed to grow / be able to be watered again.') !!}
+                {!! Form::label('Growth Time (Hours)') !!} {!! add_help('The number of hours it takes for this seed to grow / be able to be watered again.') !!}
                 {!! Form::number('growth_time', isset($object) ? $object->data['growth_time'] : 24, ['class' => 'form-control', 'min' => 1]) !!}
             </div>
             <div class="col-md form-group">
@@ -45,6 +45,10 @@
             </b>
         </p>
         <p>Users cannot see seeds that are "out of season" as options on the garden page.</p>
+
+        <div class="alert alert-info">
+            If you have the weather extension installed, you can use the seasons from that instead.
+        </div>
 
         <div class="row">
             <div class="col-md-6">
@@ -91,6 +95,11 @@
             <div class="card-header h5">Definite Rewards</div>
             <div class="card-body">
                 <p>These rewards will be earned upon success. If you wish to have potential for, say, better quality produce, use a loot table.</p>
+                <strong>Some ideas with loot tables:</strong>
+                <ul class="mb-0">
+                    <li>"Wild" seeds that can grow a random plant.</li>
+                    <li>Chance for higher quality produce.</li>
+                </ul>
                 @include('widgets._loot_select', ['loots' => isset($object) ? $object->rewards : [], 'showLootTables' => true, 'showRaffles' => true])
             </div>
         </div>

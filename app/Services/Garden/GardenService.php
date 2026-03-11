@@ -46,7 +46,6 @@ class GardenService extends Service {
             $image = null;
             if (isset($data['image']) && $data['image']) {
                 $data['has_image'] = 1;
-                $data['hash'] = randomString(10);
                 $image = $data['image'];
                 unset($data['image']);
             } else {
@@ -56,7 +55,6 @@ class GardenService extends Service {
             $backgroundImage = null;
             if (isset($data['background_image']) && $data['background_image']) {
                 $data['has_background_image'] = 1;
-                $data['background_hash'] = randomString(10);
                 $backgroundImage = $data['background_image'];
                 unset($data['background_image']);
             } else {
@@ -66,11 +64,14 @@ class GardenService extends Service {
             $plotImage = null;
             if (isset($data['plot_image']) && $data['plot_image']) {
                 $data['has_plot_image'] = 1;
-                $data['plot_hash'] = randomString(10);
                 $plotImage = $data['plot_image'];
                 unset($data['plot_image']);
             } else {
                 $data['has_plot_image'] = 0;
+            }
+
+            if ($image || $backgroundImage || $plotImage) {
+                $data['hash'] = randomString(10);
             }
 
             $garden = Garden::create($data);
@@ -83,10 +84,10 @@ class GardenService extends Service {
                 $this->handleImage($image, $garden->imagePath, $garden->imageFileName);
             }
             if ($backgroundImage) {
-                $this->handleImage($backgroundImage, $garden->backgroundImagePath, $garden->backgroundImageFileName);
+                $this->handleImage($backgroundImage, $garden->imagePath, $garden->backgroundImageFileName);
             }
             if ($plotImage) {
-                $this->handleImage($plotImage, $garden->plotImagePath, $garden->plotImageFileName);
+                $this->handleImage($plotImage, $garden->imagePath, $garden->plotImageFileName);
             }
 
             return $this->commitReturn($garden);
@@ -118,25 +119,32 @@ class GardenService extends Service {
             $image = null;
             if (isset($data['image']) && $data['image']) {
                 $data['has_image'] = 1;
-                $data['hash'] = randomString(10);
                 $image = $data['image'];
                 unset($data['image']);
+            } else {
+                $data['has_image'] = 0;
             }
 
             $backgroundImage = null;
             if (isset($data['background_image']) && $data['background_image']) {
                 $data['has_background_image'] = 1;
-                $data['background_hash'] = randomString(10);
                 $backgroundImage = $data['background_image'];
                 unset($data['background_image']);
+            } else {
+                $data['has_background_image'] = 0;
             }
 
             $plotImage = null;
             if (isset($data['plot_image']) && $data['plot_image']) {
                 $data['has_plot_image'] = 1;
-                $data['plot_hash'] = randomString(10);
                 $plotImage = $data['plot_image'];
                 unset($data['plot_image']);
+            } else {
+                $data['has_plot_image'] = 0;
+            }
+
+            if ($image || $backgroundImage || $plotImage) {
+                $data['hash'] = randomString(10);
             }
 
             $garden->update($data);
@@ -145,10 +153,14 @@ class GardenService extends Service {
                 throw new \Exception('Failed to log admin action.');
             }
 
-            if ($garden) {
+            if ($image) {
                 $this->handleImage($image, $garden->imagePath, $garden->imageFileName);
-                $this->handleImage($backgroundImage, $garden->backgroundImagePath, $garden->backgroundImageFileName);
-                $this->handleImage($plotImage, $garden->plotImagePath, $garden->plotImageFileName);
+            }
+            if ($backgroundImage) {
+                $this->handleImage($backgroundImage, $garden->imagePath, $garden->backgroundImageFileName);
+            }
+            if ($plotImage) {
+                $this->handleImage($plotImage, $garden->imagePath, $garden->plotImageFileName);
             }
 
             return $this->commitReturn($garden);
@@ -172,22 +184,24 @@ class GardenService extends Service {
 
         try {
             // Check first if the garden is currently owned or if some other site feature uses it
-            if (DB::table('user_gardens')->where([['garden_id', '=', $garden->id], ['count', '>', 0]])->exists()) {
-                throw new \Exception('At least one user currently owns this garden. Please remove the garden(s) before deleting it.');
-            }
+
+            // TODO
+            // if (DB::table('user_plots')->where([['garden_id', '=', $garden->id], ['count', '>', 0]])->exists()) {
+            //     throw new \Exception('At least one user currently owns this garden. Please remove the garden(s) before deleting it.');
+            // }
 
             if (!$this->logAdminAction($user, 'Deleted Garden', 'Deleted '.$garden->name)) {
                 throw new \Exception('Failed to log admin action.');
             }
 
             $garden->plots()->delete();
-            if ($garden->has_image) {
+            if ($garden->has_image && file_exists(public_path($garden->imageDirectory.'/'.$garden->imageFileName))) {
                 $this->deleteImage($garden->imagePath, $garden->imageFileName);
             }
-            if ($garden->has_background_image) {
+            if ($garden->has_background_image && file_exists(public_path($garden->backgroundImagePath.'/'.$garden->backgroundImageFileName))) {
                 $this->deleteImage($garden->backgroundImagePath, $garden->backgroundImageFileName);
             }
-            if ($garden->has_plot_image) {
+            if ($garden->has_plot_image && file_exists(public_path($garden->plotImagePath.'/'.$garden->plotImageFileName))) {
                 $this->deleteImage($garden->plotImagePath, $garden->plotImageFileName);
             }
             $garden->delete();
@@ -263,8 +277,8 @@ class GardenService extends Service {
             }
 
             $plot->update([
-                'data'      => Arr::only($data, ['allowed_object_types', 'can_perish']),
-                'has_image' => $data['has_image'],
+                'data'      => Arr::only($data, ['allowed_object_types', 'can_perish', 'name']),
+                'has_image' => !isset($data['has_image']) ? $plot->has_image : $data['has_image'],
             ]);
 
             if ($image) {
@@ -272,6 +286,36 @@ class GardenService extends Service {
             }
 
             return $this->commitReturn($plot);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
+    }
+
+    /**
+     * Deletes a garden plot.
+     *
+     * @param mixed $plot
+     */
+    public function deleteGardenPlot($plot) {
+        DB::beginTransaction();
+
+        try {
+            if (!$plot) {
+                throw new \Exception('Plot not found.');
+            }
+            if (DB::table('user_garden_plots')->where('garden_plot_id', $plot->id)->exists()) {
+                throw new \Exception('At least one user currently owns this plot. Please remove the plot(s) before deleting it.');
+            }
+            if ($plot->has_image && file_exists(public_path($plot->imagePath.'/'.$plot->imageFileName))) {
+                $this->deleteImage($plot->imagePath, $plot->imageFileName);
+            }
+            // delete all user plots associated with this plot
+            DB::table('user_garden_plots')->where('garden_plot_id', $plot->id)->delete();
+            $plot->delete();
+
+            return $this->commitReturn(true);
         } catch (\Exception $e) {
             $this->setError('error', $e->getMessage());
         }
@@ -297,6 +341,10 @@ class GardenService extends Service {
         DB::beginTransaction();
 
         try {
+            if (GardenObject::where('object_model', $data['object_model'])->where('object_id', $data['object_id'])->exists()) {
+                throw new \Exception('There is already an object with that model and ID. Please edit the existing object.');
+            }
+
             $objectData = $this->populateObjectData($data);
 
             $object = GardenObject::create([
@@ -331,6 +379,10 @@ class GardenService extends Service {
         DB::beginTransaction();
 
         try {
+            if (GardenObject::where('object_model', $data['object_model'])->where('object_id', $data['object_id'])->exists()) {
+                throw new \Exception('There is already an object with that model and ID. Please edit the existing object.');
+            }
+
             $objectData = $this->populateObjectData($data, $object);
 
             $object->update([

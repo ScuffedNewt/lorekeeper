@@ -7,7 +7,6 @@ use App\Models\Garden\GardenPlot;
 use App\Models\Garden\UserGardenPlot;
 use App\Models\User\User;
 use App\Services\Garden\GardenManager;
-use App\Services\Garden\PlotManager;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -20,223 +19,82 @@ class GardenController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getIndex() {
-        $is_garden_unlocked = Garden::visible(Auth::user() ?? null)->get()->mapWithKeys(function ($garden) {
+        $visibleGardens = Garden::visible(Auth::user() ?? null)->get();
+        $isGardenUnlocked = $visibleGardens->mapWithKeys(function ($garden) {
             return [$garden->id => hasUnlockedLimits(Auth::user(), $garden)];
         });
-        $groups = Garden::visible(Auth::user() ?? null)->get()->groupBy(function ($garden) use ($is_garden_unlocked) {
-            return $is_garden_unlocked[$garden->id] ? 'unlocked' : 'locked';
+        $groups = $visibleGardens->groupBy(function ($garden) use ($isGardenUnlocked) {
+            return $isGardenUnlocked[$garden->id] ? 'unlocked' : 'locked';
         })->reverse();
 
+        // get the placeable garden objects mapped by garden id
+        $placeableUserObjects = $visibleGardens->mapWithKeys(function ($garden) {
+            return [$garden->id => $garden->getUserGardenObjects(Auth::user(), 'placeable')];
+        });
+
         return view('gardens.index', [
-            'groups'              => $groups,
-            'is_garden_unlocked'  => $is_garden_unlocked,
+            'groups'               => $groups,
+            'isGardenUnlocked'     => $isGardenUnlocked,
+            'placeableUserObjects' => $placeableUserObjects,
         ]);
     }
 
     /**
-     * Places item / object in the plot.
+     * Handles all garden actions (place, care, collect) in one endpoint for easier AJAX handling on the frontend.
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function postPlace(GardenManager $service, Request $request) {
+    public function postAction(Request $request, GardenManager $service) {
+        $action = $request->input('action');
         $data = $request->only([
-            'object_type', 'stack_type', 'stack_id', 'current_garden_id', 'plot_id',
+            'plot_id', 'asset_id', 'asset_type', 'object_type', 'current_garden_id',
         ]);
-        if (!$service->place(Auth::user(), $data)) {
-            foreach ($service->errors()->getMessages()['error'] as $error) {
-                flash($error)->error();
-            }
+        switch ($action) {
+            case 'place':
+                // place item / object / modifier in the plot
+                if (!$service->place(Auth::user(), $data)) {
+                    debug($service->errors()->getMessages()['error']);
 
-            return response()->json([
-                'status'     => 'error',
-                'errors'     => $service->errors()->getMessages()['error'],
-                'message'    => $request->message,
-            ]);
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Failed to place item.',
+                        'errors'  => $service->errors()->getMessages()['error'],
+                    ]);
+                }
+                break;
+            case 'care':
+                // interact with a plot, watering, feeding, etc.
+                break;
+            case 'collect':
+                // collect the object from the plot
+                break;
+            default:
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid action.',
+                ]);
         }
-
-        flash('Placed successfully!')->success();
 
         return response()->json([
-            'status'     => 'success',
-            'message'    => $request->message,
+            'success' => true,
+            'message' => 'Action performed successfully.',
         ]);
     }
 
     /**
-     * Adds a modifier to the plot.
-     *
-     * @param mixed $id
+     * Cares for all plots of a certain garden in one go.
      */
-    // TODO
-
-    /**
-     * Interacts with a plot, watering, feeding, etc.
-     *
-     * @param mixed $id
-     *
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function postInteract(GardenManager $service, Request $request, $id) {
-        $data = $request->only([
-            // todo
-        ]);
-        $plot = UserGardenPlot::findOrFail($id);
-        if (!$service->interact(Auth::user(), $plot, $data)) {
-            foreach ($service->errors()->getMessages()['error'] as $error) {
-                flash($error)->error();
-            }
-        } else {
-            flash(($plot->object->type == 'seed' ? 'Watered' : 'Fed').' successfully!')->success();
-        }
-
-        return redirect()->to('gardens#'.strtolower(str_replace(' ', '-', $plot->garden->name)));
+    public function postCareAll(Request $request, GardenManager $service) {
+        // todo
+        // this is going to be a regular request not ajax
     }
 
     /**
-     * Collects the object from the plot.
-     *
-     * @param mixed $id
-     *
-     * @return \Illuminate\Http\RedirectResponse
+     * Collect all in one go of a certain garden in one go.
      */
-    public function postCollect(GardenManager $service, Request $request, $id) {
-        $plot = UserGardenPlot::findOrFail($id);
-        if (!$service->collect(Auth::user(), $plot)) {
-            foreach ($service->errors()->getMessages()['error'] as $error) {
-                flash($error)->error();
-            }
-        } else {
-            flash('Collected successfully!')->success();
-        }
-
-        return redirect()->to('gardens#'.strtolower(str_replace(' ', '-', $plot->garden->name)));
-    }
-
-    /************************************************************************************
-     * OLD STUFF
-     ************************************************************************************/
-
-    /**
-     * Plant seed | Place coop / barn animal.
-     */
-    public function postPlantSeed(Request $request) {
-        $data = $request->only(['item_id', 'plot_id', 'type']);
-        $service = new PlotManager;
-        if ($service->place(Auth::user(), $data)) {
-            flash($data['type'] == 'seed' ? 'Planted successfully!' : 'Placed successfully!')->success();
-            $response = [
-                'status' => 'success',
-                'msg'    => $request->message,
-            ];
-
-            return response()->json($response);
-        } else {
-            foreach ($service->errors()->getMessages()['error'] as $error) {
-                flash($error)->error();
-            }
-            $response = [
-                'status' => 'error',
-                'error'  => $service->errors()->getMessages()['error'],
-                'msg'    => $request->message,
-            ];
-
-            return response()->json($response);
-        }
-    }
-
-    /**
-     * Add Modifier.
-     */
-    public function postAddModifier(Request $request) {
-        $data = $request->only(['mod_id', 'plot_id']);
-        $service = new PlotManager;
-        if ($service->modify(Auth::user(), $data)) {
-            flash('Added modifier successfully!')->success();
-            $response = [
-                'status' => 'success',
-                'msg'    => $request->message,
-            ];
-
-            return response()->json($response);
-        } else {
-            foreach ($service->errors()->getMessages()['error'] as $error) {
-                flash($error)->error();
-            }
-            $response = [
-                'status' => 'error',
-                'msg'    => $request->message,
-            ];
-
-            return response()->json($response);
-        }
-    }
-
-    /**
-     * Water plot | feed animal.
-     *
-     * @param mixed $id
-     */
-    public function postAction($id) {
-        $plot = UserGardenPlot::findOrFail($id);
-        $service = new PlotManager;
-        if ($plot->actionReady) {
-            if ($service->action(Auth::user(), $plot, false)) {
-                flash(($plot->plot_type == 'seed' ? $plot->actionWord : 'f').'ed successfully!')->success();
-            } else {
-                foreach ($service->errors()->getMessages()['error'] as $error) {
-                    flash($error)->error();
-                }
-            }
-        } else {
-            flash('Not ready to water!')->error();
-        }
-
-        return redirect()->to(($plot->plot->plot_type == 'seed' ? 'garden#farm' : 'garden#'.($plot->plot->plot_type)));
-    }
-
-    /**
-     * waters / feeds all plots that are ready.
-     *
-     * @param mixed $type
-     */
-    public function postActionAll(PlotManager $service, $type) {
-        if ($count = $service->action(Auth::user(), $type, true)) {
-            flash(($type == 'seed' ? 'Watered' : 'Fed').' '.$count.' plots successfully!')->success();
-        } else {
-            flash('Nothing to water!')->warning();
-        }
-
-        return redirect()->back();
-    }
-
-    /**
-     * when the feeding | waterings have met the requirements and the user gets their reward.
-     *
-     * @param mixed $id
-     */
-    public function postClaim(PlotManager $service, $id) {
-        $plot = UserGardenPlot::findOrFail($id);
-        if ($plot->finishReady) {
-            if ($service->claim(Auth::user(), $plot)) {
-                flash('Claimed successfully!')->success();
-            } else {
-                foreach ($service->errors()->getMessages()['error'] as $error) {
-                    flash($error)->error();
-                }
-            }
-        } else {
-            flash('Not ready to claim!')->error();
-        }
-
-        return redirect()->to(($plot->plot->plot_type == 'seed' ? 'garden#farm' : 'garden#'.$plot->plot->plot_type));
-    }
-
-    /**
-     * Collect all in one go of a certain type of plot.
-     *
-     * @param mixed $type
-     */
-    public function postCollectAll(PlotManager $service, $type) {
+    public function postCollectAll(Request $request, GardenManager $service) {
+        // todo
+        // this is going to be a regular request not ajax
         if ($count = $service->collectAll(Auth::user(), $type)) {
             flash('Collected '.$count.' successfully!')->success();
         } else {
@@ -246,120 +104,39 @@ class GardenController extends Controller {
         return redirect()->back();
     }
 
-    /******************************************************************************************************
-     *  PLOTS
-     ******************************************************************************************************/
-
-    /**
-     * Buys the plots.
-     *
-     * @param mixed $id
-     */
-    public function postPurchasePlot($id, PlotManager $service) {
-        $plot = GardenPlot::find($id);
-        if (!$plot) {
-            abort(404);
-        }
-        if ($service->purchasePlot($plot, Auth::user())) {
-            flash('Plot purchased successfully.')->success();
-        } else {
-            foreach ($service->errors()->getMessages()['error'] as $error) {
-                flash($error)->error();
-            }
-        }
-
-        return redirect()->to('garden/#'.strtolower($plot->plot_type));
-    }
-
     /**
      * Checks if any plants have died since the user has last logged on.
      */
     public function checkPlots() {
+        // TODO
         // this is only for seeds (animals don't die (hopefully))
-        $check = 0;
-        $enabled_types = array_filter(config('lorekeeper.garden'), function ($type) {
-            return $type['is_die_enabled'];
-        });
-        foreach (UserGardenPlot::where('user_id', Auth::user()->id)->whereIn('plot_id', GardenPlot::whereIn('plot_type', array_keys($enabled_types))->pluck('id'))->get() as $plot) {
-            if (!config('lorekeeper.garden.'.$plot->plot->plot_type.'.is_die_enabled')) {
-                return;
-            } // for pussies /j
-            if (!$plot->water_at || !$plot->item_id) {
-                continue;
-            }
-            $water = Carbon::parse($plot->water_at)->addHours(config('lorekeeper.garden.seed.die_time'));
-            if ($water < Carbon::now()) {
-                $plot->is_dead = 1;
-                $plot->save();
+        // $check = 0;
+        // $enabled_types = array_filter(config('lorekeeper.garden'), function ($type) {
+        //     return $type['is_die_enabled'];
+        // });
+        // foreach (UserGardenPlot::where('user_id', Auth::user()->id)->whereIn('plot_id', GardenPlot::whereIn('plot_type', array_keys($enabled_types))->pluck('id'))->get() as $plot) {
+        //     if (!config('lorekeeper.garden.'.$plot->plot->plot_type.'.is_die_enabled')) {
+        //         return;
+        //     } // for pussies /j
+        //     if (!$plot->water_at || !$plot->item_id) {
+        //         continue;
+        //     }
+        //     $water = Carbon::parse($plot->water_at)->addHours(config('lorekeeper.garden.seed.die_time'));
+        //     if ($water < Carbon::now()) {
+        //         $plot->is_dead = 1;
+        //         $plot->save();
 
-                $check = 1;
-            }
-        }
-        if ($check) {
-            flash('One or more of your plants has died due to lack of watering.')->error();
-        }
+        //         $check = 1;
+        //     }
+        // }
+        // if ($check) {
+        //     flash('One or more of your plants has died due to lack of watering.')->error();
+        // }
     }
 
-    /**
-     * Get skull modal.
-     *
-     * @param mixed $id
-     */
-    public function getSkull($id) {
-        $plot = UserGardenPlot::find($id);
-        if (!$plot) {
-            abort(404);
-        }
-        if ($plot->plot->plot_type == 'seed') {
-            return view('garden._skull_modal', [
-                'plot' => $plot,
-            ]);
-        } else {
-            return view('garden._clear_barn_coop', [
-                'plot' => $plot,
-            ]);
-        }
-    }
+    /**********************************************************************************************
 
-    /**
-     * @param mixed $id
-     */
-    public function destroyCrop($id, PlotManager $service) {
-        $plot = UserGardenPlot::find($id);
-        if (!$plot) {
-            abort(404);
-        }
-        if ($service->clear(Auth::user(), $plot)) {
-            if ($plot->plot->plot_type == 'seed') {
-                flash('Crop destroyed successfully!')->success();
-            } else {
-                flash('Removed successfully!')->success();
-            }
-        } else {
-            foreach ($service->errors()->getMessages()['error'] as $error) {
-                flash($error)->error();
-            }
-        }
+        PRIVATE FUNCTIONS
 
-        return redirect()->to('garden/#'.$plot->plot->plot_type);
-    }
-
-    /**
-     * Post clear plot.
-     *
-     * @param mixed $id
-     */
-    public function postClearPlot($id) {
-        $plot = UserGardenPlot::findOrFail($id);
-        $service = new PlotManager;
-        if ($service->clear(Auth::user(), $plot)) {
-            flash('Cleared successfully!')->success();
-
-            return redirect()->to(($plot->plot->plot_type == 'seed' ? 'garden#farm' : 'garden#'.$plot->plot->plot_type));
-        } else {
-            foreach ($service->errors()->getMessages()['error'] as $error) {
-                flash($error)->error();
-            }
-        }
-    }
+    **********************************************************************************************/
 }
