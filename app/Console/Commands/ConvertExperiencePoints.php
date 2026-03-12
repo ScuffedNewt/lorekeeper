@@ -38,12 +38,16 @@ class ConvertExperiencePoints extends Command {
         // run migration to create experience points table
         $this->call('migrate');
 
-        Experience::create([
-            'name'        => 'Level Experience',
-            'has_image'   => false,
-            'description' => 'Experience points are earned by characters and users through various actions. They can be used to level up.',
-            'is_visible'  => false,
-        ]);
+        if (Experience::first() == null) {
+            $experience = Experience::create([
+                'name'        => 'Level Experience',
+                'has_image'   => false,
+                'description' => 'Experience points are earned by characters and users through various actions. They can be used to level up.',
+                'is_visible'  => false,
+            ]);
+        } else {
+            $experience = Experience::first();
+        }
 
         // Convert user experience points
         // chunk the updates to avoid memory issues
@@ -51,11 +55,11 @@ class ConvertExperiencePoints extends Command {
         $this->info("Converting experience points for {$userCount} users...");
         $bar = $this->output->createProgressBar($userCount);
         $bar->start();
-        UserLevel::chunk(100, function ($userLevels) use ($bar) {
+        UserLevel::chunk(100, function ($userLevels) use ($bar, $experience) {
             foreach ($userLevels as $userLevel) {
                 UserExperience::create([
                     'user_id'       => $userLevel->user_id,
-                    'experience_id' => 1,
+                    'experience_id' => $experience->id,
                     'quantity'      => $userLevel->current_exp,
                 ]);
                 $bar->advance();
@@ -69,11 +73,11 @@ class ConvertExperiencePoints extends Command {
         $this->info("Converting experience points for {$characterCount} characters...");
         $bar = $this->output->createProgressBar($characterCount);
         $bar->start();
-        CharacterLevel::chunk(100, function ($characterLevels) use ($bar) {
+        CharacterLevel::chunk(100, function ($characterLevels) use ($bar, $experience) {
             foreach ($characterLevels as $characterLevel) {
                 CharacterExperience::create([
                     'character_id'  => $characterLevel->character_id,
-                    'experience_id' => 1,
+                    'experience_id' => $experience->id,
                     'quantity'      => $characterLevel->current_exp,
                 ]);
                 $bar->advance();

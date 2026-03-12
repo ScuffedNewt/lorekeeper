@@ -395,33 +395,6 @@
                     $submissionForm.attr('action', '{{ url()->current() }}/cancel');
                     $submissionForm.submit();
                 });
-
-                $('.original.skill-select').selectize();
-
-                $('#add-skill').on('click', function(e) {
-                    e.preventDefault();
-                    addSkillRow();
-                });
-                $('.remove-skill').on('click', function(e) {
-                    e.preventDefault();
-                    removeSkillRow($(this));
-                });
-
-                function addSkillRow() {
-                    var $clone = $('.skill-row').clone();
-                    $('#skillList').append($clone);
-                    $clone.removeClass('hide skill-row');
-                    $clone.addClass('d-flex');
-                    $clone.find('.remove-skill').on('click', function(e) {
-                        e.preventDefault();
-                        removeSkillRow($(this));
-                    })
-                    $clone.find('.skill-select').selectize();
-                }
-
-                function removeSkillRow($trigger) {
-                    $trigger.parent().remove();
-                }
             });
         </script>
     @endif

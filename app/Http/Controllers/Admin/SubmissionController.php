@@ -92,7 +92,6 @@ class SubmissionController extends Controller {
             'page'             => 'submission',
             'expanded_rewards' => config('lorekeeper.extensions.character_reward_expansion.expanded'),
             'characters'       => Character::visible(Auth::user() ?? null)->myo(0)->orderBy('slug', 'DESC')->get()->pluck('fullName', 'slug')->toArray(),
-            'skills'           => Skill::pluck('name', 'id')->toArray(),
         ] + ($submission->status == 'Pending' ? [
             'characterCurrencies' => Currency::where('is_character_owned', 1)->orderBy('sort_character', 'DESC')->pluck('name', 'id'),
             'items'               => Item::orderBy('name')->pluck('name', 'id'),
@@ -106,6 +105,7 @@ class SubmissionController extends Controller {
             'classes'             => CharacterClass::orderBy('name')->pluck('name', 'id'),
             'points'              => Stat::orderBy('name')->pluck('name', 'id')->toArray(),
             'experiences'         => Experience::orderBy('name')->pluck('name', 'id')->toArray(),
+            'skills'              => Skill::pluck('name', 'id')->toArray(),
         ] : []));
     }
 
@@ -158,7 +158,6 @@ class SubmissionController extends Controller {
             'itemsrow'         => Item::all()->keyBy('id'),
             'expanded_rewards' => config('lorekeeper.extensions.character_reward_expansion.expanded'),
             'characters'       => Character::visible(Auth::user() ?? null)->myo(0)->orderBy('slug', 'DESC')->get()->pluck('fullName', 'slug')->toArray(),
-            'skills'           => Skill::pluck('name', 'id')->toArray(),
         ] + ($submission->status == 'Pending' ? [
             'characterCurrencies' => Currency::where('is_character_owned', 1)->orderBy('sort_character', 'DESC')->pluck('name', 'id'),
             'items'               => Item::orderBy('name')->pluck('name', 'id'),
@@ -171,6 +170,7 @@ class SubmissionController extends Controller {
             'classes'             => CharacterClass::orderBy('name')->pluck('name', 'id'),
             'points'              => Stat::orderBy('name')->pluck('name', 'id')->toArray(),
             'experiences'         => Experience::orderBy('name')->pluck('name', 'id')->toArray(),
+            'skills'              => Skill::pluck('name', 'id')->toArray(),
         ] : []));
     }
 
