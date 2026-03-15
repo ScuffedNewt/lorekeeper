@@ -70,6 +70,10 @@
     </div>
 </div>
 
+<a class="float-right" href="{{ $user->url . '/garden' }}" style="opacity: 1 !important; font-size: 1.5rem;">
+    🌱
+</a>
+
 @if (isset($user->profile->parsed_text))
     <div class="card mb-3" style="clear:both;">
         <div class="card-body">

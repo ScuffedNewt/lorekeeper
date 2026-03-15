@@ -48,7 +48,8 @@
                                 'user' => $user,
                                 'garden' => $garden,
                                 'readOnly' => $readOnly,
-                                'placeableUserObjects' => $readOnly ? [] : $placeableUserObjects[$garden->id] ?? [],
+                                'modifiers' => $readOnly ? [] : $modifierUserObjects[$garden->id] ?? [],
+                                'placeables' => $readOnly ? [] : $placeableUserObjects[$garden->id] ?? [],
                             ])
                         @else
                             <div class="alert alert-danger">This garden is locked.</div>

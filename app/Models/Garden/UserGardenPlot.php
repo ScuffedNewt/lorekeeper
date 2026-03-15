@@ -81,7 +81,7 @@ class UserGardenPlot extends Model {
     }
 
     /**
-     * Get the object that is currently in the plot.
+     * Get the object currently in the plot.
      */
     public function getObjectAttribute() {
         if (!isset($this->data['object_id'])) {
@@ -92,53 +92,64 @@ class UserGardenPlot extends Model {
     }
 
     /**
-     * Gets the interacted count.
+     * Number of interactions performed.
      */
     public function getInteractedCountAttribute() {
         return $this->data['interacted_count'] ?? 0;
     }
 
     /**
-     * Returns the actions required to be ready.
+     * Total interactions required.
      */
     public function getActionsRequiredAttribute() {
-        return $this->object->data['interactions'] ?? 1;
+        return $this->object?->data['interactions'] ?? 1;
     }
 
     /**
-     * gets whether the plot is ready to be waterred.
+     * Whether the next interaction can be performed.
      */
     public function getActionReadyAttribute() {
         if (!$this->object || !$this->started_at) {
             return false;
         }
 
-        if (!isset($this->data['interacted_at'])) {
-            return true;
+        if ($this->interactedCount >= $this->actionsRequired) {
+            return false;
         }
 
-        return ($this->timeUntilReady < Carbon::now() && $this->interactedCount < $this->actionsRequired) || $this->interactedCount >= $this->actionsRequired;
+        if (!isset($this->data['interacted_at'])) {
+            return $this->started_at <= Carbon::now();
+        }
+
+        return $this->timeUntilReady <= Carbon::now();
     }
 
     /**
-     * Returns whether or not the plot is ready to be collected.
+     * Whether the object can be collected.
      */
     public function getCanCollectAttribute() {
-        return $this->actionReady && $this->interactedCount >= $this->actionsRequired && $this->timeUntilReady < Carbon::now();
+        if (!$this->object || !$this->started_at) {
+            return false;
+        }
+
+        return $this->interactedCount >= $this->actionsRequired
+            && $this->timeUntilReady <= Carbon::now();
     }
 
     /**
-     * Returns the carbon instance of the next action ready time.
+     * When the next interaction or collection becomes available.
      */
     public function getTimeUntilReadyAttribute() {
-        $growthTime = $this->object->data['growth_time'] ?? 24;
-
-        if (!isset($this->data['interacted_at'])) {
-            return $this->started_at->addHours($growthTime);
+        if (!$this->object || !$this->started_at) {
+            return null;
         }
 
-        $interactedAt = Carbon::parse($this->data['interacted_at']);
+        $growthTime = $this->object->data['growth_time'] ?? 24;
 
-        return $interactedAt->addHours($growthTime);
+        $baseTime = isset($this->data['interacted_at'])
+            ? Carbon::parse($this->data['interacted_at'])
+            : $this->started_at;
+
+        return $baseTime->addHours($growthTime);
     }
 }

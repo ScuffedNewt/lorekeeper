@@ -38,24 +38,7 @@ class GardenManager extends Service {
                 throw new \Exception('Garden not found.');
             }
 
-            $userPlot = null;
-            if (strpos($data['plot_id'], 'unowned') !== false || strpos($data['plot_id'], 'plot') !== false) {
-                $plotId = explode('-', $data['plot_id'])[1];
-                $plot = GardenPlot::find($plotId);
-                if (!$plot) {
-                    throw new \Exception('Plot not found.');
-                }
-                if (!hasUnlockedLimits($user, $plot)) {
-                    throw new \Exception('You must purchase this plot before you can place anything in it.');
-                }
-                // Create a user plot
-                $userPlot = $this->createUserPlot($user, $plot);
-            } else {
-                $userPlot = UserGardenPlot::find($data['plot_id']);
-                if (!$userPlot || $userPlot->user_id != $user->id) {
-                    throw new \Exception('User plot not found.');
-                }
-            }
+            $userPlot = $this->getUserPlot($user, $data);
 
             $model = getAssetModelString($data['asset_type']);
             // if the first character is a \ remove it
@@ -115,42 +98,53 @@ class GardenManager extends Service {
     }
 
     /**
-     * Interacts with a plot.
+     * Tends to a plot.
      *
      * @param User  $user
-     * @param mixed $plot
      * @param mixed $data
      *
      * @return bool
      */
-    public function interact($user, $plot, $data) {
+    public function tend($user, $data) {
         DB::beginTransaction();
 
         try {
-            if (!$plot->user_id || $plot->user_id != $user->id) {
+            $userPlot = $this->getUserPlot($user, $data);
+            if (!$userPlot->user_id || $userPlot->user_id != $user->id) {
                 throw new \Exception('You do not own this plot.');
             }
-            if (!$plot->started_at) {
+            if (!$userPlot->started_at) {
                 throw new \Exception('This plot has not been started yet.');
             }
-            if (!$plot->actionReady) {
+            if (!$userPlot->actionReady) {
                 throw new \Exception('This plot is not ready for action yet.');
             }
 
-            $object = $plot->object;
+            $object = $userPlot->object;
             if (!$object) {
                 throw new \Exception('Garden object not found.');
             }
 
-            // todo: debits etc if needed
-            $plotData = $plot->data;
+            if ($object->type == 'animal' && isset($object->data['food'])) {
+                $this->debitAssets($user, parseAssetData($object->data['food']), 'Fed animal in garden', ['data' => 'Fed '.$object->object->displayName.' in the '.$userPlot->garden->displayName.' garden']);
+            }
+
+            $plotData = $userPlot->data;
             $plotData['interacted_at'] = Carbon::now();
             $plotData['interacted_count'] = ($plotData['interacted_count'] ?? 0) + 1;
-            $plot->update([
+            $userPlot->update([
                 'data' => $plotData,
             ]);
 
-            return $this->commitReturn(true);
+            // todo
+            $message = null;
+            if ($userPlot->actionReady && $userPlot->interacted_count >= $object->data['interactions']) {
+                $message = 'Ready to '.config('lorekeeper.garden.garden_object_types.'.$object->type.'.mode_text.tend').' in:<br />'.pretty_date($userPlot->timeUntilReady);
+            } else {
+                $message = 'Can be '.config('lorekeeper.garden.garden_object_types.'.$object->type.'.mode_text.tend_past').' in '.pretty_date($userPlot->timeUntilReady);
+            }
+
+            return $this->commitReturn($message);
         } catch (\Exception $e) {
             $this->setError('error', $e->getMessage());
         }
@@ -161,26 +155,27 @@ class GardenManager extends Service {
     /**
      * Collects the object from a plot.
      *
-     * @param User           $user
-     * @param UserGardenPlot $plot
+     * @param User  $user
+     * @param mixed $data
      *
      * @return bool
      */
-    public function collect($user, $plot) {
+    public function collect($user, $data) {
         DB::beginTransaction();
 
         try {
-            if (!$plot->user_id || $plot->user_id != $user->id) {
+            $userPlot = $this->getUserPlot($user, $data);
+            if (!$userPlot->user_id || $userPlot->user_id != $user->id) {
                 throw new \Exception('You do not own this plot.');
             }
-            if (!$plot->started_at) {
+            if (!$userPlot->started_at) {
                 throw new \Exception('This plot has not been started yet.');
             }
-            if (!$plot->canCollect) {
+            if (!$userPlot->canCollect || $userPlot->actionReady) {
                 throw new \Exception('This plot is not ready to be collected yet.');
             }
 
-            $object = $plot->object;
+            $object = $userPlot->object;
             if (!$object) {
                 throw new \Exception('Garden object not found.');
             }
@@ -200,7 +195,7 @@ class GardenManager extends Service {
             // Logging data
             $logType = 'Collected from Gardens';
             $logData = [
-                'data' => 'Collected '.$object->displayName.' from the '.$plot->garden->displayName.'.',
+                'data' => 'Collected '.$object->displayName.' from the '.$userPlot->garden->displayName,
             ];
 
             // Distribute user rewards
@@ -211,9 +206,8 @@ class GardenManager extends Service {
             flash('You have collected: '.createRewardsString($rewards))->success();
 
             // Reset the plot
-            $oldData = $plot->data;
-            dd($oldData);
-            $plot->update([
+            $oldData = $userPlot->data;
+            $userPlot->update([
                 'started_at' => null,
                 'data'       => null,
             ]);
@@ -225,12 +219,6 @@ class GardenManager extends Service {
 
         return $this->rollbackReturn(false);
     }
-
-    /**********************************************************************************************
-
-        PRIVATE FUNCTIONS
-
-    **********************************************************************************************/
 
     /**********************************************************************************************
 
@@ -255,7 +243,7 @@ class GardenManager extends Service {
         try {
             $logType = 'Used in Garden';
             $data = [
-                'data' => 'Used to plant a seed in the '.$garden->displayName.' garden.',
+                'data' => 'Used to plant a seed in the '.$garden->displayName.' garden',
             ];
 
             // check if the seed can be planted during this month
@@ -289,7 +277,7 @@ class GardenManager extends Service {
             $chosenStack = null;
             switch ($object->object_model) {
                 case 'App\Models\Item\Item':
-                    $chosenStack = (new InventoryManager)->getDebitableStack($user, $object->object_id, 1);
+                    $chosenStack = (new InventoryManager)->getDebitableStacks($user, $object->object_id, 1);
                     if (!$chosenStack) {
                         throw new \Exception('You do not have the required animal to place.');
                     }
@@ -334,7 +322,7 @@ class GardenManager extends Service {
         try {
             $logType = 'Used in Garden';
             $data = [
-                'data' => 'Used to place an animal in the '.$garden->displayName.' garden.',
+                'data' => 'Used to place an animal in the '.$garden->displayName.' ',
             ];
 
             $objectItem = $object->object_model::find($object->object_id);
@@ -342,12 +330,11 @@ class GardenManager extends Service {
                 throw new \Exception('Invalid object.');
             }
 
-            \Log::info('GardenManager::placeAnimal', $objectItem->toArray());
-
+            $chosenStacks = null;
             switch ($object->object_model) {
                 case 'App\Models\Item\Item':
-                    $chosenStack = (new InventoryManager)->getDebitableStack($user, $object->object_id, 1);
-                    if (!$chosenStack) {
+                    $chosenStacks = (new InventoryManager)->getDebitableStacks($user, $object->object_id, 1);
+                    if (!$chosenStacks) {
                         throw new \Exception('You do not have the required animal to place.');
                     }
                     break;
@@ -356,17 +343,20 @@ class GardenManager extends Service {
                     throw new \Exception('Invalid object model for animal placement.');
             }
 
+            $chosenStack = isset($chosenStacks[0]) ? $chosenStacks[0]['stack'] : null;
             // increase garden_count
-            // $user->update([
-            //     'garden_count' => $user->garden_count + 1,
-            // ]);
-
-            // $userPlot->update([
-            //     'started_at' => Carbon::now(),
-            //     'data'       => [
-            //         'object_id' => $object->id,
-            //     ],
-            // ]);
+            if ($chosenStack->availableQuantity < 1) {
+                throw new \Exception('You do not have the required animal to place.');
+            }
+            $chosenStack->garden_count += 1;
+            $chosenStack->save();
+            $userPlot->update([
+                'started_at' => Carbon::now(),
+                'data'       => [
+                    'object_id'    => $object->id,
+                    'user_item_id' => $chosenStack->id,
+                ],
+            ]);
 
             return $this->commitReturn(true);
         } catch (\Exception $e) {
@@ -397,7 +387,7 @@ class GardenManager extends Service {
         try {
             $logType = 'Used in Garden';
             $data = [
-                'data' => 'Used to fertilise a plot in the '.$garden->displayName.' garden.',
+                'data' => 'Used to fertilise a plot in the '.$garden->displayName.' garden',
             ];
 
             $userModifierData = $userPlot->data['modifiers'] ?? [];
@@ -461,5 +451,88 @@ class GardenManager extends Service {
         }
 
         return $this->rollbackReturn(false);
+    }
+
+    /**
+     * Gets a user plot based on the provided data. If the plot is unowned (but unlocked), it creates a new user plot for the specified plot.
+     *
+     * @param User  $user
+     * @param mixed $data
+     *
+     * @return GardenPlot|null
+     */
+    private function getUserPlot($user, $data) {
+        if (!isset($data['plot_id'])) {
+            throw new \Exception('No plot id provided.');
+        }
+
+        $userPlot = null;
+        if (strpos($data['plot_id'], 'unowned') !== false || strpos($data['plot_id'], 'plot') !== false) {
+            $plotId = explode('-', $data['plot_id'])[1];
+            $plot = GardenPlot::find($plotId);
+            if (!$plot) {
+                throw new \Exception('Plot not found.');
+            }
+            if (!hasUnlockedLimits($user, $plot)) {
+                throw new \Exception('You must purchase this plot before you can place anything in it.');
+            }
+            // Create a user plot
+            $userPlot = $this->createUserPlot($user, $plot);
+        } else {
+            $userPlot = UserGardenPlot::find($data['plot_id']);
+            if (!$userPlot || $userPlot->user_id != $user->id) {
+                throw new \Exception('User plot not found.');
+            }
+        }
+
+        return $userPlot;
+    }
+
+    /**********************************************************************************************
+
+        PRIVATE FUNCTIONS
+
+    **********************************************************************************************/
+
+    /**
+     * Debits the specified assets from the user, with error handling and logging.
+     *
+     * @param User   $user
+     * @param array  $assets
+     * @param string $log
+     * @param array  $logType
+     *
+     * @return bool
+     */
+    private function debitAssets($user, $assets, $log, $logType) {
+        $selected = [];
+        $debitAssets = createAssetsArray();
+        foreach ($assets as $type => $stack) {
+            foreach ($stack as $id => $asset) {
+                switch ($type) {
+                    case 'items':
+                        $chosenStacks = (new InventoryManager)->getDebitableStacks($user, $id, $asset['quantity']);
+                        if (!$chosenStacks) {
+                            throw new \Exception('You do not have the required items.');
+                        }
+
+                        $selected = array_merge($selected, $chosenStacks);
+                        addAsset($debitAssets, $asset['asset'], $asset['quantity']);
+                        break;
+                    case 'currency':
+                        addAsset($debitAssets, $asset['asset'], $asset['quantity']);
+                        break;
+                    default:
+                        throw new \Exception('Invalid asset type for debiting.');
+                        break;
+                }
+            }
+        }
+
+        if (!takeUserAssets($debitAssets, $user, null, $log, $logType, $selected)) {
+            throw new \Exception('Failed to debit from user.');
+        }
+
+        return true;
     }
 }

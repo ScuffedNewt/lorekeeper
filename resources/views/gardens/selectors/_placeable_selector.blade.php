@@ -7,17 +7,18 @@
         $icon = $asset->has_image ? `<img src='` . $asset->imageUrl . `'>` : null;
 
         $html = sprintf(
-            'draggable="true" data-name="%s" data-id="%s" data-current-garden-id="%s" data-asset-type="%s" data-object-type="%s" data-icon="%s"',
+            'draggable="true" data-name="%s" data-id="%s" data-current-garden-id="%s" data-asset-type="%s" data-object-type="%s" data-icon="%s" data-quantity="%s"',
             htmlspecialchars($asset->name),
             $id,
             $garden->id,
             $asset->assetType,
             $gardenObjectType,
             $icon,
+            $quantity,
         );
     }
 @endphp
-<button class="slot seed btn" {!! $html !!}>
+<button class="slot asset btn" {!! $html !!}>
     <span class="quantity badge badge-pill badge-dark">x{{ $quantity }}</span>
     <div class="icon">
         @if ($asset->has_image)
@@ -33,6 +34,3 @@
         @endif
     </div>
 </button>
-
-
-{{-- {{ $stack->availableQuantity > 0 ? 'data-garden-id="' . $stack->item->id . '" data-current-garden-id="' . $garden->id . '" data-stack-type="' . $stack_type . '" data-object-type="' . $object_type . '"' : '' }}> --}}

@@ -190,6 +190,20 @@
     border-radius: 1.375rem;
 }
 
+.highlight {
+    outline: 0.25rem solid color-mix(in srgb, var(--primary) 80%, transparent);
+    animation: highlight-pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes highlight-pulse {
+    0%, 100% {
+        outline-color: color-mix(in srgb, var(--primary) 80%, transparent);
+    }
+    50% {
+        outline-color: color-mix(in srgb, var(--primary) 40%, transparent);
+    }
+}
+
 .plots {
     display: grid;
     grid-template-columns: repeat(4, minmax(7.5rem, 1fr));
@@ -244,6 +258,20 @@
     pointer-events: none;
 }
 
+.plot a {
+    color: var(--primary) !important;
+}
+
+.plot .plot-center img, .plot .plot-center abbr, .plot .plot-center a {
+    pointer-events: auto !important;
+    transition: transform 0.15s ease;
+}
+
+.plot .plot-center img:hover {
+    pointer-events: auto !important;
+    transform: scale(1.1);
+}
+
 .plot .plot-center .unowned a,
 .plot .plot-center .unowned form {
     pointer-events: auto;
@@ -264,7 +292,7 @@
         inset 0 -0.75rem 1.125rem color-mix(in srgb, var(--black) 12%, transparent);
 }
 
-.plot.planted::after {
+.plot.full::after {
     content: "";
     position: absolute;
     inset: 0.625rem;
@@ -301,7 +329,7 @@
 
 .inventory {
     display: grid;
-    grid-template-columns: 13.75rem 1fr;
+    grid-template-columns: 20rem 1fr;
     gap: 0.875rem;
     align-items: start;
 }
@@ -320,7 +348,7 @@
 }
 
 .tool-row,
-.seed-row {
+.asset-row {
     display: flex;
     gap: 0.625rem;
     overflow-x: auto;
@@ -330,18 +358,18 @@
 }
 
 .tool-row::-webkit-scrollbar,
-.seed-row::-webkit-scrollbar {
+.asset-row::-webkit-scrollbar {
     height: 0.5rem;
 }
 
 .tool-row::-webkit-scrollbar-track,
-.seed-row::-webkit-scrollbar-track {
+.asset-row::-webkit-scrollbar-track {
     background: color-mix(in srgb, var(--soil) 12%, transparent);
     border-radius: 0.625rem;
 }
 
 .tool-row::-webkit-scrollbar-thumb,
-.seed-row::-webkit-scrollbar-thumb {
+.asset-row::-webkit-scrollbar-thumb {
     background: linear-gradient(180deg,
             var(--grass),
             color-mix(in srgb, var(--grass) 75%, var(--soil)));
@@ -349,7 +377,7 @@
 }
 
 .tool-row::-webkit-scrollbar-thumb:hover,
-.seed-row::-webkit-scrollbar-thumb:hover {
+.asset-row::-webkit-scrollbar-thumb:hover {
     background: linear-gradient(180deg,
             color-mix(in srgb, var(--grass) 75%, var(--soil)),
             color-mix(in srgb, var(--grass) 55%, var(--soil-dark)));
@@ -373,7 +401,7 @@
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.slot:hover {
+.slot:hover:not(.active):not(.dragging) {
     transform: translateY(-0.125rem);
     box-shadow: 0 0.625rem 1.125rem color-mix(in srgb, var(--soil) 18%, transparent);
 }
@@ -382,7 +410,11 @@
     outline: 0.1875rem solid color-mix(in srgb, var(--grass) 80%, transparent);
 }
 
-.slot.seed {
+.slot.active:hover {
+    outline: 0.1875rem solid color-mix(in srgb, var(--grass) 80%, transparent);
+}
+
+.slot.asset {
     background: linear-gradient(180deg,
             var(--white),
             color-mix(in srgb, var(--surface) 70%, var(--bg)));

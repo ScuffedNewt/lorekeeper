@@ -3,18 +3,32 @@
     <div class="card-body">
         <div class="row">
             <div class="col-md form-group">
-                {!! Form::label('Number of Feedings?') !!} {!! add_help('The number of times this animal needs to be fed before it can be harvested.') !!}
+                {!! Form::label('Number of Feedings?') !!} {!! add_help('The number of times this animal needs to be fed before it can be collected.') !!}
                 {!! Form::number('feedings', isset($object) ? $object->data['feedings'] : 1, ['class' => 'form-control']) !!}
             </div>
             <div class="col-md form-group">
-                {!! Form::label('Hunger per Feeding?') !!} {!! add_help('The amount of hunger this animal needs to be satisfied to be considered fed, aka next feeding.') !!}
-                {!! Form::number('hunger', isset($object) ? $object->data['hunger'] : 1, ['class' => 'form-control']) !!}
-            </div>
-            <div class="col-md form-group">
-                {!! Form::label('Stays in Garden?') !!} {!! add_help('Does this animal stay in the garden after it is harvested?') !!}
+                {!! Form::label('Stays in Garden?') !!} {!! add_help('Does this animal stay in the garden after it is collected? If set to no, it will be debited from the user.') !!}
                 {!! Form::select('stays', ['1' => 'Yes', '0' => 'No'], isset($object) ? $object->data['stays'] : 1, ['class' => 'form-control']) !!}
             </div>
         </div>
+
+        @if (isset($object))
+            {{-- blade-formatter-disable --}}
+            @include('widgets._add_rewards', [
+                'prefix' => 'food_',
+                'title' => 'Required Food Assets',
+                'type'  => 'Food',
+                'object' => $object ?? null,
+                'useForm' => false,
+                'loots' => isset($object) ? $object->food : [],
+                'info' => '<p>These assets will be consumed as food to feed the animal. If no food rewards are added, the animal can be fed without food.</p><p><strong>Note that ALL assets added will be consumed upon feeding.</strong></p>',
+            ])
+            {{-- blade-formatter-enable --}}
+        @else
+            <div class="alert alert-info">
+                You can add required food assets to this animal after creating it.
+            </div>
+        @endif
 
         <hr />
 

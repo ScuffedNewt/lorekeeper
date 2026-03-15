@@ -199,10 +199,15 @@ class Garden extends Model {
      * @return array
      */
     public function getUserGardenObjects($user, $type = null) {
-        $gardenObjects = $this->allowed_object_types
-            ? GardenObject::whereIn('type', $this->allowed_object_types)->get()
-            : GardenObject::all();
-        $userGardenObjects = array_fill_keys($this->allowed_object_types ?? array_keys(getGardenObjectTypes($type)), []);
+        $types = $type ? array_keys(getGardenObjectTypes($type)) : null;
+        if ($this->allowed_object_types) {
+            $types = $types ? array_values(array_intersect($this->allowed_object_types, $types)) : $this->allowed_object_types;
+        }
+        if (empty($types)) {
+            return [];
+        }
+        $gardenObjects = GardenObject::whereIn('type', $types)->get();
+        $userGardenObjects = array_fill_keys($types, []);
         $groupedObjects = $gardenObjects->groupBy('object_model');
         foreach ($groupedObjects as $objectModel => $objects) {
             /*

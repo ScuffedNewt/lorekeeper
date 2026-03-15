@@ -436,9 +436,6 @@ class ItemService extends Service {
             }
 
             $tag = $item->tags()->where('tag', $tag)->first();
-            if ($tag->tag == 'seed') {
-                $data['item'] = $item;
-            }
             $service = $tag->service;
             if (!$service->updateData($tag, $data)) {
                 $this->setErrors($service->errors());

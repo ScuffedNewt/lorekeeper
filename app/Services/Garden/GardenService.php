@@ -344,6 +344,15 @@ class GardenService extends Service {
             if (GardenObject::where('object_model', $data['object_model'])->where('object_id', $data['object_id'])->exists()) {
                 throw new \Exception('There is already an object with that model and ID. Please edit the existing object.');
             }
+            if (!isset($data['type'])) {
+                throw new \Exception('Type is required.');
+            }
+            if (!isset($data['object_model'])) {
+                throw new \Exception('Object model is required.');
+            }
+            if (!isset($data['object_id'])) {
+                throw new \Exception('Object ID is required.');
+            }
 
             $objectData = $this->populateObjectData($data);
 
@@ -379,8 +388,17 @@ class GardenService extends Service {
         DB::beginTransaction();
 
         try {
-            if (GardenObject::where('object_model', $data['object_model'])->where('object_id', $data['object_id'])->exists()) {
+            if (GardenObject::where('object_model', $data['object_model'])->where('object_id', $data['object_id'])->where('id', '!=', $object->id)->exists()) {
                 throw new \Exception('There is already an object with that model and ID. Please edit the existing object.');
+            }
+            if (!isset($data['type'])) {
+                throw new \Exception('Type is required.');
+            }
+            if (!isset($data['object_model'])) {
+                throw new \Exception('Object model is required.');
+            }
+            if (!isset($data['object_id'])) {
+                throw new \Exception('Object ID is required.');
             }
 
             $objectData = $this->populateObjectData($data, $object);
@@ -466,6 +484,9 @@ class GardenService extends Service {
         if ($data['type'] == 'seed' && isset($object)) {
             $data['stages'] = $this->handleStageImages($data, $object);
         }
+        if ($data['type'] == 'animal') {
+            $data['food'] = getDataReadyAssets(processRewardableData($data, true, 'food_'));
+        }
 
         $data['rewards'] = getDataReadyAssets(processRewardableData($data, true));
         // $data['potential_rewards'] = getDataReadyAssets(processRewardableData($data, true, 'potential_', ['chance']));
@@ -473,6 +494,8 @@ class GardenService extends Service {
         return Arr::except($data, [
             '_token', 'type', 'object_model', 'object_id', 'rewardable_type', 'rewardable_id', 'quantity',
             'potential_rewardable_type', 'potential_rewardable_id', 'potential_quantity', 'potential_chance',
+            // animal exclusive
+            'food_rewardable_type', 'food_rewardable_id', 'food_quantity',
         ]);
     }
 

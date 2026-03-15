@@ -3,7 +3,7 @@
         style="{{ $garden->has_background_image ? 'background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(0, 0, 0, 0.04)), url(\'' . $garden->backgroundImageUrl . '\') center/cover no-repeat;' : '' }}">
         <div class="chip">{!! $garden->name !!}</div>
         <div class="chip" id="modeHint">
-            Plant mode: drag seeds onto soil plots
+            Place mode: drag seeds and animals onto plots
         </div>
     </div>
 
@@ -39,24 +39,37 @@
                 <div class="section h-100">
                     <h3>Tools</h3>
                     <div class="tool-row d-flex">
-                        <button class="slot tool active btn" data-type="tool" data-name="None">
+                        <button class="slot tool active btn" data-mode="place" data-type="tool" data-name="None">
                             <div class="icon">✖</div>
                             <div class="name">None</div>
                         </button>
-                        {{-- <button class="slot tool btn" data-type="tool" data-name="Watering Can">
-                            <div class="icon">💧</div>
-                            <div class="name">Water</div>
+                        <button class="slot tool btn" data-mode="tend" data-type="tool" data-name="Love & Affection">
+                            <div class="icon">❤️</div>
+                            <div class="name">Tend</div>
                         </button>
-                        <button class="slot tool btn" data-type="tool" data-name="Shovel">
-                            <div class="icon">🪓</div>
-                            <div class="name">Till</div>
-                        </button> --}}
+                        <button class="slot tool btn" data-mode="collect" data-type="tool" data-name="Collecting Basket">
+                            <div class="icon">🎑</div>
+                            <div class="name">Collect</div>
+                        </button>
+                        {{-- other tools here --}}
+                        @foreach ($modifiers as $gardenObjectType => $objectModel)
+                            @foreach ($objectModel as $model => $object)
+                                @foreach ($object as $id => $quantity)
+                                    @include('gardens.selectors._modifier_selector', [
+                                        'id' => $id,
+                                        'object' => $object,
+                                        'quantity' => $quantity,
+                                        'gardenObjectType' => $gardenObjectType,
+                                    ])
+                                @endforeach
+                            @endforeach
+                        @endforeach
                     </div>
                 </div>
                 <div class="section h-100">
                     <h3>Seeds & Animals</h3>
-                    <div class="seed-row d-flex" id="seedRow">
-                        @foreach ($placeableUserObjects as $gardenObjectType => $objectModel)
+                    <div class="asset-row d-flex" id="seedRow">
+                        @foreach ($placeables as $gardenObjectType => $objectModel)
                             @foreach ($objectModel as $model => $object)
                                 @foreach ($object as $id => $quantity)
                                     @include('gardens.selectors._placeable_selector', [
@@ -73,8 +86,6 @@
             </div>
             <div class="status alert alert-light mb-0 mt-3" id="status">Mode: Plant. Selected tool: None</div>
         </div>
-
-        <div class="ghost" id="ghost">🥝</div>
     @else
         <div class="alert alert-info mb-0">
             There are currently no available plots in this garden.

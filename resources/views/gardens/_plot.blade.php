@@ -1,14 +1,20 @@
 @php
     if (isset($isPlotUnlocked) && $isPlotUnlocked) {
         $userPlot = $user->gardenPlots()->where('plot_id', $plot->id)->first();
+        $canInteract = !$readOnly && $userPlot?->actionReady && !$userPlot?->canCollect;
+        $canCollect = !$readOnly && $userPlot?->canCollect;
+        $empty = !($userPlot?->started_at && $userPlot?->object);
     } else {
         $userPlot = null;
+        $canInteract = false;
+        $canCollect = false;
+        $empty = true;
     }
 @endphp
 
 
-<div class="plot" data-plot-id="{{ $userPlot ? $userPlot->id : ($isPlotUnlocked ? 'plot-' . $plot->id : 'unowned-' . $plot->id) }}" data-state="empty"
-    style="{{ $plot->has_image ? 'background-image: url(' . asset($plot->imageUrl) . '); background-size: cover; background-position: center; background-repeat: no-repeat;' : '' }}">
+<div class="plot {{ $empty ? 'empty' : '' }} {{ $canCollect ? 'collect' : ($canInteract ? 'tend' : '') }}" data-plot-id="{{ $userPlot ? $userPlot->id : ($isPlotUnlocked ? 'plot-' . $plot->id : 'unowned-' . $plot->id) }}"
+    data-state="{{ $empty ? 'empty' : 'filled' }}" style="{{ $plot->has_image ? 'background-image: url(' . asset($plot->imageUrl) . '); background-size: cover; background-position: center; background-repeat: no-repeat;' : '' }}">
     <div class="plot-label">{{ $userPlot->plot->name ?? 'Plot' }}</div>
     <div class="plot-center">
         @if ($isPlotUnlocked)
@@ -23,10 +29,8 @@
                     {!! Form::close() !!}
                 </div>
             @else
-                {{-- TODO --}}
-                @if ($userPlot?->started_at && $userPlot?->object)
-                    {{-- SOMETHING IN PLOT --}}
-                    @include('gardens.objects._' . $userPlot->object?->type, [
+                @if (!$empty)
+                    @include('gardens._object', [
                         'plot' => $plot,
                         'userPlot' => $userPlot,
                         'object' => $userPlot->object,

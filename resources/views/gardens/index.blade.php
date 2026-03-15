@@ -29,6 +29,7 @@
             'isGardenUnlocked' => $isGardenUnlocked,
         ])
     @endif
+    <div class="ghost" id="ghost">🌱</div>
 @endsection
 @section('scripts')
     @parent

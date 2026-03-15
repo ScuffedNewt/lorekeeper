@@ -82,6 +82,53 @@ class GardenObject extends Model {
         return $rewards;
     }
 
+    /**
+     * Displays the objects's rewards.
+     *
+     * @return string
+     */
+    public function getFoodAttribute() {
+        if (!isset($this->data['food'])) {
+            return [];
+        }
+
+        $assets = parseAssetData($this->data['food']);
+        $rewards = [];
+        foreach ($assets as $type => $a) {
+            $class = getAssetModelString($type, false);
+            foreach ($a as $id => $asset) {
+                $rewards[] = (object) [
+                    'rewardable_type' => $class,
+                    'rewardable_id'   => $id,
+                    'quantity'        => $asset['quantity'],
+                ];
+            }
+        }
+
+        return $rewards;
+    }
+
+    /**
+     * Displays the required food as an exploded string.
+     *
+     * @return string
+     */
+    public function getDisplayFoodAttribute() {
+        if (!isset($this->data['food'])) {
+            return null;
+        }
+
+        $assets = parseAssetData($this->data['food']);
+        $display = [];
+        foreach ($assets as $a) {
+            foreach ($a as $asset) {
+                $display[] = $asset['quantity'].'x '.$asset['asset']->displayName;
+            }
+        }
+
+        return implode(', ', $display);
+    }
+
     // TODO: Potential rewards implementation
     // /**
     //  * Displays the object's potential rewards.

@@ -31,10 +31,14 @@ class GardenController extends Controller {
         $placeableUserObjects = $visibleGardens->mapWithKeys(function ($garden) {
             return [$garden->id => $garden->getUserGardenObjects(Auth::user(), 'placeable')];
         });
+        $modifierUserObjects = $visibleGardens->mapWithKeys(function ($garden) {
+            return [$garden->id => $garden->getUserGardenObjects(Auth::user(), 'modifier')];
+        });
 
         return view('gardens.index', [
             'groups'               => $groups,
             'isGardenUnlocked'     => $isGardenUnlocked,
+            'modifierUserObjects'  => $modifierUserObjects,
             'placeableUserObjects' => $placeableUserObjects,
         ]);
     }
@@ -49,6 +53,8 @@ class GardenController extends Controller {
         $data = $request->only([
             'plot_id', 'asset_id', 'asset_type', 'object_type', 'current_garden_id',
         ]);
+
+        $message = null;
         switch ($action) {
             case 'place':
                 // place item / object / modifier in the plot
@@ -62,11 +68,29 @@ class GardenController extends Controller {
                     ]);
                 }
                 break;
-            case 'care':
+            case 'tend':
                 // interact with a plot, watering, feeding, etc.
+                if (!$message = $service->tend(Auth::user(), $data)) {
+                    debug($service->errors()->getMessages()['error']);
+
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Failed to tend to plot.',
+                        'errors'  => $service->errors()->getMessages()['error'],
+                    ]);
+                }
                 break;
             case 'collect':
                 // collect the object from the plot
+                if (!$message = $service->collect(Auth::user(), $data)) {
+                    debug($service->errors()->getMessages()['error']);
+
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Failed to collect from plot.',
+                        'errors'  => $service->errors()->getMessages()['error'],
+                    ]);
+                }
                 break;
             default:
                 return response()->json([
@@ -77,7 +101,7 @@ class GardenController extends Controller {
 
         return response()->json([
             'success' => true,
-            'message' => 'Action performed successfully.',
+            'message' => $message ?? 'Action performed successfully.',
         ]);
     }
 

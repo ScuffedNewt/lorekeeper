@@ -1,10 +1,10 @@
 <script>
     const toolSlots = $('.slot.tool');
-    const seedSlots = $('.slot.seed');
+    const assetSlots = $('.slot.asset');
     const plots = $('.plot');
     const statusElement = $('#status');
     const ghost = $('#ghost');
-    const modeButtons = $('[data-mode]');
+    const modeButtons = $('.mode-pills label[data-mode]');
     const modeHint = $('#modeHint');
     const toolbarHint = $('#toolbarHint');
     const emptyDragImage = new Image();
@@ -46,8 +46,18 @@
             $button.toggleClass('active', $button.data('mode') === mode);
         });
 
+        plots.removeClass('highlight');
+        if (mode === 'tend') {
+            plots.filter('.tend').addClass('highlight');
+        } else if (mode === 'collect') {
+            plots.filter('.collect').addClass('highlight');
+        }
+
         smoothTextChange(modeHint, modeConfig[mode].banner);
         toolbarHint.text(modeConfig[mode].toolbar);
+        tools = toolSlots.filter(`[data-mode="${mode}"]`);
+        tools.addClass('active');
+        selectedTool = tools.data('name');
         statusElement.text(`Mode: ${capitalize(mode)}. Selected tool: ${selectedTool}`);
     }
 
@@ -59,7 +69,7 @@
         const $plot = $(plot);
 
         $plot.attr('data-state', state);
-        $plot.toggleClass('planted', state !== 'empty');
+        $plot.toggleClass('full', state !== 'empty');
 
         $plot.html(`
             <div class="plot-label">
@@ -70,6 +80,8 @@
                 ${text}
             </div>
         `);
+
+        // todo, fetch instead of just updating the UI - this will ensure the plot state is accurate and also update timers and other dynamic elements
     }
 
     async function sendGardenAction(action, payload) {
@@ -100,32 +112,34 @@
         toolSlots.removeClass('active');
         $(this).addClass('active');
         selectedTool = $(this).data('name');
+        setMode($(this).data('mode'));
         statusElement.text(`Mode: ${capitalize(currentMode)}. Selected tool: ${selectedTool}`);
     });
 
     modeButtons.on('click', function() {
+        toolSlots.removeClass('active');
         setMode($(this).data('mode'));
     });
 
-    seedSlots.on('dragstart', function(e) {
+    assetSlots.on('dragstart', function(e) {
         if (currentMode !== 'place') {
             e.preventDefault();
-            statusElement.text(`Mode: ${capitalize(currentMode)}. Switch to Place mode to drag seeds.`);
+            statusElement.text(`Mode: ${capitalize(currentMode)}. Switch to Place mode to drag assets.`);
             return;
         }
 
-        const $seed = $(this);
+        const $asset = $(this);
         draggedItem = {
-            id: $seed.data('id'),
-            name: $seed.data('name'),
-            icon: $seed.data('icon') ? `<img src='${$seed.data('icon')}' style='max-height: 30px;'>` : null,
-            currentGardenId: $seed.data('currentGardenId'),
-            assetType: $seed.data('assetType'),
-            objectType: $seed.data('objectType'),
-            element: $seed
+            id: $asset.data('id'),
+            name: $asset.data('name'),
+            icon: $asset.data('icon') ? `<img src='${$asset.data('icon')}' style='max-height: 30px;'>` : null,
+            currentGardenId: $asset.data('currentGardenId'),
+            assetType: $asset.data('assetType'),
+            objectType: $asset.data('objectType'),
+            element: $asset
         };
 
-        $seed.addClass('dragging');
+        $asset.addClass('dragging');
         if (draggedItem.icon) {
             ghost.html(draggedItem.icon).show();
         } else {
@@ -134,7 +148,7 @@
         e.originalEvent.dataTransfer.setData('text/plain', draggedItem.name);
         e.originalEvent.dataTransfer.setDragImage(emptyDragImage, 0, 0);
     });
-    seedSlots.on('dragend', function() {
+    assetSlots.on('dragend', function() {
         $(this).removeClass('dragging');
         ghost.hide();
         plots.removeClass('drop-hover');
@@ -151,7 +165,7 @@
         $plot.on('dragover', function(e) {
             e.preventDefault();
 
-            if (currentMode !== 'place') {
+            if (currentMode !== 'place' || !$plot.hasClass('empty')) {
                 return;
             }
 
@@ -167,7 +181,7 @@
         $plot.on('drop', async function(e) {
             e.preventDefault();
 
-            if (currentMode !== 'place') {
+            if (currentMode !== 'place' || !$plot.hasClass('empty')) {
                 return;
             }
 
@@ -178,7 +192,14 @@
             }
 
             // optimistic update
-            updatePlotUI($plot, draggedItem.icon, `${draggedItem.name} planted`, 'planted');
+            updatePlotUI($plot, draggedItem.icon, `${draggedItem.name} planted`, 'full');
+            // debit the draggedItem on the UI immediately to provide feedback that the item has been used - if the request fails, we will refund it in the catch block
+            if (draggedItem.element) {
+                const currentQuantity = parseInt(draggedItem.element.data('quantity'), 10);
+                console.log(currentQuantity)
+                draggedItem.element.data('quantity', currentQuantity - 1);
+                draggedItem.element.find('.quantity').text('x' + currentQuantity - 1);
+            }
             statusElement.text(`Planting ${draggedItem.name} on ${plotId.replace('plot-', 'Plot ')}...`);
 
             try {
@@ -206,11 +227,14 @@
         });
 
         $plot.on('click', async function() {
-            if (currentMode === 'action') {
+            if (currentMode === 'tend') {
+                if (!$plot.hasClass('tend')) {
+                    return;
+                }
                 statusElement.text(`Watering ${plotId.replace('plot-', 'Plot ')}...`);
 
                 try {
-                    let response = await sendGardenAction('care', {
+                    let response = await sendGardenAction('tend', {
                         plot_id: plotId
                     });
 
@@ -227,12 +251,16 @@
                 return;
             }
 
+            console.log('Plot clicked:', plotId, 'Current mode:', currentMode);
             if (currentMode === 'collect') {
+                if (!$plot.hasClass('collect')) {
+                    return;
+                }
                 statusElement.text(`Collecting ${plotId.replace('plot-', 'Plot ')}...`);
 
                 try {
                     await sendGardenAction('collect', {
-                        plotId: plotId
+                        plot_id: plotId,
                     });
 
                     statusElement.text(`Collected ${plotId.replace('plot-', 'Plot ')}.`);

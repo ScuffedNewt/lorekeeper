@@ -33,27 +33,27 @@ class ResetGardenAnimals extends Command {
      */
     public function handle() {
         // This only deals with animals that are in the garden. We dont have to consider seeds.
-        $plots = \App\Models\GardenPlot::where('plot_type', '!=', 'seed')->pluck('id');
-        $userPlots = \App\Models\User\UserGardenPlot::whereIn('plot_id', $plots)->where('item_id', '!=', null)->get();
-        $animalIds = [];
-        foreach ($userPlots as $plot) {
-            $animalIds[] = $plot->item_id;
+        // $plots = \App\Models\GardenPlot::where('plot_type', '!=', 'seed')->pluck('id');
+        // $userPlots = \App\Models\User\UserGardenPlot::whereIn('plot_id', $plots)->where('item_id', '!=', null)->get();
+        // $animalIds = [];
+        // foreach ($userPlots as $plot) {
+        //     $animalIds[] = $plot->item_id;
 
-            if ($plot->finishReady) {
-                $service = new \App\Services\PlotManager;
-                // dont set remove since we hard set those below
-                $service->claim($plot->user, $plot);
-            }
+        //     if ($plot->finishReady) {
+        //         $service = new \App\Services\PlotManager;
+        //         // dont set remove since we hard set those below
+        //         $service->claim($plot->user, $plot);
+        //     }
 
-            $plot->item_id = null;
-            $plot->modifiers = null;
-            $plot->started_at = null;
-            $plot->water_at = null;
-            $plot->waterings = 0;
-            $plot->is_dead = 0;
-            $plot->time = null;
-            $plot->save();
-        }
+        //     $plot->item_id = null;
+        //     $plot->modifiers = null;
+        //     $plot->started_at = null;
+        //     $plot->water_at = null;
+        //     $plot->waterings = 0;
+        //     $plot->is_dead = 0;
+        //     $plot->time = null;
+        //     $plot->save();
+        // }
         // ensure no animal is left behind
         \App\Models\User\UserItem::whereIn('item_id', $animalIds)->where('garden_count', '>', 0)->get()->each(function ($item) {
             $item->garden_count = 0;

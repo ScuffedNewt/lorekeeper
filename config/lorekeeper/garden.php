@@ -15,23 +15,48 @@ return [
         'seed'       => [
             'displayName' => 'Seed',
             'type'        => 'placeable',
+            'mode_text'   => [
+                'place'       => 'Plant',
+                'tend'        => 'Water',
+                'tend_plural' => 'Waterings',
+                'tend_past'   => 'Watered',
+                'collect'     => 'Harvest',
+            ],
         ],
         'animal'     => [
             'displayName' => 'Animal',
             'removed'     => false,
             'type'        => 'placeable',
+            'mode_text'   => [
+                'place'       => 'Place',
+                'tend'        => 'Feed',
+                'tend_plural' => 'Feedings',
+                'tend_past'   => 'Fed',
+                'collect'     => 'Collect',
+            ],
         ],
+        // applied BEFORE placing a seed
         'fertiliser' => [
             'displayName' => 'Fertiliser',
             'type'        => 'modifier',
+            'mode_text'   => [
+                'place' => 'Apply',
+            ],
         ],
         'tool'       => [
             'displayName' => 'Tool',
             'type'        => 'modifier',
+            'mode_text'   => [
+                'place' => 'Use',
+            ],
         ],
+        // can be used on both seeds and animals, is applied AFTER being placed
         'food'       => [
             'displayName' => 'Food',
             'type'        => 'modifier',
+            'mode_text'   => [
+                'place' => 'Feed',
+            ],
         ],
         // You can add more object types here with custom interactions, just be sure to create the relevant views and logic.
     ],

@@ -7,6 +7,13 @@
         $useForm = true;
     }
 
+    if (!isset($title)) {
+        $title = 'Rewards';
+    }
+    if (!isset($loots)) {
+        $loots = getRewards($object);
+    }
+
     // View options
     if (!isset($showRecipient)) {
         $showRecipient = false;
@@ -20,14 +27,17 @@
 @endphp
 
 <div class="card p-4 mb-3 mt-3" id="reward-card">
-    <h3>Rewards</h3>
+    <h3>{{ $title }}</h3>
 
-    <p>
-        You can add rewards to this object by clicking "Add Reward" & selecting a reward from the dropdown below.
-        <br />
-        <br /><b>Note that the checks for rewards are automatic, but their granting needs to be defined in the code.</b>
-    </p>
-    {!! isset($info) ? '<div class="alert alert-info">' . $info . '</div>' : '' !!}
+    @if (isset($info))
+        <div class="alert alert-info">{!! $info !!}</div>
+    @else
+        <p>
+            You can add rewards to this object by clicking "Add Reward" & selecting a reward from the dropdown below.
+            <br />
+            <br /><b>Note that the checks for rewards are automatic, but their granting needs to be defined in the code.</b>
+        </p>
+    @endif
 
     @if ($useForm)
         {!! Form::open(['url' => 'admin/rewards']) !!}
@@ -36,10 +46,11 @@
 
         @include('widgets._loot_select', [
             'prefix' => $prefix ?? '',
-            'loots' => getRewards($object),
+            'loots' => $loots,
             'showRecipient' => $showRecipient,
             'showRaffles' => $showRaffles,
             'showLootTables' => $showLootTables,
+            'type' => isset($type) ? $type : null,
         ])
 
         <div>
@@ -53,10 +64,11 @@
     @else
         @include('widgets._loot_select', [
             'prefix' => $prefix ?? '',
-            'loots' => getRewards($object),
+            'loots' => $loots,
             'showRecipient' => $showRecipient,
             'showRaffles' => $showRaffles,
             'showLootTables' => $showLootTables,
+            'type' => isset($type) ? $type : null,
         ])
     @endif
 </div>
