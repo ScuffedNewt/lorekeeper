@@ -502,15 +502,15 @@ class PetManager extends Service {
             $pet->save();
 
             // update pet drop, if relevant
-            if (isset($pet->drops)) { 
+            if (isset($pet->drops)) {
                 $newPet = Pet::find($id);
-                if(isset($newPet->dropData)) {
-                    if($pet->drops->drop_id !== $newPet->dropData->id) {
+                if (isset($newPet->dropData)) {
+                    if ($pet->drops->drop_id !== $newPet->dropData->id) {
                         $pet->drops->drop_id = $newPet->dropData->id;
                         $pet->drops->save();
                     }
                 } else {
-                    //the new variant does not have drops, so we discard the old drops row
+                    // the new variant does not have drops, so we discard the old drops row
                     $pet->drops()->delete();
                 }
             }
