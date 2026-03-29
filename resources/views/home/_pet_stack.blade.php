@@ -110,10 +110,17 @@
                     <li class="list-group-item">
                         <a class="card-title h5 collapse-title" data-toggle="collapse" href="#userVariantForm">Change Pet Variant</a>
                         {!! Form::open(['url' => 'pets/variant/' . $stack->id, 'id' => 'userVariantForm', 'class' => 'collapse']) !!}
+                        @if (isset($stack->drops) && $stack->drops->drops_available > 0)
+                            <div class="alert alert-danger">
+                                This pet currently has available drops. Changing its variant may alter or remove their currently available drops.
+                                <br>
+                                <b>Please collect your drops before changing this pet's variant.</b>
+                            </div>
+                        @endif
                         <p>
                             This will use a splice item!
                             @if ($stack->pet->isVariant)
-                                <br><b>Current variant:</b> {{ $stack->pet->name }}
+                                <br><b>Current Variant:</b> {{ $stack->pet->name }}
                             @endif
                         </p>
                         <div class="form-group">
@@ -121,7 +128,7 @@
                         </div>
                         <div class="form-group">
                             @php
-                                $variants = ['0' => 'Default'] + ($stack->pet->isVariant ? $stack->pet->parent->variants()->pluck('name', 'id')->toArray() : $stack->pet->variants()->pluck('name', 'id')->toArray());
+                                $variants = [0 => 'Default'] + ($stack->pet->isVariant ? $stack->pet->parent->variants()->pluck('name', 'id')->toArray() : $stack->pet->variants()->pluck('name', 'id')->toArray());
                             @endphp
                             {!! Form::select('variant_id', $variants, $stack->pet->parent_id, ['class' => 'form-control']) !!}
                         </div>
@@ -138,14 +145,21 @@
                         <a class="card-title h5 collapse-title" data-toggle="collapse" href="#variantForm">[ADMIN] Change Pet Variant</a>
                         {!! Form::open(['url' => 'pets/variant/' . $stack->id, 'id' => 'variantForm', 'class' => 'collapse']) !!}
                         {!! Form::hidden('is_staff', 1) !!}
+                        @if (isset($stack->drops) && $stack->drops->drops_available > 0)
+                            <div class="alert alert-danger">
+                                This pet currently has available drops. Changing its variant may alter or remove their currently available drops.
+                                <br>
+                                <b>Inform the user to collect their drops before changing this pet's variant.</b>
+                            </div>
+                        @endif
                         <p>
                             @if ($stack->variant_id)
-                                <br><b>Current variant:</b> {{ $stack->variant->name }}
+                                <br><b>Current Variant:</b> {{ $stack->variant->name }}
                             @endif
                         </p>
                         <div class="form-group">
                             @php
-                                $variants = ['0' => 'Default'] + ($stack->pet->isVariant ? $stack->pet->parent->variants()->pluck('name', 'id')->toArray() : $stack->pet->variants()->pluck('name', 'id')->toArray());
+                                $variants = [0 => 'Default'] + ($stack->pet->isVariant ? $stack->pet->parent->variants()->pluck('name', 'id')->toArray() : $stack->pet->variants()->pluck('name', 'id')->toArray());
                             @endphp
                             {!! Form::select('variant_id', $variants, $stack->pet->isVariant ? $stack->pet_id : 0, ['class' => 'form-control mt-2']) !!}
                         </div>
@@ -161,12 +175,12 @@
                         {!! Form::hidden('is_staff', 1) !!}
                         <p>
                             @if ($stack->evolution_id)
-                                <br><b>Current evolution:</b> {{ $stack->evolution->evolution_name }} (Stage {{ $stack->evolution->evolution_stage }})
+                                <br><b>Current Evolution:</b> {{ $stack->evolution->evolution_name }} (Stage {{ $stack->evolution->evolution_stage }})
                             @endif
                         </p>
                         <div class="form-group">
                             @php
-                                $evolutions = ['0' => 'Default'] + $stack->pet->evolutions()->pluck('evolution_name', 'id')->toArray();
+                                $evolutions = [0 => 'Default'] + $stack->pet->evolutions()->pluck('evolution_name', 'id')->toArray();
                             @endphp
                             {!! Form::select('evolution_id', $evolutions, $stack->evolution_id, ['class' => 'form-control mt-2']) !!}
                         </div>
