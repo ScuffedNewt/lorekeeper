@@ -41,9 +41,14 @@
     </div>
 </div>
 
-<div class="form-group hide element-row">
-    {!! Form::label('Element') !!}
-    {!! Form::select('element_ids[]', $elements, null, ['class' => 'form-control select', 'placeholder' => 'Select Element']) !!}
+<div class="row hide element-row">
+    <div class="col-md-10 form-group">
+        {!! Form::label('Element') !!}
+        {!! Form::select('element_ids[]', $elements, null, ['class' => 'form-control select', 'placeholder' => 'Select Element']) !!}
+    </div>
+    <div class="col-md-2 form-group d-flex align-items-center justify-content-center">
+        <div class="btn btn-danger remove-element mt-4">Remove Element</div>
+    </div>
 </div>
 
 <script>
@@ -58,10 +63,18 @@
                 return;
             }
             var $clone = $('.element-row').clone();
+            removeElement($clone);
             $('#elements').append($clone);
             $clone.removeClass('hide element-row');
             $clone.find('select').selectize();
         });
+
+        function removeElement(clone) {
+            clone.find('.remove-element').on('click', function(e) {
+                e.preventDefault();
+                clone.remove();
+            });
+        }
 
         // delete typing
         @if ($type && $isStaff)

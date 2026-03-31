@@ -83,20 +83,19 @@
 
     {!! Form::close() !!}
 
-    <div class="weakness-row hide mb-2">
+    <div class="weakness-row original hide mb-2">
         {!! Form::select('weakness_id[]', $elements, null, ['class' => 'form-control weakness-select mx-1', 'placeholder' => 'Select Element']) !!}
         {!! Form::number('weakness_multiplier[]', null, ['class' => 'form-control mx-1', 'step' => 0.1, 'max' => 2, 'min' => 1.1, 'placeholder' => 'Set Multiplier']) !!}
         <div class="btn btn-danger remove-weakness ml-2">Remove</div>
     </div>
 
-    <div class="immunity-row hide mb-2">
+    <div class="immunity-row original hide mb-2">
         {!! Form::select('immunity_id[]', $elements, null, ['class' => 'form-control immunity-select mx-1', 'placeholder' => 'Select Element']) !!}
         <div class="btn btn-danger remove-immunity ml-2">Remove</div>
     </div>
 
-    <hr />
-
     @if ($element->id)
+        <hr />
         <h3>Preview</h3>
         <div class="card mb-3">
             <div class="card-body">
@@ -136,9 +135,9 @@
             });
 
             function addWeaknessRow() {
-                var $clone = $('.weakness-row').clone();
+                var $clone = $('.weakness-row.original').clone();
                 $('#weaknesses').append($clone);
-                $clone.removeClass('hide feature-row');
+                $clone.removeClass('hide original weakness-row');
                 $clone.addClass('d-flex');
                 $clone.find('.remove-weakness').on('click', function(e) {
                     e.preventDefault();
@@ -163,9 +162,9 @@
             });
 
             function addImmunityRow() {
-                var $clone = $('.immunity-row').clone();
+                var $clone = $('.immunity-row.original').clone();
                 $('#immunities').append($clone);
-                $clone.removeClass('hide feature-row');
+                $clone.removeClass('hide original immunity-row');
                 $clone.addClass('d-flex');
                 $clone.find('.remove-immunity').on('click', function(e) {
                     e.preventDefault();
