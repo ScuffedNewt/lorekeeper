@@ -5,6 +5,10 @@
 @endsection
 
 @section('admin-content')
+    @if (isset($submission) && $submission->status == 'Pending' && Auth::user()->isStaff)
+        @include('admin.submissions._runbook_modal', ['submission' => $submission])
+    @endif
+
     @if ($submission->prompt_id)
         {!! breadcrumbs(['Admin Panel' => 'admin', 'Prompt Queue' => 'admin/submissions/pending', 'Submission (#' . $submission->id . ')' => $submission->viewUrl]) !!}
     @else

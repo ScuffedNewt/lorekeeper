@@ -31,11 +31,13 @@
     @endif
 
     <div class="alert alert-secondary">
-        You can reference traits using:
+        You can reference traits, items, and other things using:
         <br />
         <code>[trait:id]</code>
         <br />
-        Referenced traits will appear as their image and name with a clickable link to the trait page.
+        <code>[item:id]</code>
+        <br />
+        Referenced entries will appear as their image and name with a clickable link to their world page.
     </div>
 
     <div class="row">

@@ -9,5 +9,6 @@ return [
         'Design Update',
         'General',
         'Subsection',
+        'Prompt Submission',
     ],
 ];

@@ -10,7 +10,8 @@
     <h1>Runbooks</h1>
 
     <p>
-
+        Runbooks are a collection of instructions for performing common tasks, such as responding to an incident or approving a submission.
+        They can be used to ensure that tasks are performed consistently and efficiently, and can be especially useful for training new team members.
     </p>
 
     <div class="text-right mb-3">
