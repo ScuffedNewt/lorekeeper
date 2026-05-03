@@ -192,23 +192,16 @@ class AwardService extends Service {
             $image = null;
             if (isset($data['image']) && $data['image']) {
                 $data['has_image'] = 1;
+                $data['extension'] = $data['image']->getClientOriginalExtension();
+                $data['hash'] = randomString(10);
                 $image = $data['image'];
                 unset($data['image']);
-            } else {
-                $data['has_image'] = 0;
             }
 
             $award = Award::create($data);
 
-            // Make the image directory if it doesn't exist
-            if (!file_exists($award->imagePath)) {
-                // Create the directory.
-                if (!mkdir($award->imagePath, 0755, true)) {
-                    $this->setError('error', 'Failed to create image directory.');
-
-                    return false;
-                }
-                chmod($award->imagePath, 0755);
+            if ($image) {
+                $this->handleImage($award, $award->imagePath, $award->imageFileName);
             }
 
             $award->update([
@@ -261,35 +254,22 @@ class AwardService extends Service {
 
             $data = $this->populateData($data, $award);
 
+            $oldImageFileName = null;
+            if ($award->has_image) {
+                $oldImageFileName = $item->imageFileName;
+            }
+
             $image = null;
             if (isset($data['image']) && $data['image']) {
-                if (isset($award->extension) && $award->extension && $award->has_image) {
-                    $old = $award->imageFileName;
-                } else {
-                    $old = null;
-                }
+                $data['has_image'] = 1;
+                $data['extension'] = $data['image']->getClientOriginalExtension();
                 $data['hash'] = randomString(10);
                 $image = $data['image'];
                 unset($data['image']);
             }
 
-            // Make the image directory if it doesn't exist
-            if (!file_exists($award->imagePath)) {
-                // Create the directory.
-                if (!mkdir($award->imagePath, 0755, true)) {
-                    $this->setError('error', 'Failed to create image directory.');
-
-                    return false;
-                }
-                chmod($award->imagePath, 0755);
-            }
-
             if ($image) {
-                $award->extension = $image->getClientOriginalExtension();
-                $award->has_image = 1;
-                $award->update();
-                $this->handleImage($image, $award->imagePath, $award->imageFileName, $old);
-                $award->update();
+                $this->handleImage($award, $award->imagePath, $award->imageFileName, $oldImageFileName);
             }
 
             $award->update($data);

@@ -199,7 +199,7 @@ class Character extends Model {
      * Get the character's awards.
      */
     public function awards() {
-        return $this->belongsToMany('App\Models\Award\Award', 'character_awards')->withPivot('count', 'data', 'updated_at', 'id')->whereNull('character_awards.deleted_at');
+        return $this->belongsToMany(Award::class, 'character_awards')->withPivot('count', 'data', 'updated_at', 'id')->whereNull('character_awards.deleted_at');
     }
 
     /**
