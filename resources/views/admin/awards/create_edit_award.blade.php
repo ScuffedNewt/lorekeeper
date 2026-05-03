@@ -211,7 +211,9 @@
                     <div class="col-md-6 form-group">
                         {!! Form::checkbox('debit_progressions', 1, $award->id ? $award->debit_progressions : 0, ['class' => 'form-check-input', 'data-toggle' => 'toggle']) !!}
                         {!! Form::label('debit_progressions', 'Debit Progressions?', ['class' => 'form-check-label font-weight-bold ml-3']) !!}
-                        {!! add_help('Do you want the user to have the items required for unlock taken from their inventory when they receive the award? This only applies to receiving the award through the automatic unlock process, not when claimed through prompts or grants.') !!}
+                        {!! add_help(
+                            'Do you want the user to have the items required for unlock taken from their inventory when they receive the award? This only applies to receiving the award through the automatic unlock process, not when claimed through prompts or grants.',
+                        ) !!}
                     </div>
                     <div class="col-md-6 form-group">
                         {!! Form::checkbox('allow_reclaim', 1, $award->id ? $award->allow_reclaim : 0, ['class' => 'form-check-input', 'data-toggle' => 'toggle']) !!}

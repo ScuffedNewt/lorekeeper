@@ -120,7 +120,7 @@
                     'tables' => $tables,
                     'awards' => $characterAwards,
                     'character' => $character,
-                    'expanded_rewards' => $expanded_rewards
+                    'expanded_rewards' => $expanded_rewards,
                 ])
             @endforeach
         </div>
