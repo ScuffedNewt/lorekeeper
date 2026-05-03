@@ -3,7 +3,11 @@
 @else
     <div class="text-center">
         @if ($award->has_image)
-            <div class="mb-1"><a href="{{ $award->idUrl }}"><img src="{{ $award->imageUrl }}" alt="{{ $award->name }}" /></a></div>
+            <div class="mb-1">
+                <a href="{{ $award->idUrl }}">
+                    <img src="{{ $award->imageUrl }}" class="img-fluid" alt="{{ $award->name }}" />
+                </a>
+            </div>
         @endif
         <a href="{{ $award->idUrl }}">{{ $award->name }}</a>
     </div>
@@ -79,62 +83,61 @@
     </div>
 
     @if ($user && !$readOnly && ($stack->first()->user_id == $user->id || $user->hasPower('edit_inventories')))
-        <div class="card mt-3 p-3">
-
-            @if ($award->is_character_owned)
-                <h5 class="card-title">
-                    <a class="h5 collapse-toggle collapsed" href="#characterTransferForm" data-toggle="collapse">
+        <div class="card mt-3">
+            <ul class="list-group list-group-flush">
+                @if ($award->is_character_owned)
+                    <li class="list-group-item">
+                        <a class="card-title h5 collapse-toggle collapsed" href="#characterTransferForm" data-toggle="collapse">
+                            @if ($stack->first()->user_id != $user->id)
+                                [ADMIN]
+                            @endif Transfer Award to Character
+                        </a></h3>
+                        <div id="characterTransferForm" class="collapse">
+                            <p>This will transfer this stack or stacks to this character's awardcase.</p>
+                            <div class="form-group">
+                                {!! Form::select('character_id', $characterOptions, null, ['class' => 'form-control mr-2 default character-select']) !!}
+                            </div>
+                            <div class="text-right">
+                                {!! Form::button('Transfer', ['class' => 'btn btn-primary', 'name' => 'action', 'value' => 'characterTransfer', 'type' => 'submit']) !!}
+                            </div>
+                        </div>
+                    </li>
+                @endif
+                @if ($award->allow_transfer || ($user && $user->hasPower('edit_inventories')))
+                    <li class="list-group-item">
+                        <a class="card-title h5 collapse-toggle collapsed" href="#transferForm" data-toggle="collapse">
+                            @if ($stack->first()->user_id != $user->id)
+                                [ADMIN]
+                            @endif Transfer Award
+                        </a></h3>
+                        <div id="transferForm" class="collapse">
+                            @if ($user && $user->hasPower('edit_inventories'))
+                                <p class="alert alert-warning">Note: Your rank allows you to transfer account-bound awards to another user.</p>
+                            @endif
+                            <div class="form-group">
+                                {!! Form::label('user_id', 'Recipient') !!} {!! add_help('You can only transfer awards to verified users.') !!}
+                                {!! Form::select('user_id', $userOptions, null, ['class' => 'form-control']) !!}
+                            </div>
+                            <div class="text-right">
+                                {!! Form::button('Transfer', ['class' => 'btn btn-primary', 'name' => 'action', 'value' => 'transfer', 'type' => 'submit']) !!}
+                            </div>
+                        </div>
+                    </li>
+                @endif
+                <li class="list-group-item">
+                    <a class="card-title h5 collapse-toggle collapsed" href="#deleteForm" data-toggle="collapse">
                         @if ($stack->first()->user_id != $user->id)
                             [ADMIN]
-                        @endif Transfer Award to Character
+                        @endif Delete Award
                     </a></h3>
-                </h5>
-                <div id="characterTransferForm" class="collapse">
-                    <p>This will transfer this stack or stacks to this character's awardcase.</p>
-                    <div class="form-group">
-                        {!! Form::select('character_id', $characterOptions, null, ['class' => 'form-control mr-2 default character-select']) !!}
+                    <div id="deleteForm" class="collapse">
+                        <p>This action is not reversible. Are you sure you want to delete this award?</p>
+                        <div class="text-right">
+                            {!! Form::button('Delete', ['class' => 'btn btn-danger', 'name' => 'action', 'value' => 'delete', 'type' => 'submit']) !!}
+                        </div>
                     </div>
-                    <div class="text-right">
-                        {!! Form::button('Transfer', ['class' => 'btn btn-primary', 'name' => 'action', 'value' => 'characterTransfer', 'type' => 'submit']) !!}
-                    </div>
-                </div>
-            @endif
-            @if ($award->allow_transfer || ($user && $user->hasPower('edit_inventories')))
-                <h5 class="card-title">
-                    <a class="h5 collapse-toggle collapsed" href="#transferForm" data-toggle="collapse">
-                        @if ($stack->first()->user_id != $user->id)
-                            [ADMIN]
-                        @endif Transfer Award
-                    </a></h3>
-                </h5>
-                <div id="transferForm" class="collapse">
-                    @if ($user && $user->hasPower('edit_inventories'))
-                        <p class="alert alert-warning">Note: Your rank allows you to transfer account-bound awards to another user.</p>
-                    @endif
-                    <div class="form-group">
-                        {!! Form::label('user_id', 'Recipient') !!} {!! add_help('You can only transfer awards to verified users.') !!}
-                        {!! Form::select('user_id', $userOptions, null, ['class' => 'form-control']) !!}
-                    </div>
-                    <div class="text-right">
-                        {!! Form::button('Transfer', ['class' => 'btn btn-primary', 'name' => 'action', 'value' => 'transfer', 'type' => 'submit']) !!}
-                    </div>
-                </div>
-            @endif
-
-            <h5 class="card-title">
-                <a class="h5 collapse-toggle collapsed" href="#deleteForm" data-toggle="collapse">
-                    @if ($stack->first()->user_id != $user->id)
-                        [ADMIN]
-                    @endif Delete Award
-                </a></h3>
-            </h5>
-            <div id="deleteForm" class="collapse">
-                <p>This action is not reversible. Are you sure you want to delete this award?</p>
-                <div class="text-right">
-                    {!! Form::button('Delete', ['class' => 'btn btn-danger', 'name' => 'action', 'value' => 'delete', 'type' => 'submit']) !!}
-                </div>
-            </div>
-
+                </li>
+            </ul>
         </div>
     @endif
     {!! Form::close() !!}

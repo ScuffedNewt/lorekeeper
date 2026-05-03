@@ -262,13 +262,13 @@ class AwardService extends Service {
             $data = $this->populateData($data, $award);
 
             $image = null;
-
             if (isset($data['image']) && $data['image']) {
                 if (isset($award->extension) && $award->extension && $award->has_image) {
                     $old = $award->imageFileName;
                 } else {
                     $old = null;
                 }
+                $data['hash'] = randomString(10);
                 $image = $data['image'];
                 unset($data['image']);
             }
@@ -410,6 +410,7 @@ class AwardService extends Service {
         $data['is_character_owned'] = ((isset($data['is_character_owned']) && $data['is_character_owned']) ? 1 : 0);
         $data['is_user_owned'] = ((isset($data['is_user_owned']) && $data['is_user_owned']) ? 1 : 0);
         $data['allow_reclaim'] = ((isset($data['allow_reclaim']) && $data['allow_reclaim']) ? 1 : 0);
+        $data['debit_progressions'] = ((isset($data['debit_progressions']) && $data['debit_progressions']) ? 1 : 0);
 
         $data['credits'] = [];
         if ((isset($data['credit-name']) && count(array_filter($data['credit-name'])) > 0) || (isset($data['credit-id']) && count(array_filter($data['credit-id'])) > 0)) {

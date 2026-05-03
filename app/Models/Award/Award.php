@@ -20,6 +20,7 @@ class Award extends Model {
         'award_category_id', 'name', 'has_image', 'description', 'parsed_description',
         'data', 'is_released', 'is_featured', 'is_user_owned', 'is_character_owned',
         'user_limit', 'character_limit', 'allow_transfer', 'extension', 'allow_reclaim',
+        'debit_progressions', 'hash',
     ];
 
     /**
@@ -88,7 +89,7 @@ class Award extends Model {
     }
 
     /**
-     * Get the rewards attached to this prompt.
+     * Get the rewards attached to this award.
      */
     public function rewards() {
         return $this->morphMany(Reward::class, 'object', 'object_model', 'object_id');
@@ -201,6 +202,10 @@ class Award extends Model {
      * @return string
      */
     public function getImageFileNameAttribute() {
+        if ($this->hash) {
+            return $this->id.'-'.$this->hash.'-image.'.$this->extension;
+        }
+
         return $this->id.'-image.'.$this->extension;
     }
 
@@ -254,22 +259,19 @@ class Award extends Model {
     }
 
     /**
-     * Get the data attribute as an associative array.
+     * Get the credits attribute as an array.
      *
      * @return array
      */
-    public function getDataAttribute() {
-        if (!$this->id) {
-            return null;
-        }
-
-        return json_decode($this->attributes['data'], true);
-    }
-
     public function getCreditsAttribute() {
         return $this->data['credits'];
     }
 
+    /**
+     * Get the credits attribute as an array of linked names.
+     *
+     * @return array
+     */
     public function getPrettyCreditsAttribute() {
         $creds = [];
         $credits = [];
@@ -322,6 +324,24 @@ class Award extends Model {
         $awardPrompts = $this->data['prompts'];
 
         return Prompt::whereIn('id', $awardPrompts)->get();
+    }
+
+    /**
+     * Gets the admin edit URL.
+     *
+     * @return string
+     */
+    public function getAdminUrlAttribute() {
+        return url('admin/data/awards/edit/'.$this->id);
+    }
+
+    /**
+     * Gets the power required to edit this model.
+     *
+     * @return string
+     */
+    public function getAdminPowerAttribute() {
+        return 'edit_data';
     }
 
     /**********************************************************************************************

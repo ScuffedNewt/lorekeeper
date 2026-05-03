@@ -20,8 +20,8 @@
     {!! Form::open(['url' => $award->id ? 'admin/data/awards/edit/' . $award->id : 'admin/data/awards/create', 'files' => true]) !!}
 
     <div class="card mb-3">
-        <div class="card-header">
-            <h3 class="mb-0">Basic Information</h3>
+        <div class="card-header h3">
+            Basic Information
         </div>
         <div class="card-body">
             <div class="row no-gutters">
@@ -39,30 +39,34 @@
                         {!! Form::select('rarity_id', $rarities, $award && $award->rarity_id ? $award->rarity_id : null, ['class' => 'form-control', 'placeholder' => 'Select Rarity']) !!}
                     </div>
                 </div>
-                <div class="form-group col-md-6 pl-md-3">
+                <div class="form-group col-md-6 pl-md-3 d-flex flex-row align-items-center justify-content-md-center">
                     @if ($award->has_image)
-                        <img src="{{ $award->imageUrl }}" class="img-fluid float-left mr-2" style="max-width: 100px;" />
-                    @endif
-                    {!! Form::label('World Page Image (Optional)') !!} {!! add_help('This image is used only on the world information pages.') !!}
-                    <div class="custom-file">
-                        {!! Form::label('image', 'Choose file...', ['class' => 'custom-file-label']) !!}
-                        {!! Form::file('image', ['class' => 'custom-file-input']) !!}
-                    </div>
-                    <div class="text-muted">Recommended size: 100px x 100px</div>
-                    @if ($award->has_image)
-                        <div class="form-check">
-                            {!! Form::checkbox('remove_image', 1, false, ['class' => 'form-check-input']) !!}
-                            {!! Form::label('remove_image', 'Remove current image', ['class' => 'form-check-label']) !!}
+                        <div>
+                            <img src="{{ $award->imageUrl }}" class="img-fluid float-left mr-2" style="max-width: 100px;" />
                         </div>
                     @endif
+                    <div>
+                        {!! Form::label('World Page Image (Optional)') !!} {!! add_help('This image is used only on the world information pages.') !!}
+                        <div class="custom-file">
+                            {!! Form::label('image', 'Choose file...', ['class' => 'custom-file-label']) !!}
+                            {!! Form::file('image', ['class' => 'custom-file-input']) !!}
+                        </div>
+                        <div class="text-muted">Recommended size: 100px x 100px</div>
+                        @if ($award->has_image)
+                            <div class="form-check">
+                                {!! Form::checkbox('remove_image', 1, false, ['class' => 'form-check-input']) !!}
+                                {!! Form::label('remove_image', 'Remove current image', ['class' => 'form-check-label']) !!}
+                            </div>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="card mb-3">
-        <div class="card-header">
-            <h3 class="mb-0">Settings</h3>
+        <div class="card-header h3">
+            Settings
         </div>
         <div class="card-body">
             <div class="row no-gutters">
@@ -85,7 +89,7 @@
                     {!! Form::label('is_character_owned', 'Character Held', ['class' => 'form-check-label font-weight-bold ml-3']) !!}
                     {!! add_help('If this is enabled, characters will be able to hold this award. The limit is how many can be held at a time. 0 means no limit, if set to 1 then quantity will be treated as a boolean.') !!}
                     <div class="limit d-inline-flex align-items-center ml-3 ">
-                        {!! Form::label('character_limit', 'Limit', ['class' => 'font-weight-bold mr-3 mb-0']) !!}
+                        {!! Form::label('character_limit', 'Character Hold Limit', ['class' => 'font-weight-bold mr-3 mb-0']) !!}
                         {!! Form::number('character_limit', $award->id ? $award->character_limit : 0, ['class' => 'form-control']) !!}
                     </div>
                 </div>
@@ -94,7 +98,7 @@
                     {!! Form::label('is_user_owned', 'User Held', ['class' => 'form-check-label font-weight-bold ml-3']) !!}
                     {!! add_help('If this is enabled, users will be able to hold this award. The limit is how many can be held at a time. 0 means no limit, if set to 1 then quantity will be treated as a boolean.') !!}
                     <div class="limit d-inline-flex align-items-center ml-3 ">
-                        {!! Form::label('user_limit', 'Limit', ['class' => 'font-weight-bold mr-3 mb-0']) !!}
+                        {!! Form::label('user_limit', 'User Hold Limit', ['class' => 'font-weight-bold mr-3 mb-0']) !!}
                         {!! Form::number('user_limit', $award->id ? $award->user_limit : 0, ['class' => 'form-control']) !!}
                     </div>
                 </div>
@@ -102,10 +106,15 @@
         </div>
     </div>
 
-
-    <div class="form-group" style="clear:both;">
-        {!! Form::label('description', 'Description (Optional)', ['class' => 'h3 font-weight-bold']) !!}
-        {!! Form::textarea('description', $award->description, ['class' => 'form-control wysiwyg']) !!}
+    <div class="card mb-3">
+        <div class="card-header h3">
+            Description (Optional)
+        </div>
+        <div class="card-body">
+            <div class="form-group">
+                {!! Form::textarea('description', $award->description, ['class' => 'form-control wysiwyg']) !!}
+            </div>
+        </div>
     </div>
 
     <div class="card mb-3">
@@ -157,8 +166,8 @@
 
     @if ($award->id)
         <div class="card mb-3">
-            <div class="card-header">
-                <h3 class="mb-0">Automatic Unlock Progression</h3>
+            <div class="card-header h3">
+                Automatic Unlock Progression
             </div>
             <div class="card-body">
                 <p>
@@ -193,10 +202,23 @@
                     When a user receives an award through obtaining all of the above items, they will also receive this reward.
                 </p>
                 <p>
-                    <b>The user will only receive this reward through the automatic unlock process. When they claim the award, if the award has any rewards all the items required for unlock will be debitted from
-                        their inventory.</b>
+                    <b>The user will only receive this reward through the automatic unlock process.
+                        When they claim the award, if the award has any rewards all the items required for unlock will be debitted from
+                        their inventory.
+                    </b>
                 </p>
-
+                <div class="row">
+                    <div class="col-md-6 form-group">
+                        {!! Form::checkbox('debit_progressions', 1, $award->id ? $award->debit_progressions : 0, ['class' => 'form-check-input', 'data-toggle' => 'toggle']) !!}
+                        {!! Form::label('debit_progressions', 'Debit Progressions?', ['class' => 'form-check-label font-weight-bold ml-3']) !!}
+                        {!! add_help('Do you want the user to have the items required for unlock taken from their inventory when they receive the award? This only applies to receiving the award through the automatic unlock process, not when claimed through prompts or grants.') !!}
+                    </div>
+                    <div class="col-md-6 form-group">
+                        {!! Form::checkbox('allow_reclaim', 1, $award->id ? $award->allow_reclaim : 0, ['class' => 'form-check-input', 'data-toggle' => 'toggle']) !!}
+                        {!! Form::label('allow_reclaim', 'Allow Reclaim?', ['class' => 'form-check-label font-weight-bold ml-3']) !!}
+                        {!! add_help('Do you want the user to be able to claim the reward from this badge multiple times? They will only receive the badge once.') !!}
+                    </div>
+                </div>
                 @include('widgets._add_rewards', [
                     'object' => $award,
                     'hideTitle' => true,
@@ -204,11 +226,6 @@
                     'showRaffles' => true,
                     'showLootTables' => true,
                 ])
-                <p>
-                    {!! Form::checkbox('allow_reclaim', 1, $award->id ? $award->allow_reclaim : 0, ['class' => 'form-check-input', 'data-toggle' => 'toggle']) !!}
-                    {!! Form::label('allow_reclaim', 'Allow Reclaim?', ['class' => 'form-check-label font-weight-bold ml-3']) !!}
-                    {!! add_help('Do you want the user to be able to claim the reward from this badge multiple times? They will only receive the badge once.') !!}
-                </p>
             </div>
         </div>
     @endif

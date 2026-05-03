@@ -2,7 +2,12 @@
 
 namespace App\Models\Award;
 
+use App\Models\Currency\Currency;
+use App\Models\Item\Item;
+use App\Models\Loot\LootTable;
 use App\Models\Model;
+use App\Models\Raffle\Raffle;
+use App\Models\User\UserCurrency;
 
 class AwardProgression extends Model {
     /**
@@ -62,14 +67,19 @@ class AwardProgression extends Model {
     public function progression() {
         switch ($this->type) {
             case 'Item':
-                return $this->belongsTo('App\Models\Item\Item', 'type_id');
+                return $this->belongsTo(Item::class, 'rewardable_id');
                 break;
             case 'Currency':
-                return $this->belongsTo('App\Models\Currency\Currency', 'type_id');
+                return $this->belongsTo(Currency::class, 'rewardable_id');
+                break;
+            case 'LootTable':
+                return $this->belongsTo(LootTable::class, 'rewardable_id');
+                break;
+            case 'Raffle':
+                return $this->belongsTo(Raffle::class, 'rewardable_id');
                 break;
             case 'Award':
-                return $this->belongsTo('App\Models\Award\Award', 'type_id');
-                break;
+                return $this->belongsTo(Award::class, 'rewardable_id');
         }
 
         return null;
@@ -92,7 +102,7 @@ class AwardProgression extends Model {
                 return boolval($user->items()->where('item_id', $this->type_id)->sum('count') >= $this->quantity);
                 break;
             case 'Currency':
-                return \App\Models\User\UserCurrency::where('user_id', $user->id)->where('currency_id', $this->type_id)->sum('quantity') >= $this->quantity;
+                return UserCurrency::where('user_id', $user->id)->where('currency_id', $this->type_id)->sum('quantity') >= $this->quantity;
                 break;
             case 'Award':
                 return boolval($user->awards()->where('award_id', $this->type_id)->sum('count') >= $this->quantity);

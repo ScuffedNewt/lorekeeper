@@ -2,6 +2,7 @@
 
 namespace App\Models\User;
 
+use App\Models\Award\Award;
 use App\Models\Award\AwardLog;
 use App\Models\Character\Character;
 use App\Models\Character\CharacterBookmark;
@@ -96,7 +97,7 @@ class User extends Authenticatable implements MustVerifyEmail {
      * Get all of the user's update logs.
      */
     public function logs() {
-        return $this->hasMany('App\Models\User\UserUpdateLog');
+        return $this->hasMany(UserUpdateLog::class);
     }
 
     /**
@@ -180,7 +181,7 @@ class User extends Authenticatable implements MustVerifyEmail {
      * Get the user's awards.
      */
     public function awards() {
-        return $this->belongsToMany('App\Models\Award\Award', 'user_awards')->withPivot('count', 'data', 'updated_at', 'id')->whereNull('user_awards.deleted_at');
+        return $this->belongsToMany(Award::class, 'user_awards')->withPivot('count', 'data', 'updated_at', 'id')->whereNull('user_awards.deleted_at');
     }
 
     /**

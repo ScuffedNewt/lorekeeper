@@ -80,7 +80,7 @@
                             |
                         @endif
                         @if (isset($award->rarity) && $award->rarity)
-                            Rarity: {{ $award->rarity }}
+                            Rarity: {!! $award->rarity->displayName !!}
                         @endif
                     </div>
                 </div>

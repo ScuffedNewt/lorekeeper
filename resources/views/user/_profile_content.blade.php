@@ -120,7 +120,7 @@
         <h5 class="card-title">Awards</h5>
         <div class="card-body">
             @if (count($awards))
-                <div class="row">
+                <div class="row justify-content-center">
                     @foreach ($awards as $award)
                         <div class="col-md-3 col-6 profile-inventory-item">
                             @if ($award->imageUrl)

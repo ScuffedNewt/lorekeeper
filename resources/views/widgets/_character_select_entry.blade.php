@@ -55,7 +55,7 @@
                                                 'placeholder' => 'Select Currency',
                                             ]) !!}</div>
                                             <div class="character-items  {{ $reward->rewardable_type == 'Item' ? 'show' : 'hide' }}">{!! Form::select('character_rewardable_id[' . $character->character_id . '][]', $items, $reward->rewardable_type == 'Item' ? $reward->rewardable_id : null, ['class' => 'form-control character-item-id', 'placeholder' => 'Select Item']) !!}</div>
-                                            <div class="character-awards  {{ $reward->rewardable_type == 'Award' ? 'show' : 'hide' }}">{!! Form::select('character_rewardable_id[' . $character->character_id . '][]', $awards, $reward->rewardable_type == 'Award' ? $reward->rewardable_id : null, [
+                                            <div class="character-awards  {{ $reward->rewardable_type == 'Award' ? 'show' : 'hide' }}">{!! Form::select('character_rewardable_id[' . $character->character_id . '][]', $characterAwards, $reward->rewardable_type == 'Award' ? $reward->rewardable_id : null, [
                                                 'class' => 'form-control character-award-id',
                                                 'placeholder' => 'Select Award',
                                             ]) !!}</div>

@@ -785,6 +785,7 @@ class SubmissionManager extends Service {
             }
         }
         $promptRewards = mergeAssetsArrays($promptRewards, $this->processRewards($data, false));
+        // we attach non-default character rewards after in the character attachment function
 
         return [
             'userAssets'       => $userAssets,
@@ -852,6 +853,7 @@ class SubmissionManager extends Service {
         $currencyIds = [];
         $itemIds = [];
         $tableIds = [];
+        $awardIds = [];
         if (isset($data['character_currency_id'])) {
             foreach ($data['character_currency_id'] as $c) {
                 foreach ($c as $currencyId) {
@@ -869,6 +871,8 @@ class SubmissionManager extends Service {
                             break;
                         case 'LootTable': $tableIds[] = $id;
                             break;
+                        case 'Award': $awardIds[] = $id;
+                            break;
                     }
                 }
             } // Expanded character rewards
@@ -876,14 +880,21 @@ class SubmissionManager extends Service {
         array_unique($currencyIds);
         array_unique($itemIds);
         array_unique($tableIds);
+        array_unique($awardIds);
         $currencies = Currency::whereIn('id', $currencyIds)->where('is_character_owned', 1)->get()->keyBy('id');
         $items = Item::whereIn('id', $itemIds)->get()->keyBy('id');
         $tables = LootTable::whereIn('id', $tableIds)->get()->keyBy('id');
-
+        $awards = Award::whereIn('id', $awardIds)->get()->keyBy('id');
         // Attach characters
         foreach ($characters as $c) {
             // Users might not pass in clean arrays (may contain redundant data) so we need to clean that up
-            $assets = $this->processRewards($data + ['character_id' => $c->id, 'currencies' => $currencies, 'items' => $items, 'tables' => $tables], true);
+            $assets = $this->processRewards($data + [
+                'character_id' => $c->id,
+                'currencies'   => $currencies,
+                'items'        => $items,
+                'tables'       => $tables,
+                'awards'       => $awards,
+            ], true);
 
             if ($defaultRewards) {
                 $assets = mergeAssetsArrays($assets, $defaultRewards, true);

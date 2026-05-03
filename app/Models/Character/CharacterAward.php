@@ -2,6 +2,7 @@
 
 namespace App\Models\Character;
 
+use App\Models\Award\Award;
 use App\Models\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -25,6 +26,15 @@ class CharacterAward extends Model {
     protected $table = 'character_awards';
 
     /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'data' => 'array',
+    ];
+
+    /**
      * Whether the model contains timestamps to be saved and updated.
      *
      * @var string
@@ -41,14 +51,14 @@ class CharacterAward extends Model {
      * Get the character who owns the stack.
      */
     public function character() {
-        return $this->belongsTo('App\Models\Character\Character');
+        return $this->belongsTo(Character::class);
     }
 
     /**
      * Get the item associated with this item stack.
      */
     public function award() {
-        return $this->belongsTo('App\Models\Award\Award');
+        return $this->belongsTo(Award::class);
     }
 
     /**********************************************************************************************
@@ -56,15 +66,6 @@ class CharacterAward extends Model {
         ACCESSORS
 
     **********************************************************************************************/
-
-    /**
-     * Get the data attribute as an associative array.
-     *
-     * @return array
-     */
-    public function getDataAttribute() {
-        return json_decode($this->attributes['data'], true);
-    }
 
     /**
      * Checks if the stack is transferrable.

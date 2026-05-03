@@ -80,7 +80,9 @@ class UserController extends Controller {
             'items'      => $this->user->items()->where('count', '>', 0)->orderBy('user_items.updated_at', 'DESC')->take(4)->get(),
             'characters' => $characters,
             'aliases'    => $aliases->orderBy('is_primary_alias', 'DESC')->orderBy('site')->get(),
-            'awards'     => $this->user->awards()->orderBy('user_awards.updated_at', 'DESC')->whereNull('deleted_at')->where('count', '>', 0)->take(4)->get(),
+            'awards'     => $this->user->awards()->where('count', '>', 0)->orderBy('user_awards.updated_at', 'DESC')->get()->groupBy('id')->map(function ($group) {
+                return $group->first();
+            })->take(4),
         ]);
     }
 

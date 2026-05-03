@@ -61,9 +61,9 @@
             {{-- progression --}}
             @if (isset($staffView) && $staffView && count($award->progressions) > 0)
                 <div class="card-header h5">Award Progress ({{ count($award->progressions) }}/{{ count($award->progressions) }})</div>
-                <div class="card-body d-flex flex-wrap justify-content-center">
+                <div class="card-body d-flex flex-wrap justify-content-center align-items-center">
                     <p>Note that this looks fully completed, since you are viewing it as an admin. Progression is only visible on the awards page or user inventory.</p>
-                    <div class="row col-12">
+                    <div class="row justify-content-center align-items-center">
                         @foreach ($award->progressions as $progression)
                             <div class="col-md-2">
                                 {!! $progression->unlocked(null, true) !!}
@@ -72,63 +72,88 @@
                     </div>
                 </div>
             @elseif (Auth::check() && count($award->progressions) > 0)
-                <div class="card-header h5">Award Progress ({{ $award->progressionProgress(Auth::user()) }}/{{ count($award->progressions) }})</div>
+                <div class="card-header h5">
+                    Award Progress ({{ $award->progressionProgress(Auth::user()) }}/{{ count($award->progressions) }})
+                </div>
                 {{-- get sum of award progressions that the user has unlocked --}}
-
                 <div class="card-body text-center justify-content-center">
-                    <div class="row">
+                    <div class="row justify-content-center align-items-center">
                         @foreach ($award->progressions as $progression)
                             <div class="col-md-2">
                                 {!! $progression->unlocked(Auth::user()) !!}
                             </div>
                         @endforeach
                     </div>
-
                     @if ($award->progressionProgress(Auth::user()) == count($award->progressions) && $award->canClaim(Auth::user()))
                         <div class="mt-2">
                             {!! Form::open(['url' => 'awardcase/claim/' . $award->id]) !!}
-                            {!! Form::submit('Claim Reward', ['class' => 'btn btn-primary']) !!}
+                            {!! Form::submit('Claim Award', ['class' => 'btn btn-primary']) !!}
                             {!! Form::close() !!}
                         </div>
                     @elseif($award->progressionProgress(Auth::user()) == count($award->progressions) && !$award->canClaim(Auth::user()))
                         <div class="mt-2">
                             <hr class="w-50" />
-                            <p class="text-danger">You have already claimed this reward.</p>
-                            <p>You received this reward after gaining the following requirements:</p>
+                            <div class="alert alert-info">
+                                You have already claimed this award!
+                            </div>
                             {{-- get the user reward where the data column contains 'progression_data' in the JSON --}}
                             @php
                                 $userAward = App\Models\User\UserAward::where('user_id', Auth::user()->id)
                                     ->where('award_id', $award->id)
                                     ->where('data', 'like', '%"progression_data"%')
                                     ->first();
-                                $data = json_decode($userAward->data['progression_data']);
+                                $data = $userAward?->data['progression_data'] ?? [];
                             @endphp
-                            <div class="row text-center d-flex flex-wrap justify-content-center">
-                                @foreach ($data as $type => $type_data)
-                                    @foreach ($type_data as $id => $quantity)
-                                        {{-- find the model from the type --}}
-                                        @php
-                                            switch ($type) {
-                                                case 'Item':
-                                                    $info = App\Models\Item\Item::find($id);
-                                                    break;
-                                                case 'Currency':
-                                                    $info = App\Models\Currency\Currency::find($id);
-                                                    break;
-                                                case 'Award':
-                                                    $info = App\Models\Award\Award::find($id);
-                                                    break;
-                                            }
-                                        @endphp
+                            @if ($userAward)
+                                <p>You received this reward after gaining the following requirements:</p>
+                                <div class="row text-center d-flex flex-wrap justify-content-center align-items-center">
+                                    @foreach ($data as $type => $type_data)
+                                        @foreach ($type_data as $id => $quantity)
+                                            {{-- find the model from the type --}}
+                                            @php
+                                                switch ($type) {
+                                                    case 'Item':
+                                                        $info = App\Models\Item\Item::find($id);
+                                                        break;
+                                                    case 'Currency':
+                                                        $info = App\Models\Currency\Currency::find($id);
+                                                        break;
+                                                    case 'Award':
+                                                        $info = App\Models\Award\Award::find($id);
+                                                        break;
+                                                }
+                                            @endphp
 
-                                        <div class="col-sm-1">
-                                            <img src="{{ $info->imageUrl }}" class="img-fluid" data-toggle="tooltip" title="{{ $info->name }} x{{ $quantity }}" />
-                                        </div>
+                                            <div class="col-sm-1">
+                                                <img src="{{ $info->imageUrl }}" class="img-fluid" data-toggle="tooltip" title="{{ $info->name }} x{{ $quantity }}" />
+                                            </div>
+                                        @endforeach
                                     @endforeach
-                                @endforeach
-                            </div>
+                                </div>
+                            @else
+                                You received this award without using progressions!
+                            @endif
                         </div>
                     @endif
+                </div>
+            @endif
+            {{-- rewards --}}
+            @if (isset($award->rewards) && count($award->rewards) > 0)
+                <div class="card-header h5">Rewards</div>
+                <div class="card-body text-center justify-content-center">
+                    <p>Claiming this award will grant you the following rewards:</p>
+                    <div class="row text-center d-flex flex-wrap justify-content-center">
+                        @foreach ($award->rewards as $reward)
+                            <div class="col-md-2">
+                                @if ($reward->reward->imageUrl)
+                                    <img src="{{ $reward->reward->imageUrl }}" class="img-fluid" data-toggle="tooltip" title="{{ $reward->reward->name }} x{{ $reward->quantity }}" />
+                                    x{{ $reward->quantity }}
+                                @else
+                                    {!! $reward->reward->displayName !!} x{{ $reward->quantity }}
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
             @endif
         </div>

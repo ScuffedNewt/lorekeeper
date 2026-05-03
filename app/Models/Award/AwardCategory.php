@@ -113,6 +113,6 @@ class AwardCategory extends Model {
      * @return string
      */
     public function getSearchUrlAttribute() {
-        return url('world/awardss?award_category_id='.$this->id);
+        return url('world/awards?award_category_id='.$this->id);
     }
 }
