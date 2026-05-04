@@ -2,14 +2,10 @@
 
 namespace App\Models\Mail;
 
-use Config;
-use Carbon\Carbon;
 use App\Models\Model;
-
 use App\Traits\Commentable;
 
-class UserMail extends Model
-{
+class UserMail extends Model {
     use Commentable;
     /**
      * The attributes that are mass assignable.
@@ -17,7 +13,7 @@ class UserMail extends Model
      * @var array
      */
     protected $fillable = [
-        'sender_id', 'recipient_id', 'subject', 'message', 'seen', 'parent_id'
+        'sender_id', 'recipient_id', 'subject', 'message', 'seen', 'parent_id',
     ];
 
     /**
@@ -40,51 +36,47 @@ class UserMail extends Model
      * @var array
      */
     public static $createRules = [
-        'subject' => 'required|between:3,100',
-        'message' => 'required',
+        'subject'   => 'required|between:3,100',
+        'message'   => 'required',
         'parent_id' => 'nullable',
     ];
 
     /**********************************************************************************************
-    
+
         RELATIONS
 
     **********************************************************************************************/
-    
+
     /**
-     * Get the staff that sent the message
+     * Get the staff that sent the message.
      */
-    public function sender()
-    {
+    public function sender() {
         return $this->belongsTo('App\Models\User\User', 'sender_id');
     }
 
     /**
-     * Get the user who was sent the message
+     * Get the user who was sent the message.
      */
-    public function recipient() 
-    {
+    public function recipient() {
         return $this->belongsTo('App\Models\User\User');
     }
 
     /**
-     * Get the parent message
+     * Get the parent message.
      */
-    public function parent()
-    {
+    public function parent() {
         return $this->belongsTo($this, 'parent_id');
     }
 
     /**
-     * Get the child messages
+     * Get the child messages.
      */
-    public function children()
-    {
+    public function children() {
         return $this->hasMany($this, 'parent_id');
     }
 
     /**********************************************************************************************
-    
+
         ACCESSORS
 
     **********************************************************************************************/
@@ -94,12 +86,12 @@ class UserMail extends Model
      *
      * @return string
      */
-    public function getDisplayNameAttribute()
-    {
+    public function getDisplayNameAttribute() {
         $prefix = '';
-        if($this->parent){
+        if ($this->parent) {
             $prefix = 'Re:';
         }
+
         return '<a href="'.$this->url.'">'.$prefix.$this->subject.'</a>';
     }
 
@@ -108,8 +100,7 @@ class UserMail extends Model
      *
      * @return string
      */
-    public function getViewUrlAttribute()
-    {
+    public function getViewUrlAttribute() {
         return url('inbox/view/'.$this->id);
     }
 }

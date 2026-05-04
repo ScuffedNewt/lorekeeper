@@ -4,15 +4,11 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateModMailTables extends Migration
-{
+class CreateModMailTables extends Migration {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
-    {
+    public function up() {
         Schema::create('mod_mails', function (Blueprint $table) {
             $table->id();
             $table->integer('staff_id')->unsigned();
@@ -37,11 +33,8 @@ class CreateModMailTables extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
-    {
+    public function down() {
         Schema::dropIfExists('mod_mails');
         Schema::table('user_settings', function (Blueprint $table) {
             $table->dropColumn('strike_count');

@@ -2,14 +2,10 @@
 
 namespace App\Models\Mail;
 
-use Config;
-use Carbon\Carbon;
 use App\Models\Model;
-
 use App\Traits\Commentable;
 
-class ModMail extends Model
-{
+class ModMail extends Model {
     use Commentable;
     /**
      * The attributes that are mass assignable.
@@ -17,7 +13,7 @@ class ModMail extends Model
      * @var array
      */
     protected $fillable = [
-        'staff_id', 'user_id', 'subject', 'message', 'issue_strike', 'strike_count', 'previous_strike_count', 'seen'
+        'staff_id', 'user_id', 'subject', 'message', 'issue_strike', 'strike_count', 'previous_strike_count', 'seen',
     ];
 
     /**
@@ -45,29 +41,27 @@ class ModMail extends Model
     ];
 
     /**********************************************************************************************
-    
+
         RELATIONS
 
     **********************************************************************************************/
-    
+
     /**
-     * Get the staff that sent the message
+     * Get the staff that sent the message.
      */
-    public function staff()
-    {
+    public function staff() {
         return $this->belongsTo('App\Models\User\User', 'staff_id');
     }
 
     /**
-     * Get the user who was sent the message
+     * Get the user who was sent the message.
      */
-    public function user() 
-    {
+    public function user() {
         return $this->belongsTo('App\Models\User\User');
     }
 
     /**********************************************************************************************
-    
+
         ACCESSORS
 
     **********************************************************************************************/
@@ -77,8 +71,7 @@ class ModMail extends Model
      *
      * @return string
      */
-    public function getDisplayNameAttribute()
-    {
+    public function getDisplayNameAttribute() {
         return '<a href="'.$this->url.'">'.$this->subject.'</a>';
     }
 
@@ -87,8 +80,7 @@ class ModMail extends Model
      *
      * @return string
      */
-    public function getViewUrlAttribute()
-    {
+    public function getViewUrlAttribute() {
         return url('mail/view/'.$this->id);
     }
 }

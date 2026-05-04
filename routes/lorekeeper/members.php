@@ -270,7 +270,7 @@ Route::group(['prefix' => 'rewards'], function () {
 /**************************************************************************************************
     User Mail - mod mail is in browse, so banned users can view mail
 **************************************************************************************************/
-Route::group(['prefix' => 'inbox', 'namespace' => 'Users'], function() {
+Route::group(['prefix' => 'inbox', 'namespace' => 'Users'], function () {
     Route::get('/', 'MailController@getIndex');
     Route::get('view/{id}', 'MailController@getUserMail');
     Route::post('/view/{id}', 'MailController@postCreateUserMail');
