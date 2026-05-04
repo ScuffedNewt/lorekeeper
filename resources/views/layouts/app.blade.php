@@ -100,7 +100,7 @@
                 </div>
                 <div class="main-content col-lg-8 p-4">
                     <div>
-                        @if(Auth::check() && Auth::user()->hasUnseenMail)
+                        @if (Auth::check() && Auth::user()->hasUnseenMail)
                             <div class="alert alert-danger">
                                 <h5 class="mb-0"><i class="fas fa-exclamation"></i> <i class="fas fa-envelope"></i> - You have unread messages from staff. <a href="{{ url('mail#modMail') }}">View here.</a></h5>
                             </div>

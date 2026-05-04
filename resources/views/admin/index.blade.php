@@ -11,10 +11,12 @@
         Admin Dashboard
     </h1>
 
-    @if(Auth::user()->hasPower('send_mod_mail'))
+    @if (Auth::user()->hasPower('send_mod_mail'))
         <div class="card my-2">
             <div class="card-body">
-                <div class="card-title"><h2>Mod Mail</h2></div>
+                <div class="card-title">
+                    <h2>Mod Mail</h2>
+                </div>
                 <div class="card-text">
                     <p>In this section you can view all sent mod mail and send new mod mail to users.</p>
                     <p>
