@@ -1,7 +1,7 @@
 @if ($criterion)
     <p>
         {{ $criterion->summary }}
-        {!! $criterion->is_guide_active ? ' <a class="btn btn-link" href="' . url('/criteria/guide/' . $criterion->id) . '">Go to Guide</a>' : '' !!}
+        {!! $criterion->is_guide_active ? ' <a class="btn btn-link" href="' . url('world/criteria-guides/' . $criterion->id) . '">Go to Guide</a>' : '' !!}
     </p>
 
     @php $finalValues = $values ?? $minRequirements @endphp

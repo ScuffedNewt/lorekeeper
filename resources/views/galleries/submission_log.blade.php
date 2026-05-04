@@ -34,7 +34,9 @@
                                     <p>Adjust the criteria submitted and other options as needed for what the submitter, collaborators, and/or participants, should receive.</p>
                                     @if (isset($submission->data['criterion']))
                                         <div class="card mb-3">
-                                            <div class="card-header h3">Submitted Criteria Rewards for {!! $submission->user->displayName !!}</div>
+                                            <div class="card-header h3">
+                                                Rewards for {!! $submission->collaborators->count() ? implode(', ', $submission->collaborators->pluck('user.displayName')->toArray()) : $submission->user->displayName !!}
+                                            </div>
                                             <div class="card-body">
                                                 <fieldset disabled>
                                                     @foreach ($submission->data['criterion'] as $key => $criterionData)
@@ -113,26 +115,20 @@
                                             </div>
                                         @endif
                                     @endif
-
-                                    {{-- TODO: Cover the commissioned participant case
-                                                    -- current thought is to expose ability to add criterion to apply specifically to the commissioned person
-                                                    -- expectation is that person who uploaded image would have selected the right criterion for their own rewards --}}
                                     @if ($submission->participants->count())
-                                        <div class="h5 mt-3">Participant Rewards</div>
-                                        @foreach ($submission->participants as $key => $participant)
-                                            <div class="form-group">
-                                                {!! Form::label($participant->user->name . ' (' . $participant->displayType . ')') !!}:
-                                                {!! Form::number(
-                                                    'value[participant][' . $participant->user->id . ']',
-                                                    isset($submission->data['total'])
-                                                        ? ($participant->type == 'Comm'
-                                                            ? round(($submission->characters->count() ? round($submission->data['total'] * $submission->characters->count()) : $submission->data['total']) / ($submission->collaborators->count() ? $submission->collaborators->count() : '1') / 2)
-                                                            : 0)
-                                                        : 0,
-                                                    ['class' => 'form-control'],
-                                                ) !!}
+                                        <div class="card mb-3">
+                                            <div class="card-header h3">Participant Rewards</div>
+                                            <div class="card-body">
+                                                <p>If there are participants attached to the submission, you can add currency rewards for them here.</p>
+                                                @foreach ($submission->participants as $key => $participant)
+                                                    <div class="row mb-2">
+                                                        <div class="col-md">{!! Form::label($participant->user->name . ' (' . $participant->displayType . ')') !!}</div>
+                                                        <div class="col-md-3 btn btn-outline-primary add-currency" data-id="{{ $participant->user->id }}">Add Currency</div>
+                                                    </div>
+                                                    <div class="participant-rewards-{{ $participant->user->id }}"></div>
+                                                @endforeach
                                             </div>
-                                        @endforeach
+                                        </div>
                                     @endif
                                     <div class="form-group">
                                         {!! Form::checkbox('ineligible', 1, false, ['class' => 'form-check-input', 'data-toggle' => 'toggle', 'data-onstyle' => 'danger']) !!}
@@ -153,29 +149,32 @@
                                     <p>This submission has been evaluated as ineligible for rewards.</p>
                                 @else
                                     @if (isset($totals) && count($totals) > 0)
+                                        @php
+                                            $shouldDivide = Settings::get('gallery_rewards_divided') && $collaboratorsCount;
+                                        @endphp
                                         @foreach ($totals as $total)
                                             <h4>{{ $total['name'] }} Criterion</h4>
                                             <div class="row">
                                                 @if (!$submission->collaborators->count() || $submission->collaborators->where('user_id', $submission->user_id)->first() == null)
-                                                    <div class="col-md-4">
-                                                        {!! $submission->user->displayName !!}: {!! $total['currency']->display($total['value'] / ($collaboratorsCount ?? 1)) !!}
+                                                    <div class="col-md-4 mb-3">
+                                                        {!! $submission->user->displayName !!}: {!! $total['currency']->display($total['value'] / ($shouldDivide ? $submission->collaborators->count() : 1)) !!}
                                                     </div>
                                                 @endif
                                                 @if ($submission->collaborators->count())
-                                                    <div class="col-md-4">
+                                                    <div class="col-md-4 mb-3">
                                                         <h5>Collaborators</h5>
                                                         @foreach ($submission->collaborators as $collaborator)
-                                                            {!! $collaborator->user->displayName !!} ({{ $collaborator->data ?? 'No extra details' }}): {!! $total['currency']->display($total['value'] / ($collaboratorsCount ?? 1)) !!}
+                                                            {!! $collaborator->user->displayName !!} ({{ $collaborator->data ?? 'No extra details' }}): {!! $total['currency']->display($total['value'] / ($shouldDivide ? $submission->collaborators->count() : 1)) !!}
                                                             <br />
                                                         @endforeach
                                                     </div>
                                                 @endif
                                                 {{-- TODO: --}}
                                                 @if ($submission->participants->count())
-                                                    <div class="col-md-4">
+                                                    <div class="col-md-4 mb-3">
                                                         <h5>Participants</h5>
                                                         @foreach ($submission->participants as $participant)
-                                                            {!! $participant->user->displayName !!} ({{ $participant->displayType }}): {!! $total['currency']->display($total['value'] / ($collaboratorsCount ?? 1)) !!}
+                                                            {!! $participant->user->displayName !!} ({{ $participant->displayType }}): {!! $total['currency']->display($total['value'] / ($shouldDivide ? $submission->collaborators->count() : 1)) !!}
                                                             <br />
                                                         @endforeach
                                                     </div>
@@ -184,6 +183,20 @@
                                         @endforeach
                                     @else
                                         <p>This submission didn't have any criteria specified for rewards.</p>
+                                    @endif
+                                    @if (isset($participantTotals) && count($participantTotals) > 0)
+                                        <hr />
+                                        <h4>Participant Rewards</h4>
+                                        @foreach ($submission->participants as $participant)
+                                            <h5>{!! $participant->user->displayName !!} ({{ $participant->displayType }})</h5>
+                                            @if (isset($participantTotals[$participant->user_id]) && count($participantTotals[$participant->user_id]) > 0)
+                                                <div class="d-flex">
+                                                    {!! implode(', ', array_map(function($obj) { return $obj['currency']->display($obj['value']); }, $participantTotals[$participant->user_id])) !!}
+                                                </div>
+                                            @else
+                                                <p>No rewards were specified for this participant.</p>
+                                            @endif
+                                        @endforeach
                                     @endif
                                 @endif
                             @endif
@@ -254,12 +267,53 @@
             @include('criteria._criterion_selector', ['criteria' => $criteria])
         @endif
     </div>
+{{-- 
+    {!! Form::number(
+        'value[participant][' . $participant->user->id . ']',
+        isset($submission->data['total'])
+            ? ($participant->type == 'Comm'
+                ? round(($submission->characters->count() ? round($submission->data['total'] * $submission->characters->count()) : $submission->data['total']) / ($submission->collaborators->count() ? $submission->collaborators->count() : '1') / 2)
+                : 0)
+            : 0,
+        ['class' => 'form-control'],
+    ) !!} --}}
+
+    <div id="copy-calc-participant" class="row hide">
+        <div class="col-md-5 form-group">
+            {!! Form::select('value[participant][#][currency_id][]', $currencies, null, ['class' => 'form-control']) !!}
+        </div>
+        <div class="col-md-5 form-group">
+            {!! Form::number('value[participant][#][quantity][]', 1, ['class' => 'form-control']) !!}
+        </div>
+        <div class="col-md-2 text-right">
+            <button class="btn btn-danger remove-currency" type="button">X</button>
+        </div>
+    </div>
 
 @endsection
 @section('scripts')
     @parent
     <script>
         $(document).ready(function() {
+            // participants
+            $('.add-currency').on('click', function(e) {
+                e.preventDefault();
+                const id = $(this).data('id');
+                $clone = $(`#copy-calc-participant`).clone();
+                $clone.removeClass('hide');
+                $clone.find('select').attr('name', `value[participant][${id}][currency_id][]`);
+                $clone.find('input').attr('name', `value[participant][${id}][quantity][]`);
+                $clone.find('.remove-currency').on('click', function(e) {
+                    e.preventDefault();
+                    $(this).closest('.row').remove();
+                });
+                $(`.participant-rewards-${id}`).append($clone);
+            });
+            $('.remove-currency').on('click', function(e) {
+                e.preventDefault();
+                $(this).closest('.row').remove();
+            });
+            // criteria
             $('input[name*=criterion]').on('change input', () => {
                 const disabledInputs = $('input[name*=criterion]').filter('[disabled]');
                 disabledInputs.prop('disabled', false);

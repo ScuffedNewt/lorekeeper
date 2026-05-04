@@ -120,7 +120,7 @@
                             <div class="card p-3 mb-2">
                                 @php $criterion = \App\Models\Criteria\Criterion::where('id', $criterionData['id'])->first() @endphp
                                 <h3>{!! $criterion->displayName !!}</h3>
-                                {!! Form::hidden('criterion[' . $key . '][id]', $criterionData['id']) !!}
+                                {!! Form::hidden('criterion[' . $key . '][id]', $criterionData['id'], ['class' => 'criterion-select']) !!}
                                 @include('criteria._minimum_requirements', [
                                     'criterion' => $criterion,
                                     'values' => $criterionData,

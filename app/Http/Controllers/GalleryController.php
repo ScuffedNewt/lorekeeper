@@ -247,6 +247,18 @@ class GalleryController extends Controller {
                 ];
             }
         }
+        $participantTotals = [];
+        if (isset($submission->data['participants'])) {
+            foreach ($submission->data['participants'] as $participantId => $participantData) {
+                foreach ($participantData['currency_id'] as $key => $currencyId) {
+                    $participantTotals[$participantId][] = [
+                        'value'    => $participantData['quantity'][$key],
+                        'currency' => Currency::find($currencyId),
+                        'name'     => Currency::find($currencyId)->name,
+                    ];
+                }
+            }
+        }
 
         $galleryCriteria = GalleryCriterion::where('gallery_id', $submission->gallery_id)->pluck('criterion_id')->toArray();
 
@@ -255,8 +267,10 @@ class GalleryController extends Controller {
             'galleryPage'        => true,
             'sideGallery'        => $submission->gallery,
             'totals'             => $totals,
+            'participantTotals'  => $participantTotals,
             'collaboratorsCount' => $submission->collaborators->count() + ($submission->collaborators->where('user_id', $submission->user_id)->first() === null ? 1 : 0),
             'criteria'           => Criterion::active()->whereIn('id', $galleryCriteria)->orderBy('name')->pluck('name', 'id'),
+            'currencies'         => Currency::orderBy('name')->pluck('name', 'id'),
         ]);
     }
 
@@ -364,7 +378,7 @@ class GalleryController extends Controller {
 
         // Show inactive prompts in the event of being edited by an admin after acceptance
         $prompts = Auth::user()->hasPower('manage_submissions') && $submission->status == 'Pending' ? Prompt::query() : Prompt::active();
-        $galleryCriteria = GalleryCriterion::where('gallery_id', $id)->pluck('criterion_id')->toArray();
+        $galleryCriteria = GalleryCriterion::where('gallery_id', $submission->gallery_id)->pluck('criterion_id')->toArray();
 
         return view('galleries.create_edit_submission', [
             'closed'         => false,
@@ -424,15 +438,9 @@ class GalleryController extends Controller {
             'criterion', 'criterion_id',
         ]);
 
-        if (!$id) {
-            $currencyFormData = $request->only(['criterion']);
-        } else {
-            $currencyFormData = null;
-        }
-
         if ($id && $service->updateSubmission(GallerySubmission::find($id), $data, Auth::user())) {
             flash('Submission updated successfully.')->success();
-        } elseif (!$id && $gallery = $service->createSubmission($data, $currencyFormData, Auth::user())) {
+        } elseif (!$id && $gallery = $service->createSubmission($data, $request->only(['criterion']), Auth::user())) {
             flash('Submission created successfully.')->success();
 
             return redirect()->to('gallery/submissions/pending');

@@ -1,5 +1,8 @@
 @if ($criterion)
-    <p>{{ $criterion->summary }}{!! $criterion->is_guide_active ? ' - <a href="' . url('/criteria/guide/' . $criterion->id) . '">Go To Guide</a>' : '' !!}</p>
+    <p>
+        {{ $criterion->summary }}
+        {!! $criterion->is_guide_active ? ' - <a href="' . url('world/criteria-guides/' . $criterion->id) . '">Go To Guide</a>' : '' !!}
+    </p>
 
     @php $finalValues = $values ?? $minRequirements @endphp
     <div id="calc-{{ isset($id) ? $id : $criterion->id }}" class="ml-5 steps">

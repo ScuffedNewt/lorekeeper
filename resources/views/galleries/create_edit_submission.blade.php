@@ -121,8 +121,15 @@
                             <h5>Collaborators</h5>
                         </div>
                         <div class="card-body">
-                            <p>If this piece is a collaboration, add collaborators and their roles here, including yourself. <strong>Otherwise, leave this blank</strong>. You <strong>will not</strong> be able to edit this once the submission has been
-                                accepted, but will while it is still pending.</p>
+                            <p>
+                                If this piece is a collaboration, add collaborators and their roles here.
+                                <strong>Otherwise, leave this blank</strong>.
+                                You <strong>will not</strong> be able to edit this once the submission has been
+                                accepted, but will while it is still pending.
+                                <div class="alert alert-info">
+                                    <strong>You must also add yourself to the collaborators list if you worked on the submission.</strong>
+                                </div>
+                            </p>
                             @if (!$submission->id || $submission->status == 'Pending')
                                 <div class="text-right mb-3">
                                     <a href="#" class="btn btn-outline-info" id="add-collaborator">Add Collaborator</a>
@@ -179,7 +186,7 @@
                                             <div class="mb-2">
                                                 <div class="d-flex">{!! Form::select('participant_id[]', $users, $participant->user_id, ['class' => 'form-control mr-2 participant-select original', 'placeholder' => 'Select User']) !!}</div>
                                                 <div class="d-flex">
-                                                    {!! Form::select('participant_type[]', ['Gift' => 'Gift For', 'Trade' => 'Traded For', 'Comm' => 'Commissioned'], $participant->type, ['class' => 'form-control mr-2', 'placeholder' => 'Select Role']) !!}
+                                                    {!! Form::select('participant_type[]', ['Gift' => 'Gift For', 'Trade' => 'Traded For', 'Comm' => 'Commissioned'], $participant->type, ['class' => 'form-control mr-2', 'placeholder' => 'Select Role', 'required']) !!}
                                                     <a href="#" class="remove-participant btn btn-danger mb-2">×</a>
                                                 </div>
                                             </div>
@@ -190,7 +197,7 @@
                                             <div class="mb-2">
                                                 <div class="d-flex">{!! Form::select('participant_id[]', $users, $participant, ['class' => 'form-control mr-2 participant-select original', 'placeholder' => 'Select User']) !!}</div>
                                                 <div class="d-flex">
-                                                    {!! Form::select('participant_type[]', ['Gift' => 'Gift For', 'Trade' => 'Traded For', 'Comm' => 'Commissioned'], old('participant_type')[$key], ['class' => 'form-control mr-2', 'placeholder' => 'Select Role']) !!}
+                                                    {!! Form::select('participant_type[]', ['Gift' => 'Gift For', 'Trade' => 'Traded For', 'Comm' => 'Commissioned'], old('participant_type')[$key], ['class' => 'form-control mr-2', 'placeholder' => 'Select Role', 'required']) !!}
                                                     <a href="#" class="remove-participant btn btn-danger mb-2">×</a>
                                                 </div>
                                             </div>
@@ -230,14 +237,34 @@
             <a href="#" class="btn btn-outline-info" id="addCharacter">Add Character</a>
         </div>
 
-        @if ($gallery->criteria->count() > 0 && !$submission->id)
+        @if ($gallery->criteria->count() > 0)
             <h2 id="criterion-section" class="mt-5">
                 Criteria Rewards
                 <button class="btn  btn-outline-info float-right add-calc" type="button">Add Criterion</a>
             </h2>
-            <p>Criteria can be used in addition to or in replacement of rewards. They take input on what you are turning in for the prompt in order to calculate your final reward.</p>
-            <p>Criteria may populate in with pre-selected minimum requirements for this prompt. </p>
-            <div id="criteria"></div>
+            <div id="criteria">
+                @foreach ($submission->data['criterion'] ?? [] as $key => $criterionData)
+                    <div class="card p-3 mb-2">
+                        @php $criterion = \App\Models\Criteria\Criterion::where('id', $criterionData['id'])->first() @endphp
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="h3">{!! $criterion->displayName !!}</div>
+                            <div class="text-right btn btn-danger delete-calc">
+                                <i class="fas fa-trash"></i>
+                            </div>
+                        </div>
+                        {!! Form::hidden('criterion[' . $key . '][id]', $criterionData['id'], ['class' => 'criterion-select']) !!}
+                        @include('criteria._minimum_requirements', [
+                            'criterion' => $criterion,
+                            'values' => $criterionData,
+                            'minRequirements' => $submission->gallery->criteria->where('criterion_id', $criterionData['id'])->first()->minRequirements ?? null,
+                            'title' => 'Selections',
+                            'limitByMinReq' => true,
+                            'id' => $key,
+                            'criterion_currency' => isset($criterionData['criterion_currency_id']) ? $criterionData['criterion_currency_id'] : $criterion->currency_id,
+                        ])
+                    </div>
+                @endforeach
+            </div>
             <div class="mb-4"></div>
         @endif
 

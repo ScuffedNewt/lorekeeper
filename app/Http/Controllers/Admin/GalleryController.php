@@ -118,7 +118,7 @@ class GalleryController extends Controller {
                     return $this->postStaffComments($id, $request->only(['staff_comments', 'alert_user']), $service);
                     break;
                 case 'value':
-                    return $this->postValue($id, $request->only(['criterion', 'ineligible']), $service);
+                    return $this->postValue($id, $request->only(['criterion', 'ineligible', 'value']), $service);
                     break;
             }
         }
