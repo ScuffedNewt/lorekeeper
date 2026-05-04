@@ -17,6 +17,7 @@
             attachRewardTypeListener($clone.find('.character-rewardable-type'));
             $characters.append($clone);
             $clone.find('.character-code').selectize();
+            $clone.find('.criterion-character-section').removeClass('hide');
             count++;
         });
 
@@ -50,6 +51,21 @@
                 attachRewardTypeListener(node.find('.character-rewardable-type'));
             });
             attachRewardTypeListener(node.find('.character-rewardable-type'));
+
+            //criterias
+            node.find('.add-character-calc').on('click', function(e) {
+                e.preventDefault();
+                var clone = $('#copy-character-calc').clone();
+                clone.removeClass('hide');
+                var input = clone.find('[name*=criterion]');
+                var count = $('.criterion-select').length;
+                input.attr('name', input.attr('name').replace('slug', node.find('.character-code').val()));
+                input.attr('name', input.attr('name').replace('#', count))
+                clone.find('.criterion-select').on('change', loadForm);
+                clone.find('.delete-calc').on('click', deleteCriterion);
+                clone.removeAttr('id');
+                $(this).parent().parent().append(clone);
+            });
         }
 
         function attachRewardTypeListener(node) {
@@ -83,7 +99,7 @@
             node.find('.character-table-id').attr('name', 'character_rewardable_id[' + id + '][]');
         }
 
-        //start criteria
+        // start criteria
         function loadForm(e) {
             var id = $(this).val();
             var promptId = $('#prompt').val();

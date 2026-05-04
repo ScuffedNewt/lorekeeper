@@ -2,6 +2,7 @@
 
 namespace App\Models\Criteria;
 
+use App\Models\Currency\Currency;
 use App\Models\Model;
 
 class Criterion extends Model {
@@ -27,7 +28,7 @@ class Criterion extends Model {
      * @var array
      */
     public static $createRules = [
-        'name'        => 'required|unique:character_categories|between:3,100',
+        'name'        => 'required|unique:criteria|between:3,100',
         'currency_id' => 'required',
     ];
 
@@ -50,14 +51,14 @@ class Criterion extends Model {
      * Get the currency for this criterion.
      */
     public function currency() {
-        return $this->belongsTo('App\Models\Currency\Currency', 'currency_id');
+        return $this->belongsTo(Currency::class, 'currency_id');
     }
 
     /**
      * Get all steps associated with the criterion.
      */
     public function steps() {
-        return $this->hasMany('App\Models\Criteria\CriterionStep', 'criterion_id')->orderBy('order');
+        return $this->hasMany(CriterionStep::class, 'criterion_id')->orderBy('order');
     }
 
     /**********************************************************************************************

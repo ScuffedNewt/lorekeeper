@@ -4,6 +4,7 @@ namespace App\Models\Prompt;
 
 use App\Models\Model;
 use App\Models\Reward\Reward;
+use App\Models\Submission\Submission;
 use Carbon\Carbon;
 
 class Prompt extends Model {
