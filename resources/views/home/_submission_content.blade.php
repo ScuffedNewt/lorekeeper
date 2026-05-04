@@ -113,8 +113,8 @@
                     <h3>
                         {!! $criterion->displayName !!}
                         <span class="text-secondary"> - {!! isset($criterionData['criterion_currency_id'])
-                        ? \App\Models\Currency\Currency::find($criterionData['criterion_currency_id'])->display($criterion->calculateReward($criterionData))
-                        : $criterion->currency->display($criterion->calculateReward($criterionData)) !!}
+                            ? \App\Models\Currency\Currency::find($criterionData['criterion_currency_id'])->display($criterion->calculateReward($criterionData))
+                            : $criterion->currency->display($criterion->calculateReward($criterionData)) !!}
                         </span>
                     </h3>
                     @foreach ($criterion->steps->where('is_active', 1) as $step)
@@ -211,8 +211,8 @@
                                                 <h5>
                                                     {!! $criterion->displayName !!}
                                                     <span class="text-secondary"> - {!! isset($criterionData['criterion_currency_id'])
-                                                    ? \App\Models\Currency\Currency::find($criterionData['criterion_currency_id'])->display($criterion->calculateReward($criterionData))
-                                                    : $criterion->currency->display($criterion->calculateReward($criterionData)) !!}
+                                                        ? \App\Models\Currency\Currency::find($criterionData['criterion_currency_id'])->display($criterion->calculateReward($criterionData))
+                                                        : $criterion->currency->display($criterion->calculateReward($criterionData)) !!}
                                                     </span>
                                                 </h5>
                                                 @foreach ($criterion->steps->where('is_active', 1) as $step)
@@ -230,7 +230,7 @@
                                                 @endforeach
                                             </div>
                                         @endforeach
-                                    </div> 
+                                    </div>
                                 @endif
                             </div>
                         </div>
