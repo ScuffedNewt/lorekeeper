@@ -8,8 +8,7 @@
     {!! breadcrumbs(['gallery' => 'gallery', $submission->gallery->displayName => 'gallery/' . $submission->gallery->id, $submission->title => 'gallery/view/' . $submission->id, 'Log Details' => 'gallery/queue/' . $submission->id]) !!}
 
     <h1>Log Details
-        <span
-            class="float-right badge badge-{{ $submission->status == 'Pending' ? 'secondary' : ($submission->status == 'Accepted' ? 'success' : 'danger') }}">
+        <span class="float-right badge badge-{{ $submission->status == 'Pending' ? 'secondary' : ($submission->status == 'Accepted' ? 'success' : 'danger') }}">
             {{ $submission->collaboratorApproval ? $submission->status : 'Pending Collaborator Approval' }}
         </span>
     </h1>
