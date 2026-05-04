@@ -11,14 +11,18 @@
     <p>
         Here you can find guides for each criterion. These guides will help you understand how to calculate the amount of currency you will receive for each criteria.
     </p>
-    @foreach ($criterions as $criterion)
-        <div class="card">
-            <div class="card-body">
-                @include('criteria._guide', [
-                    'criterion' => $criterion,
-                    'isPage' => false,
-                ])
+    @if (count($criterions))
+        @foreach ($criterions as $criterion)
+            <div class="card">
+                <div class="card-body">
+                    @include('criteria._guide', [
+                        'criterion' => $criterion,
+                        'isPage' => false,
+                    ])
+                </div>
             </div>
-        </div>
-    @endforeach
+        @endforeach
+    @else
+        <p>No criteria guides have been added yet.</p>
+    @endif
 @endsection
