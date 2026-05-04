@@ -68,10 +68,4 @@ class GalleryCriterion extends Model {
     public function criterion() {
         return $this->belongsTo(Criterion::class, 'criterion_id');
     }
-
-    /**********************************************************************************************
-
-         ACCESSORS
-
-     **********************************************************************************************/
 }

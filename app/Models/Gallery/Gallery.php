@@ -107,7 +107,7 @@ class Gallery extends Model {
      * Get the criteria attached to this gallery.
      */
     public function criteria() {
-        return $this->hasMany('App\Models\Gallery\GalleryCriterion', 'gallery_id');
+        return $this->hasMany(GalleryCriterion::class, 'gallery_id');
     }
 
     /**********************************************************************************************
