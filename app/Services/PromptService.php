@@ -83,6 +83,11 @@ class PromptService extends Service {
 
             $data = $this->populateCategoryData($data, $category);
 
+            $oldImageFileName = null;
+            if ($category->has_image) {
+                $oldImageFileName = $category->categoryImageFileName;
+            }
+
             $image = null;
             if (isset($data['image']) && $data['image']) {
                 $data['has_image'] = 1;
@@ -93,8 +98,8 @@ class PromptService extends Service {
 
             $category->update($data);
 
-            if ($category) {
-                $this->handleImage($image, $category->categoryImagePath, $category->categoryImageFileName);
+            if ($image) {
+                $this->handleImage($image, $category->categoryImagePath, $category->categoryImageFileName, $oldImageFileName);
             }
 
             return $this->commitReturn($category);
@@ -121,9 +126,7 @@ class PromptService extends Service {
                 throw new \Exception('An prompt with this category exists. Please change its category first.');
             }
 
-            if ($category->has_image) {
-                $this->deleteImage($category->categoryImagePath, $category->categoryImageFileName);
-            }
+            $this->deleteImage($category->categoryImagePath, $category->categoryImageFileName);
             $category->delete();
 
             return $this->commitReturn(true);
@@ -264,6 +267,11 @@ class PromptService extends Service {
 
             $data = $this->populateData($data, $prompt);
 
+            $oldImageFileName = null;
+            if ($prompt->has_image) {
+                $oldImageFileName = $prompt->imageFileName;
+            }
+
             $image = null;
             if (isset($data['image']) && $data['image']) {
                 $data['has_image'] = 1;
@@ -281,8 +289,8 @@ class PromptService extends Service {
                 'limit', 'limit_period', 'limit_character',
             ]));
 
-            if ($prompt) {
-                $this->handleImage($image, $prompt->imagePath, $prompt->imageFileName);
+            if ($image) {
+                $this->handleImage($image, $prompt->imagePath, $prompt->imageFileName, $oldImageFileName);
             }
 
             $rewardService = new RewardService;
@@ -325,9 +333,7 @@ class PromptService extends Service {
             }
 
             $prompt->rewards()->delete();
-            if ($prompt->has_image) {
-                $this->deleteImage($prompt->imagePath, $prompt->imageFileName);
-            }
+            $this->deleteImage($prompt->imagePath, $prompt->imageFileName);
             $prompt->delete();
 
             return $this->commitReturn(true);

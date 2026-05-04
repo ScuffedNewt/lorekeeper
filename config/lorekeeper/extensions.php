@@ -156,4 +156,7 @@ return [
         'Quarter'   => 'Quarter', // This is once every three months.
         'Year'      => 'Year',
     ],
+
+    // Limit Userpage Sublists to Characters - Speedy
+    'limit_userpage_sublists_to_characters' => 0, // If enabled, will only show sub masterlists on user pages that the characters owned by the user belong to.
 ];
