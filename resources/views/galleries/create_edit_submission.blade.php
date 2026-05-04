@@ -126,9 +126,9 @@
                                 <strong>Otherwise, leave this blank</strong>.
                                 You <strong>will not</strong> be able to edit this once the submission has been
                                 accepted, but will while it is still pending.
-                                <div class="alert alert-info">
-                                    <strong>You must also add yourself to the collaborators list if you worked on the submission.</strong>
-                                </div>
+                            <div class="alert alert-info">
+                                <strong>You must also add yourself to the collaborators list if you worked on the submission.</strong>
+                            </div>
                             </p>
                             @if (!$submission->id || $submission->status == 'Pending')
                                 <div class="text-right mb-3">

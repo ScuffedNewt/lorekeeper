@@ -9,7 +9,7 @@
         <div>
             <h4>Calculated Totals:</h4>
             @foreach ($totals as $total)
-                @php 
+                @php
                     if (!isset($totalCurrencies[$total['currency']->id])) {
                         $totalCurrencies[$total['currency']->id] = [
                             'currency' => $total['currency'],
@@ -27,7 +27,12 @@
             @endforEach
             <hr />
             <h4>Total Rewards:</h4>
-            {!! implode(', ', array_map(function($obj) { return $obj['currency']->display($obj['value']); }, $totalCurrencies)) !!}
+            {!! implode(
+                ', ',
+                array_map(function ($obj) {
+                    return $obj['currency']->display($obj['value']);
+                }, $totalCurrencies),
+            ) !!}
             @if ($collaboratorsCount > 1 && Settings::get('gallery_rewards_divided') === '1')
                 <br />Divided Among {{ $collaboratorsCount }} {{ str_plural('Collaborator', $collaboratorsCount) }}
             @elseif ($collaboratorsCount > 1)

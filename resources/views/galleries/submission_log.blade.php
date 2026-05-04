@@ -191,7 +191,12 @@
                                             <h5>{!! $participant->user->displayName !!} ({{ $participant->displayType }})</h5>
                                             @if (isset($participantTotals[$participant->user_id]) && count($participantTotals[$participant->user_id]) > 0)
                                                 <div class="d-flex">
-                                                    {!! implode(', ', array_map(function($obj) { return $obj['currency']->display($obj['value']); }, $participantTotals[$participant->user_id])) !!}
+                                                    {!! implode(
+                                                        ', ',
+                                                        array_map(function ($obj) {
+                                                            return $obj['currency']->display($obj['value']);
+                                                        }, $participantTotals[$participant->user_id]),
+                                                    ) !!}
                                                 </div>
                                             @else
                                                 <p>No rewards were specified for this participant.</p>
@@ -267,7 +272,7 @@
             @include('criteria._criterion_selector', ['criteria' => $criteria])
         @endif
     </div>
-{{-- 
+    {{-- 
     {!! Form::number(
         'value[participant][' . $participant->user->id . ']',
         isset($submission->data['total'])
