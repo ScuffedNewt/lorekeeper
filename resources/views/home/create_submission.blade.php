@@ -106,8 +106,11 @@
                         $rewards.load('{{ url('submissions/new/prompt') }}/' + $(this).val());
                         $requirementsWarning.load('{{ url('submissions/new/prompt') }}/' + $(this).val() + '/requirements');
                         $('#copy-calc').load('{{ url('criteria/prompt') }}/' + $(this).val());
+                        $('#copy-character-calc').load('{{ url('criteria/character/prompt') }}/' + $(this).val());
                         if ($(this).val()) $('#criterion-section').removeClass('hide');
                         else $('#criterion-section').addClass('hide');
+                        if ($(this).val()) $('.criterion-character-section').removeClass('hide');
+                        else $('.criterion-character-section').addClass('hide');
                     });
 
                     if ($prompt.val()) {

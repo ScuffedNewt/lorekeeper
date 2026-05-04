@@ -199,3 +199,9 @@
         @include('criteria._criterion_selector', ['criteria' => $criteria])
     @endif
 </div>
+
+<div id="copy-character-calc" class="card p-3 mb-2 pl-0 hide">
+    @if (isset($characterCriteria))
+        @include('criteria._criterion_character_selector', ['criteria' => $characterCriteria])
+    @endif
+</div>
