@@ -202,6 +202,15 @@ class SubmissionManager extends Service {
                 $prompt = null;
             }
 
+            $withCriteriaSelected = isset($data['criterion']) ? array_filter($data['criterion'], function ($obj) {
+                return isset($obj['id']);
+            }) : [];
+            if (count($withCriteriaSelected) > 0) {
+                $data['criterion'] = $withCriteriaSelected;
+            } else {
+                $data['criterion'] = null;
+            }
+
             // First, return all items and currency applied.
             // Also, as this is an edit, delete all attached characters to be re-applied later.
             $this->removeAttachments($submission);
@@ -227,6 +236,7 @@ class SubmissionManager extends Service {
                     'user'              => Arr::only(getDataReadyAssets($userAssets), ['user_items', 'currencies']),
                     'rewards'           => getDataReadyAssets($promptRewards),
                     'character_rewards' => getDataReadyAssets($characterRewards),
+                    'criterion'         => $data['criterion'] ?? null,
                 ] + (config('lorekeeper.settings.allow_gallery_submissions_on_prompts') ? ['gallery_submission_id' => $data['gallery_submission_id'] ?? null] : []),
             ] + ($isClaim ? [] : ['prompt_id' => $prompt->id]));
 

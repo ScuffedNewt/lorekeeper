@@ -7,6 +7,7 @@ use App\Models\Currency\Currency;
 use App\Models\Gallery\GalleryCriterion;
 use App\Models\Prompt\PromptCriterion;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class CriterionController extends Controller {
     /**
@@ -34,6 +35,7 @@ class CriterionController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getCriterionForm($entity, $id, $entity_id = null, $form_id = null) {
+        Log::info("Getting criterion form for entity: {$entity}, id: {$id}, entity_id: {$entity_id}, form_id: {$form_id}");
         if ($entity_id && $entity) {
             if ($entity === 'prompt') {
                 $entityCriteria = PromptCriterion::where('prompt_id', $entity_id)->where('criterion_id', $id)->first();

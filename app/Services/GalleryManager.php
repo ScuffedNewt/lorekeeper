@@ -682,6 +682,7 @@ class GalleryManager extends Service {
                         'staff'      => $user->id,
                     ];
                 } else {
+                    // don't bother adding staff-added criterion in this instance
                     $valueData = ['ineligible' => 1, 'staff' => $user->id];
                 }
 

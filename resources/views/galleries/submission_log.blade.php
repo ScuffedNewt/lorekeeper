@@ -9,17 +9,22 @@
 
     <h1>Log Details
         <span
-            class="float-right badge badge-{{ $submission->status == 'Pending' ? 'secondary' : ($submission->status == 'Accepted' ? 'success' : 'danger') }}">{{ $submission->collaboratorApproval ? $submission->status : 'Pending Collaborator Approval' }}</span>
+            class="float-right badge badge-{{ $submission->status == 'Pending' ? 'secondary' : ($submission->status == 'Accepted' ? 'success' : 'danger') }}">
+            {{ $submission->collaboratorApproval ? $submission->status : 'Pending Collaborator Approval' }}
+        </span>
     </h1>
 
     @include('galleries._queue_submission', ['key' => 0])
 
     <div class="row">
-        <div class="col-md">
+        <div class="col-md-7">
             @if ($submission->gallery->criteria)
                 <div class="card mb-4">
-                    <div class="card-header">
-                        <h5> Award Info <a class="small inventory-collapse-toggle collapse-toggle {{ $submission->status == 'Accepted' ? '' : 'collapsed' }}" href="#currencyForm" data-toggle="collapse">Show</a></h5>
+                    <div class="card-header h5">
+                        Award Info
+                        <a class="small inventory-collapse-toggle collapse-toggle {{ $submission->status == 'Accepted' ? '' : 'collapsed' }}" href="#currencyForm" data-toggle="collapse">
+                            Show
+                        </a>
                     </div>
                     <div class="card-body collapse {{ $submission->status == 'Accepted' ? 'show' : '' }}" id="currencyForm">
                         @if ($submission->status == 'Accepted')
@@ -29,25 +34,85 @@
                                     <div class="h5">Contributor Rewards</div>
                                     <p>Adjust the criteria submitted and other options as needed for what the submitter, collaborators, and/or participants, should receive.</p>
                                     @if (isset($submission->data['criterion']))
-                                        <h2 class="mt-5">Criteria Rewards for {!! $submission->user->displayName !!}</h2>
-                                        @foreach ($submission->data['criterion'] as $key => $criterionData)
-                                            <div class="card p-3 mb-2">
-                                                @php $criterion = \App\Models\Criteria\Criterion::where('id', $criterionData['id'])->first() @endphp
-                                                <h3>{!! $criterion->displayName !!}</h3>
-                                                {!! Form::hidden('criterion[' . $key . '][id]', $criterionData['id']) !!}
-                                                @include('criteria._minimum_requirements', [
-                                                    'criterion' => $criterion,
-                                                    'values' => $criterionData,
-                                                    'minRequirements' => $submission->gallery->criteria->where('criterion_id', $criterionData['id'])->first()->minRequirements,
-                                                    'title' => 'Selections',
-                                                    'limitByMinReq' => true,
-                                                    'id' => $key,
-                                                    'criterion_currency' => isset($criterionData['criterion_currency_id']) ? $criterionData['criterion_currency_id'] : $criterion->currency_id,
-                                                ])
+                                        <div class="card mb-3">
+                                            <div class="card-header h3">Submitted Criteria Rewards for {!! $submission->user->displayName !!}</div>
+                                            <div class="card-body">
+                                                <fieldset disabled>
+                                                    @foreach ($submission->data['criterion'] as $key => $criterionData)
+                                                        <div class="card p-3 mb-2">
+                                                            @php $criterion = \App\Models\Criteria\Criterion::where('id', $criterionData['id'])->first() @endphp
+                                                            <div class="h3">{!! $criterion->displayName !!}</div>
+                                                            @include('criteria._minimum_requirements', [
+                                                                'criterion' => $criterion,
+                                                                'values' => $criterionData,
+                                                                'minRequirements' => $submission->gallery->criteria->where('criterion_id', $criterionData['id'])->first()->minRequirements,
+                                                                'title' => 'Selections',
+                                                                'limitByMinReq' => true,
+                                                                'id' => $key,
+                                                                'criterion_currency' => isset($criterionData['criterion_currency_id']) ? $criterionData['criterion_currency_id'] : $criterion->currency_id,
+                                                            ])
+                                                        </div>
+                                                    @endforeach
+                                                </fieldset>
+                                                {{--  --}}
                                             </div>
-                                        @endforeach
+                                        </div>
+                                        @if ($submission->gallery->criteria->count() > 0 && isset($criteria))
+                                            <div class="card mb-3">
+                                                <div class="card-header h2">
+                                                    Edit Criteria Rewards
+                                                    <button class="btn  btn-outline-info float-right add-calc" type="button">Add Criterion</a>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div id="criteria">
+                                                        @foreach ($submission->data['criterion'] ?? [] as $key => $criterionData)
+                                                            <div class="card p-3 mb-2">
+                                                                @php $criterion = \App\Models\Criteria\Criterion::where('id', $criterionData['id'])->first() @endphp
+                                                                <div class="d-flex justify-content-between align-items-center">
+                                                                    <div class="h3">{!! $criterion->displayName !!}</div>
+                                                                    <div class="text-right btn btn-danger delete-calc">
+                                                                        <i class="fas fa-trash"></i>
+                                                                    </div>
+                                                                </div>
+                                                                {!! Form::hidden('criterion[' . $key . '][id]', $criterionData['id'], ['class' => 'criterion-select']) !!}
+                                                                @include('criteria._minimum_requirements', [
+                                                                    'criterion' => $criterion,
+                                                                    'values' => $criterionData,
+                                                                    'minRequirements' => $submission->gallery->criteria->where('criterion_id', $criterionData['id'])->first()->minRequirements ?? null,
+                                                                    'title' => 'Selections',
+                                                                    'limitByMinReq' => true,
+                                                                    'id' => $key,
+                                                                    'criterion_currency' => isset($criterionData['criterion_currency_id']) ? $criterionData['criterion_currency_id'] : $criterion->currency_id,
+                                                                ])
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
                                     @else
-                                        <div class="alert alert-secondary">This submission didn't have any criteria specified for rewards for contributors. Hitting submit will confirm this and clear it from the queue.</div>
+                                        <div class="alert alert-secondary">
+                                            This submission didn't have any criteria specified for rewards for contributors.
+                                            Hitting submit will confirm this and clear it from the queue.
+                                        </div>
+                                        <div class="alert alert-info">
+                                            If you add criteria and hit submit, it will award the submission based on the criteria you added.
+                                            If you want to mark the submission as accepted without awarding anything, simply hit submit without adding any criteria.
+                                        </div>
+                                        @if ($submission->gallery->criteria->count() > 0 && isset($criteria))
+                                            <div class="card mb-3">
+                                                <div class="card-header h2">
+                                                    Add Criteria Rewards
+                                                    <button class="btn  btn-outline-info float-right add-calc" type="button">Add Criterion</a>
+                                                </div>
+                                                <div class="card-body">
+                                                    <p>Criteria can be used in addition to or in replacement of rewards. They take input on what you are turning in for the prompt in order to calculate your final reward.</p>
+                                                    <p>Criteria may populate in with pre-selected minimum requirements for this prompt. </p>
+                                                    <div id="criteria"></div>
+                                                    <div class="mb-4"></div>
+                                                </div>
+                                            </div>
+                                        @endif
                                     @endif
 
                                     {{-- TODO: Cover the commissioned participant case
@@ -72,44 +137,14 @@
                                     @endif
                                     <div class="form-group">
                                         {!! Form::checkbox('ineligible', 1, false, ['class' => 'form-check-input', 'data-toggle' => 'toggle', 'data-onstyle' => 'danger']) !!}
-                                        {!! Form::label('ineligible', 'Inelegible/Award No Currency', ['class' => 'form-check-label ml-3']) !!} {!! add_help('When on, this will mark the submission as valued, but will not award currency to any of the users listed.') !!}
+                                        {!! Form::label('ineligible', 'Inelegible / Award No Currency', ['class' => 'form-check-label ml-3']) !!} {!! add_help('When on, this will mark the submission as valued, but will not award currency to any of the users listed.') !!}
                                     </div>
                                     <div class="text-right">
                                         {!! Form::submit('Submit', ['class' => 'btn btn-primary']) !!}
                                     </div>
                                     {!! Form::close() !!}
                                 @else
-                                    @if (isset($submission->data['staff']))
-                                        <p><strong>Processed By:</strong> {!! App\Models\User\User::find($submission->data['staff'])->displayName !!}</p>
-                                    @endif
-                                    @if (isset($submission->data['ineligible']) && $submission->data['ineligible'] == 1)
-                                        <p>This submission has been evaluated as ineligible for {{ $currency->name }} rewards.</p>
-                                    @else
-                                        <p>{{ $currency->name }} has been awarded for this submission.</p>
-                                        <div class="row">
-                                            @if (isset($submission->data['value']['submitted']))
-                                                <div class="col-md-4">
-                                                    {!! $submission->user->displayName !!}: {!! $currency->display($submission->data['value']['submitted'][$submission->user->id]) !!}
-                                                </div>
-                                            @endif
-                                            @if ($submission->collaborators->count())
-                                                <div class="col-md-4">
-                                                    @foreach ($submission->collaborators as $collaborator)
-                                                        {!! $collaborator->user->displayName !!} ({{ $collaborator->data ?? 'No extra details' }}): {!! $currency->display($submission->data['value']['collaborator'][$collaborator->user->id]) !!}
-                                                        <br />
-                                                    @endforeach
-                                                </div>
-                                            @endif
-                                            @if ($submission->participants->count())
-                                                <div class="col-md-4">
-                                                    @foreach ($submission->participants as $participant)
-                                                        {!! $participant->user->displayName !!} ({{ $participant->displayType ?? 'No extra details' }}): {!! $currency->display($submission->data['value']['participant'][$participant->user->id]) !!}
-                                                        <br />
-                                                    @endforeach
-                                                </div>
-                                            @endif
-                                        </div>
-                                    @endif
+                                    <p>This submission hasn't been evaluated yet. You'll receive a notification once it has!</p>
                                 @endif
                             @else
                                 @if (isset($submission->data['staff']))
@@ -163,69 +198,122 @@
                             </div>
                         @endif
                     </div>
+                </div>
             @endif
-        </div>
-        <div class="card mb-4">
-            <div class="card-header">
-                <h4>Staff Comments</h4> {!! Auth::user()->hasPower('staff_comments') ? '(Visible to ' . $submission->credits . ')' : '' !!}
-            </div>
-            <div class="card-body">
-                @if (isset($submission->parsed_staff_comments))
-                    <h5>Staff Comments (Old):</h5>
-                    {!! $submission->parsed_staff_comments !!}
-                    <hr />
-                @endif
-                <!-- Staff-User Comments -->
-                <div class="container">
-                    @comments(['model' => $submission, 'type' => 'Staff-User', 'perPage' => 5])
-                </div>
-            </div>
-        </div>
-    </div>
-    @if (Auth::user()->hasPower('manage_submissions') && $submission->collaboratorApproval)
-        <div class="col-12 col-md-5">
             <div class="card mb-4">
                 <div class="card-header">
-                    <h5>[Admin] Vote Info</h5>
+                    <h4>Staff Comments</h4> {!! Auth::user()->hasPower('staff_comments') ? '(Visible to ' . $submission->credits . ')' : '' !!}
                 </div>
                 <div class="card-body">
-                    @if ($submission->getVoteData()['raw']->count())
-                        @foreach ($submission->getVoteData(1)['raw'] as $vote)
-                            <li>
-                                {!! $vote['user']->displayName !!} {{ $vote['user']->id == Auth::user()->id ? '(you)' : '' }}: <span {!! $vote['vote'] == 2 ? 'class="text-success">Accept' : 'class="text-danger">Reject' !!}</span>
-                            </li>
-                        @endforeach
-                    @else
-                        <p>No votes have been cast yet!</p>
+                    @if (isset($submission->parsed_staff_comments))
+                        <h5>Staff Comments (Old):</h5>
+                        {!! $submission->parsed_staff_comments !!}
+                        <hr />
                     @endif
-                </div>
-            </div>
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5>[Admin] Staff Comments</h5> (Only visible to staff)
-                </div>
-                <div class="card-body">
                     <!-- Staff-User Comments -->
-                    <div class="container">
-                        @comments(['model' => $submission, 'type' => 'Staff-Staff', 'perPage' => 5, 'commentType' => 'staff'])
+                    <div class="w-100">
+                        @comments(['model' => $submission, 'type' => 'Staff-User', 'perPage' => 5])
                     </div>
                 </div>
             </div>
         </div>
-    @endif
+        @if (Auth::user()->hasPower('manage_submissions') && $submission->collaboratorApproval)
+            <div class="col-12 col-md-5">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>[Admin] Vote Info</h5>
+                    </div>
+                    <div class="card-body">
+                        @if ($submission->getVoteData()['raw']->count())
+                            @foreach ($submission->getVoteData(1)['raw'] as $vote)
+                                <li>
+                                    {!! $vote['user']->displayName !!} {{ $vote['user']->id == Auth::user()->id ? '(you)' : '' }}: <span {!! $vote['vote'] == 2 ? 'class="text-success">Accept' : 'class="text-danger">Reject' !!}</span>
+                                </li>
+                            @endforeach
+                        @else
+                            <p>No votes have been cast yet!</p>
+                        @endif
+                    </div>
+                </div>
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>[Admin] Staff Comments</h5> (Only visible to staff)
+                    </div>
+                    <div class="card-body">
+                        <!-- Staff-User Comments -->
+                        <div class="container">
+                            @comments(['model' => $submission, 'type' => 'Staff-Staff', 'perPage' => 5, 'commentType' => 'staff'])
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
     </div>
 
-    <script>
-        $('input[name*=criterion]').on('change input', () => {
-            const disabledInputs = $('input[name*=criterion]').filter('[disabled]');
-            disabledInputs.prop('disabled', false);
-            formObj = {};
-            let formData = $('input[name*=criterion]').closest('form').serializeArray();
-            disabledInputs.prop('disabled', true);
-            formObj['_token'] = formData[0].value;
-            formData.forEach((item) => formObj[item.name] = item.value);
-            $(`#totals`).load('{{ url('/gallery/queue/totals/' . $submission->id) }}', formObj);
-        })
-    </script>
+    <div id="copy-calc" class="card p-3 mb-2 pl-0 hide">
+        @if (isset($criteria))
+            @include('criteria._criterion_selector', ['criteria' => $criteria])
+        @endif
+    </div>
 
+@endsection
+@section('scripts')
+    @parent
+    <script>
+        $(document).ready(function() {
+            $('input[name*=criterion]').on('change input', () => {
+                const disabledInputs = $('input[name*=criterion]').filter('[disabled]');
+                disabledInputs.prop('disabled', false);
+                formObj = {};
+                let formData = $('input[name*=criterion]').closest('form').serializeArray();
+                disabledInputs.prop('disabled', true);
+                formObj['_token'] = formData[0].value;
+                formData.forEach((item) => formObj[item.name] = item.value);
+                $(`#totals`).load('{{ url('/gallery/queue/totals/' . $submission->id) }}', formObj);
+            });
+
+            $('.add-calc').on('click', function(e) {
+                e.preventDefault();
+                var clone = $('#copy-calc').clone();
+                clone.removeClass('hide');
+                var input = clone.find('[name*=criterion]');
+                var count = $('.criterion-select').length;
+                input.attr('name', input.attr('name').replace('#', count))
+                clone.find('.criterion-select').on('change', loadForm);
+                clone.find('.delete-calc').on('click', deleteCriterion);
+                clone.removeAttr('id');
+                $('#criteria').append(clone);
+            });
+
+            $('.delete-calc').on('click', deleteCriterion);
+
+            function deleteCriterion(e) {
+                e.preventDefault();
+                var toDelete = $(this).closest('.card');
+                toDelete.remove();
+            }
+
+            function loadForm(e) {
+                var id = $(this).val();
+                var formId = $(this).attr('name').split('[')[1].replace(']', '');
+
+                if (id) {
+                    var form = $(this).closest('.card').find('.form');
+                    form.load("{{ url('criteria/gallery') }}/" + id + "/{{ $submission->gallery->id }}/" + formId, (response, status, xhr) => {
+                        if (status == "error") {
+                            var msg = "Error: ";
+                            console.error(msg + xhr.status + " " + xhr.statusText);
+                        } else {
+                            form.find('[data-toggle=tooltip]').tooltip({
+                                html: true
+                            });
+                            form.find('[data-toggle=toggle]').bootstrapToggle();
+                        }
+                    });
+                }
+            }
+
+            $('.criterion-select').on('change', loadForm);
+        });
+    </script>
 @endsection

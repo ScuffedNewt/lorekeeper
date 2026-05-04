@@ -134,7 +134,7 @@
                 }
             }
 
-            $('.criterion-select').on('change', loadForm)
+            $('.criterion-select').on('change', loadForm);
         });
     </script>
 @endsection

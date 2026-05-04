@@ -248,12 +248,15 @@ class GalleryController extends Controller {
             }
         }
 
+        $galleryCriteria = GalleryCriterion::where('gallery_id', $submission->gallery_id)->pluck('criterion_id')->toArray();
+
         return view('galleries.submission_log', [
             'submission'         => $submission,
             'galleryPage'        => true,
             'sideGallery'        => $submission->gallery,
             'totals'             => $totals,
             'collaboratorsCount' => $submission->collaborators->count() + ($submission->collaborators->where('user_id', $submission->user_id)->first() === null ? 1 : 0),
+            'criteria'           => Criterion::active()->whereIn('id', $galleryCriteria)->orderBy('name')->pluck('name', 'id'),
         ]);
     }
 
@@ -416,7 +419,10 @@ class GalleryController extends Controller {
      */
     public function postCreateEditGallerySubmission(Request $request, GalleryManager $service, $id = null) {
         $id ? $request->validate(GallerySubmission::$updateRules) : $request->validate(GallerySubmission::$createRules);
-        $data = $request->only(['image', 'text', 'title', 'description', 'slug', 'collaborator_id', 'collaborator_data', 'participant_id', 'participant_type', 'gallery_id', 'alert_user', 'prompt_id', 'content_warning']);
+        $data = $request->only([
+            'image', 'text', 'title', 'description', 'slug', 'collaborator_id', 'collaborator_data', 'participant_id', 'participant_type', 'gallery_id', 'alert_user', 'prompt_id', 'content_warning',
+            'criterion', 'criterion_id',
+        ]);
 
         if (!$id) {
             $currencyFormData = $request->only(['criterion']);

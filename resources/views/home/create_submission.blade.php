@@ -174,6 +174,7 @@
 
             function loadForm(e) {
                 var id = $(this).val();
+                var $prompt = $('#prompt');
                 var promptId = $prompt.val();
                 var formId = $(this).attr('name').split('[')[1].replace(']', '');
 
@@ -193,7 +194,7 @@
                 }
             }
 
-            $('.criterion-select').on('change', loadForm)
+            $('.criterion-select').on('change', loadForm);
         </script>
     @endif
 @endsection

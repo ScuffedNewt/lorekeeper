@@ -21,24 +21,24 @@
     <div>
         @foreach ($defaults as $default)
             <div class="card p-3 mb-2 pl-0">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div class="flex-grow-1">
+                <div class="row">
+                    <div class="col-md-4">
                         <h4 class="pb-0 mb-0">
-
                             {{ $default->name }}
                         </h4>
                         <span class="text-secondary">{{ $default->summary }}</span>
                     </div>
-                    <div class="flex-grow-1">
-                        <h4 class="pb-0 mb-0">
-                            Criteria Within:</h4>
+                    <div class="col-md-6">
+                        <h5 class="pb-0 mb-0">
+                            Criteria:
+                        </h5>
                         <ul>
                             @foreach ($default->criteria as $criterion)
                                 <li>{{ $criterion->criterion->name }}</li>
                             @endforeach
                         </ul>
                     </div>
-                    <div>
+                    <div class="col-md-2 text-right">
                         <a href="{{ url('admin/data/criteria-defaults/edit/' . $default->id) }}" class="btn btn-info text-white mr-2"><i class="fas fa-pencil-alt"></i></a>
                         <button class="btn btn-danger delete-button" data-id="{{ $default->id }}"><i class="fas fa-trash"></i></button>
                     </div>

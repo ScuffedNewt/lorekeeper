@@ -176,14 +176,6 @@ class SubmissionController extends Controller {
         });
 
         $prompt = $submission->prompt;
-
-        $count['all'] = Submission::submitted($prompt->id, Auth::user()->id)->count();
-        $count['Hour'] = Submission::submitted($prompt->id, Auth::user()->id)->where('created_at', '>=', now()->startOfHour())->count();
-        $count['Day'] = Submission::submitted($prompt->id, Auth::user()->id)->where('created_at', '>=', now()->startOfDay())->count();
-        $count['Week'] = Submission::submitted($prompt->id, Auth::user()->id)->where('created_at', '>=', now()->startOfWeek())->count();
-        $count['Month'] = Submission::submitted($prompt->id, Auth::user()->id)->where('created_at', '>=', now()->startOfMonth())->count();
-        $count['Year'] = Submission::submitted($prompt->id, Auth::user()->id)->where('created_at', '>=', now()->startOfYear())->count();
-
         $criteria = PromptCriterion::where('prompt_id', $submission->prompt_id)->get();
         if ($criteria) {
             $promptCriteria = $criteria->where('characterCriteria', '=', false)->pluck('criterion_id')->toArray();
@@ -209,7 +201,7 @@ class SubmissionController extends Controller {
             'page'                   => 'submission',
             'expanded_rewards'       => config('lorekeeper.extensions.character_reward_expansion.expanded'),
             'selectedInventory'      => isset($submission->data['user']) ? parseAssetData($submission->data['user']) : null,
-            'count'                  => $count,
+            'count'                  => $prompt->getCount(Auth::user()),
             'userGallerySubmissions' => $gallerySubmissions,
             'criteria'               => Criterion::active()->whereIn('id', $promptCriteria)->orderBy('name')->pluck('name', 'id'),
             'characterCriteria'      => Criterion::active()->whereIn('id', $characterCriteria)->orderBy('name')->pluck('name', 'id'),

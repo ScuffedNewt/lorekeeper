@@ -33,7 +33,11 @@
 
     <div class="form-group">
         {!! Form::label('Guide Image (Optional)') !!} {!! add_help('This image is used as an example of the step if the guide page is enabled for your criterion.') !!}
-        <div>{!! Form::file('image') !!}</div>
+        <div class="custom-file">
+            {!! Form::label('image', 'Choose file...', ['class' => 'custom-file-label']) !!}
+            {!! Form::file('image', ['class' => 'custom-file-input']) !!}
+        </div>
+        <div class="text-muted">Recommended size: 100px x 100px</div>
         @if ($step->has_image)
             <img style="height: 100px; width: auto;" src="{{ $step->imageUrl }}" />
             <div class="form-check">
