@@ -535,6 +535,11 @@ class PetManager extends Service {
         DB::beginTransaction();
 
         try {
+            
+            if($id == 0) {
+                $id = null;
+            }
+
             if (!$isStaff || !Auth::user()->isStaff) {
                 if (!$stack_id) {
                     throw new \Exception('No item selected.');
@@ -551,7 +556,7 @@ class PetManager extends Service {
                     throw new \Exception('Could not debit item.');
                 }
             } else {
-                $this->logAdminAction($pet->user, 'Pet Evolution Changed', ['pet' => $pet->id, 'evolution' => $id]);
+                $this->logAdminAction($pet->user, 'Pet Evolution Changed',  'Changed pet id #'.$pet->id.'/'.$pet->pet->name.' to evolution #'.$id);
             }
 
             $pet->evolution_id = $id;
