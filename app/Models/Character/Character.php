@@ -197,6 +197,24 @@ class Character extends Model {
         return $this->belongsToMany(Item::class, 'character_items')->withPivot('count', 'data', 'updated_at', 'id', 'stack_name')->whereNull('character_items.deleted_at');
     }
 
+    /**
+     * Gets the character's associated sublists.
+     *
+     * @return object
+     */
+    public function sublists() {
+        if (!$this->is_myo_slot) {
+            $categorySub = $this->category->masterlist_sub_id ?? null;
+            $speciesSub = $this->image->species->masterlist_sub_id ?? null;
+
+            $result = Sublist::where('id', $categorySub)->orWhere('id', $speciesSub)->get() ?? null;
+
+            return $result;
+        }
+
+        return null;
+    }
+
     /**********************************************************************************************
 
         SCOPES
