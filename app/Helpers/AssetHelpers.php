@@ -703,7 +703,11 @@ function createRewardsString($array, $useDisplayName = true, $absQuantities = fa
  */
 function getRewardTypes($showData, $recipient) {
     if ($recipient == 'User') {
-        return ['Item' => 'Item', 'Currency' => 'Currency'] +
+        return [
+                'Item'     => 'Item',
+                'Currency' => 'Currency',
+                'Pet'      => 'Pet',
+            ] +
             ($showData['showLootTables'] ? ['LootTable' => 'Loot Table'] : []) +
             ($showData['showRaffles'] ? ['Raffle' => 'Raffle Ticket'] : []);
     } elseif ($recipient == 'Character') {
@@ -778,6 +782,9 @@ function getRewardLootData($showData, $recipient = 'User', $useCustomSelectize =
                 // case 'Example':
                 //  $query = \App\Models\Example::orderby('name');
                 //  break;
+            case 'Pet':
+                $query = App\Models\Pet\Pet::orderBy('parent_id')->with('parent');
+                break;
         }
 
         // If your asset type does not have a model with an id and name value, then you may need to add special handling here.
@@ -790,6 +797,8 @@ function getRewardLootData($showData, $recipient = 'User', $useCustomSelectize =
                     ]),
                 ];
             });
+        } elseif ($rewardKey == 'Pet') {
+            $data = $query->get()->sortBy(['parent_id', 'fullName'])->pluck('fullName', 'id')->toArray();
         } else {
             $data = $query->pluck('name', 'id')->toArray();
         }
