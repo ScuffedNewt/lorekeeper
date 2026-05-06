@@ -274,7 +274,7 @@ class PetController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getPetPage($id) {
-        $stack = UserPet::with('pet', 'pet.variants', 'pet.evolutions', 'pet.dropData', 'pet.parent')->firstWhere('id', $id);
+        $stack = UserPet::with('pet', 'pet.variants', 'pet.evolutions', 'pet.parent')->firstWhere('id', $id);
         if(!$stack) {
             abort(404);
         }
