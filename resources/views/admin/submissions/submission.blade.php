@@ -134,7 +134,7 @@
                     @endforeach
                 @else
                     <div class="alert alert-info">
-                        No criteria rewards have been added to this {{ $submission->prompt_id ? 'submission' : 'claim' }}.
+                        No criteria rewards have been added to this submission.
                     </div>
                 @endif
             </div>
