@@ -274,7 +274,10 @@ class PetController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getPetPage($id) {
-        $stack = UserPet::findOrFail($id);
+        $stack = UserPet::with('pet', 'pet.variants', 'pet.evolutions', 'pet.dropData', 'pet.parent')->firstWhere('id', $id);
+        if(!$stack) {
+            abort(404);
+        }
         $user = $stack->user;
 
         // if the tag has data['variant_ids'], only show if the userpet->pet has a variant that matches
@@ -286,12 +289,12 @@ class PetController extends Controller {
                     return true;
                 }
 
-                return Pet::whereIn('id', $tag->data['variant_ids'])->where('parent_id', $stack->pet->isVariant ? $stack->pet->parent_id : $stack->pet_id)->exists();
+                return $stack->pet->variants->whereIn('id', $tag->data['variant_ids'])->count();
             } else {
                 return true;
             }
         })->pluck('item_id');
-        $splices = UserItem::where('user_id', $user->id)->whereIn('item_id', $tags)->where('count', '>', 0)->with('item')->get()->pluck('item.name', 'id');
+        $splices = UserItem::where('user_id', $user->id)->whereIn('item_id', $tags->pluck('item_id'))->where('count', '>', 0)->with('item')->get()->pluck('item.name', 'id');
         $evolutions = UserItem::where('user_id', $user->id)->whereIn('item_id', $rareCandyTag)->where('count', '>', 0)->with('item')->get()->pluck('item.name', 'id');
 
         return view('user.pet', [
@@ -301,7 +304,7 @@ class PetController extends Controller {
             'userOptions' => User::where('id', '!=', $user->id)->orderBy('name')->pluck('name', 'id')->toArray(),
             'logs'        => $user->getPetLogs(),
             'splices'     => $splices,
-            'evolutions' => $evolutions,
+            'evolutions'  => $evolutions,
         ]);
     }
 
