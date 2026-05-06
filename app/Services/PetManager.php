@@ -502,15 +502,15 @@ class PetManager extends Service {
             $pet->save();
 
             // update pet drop, if relevant
-            if (isset($pet->drops)) { 
+            if (isset($pet->drops)) {
                 $newPet = Pet::find($id);
-                if(isset($newPet->dropData)) {
-                    if($pet->drops->drop_id !== $newPet->dropData->id) {
+                if (isset($newPet->dropData)) {
+                    if ($pet->drops->drop_id !== $newPet->dropData->id) {
                         $pet->drops->drop_id = $newPet->dropData->id;
                         $pet->drops->save();
                     }
                 } else {
-                    //the new variant does not have drops, so we discard the old drops row
+                    // the new variant does not have drops, so we discard the old drops row
                     $pet->drops()->delete();
                 }
             }
@@ -535,8 +535,7 @@ class PetManager extends Service {
         DB::beginTransaction();
 
         try {
-            
-            if($id == 0) {
+            if ($id == 0) {
                 $id = null;
             }
 
@@ -556,7 +555,7 @@ class PetManager extends Service {
                     throw new \Exception('Could not debit item.');
                 }
             } else {
-                $this->logAdminAction($pet->user, 'Pet Evolution Changed',  'Changed pet id #'.$pet->id.'/'.$pet->pet->name.' to evolution #'.$id);
+                $this->logAdminAction($pet->user, 'Pet Evolution Changed', 'Changed pet id #'.$pet->id.'/'.$pet->pet->name.' to evolution #'.$id);
             }
 
             $pet->evolution_id = $id;

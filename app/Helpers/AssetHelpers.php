@@ -457,7 +457,7 @@ function fillUserAssets($assets, $sender, $recipient, $logType, $data) {
                 }
             }
         } elseif ($key == 'pets' && count($contents)) {
-            $service = new \App\Services\PetManager;
+            $service = new App\Services\PetManager;
             foreach ($contents as $asset) {
                 if (!$service->creditPet($sender, $recipient, $logType, $data, $asset['asset'], $asset['quantity'])) {
                     return false;
@@ -704,10 +704,10 @@ function createRewardsString($array, $useDisplayName = true, $absQuantities = fa
 function getRewardTypes($showData, $recipient) {
     if ($recipient == 'User') {
         return [
-                'Item'     => 'Item',
-                'Currency' => 'Currency',
-                'Pet'      => 'Pet',
-            ] +
+            'Item'     => 'Item',
+            'Currency' => 'Currency',
+            'Pet'      => 'Pet',
+        ] +
             ($showData['showLootTables'] ? ['LootTable' => 'Loot Table'] : []) +
             ($showData['showRaffles'] ? ['Raffle' => 'Raffle Ticket'] : []);
     } elseif ($recipient == 'Character') {

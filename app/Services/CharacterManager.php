@@ -17,8 +17,8 @@ use App\Models\Character\CharacterTransfer;
 use App\Models\Sales\SalesCharacter;
 use App\Models\Species\Subtype;
 use App\Models\User\User;
-use App\Models\User\UserPet;
 use App\Models\User\UserCharacterLog;
+use App\Models\User\UserPet;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -1037,8 +1037,8 @@ class CharacterManager extends Service {
     /**
      * Sorts a character's pets.
      *
-     * @param array                 $data
-     * @param \App\Models\User\User $user
+     * @param array $data
+     * @param User  $user
      *
      * @return bool
      */
@@ -1067,6 +1067,7 @@ class CharacterManager extends Service {
 
         return $this->rollbackReturn(false);
     }
+
     /**
      * Updates a character's stats.
      *

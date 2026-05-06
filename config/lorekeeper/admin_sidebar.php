@@ -120,7 +120,7 @@ return [
                 'name' => 'Loot Table Grants',
                 'url'  => 'admin/grants/loot-tables',
             ],
-            [                
+            [
                 'name' => 'Pet Grants',
                 'url'  => 'admin/grants/pets',
             ],

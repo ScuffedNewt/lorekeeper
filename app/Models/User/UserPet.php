@@ -2,8 +2,8 @@
 
 namespace App\Models\User;
 
-use App\Models\Model;
 use App\Models\Character\Character;
+use App\Models\Model;
 use App\Models\Pet\Pet;
 use App\Models\Pet\PetDrop;
 use App\Models\Pet\PetEvolution;
@@ -20,7 +20,7 @@ class UserPet extends Model {
      */
     protected $fillable = [
         'data', 'pet_id', 'user_id', 'attached_at', 'pet_name', 'has_image', 'artist_url', 'artist_id', 'description',
-        'evolution_id', 'sort', 'bonded_at'
+        'evolution_id', 'sort', 'bonded_at',
     ];
 
     /**
@@ -31,22 +31,22 @@ class UserPet extends Model {
     protected $table = 'user_pets';
 
     /**
-     * Whether the model contains timestamps to be saved and updated.
-     *
-     * @var string
-     */
-    public $timestamps = true;
-
-    /**
      * The attributes that should be cast to native types.
      *
      * @var array
      */
     protected $casts = [
-        'bonded_at' => 'datetime',
+        'bonded_at'   => 'datetime',
         'attached_at' => 'datetime',
-        'data' => 'array',
+        'data'        => 'array',
     ];
+
+    /**
+     * Whether the model contains timestamps to be saved and updated.
+     *
+     * @var string
+     */
+    public $timestamps = true;
 
     /**********************************************************************************************
 
@@ -124,7 +124,7 @@ class UserPet extends Model {
     }
 
     /**
-     * Get the pets current level
+     * Get the pets current level.
      */
     public function level() {
         return $this->hasOne(UserPetLevel::class, 'user_pet_id');
@@ -266,13 +266,15 @@ class UserPet extends Model {
 
     /**
      * Determines if the user can bond with the pet.
+     *
+     * @param mixed $reason
      */
     public function canBond($reason = false) {
         // create level if needed
         if (!$this->level) {
             $this->level()->create([
                 'bonding_level'       => 0,
-                'bonding'     => 0,
+                'bonding'             => 0,
             ]);
             $this->refresh();
             $this->level->refresh();

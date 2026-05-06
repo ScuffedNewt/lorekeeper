@@ -6,7 +6,6 @@ use App\Models\Model;
 use App\Models\Pet\PetLevel;
 
 class UserPetLevel extends Model {
-
     /**
      * The attributes that are mass assignable.
      *
@@ -36,7 +35,6 @@ class UserPetLevel extends Model {
         return $this->belongsTo(UserPet::class, 'user_pet_id');
     }
 
-
     /**
      * Get the level associated with this pet stack.
      */
@@ -51,14 +49,14 @@ class UserPetLevel extends Model {
     **********************************************************************************************/
 
     /**
-     * Returns the level name of the pet
+     * Returns the level name of the pet.
      */
     public function getLevelNameAttribute() {
         return $this->level ? $this->level->name : config('lorekeeper.pets.initial_level_name');
     }
 
     /**
-     * Gets the next level for the pet
+     * Gets the next level for the pet.
      */
     public function getNextLevelAttribute() {
         return PetLevel::where('level', $this->bonding_level + 1)->first();

@@ -5,14 +5,13 @@ namespace App\Models\Pet;
 use App\Models\Model;
 
 class PetLevelPet extends Model {
-
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'pet_level_id', 'pet_id', 'rewards'
+        'pet_level_id', 'pet_id', 'rewards',
     ];
 
     /**
@@ -38,7 +37,7 @@ class PetLevelPet extends Model {
     **********************************************************************************************/
 
     /**
-     * Get the level this pet is attached to
+     * Get the level this pet is attached to.
      */
     public function level() {
         return $this->belongsTo(PetLevel::class, 'pet_level_id');

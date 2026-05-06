@@ -175,7 +175,7 @@ class Shop extends Model {
             return;
         }
         // Get the coupons from the id in allowed_coupons
-        $coupons = \App\Models\Item\Item::whereIn('id', json_decode($this->allowed_coupons, 1))->get();
+        $coupons = Item::whereIn('id', json_decode($this->allowed_coupons, 1))->get();
 
         return $coupons;
     }

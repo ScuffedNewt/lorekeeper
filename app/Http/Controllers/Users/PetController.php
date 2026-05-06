@@ -13,8 +13,8 @@ use App\Models\User\UserItem;
 use App\Models\User\UserPet;
 use App\Services\PetDropService;
 use App\Services\PetManager;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PetController extends Controller {
     /*
@@ -206,7 +206,6 @@ class PetController extends Controller {
         return redirect()->back();
     }
 
-
     /**
      * Changes evolution.
      *
@@ -219,21 +218,22 @@ class PetController extends Controller {
     public function postEvolution(Request $request, PetManager $service, $id, $isStaff = false) {
         $pet = UserPet::find($id);
 
-        if(count($pet->pet->evolutions) == 0) {
+        if (count($pet->pet->evolutions) == 0) {
             flash('This pet can not evolve.')->error();
+
             return redirect()->back();
         }
 
-        if($request->input('evolution_id') == null) {
+        if ($request->input('evolution_id') == null) {
             $currentEvolution = $pet->evolution;
-            if($currentEvolution == null) {
+            if ($currentEvolution == null) {
                 $targetEvolution = $pet->pet->evolutions->where('evolution_stage', 1)->first();
             } else {
                 $targetEvolution = $pet->pet->evolutions->where('evolution_stage', $currentEvolution->evolution_stage + 1)->first();
             }
-            if($targetEvolution == null) {
+            if ($targetEvolution == null) {
                 flash('This pet is at its max evolution.')->error();
-                
+
                 return redirect()->back();
             } else {
                 $targetEvolution = $targetEvolution->id;
@@ -275,7 +275,7 @@ class PetController extends Controller {
      */
     public function getPetPage($id) {
         $stack = UserPet::with('pet', 'pet.variants', 'pet.evolutions', 'pet.parent')->firstWhere('id', $id);
-        if(!$stack) {
+        if (!$stack) {
             abort(404);
         }
         $user = $stack->user;
@@ -412,6 +412,8 @@ class PetController extends Controller {
 
     /**
      * Bonds with a pet.
+     *
+     * @param mixed $id
      */
     public function postBond($id, Request $request, PetManager $service) {
         $pet = UserPet::findOrFail($id);
