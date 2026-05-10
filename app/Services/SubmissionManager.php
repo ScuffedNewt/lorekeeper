@@ -483,14 +483,7 @@ class SubmissionManager extends Service {
                 'data' => 'Received rewards for '.($submission->prompt_id ? 'submission' : 'claim').' (<a href="'.$submission->viewUrl.'">#'.$submission->id.'</a>)',
             ];
 
-            // Distribute user rewards
-            if (!$rewards = fillUserAssets($rewards, $user, $submission->user, $promptLogType, $promptData)) {
-                throw new \Exception('Failed to distribute rewards to user.');
-            }
-
-            // Distribute currency from criteria
-            $service = new CurrencyManager;
-
+            // Add currency to asset array from criteria
             if (isset($data['criterion'])) {
                 foreach ($data['criterion'] as $key => $criterionData) {
                     $criterion = Criterion::where('id', $criterionData['id'])->first();
@@ -500,10 +493,13 @@ class SubmissionManager extends Service {
                         $criterion_currency = $criterion->currency;
                     }
 
-                    if (!$service->creditCurrency($user, $submission->user, $promptLogType, $promptData['data'], $criterion_currency, $criterion->calculateReward($criterionData))) {
-                        throw new \Exception('Failed to distribute criterion rewards to user.');
-                    }
+                    addAsset($rewards, $criterion_currency, $criterion->calculateReward($criterionData));
                 }
+            }
+
+            // Distribute user rewards
+            if (!$rewards = fillUserAssets($rewards, $user, $submission->user, $promptLogType, $promptData)) {
+                throw new \Exception('Failed to distribute rewards to user.');
             }
 
             // Retrieve all reward IDs for characters
