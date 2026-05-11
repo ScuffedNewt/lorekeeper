@@ -69,7 +69,9 @@ class CharacterController extends Controller {
     }
 
     /**
-     * Sorts the characters pets
+     * Sorts the characters pets.
+     *
+     * @param mixed $slug
      */
     public function postSortCharacterPets(CharacterManager $service, Request $request, $slug) {
         if ($service->sortCharacterPets($request->only(['sort']), Auth::user())) {

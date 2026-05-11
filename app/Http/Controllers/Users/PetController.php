@@ -13,8 +13,8 @@ use App\Models\User\UserItem;
 use App\Models\User\UserPet;
 use App\Services\PetDropService;
 use App\Services\PetManager;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PetController extends Controller {
     /*
@@ -217,7 +217,32 @@ class PetController extends Controller {
      */
     public function postEvolution(Request $request, PetManager $service, $id, $isStaff = false) {
         $pet = UserPet::find($id);
-        if ($service->editEvolution($request->input('evolution_id'), $pet, $request->input('stack_id'), $request->input('is_staff'))) {
+
+        if (count($pet->pet->evolutions) == 0) {
+            flash('This pet can not evolve.')->error();
+
+            return redirect()->back();
+        }
+
+        if ($request->input('evolution_id') == null) {
+            $currentEvolution = $pet->evolution;
+            if ($currentEvolution == null) {
+                $targetEvolution = $pet->pet->evolutions->where('evolution_stage', 1)->first();
+            } else {
+                $targetEvolution = $pet->pet->evolutions->where('evolution_stage', $currentEvolution->evolution_stage + 1)->first();
+            }
+            if ($targetEvolution == null) {
+                flash('This pet is at its max evolution.')->error();
+
+                return redirect()->back();
+            } else {
+                $targetEvolution = $targetEvolution->id;
+            }
+        } else {
+            $targetEvolution = $request->input('evolution_id');
+        }
+
+        if ($service->editEvolution($targetEvolution, $pet, $request->input('stack_id'), $request->input('is_staff'))) {
             flash('Pet evolution changed successfully.')->success();
         } else {
             foreach ($service->errors()->getMessages()['error'] as $error) {
@@ -249,23 +274,28 @@ class PetController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getPetPage($id) {
-        $stack = UserPet::findOrFail($id);
+        $stack = UserPet::with('pet', 'pet.variants', 'pet.evolutions', 'pet.parent')->firstWhere('id', $id);
+        if (!$stack) {
+            abort(404);
+        }
         $user = $stack->user;
 
         // if the tag has data['variant_ids'], only show if the userpet->pet has a variant that matches
         $tags = ItemTag::where('tag', 'splice')->where('is_active', 1)->get();
+        $rareCandyTag = ItemTag::where('tag', 'rare_candy')->where('is_active', 1)->get()->pluck('item_id');
         $tags = $tags->filter(function ($tag) use ($stack) {
             if (isset($tag->data['variant_ids'])) {
                 if (in_array('default', $tag->data['variant_ids'])) {
                     return true;
                 }
 
-                return Pet::whereIn('id', $tag->data['variant_ids'])->where('parent_id', $stack->pet->isVariant ? $stack->pet->parent_id : $stack->pet_id)->exists();
+                return $stack->pet->variants->whereIn('id', $tag->data['variant_ids'])->count();
             } else {
                 return true;
             }
         })->pluck('item_id');
-        $splices = UserItem::where('user_id', $user->id)->whereIn('item_id', $tags)->where('count', '>', 0)->with('item')->get()->pluck('item.name', 'id');
+        $splices = UserItem::where('user_id', $user->id)->whereIn('item_id', $tags->pluck('item_id'))->where('count', '>', 0)->with('item')->get()->pluck('item.name', 'id');
+        $evolutions = UserItem::where('user_id', $user->id)->whereIn('item_id', $rareCandyTag)->where('count', '>', 0)->with('item')->get()->pluck('item.name', 'id');
 
         return view('user.pet', [
             'user'        => $user,
@@ -274,6 +304,7 @@ class PetController extends Controller {
             'userOptions' => User::where('id', '!=', $user->id)->orderBy('name')->pluck('name', 'id')->toArray(),
             'logs'        => $user->getPetLogs(),
             'splices'     => $splices,
+            'evolutions'  => $evolutions,
         ]);
     }
 
@@ -381,6 +412,8 @@ class PetController extends Controller {
 
     /**
      * Bonds with a pet.
+     *
+     * @param mixed $id
      */
     public function postBond($id, Request $request, PetManager $service) {
         $pet = UserPet::findOrFail($id);

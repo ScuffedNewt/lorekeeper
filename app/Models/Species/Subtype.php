@@ -23,15 +23,6 @@ class Subtype extends Model {
     protected $table = 'subtypes';
 
     /**
-     * Accessors to append to the model.
-     *
-     * @var array
-     */
-    protected $appends = [
-        'name_with_species',
-    ];
-
-    /**
      * Validation rules for creation.
      *
      * @var array
@@ -72,7 +63,7 @@ class Subtype extends Model {
      * Get the features associated with this subtype.
      */
     public function features() {
-        return $this->hasMany(Feature::class);
+        return $this->belongsToMany(Feature::class, 'feature_subtypes');
     }
 
     /**********************************************************************************************

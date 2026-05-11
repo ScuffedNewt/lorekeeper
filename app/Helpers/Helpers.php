@@ -507,9 +507,35 @@ function hasLimits($object) {
  * Checks if a user has a limit unlocked.
  *
  * @param mixed $object
+ * @param mixed $user
  */
-function hasUnlockedLimits($object) {
-    $service = new App\Services\LimitManager;
+function hasUnlockedLimits($user, $object) {
+    if (!hasLimits($object)) {
+        return true;
+    }
 
-    return $service->checkLimits($object);
+    return App\Models\Limit\UserUnlockedLimit::where('user_id', $user->id)
+        ->where('object_model', get_class($object))
+        ->where('object_id', $object->id)
+        ->exists();
+}
+
+/**
+ * Returns the given objects rewards, if any.
+ *
+ * @param mixed $object
+ *
+ * @return bool
+ */
+function getRewards($object) {
+    return App\Models\Reward\Reward::where('object_model', get_class($object))->where('object_id', $object->id)->get();
+}
+
+/**
+ * checks if a certain object has any rewards.
+ *
+ * @param mixed $object
+ */
+function hasRewards($object) {
+    return App\Models\Reward\Reward::where('object_model', get_class($object))->where('object_id', $object->id)->exists();
 }

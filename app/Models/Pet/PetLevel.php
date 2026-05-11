@@ -5,7 +5,6 @@ namespace App\Models\Pet;
 use App\Models\Model;
 
 class PetLevel extends Model {
-
     /**
      * The attributes that are mass assignable.
      *

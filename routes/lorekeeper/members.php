@@ -243,6 +243,7 @@ Route::group(['prefix' => 'designs', 'namespace' => 'Characters'], function () {
     Route::get('{id}/traits', 'DesignController@getFeatures');
     Route::post('{id}/traits', 'DesignController@postFeatures');
     Route::get('traits/subtype', 'DesignController@getFeaturesSubtype');
+    Route::get('traits/feature', 'DesignController@getFeaturesTrait');
 
     Route::get('{id}/confirm', 'DesignController@getConfirm');
     Route::post('{id}/submit', 'DesignController@postSubmit');
@@ -281,4 +282,11 @@ Route::group(['prefix' => 'comments', 'namespace' => 'Comments'], function () {
 **************************************************************************************************/
 Route::group(['prefix' => 'limits'], function () {
     Route::post('unlock/{id}', 'Admin\LimitController@postUnlockLimits');
+});
+
+/**************************************************************************************************
+    Rewards
+**************************************************************************************************/
+Route::group(['prefix' => 'rewards'], function () {
+    Route::post('/types', 'RewardController@postRewardTypes');
 });

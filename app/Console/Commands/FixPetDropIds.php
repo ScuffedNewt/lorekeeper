@@ -31,7 +31,7 @@ class FixPetDropIds extends Command {
                     $drop->update([
                         'drop_id' => $drop->user_pet->pet->dropData->id,
                     ]);
-                    $this->line("Corrected pet ID #".$drop->user_pet->id."\n");
+                    $this->line('Corrected pet ID #'.$drop->user_pet->id."\n");
                 } elseif (!isset($drop->user_pet->pet->dropData)) {
                     // the pet has no drop data and the PetDrop can be deleted
                     $this->line('Deleted drop data for pet #'.$drop->user_pet_id." that has no drops\n");

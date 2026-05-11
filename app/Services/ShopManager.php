@@ -184,25 +184,9 @@ class ShopManager extends Service {
                             ];
                         }
                     } else {
-                        $stacks = UserItem::where('user_id', $user->id)->where('item_id', $cost->item->id)->where('count', '>', '0')->get()->filter(function ($stack) {
-                            return $stack->available_quantity > 0;
-                        });
-                        foreach ($stacks as $stack) {
-                            if ($stack->count >= $requiredQuantity) {
-                                $selected[] = [
-                                    'stack'    => $stack,
-                                    'quantity' => $requiredQuantity,
-                                ];
-                                $requiredQuantity = 0;
-                                break;
-                            } else {
-                                $selected[] = [
-                                    'stack'    => $stack,
-                                    'quantity' => $stack->count,
-                                ];
-                                $requiredQuantity -= $stack->count;
-                            }
-                        }
+                        $chosenStacks = (new InventoryManager)->getDebitableStacks($user, $cost->item->id, $requiredQuantity);
+                        $requiredQuantity -= array_sum(array_column($chosenStacks, 'quantity'));
+                        $selected = array_merge($selected, $chosenStacks);
                     }
 
                     if ($requiredQuantity > 0) {
@@ -228,14 +212,14 @@ class ShopManager extends Service {
                     'data' => 'Purchased '.$shopStock->item->name.' x'.$quantity.' from '.$shop->name.
                     ($coupon ? '. Coupon used: '.$couponUserItem->item->name : ''),
                 ])) {
-                    throw new \Exception('Failed to purchase item.');
+                    throw new \Exception('Failed to purchase item - could not debit character costs.');
                 }
             }
-            if (!fillUserAssets($userCostAssets, $user, null, 'Shop Purchase', [
+            if (!takeUserAssets($userCostAssets, $user, null, 'Shop Purchase', [
                 'data' => 'Purchased '.$shopStock->item->name.' x'.$quantity.' from '.$shop->name.
                 ($coupon ? '. Coupon used: '.$couponUserItem->item->name : ''),
             ], $selected)) {
-                throw new \Exception('Failed to purchase item - could not debit costs.');
+                throw new \Exception('Failed to purchase item - could not debit user costs.');
             }
 
             // If the item has a limited quantity, decrease the quantity

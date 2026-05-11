@@ -28,7 +28,7 @@ class PetDropData extends Model {
      */
     protected $casts = [
         'parameters' => 'array',
-        'data' => 'array',
+        'data'       => 'array',
     ];
 
     /**
@@ -218,17 +218,18 @@ class PetDropData extends Model {
             foreach ($reward_values as $reward) {
                 $reward_object = $reward->rewardable_type::find($reward->rewardable_id);
                 if ($reward->min_quantity == $reward->max_quantity) {
-                    $string[$label][] = $reward_object->displayname . ' (' . $reward->min_quantity . ')';
+                    $string[$label][] = $reward_object->displayname.' ('.$reward->min_quantity.')';
                 } else {
-                    $string[$label][] = $reward_object->displayname . ' (' . $reward->min_quantity . '-' . $reward->max_quantity . ')';
+                    $string[$label][] = $reward_object->displayname.' ('.$reward->min_quantity.'-'.$reward->max_quantity.')';
                 }
             }
         }
 
         $result = [];
         foreach ($string as $label => $items) {
-            $result[] = '<div><b>' . $label . ':</b> ' . implode(', ', $items) . '</div>';
+            $result[] = '<div><b>'.$label.':</b> '.implode(', ', $items).'</div>';
         }
+
         return implode('', $result);
     }
 }

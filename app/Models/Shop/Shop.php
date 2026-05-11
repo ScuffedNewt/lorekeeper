@@ -175,7 +175,7 @@ class Shop extends Model {
             return;
         }
         // Get the coupons from the id in allowed_coupons
-        $coupons = \App\Models\Item\Item::whereIn('id', json_decode($this->allowed_coupons, 1))->get();
+        $coupons = Item::whereIn('id', json_decode($this->allowed_coupons, 1))->get();
 
         return $coupons;
     }
@@ -217,20 +217,22 @@ class Shop extends Model {
      * We dont account for is_visible here, as this is used for checking both visible and invisible shop.
      */
     public function getIsActiveCheckAttribute() {
-        if ($this->start_at && $this->start_at > Carbon::now()) {
-            return false;
-        }
+        if ($this->is_timed_shop) {
+            if ($this->start_at && $this->start_at > Carbon::now()) {
+                return false;
+            }
 
-        if ($this->end_at && $this->end_at < Carbon::now()) {
-            return false;
-        }
+            if ($this->end_at && $this->end_at < Carbon::now()) {
+                return false;
+            }
 
-        if ($this->days && !in_array(Carbon::now()->format('l'), $this->days)) {
-            return false;
-        }
+            if ($this->days && !in_array(Carbon::now()->format('l'), $this->days)) {
+                return false;
+            }
 
-        if ($this->months && !in_array(Carbon::now()->format('F'), $this->months)) {
-            return false;
+            if ($this->months && !in_array(Carbon::now()->format('F'), $this->months)) {
+                return false;
+            }
         }
 
         if (!$this->is_timed_shop && !$this->is_active) {

@@ -400,6 +400,9 @@ Route::group(['prefix' => 'grants', 'namespace' => 'Users', 'middleware' => 'pow
     Route::get('pets/evolutions/{id}', 'GrantController@getPetEvolutions');
 
     Route::get('item-search', 'GrantController@getItemSearch');
+
+    Route::get('loot-tables', 'GrantController@getLootTables');
+    Route::post('loot-tables', 'GrantController@postLootTables');
 });
 
 // PETS
@@ -565,4 +568,9 @@ Route::get('{type}/{status}', 'DesignController@getDesignIndex')->where('type', 
 // LIMITS
 Route::group(['prefix' => 'limits', 'middleware' => 'power:manage_data'], function () {
     Route::post('/', 'LimitController@postCreateEditLimits');
+});
+
+// REWARDS
+Route::group(['prefix' => 'rewards', 'middleware' => 'power:manage_data'], function () {
+    Route::post('/', 'RewardController@postPopulateRewards');
 });

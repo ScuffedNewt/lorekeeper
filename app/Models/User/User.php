@@ -14,10 +14,10 @@ use App\Models\Gallery\GalleryFavorite;
 use App\Models\Gallery\GallerySubmission;
 use App\Models\Item\Item;
 use App\Models\Item\ItemLog;
-use App\Models\Pet\Pet;
-use App\Models\Pet\PetLog;
 use App\Models\Limit\UserUnlockedLimit;
 use App\Models\Notification;
+use App\Models\Pet\Pet;
+use App\Models\Pet\PetLog;
 use App\Models\Rank\Rank;
 use App\Models\Rank\RankPower;
 use App\Models\Shop\ShopLog;
@@ -592,9 +592,11 @@ class User extends Authenticatable implements MustVerifyEmail {
     public function getCurrencyLogs() {
         $user = $this;
         $query = CurrencyLog::with('currency')->where(function ($query) use ($user) {
-            $query->with('sender')->where('sender_type', 'User')->where('sender_id', $user->id)->whereNotIn('log_type', ['Staff Grant', 'Prompt Rewards', 'Claim Rewards', 'Gallery Submission Reward']);
-        })->orWhere(function ($query) use ($user) {
-            $query->with('recipient')->where('recipient_type', 'User')->where('recipient_id', $user->id)->where('log_type', '!=', 'Staff Removal');
+            $query->where(function ($query) use ($user) {
+                $query->with('sender')->where('sender_type', 'User')->where('sender_id', $user->id)->whereNotIn('log_type', ['Staff Grant', 'Prompt Rewards', 'Claim Rewards', 'Gallery Submission Reward']);
+            })->orWhere(function ($query) use ($user) {
+                $query->with('recipient')->where('recipient_type', 'User')->where('recipient_id', $user->id)->where('log_type', '!=', 'Staff Removal');
+            });
         })->orderBy('id', 'DESC');
 
         return $query;
