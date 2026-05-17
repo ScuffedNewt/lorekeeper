@@ -256,7 +256,7 @@ class AwardService extends Service {
 
             $oldImageFileName = null;
             if ($award->has_image) {
-                $oldImageFileName = $item->imageFileName;
+                $oldImageFileName = $award->imageFileName;
             }
 
             $image = null;
