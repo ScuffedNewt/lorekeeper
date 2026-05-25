@@ -99,7 +99,7 @@ class ItemService extends Service {
                 throw new \Exception('Failed to log admin action.');
             }
 
-            if ($category) {
+            if ($image) {
                 $this->handleImage($image, $category->categoryImagePath, $category->categoryImageFileName);
             }
 
@@ -287,7 +287,7 @@ class ItemService extends Service {
                 ]), // rarity, availability info (original source, purchase locations, drop locations)
             ]);
 
-            if ($item) {
+            if ($image) {
                 $this->handleImage($image, $item->imagePath, $item->imageFileName);
             }
 
