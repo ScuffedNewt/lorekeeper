@@ -72,15 +72,7 @@ class SubmissionManager extends Service {
                 if ($prompt->limit) {
                     // check that the user hasn't hit the prompt submission limit
                     // filter the submissions by hour/day/week/etc and count
-                    $count['all'] = Submission::submitted($prompt->id, $user->id)->count();
-                    $count['Hour'] = Submission::submitted($prompt->id, $user->id)->where('created_at', '>=', now()->startOfHour())->count();
-                    $count['Day'] = Submission::submitted($prompt->id, $user->id)->where('created_at', '>=', now()->startOfDay())->count();
-                    $count['Week'] = Submission::submitted($prompt->id, $user->id)->where('created_at', '>=', now()->startOfWeek())->count();
-                    $count['BiWeekly'] = Submission::submitted($prompt->id, $user->id)->where('created_at', '>=', now()->subWeeks(2))->count();
-                    $count['Month'] = Submission::submitted($prompt->id, $user->id)->where('created_at', '>=', now()->startOfMonth())->count();
-                    $count['BiMonthly'] = Submission::submitted($prompt->id, $user->id)->where('created_at', '>=', now()->subMonths(2))->count();
-                    $count['Quarter'] = Submission::submitted($prompt->id, $user->id)->where('created_at', '>=', now()->subMonths(3))->count();
-                    $count['Year'] = Submission::submitted($prompt->id, $user->id)->where('created_at', '>=', now()->startOfYear())->count();
+                    $count = $prompt->getCount($user);
 
                     // if limit by character is on... multiply by # of chars. otherwise, don't
                     if ($prompt->limit_character) {
@@ -176,18 +168,15 @@ class SubmissionManager extends Service {
                 }
 
                 // check that the prompt limit hasn't been hit
-                if ($prompt->limit && !($submission->status == 'Draft' && $submission->prompt_id && $submission->staff_comments)) {
+                if ($prompt->limit &&
+                    // allow any draft to be submitted if it was sent back by staff
+                    !($submission->status == 'Draft' && $submission->prompt_id && $submission->staff_comments ||
+                    // only allow drafts of active prompts to be submitted from first principle
+                    ($submission->status == 'Draft' && $submission->prompt && Prompt::active()->where('id', $submission->prompt_id)->exists()))
+                ) {
                     // check that the user hasn't hit the prompt submission limit
                     // filter the submissions by hour/day/week/etc and count
-                    $count['all'] = Submission::submitted($prompt->id, $user->id)->count();
-                    $count['Hour'] = Submission::submitted($prompt->id, $user->id)->where('created_at', '>=', now()->startOfHour())->count();
-                    $count['Day'] = Submission::submitted($prompt->id, $user->id)->where('created_at', '>=', now()->startOfDay())->count();
-                    $count['Week'] = Submission::submitted($prompt->id, $user->id)->where('created_at', '>=', now()->startOfWeek())->count();
-                    $count['BiWeekly'] = Submission::submitted($prompt->id, $user->id)->where('created_at', '>=', now()->subWeeks(2))->count();
-                    $count['Month'] = Submission::submitted($prompt->id, $user->id)->where('created_at', '>=', now()->startOfMonth())->count();
-                    $count['BiMonthly'] = Submission::submitted($prompt->id, $user->id)->where('created_at', '>=', now()->subMonths(2))->count();
-                    $count['Quarter'] = Submission::submitted($prompt->id, $user->id)->where('created_at', '>=', now()->subMonths(3))->count();
-                    $count['Year'] = Submission::submitted($prompt->id, $user->id)->where('created_at', '>=', now()->startOfYear())->count();
+                    $count = $prompt->getCount($user);
 
                     // if limit by character is on... multiply by # of chars. otherwise, don't
                     if ($prompt->limit_character) {
@@ -572,7 +561,7 @@ class SubmissionManager extends Service {
                 SubmissionCharacter::create([
                     'character_id'  => $c->id,
                     'submission_id' => $submission->id,
-                    'data'          => getDataReadyAssets($assets),
+                    'data'          => getDataReadyAssets($assets, true),
                 ]);
             }
 

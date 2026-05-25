@@ -31,20 +31,21 @@
             'showRaffles' => isset($showRaffles) && $showRaffles ? $showRaffles : false,
         ];
 
-    // Fetch valid reward types, defined in AssetHelpers
-    // This is also called individually for each pre-existing loot row, to fill out the table accurately
-    // All available reward or asset types should now be added to getRewardTypes
-
     // Fetch reward data, defined in AssetHelpers
     // All previous code that defines available asset IDs should now be moved to getRewardLootData
     if ($showRecipient) {
         foreach ($rewardableRecipients as $recipient) {
             $rewardTypes[$recipient] = getRewardTypes($showData, $recipient);
             $rewardLootData[$recipient] = getRewardLootData($showData, $recipient, $useCustomSelectize);
+            // Fetch valid reward types, defined in AssetHelpers
+            // This is also called individually for each pre-existing loot row, to fill out the table accurately
+            // All available reward or asset types should now be added to getRewardTypes
+            $rewardTypes[$recipient] = getRewardTypes($showData, $recipient);
         }
     } else {
         $rewardTypes = getRewardTypes($showData, $recipient);
         $rewardLootData = getRewardLootData($showData, $recipient, $useCustomSelectize);
+        $rewardTypes = getRewardTypes($showData, $recipient);
     }
 @endphp
 <div class="text-right mb-3">
@@ -96,7 +97,7 @@
                         {{-- If statements here can be removed and replaced with the below code. They are now defined programmatically --}}
                         {!! Form::select($prefix . 'rewardable_id[]', $showRecipient ? $rewardLootData[$loot->rewardable_recipient ?? $recipient][$loot->rewardable_type] : $rewardLootData[$loot->rewardable_type], $loot->rewardable_id ?? 0, [
                             'class' => 'form-control ' . strtolower($loot->rewardable_type) . '-select',
-                            'placeholder' => 'Select ' . ($showRecipient ? $rewardTypes[$loot->rewardable_recipient ?? $recipient][$loot->rewardable_type] : $rewardTypes[$loot->rewardable_type]),
+                            'placeholder' => 'Select ' . ($rewardTypes[$loot->rewardable_recipient ?? $recipient][$loot->rewardable_type] ?? 'Reward'),
                         ]) !!}
                     </td>
                     <td>{!! Form::text($prefix . 'quantity[]', $loot->quantity, ['class' => 'form-control']) !!}</td>

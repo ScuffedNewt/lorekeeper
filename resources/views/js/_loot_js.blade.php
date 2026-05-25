@@ -58,7 +58,7 @@
                 return;
             }
 
-            // Update the lootRow with the new types
+            //Update the lootRow with the new types
             $.ajax({
                 type: "POST",
                 headers: {
