@@ -161,6 +161,25 @@ class Shop extends Model {
         return url('shops/'.$this->id);
     }
 
+    /**********************************************************************************************
+
+        OTHER FUNCTIONS
+
+    **********************************************************************************************/
+
+    /**
+     * Gets all the coupons useable in the shop.
+     */
+    public function getAllAllowedCouponsAttribute() {
+        if (!$this->use_coupons || !$this->allowed_coupons) {
+            return;
+        }
+        // Get the coupons from the id in allowed_coupons
+        $coupons = Item::whereIn('id', json_decode($this->allowed_coupons, 1))->get();
+
+        return $coupons;
+    }
+
     /**
      * Gets the admin edit URL.
      *

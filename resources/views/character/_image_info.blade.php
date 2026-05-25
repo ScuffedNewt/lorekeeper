@@ -174,7 +174,17 @@
                         <strong>Last Edited:</strong> {!! pretty_date($image->updated_at) !!}
                     </div>
 
+                    @if (Auth::check() && Auth::user()->hasPower('manage_characters'))
+                        <div class="mt-3">
+                            <a href="#" class="btn btn-outline-info btn-sm edit-features mb-3" data-id="{{ $image->id }}"><i class="fas fa-cog"></i> Edit Traits</a>
+                        </div>
+                    @endif
+
                     @if (count($image->character->pets))
+                    <div class="mb-1">
+                        <div>
+                            <h5>Pets</h5>
+                        </div>
                         <div class="row justify-content-center text-center">
                             {{-- get one random pet --}}
                             @php
@@ -195,6 +205,7 @@
                                 <a href="{{ $character->url . '/pets' }}" class="btn btn-outline-info btn-sm">View All</a>
                             </div>
                         </div>
+                    </div>
                     @endif
                     @if ((config('lorekeeper.claymores_and_companions.visibility_settings.gear') || config('lorekeeper.claymores_and_companions.visibility_settings.weapons')) && count($image->character->equipment()))
                         <div class="mb-1 mt-4">

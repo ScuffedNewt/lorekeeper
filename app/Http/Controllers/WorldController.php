@@ -848,7 +848,7 @@ class WorldController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getPets(Request $request) {
-        $query = Pet::with('category')->visible(Auth::check() ? Auth::user() : null);
+        $query = Pet::with('category', 'parent', 'variants', 'evolutions', 'dropData')->visible(Auth::check() ? Auth::user() : null);
         // only show pets with no parent_id if config is set
         if (!config('lorekeeper.pets.include_variants')) {
             $query->whereNull('parent_id');

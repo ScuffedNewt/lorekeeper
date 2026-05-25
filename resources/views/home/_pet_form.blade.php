@@ -97,12 +97,32 @@
         </div>
         <div class="form-group">
             @php
-                $variants = [0 => 'Default'] + ($pet->pet->isVariant ? $pet->pet->parent->variants()->pluck('name', 'id')->toArray() : $pet->pet->variants()->pluck('name', 'id')->toArray());
+                $variants = [0 => 'Default'] + ($pet->pet->isVariant ? $pet->pet->parent->variants->pluck('name', 'id')->toArray() : $pet->pet->variants->pluck('name', 'id')->toArray());
             @endphp
             {!! Form::select('variant_id', $variants, $pet->variant_id, ['class' => 'form-control']) !!}
         </div>
         <div class="text-right">
             {!! Form::submit('Change Variant', ['class' => 'btn btn-primary']) !!}
+        </div>
+        {!! Form::close() !!}
+    </li>
+@endif
+
+@if ($user && isset($evolutions) && count($evolutions) && count($pet->pet->evolutions) > 0 && $user->id == $pet->user_id)
+    <li class="list-group-item">
+        <a class="card-title h5 collapse-title" data-toggle="collapse" href="#userEvolutionForm">Change Pet Evolution</a>
+        {!! Form::open(['url' => 'pets/evolution/' . $pet->id, 'id' => 'userEvolutionForm', 'class' => 'collapse']) !!}
+        <p>
+            This will use a rare candy item to evolve your pet to the next stage, if possible.
+            @if ($pet->evolution)
+                <br>Current Evolution: {{ $pet->evolution->evolution_name }}
+            @endif
+        </p>
+        <div class="form-group">
+            {!! Form::select('stack_id', $evolutions, null, ['class' => 'form-control', 'placeholder' => 'Select Item']) !!}
+        </div>
+        <div class="text-right">
+            {!! Form::submit('Evolve Pet', ['class' => 'btn btn-primary']) !!}
         </div>
         {!! Form::close() !!}
     </li>
@@ -123,7 +143,7 @@
         @endif
         <div class="form-group">
             @php
-                $variants = [0 => 'Default'] + ($pet->pet->isVariant ? $pet->pet->parent->variants()->pluck('name', 'id')->toArray() : $pet->pet->variants()->pluck('name', 'id')->toArray());
+                $variants = [0 => 'Default'] + ($pet->pet->isVariant ? $pet->pet->parent->variants->pluck('name', 'id')->toArray() : $pet->pet->variants->pluck('name', 'id')->toArray());
             @endphp
             {!! Form::select('variant_id', $variants, $pet->variant_id, ['class' => 'form-control mt-2']) !!}
         </div>
@@ -140,7 +160,7 @@
         {!! Form::hidden('is_staff', 1) !!}
         <div class="form-group">
             @php
-                $evolutions = [0 => 'Default'] + $pet->pet->evolutions()->pluck('evolution_name', 'id')->toArray();
+                $evolutions = [0 => 'Default'] + $pet->pet->evolutions->pluck('evolution_name', 'id')->toArray();
             @endphp
             {!! Form::select('evolution_id', $evolutions, $pet->evolution_id, ['class' => 'form-control mt-2']) !!}
         </div>
