@@ -949,7 +949,7 @@ function getRewardLootData($showData, $recipient = 'User', $useCustomSelectize =
                 //  $query = \App\Models\Example::orderby('name');
                 //  break;
             case 'Pet':
-                $query = App\Models\Pet\Pet::orderBy('name');
+                $query = App\Models\Pet\Pet::orderBy('parent_id')->with('parent');
                 break;
             case 'Weapon':
                 $query = App\Models\Claymore\Weapon::orderBy('name');
@@ -991,6 +991,8 @@ function getRewardLootData($showData, $recipient = 'User', $useCustomSelectize =
                     ]),
                 ];
             });
+        } elseif ($rewardKey == 'Pet') {
+            $data = $query->get()->sortBy(['parent_id', 'fullName'])->pluck('fullName', 'id')->toArray();
         } else {
             $data = $query->pluck('name', 'id')->toArray();
         }
