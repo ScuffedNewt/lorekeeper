@@ -285,7 +285,7 @@ class PetService extends Service {
             if (DB::table('shop_stock')->where('item_id', $pet->id)->where('stock_type', 'Pet')->exists()) {
                 throw new \Exception('A shop currently stocks this pet. Please remove the pet before deleting it.');
             }
-            if (DB::table('pets')->where('parent_id', $pet->id)->where('count', '>', 0)->where('deleted_at', '!=', null)->exists()) {
+            if (DB::table('pets')->where('parent_id', $pet->id)->exists()) {
                 throw new \Exception('At least one pet currently has this as a parent. Please remove the pet(s) before deleting it.');
             }
 
