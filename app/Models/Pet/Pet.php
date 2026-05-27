@@ -294,10 +294,6 @@ class Pet extends Model {
         if ($userpet->has_image) {
             return $userpet->imageUrl;
         }
-        // check if there is an evolution and variant
-        elseif ($userpet->evolution_id && $this->parent_id) {
-            return $userpet->evolution->imageUrl($userpet->pet);
-        }
         // evolution > variant
         elseif ($userpet->evolution_id) {
             return $userpet->evolution->imageUrl;
