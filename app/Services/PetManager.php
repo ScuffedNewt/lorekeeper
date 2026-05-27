@@ -483,7 +483,7 @@ class PetManager extends Service {
                 if (!$tag) {
                     throw new \Exception('Item is not a splice.');
                 }
-                if ($default == true && $tag->data['variant_ids']&& !in_array('default', $tag->data['variant_ids'])) {
+                if ($default == true && $tag->data['variant_ids'] && !in_array('default', $tag->data['variant_ids'])) {
                     throw new \Exception('Item can not change pet into the default variant.');
                 }
                 if ($default == false && $tag->data['variant_ids'] && !in_array($id, $tag->data['variant_ids'])) {
