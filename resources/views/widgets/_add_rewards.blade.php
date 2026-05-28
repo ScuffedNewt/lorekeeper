@@ -6,6 +6,9 @@
     if (!isset($useForm)) {
         $useForm = true;
     }
+    if (!isset($type)) {
+        $type = 'Reward';
+    }
 
     if (!isset($title)) {
         $title = 'Rewards';
@@ -24,20 +27,20 @@
     if (!isset($showLootTables)) {
         $showLootTables = false;
     }
+    if (!isset($loots)) {
+        $loots = getRewards($object);
+    }
 @endphp
 
 <div class="card p-4 mb-3 mt-3" id="reward-card">
-    <h3>{{ $title }}</h3>
+    <h3>{{ ucFirst($type) }}s</h3>
 
-    @if (isset($info))
-        <div class="alert alert-info">{!! $info !!}</div>
-    @else
-        <p>
-            You can add rewards to this object by clicking "Add Reward" & selecting a reward from the dropdown below.
-            <br />
-            <br /><b>Note that the checks for rewards are automatic, but their granting needs to be defined in the code.</b>
-        </p>
-    @endif
+    <p>
+        You can add {{ $type }}s to this object by clicking "Add {{ ucfirst($type) }}" & selecting a {{ $type }} from the dropdown below.
+        <br />
+        <br /><b>Note that the checks for {{ $type }}s are automatic, but their granting needs to be defined in the code.</b>
+    </p>
+    {!! isset($info) ? '<div class="alert alert-info">' . $info . '</div>' : '' !!}
 
     @if ($useForm)
         {!! Form::open(['url' => 'admin/rewards']) !!}
@@ -50,7 +53,7 @@
             'showRecipient' => $showRecipient,
             'showRaffles' => $showRaffles,
             'showLootTables' => $showLootTables,
-            'type' => isset($type) ? $type : null,
+            'type' => $type,
         ])
 
         <div>
@@ -68,7 +71,7 @@
             'showRecipient' => $showRecipient,
             'showRaffles' => $showRaffles,
             'showLootTables' => $showLootTables,
-            'type' => isset($type) ? $type : null,
+            'type' => $type,
         ])
     @endif
 </div>
@@ -79,6 +82,7 @@
         'showRecipient' => $showRecipient,
         'showRaffles' => $showRaffles,
         'showLootTables' => $showLootTables,
+        'type' => $type,
     ])
     @include('js._loot_js', [
         'prefix' => $prefix ?? '',
