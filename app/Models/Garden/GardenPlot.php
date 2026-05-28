@@ -84,6 +84,6 @@ class GardenPlot extends Model {
      * Returns a name for unlocking purposes.
      */
     public function getnameAttribute() {
-        return $this->data['name'] ?? 'Garden Plot';
+        return $this->data['name'] ?? null;
     }
 }

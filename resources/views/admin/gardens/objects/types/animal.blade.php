@@ -4,11 +4,11 @@
         <div class="row">
             <div class="col-md form-group">
                 {!! Form::label('Number of Feedings?') !!} {!! add_help('The number of times this animal needs to be fed before it can be collected.') !!}
-                {!! Form::number('feedings', isset($object) ? $object->data['feedings'] : 1, ['class' => 'form-control']) !!}
+                {!! Form::number('interactions', isset($object) ? $object->data['interactions'] : 1, ['class' => 'form-control', 'min' => 0]) !!}
             </div>
             <div class="col-md form-group">
-                {!! Form::label('Stays in Garden?') !!} {!! add_help('Does this animal stay in the garden after it is collected? If set to no, it will be debited from the user.') !!}
-                {!! Form::select('stays', ['1' => 'Yes', '0' => 'No'], isset($object) ? $object->data['stays'] : 1, ['class' => 'form-control']) !!}
+                {!! Form::label('Collection Options') !!} {!! add_help('Stay keeps the animal in its plot for repeat produce. Remove consumes it. Both lets the user choose each time.') !!}
+                {!! Form::select('collection_options', ['both' => 'Stay or Remove (User Choice)', 'stay' => 'Stay Only', 'remove' => 'Remove Only'], isset($object) ? $object->data['collection_options'] : 'stay', ['class' => 'form-control']) !!}
             </div>
         </div>
 
@@ -21,7 +21,7 @@
                 'object' => $object ?? null,
                 'useForm' => false,
                 'loots' => isset($object) ? $object->food : [],
-                'info' => '<p>These assets will be consumed as food to feed the animal. If no food rewards are added, the animal can be fed without food.</p><p><strong>Note that ALL assets added will be consumed upon feeding.</strong></p>',
+                'info' => '<p>These assets will be consumed as food to feed the animal. If no food rewards are added, the animal can be fed without food.</p><p class="mb-0"><strong>Note that ALL assets added will be consumed upon feeding.</strong></p>',
             ])
             {{-- blade-formatter-enable --}}
         @else
@@ -32,31 +32,44 @@
 
         <hr />
 
-        <div class="card mb-3">
-            <div class="card-header h5">Definite Rewards</div>
-            <div class="card-body">
-                <p>These rewards will be earned upon success. If you wish to have potential for, say, better quality produce, use a loot table.</p>
-                @include('widgets._loot_select', ['loots' => isset($object) ? $object->rewards : [], 'showLootTables' => true, 'showRaffles' => true])
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mb-3">
+                    <div class="card-header h5">Stay Rewards</div>
+                    <div class="card-body">
+                        <p>Earned when the animal stays in its plot and begins another production cycle.</p>
+                        @include('widgets._loot_select', [
+                            'loots' => isset($object) ? $object->rewardsFor('stay') : [],
+                            'showLootTables' => true,
+                            'showRaffles' => true,
+                            'prefix' => 'stay_',
+                        ])
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card mb-3">
+                    <div class="card-header h5">Removal Rewards</div>
+                    <div class="card-body">
+                        <p>These rewards will be earned upon removal of the animal from the garden (the user will lose the animal).</p>
+                        @include('widgets._loot_select', [
+                            'loots' => isset($object) ? $object->rewardsFor('remove') : [],
+                            'showLootTables' => true,
+                            'showRaffles' => true,
+                            'prefix' => 'remove_',
+                        ])
+                    </div>
+                </div>
             </div>
         </div>
 
-        {{-- TODO --}}
-        {{-- <div class="card">
-            <div class="card-header h5">Potential Rewards</div>
-            <div class="card-body">
-                <p>This reward has the potential to be obtained if the bonus chance below succeeds.</p>
-                <p>To have the chance of "nothing" being rewarded for this seed, use a loot table.</p>
-                
-                @include('widgets._loot_select', ['loots' => isset($object) ? $object->potentialRewards : [], 'showLootTables' => true, 'showRaffles' => true, 'prefix' => 'potential_'])
+        @include('admin.gardens.objects._potential_rewards', ['object' => $object ?? null])
 
-                {!! Form::label('Bonus Chance Percentage') !!}
-                {!! Form::number('bonus_chance', $object?->data['bonus_chance'] ?? 0, ['class' => 'form-control mb-1', 'min' => 0, 'max' => 100]) !!}
-            </div>
-        </div> --}}
     </div>
 </div>
 
-@include('js._loot_js', ['showLootTables' => true, 'showRaffles' => true])
+@include('js._loot_js', ['showLootTables' => true, 'showRaffles' => true, 'prefix' => 'stay_'])
+@include('js._loot_js', ['showLootTables' => true, 'showRaffles' => true, 'prefix' => 'remove_'])
 @include('js._loot_js', ['showLootTables' => true, 'showRaffles' => true, 'prefix' => 'potential_'])
 
 <script>

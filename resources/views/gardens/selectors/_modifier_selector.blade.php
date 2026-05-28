@@ -24,7 +24,7 @@
         @if ($asset->has_image)
             <img src="{{ $asset->imageUrl }}" style="max-height: 30px;">
         @else
-            🪓
+            <i class="fas fa-tools" aria-hidden="true"></i>
         @endif
     </div>
     <div class="name">

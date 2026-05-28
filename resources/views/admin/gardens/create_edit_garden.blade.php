@@ -9,6 +9,7 @@
 
     <h1>{{ $garden->id ? 'Edit' : 'Create' }} Garden
         @if ($garden->id)
+            ({!! $garden->displayName !!})
             <a href="#" class="btn btn-outline-danger float-right delete-garden-button">Delete Garden</a>
         @endif
     </h1>

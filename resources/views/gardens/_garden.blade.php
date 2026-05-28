@@ -1,9 +1,9 @@
-@if ($readOnly && !$user->id == (Auth::check() ? Auth::user()->id : null))
+@if ($readOnly && $user->id != (Auth::check() ? Auth::user()->id : null))
     @if (Auth::check() && config('lorekeeper.garden.allow_users_to_water_gardens'))
-        <div class="alert alert-info">
+        <div class="guest-watering-alert alert alert-info">
             You can water plants in gardens you visit to help them grow!
             @if (config('lorekeeper.garden.user_guest_water_limit'))
-                You have <strong>{{ config('lorekeeper.garden.user_guest_water_limit') - $user->activity?->garden_guest_waters_today }}</strong> waters remaining today.
+                You have <strong class="guest-waters-remaining">{{ max(0, config('lorekeeper.garden.user_guest_water_limit') - (Auth::user()?->activity?->garden_guest_waters_today ?? 0)) }}</strong> waters remaining today.
             @endif
         </div>
     @endif
@@ -28,15 +28,21 @@
                 @endforeach
             </ul>
             <div class="mode-pills btn-group btn-group-toggle" data-toggle="buttons" role="group" aria-label="Garden modes">
-                <label class="pill btn active" data-mode="place">
-                    <input type="radio" name="mode" autocomplete="off" checked> Place
-                </label>
-                <label class="pill btn" data-mode="tend">
-                    <input type="radio" name="mode" autocomplete="off"> Tend
-                </label>
-                <label class="pill btn" data-mode="collect">
-                    <input type="radio" name="mode" autocomplete="off"> Collect
-                </label>
+                @if ($readOnly)
+                    <label class="pill btn active" data-mode="tend">
+                        <input type="radio" name="mode" autocomplete="off" checked> Tend
+                    </label>
+                @else
+                    <label class="pill btn active" data-mode="place">
+                        <input type="radio" name="mode" autocomplete="off" checked> Place
+                    </label>
+                    <label class="pill btn" data-mode="tend">
+                        <input type="radio" name="mode" autocomplete="off"> Tend
+                    </label>
+                    <label class="pill btn" data-mode="collect">
+                        <input type="radio" name="mode" autocomplete="off"> Collect
+                    </label>
+                @endif
             </div>
         </div>
         <div class="card-body tab-content">

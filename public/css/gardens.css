@@ -1,516 +1,58 @@
-:root {
-    --bg: #f4efe6;
-    --surface: #fffaf2;
-    --surface-dark: #f8f1e7;
-    --panel: #f6ecdd;
-    --panel-dark: #eee3d0;
-
-    --soil: #6b4a3f;
-    --soil-dark: #56382f;
-
-    --grass: #a8c66c;
-    --accent: #f2c14e;
-    --danger: #ec665a;
-
-    --text: #51463b;
-    --text-muted: #897c70;
-    --white: #fff;
-    --black: #000;
-
-    --shadow: 0 10px 24px color-mix(in srgb, var(--soil) 18%, transparent);
-    --radius: 1.125rem;
-}
-
-.garden-tabs {
-    gap: 0;
-    padding-top: 1rem;
-    border-bottom: 0.0625rem solid color-mix(in srgb, var(--soil) 18%, transparent);
-    align-items: flex-end;
-}
-
-.garden-tabs .nav-item {
-    margin: 0 0.375rem -0.0625rem 0;
-}
-
-.garden-tabs .nav-link {
-    padding: 0.6875rem 1.125rem 0.75rem;
-    border: 0.0625rem solid color-mix(in srgb, var(--soil) 10%, transparent);
-    border-bottom-color: transparent;
-    border-radius: 0.875rem 0.875rem 0 0;
-    color: color-mix(in srgb, var(--text) 75%, var(--soil));
-    font-weight: 700;
-    background: linear-gradient(180deg,
-            color-mix(in srgb, var(--surface) 85%, var(--bg)),
-            color-mix(in srgb, var(--bg) 92%, var(--soil) 8%));
-}
-
-.garden-tabs .nav-link:hover {
-    background: color-mix(in srgb, var(--white) 62%, transparent);
-    border-color:
-        color-mix(in srgb, var(--grass) 22%, transparent) color-mix(in srgb, var(--grass) 22%, transparent) transparent;
-    color: color-mix(in srgb, var(--grass) 45%, var(--soil-dark));
-}
-
-.garden-tabs .nav-link.active,
-.garden-tabs .nav-link.active:hover,
-.garden-tabs .nav-item.show .nav-link {
-    background: var(--surface);
-    border-color:
-        color-mix(in srgb, var(--grass) 38%, transparent) color-mix(in srgb, var(--grass) 38%, transparent) var(--surface);
-    color: color-mix(in srgb, var(--grass) 40%, var(--soil-dark));
-    box-shadow: inset 0 0.25rem 0 var(--grass);
-}
-
-.bounce {
-    animation: bounce 1s infinite;
-}
-
-@keyframes bounce {
-
-    0%,
-    20%,
-    50%,
-    80%,
-    100% {
-        transform: translateY(0);
-    }
-
-    40% {
-        transform: translateY(-0.9375rem);
-    }
-
-    60% {
-        transform: translateY(-0.5rem);
-    }
-}
-
-.container {
-    max-width: 75rem;
-    margin: 1.5rem auto;
-    padding: 0 1rem 2rem;
-}
-
-.garden-card {
-    background: var(--surface);
-    border: 0.0625rem solid color-mix(in srgb, var(--soil) 12%, transparent);
-    border-radius: 1.5rem;
-    box-shadow: var(--shadow);
-    overflow: hidden;
-}
-
-.garden-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1.125rem 1.375rem;
-    background: linear-gradient(180deg,
-            var(--surface),
-            color-mix(in srgb, var(--surface) 70%, var(--bg)));
-    border-bottom: 0.0625rem solid color-mix(in srgb, var(--soil) 12%, transparent);
-}
-
-.title-wrap h2 {
-    margin: 0;
-    font-size: 1.35rem;
-}
-
-.title-wrap p {
-    margin: 0.375rem 0 0;
-    font-size: 0.95rem;
-    color: var(--text-muted);
-}
-
-.mode-pills {
-    display: flex;
-    flex-wrap: wrap;
-}
-
-.pill {
-    padding: 0.625rem 0.875rem;
-    border: 0;
-    border-radius: 999rem;
-    background: color-mix(in srgb, var(--panel-dark) 100%, var(--white));
-    color: color-mix(in srgb, var(--text) 85%, var(--soil));
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.pill.active {
-    background: var(--grass);
-    color: var(--white);
-}
-
-.garden-background,
-.garden-no-background {
-    position: relative;
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    margin-bottom: 1.125rem;
-    padding: 1.125rem;
-    border-radius: 1.375rem;
-    overflow: hidden;
-    box-shadow: inset 0 -2.5rem 5rem color-mix(in srgb, var(--black) 12%, transparent);
-}
-
-.garden-background {
-    min-height: 13.75rem;
-}
-
-.garden-background .chip,
-.garden-no-background .chip {
-    padding: 0.625rem 0.875rem;
-    border-radius: 999rem;
-    background: color-mix(in srgb, var(--white) 84%, transparent);
-    backdrop-filter: blur(0.375rem);
-    font-weight: 600;
-    box-shadow: 0 0.375rem 0.75rem color-mix(in srgb, var(--black) 8%, transparent);
-}
-
-#modeHint {
-    display: inline-block;
-    white-space: nowrap;
-    overflow: hidden;
-    transform-origin: center;
-    transition:
-        width 220ms cubic-bezier(0.2, 0.8, 0.2, 1.05),
-        transform 200ms ease,
-        opacity 140ms ease;
-}
-
-#modeHint.squish {
-    transform: scaleX(0.96);
-    opacity: 0.9;
-}
-
-.grid-wrap {
-    padding: 1.25rem;
-    background: var(--surface-dark);
-    border: 0.0625rem solid color-mix(in srgb, var(--soil) 12%, transparent);
-    border-radius: 1.375rem;
-}
-
-.highlight {
-    outline: 0.25rem solid color-mix(in srgb, var(--primary) 80%, transparent);
-    animation: highlight-pulse 2.5s ease-in-out infinite;
-}
-
-@keyframes highlight-pulse {
-    0%, 100% {
-        outline-color: color-mix(in srgb, var(--primary) 80%, transparent);
-    }
-    50% {
-        outline-color: color-mix(in srgb, var(--primary) 40%, transparent);
-    }
-}
-
-.plots {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(7.5rem, 1fr));
-    gap: 1rem;
-}
-
-.plot {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 9.375rem;
-    max-width: 12.5rem;
-    max-height: 12.5rem;
-    aspect-ratio: 1;
-    color: var(--white);
-    background: linear-gradient(180deg, var(--soil), var(--soil-dark));
-    border: 0.1875rem dashed color-mix(in srgb, var(--white) 24%, transparent);
-    border-radius: 1.25rem;
-    box-shadow:
-        inset 0 0.75rem 1.125rem color-mix(in srgb, var(--white) 4%, transparent),
-        inset 0 -0.75rem 1.125rem color-mix(in srgb, var(--black) 12%, transparent);
-    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
-}
-
-.plot .alert-danger {
-    background: var(--danger);
-    border-color: var(--danger);
-    color: var(--white);
-}
-
-.plot .alert-danger .alert-secondary {
-    background: var(--text-muted);
-    border-color: var(--text-muted);
-    color: var(--white);
-}
-
-.plot .alert-danger .alert-secondary .btn-secondary {
-    background: var(--grass);
-}
-
-.plot .plot-label {
-    position: absolute;
-    top: 0.625rem;
-    left: 0.75rem;
-    font-size: 0.82rem;
-    opacity: 0.8;
-}
-
-.plot .plot-center {
-    text-align: center;
-    pointer-events: none;
-}
-
-.plot a {
-    color: var(--primary) !important;
-}
-
-.plot .plot-center img, .plot .plot-center abbr, .plot .plot-center a {
-    pointer-events: auto !important;
-    transition: transform 0.15s ease;
-}
-
-.plot .plot-center img:hover {
-    pointer-events: auto !important;
-    transform: scale(1.1);
-}
-
-.plot .plot-center .unowned a,
-.plot .plot-center .unowned form {
-    pointer-events: auto;
-}
-
-.plot .plot-center .icon {
-    display: block;
-    margin-bottom: 0.375rem;
-    font-size: 1.8rem;
-}
-
-.plot.drop-hover {
-    transform: translateY(-0.125rem) scale(1.01);
-    border-color: color-mix(in srgb, var(--accent) 55%, var(--white));
-    box-shadow:
-        0 0 0 0.3125rem color-mix(in srgb, var(--accent) 18%, transparent),
-        inset 0 0.75rem 1.125rem color-mix(in srgb, var(--white) 4%, transparent),
-        inset 0 -0.75rem 1.125rem color-mix(in srgb, var(--black) 12%, transparent);
-}
-
-.plot.full::after {
-    content: "";
-    position: absolute;
-    inset: 0.625rem;
-    border: 0.125rem dashed color-mix(in srgb, var(--white) 12%, transparent);
-    border-radius: 0.875rem;
-}
-
-.toolbar {
-    position: sticky;
-    bottom: 0;
-    margin-top: 1.125rem;
-    padding: 0.875rem;
-    background: color-mix(in srgb, var(--surface) 88%, var(--bg));
-    backdrop-filter: blur(0.625rem);
-    border: 0.0625rem solid color-mix(in srgb, var(--soil) 12%, transparent);
-    border-radius: 1.375rem;
-    box-shadow: var(--shadow);
-}
-
-.toolbar-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.625rem;
-    flex-wrap: wrap;
-    margin-bottom: 0.75rem;
-}
-
-.toolbar-top .hint,
-.status {
-    font-size: 0.92rem;
-    color: var(--text-muted);
-}
-
-.inventory {
-    display: grid;
-    grid-template-columns: 20rem 1fr;
-    gap: 0.875rem;
-    align-items: start;
-}
-
-.section {
-    padding: 0.75rem;
-    background: var(--panel);
-    border: 0.0625rem solid color-mix(in srgb, var(--soil) 12%, transparent);
-    border-radius: 1.125rem;
-}
-
-.section h3 {
-    margin: 0 0 0.625rem;
-    font-size: 0.95rem;
-    color: color-mix(in srgb, var(--text) 80%, var(--soil));
-}
-
-.tool-row,
-.asset-row {
-    display: flex;
-    gap: 0.625rem;
-    overflow-x: auto;
-    padding-bottom: 0.125rem;
-    scrollbar-width: thin;
-    scrollbar-color: var(--grass) color-mix(in srgb, var(--soil) 12%, transparent);
-}
-
-.tool-row::-webkit-scrollbar,
-.asset-row::-webkit-scrollbar {
-    height: 0.5rem;
-}
-
-.tool-row::-webkit-scrollbar-track,
-.asset-row::-webkit-scrollbar-track {
-    background: color-mix(in srgb, var(--soil) 12%, transparent);
-    border-radius: 0.625rem;
-}
-
-.tool-row::-webkit-scrollbar-thumb,
-.asset-row::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg,
-            var(--grass),
-            color-mix(in srgb, var(--grass) 75%, var(--soil)));
-    border-radius: 0.625rem;
-}
-
-.tool-row::-webkit-scrollbar-thumb:hover,
-.asset-row::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg,
-            color-mix(in srgb, var(--grass) 75%, var(--soil)),
-            color-mix(in srgb, var(--grass) 55%, var(--soil-dark)));
-}
-
-.slot {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-width: 5.25rem;
-    height: 5.25rem;
-    padding: 0.5rem;
-    border: 0;
-    border-radius: 1.125rem;
-    background: var(--white);
-    box-shadow: 0 0.375rem 0.875rem color-mix(in srgb, var(--soil) 12%, transparent);
-    cursor: pointer;
-    user-select: none;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.slot:hover:not(.active):not(.dragging) {
-    transform: translateY(-0.125rem);
-    box-shadow: 0 0.625rem 1.125rem color-mix(in srgb, var(--soil) 18%, transparent);
-}
-
-.slot.active {
-    outline: 0.1875rem solid color-mix(in srgb, var(--grass) 80%, transparent);
-}
-
-.slot.active:hover {
-    outline: 0.1875rem solid color-mix(in srgb, var(--grass) 80%, transparent);
-}
-
-.slot.asset {
-    background: linear-gradient(180deg,
-            var(--white),
-            color-mix(in srgb, var(--surface) 70%, var(--bg)));
-}
-
-.slot.tool {
-    background: linear-gradient(180deg,
-            color-mix(in srgb, var(--panel-dark) 35%, var(--white)),
-            color-mix(in srgb, var(--panel-dark) 70%, var(--soil) 10%));
-}
-
-.slot .icon {
-    margin-bottom: 0.375rem;
-    font-size: 1.9rem;
-    line-height: 1;
-}
-
-.slot .name {
-    font-size: 0.82rem;
-    font-weight: 700;
-    text-align: center;
-    color: var(--text);
-}
-
-.slot .quantity {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
-    padding: 0.25rem 0.375rem;
-    border-radius: 999rem;
-    background: color-mix(in srgb, var(--text) 85%, var(--soil));
-    color: var(--white);
-    font-size: 0.72rem;
-    line-height: 1;
-}
-
-.slot.dragging {
-    opacity: 0.45;
-    transform: scale(0.96);
-}
-
-.ghost {
-    position: fixed;
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 4.625rem;
-    height: 4.625rem;
-    border: 0.0625rem solid color-mix(in srgb, var(--black) 8%, transparent);
-    border-radius: 1rem;
-    background: color-mix(in srgb, var(--white) 94%, transparent);
-    box-shadow: 0 0.875rem 1.625rem color-mix(in srgb, var(--black) 18%, transparent);
-    pointer-events: none;
-    font-size: 1.8rem;
-    line-height: 1;
-    transform: translate(-50%, -50%) scale(1.1);
-}
-
-.status {
-    margin-top: 0.75rem;
-    min-height: 1.4em;
-    color: color-mix(in srgb, var(--text-muted) 80%, var(--soil));
-}
-
-@media (max-width: 61.9375em) {
-    .plots {
-        grid-template-columns: repeat(2, minmax(7.5rem, 1fr));
-    }
-
-    .inventory {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 35.9375em) {
-    .garden-header {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 0.75rem;
-    }
-
-    .grid-wrap {
-        padding: 0.875rem;
-    }
-
-    .plots {
-        gap: 0.75rem;
-    }
-
-    .plot {
-        min-height: 7.5rem;
-    }
-
-    .slot {
-        min-width: 4.625rem;
-        height: 4.625rem;
-    }
-}
+:root { --garden-green:#4f7f38; --garden-green-dark:#365f25; --garden-green-bright:#78a94f; --garden-pale:#e2efda; --garden-soil:#805344; --garden-soil-dark:#5e382f; --garden-cream:#faf6e9; --garden-tan:#e9ddc5; --garden-surface:#fff; --garden-border:#cfc3ae; }
+
+.garden-card { overflow:hidden; background:var(--garden-surface); border:1px solid var(--garden-border); border-radius:.25rem; }
+.garden-card>.card-body { background:linear-gradient(180deg,var(--garden-surface),var(--garden-cream)); }
+.garden-header { display:flex; align-items:flex-end; justify-content:space-between; padding:1rem 1rem 0; background:var(--garden-cream); border-bottom:1px solid var(--garden-border); }
+.garden-tabs { align-self:stretch; align-items:flex-end; margin-bottom:-1px; border-bottom:0; }
+.garden-tabs .nav-item { display:flex; align-self:stretch; align-items:flex-end; margin-bottom:0; }
+.garden-tabs .nav-link { display:flex; align-items:center; gap:.375rem; min-height:100%; color:#495057; border-radius:.25rem .25rem 0 0; }
+.garden-tabs .nav-link.active,.garden-tabs .nav-item.show .nav-link { color:var(--garden-green); font-weight:600; background:var(--garden-surface); border-color:var(--garden-border) var(--garden-border) var(--garden-surface); }
+.mode-pills { margin-bottom:1rem; }
+.pill { padding:.375rem .75rem; color:var(--garden-green); font-weight:600; background:var(--garden-surface); border:1px solid var(--garden-green); cursor:pointer; }
+.pill+.pill { margin-left:-1px; }
+.pill:first-child { border-radius:.25rem 0 0 .25rem; }
+.pill:last-child { border-radius:0 .25rem .25rem 0; }
+.pill.active { color:#fff; background:linear-gradient(180deg,var(--garden-green-bright),var(--garden-green)); }
+
+.scene { padding:1rem; background-color:var(--garden-cream); background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath d='M0 12h24M12 0v24' fill='none' stroke='%235f7d4e' stroke-opacity='.045'/%3E%3C/svg%3E"); }
+.garden-background,.garden-no-background { position:relative; display:flex; align-items:center; justify-content:space-between; min-height:4.5rem; margin-bottom:1rem; padding:1rem; overflow:hidden; background-color:var(--garden-tan); background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='16'%3E%3Cpath d='M0 8L8 0l8 8 8-8 8 8-8 8-8-8-8 8z' fill='none' stroke='%23765449' stroke-opacity='.07'/%3E%3C/svg%3E"); border:1px solid var(--garden-border); border-radius:.25rem; }
+.garden-background { min-height:12rem; }
+.garden-background .chip,.garden-no-background .chip { padding:.375rem .75rem; color:#fff; background:rgba(0,0,0,.6); border:1px solid rgba(255,255,255,.25); border-radius:.5rem; font-weight:600; }
+#modeHint { color:#fff; font-weight:400; background:rgba(0,0,0,.6); border-color:rgba(255,255,255,.25); border-radius:.5rem; }
+.grid-wrap { padding:1rem; background-color:var(--garden-tan); background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18'%3E%3Ccircle cx='2' cy='2' r='1' fill='%23765449' fill-opacity='.08'/%3E%3C/svg%3E"); border:1px solid var(--garden-border); border-radius:.25rem; }
+.plots { display:grid; grid-template-columns:repeat(4,minmax(7.5rem,1fr)); gap:1rem; justify-content:center; }
+.plot { position:relative; display:flex; align-items:center; justify-content:center; min-height:9.375rem; max-width:12.5rem; max-height:12.5rem; aspect-ratio:1; color:#fff; background-color:var(--garden-soil); background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Cpath d='M-5 5L5-5M0 20L20 0M15 25L25 15' stroke='%23fff' stroke-opacity='.055'/%3E%3C/svg%3E"); border:2px solid var(--garden-soil-dark); border-radius:.25rem; }
+.plot::after { content:""; position:absolute; inset:.5rem; border:2px dashed rgba(255,255,255,.3); border-radius:.2rem; pointer-events:none; }
+.plot.has-plot-image { color:#212529; background-repeat:no-repeat; background-position:center; background-size:contain; border-color:var(--garden-border); }
+.plot.highlight,.plot.drop-hover { outline:3px solid #ffc107; outline-offset:2px; }
+.plot .plot-label { position:absolute; top:.5rem; left:.625rem; font-size:.8rem; opacity:.85; }
+.plot .plot-center { padding:.75rem; text-align:center; }
+.plot .plot-center>.icon { display:block; margin-bottom:.375rem; font-size:1.5rem; }
+.plot .garden-object-image { width:auto; height:auto; max-width:min(8rem,80%); max-height:8rem; object-fit:contain; }
+.plot .animal-collection-options { display:flex; gap:.25rem; justify-content:center; }
+.plot .alert { border-radius:.25rem; }
+.plot a { color:#fff; text-decoration:underline; }
+.plot.has-plot-image a { color:var(--primary); }
+
+.toolbar { margin-top:1rem; padding:1rem; background:linear-gradient(180deg,var(--garden-surface),var(--garden-pale)); border:1px solid var(--garden-border); border-radius:.25rem; }
+.toolbar-top { display:flex; align-items:center; justify-content:space-between; gap:.75rem; flex-wrap:wrap; margin-bottom:.75rem; }
+.toolbar-top .hint,.status { color:#6c757d; font-size:.875rem; }
+.inventory { display:grid; grid-template-columns:20rem 1fr; gap:.75rem; align-items:stretch; }
+.section { padding:.75rem; background-color:var(--garden-cream); background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath d='M0 24L24 0M12 24L24 12' stroke='%235f7d4e' stroke-opacity='.04'/%3E%3C/svg%3E"); border:1px solid var(--garden-border); border-radius:.25rem; }
+.section h3 { margin:0 0 .625rem; color:#495057; font-size:.875rem; font-weight:600; text-transform:uppercase; }
+.tool-row,.asset-row { display:flex; gap:.5rem; overflow-x:auto; padding-bottom:.25rem; }
+.slot { position:relative; display:flex; flex:0 0 5.25rem; flex-direction:column; align-items:center; justify-content:center; min-width:5.25rem; height:5.25rem; padding:.5rem; color:#495057; background:var(--garden-surface); border:1px solid var(--garden-border); border-radius:.25rem; cursor:pointer; user-select:none; }
+.slot.active { color:#fff; background:linear-gradient(180deg,var(--garden-green-bright),var(--garden-green)); border-color:var(--garden-green-dark); }
+.slot.active .icon { color:#fff; }
+.slot .icon { margin-bottom:.375rem; color:var(--garden-green); font-size:1.5rem; line-height:1; }
+.slot .icon img { max-width:2rem; max-height:2rem; object-fit:contain; }
+.slot .name { color:inherit; font-size:.75rem; font-weight:600; line-height:1.2; text-align:center; }
+.slot .quantity { position:absolute; top:.25rem; right:.25rem; }
+.slot.dragging { opacity:.5; }
+.ghost { position:fixed; z-index:9999; display:flex; align-items:center; justify-content:center; width:4.5rem; height:4.5rem; color:var(--garden-green); background:#fff; border:2px solid var(--garden-green); border-radius:.25rem; pointer-events:none; font-size:1.5rem; transform:translate(-50%,-50%); }
+.ghost img,.ghost .garden-object-image { width:auto; height:auto; max-width:50px; max-height:50px; object-fit:contain; }
+.status { margin-top:.75rem; min-height:1.4em; }
+.garden-world-background { min-height:11rem; background-repeat:no-repeat; background-position:center; background-size:cover; border-bottom:1px solid rgba(0,0,0,.125); }
+
+@media (max-width:61.9375em) { .plots { grid-template-columns:repeat(2,minmax(7.5rem,1fr)); } .inventory { grid-template-columns:1fr; } }
+@media (max-width:35.9375em) { .garden-header { align-items:stretch; flex-direction:column; gap:.75rem; } .mode-pills { align-self:flex-start; } .garden-background,.garden-no-background { align-items:flex-start; flex-direction:column; gap:.5rem; } .grid-wrap { padding:.75rem; } .plots { gap:.75rem; } .plot { min-height:7.5rem; } }

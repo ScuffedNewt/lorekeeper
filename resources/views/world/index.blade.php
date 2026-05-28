@@ -45,4 +45,10 @@
             </div>
         </div>
     </div>
+    <div class="card mb-4">
+        <div class="card-body text-center">
+            <h5 class="card-title">Activities</h5>
+            <a href="{{ url('world/gardens') }}">Gardens</a>
+        </div>
+    </div>
 @endsection

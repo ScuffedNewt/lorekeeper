@@ -3,11 +3,9 @@
 namespace App\Http\Controllers\Activities;
 
 use App\Models\Garden\Garden;
-use App\Models\Garden\GardenPlot;
 use App\Models\Garden\UserGardenPlot;
 use App\Models\User\User;
 use App\Services\Garden\GardenManager;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -51,14 +49,14 @@ class GardenController extends Controller {
     public function postAction(Request $request, GardenManager $service) {
         $action = $request->input('action');
         $data = $request->only([
-            'plot_id', 'asset_id', 'asset_type', 'object_type', 'current_garden_id',
+            'plot_id', 'asset_id', 'asset_type', 'object_type', 'current_garden_id', 'collection_outcome',
         ]);
 
         $message = null;
         switch ($action) {
             case 'place':
                 // place item / object / modifier in the plot
-                if (!$service->place(Auth::user(), $data)) {
+                if (!$message = $service->place(Auth::user(), $data)) {
                     debug($service->errors()->getMessages()['error']);
 
                     return response()->json([
@@ -92,6 +90,12 @@ class GardenController extends Controller {
                     ]);
                 }
                 break;
+            case 'remove_animal':
+                if (!$service->removeAnimal(Auth::user(), $data['plot_id'])) {
+                    return response()->json(['success' => false, 'message' => 'Failed to remove animal.', 'errors' => $service->errors()->getMessages()['error']]);
+                }
+                $message = 'Animal returned to your inventory.';
+                break;
             default:
                 return response()->json([
                     'success' => false,
@@ -99,27 +103,94 @@ class GardenController extends Controller {
                 ]);
         }
 
+        $userPlot = $service->getUserPlot(Auth::user(), $data);
+
         return response()->json([
             'success' => true,
-            'message' => $message ?? 'Action performed successfully.',
+            'message' => $message,
+            'view'    => $userPlot?->object ? view('gardens._object', [
+                'plot'       => $userPlot?->plot,
+                'userPlot'   => $userPlot,
+                'object'     => $userPlot?->object,
+            ])->render() : '',
+            'state'       => $userPlot?->started_at ? 'filled' : 'empty',
+            'actionReady' => $userPlot?->actionReady ?? false,
+            'canCollect'  => $userPlot?->canCollect ?? false,
+            'isPerished'  => $userPlot?->isPerished ?? false,
         ]);
     }
 
     /**
-     * Cares for all plots of a certain garden in one go.
+     * Returns fresh server-rendered state for a plot.
+     *
+     * @param int $plotId
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function postCareAll(Request $request, GardenManager $service) {
-        // todo
-        // this is going to be a regular request not ajax
+    public function getPlotState($plotId) {
+        $userPlot = UserGardenPlot::findOrFail($plotId);
+        if ($userPlot->user_id != Auth::id() && !config('lorekeeper.garden.allow_users_to_visit_gardens')) {
+            abort(403);
+        }
+
+        return response()->json([
+            'view' => $userPlot->isPerished
+                ? view('gardens._perished', ['userPlot' => $userPlot])->render()
+                : ($userPlot->object ? view('gardens._object', [
+                    'plot'     => $userPlot->plot,
+                    'userPlot' => $userPlot,
+                    'object'   => $userPlot->object,
+                ])->render() : '<span class="icon">➕</span>Empty plot'),
+            'state'       => $userPlot->started_at ? 'filled' : 'empty',
+            'actionReady' => $userPlot->actionReady,
+            'canCollect'  => $userPlot->canCollect,
+            'isPerished'  => $userPlot->isPerished,
+        ]);
     }
 
     /**
-     * Collect all in one go of a certain garden in one go.
+     * Clears a perished seed from one of the authenticated user's plots.
+     *
+     * @param App\Services\Garden\GardenManager $service
+     * @param int                               $plotId
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function postClearPerished(GardenManager $service, $plotId) {
+        if ($service->clearPerished(Auth::user(), $plotId)) {
+            flash('Perished seed cleared.')->success();
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
+        }
+
+        return redirect()->back();
+    }
+
+    /**
+     * Cares for all plots of a certain garden in one go.
+     *
+     * @param App\Services\Garden\GardenManager $service
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function postCareAll(Request $request, GardenManager $service) {
+        $count = $service->careAll(Auth::user(), $request->input('garden_id'));
+        flash($count ? 'Cared for '.$count.' plot'.($count == 1 ? '' : 's').'.' : 'No plots were ready for care.')->success();
+
+        return redirect()->back();
+    }
+
+    /**
+     * Collects all ready plots in a garden in one go.
+     *
+     * @param App\Services\Garden\GardenManager $service
+     *
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function postCollectAll(Request $request, GardenManager $service) {
-        // todo
-        // this is going to be a regular request not ajax
-        if ($count = $service->collectAll(Auth::user(), $type)) {
+        if ($count = $service->collectAll(Auth::user(), $request->input('garden_id'))) {
             flash('Collected '.$count.' successfully!')->success();
         } else {
             flash('Nothing to collect!')->warning();
@@ -129,33 +200,25 @@ class GardenController extends Controller {
     }
 
     /**
-     * Checks if any plants have died since the user has last logged on.
+     * Waters another user's ready seed.
+     *
+     * @param App\Services\Garden\GardenManager $service
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function checkPlots() {
-        // TODO
-        // this is only for seeds (animals don't die (hopefully))
-        // $check = 0;
-        // $enabled_types = array_filter(config('lorekeeper.garden'), function ($type) {
-        //     return $type['is_die_enabled'];
-        // });
-        // foreach (UserGardenPlot::where('user_id', Auth::user()->id)->whereIn('plot_id', GardenPlot::whereIn('plot_type', array_keys($enabled_types))->pluck('id'))->get() as $plot) {
-        //     if (!config('lorekeeper.garden.'.$plot->plot->plot_type.'.is_die_enabled')) {
-        //         return;
-        //     } // for pussies /j
-        //     if (!$plot->water_at || !$plot->item_id) {
-        //         continue;
-        //     }
-        //     $water = Carbon::parse($plot->water_at)->addHours(config('lorekeeper.garden.seed.die_time'));
-        //     if ($water < Carbon::now()) {
-        //         $plot->is_dead = 1;
-        //         $plot->save();
+    public function postGuestTend(Request $request, GardenManager $service) {
+        if ($message = $service->guestTend(Auth::user(), $request->input('plot_id'))) {
+            $limit = max(0, (int) config('lorekeeper.garden.user_guest_water_limit'));
+            Auth::user()->load('activity');
 
-        //         $check = 1;
-        //     }
-        // }
-        // if ($check) {
-        //     flash('One or more of your plants has died due to lack of watering.')->error();
-        // }
+            return response()->json([
+                'success'   => true,
+                'message'   => $message,
+                'remaining' => $limit ? max(0, $limit - (Auth::user()->activity?->garden_guest_waters_today ?? 0)) : null,
+            ]);
+        }
+
+        return response()->json(['success' => false, 'message' => $service->errors()->first('error')], 422);
     }
 
     /**********************************************************************************************

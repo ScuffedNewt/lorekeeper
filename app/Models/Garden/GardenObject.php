@@ -83,6 +83,42 @@ class GardenObject extends Model {
     }
 
     /**
+     * Gets the raw rewards for an animal collection outcome.
+     *
+     * @param string $outcome
+     *
+     * @return array
+     */
+    public function rawRewardsFor($outcome = 'stay') {
+        $key = $outcome === 'remove' ? 'remove_rewards' : 'stay_rewards';
+
+        return $this->data[$key] ?? [];
+    }
+
+    /**
+     * Gets rewards formatted for the admin reward widget.
+     *
+     * @param string $outcome
+     *
+     * @return array
+     */
+    public function rewardsFor($outcome = 'stay') {
+        $rewards = [];
+        foreach (parseAssetData($this->rawRewardsFor($outcome)) as $type => $assets) {
+            $class = getAssetModelString($type, false);
+            foreach ($assets as $id => $asset) {
+                $rewards[] = (object) [
+                    'rewardable_type' => $class,
+                    'rewardable_id'   => $id,
+                    'quantity'        => $asset['quantity'],
+                ];
+            }
+        }
+
+        return $rewards;
+    }
+
+    /**
      * Displays the objects's rewards.
      *
      * @return string
@@ -114,7 +150,7 @@ class GardenObject extends Model {
      * @return string
      */
     public function getDisplayFoodAttribute() {
-        if (!isset($this->data['food'])) {
+        if (!isset($this->data['food']) || empty($this->data['food'])) {
             return null;
         }
 
@@ -129,33 +165,27 @@ class GardenObject extends Model {
         return implode(', ', $display);
     }
 
-    // TODO: Potential rewards implementation
-    // /**
-    //  * Displays the object's potential rewards.
-    //  *
-    //  * @return string
-    //  */
-    // public function getPotentialRewardsAttribute() {
-    //     if (!isset($this->data['potential_rewards'])) {
-    //         return [];
-    //     }
+    /**
+     * Displays the object's independently rolled potential rewards.
+     *
+     * @return array
+     */
+    public function getPotentialRewardsAttribute() {
+        $rewards = [];
+        foreach (parseAssetData($this->data['potential_rewards'] ?? []) as $type => $assets) {
+            $class = getAssetModelString($type, false);
+            foreach ($assets as $id => $asset) {
+                $rewards[] = (object) [
+                    'rewardable_type' => $class,
+                    'rewardable_id'   => $id,
+                    'quantity'        => $asset['quantity'],
+                    'data'            => $asset['data'],
+                ];
+            }
+        }
 
-    //     $assets = parseAssetData($this->data['potential_rewards']);
-    //     $rewards = [];
-    //     foreach ($assets as $type => $a) {
-    //         $class = getAssetModelString($type, false);
-    //         foreach ($a as $id => $asset) {
-    //             $rewards[] = (object) [
-    //                 'rewardable_type' => $class,
-    //                 'rewardable_id'   => $id,
-    //                 'quantity'        => $asset['quantity'],
-    //                 'chance'          => $asset['data']['chance'] ?? 0,
-    //             ];
-    //         }
-    //     }
-
-    //     return $rewards;
-    // }
+        return $rewards;
+    }
 
     /**********************************************************************************************
 
@@ -167,6 +197,8 @@ class GardenObject extends Model {
      * Displays the object's stage images.
      *
      * @param mixed $interactions
+     *
+     * @return string|null
      */
     public function stageImage($interactions) {
         // find closest stage image less than or equal to current stage
@@ -175,20 +207,74 @@ class GardenObject extends Model {
             return null;
         }
 
-        if (isset($this->data['stages'][$interactions])) {
+        $stages = collect($this->data['stages'])->map(function ($stage, $key) {
+            return is_numeric($stage) ? (int) $stage : (int) $key;
+        })->unique()->sort()->values();
+
+        if ($stages->contains((int) $interactions)) {
             return asset('images/data/gardens/objects/'.$this->id.'-'.$interactions.'-image.png');
         }
 
-        $stages = collect($this->data['stages'])->filter(function ($value, $key) use ($interactions) {
-            return $key < $interactions;
-        })->sortKeysDesc();
+        $stages = $stages->filter(function ($stage) use ($interactions) {
+            return $stage < $interactions;
+        })->sortDesc();
 
         if ($stages->isNotEmpty()) {
-            $closestStage = $stages->keys()->first();
+            $closestStage = $stages->first();
 
             return asset('images/data/gardens/objects/'.$this->id.'-'.$closestStage.'-image.png');
         }
 
         return null;
+    }
+
+    /**
+     * Whether this seed may be planted in the supplied month.
+     *
+     * @param int|null $month
+     *
+     * @return bool
+     */
+    public function isInSeason($month = null) {
+        if ($this->type !== 'seed') {
+            return true;
+        }
+
+        $start = $this->data['start_month'] ?? null;
+        $end = $this->data['end_month'] ?? $start;
+        if (!$start) {
+            return true;
+        }
+
+        $month = $month ?? now()->month;
+
+        return $start <= $end
+            ? $month >= $start && $month <= $end
+            : $month >= $start || $month <= $end;
+    }
+
+    /**
+     * Gets the human-readable planting season for encyclopedia and admin displays.
+     *
+     * @return string
+     */
+    public function getSeasonLabelAttribute() {
+        if ($this->type !== 'seed' || empty($this->data['start_month'])) {
+            return 'Year-round';
+        }
+
+        $months = [
+            1 => 'January', 2 => 'February', 3 => 'March', 4 => 'April',
+            5 => 'May', 6 => 'June', 7 => 'July', 8 => 'August',
+            9 => 'September', 10 => 'October', 11 => 'November', 12 => 'December',
+        ];
+        $start = (int) $this->data['start_month'];
+        $end = (int) ($this->data['end_month'] ?? $start);
+
+        if (!isset($months[$start], $months[$end])) {
+            return 'Year-round';
+        }
+
+        return $start === $end ? $months[$start] : $months[$start].'–'.$months[$end];
     }
 }

@@ -113,12 +113,12 @@ class UserGardenPlot extends Model {
             return false;
         }
 
-        if ($this->interactedCount >= $this->actionsRequired) {
+        if ($this->isPerished) {
             return false;
         }
 
-        if (!isset($this->data['interacted_at'])) {
-            return $this->started_at <= Carbon::now();
+        if ($this->interactedCount >= $this->actionsRequired) {
+            return false;
         }
 
         return $this->timeUntilReady <= Carbon::now();
@@ -129,6 +129,10 @@ class UserGardenPlot extends Model {
      */
     public function getCanCollectAttribute() {
         if (!$this->object || !$this->started_at) {
+            return false;
+        }
+
+        if ($this->isPerished) {
             return false;
         }
 
@@ -144,12 +148,65 @@ class UserGardenPlot extends Model {
             return null;
         }
 
-        $growthTime = $this->object->data['growth_time'] ?? 24;
+        $growthTime = $this->growthTime;
 
         $baseTime = isset($this->data['interacted_at'])
             ? Carbon::parse($this->data['interacted_at'])
             : $this->started_at;
 
         return $baseTime->addHours($growthTime);
+    }
+
+    /**
+     * Growth time after any pre-placement fertiliser reduction.
+     *
+     * @return float
+     */
+    public function getGrowthTimeAttribute() {
+        $growthTime = (float) ($this->object?->data['growth_time'] ?? 24);
+        $fertiliserId = $this->modifiers['fertiliser'] ?? null;
+        $fertiliser = $fertiliserId ? GardenObject::find($fertiliserId) : null;
+        if (!$fertiliser) {
+            return $growthTime;
+        }
+
+        $reduction = (float) ($fertiliser->data['time_reduced'] ?? 0);
+        if (($fertiliser->data['formula'] ?? 0) && ($this->object?->requiredQuality ?? 0) > 0) {
+            $reduction *= ($fertiliser->data['quality'] ?? 0) / $this->object->requiredQuality;
+        }
+
+        return max(0, $growthTime - $reduction);
+    }
+
+    /**
+     * Whether this plot's current seed is allowed to perish.
+     *
+     * @return bool
+     */
+    public function getCanPerishAttribute() {
+        return $this->object?->type === 'seed'
+            && (($this->plot?->garden?->can_perish ?? false) || ($this->plot?->data['can_perish'] ?? false));
+    }
+
+    /**
+     * When the current seed perishes if it is not tended to or collected.
+     *
+     * @return \Carbon\Carbon|null
+     */
+    public function getPerishesAtAttribute() {
+        if (!$this->canPerish || !$this->timeUntilReady) {
+            return null;
+        }
+
+        return $this->timeUntilReady->copy()->addHours($this->object->data['perish_time'] ?? 24);
+    }
+
+    /**
+     * Whether the current seed has passed its maintenance grace period.
+     *
+     * @return bool
+     */
+    public function getIsPerishedAttribute() {
+        return $this->perishesAt?->isPast() ?? false;
     }
 }

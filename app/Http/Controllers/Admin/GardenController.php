@@ -180,7 +180,7 @@ class GardenController extends Controller {
      */
     public function postCreateEditGardenPlot(Request $request, GardenService $service, $gardenId, $id = null) {
         $data = $request->only([
-            'can_perish', 'image', 'remove_image', 'name',
+            'allowed_object_types', 'can_perish', 'ignore_seasons', 'image', 'remove_image', 'name',
         ]);
         if ($id && $service->updateGardenPlot(GardenPlot::find($id), $data, Auth::user())) {
             flash('Garden plot updated successfully.')->success();
@@ -327,6 +327,34 @@ class GardenController extends Controller {
             }
         }
 
+        return redirect()->back();
+    }
+
+    /**
+     * Gets the garden object deletion modal.
+     *
+     * @param int $id
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getDeleteGardenObject($id) {
+        return view('admin.gardens.objects._delete_garden_object', ['object' => GardenObject::findOrFail($id)]);
+    }
+
+    /**
+     * Deletes a garden object.
+     *
+     * @param App\Services\Garden\GardenService $service
+     * @param int                                $id
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function postDeleteGardenObject(GardenService $service, $id) {
+        if ($service->deleteGardenObject(GardenObject::find($id), Auth::user())) {
+            flash('Garden object deleted successfully.')->success();
+            return redirect()->to('admin/gardens/objects');
+        }
+        foreach ($service->errors()->getMessages()['error'] as $error) flash($error)->error();
         return redirect()->back();
     }
 

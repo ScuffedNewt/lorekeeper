@@ -12,6 +12,7 @@ return new class extends Migration {
         Schema::create('user_activities', function (Blueprint $table) {
             $table->unsignedBigInteger('user_id');
             $table->integer('garden_guest_waters_today')->default(0);
+            $table->unique('user_id');
         });
     }
 

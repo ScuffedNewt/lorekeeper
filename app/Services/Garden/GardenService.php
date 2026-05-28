@@ -5,6 +5,7 @@ namespace App\Services\Garden;
 use App\Models\Garden\Garden;
 use App\Models\Garden\GardenObject;
 use App\Models\Garden\GardenPlot;
+use App\Models\Garden\UserGardenPlot;
 use App\Services\Service;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -50,6 +51,7 @@ class GardenService extends Service {
                 unset($data['image']);
             } else {
                 $data['has_image'] = 0;
+                unset($data['image']);
             }
 
             $backgroundImage = null;
@@ -59,6 +61,7 @@ class GardenService extends Service {
                 unset($data['background_image']);
             } else {
                 $data['has_background_image'] = 0;
+                unset($data['background_image']);
             }
 
             $plotImage = null;
@@ -68,6 +71,7 @@ class GardenService extends Service {
                 unset($data['plot_image']);
             } else {
                 $data['has_plot_image'] = 0;
+                unset($data['plot_image']);
             }
 
             if ($image || $backgroundImage || $plotImage) {
@@ -122,7 +126,7 @@ class GardenService extends Service {
                 $image = $data['image'];
                 unset($data['image']);
             } else {
-                $data['has_image'] = 0;
+                unset($data['image']);
             }
 
             $backgroundImage = null;
@@ -131,7 +135,7 @@ class GardenService extends Service {
                 $backgroundImage = $data['background_image'];
                 unset($data['background_image']);
             } else {
-                $data['has_background_image'] = 0;
+                unset($data['background_image']);
             }
 
             $plotImage = null;
@@ -140,7 +144,7 @@ class GardenService extends Service {
                 $plotImage = $data['plot_image'];
                 unset($data['plot_image']);
             } else {
-                $data['has_plot_image'] = 0;
+                unset($data['plot_image']);
             }
 
             if ($image || $backgroundImage || $plotImage) {
@@ -183,12 +187,9 @@ class GardenService extends Service {
         DB::beginTransaction();
 
         try {
-            // Check first if the garden is currently owned or if some other site feature uses it
-
-            // TODO
-            // if (DB::table('user_plots')->where([['garden_id', '=', $garden->id], ['count', '>', 0]])->exists()) {
-            //     throw new \Exception('At least one user currently owns this garden. Please remove the garden(s) before deleting it.');
-            // }
+            if (UserGardenPlot::whereIn('plot_id', $garden->plots()->pluck('id'))->exists()) {
+                throw new \Exception('This garden has user plots and cannot be deleted until they are cleared.');
+            }
 
             if (!$this->logAdminAction($user, 'Deleted Garden', 'Deleted '.$garden->name)) {
                 throw new \Exception('Failed to log admin action.');
@@ -199,10 +200,10 @@ class GardenService extends Service {
                 $this->deleteImage($garden->imagePath, $garden->imageFileName);
             }
             if ($garden->has_background_image && file_exists(public_path($garden->backgroundImagePath.'/'.$garden->backgroundImageFileName))) {
-                $this->deleteImage($garden->backgroundImagePath, $garden->backgroundImageFileName);
+                $this->deleteImage($garden->imagePath, $garden->backgroundImageFileName);
             }
             if ($garden->has_plot_image && file_exists(public_path($garden->plotImagePath.'/'.$garden->plotImageFileName))) {
-                $this->deleteImage($garden->plotImagePath, $garden->plotImageFileName);
+                $this->deleteImage($garden->imagePath, $garden->plotImageFileName);
             }
             $garden->delete();
 
@@ -259,6 +260,9 @@ class GardenService extends Service {
             if (!isset($data['can_perish'])) {
                 $data['can_perish'] = 0;
             }
+            if (!isset($data['ignore_seasons'])) {
+                $data['ignore_seasons'] = 0;
+            }
 
             if (isset($data['remove_image'])) {
                 if ($plot && $plot->has_image && $data['remove_image']) {
@@ -277,7 +281,7 @@ class GardenService extends Service {
             }
 
             $plot->update([
-                'data'      => Arr::only($data, ['allowed_object_types', 'can_perish', 'name']),
+                'data'      => Arr::only($data, ['allowed_object_types', 'can_perish', 'ignore_seasons', 'name']),
                 'has_image' => !isset($data['has_image']) ? $plot->has_image : $data['has_image'],
             ]);
 
@@ -305,14 +309,14 @@ class GardenService extends Service {
             if (!$plot) {
                 throw new \Exception('Plot not found.');
             }
-            if (DB::table('user_garden_plots')->where('garden_plot_id', $plot->id)->exists()) {
+            if (DB::table('user_garden_plots')->where('plot_id', $plot->id)->exists()) {
                 throw new \Exception('At least one user currently owns this plot. Please remove the plot(s) before deleting it.');
             }
             if ($plot->has_image && file_exists(public_path($plot->imagePath.'/'.$plot->imageFileName))) {
                 $this->deleteImage($plot->imagePath, $plot->imageFileName);
             }
             // delete all user plots associated with this plot
-            DB::table('user_garden_plots')->where('garden_plot_id', $plot->id)->delete();
+            DB::table('user_garden_plots')->where('plot_id', $plot->id)->delete();
             $plot->delete();
 
             return $this->commitReturn(true);
@@ -354,6 +358,8 @@ class GardenService extends Service {
                 throw new \Exception('Object ID is required.');
             }
 
+            // Stage images need the persisted object's ID for their filenames.
+            // Build the ordinary data first, then process stages after creation.
             $objectData = $this->populateObjectData($data);
 
             $object = GardenObject::create([
@@ -362,6 +368,11 @@ class GardenService extends Service {
                 'object_id'    => $data['object_id'],
                 'data'         => $objectData,
             ]);
+
+            if ($data['type'] == 'seed') {
+                $objectData['stages'] = $this->handleStageImages($data, $object);
+                $object->update(['data' => $objectData]);
+            }
 
             if (!$this->logAdminAction($user, 'Created Garden Object', 'Created object #'.$object->id)) {
                 throw new \Exception('Failed to log admin action.');
@@ -419,6 +430,33 @@ class GardenService extends Service {
             $this->setError('error', $e->getMessage());
         }
 
+        return $this->rollbackReturn(false);
+    }
+
+    /**
+     * Deletes an unused garden object.
+     *
+     * @param GardenObject          $object
+     * @param \App\Models\User\User $user
+     *
+     * @return bool
+     */
+    public function deleteGardenObject($object, $user) {
+        DB::beginTransaction();
+        try {
+            if (!$object) throw new \Exception('Garden object not found.');
+            if (UserGardenPlot::where('data->object_id', $object->id)->exists()) {
+                throw new \Exception('This object is currently in use in at least one garden plot.');
+            }
+            foreach (glob(public_path('images/data/gardens/objects/'.$object->id.'-*')) ?: [] as $file) {
+                if (is_file($file)) unlink($file);
+            }
+            $object->delete();
+            $this->logAdminAction($user, 'Deleted Garden Object', 'Deleted garden object #'.$object->id);
+            return $this->commitReturn(true);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
         return $this->rollbackReturn(false);
     }
 
@@ -481,21 +519,36 @@ class GardenService extends Service {
      * @return array
      */
     private function populateObjectData($data, $object = null, $garden = null) {
+        if ($data['type'] == 'seed' && (!isset($data['perish_time']) || !is_numeric($data['perish_time']) || $data['perish_time'] < 1)) {
+            throw new \Exception('The perish grace period must be at least one hour.');
+        }
         if ($data['type'] == 'seed' && isset($object)) {
             $data['stages'] = $this->handleStageImages($data, $object);
         }
         if ($data['type'] == 'animal') {
             $data['food'] = getDataReadyAssets(processRewardableData($data, true, 'food_'));
+            $data['stay_rewards'] = getDataReadyAssets(processRewardableData($data, true, 'stay_'));
+            $data['remove_rewards'] = getDataReadyAssets(processRewardableData($data, true, 'remove_'));
         }
 
-        $data['rewards'] = getDataReadyAssets(processRewardableData($data, true));
-        // $data['potential_rewards'] = getDataReadyAssets(processRewardableData($data, true, 'potential_', ['chance']));
+        if ($data['type'] != 'animal') {
+            $data['rewards'] = getDataReadyAssets(processRewardableData($data, true));
+        }
+        foreach ($data['potential_chance'] ?? [] as $chance) {
+            if (!is_numeric($chance) || $chance < 0 || $chance > 100) {
+                throw new \Exception('Potential reward chances must be between 0 and 100.');
+            }
+        }
+        $data['potential_rewards'] = getDataReadyAssets(processRewardableData($data, true, 'potential_', ['chance']));
 
         return Arr::except($data, [
-            '_token', 'type', 'object_model', 'object_id', 'rewardable_type', 'rewardable_id', 'quantity',
+            '_token', 'type', 'object_model', 'object_id', 'stage_number', 'stage_image',
+            'rewardable_type', 'rewardable_id', 'quantity',
             'potential_rewardable_type', 'potential_rewardable_id', 'potential_quantity', 'potential_chance',
             // animal exclusive
             'food_rewardable_type', 'food_rewardable_id', 'food_quantity',
+            'stay_rewardable_type', 'stay_rewardable_id', 'stay_quantity',
+            'remove_rewardable_type', 'remove_rewardable_id', 'remove_quantity',
         ]);
     }
 
@@ -509,43 +562,49 @@ class GardenService extends Service {
      * @return array
      */
     private function handleStageImages($data, $object) {
-        if (isset($data['stage_number'])) {
-            // filter null values, but not zeroes
-            $data['stage_number'] = array_filter($data['stage_number'], function ($value) {
-                return $value !== null && $value !== '';
-            });
-        }
-        if (isset($data['stage_image'])) {
-            $data['stage_image'] = array_filter($data['stage_image']);
-        }
-        // /
+        $stageNumbers = array_filter($data['stage_number'] ?? [], function ($value) {
+            return $value !== null && $value !== '';
+        });
+        $stageImages = $data['stage_image'] ?? [];
+        $existingStages = array_map('intval', $object->data['stages'] ?? []);
         $stages = [];
-        if (isset($data['stage_number'])) {
-            // if old stages exist
-            if (isset($object->data['stages'])) {
-                foreach ($object->data['stages'] as $stage) {
-                    // if the stage number is not contained in $data['stage_number'], then delete the old image
-                    if (!in_array($stage, $data['stage_number'])) {
-                        if (file_exists(public_path('images/data/gardens/objects/'.$object->id.'-'.$stage.'-image.png'))) {
-                            $this->deleteImage(public_path('images/data/gardens/objects'), $object->id.'-'.$stage.'-image.png');
-                        }
-                    } else {
-                        $stages[] = $stage;
-                    } // make sure there are no duplicates
+
+        if ($stageNumbers) {
+            foreach ($stageNumbers as $key => $stage) {
+                if (filter_var($stage, FILTER_VALIDATE_INT) === false || (int) $stage < 0) {
+                    throw new \Exception('Stage numbers must be whole numbers of zero or greater.');
+                }
+
+                $stage = (int) $stage;
+                if (in_array($stage, $stages, true)) {
+                    throw new \Exception('Each stage number must be unique.');
+                }
+
+                $hasUpload = isset($stageImages[$key]) && $stageImages[$key];
+                if (!$hasUpload && !in_array($stage, $existingStages, true)) {
+                    throw new \Exception('Stage '.$stage.' needs an image upload.');
+                }
+
+                $stages[] = $stage;
+            }
+
+            // Validate every row before writing any files, then use the original
+            // row keys to keep each upload paired with its submitted stage.
+            foreach ($stageNumbers as $key => $stage) {
+                if (isset($stageImages[$key]) && $stageImages[$key]) {
+                    $this->handleImage($stageImages[$key], public_path('images/data/gardens/objects'), $object->id.'-'.(int) $stage.'-image.png');
                 }
             }
 
-            $stages = array_unique(array_merge($stages, $data['stage_number']));
-            // now go thru new stages
-            foreach ($stages as $key => $stage) {
-                if (isset($data['stage_image'][$key])) {
-                    $this->handleImage($data['stage_image'][$key], public_path('images/data/gardens/objects'), $object->id.'-'.$stage.'-image.png');
-                }
+            foreach (array_diff($existingStages, $stages) as $removedStage) {
+                $this->deleteImage(public_path('images/data/gardens/objects'), $object->id.'-'.$removedStage.'-image.png');
             }
+
+            sort($stages);
         } else {
-            if (isset($object->data['stages']) && !empty($object->data['stages']) && $object->data['stages'] != '[]') {
-                foreach ($object->data['stages'] as $stage) {
-                    $this->deleteImage(public_path('iimages/data/gardens/objects'), $object->id.'-'.$stage.'-image.png');
+            if ($existingStages) {
+                foreach ($existingStages as $stage) {
+                    $this->deleteImage(public_path('images/data/gardens/objects'), $object->id.'-'.$stage.'-image.png');
                 }
                 // delete all of them that begin with the tag id (just in case)
                 // match all files that begin with the tag id

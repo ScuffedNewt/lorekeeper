@@ -35,6 +35,8 @@ class Kernel extends ConsoleKernel {
             ->everyMinute();
         $schedule->command('app:reset-user-activities')
             ->daily();
+        $schedule->command('check-garden-notifications')
+            ->everyMinute();
     }
 
     /**

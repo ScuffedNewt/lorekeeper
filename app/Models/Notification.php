@@ -164,4 +164,6 @@ class Notification extends Model {
     public const GALLERY_SUBMISSION_STAFF_COMMENTS = 513;
     public const GALLERY_SUBMISSION_EDITED = 514;
     public const GALLERY_SUBMISSION_PARTICIPANT = 515;
+    public const GARDEN_READY = 520;
+    public const GARDEN_PERISHED = 521;
 }

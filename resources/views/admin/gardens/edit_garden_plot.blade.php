@@ -64,6 +64,10 @@
                     {!! Form::label('Can Perish?') !!} {!! add_help('Can the plot contents perish if not maintained?') !!}
                     {!! Form::checkbox('can_perish', 1, $plot->data['can_perish'] ?? null, ['class' => 'form-check-input', 'data-toggle' => 'toggle', 'data-on' => 'Yes', 'data-off' => 'No']) !!}
                 </div>
+                <div class="col-md form-group">
+                    {!! Form::label('Ignore Seasons?') !!} {!! add_help('Allows seeds to be planted here outside their configured months, like a greenhouse.') !!}
+                    {!! Form::checkbox('ignore_seasons', 1, $plot->data['ignore_seasons'] ?? false, ['class' => 'form-check-input', 'data-toggle' => 'toggle', 'data-on' => 'Yes', 'data-off' => 'No']) !!}
+                </div>
             </div>
         </div>
     </div>

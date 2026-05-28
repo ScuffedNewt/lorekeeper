@@ -24,13 +24,16 @@
         @if ($asset->has_image)
             <img src="{{ $asset->imageUrl }}" style="max-height: 30px;">
         @else
-            🌱
+            <i class="fas fa-seedling" aria-hidden="true"></i>
         @endif
     </div>
     <div class="name">
         {{ $asset->name }}
         @if ($gardenObject && $gardenObject->requiredQuality > 0)
             <div>Quality: {{ $gardenObject->requiredQuality }}</div>
+        @endif
+        @if ($gardenObject && !$gardenObject->isInSeason())
+            <div class="text-warning">Greenhouse only</div>
         @endif
     </div>
 </button>

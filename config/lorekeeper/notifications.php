@@ -483,4 +483,14 @@ return [
         'message' => '<a href="{sender_url}">{sender}</a> has added you as a participant on a gallery submission. (<a href="{url}">View Submission</a>)',
         'url'     => 'gallery/view/{submission_id}',
     ],
+    520 => [
+        'name' => 'Garden Plot Ready',
+        'message' => 'Your garden plot containing <strong>{object}</strong> is ready for attention. (<a href="{url}">Visit Gardens</a>)',
+        'url' => 'gardens',
+    ],
+    521 => [
+        'name' => 'Garden Seed Perished',
+        'message' => 'Your <strong>{object}</strong> has perished and needs to be cleared. (<a href="{url}">Visit Gardens</a>)',
+        'url' => 'gardens',
+    ],
 ];

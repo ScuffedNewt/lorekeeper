@@ -4,6 +4,10 @@
     {{ $user->name }}'s Garden
 @endsection
 
+@section('head')
+    <link href="{{ asset('css/gardens.css?v=' . filemtime(public_path('css/gardens.css'))) }}" rel="stylesheet">
+@endsection
+
 @section('profile-content')
     {!! breadcrumbs(['Users' => 'users', $user->name => $user->url, 'Garden' => $user->url . '/garden']) !!}
 
@@ -20,7 +24,7 @@
             'user' => $user,
             'readOnly' => $readOnly,
             'groups' => $groups,
-            'is_garden_unlocked' => $is_garden_unlocked,
+            'isGardenUnlocked' => $is_garden_unlocked,
         ])
     </div>
 @endsection

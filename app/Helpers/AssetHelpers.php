@@ -251,10 +251,11 @@ function removeAsset(&$array, $asset, $quantity = 1) {
  * @param array      $data
  * @param mixed      $isStaff
  * @param mixed|null $prefix
+ * @param array      $customFields
  *
  * @return array
  */
-function processRewardableData($data, $isStaff = false, $prefix = null) {
+function processRewardableData($data, $isStaff = false, $prefix = null, $customFields = []) {
     $assets = createAssetsArray();
     if (isset($data[$prefix.'rewardable_type'])) {
         $assets = createAssetsArray();
@@ -288,6 +289,9 @@ function processRewardableData($data, $isStaff = false, $prefix = null) {
             }
 
             addAsset($assets, $reward, $data[$prefix.'quantity'][$key]);
+            foreach ($customFields as $field) {
+                $assets[$reward->assetType][$reward->id]['data'][$field] = $data[$prefix.$field][$key] ?? null;
+            }
         }
     }
 
@@ -310,7 +314,10 @@ function getDataReadyAssets($array, $isCharacter = false) {
             $result[$key] = [];
         }
         foreach ($type as $assetId => $assetData) {
-            $result[$key][$assetId] = $assetData['quantity'];
+            $result[$key][$assetId] = isset($assetData['data']) ? [
+                'quantity' => $assetData['quantity'],
+                'data'     => $assetData['data'],
+            ] : $assetData['quantity'];
         }
     }
 
@@ -332,9 +339,12 @@ function parseAssetData($array, $isCharacter = false) {
         $model = getAssetModelString($key);
         if ($model) {
             foreach ($contents as $id => $quantity) {
+                $data = is_array($quantity) ? ($quantity['data'] ?? []) : [];
+                $quantity = is_array($quantity) ? ($quantity['quantity'] ?? 0) : $quantity;
                 $assets[$key][$id] = [
                     'asset'    => $model::find($id),
                     'quantity' => $quantity,
+                    'data'     => $data,
                 ];
             }
         }

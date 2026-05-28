@@ -7,6 +7,8 @@ use App\Models\Currency\Currency;
 use App\Models\Currency\CurrencyCategory;
 use App\Models\Feature\Feature;
 use App\Models\Feature\FeatureCategory;
+use App\Models\Garden\Garden;
+use App\Models\Garden\GardenObject;
 use App\Models\Item\Item;
 use App\Models\Item\ItemCategory;
 use App\Models\Rarity;
@@ -35,6 +37,23 @@ class WorldController extends Controller {
      */
     public function getIndex() {
         return view('world.index');
+    }
+
+    /**
+     * Shows the garden encyclopedia page.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getGardens(Request $request) {
+        $query = Garden::visible(Auth::user() ?? null)->with('plots');
+        if ($request->filled('name')) {
+            $query->where('name', 'LIKE', '%'.$request->get('name').'%');
+        }
+
+        return view('world.gardens', [
+            'gardens' => $query->orderBy('name')->paginate(20)->appends($request->query()),
+            'objects' => GardenObject::get()->groupBy('type'),
+        ]);
     }
 
     /**

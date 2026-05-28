@@ -28,6 +28,10 @@
                 {!! Form::number('growth_time', isset($object) ? $object->data['growth_time'] : 24, ['class' => 'form-control', 'min' => 1]) !!}
             </div>
             <div class="col-md form-group">
+                {!! Form::label('Perish Grace Period (Hours)') !!} {!! add_help('In gardens or plots where perishing is enabled, the seed dies this many hours after a watering or harvest becomes ready.') !!}
+                {!! Form::number('perish_time', isset($object) ? ($object->data['perish_time'] ?? 24) : 24, ['class' => 'form-control', 'min' => 1]) !!}
+            </div>
+            <div class="col-md form-group">
                 {!! Form::label('Minimum Fertiliser Quality (Optional)') !!} {!! add_help('The minimum quality of fertiliser required to grow this seed. Leave at 0 for no requirement.') !!}
                 {!! Form::number('quality', isset($object) ? $object->data['quality'] : 0, ['class' => 'form-control mb-1', 'min' => 0]) !!}
             </div>
@@ -72,20 +76,26 @@
                 @if (isset($object) && isset($object->data['stages']))
                     <p>Leave image form blank to keep old image.</p>
                     @foreach ($object->data['stages'] as $stage)
-                        <div class="d-flex mb-2">
-                            <img src="{{ asset($object->stageImage($stage)) }}" alt="Stage {{ $stage }}" class="mr-2" style="height: 50px;">
-                            {!! Form::file('stage_image[]') !!} {!! add_help('Leave empty to keep old image.') !!}
-                            {!! Form::number('stage_number[]', $stage, ['class' => 'form-control mr-2', 'placeholder' => 'When Does the Stage Appear?']) !!}
-                            <a href="#" class="remove-stage btn btn-danger mb-2">×</a>
+                        <div class="d-flex mb-2 align-items-center">
+                            <img src="{{ $object->stageImage($stage) }}" alt="Stage {{ $stage }}" class="mr-2" style="height: 50px;">
+                            <div class="custom-file">
+                                {!! Form::label('stage_image[]', 'Choose file...', ['class' => 'custom-file-label']) !!}
+                                {!! Form::file('stage_image[]', ['class' => 'custom-file-input']) !!}
+                            </div>
+                            {!! Form::number('stage_number[]', $stage, ['class' => 'form-control mx-2', 'placeholder' => 'When Does the Stage Appear?']) !!}
+                            <a href="#" class="remove-stage btn btn-danger">×</a>
                         </div>
                     @endforeach
                 @endif
             </div>
             <div><a href="#" class="btn btn-primary" id="add-stage">Add Stage</a></div>
-            <div class="stage-row hide mb-2">
-                {!! Form::file('stage_image[]') !!}
-                {!! Form::number('stage_number[]', null, ['class' => 'form-control mr-2', 'placeholder' => 'When does the stage appear? E.g. stage == number of completed waterings.', 'min' => 0]) !!}
-                <a href="#" class="remove-stage btn btn-danger mb-2">×</a>
+            <div class="stage-row hide mb-2 align-items-center">
+                <div class="custom-file">
+                    {!! Form::label('stage_image[]', 'Choose file...', ['class' => 'custom-file-label']) !!}
+                    {!! Form::file('stage_image[]', ['class' => 'custom-file-input']) !!}
+                </div>
+                {!! Form::number('stage_number[]', null, ['class' => 'form-control mx-2', 'placeholder' => 'When does the stage appear? E.g. stage == number of completed waterings.', 'min' => 0]) !!}
+                <a href="#" class="remove-stage btn btn-danger">×</a>
             </div>
         </div>
 
@@ -104,33 +114,8 @@
             </div>
         </div>
 
-        {{-- TODO --}}
-        {{-- <div class="card">
-            <div class="card-header h5">Potential Rewards</div>
-            <div class="card-body">
-                <p>This reward has the potential to be obtained if the bonus chance below succeeds.</p>
-                <p>To have the chance of "nothing" being rewarded for this seed, use a loot table.</p>
+        @include('admin.gardens.objects._potential_rewards', ['object' => $object ?? null])
 
-                @include('widgets._loot_select', [
-                    'loots' => isset($object) ? $object->potentialRewards : [],
-                    'showLootTables' => true, 'showRaffles' => true,
-                    'prefix' => 'potential_',
-                    'extra_fields' => [
-                        'chance' => [
-                            'type' => 'number',
-                            'label' => 'Chance (%)',
-                            'attributes' => ['step' => '0.01', 'min' => '0', 'max' => '100'],
-                            'default' => 100,
-                        ],
-                    ]
-                ])
-                <hr />
-                <div class="form-group">
-                    {!! Form::label('Bonus Chance Percentage') !!}
-                    {!! Form::number('bonus_chance', $object?->data['bonus_chance'] ?? 0, ['class' => 'form-control mb-1', 'min' => 0, 'max' => 100]) !!}
-                </div>
-            </div>
-        </div> --}}
     </div>
 </div>
 

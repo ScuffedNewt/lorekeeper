@@ -29,7 +29,7 @@
             'isGardenUnlocked' => $isGardenUnlocked,
         ])
     @endif
-    <div class="ghost" id="ghost">🌱</div>
+    <div class="ghost" id="ghost"><i class="fas fa-seedling" aria-hidden="true"></i></div>
 @endsection
 @section('scripts')
     @parent
@@ -37,8 +37,13 @@
     <script>
         $(document).ready(function() {
             $('.userselectize').selectize();
+            $('[data-garden-tab]').on('click', function(event) {
+                event.preventDefault();
+                $('#' + $(this).data('gardenTab')).tab('show');
+                location.hash = $(this).attr('href');
+            });
             if (location.hash) {
-                $("a[href='" + location.hash + "']").tab("show");
+                $("#gardenTabs a[href='" + location.hash + "']").tab("show");
             }
             $(document.body).on("click", "a[data-toggle='tab']", function(event) {
                 location.hash = this.getAttribute("href");
@@ -47,7 +52,7 @@
         // stay tabbed in on selected pane
         $(window).on("popstate", function() {
             var anchor = location.hash || $("a[data-toggle='tab']").first().attr("href");
-            $("a[href='" + anchor + "']").tab("show");
+            $("#gardenTabs a[href='" + anchor + "']").tab("show");
         });
     </script>
 @endsection

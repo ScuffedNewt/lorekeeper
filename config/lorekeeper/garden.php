@@ -17,6 +17,7 @@ return [
             'type'        => 'placeable',
             'mode_text'   => [
                 'place'       => 'Plant',
+                'place_past'  => 'planted',
                 'tend'        => 'Water',
                 'tend_plural' => 'Waterings',
                 'tend_past'   => 'Watered',
@@ -29,6 +30,7 @@ return [
             'type'        => 'placeable',
             'mode_text'   => [
                 'place'       => 'Place',
+                'place_past'  => 'placed',
                 'tend'        => 'Feed',
                 'tend_plural' => 'Feedings',
                 'tend_past'   => 'Fed',
@@ -43,25 +45,10 @@ return [
                 'place' => 'Apply',
             ],
         ],
-        'tool'       => [
-            'displayName' => 'Tool',
-            'type'        => 'modifier',
-            'mode_text'   => [
-                'place' => 'Use',
-            ],
-        ],
-        // can be used on both seeds and animals, is applied AFTER being placed
-        'food'       => [
-            'displayName' => 'Food',
-            'type'        => 'modifier',
-            'mode_text'   => [
-                'place' => 'Feed',
-            ],
-        ],
         // You can add more object types here with custom interactions, just be sure to create the relevant views and logic.
     ],
 
     'allow_users_to_visit_gardens' => true, // allows users to visit other users' gardens
     'allow_users_to_water_gardens' => true, // allows users to water other users' gardens
-    'user_guest_water_limit'       => 5, // number of times a guest user can water another user's garden per day, set to 0 for unlimited
+    'user_guest_water_limit'       => 5, // number of times a guest user can water another user's garden TOTAL per day, set to 0 for unlimited
 ];

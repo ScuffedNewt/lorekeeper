@@ -46,6 +46,10 @@
         @endif
     </div>
 
+    @if ($object->id)
+        @include('admin.gardens.objects._lifecycle_preview', ['object' => $object])
+    @endif
+
     <div class="text-right">
         {!! Form::submit($object->id ? 'Edit' : 'Create', ['class' => 'btn btn-primary']) !!}
     </div>
@@ -53,6 +57,8 @@
     {!! Form::close() !!}
 
     @include('widgets._loot_select_row', ['showLootTables' => true, 'showRaffles' => true])
+    @include('widgets._loot_select_row', ['showLootTables' => true, 'showRaffles' => true, 'prefix' => 'stay_'])
+    @include('widgets._loot_select_row', ['showLootTables' => true, 'showRaffles' => true, 'prefix' => 'remove_'])
     @include('widgets._loot_select_row', [
         'showLootTables' => true,
         'showRaffles' => true,

@@ -21,7 +21,7 @@
         <div class="sidebar-item"><a href="{{ $user->url . '/inventory' }}" class="{{ set_active('user/' . $user->name . '/inventory*') }}">Inventory</a></div>
         <div class="sidebar-item"><a href="{{ $user->url . '/bank' }}" class="{{ set_active('user/' . $user->name . '/bank*') }}">Bank</a></div>
         @if (config('lorekeeper.garden.allow_users_to_visit_gardens'))
-            <div class="sidebar-item"><a href="{{ $user->url . '/garden' }}" class="{{ set_active('user/' . $user->name . '/gardens*') }}">🌱 Garden</a></div>
+            <div class="sidebar-item"><a href="{{ $user->url . '/garden' }}" class="{{ set_active('user/' . $user->name . '/garden*') }}">{{ Auth::check() && Auth::id() == $user->id ? 'My Garden' : 'Garden' }}</a></div>
         @endif
     </li>
     <li class="sidebar-section">

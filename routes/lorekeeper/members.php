@@ -273,4 +273,9 @@ Route::group(['prefix' => 'rewards'], function () {
 Route::group(['prefix' => 'gardens', 'namespace' => 'Activities'], function () {
     Route::get('/', 'GardenController@getIndex');
     Route::post('action', 'GardenController@postAction');
+    Route::post('clear/{plotId}', 'GardenController@postClearPerished');
+    Route::post('care-all', 'GardenController@postCareAll');
+    Route::post('collect-all', 'GardenController@postCollectAll');
+    Route::post('guest-tend', 'GardenController@postGuestTend');
+    Route::get('plot/{plotId}', 'GardenController@getPlotState');
 });

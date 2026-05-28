@@ -176,6 +176,15 @@ class Garden extends Model {
     }
 
     /**
+     * Gets the admin edit URL.
+     *
+     * @return string
+     */
+    public function getAdminUrlAttribute() {
+        return url('admin/gardens/edit/'.$this->id);
+    }
+
+    /**
      * Gets the URL of the individual item's page, by ID.
      *
      * @return string
@@ -207,6 +216,12 @@ class Garden extends Model {
             return [];
         }
         $gardenObjects = GardenObject::whereIn('type', $types)->get();
+        $hasGreenhouse = $this->plots->contains(function ($plot) {
+            return $plot->data['ignore_seasons'] ?? false;
+        });
+        $gardenObjects = $gardenObjects->filter(function ($object) use ($hasGreenhouse) {
+            return $object->isInSeason() || $hasGreenhouse;
+        });
         $userGardenObjects = array_fill_keys($types, []);
         $groupedObjects = $gardenObjects->groupBy('object_model');
         foreach ($groupedObjects as $objectModel => $objects) {
