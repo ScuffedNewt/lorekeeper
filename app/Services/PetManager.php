@@ -461,8 +461,11 @@ class PetManager extends Service {
         try {
             // find parent if id is default
             if ($id == 0) {
+                $default = true;
                 $pet_type = Pet::find($pet->pet_id);
                 $id = $pet_type->parent == null ? null : $pet_type->parent->id;
+            } else {
+                $default = false;
             }
 
             if ($id == null) {
@@ -480,7 +483,10 @@ class PetManager extends Service {
                 if (!$tag) {
                     throw new \Exception('Item is not a splice.');
                 }
-                if ($tag->data['variant_ids'] && !in_array($id, $tag->data['variant_ids'])) {
+                if ($default == true && $tag->data['variant_ids'] && !in_array('default', $tag->data['variant_ids'])) {
+                    throw new \Exception('Item can not change pet into the default variant.');
+                }
+                if ($default == false && $tag->data['variant_ids'] && !in_array($id, $tag->data['variant_ids'])) {
                     throw new \Exception('Item is not a splice for this variant.');
                 }
                 if ($id == $pet->pet_id) {
