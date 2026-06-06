@@ -115,12 +115,16 @@ class SkillManager extends Service {
                 ['skill_id', '=', $skill->id],
             ])->first();
 
+            if (!$data) {
+                $data = '';
+            }
+
             if (!$recipient_stack) {
-                $data['data'] .= 'Received '.$quantity.' points for '.$skill->name.' skill. Previous Level: 0';
+                $data .= 'Received '.$quantity.' points for '.$skill->name.' skill. Previous Level: 0';
 
                 $recipient_stack = CharacterSkill::create(['character_id' => $recipient->id, 'skill_id' => $skill->id, 'level' => $quantity]);
             } else {
-                $data['data'] = 'Received '.$quantity.' points for '.$skill->name.' skill. Previous Level: '.$recipient_stack->level;
+                $data .= 'Received '.$quantity.' points for '.$skill->name.' skill. Previous Level: '.$recipient_stack->level;
 
                 $recipient_stack->level += $quantity;
                 $recipient_stack->save();
@@ -153,7 +157,7 @@ class SkillManager extends Service {
                 'sender_id'    => $senderId,
                 'log'          => 'Skill Awarded ('.$type.')',
                 'log_type'     => 'Skill Awarded',
-                'data'         => $data['data'],
+                'data'         => json_encode(['data' => $data]),
                 'created_at'   => Carbon::now(),
                 'updated_at'   => Carbon::now(),
             ]

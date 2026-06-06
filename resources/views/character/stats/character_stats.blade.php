@@ -27,7 +27,7 @@
             <div class="card-header h2">
                 Stat Information
                 <span class="badge badge-dark text-white mx-1 float-right" data-toggle="tooltip" title="Current Stat Points">
-                    Available Stat Points: {{ $character->level->current_points }}
+                    Available Stat Points: {{ $character->level->current_points ?? 0 }}
                 </span>
             </div>
             <div class="card-body">

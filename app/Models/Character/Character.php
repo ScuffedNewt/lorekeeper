@@ -238,9 +238,10 @@ class Character extends Model {
             return $this->hasMany(UserWeapon::class, 'character_id');
         }
 
-        return $this->hasMany(UserGear::class, 'character_id')
-            ->union($this->hasMany(UserWeapon::class, 'character_id')->toBase())
-            ->get();
+        $gear = $this->hasMany(UserGear::class, 'character_id')->get();
+        $weapons = $this->hasMany(UserWeapon::class, 'character_id')->get();
+
+        return $gear->merge($weapons);
     }
 
     /**
@@ -942,8 +943,8 @@ class Character extends Model {
     public function bonusStatCount($stat_id) {
         $total = 0;
         foreach ($this->equipment() as $equipment) {
-            if ($equipment->equipment->stats()->where('stat_id', $stat_id)->first()) {
-                $total += $equipment->equipment->stats()->where('stat_id', $stat_id)->first()->count;
+            if ($equipment->equipment?->stats()->where('stat_id', $stat_id)->first()) {
+                $total += $equipment->equipment?->stats()->where('stat_id', $stat_id)->first()->count;
             }
         }
 
@@ -957,7 +958,7 @@ class Character extends Model {
      */
     public function getStatEquipment($stat_id) {
         return $this->equipment()->filter(function ($equipment) use ($stat_id) {
-            return $equipment->equipment->stats()->where('stat_id', $stat_id)->first();
+            return $equipment->equipment?->stats()->where('stat_id', $stat_id)->first();
         });
     }
 }

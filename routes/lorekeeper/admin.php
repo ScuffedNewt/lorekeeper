@@ -660,14 +660,14 @@ Route::group(['prefix' => 'levels', 'namespace' => 'Stats', 'middleware' => 'pow
 // GEARS
 Route::group(['prefix' => 'gear', 'namespace' => 'Claymores', 'middleware' => 'power:edit_claymores'], function () {
     Route::get('/', 'GearController@getGearIndex');
-    Route::get('/create', 'GearController@getCreateGear');
-    Route::post('/create', 'GearController@postCreateEditGear');
-    Route::get('/edit/{id}', 'GearController@getEditGear');
-    Route::post('/edit/{id}', 'GearController@postCreateEditGear');
+    Route::get('create', 'GearController@getCreateGear');
+    Route::post('create', 'GearController@postCreateEditGear');
+    Route::get('edit/{id}', 'GearController@getEditGear');
+    Route::post('edit/{id}', 'GearController@postCreateEditGear');
     Route::get('delete/{id}', 'GearController@getDeleteGear');
     Route::post('delete/{id}', 'GearController@postDeleteGear');
 
-    Route::post('/stats/{id}', 'GearController@postEditGearStats');
+    Route::post('stats/{id}', 'GearController@postEditGearStats');
 
     // categories
     Route::get('gear-categories', 'GearController@getGearCategoryIndex');

@@ -324,7 +324,7 @@ class GearService extends Service {
 
             if (isset($data['stats'])) {
                 foreach ($data['stats'] as $key=>$stat) {
-                    if ($stat != null && $stat > 0) {
+                    if ($stat != null) {
                         GearStat::create([
                             'gear_id' => $id,
                             'stat_id' => $key,

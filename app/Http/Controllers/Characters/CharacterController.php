@@ -341,6 +341,19 @@ class CharacterController extends Controller {
     }
 
     /**
+     * Get the character's equipment page.
+     *
+     * @param mixed $slug
+     */
+    public function getCharacterEquipment($slug) {
+        $character = $this->character;
+
+        return view('character.equipment', [
+            'character' => $this->character,
+        ]);
+    }
+
+    /**
      * Transfers currency between the user and character.
      *
      * @param App\Services\CharacterManager $service

@@ -4,80 +4,92 @@
         </h1>
         <div class="row">
             <div class="col-md-6">
-                <h2>Base Stat Information</h2>
-                <p>
-                    Here you can view information about the stat at its base level.
-                </p>
-                <hr class="my-3">
-                <h4>Base Stat</h4>
-                <p>
-                    {{ $stat->stat->base }}
-                </p>
-                <h4>Max Level</h4>
-                <p>
-                    {{ $stat->stat->max_level ?? 'None' }}
-                </p>
-                <h4>Level Up Information</h4>
-                <p>
-                    @php
-                        $increment = $stat->stat->increment ?? 1;
-                        $multiplier = $stat->stat->multiplier ?? 1;
-                        if (($increment && $stat->base != 0) || ($multiplier && $stat->base != 0)) {
-                            // Calculate the new stat value
-                            $newStat = ($stat->stat->base + $increment) * $multiplier;
+                <div class="card h-100">
+                    <div class="card-header h2">
+                        Base Stat Information
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            Here you can view information about the stat at its base level.
+                        </p>
+                        <hr class="my-3">
+                        <h4>Base Stat</h4>
+                        <p>
+                            {{ $stat->stat->base }}
+                        </p>
+                        <h4>Max Level</h4>
+                        <p>
+                            {{ $stat->stat->max_level ?? 'None' }}
+                        </p>
+                        <h4>Level Up Information</h4>
+                        <p>
+                            @php
+                                $increment = $stat->stat->increment ?? 1;
+                                $multiplier = $stat->stat->multiplier ?? 1;
+                                if (($increment && $stat->base != 0) || ($multiplier && $stat->base != 0)) {
+                                    // Calculate the new stat value
+                                    $newStat = ($stat->stat->base + $increment) * $multiplier;
 
-                            // Calculate the percentage increase
-                            $percentageIncrease = (($newStat - $stat->stat->base) / $stat->stat->base) * 100 . '%';
-                        } else {
-                            $newStat = $increment * $multiplier;
-                            $percentageIncrease = $newStat * 100 . '%';
-                        }
-                    @endphp
-                    This stat increases by <b>{{ $percentageIncrease }}</b> per level up.
-                    ({{ '(' . $stat->stat->base . ' + ' . $increment . ') * ' . $multiplier . ' = ' . $newStat }})
-                </p>
-                @if (count($stat->stat->limits))
-                    <hr class="my-3">
-                    <h4>Stat Limits</h4>
-                    <p>
-                        The stat applies only to the following:
-                        <br />
-                        {!! $stat->stat->displayLimits() !!}
-                    </p>
-                @endif
+                                    // Calculate the percentage increase
+                                    $percentageIncrease = (($newStat - $stat->stat->base) / $stat->stat->base) * 100 . '%';
+                                } else {
+                                    $newStat = $increment * $multiplier;
+                                    $percentageIncrease = $newStat * 100 . '%';
+                                }
+                            @endphp
+                            This stat increases by <b>{{ $percentageIncrease }}</b> per level up.
+                            ({{ '(' . $stat->stat->base . ' + ' . $increment . ') * ' . $multiplier . ' = ' . $newStat }})
+                        </p>
+                        @if (count($stat->stat->limits))
+                            <hr class="my-3">
+                            <h4>Stat Limits</h4>
+                            <p>
+                                The stat applies only to the following:
+                                <br />
+                                {!! $stat->stat->displayLimits() !!}
+                            </p>
+                        @endif
+                    </div>
+                </div>
             </div>
             <div class="col-md-6">
-                <h2>Current Stat Information</h2>
-                <p>
-                    Here you can view information about the stat at the current level (<b>{{ $stat->stat_level }}</b>).
-                </p>
-                <hr class="my-3">
-                <h4>Stat Value</h4>
-                <p>
-                    {!! $stat->count !!}
-                </p>
-                <h4>Bonuses</h4>
-                <p>
-                    Listed are the following equipment that apply a bonus to this stat:
-                <div class="text-center row">
-                    @foreach ($character->getStatEquipment($stat->stat->id) as $equipment)
-                        <div class="col-md-2">
-                            @if ($equipment->has_image)
-                                <img class="rounded" src="{{ $equipment->imageUrl }}" data-toggle="tooltip" title="{{ $equipment->equipment->name }}<br />+ {{ $equipment->equipment->stats()->where('stat_id', $stat->stat->id)->first()->count }}"
-                                    style="max-width: 75px;" />
-                            @elseif($equipment->equipment->imageurl)
-                                <img class="rounded" src="{{ $equipment->equipment->imageUrl }}" data-toggle="tooltip"
-                                    title="{{ $equipment->equipment->name }}<br />+ {{ $equipment->equipment->stats()->where('stat_id', $stat->stat->id)->first()->count }}" style="max-width: 75px;" />
-                            @else
-                                {!! $equipment->equipment->displayName !!}
-                                <small>
-                                    {{ $equipment->equipment->name }}<br />+ {{ $equipment->equipment->stats()->where('stat_id', $stat->stat->id)->first()->count }}
-                                </small>
-                            @endif
+                <div class="card h-100">
+                    <div class="card-header h2">
+                        Current Stat Information
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            Here you can view information about the stat at the current level (<b>{{ $stat->stat_level }}</b>).
+                        </p>
+                        <hr class="my-3">
+                        <h4>Stat Value</h4>
+                        <p>
+                            {!! $stat->count !!}
+                        </p>
+                        <h4>Bonuses</h4>
+                        <p class="mb-0">
+                            Listed are the following equipment that apply a bonus to this stat:
+                        </p>
+                        <div class="text-center row">
+                            @foreach ($character->getStatEquipment($stat->stat->id) as $equipment)
+                                <div class="col-md-2">
+                                    @if ($equipment->has_image)
+                                        <img class="rounded" src="{{ $equipment->imageUrl }}" data-toggle="tooltip" title="{{ $equipment->equipment->name }}<br />+ {{ $equipment->equipment->stats()->where('stat_id', $stat->stat->id)->first()->count }}"
+                                            style="max-width: 75px;" />
+                                    @elseif($equipment->equipment->imageurl)
+                                        <img class="rounded" src="{{ $equipment->equipment->imageUrl }}" data-toggle="tooltip"
+                                            title="{{ $equipment->equipment->name }}<br />+ {{ $equipment->equipment->stats()->where('stat_id', $stat->stat->id)->first()->count }}" style="max-width: 75px;" />
+                                    @else
+                                        {!! $equipment->equipment->displayName !!}
+                                        <small>
+                                            {{ $equipment->equipment->name }}<br />+ {{ $equipment->equipment->stats()->where('stat_id', $stat->stat->id)->first()->count }}
+                                        </small>
+                                    @endif
+                                </div>
+                            @endforeach
                         </div>
-                    @endforeach
+                    </div>
                 </div>
-                </p>
             </div>
         </div>
 

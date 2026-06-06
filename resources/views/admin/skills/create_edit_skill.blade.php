@@ -30,7 +30,10 @@
 
     <div class="form-group">
         {!! Form::label('World Page Image (Optional)') !!} {!! add_help('This image is used only on the world information pages.') !!}
-        <div>{!! Form::file('image') !!}</div>
+        <div class="custom-file">
+            {!! Form::label('image', 'Choose file...', ['class' => 'custom-file-label']) !!}
+            {!! Form::file('image', ['class' => 'custom-file-input']) !!}
+        </div>
         <div class="text-muted">Recommended size: 100px x 100px</div>
         @if ($skill->has_image)
             <div class="form-check">
@@ -78,6 +81,7 @@
     @if ($skill->id)
         <div class="form-group">
             {!! Form::label('Species / Subtypes') !!} {!! add_help('Allow only the selected species / subtypes to have this skill.') !!}
+            <p>Only the selected species / subtypes will be able to have this skill. If none are selected, all species / subtypes will be able to have this skill.</p>
             <div id="featureList">
                 @foreach ($skill->species as $species)
                     <div class="d-flex mb-2">
