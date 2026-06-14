@@ -1,7 +1,8 @@
 <div class="row flex-wrap">
     <div class="col-6 col-md-2">
         <div class="logs-table-cell">
-            <i class="{{ $log->recipient_id == $owner->id ? 'in' : 'out' }}flow
+            <i
+                class="{{ $log->recipient_id == $owner->id ? 'in' : 'out' }}flow
                 bg-{{ $log->recipient_id == $owner->id ? 'success' : 'danger' }}
                 fas {{ $log->recipient_id == $owner->id ? 'fa-arrow-up' : 'fa-arrow-down' }} mr-2">
             </i>

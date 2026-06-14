@@ -74,8 +74,8 @@
                             @foreach ($character->getStatEquipment($stat->stat->id) as $equipment)
                                 <div class="col-md-2">
                                     @if ($equipment->has_image)
-                                        <img class="rounded" src="{{ $equipment->imageUrl }}" data-toggle="tooltip" title="{{ $equipment->equipment->name }}<br />+ {{ $equipment->equipment->stats()->where('stat_id', $stat->stat->id)->first()->count }}"
-                                            style="max-width: 75px;" />
+                                        <img class="rounded" src="{{ $equipment->imageUrl }}" data-toggle="tooltip"
+                                            title="{{ $equipment->equipment->name }}<br />+ {{ $equipment->equipment->stats()->where('stat_id', $stat->stat->id)->first()->count }}" style="max-width: 75px;" />
                                     @elseif($equipment->equipment->imageurl)
                                         <img class="rounded" src="{{ $equipment->equipment->imageUrl }}" data-toggle="tooltip"
                                             title="{{ $equipment->equipment->name }}<br />+ {{ $equipment->equipment->stats()->where('stat_id', $stat->stat->id)->first()->count }}" style="max-width: 75px;" />
