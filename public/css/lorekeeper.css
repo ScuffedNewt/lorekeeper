@@ -72,6 +72,17 @@ body {
     height: auto !important;
 }
 
+.mobile-handle {
+    font-size: 1.75rem;
+    position: absolute;
+    top: -1rem;
+    right: 0;
+}
+
+.mobile-handle i {
+    transform: rotate(-25deg);
+}
+
 /**************************************************************************************************
 
     Layout
@@ -448,16 +459,9 @@ main > .row {
     padding: .75rem 1.25rem;
     border-top: 1px solid rgba(0,0,0,0.1);
 }
-.text-break {
-    overflow-wrap: break-word;
-    word-break: break-word;
-}
 .small-icon {
     height: 2rem;
     padding-right: .5rem;
-}
-.text-wrap {
-    text-wrap: auto;
 }
 
 /* NOTIFICATIONS *********************************************************************************/
@@ -788,4 +792,25 @@ tr.accountbound {
 
 @media only screen and (max-width: 600px) {
     .comment_replies { padding-left:1rem;}
+}
+
+.content-warning {
+    filter: blur(2px) grayscale(60%);
+    transition: filter 0.25s ease;
+}
+
+.content-warning:hover {
+    filter: none;
+}
+
+/* CODE EDITOR *************************************************************************************/
+#ace-code-editor-wrapper .editor-btn {
+    background: white;
+    font-size: 14px;
+    height: 34px;
+    width: 34px;
+}
+
+#ace-code-editor-wrapper .editor-btn:hover {
+    background: buttonface;
 }

@@ -7,12 +7,14 @@ use App\Models\Character\CharacterBookmark;
 use App\Models\Character\CharacterImageCreator;
 use App\Models\Comment\CommentLike;
 use App\Models\Currency\Currency;
+use App\Models\Currency\CurrencyCategory;
 use App\Models\Currency\CurrencyLog;
 use App\Models\Gallery\GalleryCollaborator;
 use App\Models\Gallery\GalleryFavorite;
 use App\Models\Gallery\GallerySubmission;
 use App\Models\Item\Item;
 use App\Models\Item\ItemLog;
+use App\Models\Limit\UserUnlockedLimit;
 use App\Models\Notification;
 use App\Models\Rank\Rank;
 use App\Models\Shop\ShopLog;
@@ -23,7 +25,9 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use Throwable;
 
 class User extends Authenticatable implements MustVerifyEmail {
     use Commenter, Notifiable, TwoFactorAuthenticatable;
@@ -35,7 +39,7 @@ class User extends Authenticatable implements MustVerifyEmail {
      */
     protected $fillable = [
         'name', 'alias', 'rank_id', 'email', 'email_verified_at', 'password', 'is_news_unread', 'is_banned', 'has_alias', 'avatar', 'is_sales_unread', 'birthday',
-        'is_deactivated', 'deactivater_id',
+        'is_deactivated', 'deactivater_id', 'content_warning_visibility',
     ];
 
     /**
@@ -91,6 +95,19 @@ class User extends Authenticatable implements MustVerifyEmail {
         'avatar'      => 'required|mimes:jpeg,jpg,gif,png,webp|max:1024',
     ];
 
+    /**
+     * Send the email verification notification.
+     *
+     * @throws \Exception
+     */
+    public function sendEmailVerificationNotification() {
+        try {
+            parent::sendEmailVerificationNotification();
+        } catch (Throwable $e) {
+            throw new \Exception('Failed to send verification email. Please try again or contact an administrator.');
+        }
+    }
+
     /**********************************************************************************************
 
         RELATIONS
@@ -101,7 +118,7 @@ class User extends Authenticatable implements MustVerifyEmail {
      * Get all of the user's update logs.
      */
     public function logs() {
-        return $this->hasMany('App\Models\User\UserUpdateLog');
+        return $this->hasMany(UserUpdateLog::class);
     }
 
     /**
@@ -213,6 +230,13 @@ class User extends Authenticatable implements MustVerifyEmail {
         return $this->hasMany(CommentLike::class);
     }
 
+    /**
+     * Gets all of the user's unlocked limits.
+     */
+    public function unlockedLimits() {
+        return $this->hasMany(UserUnlockedLimit::class);
+    }
+
     /**********************************************************************************************
 
         SCOPES
@@ -280,6 +304,19 @@ class User extends Authenticatable implements MustVerifyEmail {
         }
 
         return $this->attributes['has_alias'];
+    }
+
+    /**
+     * Checks if the user has an email.
+     *
+     * @return bool
+     */
+    public function getHasEmailAttribute() {
+        if (!config('lorekeeper.settings.require_email')) {
+            return true;
+        }
+
+        return $this->attributes['email'] && $this->attributes['email_verified_at'];
     }
 
     /**
@@ -491,22 +528,37 @@ class User extends Authenticatable implements MustVerifyEmail {
     /**
      * Get the user's held currencies.
      *
-     * @param bool $showAll
+     * @param bool       $showAll
+     * @param mixed|null $user
+     * @param mixed      $showCategories
      *
      * @return \Illuminate\Support\Collection
      */
-    public function getCurrencies($showAll = false) {
+    public function getCurrencies($showAll = false, $showCategories = false, $user = null) {
         // Get a list of currencies that need to be displayed
         // On profile: only ones marked is_displayed
         // In bank: ones marked is_displayed + the ones the user has
 
         $owned = UserCurrency::where('user_id', $this->id)->pluck('quantity', 'currency_id')->toArray();
 
-        $currencies = Currency::where('is_user_owned', 1);
+        $currencies = Currency::where('is_user_owned', 1)
+            ->whereHas('category', function ($query) use ($user) {
+                $query->visible($user);
+            })
+            ->orWhereNull('currency_category_id')
+            ->visible($user);
         if ($showAll) {
             $currencies->where(function ($query) use ($owned) {
                 $query->where('is_displayed', 1)->orWhereIn('id', array_keys($owned));
             });
+
+            if ($showCategories) {
+                $categories = CurrencyCategory::visible()->orderBy('sort', 'DESC')->get();
+
+                if ($categories->count()) {
+                    $currencies->orderByRaw('FIELD(currency_category_id,'.implode(',', $categories->pluck('id')->toArray()).')');
+                }
+            }
         } else {
             $currencies = $currencies->where('is_displayed', 1);
         }
@@ -515,6 +567,16 @@ class User extends Authenticatable implements MustVerifyEmail {
 
         foreach ($currencies as $currency) {
             $currency->quantity = $owned[$currency->id] ?? 0;
+        }
+
+        if ($showAll && $showCategories) {
+            $currencies = $currencies->groupBy(function ($currency) use ($categories) {
+                if (!$currency->category) {
+                    return 'Miscellaneous';
+                }
+
+                return $categories->where('id', $currency->currency_category_id)->first()->name;
+            });
         }
 
         return $currencies;
@@ -539,43 +601,35 @@ class User extends Authenticatable implements MustVerifyEmail {
     /**
      * Get the user's currency logs.
      *
-     * @param int $limit
-     *
      * @return \Illuminate\Pagination\LengthAwarePaginator|\Illuminate\Support\Collection
      */
-    public function getCurrencyLogs($limit = 10) {
+    public function getCurrencyLogs() {
         $user = $this;
         $query = CurrencyLog::with('currency')->where(function ($query) use ($user) {
-            $query->with('sender')->where('sender_type', 'User')->where('sender_id', $user->id)->whereNotIn('log_type', ['Staff Grant', 'Prompt Rewards', 'Claim Rewards', 'Gallery Submission Reward']);
-        })->orWhere(function ($query) use ($user) {
-            $query->with('recipient')->where('recipient_type', 'User')->where('recipient_id', $user->id)->where('log_type', '!=', 'Staff Removal');
+            $query->where(function ($query) use ($user) {
+                $query->with('sender')->where('sender_type', 'User')->where('sender_id', $user->id)->whereNotIn('log_type', ['Staff Grant', 'Prompt Rewards', 'Claim Rewards', 'Gallery Submission Reward']);
+            })->orWhere(function ($query) use ($user) {
+                $query->with('recipient')->where('recipient_type', 'User')->where('recipient_id', $user->id)->where('log_type', '!=', 'Staff Removal');
+            });
         })->orderBy('id', 'DESC');
-        if ($limit) {
-            return $query->take($limit)->get();
-        } else {
-            return $query->paginate(30);
-        }
+
+        return $query;
     }
 
     /**
      * Get the user's item logs.
      *
-     * @param int $limit
-     *
      * @return \Illuminate\Pagination\LengthAwarePaginator|\Illuminate\Support\Collection
      */
-    public function getItemLogs($limit = 10) {
+    public function getItemLogs() {
         $user = $this;
         $query = ItemLog::with('item')->where(function ($query) use ($user) {
             $query->with('sender')->where('sender_type', 'User')->where('sender_id', $user->id)->whereNotIn('log_type', ['Staff Grant', 'Prompt Rewards', 'Claim Rewards']);
         })->orWhere(function ($query) use ($user) {
             $query->with('recipient')->where('recipient_type', 'User')->where('recipient_id', $user->id)->where('log_type', '!=', 'Staff Removal');
         })->orderBy('id', 'DESC');
-        if ($limit) {
-            return $query->take($limit)->get();
-        } else {
-            return $query->paginate(30);
-        }
+
+        return $query;
     }
 
     /**
@@ -677,7 +731,7 @@ class User extends Authenticatable implements MustVerifyEmail {
      * @return \Illuminate\Pagination\LengthAwarePaginator
      */
     public function getSubmissions($user = null) {
-        return Submission::with('user')->with('prompt')->viewable($user ? $user : null)->where('user_id', $this->id)->orderBy('id', 'DESC')->paginate(30);
+        return Submission::with('user')->with('prompt')->viewable($user ? $user : null)->where('user_id', $this->id)->orderBy('id', 'DESC');
     }
 
     /**

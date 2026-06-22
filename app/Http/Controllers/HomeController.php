@@ -28,7 +28,7 @@ class HomeController extends Controller {
      */
     public function getIndex() {
         if (config('lorekeeper.extensions.show_all_recent_submissions.enable')) {
-            $query = GallerySubmission::visible(Auth::check() ? Auth::user() : null)->accepted()->orderBy('created_at', 'DESC');
+            $query = GallerySubmission::visible(Auth::user() ?? null)->accepted()->orderBy('created_at', 'DESC');
             $gallerySubmissions = $query->get()->take(8);
         } else {
             $gallerySubmissions = [];
@@ -46,9 +46,9 @@ class HomeController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getLink(Request $request) {
-        // If the user already has a username associated with their account, redirect them
+        // If the user already has an alias associated with their account, redirect them
         if (Auth::check() && Auth::user()->hasAlias) {
-            redirect()->to('home');
+            return redirect()->route('home');
         }
 
         // Display the login link
@@ -101,6 +101,45 @@ class HomeController extends Controller {
         }
 
         return redirect()->to('/');
+    }
+
+    /**
+     * Shows the email page.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getEmail(Request $request) {
+        // If the user already has an email associated with their account, redirect them
+        if (Auth::check() && Auth::user()->hasEmail) {
+            return redirect()->route('home');
+        }
+
+        if (config('lorekeeper.settings.allow_unverified_users_to_modify_emails') && $request->is('email/update')) {
+            return view('auth.update_email');
+        }
+
+        // Step 1: display a login email
+        return view('auth.email');
+    }
+
+    /**
+     * Posts the email page.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function postEmail(UserService $service, Request $request) {
+        $data = $request->input('email');
+        if ($service->updateEmail(['email' => $data], Auth::user())) {
+            flash('Email added successfully!');
+
+            return redirect()->route('home');
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
+
+            return redirect()->back();
+        }
     }
 
     /**
