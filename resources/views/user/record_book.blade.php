@@ -30,10 +30,7 @@
                 @foreach ($categoryItems as $item)
                     <div class="col-lg-3 col-sm-4 col-12 text-center">
                         @php
-                            $check = !$user
-                                ->items()
-                                ->where('item_id', $item->id)
-                                ->exists();
+                            $check = !$user->items()->where('item_id', $item->id)->exists();
                         @endphp
                         @if ($item->has_image)
                             <img src="{{ $item->imageUrl }}" class="img-fluid" style="{{ $check ? 'filter: grayscale(100%)  blur(.15em); opacity: 0.75;' : '' }}" alt="{{ $item->name }}" />
