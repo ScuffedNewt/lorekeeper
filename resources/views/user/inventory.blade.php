@@ -18,6 +18,30 @@
         </div>
     </div>
 
+    <div>
+        {!! Form::open(['method' => 'GET', 'class' => '']) !!}
+        <div class="form-inline justify-content-end">
+            <div class="form-group ml-3 mb-3">
+                {!! Form::text('name', Request::get('name'), ['class' => 'form-control', 'placeholder' => 'Name']) !!}
+            </div>
+            <div class="form-group ml-3 mb-3">
+                {!! Form::select('item_category_id', $categories->pluck('name', 'id'), Request::get('item_category_id'), ['class' => 'form-control', 'placeholder' => 'Any Category']) !!}
+            </div>
+            @if (config('lorekeeper.extensions.item_entry_expansion.extra_fields'))
+                <div class="form-group ml-3 mb-3">
+                    {!! Form::select('rarity_id', $rarities, Request::get('rarity_id'), ['class' => 'form-control', 'placeholder' => 'Any Rarity']) !!}
+                </div>
+                <div class="form-group ml-3 mb-3">
+                    {!! Form::select('artist', $artists, Request::get('artist'), ['class' => 'form-control', 'placeholder' => 'Any Artist']) !!}
+                </div>
+            @endif
+            <div class="form-group ml-3 mb-3">
+                {!! Form::submit('Search', ['class' => 'btn btn-primary']) !!}
+            </div>
+        </div>
+        {!! Form::close() !!}
+    </div>
+
     <div id="defView" class="hide">
         @foreach ($items as $categoryId => $categoryItems)
             <div class="card mb-3 inventory-category">
@@ -32,11 +56,13 @@
                         <div class="row mb-3">
                             @foreach ($chunk as $itemId => $stack)
                                 <div class="col-sm-3 col-6 text-center inventory-item" data-id="{{ $stack->first()->pivot->id }}" data-name="{{ $user->name }}'s {{ $stack->first()->name }}">
-                                    <div class="mb-1">
-                                        <a href="#" class="inventory-stack">
-                                            <img src="{{ $stack->first()->imageUrl }}" alt="{{ $stack->first()->name }}" />
-                                        </a>
-                                    </div>
+                                    @if ($stack->first()->has_image)
+                                        <div class="mb-1">
+                                            <a href="#" class="inventory-stack">
+                                                <img src="{{ $stack->first()->imageUrl }}" alt="{{ $stack->first()->name }}" />
+                                            </a>
+                                        </div>
+                                    @endif
                                     <div>
                                         <a href="#" class="inventory-stack inventory-stack-name">
                                             {{ $stack->first()->name }} x{{ $stack->sum('pivot.count') }}

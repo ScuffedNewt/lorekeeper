@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Facades\Settings;
 use App\Http\Controllers\Controller;
 use App\Models\AdminLog;
 use App\Models\Character\CharacterDesignUpdate;
@@ -10,13 +11,11 @@ use App\Models\Currency\Currency;
 use App\Models\Gallery\GallerySubmission;
 use App\Models\Report\Report;
 use App\Models\Submission\Submission;
-use App\Models\Trade;
+use App\Models\Trade\Trade;
 use App\Models\User\User;
-use Auth;
-use Config;
-use DB;
 use Illuminate\Http\Request;
-use Settings;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller {
     /**
@@ -26,6 +25,7 @@ class HomeController extends Controller {
      */
     public function getIndex() {
         $openTransfersQueue = Settings::get('open_transfers_queue');
+        $openTradesQueue = Settings::get('open_trades_queue');
         $galleryRequireApproval = Settings::get('gallery_submissions_require_approval');
         $galleryCurrencyAwards = Settings::get('gallery_submissions_reward_currency');
 
@@ -37,6 +37,7 @@ class HomeController extends Controller {
             'reportCount'            => Report::where('status', 'Pending')->count(),
             'assignedReportCount'    => Report::assignedToMe(Auth::user())->count(),
             'openTransfersQueue'     => $openTransfersQueue,
+            'openTradesQueue'        => $openTradesQueue,
             'transferCount'          => $openTransfersQueue ? CharacterTransfer::active()->where('is_approved', 0)->count() : 0,
             'tradeCount'             => $openTransfersQueue ? Trade::where('status', 'Pending')->count() : 0,
             'galleryRequireApproval' => $galleryRequireApproval,
@@ -85,7 +86,7 @@ class HomeController extends Controller {
      */
     public function getStaffRewardSettings() {
         return view('admin.staff_reward_settings', [
-            'currency' => Currency::find(Config::get('lorekeeper.extensions.staff_rewards.currency_id')),
+            'currency' => Currency::find(config('lorekeeper.extensions.staff_rewards.currency_id')),
             'settings' => DB::table('staff_actions')->orderBy('key')->paginate(20),
         ]);
     }

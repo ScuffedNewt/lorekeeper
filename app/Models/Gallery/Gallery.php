@@ -4,7 +4,6 @@ namespace App\Models\Gallery;
 
 use App\Models\Model;
 use Carbon\Carbon;
-use Settings;
 
 class Gallery extends Model {
     /**
@@ -24,12 +23,16 @@ class Gallery extends Model {
      * @var string
      */
     protected $table = 'galleries';
+
     /**
-     * Dates on the model to convert to Carbon instances.
+     * The attributes that should be cast to native types.
      *
      * @var array
      */
-    public $dates = ['start_at', 'end_at'];
+    protected $casts = [
+        'start_at' => 'datetime',
+        'end_at'   => 'datetime',
+    ];
 
     /**
      * Validation rules for character creation.
@@ -61,21 +64,43 @@ class Gallery extends Model {
      * Get the parent gallery.
      */
     public function parent() {
-        return $this->belongsTo('App\Models\Gallery\Gallery', 'parent_id');
+        return $this->belongsTo(self::class, 'parent_id');
     }
 
     /**
      * Get the child galleries of this gallery.
      */
     public function children() {
-        return $this->hasMany('App\Models\Gallery\Gallery', 'parent_id')->sort();
+        return $this->hasMany(self::class, 'parent_id')->sort();
+    }
+
+    /**
+     * Get the sibling galleries of this gallery.
+     */
+    public function siblings() {
+        if ($this->parent) {
+            return $this->parent->hasMany(self::class, 'parent_id')->sort();
+        }
+
+        return null;
+    }
+
+    /**
+     * Get the avunculi galleries of this gallery.
+     */
+    public function avunculi() {
+        if ($this->parent && $this->parent->siblings()) {
+            return $this->parent->siblings()->sort();
+        }
+
+        return null;
     }
 
     /**
      * Get the submissions made to this gallery.
      */
     public function submissions() {
-        return $this->hasMany('App\Models\Gallery\GallerySubmission', 'gallery_id')->visible()->orderBy('created_at', 'DESC');
+        return $this->hasMany(GallerySubmission::class, 'gallery_id')->visible()->orderBy('created_at', 'DESC');
     }
 
     /**********************************************************************************************
@@ -176,12 +201,13 @@ class Gallery extends Model {
     /**
      * Gets whether or not the user can submit to the gallery.
      *
+     * @param bool       $submissionsOpen
      * @param mixed|null $user
      *
      * @return string
      */
-    public function canSubmit($user = null) {
-        if (Settings::get('gallery_submissions_open')) {
+    public function canSubmit($submissionsOpen, $user = null) {
+        if ($submissionsOpen) {
             if ((isset($this->start_at) && $this->start_at->isFuture()) || (isset($this->end_at) && $this->end_at->isPast())) {
                 return false;
             } elseif ($user && $user->hasPower('manage_submissions')) {

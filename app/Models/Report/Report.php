@@ -3,6 +3,7 @@
 namespace App\Models\Report;
 
 use App\Models\Model;
+use App\Models\User\User;
 use App\Traits\Commentable;
 
 class Report extends Model {
@@ -25,6 +26,15 @@ class Report extends Model {
      * @var string
      */
     protected $table = 'reports';
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'data' => 'array',
+    ];
 
     /**
      * Whether the model contains timestamps to be saved and updated.
@@ -60,14 +70,14 @@ class Report extends Model {
      * Get the user who made the report.
      */
     public function user() {
-        return $this->belongsTo('App\Models\User\User', 'user_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     /**
      * Get the staff who processed the report.
      */
     public function staff() {
-        return $this->belongsTo('App\Models\User\User', 'staff_id');
+        return $this->belongsTo(User::class, 'staff_id');
     }
 
     /**********************************************************************************************
@@ -122,14 +132,15 @@ class Report extends Model {
     }
 
     /**
-     * Scope a query to sort reports oldest first.
+     * Scope a query to sort reports by newest first.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param mixed                                 $reverse
      *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeSortOldest($query) {
-        return $query->orderBy('id');
+    public function scopeSortNewest($query, $reverse = false) {
+        return $query->orderBy('id', $reverse ? 'ASC' : 'DESC');
     }
 
     /**********************************************************************************************
@@ -137,15 +148,6 @@ class Report extends Model {
         ACCESSORS
 
     **********************************************************************************************/
-
-    /**
-     * Get the data attribute as an associative array.
-     *
-     * @return array
-     */
-    public function getDataAttribute() {
-        return json_decode($this->attributes['data'], true);
-    }
 
     /**
      * Get the viewing URL of the report/claim.

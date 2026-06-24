@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Characters;
 
+use App\Facades\Settings;
 use App\Http\Controllers\Controller;
 use App\Models\Character\Character;
 use App\Models\Character\CharacterCurrency;
@@ -12,6 +13,7 @@ use App\Models\Currency\Currency;
 use App\Models\Gallery\GallerySubmission;
 use App\Models\Item\Item;
 use App\Models\Item\ItemCategory;
+use App\Models\Rarity;
 use App\Models\User\User;
 use App\Models\User\UserCurrency;
 use App\Models\User\UserItem;
@@ -19,12 +21,10 @@ use App\Services\CharacterManager;
 use App\Services\CurrencyManager;
 use App\Services\DesignUpdateManager;
 use App\Services\InventoryManager;
-use Auth;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
 use Route;
-use Settings;
 
 class CharacterController extends Controller {
     /*
@@ -53,10 +53,10 @@ class CharacterController extends Controller {
 
             $this->character->updateOwner();
 
-            if (Config::get('lorekeeper.extensions.previous_and_next_characters.display')) {
+            if (config('lorekeeper.extensions.previous_and_next_characters.display')) {
                 $query = Character::myo(0);
                 // Get only characters of this category if pull number is limited to category
-                if (Config::get('lorekeeper.settings.character_pull_number') === 'category') {
+                if (config('lorekeeper.settings.character_pull_number') === 'category') {
                     $query->where('character_category_id', $this->character->character_category_id);
                 }
 
@@ -78,7 +78,7 @@ class CharacterController extends Controller {
                     $higherChar = $characters->where('number', '>', $this->character->number)->last();
                 }
 
-                if (Config::get('lorekeeper.extensions.previous_and_next_characters.reverse') == 0) {
+                if (config('lorekeeper.extensions.previous_and_next_characters.reverse') == 0) {
                     $nextCharacter = $lowerChar;
                     $previousCharacter = $higherChar;
                 } else {
@@ -203,7 +203,7 @@ class CharacterController extends Controller {
         return view('character.gallery', [
             'character'             => $this->character,
             'extPrevAndNextBtnsUrl' => '/gallery',
-            'submissions'           => GallerySubmission::whereIn('id', $this->character->gallerySubmissions->pluck('gallery_submission_id')->toArray())->visible()->accepted()->orderBy('created_at', 'DESC')->paginate(20)->appends($request->query()),
+            'submissions'           => GallerySubmission::whereIn('id', $this->character->gallerySubmissions->pluck('gallery_submission_id')->toArray())->visible(Auth::user() ?? null)->orderBy('created_at', 'DESC')->paginate(20),
         ]);
     }
 
@@ -216,7 +216,7 @@ class CharacterController extends Controller {
      */
     public function getCharacterImages($slug) {
         return view('character.images', [
-            'user'                  => Auth::check() ? Auth::user() : null,
+            'user'                  => Auth::user() ?? null,
             'character'             => $this->character,
             'extPrevAndNextBtnsUrl' => '/images',
         ]);
@@ -229,12 +229,33 @@ class CharacterController extends Controller {
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function getCharacterInventory($slug) {
-        $categories = ItemCategory::visible(Auth::check() ? Auth::user() : null)->where('is_character_owned', '1')->orderBy('sort', 'DESC')->get();
+    public function getCharacterInventory(Request $request, $slug) {
+        $categories = ItemCategory::visible(Auth::user() ?? null)->where('is_character_owned', '1')->orderBy('sort', 'DESC')->get();
         $itemOptions = Item::whereIn('item_category_id', $categories->pluck('id'));
+
+        $query = Item::query();
+        $data = $request->only(['item_category_id', 'name', 'artist', 'rarity_id']);
+        if (isset($data['item_category_id'])) {
+            $query->where('item_category_id', $data['item_category_id']);
+        }
+        if (isset($data['name'])) {
+            $query->where('name', 'LIKE', '%'.$data['name'].'%');
+        }
+        if (isset($data['artist'])) {
+            $query->where('artist_id', $data['artist']);
+        }
+        if (isset($data['rarity_id'])) {
+            if ($data['rarity_id'] == 'withoutOption') {
+                $query->whereNull('data->rarity_id');
+            } else {
+                $query->where('data->rarity_id', $data['rarity_id']);
+            }
+        }
 
         $items = count($categories) ?
             $this->character->items()
+                ->whereIn('items.id', $query->pluck('id')->toArray())
+                ->with('category')
                 ->where('count', '>', 0)
                 ->orderByRaw('FIELD(item_category_id,'.implode(',', $categories->pluck('id')->toArray()).')')
                 ->orderBy('name')
@@ -242,6 +263,8 @@ class CharacterController extends Controller {
                 ->get()
                 ->groupBy(['item_category_id', 'id']) :
             $this->character->items()
+                ->whereIn('items.id', $query->pluck('id')->toArray())
+                ->with('category')
                 ->where('count', '>', 0)
                 ->orderBy('name')
                 ->orderBy('updated_at')
@@ -254,12 +277,11 @@ class CharacterController extends Controller {
             'categories'            => $categories->keyBy('id'),
             'items'                 => $items,
             'logs'                  => $this->character->getItemLogs(),
+            'artists'               => User::whereIn('id', Item::whereNotNull('artist_id')->pluck('artist_id')->toArray())->pluck('name', 'id')->toArray(),
+            'rarities'              => ['withoutOption' => 'Without Rarity'] + Rarity::orderBy('rarities.sort', 'DESC')->pluck('name', 'id')->toArray(),
         ] + (Auth::check() && (Auth::user()->hasPower('edit_inventories') || Auth::user()->id == $this->character->user_id) ? [
-            'itemOptions'   => $itemOptions->pluck('name', 'id'),
-            'userInventory' => UserItem::with('item')->whereIn('item_id', $itemOptions->pluck('id'))->whereNull('deleted_at')->where('count', '>', '0')->where('user_id', Auth::user()->id)->get()->filter(function ($userItem) {
-                return $userItem->isTransferrable == true;
-            })->sortBy('item.name'),
-            'page'          => 'character',
+            'itemOptions' => $itemOptions->pluck('name', 'id'),
+            'page'        => 'character',
         ] : []));
     }
 
@@ -580,6 +602,10 @@ class CharacterController extends Controller {
      * @return \Illuminate\Http\RedirectResponse
      */
     private function postName(Request $request, InventoryManager $service) {
+        $request->validate([
+            'stack_name' => 'nullable|max:100',
+        ]);
+
         if ($service->nameStack($this->character, CharacterItem::find($request->get('ids')), $request->get('stack_name'), Auth::user())) {
             flash('Item named successfully.')->success();
         } else {

@@ -3,6 +3,7 @@
 namespace App\Models\Sales;
 
 use App\Models\Model;
+use App\Models\User\User;
 use App\Traits\Commentable;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
@@ -19,6 +20,7 @@ class Sales extends Model implements Feedable {
     protected $fillable = [
         'user_id', 'text', 'parsed_text', 'title', 'is_visible', 'post_at',
         'is_open', 'comments_open_at',
+        'has_image', 'hash',
     ];
 
     /**
@@ -29,18 +31,21 @@ class Sales extends Model implements Feedable {
     protected $table = 'sales';
 
     /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'post_at'          => 'datetime',
+        'comments_open_at' => 'datetime',
+    ];
+
+    /**
      * Whether the model contains timestamps to be saved and updated.
      *
      * @var string
      */
     public $timestamps = true;
-
-    /**
-     * Dates on the model to convert to Carbon instances.
-     *
-     * @var array
-     */
-    public $dates = ['post_at', 'comments_open_at'];
 
     /**
      * Validation rules for creation.
@@ -50,6 +55,7 @@ class Sales extends Model implements Feedable {
     public static $createRules = [
         'title' => 'required|between:3,100',
         'text'  => 'required',
+        'image' => 'mimes:png',
     ];
 
     /**
@@ -60,6 +66,7 @@ class Sales extends Model implements Feedable {
     public static $updateRules = [
         'title' => 'required|between:3,100',
         'text'  => 'required',
+        'image' => 'mimes:png',
     ];
 
     /**********************************************************************************************
@@ -72,14 +79,14 @@ class Sales extends Model implements Feedable {
      * Get the user who created the Sales post.
      */
     public function user() {
-        return $this->belongsTo('App\Models\User\User');
+        return $this->belongsTo(User::class);
     }
 
     /**
      * Get the characters associated with the sales post.
      */
     public function characters() {
-        return $this->hasMany('App\Models\Sales\SalesCharacter', 'sales_id');
+        return $this->hasMany(SalesCharacter::class, 'sales_id');
     }
 
     /**********************************************************************************************
@@ -92,10 +99,15 @@ class Sales extends Model implements Feedable {
      * Scope a query to only include visible posts.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param mixed|null                            $user
      *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeVisible($query) {
+    public function scopeVisible($query, $user = null) {
+        if ($user && $user->hasPower('manage_sales')) {
+            return $query;
+        }
+
         return $query->where('is_visible', 1);
     }
 
@@ -126,22 +138,12 @@ class Sales extends Model implements Feedable {
      * Scope a query to sort sales by newest first.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param mixed                                 $reverse
      *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeSortNewest($query) {
-        return $query->orderBy('id', 'DESC');
-    }
-
-    /**
-     * Scope a query to sort sales oldest first.
-     *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     *
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeSortOldest($query) {
-        return $query->orderBy('id');
+    public function scopeSortNewest($query, $reverse = false) {
+        return $query->orderBy('id', $reverse ? 'ASC' : 'DESC');
     }
 
     /**
@@ -181,6 +183,46 @@ class Sales extends Model implements Feedable {
     }
 
     /**
+     * Gets the file directory containing the model's image.
+     *
+     * @return string
+     */
+    public function getImageDirectoryAttribute() {
+        return 'images/data/sales';
+    }
+
+    /**
+     * Gets the file name of the model's image.
+     *
+     * @return string
+     */
+    public function getImageFileNameAttribute() {
+        return $this->id.'-'.$this->hash.'-image.png';
+    }
+
+    /**
+     * Gets the path to the file directory containing the model's image.
+     *
+     * @return string
+     */
+    public function getImagePathAttribute() {
+        return public_path($this->imageDirectory);
+    }
+
+    /**
+     * Gets the URL of the model's image.
+     *
+     * @return string
+     */
+    public function getImageUrlAttribute() {
+        if (!$this->has_image) {
+            return null;
+        }
+
+        return asset($this->imageDirectory.'/'.$this->imageFileName);
+    }
+
+    /**
      * Gets the Sales post URL.
      *
      * @return string
@@ -204,7 +246,7 @@ class Sales extends Model implements Feedable {
      * @return string
      */
     public function getAdminPowerAttribute() {
-        return 'edit_pages';
+        return 'manage_sales';
     }
 
     /**********************************************************************************************

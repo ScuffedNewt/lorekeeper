@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Facades\Notifications;
+use App\Facades\Settings;
 use App\Models\Character\Character;
 use App\Models\Currency\Currency;
 use App\Models\Gallery\Gallery;
@@ -11,11 +13,8 @@ use App\Models\Gallery\GalleryFavorite;
 use App\Models\Gallery\GallerySubmission;
 use App\Models\Prompt\Prompt;
 use App\Models\User\User;
-use Config;
-use DB;
-use Image;
-use Notifications;
-use Settings;
+use Illuminate\Support\Facades\DB;
+use Intervention\Image\Facades\Image;
 
 class GalleryManager extends Service {
     /*
@@ -34,7 +33,7 @@ class GalleryManager extends Service {
      * @param array $currencyFormData
      * @param User  $user
      *
-     * @return \App\Models\Gallery\GallerySubmission|bool
+     * @return bool|GallerySubmission
      */
     public function createSubmission($data, $currencyFormData, $user) {
         DB::beginTransaction();
@@ -107,7 +106,6 @@ class GalleryManager extends Service {
             if (isset($currencyFormData) && $currencyFormData) {
                 $data['data']['currencyData'] = $currencyFormData;
                 $data['data']['total'] = calculateGroupCurrency($currencyFormData);
-                $data['data'] = collect($data['data'])->toJson();
             }
 
             $submission->update($data);
@@ -178,7 +176,7 @@ class GalleryManager extends Service {
      * @param array             $data
      * @param User              $user
      *
-     * @return \App\Models\Gallery\GallerySubmission|bool
+     * @return bool|GallerySubmission
      */
     public function updateSubmission($submission, $data, $user) {
         DB::beginTransaction();
@@ -187,6 +185,10 @@ class GalleryManager extends Service {
             // Check that the user can edit the submission
             if (!$submission->user_id == $user->id && !$user->hasPower('manage_submissions')) {
                 throw new \Exception("You can't edit this submission.");
+            }
+
+            if ($submission->status == 'Rejected') {
+                throw new \Exception('This submission has been rejected and cannot be edited.');
             }
 
             // Check that there is text and/or an image, including if there is an existing image (via the existence of a hash)
@@ -342,7 +344,7 @@ class GalleryManager extends Service {
      * @param User              $user
      * @param mixed             $data
      *
-     * @return \App\Models\Gallery\GalleryFavorite|bool
+     * @return bool|GalleryFavorite
      */
     public function editCollaborator($submission, $data, $user) {
         DB::beginTransaction();
@@ -368,7 +370,7 @@ class GalleryManager extends Service {
 
                 // Check if all collaborators have approved, and if so send a notification to the
                 // submitting user (unless they are the last to approve-- which shouldn't happen, but)
-                if ($submission->collaboratorApproved) {
+                if ($submission->collaboratorApproval) {
                     if (Settings::get('gallery_submissions_require_approval') && $submission->gallery->votes_required > 0) {
                         if ($submission->user->id != $user->id) {
                             Notifications::create('GALLERY_COLLABORATORS_APPROVED', $submission->user, [
@@ -406,7 +408,7 @@ class GalleryManager extends Service {
             if ($submission->status != 'Pending') {
                 throw new \Exception('This request cannot be processed.');
             }
-            if (!$submission->collaboratorApproved) {
+            if (!$submission->collaboratorApproval) {
                 throw new \Exception("This submission's collaborators have not all approved yet.");
             }
 
@@ -424,30 +426,18 @@ class GalleryManager extends Service {
 
             // Get existing vote data if it exists, remove any existing vote data for the user,
             // add the new vote data, and json encode it
-            $voteData = (isset($submission->vote_data) ? collect(json_decode($submission->vote_data, true)) : collect([]));
+            $voteData = (isset($submission->vote_data) ? collect($submission->vote_data, true) : collect([]));
             $voteData->get($user->id) ? $voteData->pull($user->id) : null;
             $voteData->put($user->id, $vote);
-            $submission->vote_data = $voteData->toJson();
+            $submission->vote_data = $voteData;
 
             $submission->save();
 
-            // Count up the existing votes to see if the required number has been reached
-            $rejectSum = 0;
-            $approveSum = 0;
-            foreach ($submission->voteData as $voter=> $vote) {
-                if ($vote == 1) {
-                    $rejectSum += 1;
-                }
-                if ($vote == 2) {
-                    $approveSum += 1;
-                }
-            }
-
-            // And if so, process the submission
-            if ($action == 'reject' && $rejectSum >= $submission->gallery->votes_required) {
+            // Process the submission if the required number of votes has been reached
+            if ($action == 'reject' && $submission->getVoteData()['reject'] >= $submission->gallery->votes_required) {
                 $this->rejectSubmission($submission, $user);
             }
-            if ($action == 'accept' && $approveSum >= $submission->gallery->votes_required) {
+            if ($action == 'accept' && $submission->getVoteData()['approve'] >= $submission->gallery->votes_required) {
                 $this->acceptSubmission($submission);
             }
 
@@ -470,7 +460,7 @@ class GalleryManager extends Service {
      * @param mixed $id
      * @param mixed $data
      *
-     * @return \App\Models\Gallery\GalleryFavorite|bool
+     * @return bool|GalleryFavorite
      */
     public function postStaffComments($id, $data, $user) {
         DB::beginTransaction();
@@ -559,7 +549,7 @@ class GalleryManager extends Service {
      * @param mixed $id
      * @param mixed $data
      *
-     * @return \App\Models\Gallery\GalleryFavorite|bool
+     * @return bool|GalleryFavorite
      */
     public function postValueSubmission($id, $data, $user) {
         DB::beginTransaction();
@@ -634,9 +624,9 @@ class GalleryManager extends Service {
                         'total'        => $submission->data['total'],
                         'value'        => $data['value'],
                         'staff'        => $user->id,
-                    ])->toJson();
+                    ]);
                 } else {
-                    $valueData = collect(['value' => $data['value'], 'staff' => $user->id])->toJson();
+                    $valueData = ['value' => $data['value'], 'staff' => $user->id];
                 }
 
                 // Update the submission with the new data and mark it as processed
@@ -666,9 +656,9 @@ class GalleryManager extends Service {
                         'total'        => $submission->data['total'],
                         'ineligible'   => 1,
                         'staff'        => $user->id,
-                    ])->toJson();
+                    ]);
                 } else {
-                    $valueData = collect(['ineligible' => 1, 'staff' => $user->id])->toJson();
+                    $valueData = ['ineligible' => 1, 'staff' => $user->id];
                 }
 
                 // Update the submission, including marking it as processed
@@ -692,7 +682,7 @@ class GalleryManager extends Service {
      * @param GallerySubmission $submission
      * @param User              $user
      *
-     * @return \App\Models\Gallery\GalleryFavorite|bool
+     * @return bool|GalleryFavorite
      */
     public function favoriteSubmission($submission, $user) {
         DB::beginTransaction();
@@ -740,7 +730,7 @@ class GalleryManager extends Service {
      * @param GallerySubmission $submission
      * @param mixed             $user
      *
-     * @return \App\Models\Gallery\GallerySubmission|bool
+     * @return bool|GallerySubmission
      */
     public function rejectSubmission($submission, $user) {
         DB::beginTransaction();
@@ -801,26 +791,45 @@ class GalleryManager extends Service {
      * @return array
      */
     private function processImage($data, $submission) {
+        $imageFile = $data['image'];
+
         if (isset($submission->hash)) {
-            unlink($submission->imagePath.'/'.$submission->imageFileName);
-            unlink($submission->imagePath.'/'.$submission->thumbnailFileName);
+            $this->deleteImage($submission->imagePath, $submission->imageFileName);
+            $this->deleteImage($submission->thumbnailPath, $submission->thumbnailFileName);
         }
+
         $submission->hash = randomString(10);
-        $submission->extension = $data['image']->getClientOriginalExtension();
+        $submission->extension = config('lorekeeper.settings.gallery_images_format') ?? $imageFile->getClientOriginalExtension();
 
         // Save image itself
-        $this->handleImage($data['image'], $submission->imageDirectory, $submission->imageFileName);
+        $this->handleImage($imageFile, $submission->imagePath, $submission->imageFileName);
+
+        // Configure image driver based on dimensions
+        $this->configureImageDriver($submission->imagePath.'/'.$submission->imageFileName);
+
+        // Process image: resize/format if needed using consolidated method
+        if (config('lorekeeper.settings.gallery_images_cap') || config('lorekeeper.settings.gallery_images_format')) {
+            $image = Image::make($submission->imagePath.'/'.$submission->imageFileName);
+
+            // Scale the image if desired/necessary
+            $imageWidth = $image->width();
+            $imageHeight = $image->height();
+            $applyCap = config('lorekeeper.settings.gallery_images_cap') && !in_array(strtolower($submission->extension), config('lorekeeper.settings.gallery_images_exclude_formats'));
+            if ($applyCap && ($imageWidth > config('lorekeeper.settings.gallery_images_cap') || $imageHeight > config('lorekeeper.settings.gallery_images_cap'))) {
+                $image = $this->resizeImage($image, config('lorekeeper.settings.gallery_images_cap'), 'max');
+            }
+
+            // Save the processed image
+            $image->save($submission->imagePath.'/'.$submission->imageFileName, 100, config('lorekeeper.settings.gallery_images_format'));
+        }
 
         // Process thumbnail
-        $thumbnail = Image::make($submission->imagePath.'/'.$submission->imageFileName);
-        // Resize
-        $thumbnail->resize(null, Config::get('lorekeeper.settings.masterlist_thumbnails.height'), function ($constraint) {
-            $constraint->aspectRatio();
-            $constraint->upsize();
-        });
-
-        // Save thumbnail
-        $thumbnail->save($submission->thumbnailPath.'/'.$submission->thumbnailFileName);
+        Image::make($submission->imagePath.'/'.$submission->imageFileName)
+            ->resize(null, config('lorekeeper.settings.masterlist_thumbnails.height'), function ($constraint) {
+                $constraint->aspectRatio();
+                $constraint->upsize();
+            })
+            ->save($submission->thumbnailPath.'/'.$submission->thumbnailFileName);
 
         return $submission;
     }
@@ -830,7 +839,7 @@ class GalleryManager extends Service {
      *
      * @param GallerySubmission $submission
      *
-     * @return \App\Models\Gallery\GallerySubmission|bool
+     * @return bool|GallerySubmission
      */
     private function acceptSubmission($submission) {
         DB::beginTransaction();
@@ -858,7 +867,7 @@ class GalleryManager extends Service {
                 // Send a notification to included characters' owners now that the submission is accepted
                 // but not for the submitting user's own characters
                 foreach ($submission->characters as $character) {
-                    if ($character->user && $character->character->user->id != $submission->user->id) {
+                    if ($character->character->user && $character->character->user->id != $submission->user->id) {
                         Notifications::create('GALLERY_SUBMISSION_CHARACTER', $character->character->user, [
                             'sender'        => $submission->user->name,
                             'sender_url'    => $submission->user->url,

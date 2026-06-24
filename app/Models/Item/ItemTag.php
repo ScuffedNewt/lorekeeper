@@ -3,7 +3,7 @@
 namespace App\Models\Item;
 
 use App\Models\Model;
-use Config;
+use Illuminate\Support\Facades\Config;
 
 class ItemTag extends Model {
     /**
@@ -22,6 +22,15 @@ class ItemTag extends Model {
      */
     protected $table = 'item_tags';
 
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'data' => 'array',
+    ];
+
     /**********************************************************************************************
 
         RELATIONS
@@ -32,7 +41,7 @@ class ItemTag extends Model {
      * Get the item that this tag is attached to.
      */
     public function item() {
-        return $this->belongsTo('App\Models\Item\Item');
+        return $this->belongsTo(Item::class);
     }
 
     /**********************************************************************************************
@@ -76,7 +85,7 @@ class ItemTag extends Model {
      * @return string
      */
     public function getDisplayTagAttribute() {
-        $tag = Config::get('lorekeeper.item_tags.'.$this->tag);
+        $tag = config('lorekeeper.item_tags.'.$this->tag);
         if ($tag) {
             return '<span class="badge" style="color: '.$tag['text_color'].';background-color: '.$tag['background_color'].';">'.$tag['name'].'</span>';
         }
@@ -90,7 +99,7 @@ class ItemTag extends Model {
      * @return mixed
      */
     public function getName() {
-        return Config::get('lorekeeper.item_tags.'.$this->tag.'.name');
+        return config('lorekeeper.item_tags.'.$this->tag.'.name');
     }
 
     /**
@@ -103,15 +112,6 @@ class ItemTag extends Model {
     }
 
     /**
-     * Get the data attribute as an associative array.
-     *
-     * @return array
-     */
-    public function getDataAttribute() {
-        return json_decode($this->attributes['data'], true);
-    }
-
-    /**
      * Get the service associated with this tag.
      *
      * @return mixed
@@ -119,7 +119,7 @@ class ItemTag extends Model {
     public function getServiceAttribute() {
         $class = 'App\Services\Item\\'.str_replace(' ', '', ucwords(str_replace('_', ' ', $this->tag))).'Service';
 
-        return new $class();
+        return new $class;
     }
 
     /**********************************************************************************************
@@ -134,7 +134,7 @@ class ItemTag extends Model {
      * @return mixed
      */
     public function getEditData() {
-        return $this->service->getEditData();
+        return $this->service->getEditData($this);
     }
 
     /**

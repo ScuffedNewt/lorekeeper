@@ -5,8 +5,7 @@ namespace App\Services;
 use App\Models\Item\Item;
 use App\Models\Item\ItemCategory;
 use App\Models\Item\ItemTag;
-use Config;
-use DB;
+use Illuminate\Support\Facades\DB;
 
 class ItemService extends Service {
     /*
@@ -30,7 +29,7 @@ class ItemService extends Service {
      * @param array                 $data
      * @param \App\Models\User\User $user
      *
-     * @return \App\Models\Item\ItemCategory|bool
+     * @return bool|ItemCategory
      */
     public function createItemCategory($data, $user) {
         DB::beginTransaction();
@@ -41,6 +40,7 @@ class ItemService extends Service {
             $image = null;
             if (isset($data['image']) && $data['image']) {
                 $data['has_image'] = 1;
+                $data['hash'] = randomString(10);
                 $image = $data['image'];
                 unset($data['image']);
             } else {
@@ -72,7 +72,7 @@ class ItemService extends Service {
      * @param array                 $data
      * @param \App\Models\User\User $user
      *
-     * @return \App\Models\Item\ItemCategory|bool
+     * @return bool|ItemCategory
      */
     public function updateItemCategory($category, $data, $user) {
         DB::beginTransaction();
@@ -85,9 +85,16 @@ class ItemService extends Service {
 
             $data = $this->populateCategoryData($data, $category);
 
+            // Store old image filename before updating hash
+            $oldImageFileName = null;
+            if ($category->has_image) {
+                $oldImageFileName = $category->categoryImageFileName;
+            }
+
             $image = null;
             if (isset($data['image']) && $data['image']) {
                 $data['has_image'] = 1;
+                $data['hash'] = randomString(10);
                 $image = $data['image'];
                 unset($data['image']);
             }
@@ -98,8 +105,9 @@ class ItemService extends Service {
                 throw new \Exception('Failed to log admin action.');
             }
 
-            if ($category) {
-                $this->handleImage($image, $category->categoryImagePath, $category->categoryImageFileName);
+            if ($image) {
+                // Pass old filename so it gets properly cleaned up
+                $this->handleImage($image, $category->categoryImagePath, $category->categoryImageFileName, $oldImageFileName);
             }
 
             return $this->commitReturn($category);
@@ -130,9 +138,7 @@ class ItemService extends Service {
                 throw new \Exception('Failed to log admin action.');
             }
 
-            if ($category->has_image) {
-                $this->deleteImage($category->categoryImagePath, $category->categoryImageFileName);
-            }
+            $this->deleteImage($category->categoryImagePath, $category->categoryImageFileName);
             $category->delete();
 
             return $this->commitReturn(true);
@@ -181,7 +187,7 @@ class ItemService extends Service {
      * @param array                 $data
      * @param \App\Models\User\User $user
      *
-     * @return \App\Models\Item\Item|bool
+     * @return bool|Item
      */
     public function createItem($data, $user) {
         DB::beginTransaction();
@@ -200,6 +206,7 @@ class ItemService extends Service {
             $image = null;
             if (isset($data['image']) && $data['image']) {
                 $data['has_image'] = 1;
+                $data['hash'] = randomString(10);
                 $image = $data['image'];
                 unset($data['image']);
             } else {
@@ -213,13 +220,13 @@ class ItemService extends Service {
             }
 
             $item->update([
-                'data' => json_encode([
-                    'rarity'  => isset($data['rarity']) && $data['rarity'] ? $data['rarity'] : null,
-                    'uses'    => isset($data['uses']) && $data['uses'] ? $data['uses'] : null,
-                    'release' => isset($data['release']) && $data['release'] ? $data['release'] : null,
-                    'prompts' => isset($data['prompts']) && $data['prompts'] ? $data['prompts'] : null,
-                    'resell'  => isset($data['currency_quantity']) ? [$data['currency_id'] => $data['currency_quantity']] : null,
-                ]), // rarity, availability info (original source, purchase locations, drop locations)
+                'data' => [
+                    'uses'      => isset($data['uses']) && $data['uses'] ? $data['uses'] : null,
+                    'release'   => isset($data['release']) && $data['release'] ? $data['release'] : null,
+                    'prompts'   => isset($data['prompts']) && $data['prompts'] ? $data['prompts'] : null,
+                    'resell'    => isset($data['currency_quantity']) ? [$data['currency_id'] => $data['currency_quantity']] : null,
+                    'rarity_id' => isset($data['rarity_id']) && $data['rarity_id'] ? $data['rarity_id'] : null,
+                ], // rarity, availability info (original source, purchase locations, drop locations)
             ]);
 
             if ($image) {
@@ -241,7 +248,7 @@ class ItemService extends Service {
      * @param array                 $data
      * @param \App\Models\User\User $user
      *
-     * @return \App\Models\Item\Item|bool
+     * @return bool|Item
      */
     public function updateItem($item, $data, $user) {
         DB::beginTransaction();
@@ -261,9 +268,15 @@ class ItemService extends Service {
 
             $data = $this->populateData($data, $item);
 
+            $oldImageFileName = null;
+            if ($item->has_image) {
+                $oldImageFileName = $item->imageFileName;
+            }
+
             $image = null;
             if (isset($data['image']) && $data['image']) {
                 $data['has_image'] = 1;
+                $data['hash'] = randomString(10);
                 $image = $data['image'];
                 unset($data['image']);
             }
@@ -275,17 +288,17 @@ class ItemService extends Service {
             }
 
             $item->update([
-                'data' => json_encode([
-                    'rarity'  => isset($data['rarity']) && $data['rarity'] ? $data['rarity'] : null,
-                    'uses'    => isset($data['uses']) && $data['uses'] ? $data['uses'] : null,
-                    'release' => isset($data['release']) && $data['release'] ? $data['release'] : null,
-                    'prompts' => isset($data['prompts']) && $data['prompts'] ? $data['prompts'] : null,
-                    'resell'  => isset($data['currency_quantity']) ? [$data['currency_id'] => $data['currency_quantity']] : null,
-                ]), // rarity, availability info (original source, purchase locations, drop locations)
+                'data' => [
+                    'uses'      => isset($data['uses']) && $data['uses'] ? $data['uses'] : null,
+                    'release'   => isset($data['release']) && $data['release'] ? $data['release'] : null,
+                    'prompts'   => isset($data['prompts']) && $data['prompts'] ? $data['prompts'] : null,
+                    'resell'    => isset($data['currency_quantity']) ? [$data['currency_id'] => $data['currency_quantity']] : null,
+                    'rarity_id' => isset($data['rarity_id']) && $data['rarity_id'] ? $data['rarity_id'] : null,
+                ], // rarity, availability info (original source, purchase locations, drop locations)
             ]);
 
-            if ($item) {
-                $this->handleImage($image, $item->imagePath, $item->imageFileName);
+            if ($image) {
+                $this->handleImage($image, $item->imagePath, $item->imageFileName, $oldImageFileName);
             }
 
             return $this->commitReturn($item);
@@ -318,8 +331,8 @@ class ItemService extends Service {
             if (DB::table('loots')->where('rewardable_type', 'Item')->where('rewardable_id', $item->id)->exists()) {
                 throw new \Exception('A loot table currently distributes this item as a potential reward. Please remove the item before deleting it.');
             }
-            if (DB::table('prompt_rewards')->where('rewardable_type', 'Item')->where('rewardable_id', $item->id)->exists()) {
-                throw new \Exception('A prompt currently distributes this item as a reward. Please remove the item before deleting it.');
+            if (DB::table('rewards')->where('rewardable_type', 'Item')->where('rewardable_id', $item->id)->exists()) {
+                throw new \Exception('An object currently distributes this item as a reward. Please remove the item before deleting it.');
             }
             if (DB::table('shop_stock')->where('item_id', $item->id)->exists()) {
                 throw new \Exception('A shop currently stocks this item. Please remove the item before deleting it.');
@@ -333,9 +346,7 @@ class ItemService extends Service {
             DB::table('user_items')->where('item_id', $item->id)->delete();
             DB::table('character_items')->where('item_id', $item->id)->delete();
             $item->tags()->delete();
-            if ($item->has_image) {
-                $this->deleteImage($item->imagePath, $item->imageFileName);
-            }
+            $this->deleteImage($item->imagePath, $item->imageFileName);
             $item->delete();
 
             return $this->commitReturn(true);
@@ -358,7 +369,7 @@ class ItemService extends Service {
      * @return array
      */
     public function getItemTags() {
-        $tags = Config::get('lorekeeper.item_tags');
+        $tags = config('lorekeeper.item_tags');
         $result = [];
         foreach ($tags as $tag => $tagData) {
             $result[$tag] = $tagData['name'];
@@ -489,8 +500,8 @@ class ItemService extends Service {
     /**
      * Handle category data.
      *
-     * @param array                              $data
-     * @param \App\Models\Item\ItemCategory|null $category
+     * @param array             $data
+     * @param ItemCategory|null $category
      *
      * @return array
      */
@@ -541,10 +552,13 @@ class ItemService extends Service {
         if (!isset($data['allow_transfer'])) {
             $data['allow_transfer'] = 0;
         }
-        if (!isset($data['is_released']) && Config::get('lorekeeper.extensions.item_entry_expansion.extra_fields')) {
+        if (!isset($data['is_released']) && config('lorekeeper.extensions.item_entry_expansion.extra_fields')) {
             $data['is_released'] = 0;
         } else {
             $data['is_released'] = 1;
+        }
+        if (!isset($data['is_deletable'])) {
+            $data['is_deletable'] = 0;
         }
         if (!isset($data['is_recorded'])) {
             $data['is_recorded'] = 0;

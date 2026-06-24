@@ -2,11 +2,11 @@
 
 namespace App\Services;
 
+use App\Facades\Notifications;
+use App\Facades\Settings;
 use App\Models\Prompt\Prompt;
 use App\Models\Report\Report;
-use DB;
-use Notifications;
-use Settings;
+use Illuminate\Support\Facades\DB;
 
 class ReportManager extends Service {
     /*
@@ -40,7 +40,7 @@ class ReportManager extends Service {
             if (!isset($data['is_br'])) {
                 $data['is_br'] = 0;
             }
-            //dd($data['error']);
+            // dd($data['error']);
 
             $report = Report::create([
                 'user_id'    => $user->id,

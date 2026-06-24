@@ -8,10 +8,9 @@ use App\Models\User\User;
 use App\Models\User\UserAlias;
 use App\Models\User\UserUpdateLog;
 use App\Services\UserService;
-use Auth;
 use Carbon\Carbon;
-use Config;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller {
     /**
@@ -43,10 +42,10 @@ class UserController extends Controller {
                 $query->orderBy('name', 'DESC');
                 break;
             case 'alias':
-                $query->orderBy('alias', 'ASC');
+                $query->aliasSort();
                 break;
             case 'alias-reverse':
-                $query->orderBy('alias', 'DESC');
+                $query->aliasSort(true);
                 break;
             case 'rank':
                 $query->orderBy('ranks.sort', 'DESC')->orderBy('name');
@@ -106,7 +105,7 @@ class UserController extends Controller {
 
             $logData = ['old_name' => $user->name] + $data;
             if ($user->update($data)) {
-                UserUpdateLog::create(['staff_id' => Auth::user()->id, 'user_id' => $user->id, 'data' => json_encode($logData), 'type' => 'Name/Rank Change']);
+                UserUpdateLog::create(['staff_id' => Auth::user()->id, 'user_id' => $user->id, 'data' => $logData, 'type' => 'Name/Rank Change']);
                 flash('Updated user\'s information successfully.')->success();
             } else {
                 flash('Failed to update user\'s information.')->error();
@@ -138,7 +137,7 @@ class UserController extends Controller {
                 } else {
                     // Hidden aliases are excluded as a courtesy measure (users may not want them forced visible for any number of reasons)
                     foreach ($user->aliases as $alias) {
-                        if (Config::get('lorekeeper.sites.'.$alias->site.'.auth') && Config::get('lorekeeper.sites.'.$alias->site.'.primary_alias') && $alias->is_visible) {
+                        if (config('lorekeeper.sites.'.$alias->site.'.auth') && config('lorekeeper.sites.'.$alias->site.'.primary_alias') && $alias->is_visible) {
                             $alias->update(['is_primary_alias' => 1]);
                             break;
                         }
@@ -155,7 +154,7 @@ class UserController extends Controller {
                 return redirect()->back();
             }
 
-            UserUpdateLog::create(['staff_id' => Auth::user()->id, 'user_id' => $user->id, 'data' => json_encode($logData), 'type' => 'Clear Alias']);
+            UserUpdateLog::create(['staff_id' => Auth::user()->id, 'user_id' => $user->id, 'data' => $logData, 'type' => 'Clear Alias']);
             flash('Cleared user\'s alias successfully.')->success();
         } else {
             flash('Failed to clear user\'s alias.')->error();
@@ -178,7 +177,7 @@ class UserController extends Controller {
                 return redirect()->back();
             }
 
-            UserUpdateLog::create(['staff_id' => Auth::user()->id, 'user_id' => $user->id, 'data' => json_encode(['is_fto' => $request->get('is_fto') ? 'Yes' : 'No']), 'type' => 'FTO Status Change']);
+            UserUpdateLog::create(['staff_id' => Auth::user()->id, 'user_id' => $user->id, 'data' => ['is_fto' => $request->get('is_fto') ? 'Yes' : 'No'], 'type' => 'FTO Status Change']);
             flash('Updated user\'s account information successfully.')->success();
         } else {
             flash('Failed to update user\'s account information.')->error();
@@ -195,8 +194,7 @@ class UserController extends Controller {
 
         $service = new UserService;
         // Make birthday into format we can store
-        $data = $request->input('dob');
-        $date = $data['day'].'-'.$data['month'].'-'.$data['year'];
+        $date = $request->input('dob');
 
         $formatDate = Carbon::parse($date);
         $logData = ['old_date' => $user->birthday ? $user->birthday->isoFormat('DD-MM-YYYY') : Carbon::now()->isoFormat('DD-MM-YYYY')] + ['new_date' => $date];
@@ -207,7 +205,7 @@ class UserController extends Controller {
         }
 
         if ($service->updateBirthday($formatDate, $user)) {
-            UserUpdateLog::create(['staff_id' => Auth::user()->id, 'user_id' => $user->id, 'data' => json_encode($logData), 'type' => 'Birth Date Change']);
+            UserUpdateLog::create(['staff_id' => Auth::user()->id, 'user_id' => $user->id, 'data' => $logData, 'type' => 'Birth Date Change']);
             flash('Birthday updated successfully!')->success();
         } else {
             foreach ($service->errors()->getMessages()['error'] as $error) {

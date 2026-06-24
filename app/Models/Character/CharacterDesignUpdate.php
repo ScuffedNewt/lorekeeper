@@ -3,9 +3,11 @@
 namespace App\Models\Character;
 
 use App\Models\Currency\Currency;
-use App\Models\Feature\FeatureCategory;
 use App\Models\Model;
-use DB;
+use App\Models\Rarity;
+use App\Models\Species\Species;
+use App\Models\Species\Subtype;
+use App\Models\User\User;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CharacterDesignUpdate extends Model {
@@ -20,10 +22,10 @@ class CharacterDesignUpdate extends Model {
         'character_id', 'status', 'user_id', 'staff_id',
         'comments', 'staff_comments', 'data', 'extension',
         'use_cropper', 'x0', 'x1', 'y0', 'y1',
-        'hash', 'species_id', 'subtype_id', 'rarity_id',
+        'hash', 'species_id', 'subtype_ids', 'rarity_id',
         'has_comments', 'has_image', 'has_addons', 'has_features',
         'submitted_at', 'update_type', 'fullsize_hash',
-        'approval_votes', 'rejection_votes',
+        'vote_data',
     ];
 
     /**
@@ -34,6 +36,18 @@ class CharacterDesignUpdate extends Model {
     protected $table = 'design_updates';
 
     /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'submitted_at' => 'datetime',
+        'subtype_ids'  => 'array',
+        'data'         => 'array',
+        'vote_data'    => 'array',
+    ];
+
+    /**
      * Whether the model contains timestamps to be saved and updated.
      *
      * @var string
@@ -41,20 +55,13 @@ class CharacterDesignUpdate extends Model {
     public $timestamps = true;
 
     /**
-     * Dates on the model to convert to Carbon instances.
-     *
-     * @var array
-     */
-    public $dates = ['submitted_at'];
-
-    /**
      * Validation rules for uploaded images.
      *
      * @var array
      */
     public static $imageRules = [
-        'image'          => 'nullable|mimes:jpeg,gif,png',
-        'thumbnail'      => 'nullable|mimes:jpeg,gif,png',
+        'image'          => 'nullable|mimes:jpeg,jpg,gif,png,webp|max:2048',
+        'thumbnail'      => 'nullable|mimes:jpeg,jpg,gif,png,webp|max:2048',
         'artist_url.*'   => 'nullable|url',
         'designer_url.*' => 'nullable|url',
     ];
@@ -69,74 +76,69 @@ class CharacterDesignUpdate extends Model {
      * Get the character associated with the design update.
      */
     public function character() {
-        return $this->belongsTo('App\Models\Character\Character', 'character_id');
+        return $this->belongsTo(Character::class, 'character_id');
     }
 
     /**
      * Get the user who created the design update.
      */
     public function user() {
-        return $this->belongsTo('App\Models\User\User', 'user_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     /**
      * Get the staff who processed the design update.
      */
     public function staff() {
-        return $this->belongsTo('App\Models\User\User', 'staff_id');
+        return $this->belongsTo(User::class, 'staff_id');
     }
 
     /**
      * Get the species of the design update.
      */
     public function species() {
-        return $this->belongsTo('App\Models\Species\Species', 'species_id');
-    }
-
-    /**
-     * Get the subtype of the design update.
-     */
-    public function subtype() {
-        return $this->belongsTo('App\Models\Species\Subtype', 'subtype_id');
+        return $this->belongsTo(Species::class, 'species_id');
     }
 
     /**
      * Get the rarity of the design update.
      */
     public function rarity() {
-        return $this->belongsTo('App\Models\Rarity', 'rarity_id');
+        return $this->belongsTo(Rarity::class, 'rarity_id');
     }
 
     /**
      * Get the features (traits) attached to the design update, ordered by display order.
      */
     public function features() {
-        $ids = FeatureCategory::orderBy('sort', 'DESC')->pluck('id')->toArray();
+        $query = $this
+            ->hasMany(CharacterFeature::class, 'character_image_id')->where('character_features.character_type', 'Update')
+            ->join('features', 'features.id', '=', 'character_features.feature_id')
+            ->leftJoin('feature_categories', 'feature_categories.id', '=', 'features.feature_category_id')
+            ->select(['character_features.*', 'features.*', 'character_features.id AS character_feature_id', 'feature_categories.sort']);
 
-        $query = $this->hasMany('App\Models\Character\CharacterFeature', 'character_image_id')->where('character_features.character_type', 'Update')->join('features', 'features.id', '=', 'character_features.feature_id')->select(['character_features.*', 'features.*', 'character_features.id AS character_feature_id']);
-
-        return count($ids) ? $query->orderByRaw(DB::raw('FIELD(features.feature_category_id, '.implode(',', $ids).')')) : $query;
+        return $query->orderByDesc('sort');
     }
 
     /**
      * Get the features (traits) attached to the design update with no extra sorting.
      */
     public function rawFeatures() {
-        return $this->hasMany('App\Models\Character\CharacterFeature', 'character_image_id')->where('character_features.character_type', 'Update');
+        return $this->hasMany(CharacterFeature::class, 'character_image_id')->where('character_features.character_type', 'Update');
     }
 
     /**
      * Get the designers attached to the design update.
      */
     public function designers() {
-        return $this->hasMany('App\Models\Character\CharacterImageCreator', 'character_image_id')->where('type', 'Designer')->where('character_type', 'Update');
+        return $this->hasMany(CharacterImageCreator::class, 'character_image_id')->where('type', 'Designer')->where('character_type', 'Update');
     }
 
     /**
      * Get the artists attached to the design update.
      */
     public function artists() {
-        return $this->hasMany('App\Models\Character\CharacterImageCreator', 'character_image_id')->where('type', 'Artist')->where('character_type', 'Update');
+        return $this->hasMany(CharacterImageCreator::class, 'character_image_id')->where('type', 'Artist')->where('character_type', 'Update');
     }
 
     /**********************************************************************************************
@@ -178,20 +180,23 @@ class CharacterDesignUpdate extends Model {
         $query->select('design_updates.*')->where('update_type', 'Character');
     }
 
+    /**
+     * Scope a query to sort updates by newest first.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param mixed                                 $reverse
+     *
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeSortNewest($query, $reverse = false) {
+        return $query->orderBy('id', $reverse ? 'ASC' : 'DESC');
+    }
+
     /**********************************************************************************************
 
         ACCESSORS
 
     **********************************************************************************************/
-
-    /**
-     * Get the data attribute as an associative array.
-     *
-     * @return array
-     */
-    public function getDataAttribute() {
-        return json_decode($this->attributes['data'], true);
-    }
 
     /**
      * Get the items (UserItem IDs) attached to this update request.
@@ -274,7 +279,13 @@ class CharacterDesignUpdate extends Model {
      * @return string
      */
     public function getThumbnailFileNameAttribute() {
-        return $this->id.'_'.$this->hash.'_th.'.$this->extension;
+        if (config('lorekeeper.settings.masterlist_image_format') != null && config('lorekeeper.settings.masterlist_image_format') != $this->extension) {
+            $extension = config('lorekeeper.settings.masterlist_image_format');
+        } else {
+            $extension = $this->extension;
+        }
+
+        return $this->id.'_'.$this->hash.'_th.'.$extension;
     }
 
     /**
@@ -302,15 +313,6 @@ class CharacterDesignUpdate extends Model {
      */
     public function getUrlAttribute() {
         return url('designs/'.$this->id);
-    }
-
-    /**
-     * Gets the voting data of the design update request.
-     *
-     * @return string
-     */
-    public function getVoteDataAttribute() {
-        return collect(json_decode($this->attributes['vote_data'], true));
     }
 
     /**********************************************************************************************
@@ -342,5 +344,65 @@ class CharacterDesignUpdate extends Model {
         }
 
         return $result;
+    }
+
+    /**
+     * Get the subtypes of the design update.
+     */
+    public function subtypes() {
+        return $this->subtype_ids;
+    }
+
+    /**
+     * Get the subtypes of the design update.
+     */
+    public function displaySubtypes() {
+        $subtypes = $this->subtypes();
+        $result = [];
+        foreach ($subtypes as $subtype) {
+            $result[] = Subtype::find($subtype)->displayName;
+        }
+
+        return implode(', ', $result);
+    }
+
+    /**
+     * Gets the voting data of the gallery submission and performs preliminary processing.
+     *
+     * @param bool $withUsers
+     *
+     * @return array
+     */
+    public function getVoteData($withUsers = 0) {
+        $voteData['raw'] = $this->vote_data;
+
+        // Only query users if necessary, and condense to one query per submission
+        if ($withUsers) {
+            $users = User::whereIn('id', array_keys($voteData['raw']))->select('id', 'name', 'rank_id')->get();
+        } else {
+            $users = null;
+        }
+
+        $voteData['raw'] = collect($voteData['raw'])->mapWithKeys(function ($vote, $id) use ($users) {
+            return [$id => [
+                'vote' => $vote,
+                'user' => $users ? $users->where('id', $id)->first() : $id,
+            ]];
+        });
+
+        // Tally approve/reject sums for ease
+        $voteData['approve'] = $voteData['reject'] = 0;
+        foreach ($voteData['raw'] as $vote) {
+            switch ($vote['vote']) {
+                case 1:
+                    $voteData['reject'] += 1;
+                    break;
+                case 2:
+                    $voteData['approve'] += 1;
+                    break;
+            }
+        }
+
+        return $voteData;
     }
 }

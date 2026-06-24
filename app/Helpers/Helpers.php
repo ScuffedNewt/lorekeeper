@@ -117,7 +117,6 @@ function parse($text, &$pings = null) {
     $config->set('Attr.EnableID', true);
     $config->set('HTML.DefinitionID', 'include');
     $config->set('HTML.DefinitionRev', 2);
-    $config->set('Cache.DefinitionImpl', null); // TODO: remove this later!
     if ($def = $config->maybeGetRawHTMLDefinition()) {
         $def->addElement('include', 'Block', 'Empty', 'Common', ['file*' => 'URI', 'height' => 'Text', 'width' => 'Text']);
         $def->addAttribute('a', 'data-toggle', 'Enum#collapse,tab');
@@ -190,7 +189,7 @@ function parseUsersAndAvatars($text, &$users) {
             $user = App\Models\User\User::where('name', $match)->first();
             if ($user) {
                 $users[] = $user;
-                $text = preg_replace('/\B%'.$match.'/', '<a href="'.$user->url.'"><img src="/images/avatars/'.$user->avatar.'" style="width:70px; height:70px; border-radius:50%; " alt="'.$user->name.'\'s Avatar"></a>'.$user->displayName, $text);
+                $text = preg_replace('/\B%'.$match.'/', '<a href="'.$user->url.'"><img src="'.$user->avatarUrl.'" style="width:70px; height:70px; border-radius:50%; " alt="'.$user->name.'\'s Avatar"></a>'.$user->displayName, $text);
             }
         }
     }
@@ -244,7 +243,7 @@ function parseUserIDsForAvatars($text, &$users) {
             $user = App\Models\User\User::where('id', $match)->first();
             if ($user) {
                 $users[] = $user;
-                $text = preg_replace('/\[userav='.$match.'\]/', '<a href="'.$user->url.'"><img src="/images/avatars/'.$user->avatar.'" style="width:70px; height:70px; border-radius:50%; " alt="'.$user->name.'\'s Avatar"></a>', $text);
+                $text = preg_replace('/\[userav='.$match.'\]/', '<a href="'.$user->url.'"><img src="'.$user->avatarUrl.'" style="width:70px; height:70px; border-radius:50%; " alt="'.$user->name.'\'s Avatar"></a>', $text);
             }
         }
     }
@@ -357,14 +356,14 @@ function randomString($characters) {
  * @param string $url
  * @param bool   $failOnError
  *
- * @return \App\Models\User\User|string
+ * @return App\Models\User\User|string
  */
 function checkAlias($url, $failOnError = true) {
     if ($url) {
         $recipient = null;
         $matches = [];
         // Check to see if url is 1. from a site used for auth
-        foreach (Config::get('lorekeeper.sites') as $key=> $site) {
+        foreach (config('lorekeeper.sites') as $key=> $site) {
             if (isset($site['auth']) && $site['auth']) {
                 preg_match_all($site['regex'], $url, $matches, PREG_SET_ORDER, 0);
                 if ($matches != []) {
@@ -406,20 +405,21 @@ function checkAlias($url, $failOnError = true) {
 function prettyProfileLink($url) {
     $matches = [];
     // Check different sites and return site if a match is made, plus username (retreived from the URL)
-    foreach (Config::get('lorekeeper.sites') as $siteName=> $siteInfo) {
+    foreach (config('lorekeeper.sites') as $siteName=> $siteInfo) {
         if (preg_match_all($siteInfo['regex'], $url, $matches)) {
             $site = $siteName;
             $name = $matches[1][0];
             $link = $matches[0][0];
+            $icon = $siteInfo['icon'] ?? 'fas fa-globe';
             break;
         }
     }
 
     // Return formatted link if possible; failing that, an unformatted link
     if (isset($name) && isset($site) && isset($link)) {
-        return '<a href="https://'.$link.'">'.$name.'@'.(Config::get('lorekeeper.sites.'.$site.'.display_name') != null ? Config::get('lorekeeper.sites.'.$site.'.display_name') : $site).'</a>';
+        return '<a href="https://'.$link.'"><i class="'.$icon.' mr-1" style="opacity: 50%;"></i>'.$name.'@'.(config('lorekeeper.sites.'.$site.'.display_name') != null ? config('lorekeeper.sites.'.$site.'.display_name') : $site).'</a>';
     } else {
-        return '<a href="'.$url.'">'.$url.'</a>';
+        return '<a href="'.$url.'"><i class="fas fa-globe mr-1" style="opacity: 50%;"></i>'.$url.'</a>';
     }
 }
 
@@ -433,7 +433,7 @@ function prettyProfileLink($url) {
 function prettyProfileName($url) {
     $matches = [];
     // Check different sites and return site if a match is made, plus username (retreived from the URL)
-    foreach (Config::get('lorekeeper.sites') as $siteName=> $siteInfo) {
+    foreach (config('lorekeeper.sites') as $siteName=> $siteInfo) {
         if (preg_match_all($siteInfo['regex'], $url, $matches)) {
             $site = $siteName;
             $name = $matches[1][0];
@@ -443,8 +443,89 @@ function prettyProfileName($url) {
 
     // Return formatted name if possible; failing that, an unformatted url
     if (isset($name) && isset($site)) {
-        return $name.'@'.(Config::get('lorekeeper.sites.'.$site.'.display_name') != null ? Config::get('lorekeeper.sites.'.$site.'.display_name') : $site);
+        return $name.'@'.(config('lorekeeper.sites.'.$site.'.display_name') != null ? config('lorekeeper.sites.'.$site.'.display_name') : $site);
     } else {
         return $url;
     }
+}
+
+/**
+ * Checks the site setting and returns the appropriate FontAwesome version.
+ *
+ * @return string
+ */
+function faVersion() {
+    $setting = config('lorekeeper.settings.fa_version');
+    $directory = 'css';
+
+    switch ($setting) {
+        case 0:
+            $version = 'allv5';
+            break;
+        case 1:
+            $version = 'allv6';
+            break;
+        case 2:
+            $version = 'allvmix';
+            break;
+    }
+
+    return asset($directory.'/'.$version.'.min.css');
+}
+
+/**
+ * Returns the given objects limits, if any.
+ *
+ * @param mixed $object
+ *
+ * @return bool
+ */
+function getLimits($object) {
+    return App\Models\Limit\Limit::where('object_model', get_class($object))->where('object_id', $object->id)->get();
+}
+
+/**
+ * checks if a certain object has any limits.
+ *
+ * @param mixed $object
+ */
+function hasLimits($object) {
+    return App\Models\Limit\Limit::where('object_model', get_class($object))->where('object_id', $object->id)->exists();
+}
+
+/**
+ * Checks if a user has a limit unlocked.
+ *
+ * @param mixed $object
+ * @param mixed $user
+ */
+function hasUnlockedLimits($user, $object) {
+    if (!hasLimits($object)) {
+        return true;
+    }
+
+    return App\Models\Limit\UserUnlockedLimit::where('user_id', $user->id)
+        ->where('object_model', get_class($object))
+        ->where('object_id', $object->id)
+        ->exists();
+}
+
+/**
+ * Returns the given objects rewards, if any.
+ *
+ * @param mixed $object
+ *
+ * @return bool
+ */
+function getRewards($object) {
+    return App\Models\Reward\Reward::where('object_model', get_class($object))->where('object_id', $object->id)->get();
+}
+
+/**
+ * checks if a certain object has any rewards.
+ *
+ * @param mixed $object
+ */
+function hasRewards($object) {
+    return App\Models\Reward\Reward::where('object_model', get_class($object))->where('object_id', $object->id)->exists();
 }

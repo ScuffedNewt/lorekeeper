@@ -2,18 +2,21 @@
 
 namespace App\Models\Character;
 
+use App\Facades\Notifications;
 use App\Models\Currency\Currency;
 use App\Models\Currency\CurrencyLog;
+use App\Models\Gallery\GalleryCharacter;
 use App\Models\Item\Item;
 use App\Models\Item\ItemLog;
 use App\Models\Model;
+use App\Models\Rarity;
 use App\Models\Submission\Submission;
 use App\Models\Submission\SubmissionCharacter;
+use App\Models\Trade\Trade;
 use App\Models\User\User;
 use App\Models\User\UserCharacterLog;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Notifications;
 
 class Character extends Model {
     use SoftDeletes;
@@ -40,18 +43,20 @@ class Character extends Model {
     protected $table = 'characters';
 
     /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'transferrable_at' => 'datetime',
+    ];
+
+    /**
      * Whether the model contains timestamps to be saved and updated.
      *
      * @var string
      */
     public $timestamps = true;
-
-    /**
-     * Dates on the model to convert to Carbon instances.
-     *
-     * @var array
-     */
-    public $dates = ['transferrable_at'];
 
     /**
      * Accessors to append to the model.
@@ -72,9 +77,9 @@ class Character extends Model {
         'number'                => 'required',
         'slug'                  => 'required|alpha_dash',
         'description'           => 'nullable',
-        'sale_value'            => 'nullable',
-        'image'                 => 'required|mimes:jpeg,jpg,gif,png|max:20000',
-        'thumbnail'             => 'nullable|mimes:jpeg,jpg,gif,png|max:20000',
+        'sale_value'            => 'nullable|decimal:0,2',
+        'image'                 => 'required|mimes:jpeg,jpg,gif,png|max:2048',
+        'thumbnail'             => 'nullable|mimes:jpeg,jpg,gif,png|max:2048',
         'owner_url'             => 'url|nullable',
     ];
 
@@ -88,7 +93,9 @@ class Character extends Model {
         'number'                => 'required',
         'slug'                  => 'required',
         'description'           => 'nullable',
-        'sale_value'            => 'nullable',
+        'sale_value'            => 'nullable|decimal:0,2',
+        'image'                 => 'nullable|mimes:jpeg,jpg,gif,png|max:2048',
+        'thumbnail'             => 'nullable|mimes:jpeg,jpg,gif,png|max:2048',
     ];
 
     /**
@@ -102,10 +109,10 @@ class Character extends Model {
         'number'      => 'nullable',
         'slug'        => 'nullable',
         'description' => 'nullable',
-        'sale_value'  => 'nullable',
+        'sale_value'  => 'nullable|decimal:0,2',
         'name'        => 'required',
-        'image'       => 'nullable|mimes:jpeg,gif,png|max:20000',
-        'thumbnail'   => 'nullable|mimes:jpeg,gif,png|max:20000',
+        'image'       => 'nullable|mimes:jpeg,gif,png|max:2048',
+        'thumbnail'   => 'nullable|mimes:jpeg,gif,png|max:2048',
     ];
 
     /**********************************************************************************************
@@ -118,21 +125,21 @@ class Character extends Model {
      * Get the user who owns the character.
      */
     public function user() {
-        return $this->belongsTo('App\Models\User\User', 'user_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     /**
      * Get the category the character belongs to.
      */
     public function category() {
-        return $this->belongsTo('App\Models\Character\CharacterCategory', 'character_category_id');
+        return $this->belongsTo(CharacterCategory::class, 'character_category_id');
     }
 
     /**
      * Get the masterlist image of the character.
      */
     public function image() {
-        return $this->belongsTo('App\Models\Character\CharacterImage', 'character_image_id');
+        return $this->belongsTo(CharacterImage::class, 'character_image_id');
     }
 
     /**
@@ -141,49 +148,67 @@ class Character extends Model {
      * @param mixed|null $user
      */
     public function images($user = null) {
-        return $this->hasMany('App\Models\Character\CharacterImage', 'character_id')->images($user);
+        return $this->hasMany(CharacterImage::class, 'character_id')->images($user);
     }
 
     /**
      * Get the user-editable profile data of the character.
      */
     public function profile() {
-        return $this->hasOne('App\Models\Character\CharacterProfile', 'character_id');
+        return $this->hasOne(CharacterProfile::class, 'character_id');
     }
 
     /**
      * Get the character's active design update.
      */
     public function designUpdate() {
-        return $this->hasMany('App\Models\Character\CharacterDesignUpdate', 'character_id');
+        return $this->hasMany(CharacterDesignUpdate::class, 'character_id');
     }
 
     /**
      * Get the trade this character is attached to.
      */
     public function trade() {
-        return $this->belongsTo('App\Models\Trade', 'trade_id');
+        return $this->belongsTo(Trade::class, 'trade_id');
     }
 
     /**
      * Get the rarity of this character.
      */
     public function rarity() {
-        return $this->belongsTo('App\Models\Rarity', 'rarity_id');
+        return $this->belongsTo(Rarity::class, 'rarity_id');
     }
 
     /**
      * Get the character's associated gallery submissions.
      */
     public function gallerySubmissions() {
-        return $this->hasMany('App\Models\Gallery\GalleryCharacter', 'character_id');
+        return $this->hasMany(GalleryCharacter::class, 'character_id');
     }
 
     /**
      * Get the character's items.
      */
     public function items() {
-        return $this->belongsToMany('App\Models\Item\Item', 'character_items')->withPivot('count', 'data', 'updated_at', 'id')->whereNull('character_items.deleted_at');
+        return $this->belongsToMany(Item::class, 'character_items')->withPivot('count', 'data', 'updated_at', 'id', 'stack_name')->whereNull('character_items.deleted_at');
+    }
+
+    /**
+     * Gets the character's associated sublists.
+     *
+     * @return object
+     */
+    public function sublists() {
+        if (!$this->is_myo_slot) {
+            $categorySub = $this->category->masterlist_sub_id ?? null;
+            $speciesSub = $this->image->species->masterlist_sub_id ?? null;
+
+            $result = Sublist::where('id', $categorySub)->orWhere('id', $speciesSub)->get() ?? null;
+
+            return $result;
+        }
+
+        return null;
     }
 
     /**********************************************************************************************
@@ -208,10 +233,15 @@ class Character extends Model {
      * Scope a query to only include visible characters.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param mixed|null                            $user
      *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeVisible($query) {
+    public function scopeVisible($query, $user = null) {
+        if ($user && $user->hasPower('manage_characters')) {
+            return $query;
+        }
+
         return $query->where('is_visible', 1);
     }
 
@@ -318,6 +348,17 @@ class Character extends Model {
     }
 
     /**
+     * Gets the character's warnings, if they exist.
+     */
+    public function getWarningsAttribute() {
+        if (config('lorekeeper.settings.enable_character_content_warnings') && $this->image->content_warnings) {
+            return '<i class="fa fa-exclamation-triangle text-danger" data-toggle="tooltip" title="'.implode(', ', $this->image->content_warnings).'"></i> ';
+        }
+
+        return null;
+    }
+
+    /**
      * Gets the character's page's URL.
      *
      * @return string
@@ -346,6 +387,26 @@ class Character extends Model {
      */
     public function getLogTypeAttribute() {
         return 'Character';
+    }
+
+    /**
+     * Gets the character's trading, gift art and gift writing status as badges.
+     * If this is a MYO slot, only returns trading status.
+     *
+     * @return string
+     */
+    public function getMiniBadgeAttribute() {
+        $tradingCode = $this->is_trading ? 'badge-success' : 'badge-danger';
+        $tradingSection = "<span class='badge ".$tradingCode."'><i class='fas fa-comments-dollar'></i></span>";
+        $nonMyoSection = '';
+
+        if (!$this->is_myo_slot) {
+            $artCode = $this->is_gift_art_allowed == 1 ? 'badge-success' : ($this->is_gift_art_allowed == 2 ? 'badge-warning text-light' : 'badge-danger');
+            $writingCode = $this->is_gift_writing_allowed == 1 ? 'badge-success' : ($this->is_gift_writing_allowed == 2 ? 'badge-warning text-light' : 'badge-danger');
+            $nonMyoSection = "<span class='badge ".$artCode."'><i class='fas fa-pencil-ruler'></i></span> <span class='badge ".$writingCode."'><i class='fas fa-file-alt'></i></span> ";
+        }
+
+        return ' ・ <i class="fas fa-info-circle help-icon m-0" data-toggle="tooltip" data-html="true" title="'.$nonMyoSection.$tradingSection.'"></i>';
     }
 
     /**********************************************************************************************
@@ -426,10 +487,13 @@ class Character extends Model {
     public function getCurrencyLogs($limit = 10) {
         $character = $this;
         $query = CurrencyLog::with('currency')->where(function ($query) use ($character) {
-            $query->with('sender.rank')->where('sender_type', 'Character')->where('sender_id', $character->id)->where('log_type', '!=', 'Staff Grant');
-        })->orWhere(function ($query) use ($character) {
-            $query->with('recipient.rank')->where('recipient_type', 'Character')->where('recipient_id', $character->id)->where('log_type', '!=', 'Staff Removal');
+            $query->where(function ($query) use ($character) {
+                $query->with('sender.rank')->where('sender_type', 'Character')->where('sender_id', $character->id)->where('log_type', '!=', 'Staff Grant');
+            })->orWhere(function ($query) use ($character) {
+                $query->with('recipient.rank')->where('recipient_type', 'Character')->where('recipient_id', $character->id)->where('log_type', '!=', 'Staff Removal');
+            });
         })->orderBy('id', 'DESC');
+
         if ($limit) {
             return $query->take($limit)->get();
         } else {
@@ -491,14 +555,14 @@ class Character extends Model {
         return Submission::with('user.rank')->with('prompt')->where('status', 'Approved')->whereIn('id', SubmissionCharacter::where('character_id', $this->id)->pluck('submission_id')->toArray())->paginate(30);
 
         // Untested
-        //$character = $this;
-        //return Submission::where('status', 'Approved')->with(['characters' => function($query) use ($character) {
+        // $character = $this;
+        // return Submission::where('status', 'Approved')->with(['characters' => function($query) use ($character) {
         //    $query->where('submission_characters.character_id', 1);
-        //}])
-        //->whereHas('characters', function($query) use ($character) {
+        // }])
+        // ->whereHas('characters', function($query) use ($character) {
         //    $query->where('submission_characters.character_id', 1);
-        //});
-        //return Submission::where('status', 'Approved')->where('user_id', $this->id)->orderBy('id', 'DESC')->paginate(30);
+        // });
+        // return Submission::where('status', 'Approved')->where('user_id', $this->id)->orderBy('id', 'DESC')->paginate(30);
     }
 
     /**

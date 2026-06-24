@@ -4,9 +4,10 @@ namespace App\Models\Item;
 
 use App\Models\Model;
 use App\Models\Prompt\Prompt;
+use App\Models\Rarity;
 use App\Models\Shop\Shop;
+use App\Models\Shop\ShopStock;
 use App\Models\User\User;
-use App\Models\User\UserItem;
 
 class Item extends Model {
     /**
@@ -16,7 +17,8 @@ class Item extends Model {
      */
     protected $fillable = [
         'item_category_id', 'name', 'has_image', 'description', 'parsed_description', 'allow_transfer',
-        'data', 'reference_url', 'artist_alias', 'artist_url', 'artist_id', 'is_released', 'is_recorded',
+        'data', 'reference_url', 'artist_alias', 'artist_url', 'artist_id', 'is_released', 'hash', 'is_deletable',
+        'is_recorded',
     ];
 
     protected $appends = ['image_url'];
@@ -27,21 +29,40 @@ class Item extends Model {
      * @var string
      */
     protected $table = 'items';
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'data' => 'array',
+    ];
+
+    /**
+     * The relationships that should always be loaded.
+     *
+     * @var array
+     */
+    protected $with = [
+        'tags',
+    ];
+
     /**
      * Validation rules for creation.
      *
      * @var array
      */
     public static $createRules = [
-        'item_category_id'  => 'nullable',
-        'name'              => 'required|unique:items|between:3,100',
-        'description'       => 'nullable',
-        'image'             => 'mimes:png',
-        'rarity'            => 'nullable',
-        'reference_url'     => 'nullable|between:3,200',
-        'uses'              => 'nullable|between:3,250',
-        'release'           => 'nullable|between:3,100',
-        'currency_quantity' => 'nullable|integer|min:1',
+        'item_category_id'   => 'nullable',
+        'name'               => 'required|unique:items|between:3,100',
+        'description'        => 'nullable',
+        'image'              => 'mimes:png',
+        'rarity_id'          => 'nullable',
+        'reference_url'      => 'nullable|between:3,200',
+        'uses'               => 'nullable|between:3,250',
+        'release'            => 'nullable|between:3,100',
+        'currency_quantity'  => 'nullable|integer|min:1',
     ];
 
     /**
@@ -70,21 +91,35 @@ class Item extends Model {
      * Get the category the item belongs to.
      */
     public function category() {
-        return $this->belongsTo('App\Models\Item\ItemCategory', 'item_category_id');
+        return $this->belongsTo(ItemCategory::class, 'item_category_id');
     }
 
     /**
      * Get the item's tags.
      */
     public function tags() {
-        return $this->hasMany('App\Models\Item\ItemTag', 'item_id');
+        return $this->hasMany(ItemTag::class, 'item_id');
     }
 
     /**
      * Get the user that drew the item art.
      */
     public function artist() {
-        return $this->belongsTo('App\Models\User\User', 'artist_id');
+        return $this->belongsTo(User::class, 'artist_id');
+    }
+
+    /**
+     * Gets the item's rarity.
+     */
+    public function rarity() {
+        return $this->belongsTo(Rarity::class, $this->attributes['rarity_id'] ?? null, 'id');
+    }
+
+    /**
+     * Get shop stock for this item.
+     */
+    public function shopStock() {
+        return $this->hasMany(ShopStock::class, 'item_id')->where('stock_type', 'Item')->where('is_visible', 1);
     }
 
     /**********************************************************************************************
@@ -124,33 +159,28 @@ class Item extends Model {
      * Scope a query to sort items by newest first.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param mixed                                 $reverse
      *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeSortNewest($query) {
-        return $query->orderBy('id', 'DESC');
-    }
-
-    /**
-     * Scope a query to sort features oldest first.
-     *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     *
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeSortOldest($query) {
-        return $query->orderBy('id');
+    public function scopeSortNewest($query, $reverse = false) {
+        return $query->orderBy('id', $reverse ? 'ASC' : 'DESC');
     }
 
     /**
      * Scope a query to show only released or "released" (at least one user-owned stack has ever existed) items.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param mixed|null                            $user
      *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeReleased($query) {
-        return $query->whereIn('id', UserItem::pluck('item_id')->toArray())->orWhere('is_released', 1);
+    public function scopeReleased($query, $user = null) {
+        if ($user && $user->hasPower('edit_data')) {
+            return $query;
+        }
+
+        return $query->where('is_released', 1);
     }
 
     /**********************************************************************************************
@@ -165,7 +195,7 @@ class Item extends Model {
      * @return string
      */
     public function getDisplayNameAttribute() {
-        return '<a href="'.$this->url.'" class="display-item">'.$this->name.'</a>';
+        return '<a href="'.$this->idUrl.'" class="display-item">'.$this->name.'</a>';
     }
 
     /**
@@ -183,7 +213,7 @@ class Item extends Model {
      * @return string
      */
     public function getImageFileNameAttribute() {
-        return $this->id.'-image.png';
+        return $this->id.'-'.$this->hash.'-image.png';
     }
 
     /**
@@ -274,29 +304,16 @@ class Item extends Model {
     }
 
     /**
-     * Get the data attribute as an associative array.
-     *
-     * @return array
-     */
-    public function getDataAttribute() {
-        if (!$this->id) {
-            return null;
-        }
-
-        return json_decode($this->attributes['data'], true);
-    }
-
-    /**
      * Get the rarity attribute.
      *
      * @return string
      */
-    public function getRarityAttribute() {
-        if (!isset($this->data) || !isset($this->data['rarity'])) {
+    public function getRarityIdAttribute() {
+        if (!isset($this->data) || !isset($this->data['rarity_id'])) {
             return null;
         }
 
-        return $this->data['rarity'];
+        return $this->data['rarity_id'];
     }
 
     /**
@@ -339,20 +356,6 @@ class Item extends Model {
     }
 
     /**
-     * Get the shops attribute as an associative array.
-     *
-     * @return array
-     */
-    public function getShopsAttribute() {
-        if (!$this->data) {
-            return null;
-        }
-        $itemShops = $this->data['shops'];
-
-        return Shop::whereIn('id', $itemShops)->get();
-    }
-
-    /**
      * Get the prompts attribute as an associative array.
      *
      * @return array
@@ -363,7 +366,11 @@ class Item extends Model {
         }
         $itemPrompts = $this->data['prompts'];
 
-        return Prompt::whereIn('id', $itemPrompts)->get();
+        if (count($itemPrompts)) {
+            return Prompt::whereIn('id', $itemPrompts)->get();
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -410,5 +417,28 @@ class Item extends Model {
      */
     public function tag($tag) {
         return $this->tags()->where('tag', $tag)->where('is_active', 1)->first();
+    }
+
+    /**
+     * Get the shops that stock this item.
+     *
+     * @param mixed|null $user
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function shops($user = null) {
+        if (!config('lorekeeper.extensions.item_entry_expansion.extra_fields') || !$this->shop_stock_count) {
+            return null;
+        }
+
+        $shops = Shop::where(function ($query) use ($user) {
+            if ($user && $user->hasPower('edit_data')) {
+                return $query;
+            }
+
+            return $query->where('is_hidden', 0)->where('is_staff', 0);
+        })->whereIn('id', $this->shopStock->pluck('shop_id')->toArray())->get();
+
+        return $shops;
     }
 }

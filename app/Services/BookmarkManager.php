@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Models\Character\Character;
 use App\Models\Character\CharacterBookmark;
-use DB;
+use Illuminate\Support\Facades\DB;
 
 class BookmarkManager extends Service {
     /*
@@ -22,7 +22,7 @@ class BookmarkManager extends Service {
      * @param array                 $data
      * @param \App\Models\User\User $user
      *
-     * @return \App\Models\Character\CharacterBookmark|bool
+     * @return bool|CharacterBookmark
      */
     public function createBookmark($data, $user) {
         DB::beginTransaction();
@@ -67,7 +67,7 @@ class BookmarkManager extends Service {
      * @param array                 $data
      * @param \App\Models\User\User $user
      *
-     * @return \App\Models\Character\CharacterBookmark|bool
+     * @return bool|CharacterBookmark
      */
     public function updateBookmark($data, $user) {
         DB::beginTransaction();
