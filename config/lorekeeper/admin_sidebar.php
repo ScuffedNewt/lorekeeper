@@ -103,6 +103,10 @@ return [
                 'name' => 'Claim Submissions',
                 'url'  => 'admin/claims',
             ],
+            [
+                'name' => 'Trades',
+                'url'  => 'admin/trades/incoming',
+            ],
         ],
     ],
     'Grants'     => [
@@ -115,6 +119,18 @@ return [
             [
                 'name' => 'Item Grants',
                 'url'  => 'admin/grants/items',
+            ],
+            [
+                'name' => 'Loot Table Grants',
+                'url'  => 'admin/grants/loot-tables',
+            ],
+            [
+                'name' => 'User Reward Grants',
+                'url'  => 'admin/grants/user-rewards',
+            ],
+            [
+                'name' => 'Character Reward Grants',
+                'url'  => 'admin/grants/character-rewards',
             ],
         ],
     ],
@@ -132,10 +148,6 @@ return [
             [
                 'name' => 'Character Transfers',
                 'url'  => 'admin/masterlist/transfers/incoming',
-            ],
-            [
-                'name' => 'Character Trades',
-                'url'  => 'admin/masterlist/trades/incoming',
             ],
             [
                 'name' => 'Design Updates',

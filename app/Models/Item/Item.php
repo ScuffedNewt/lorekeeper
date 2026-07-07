@@ -118,7 +118,7 @@ class Item extends Model {
      * Get shop stock for this item.
      */
     public function shopStock() {
-        return $this->hasMany(ShopStock::class, 'item_id')->where('is_visible', 1);
+        return $this->hasMany(ShopStock::class, 'item_id')->where('stock_type', 'Item')->where('is_visible', 1);
     }
 
     /**********************************************************************************************
@@ -194,7 +194,7 @@ class Item extends Model {
      * @return string
      */
     public function getDisplayNameAttribute() {
-        return '<a href="'.$this->url.'" class="display-item">'.$this->name.'</a>';
+        return '<a href="'.$this->idUrl.'" class="display-item">'.$this->name.'</a>';
     }
 
     /**

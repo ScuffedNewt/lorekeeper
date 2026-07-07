@@ -3,6 +3,8 @@
 namespace App\Models\Prompt;
 
 use App\Models\Model;
+use App\Models\Reward\Reward;
+use App\Models\Submission\Submission;
 use Carbon\Carbon;
 
 class Prompt extends Model {
@@ -15,6 +17,7 @@ class Prompt extends Model {
         'prompt_category_id', 'name', 'summary', 'description', 'parsed_description', 'is_active',
         'start_at', 'end_at', 'hide_before_start', 'hide_after_end', 'has_image', 'prefix',
         'hide_submissions', 'staff_only', 'hash',
+        'limit', 'limit_period', 'limit_character',
     ];
 
     /**
@@ -79,7 +82,7 @@ class Prompt extends Model {
      * Get the rewards attached to this prompt.
      */
     public function rewards() {
-        return $this->hasMany(PromptReward::class, 'prompt_id');
+        return $this->morphMany(Reward::class, 'object', 'object_model', 'object_id');
     }
 
     /**********************************************************************************************
@@ -227,7 +230,7 @@ class Prompt extends Model {
      * @return string
      */
     public function getDisplayNameAttribute() {
-        return '<a href="'.$this->url.'" class="display-prompt">'.$this->name.'</a>';
+        return '<a href="'.$this->idUrl.'" class="display-prompt">'.$this->name.'</a>';
     }
 
     /**
@@ -313,5 +316,33 @@ class Prompt extends Model {
      */
     public function getAdminPowerAttribute() {
         return 'edit_data';
+    }
+
+    /**********************************************************************************************
+
+        OTHER FUNCTIONS
+
+    **********************************************************************************************/
+
+    /**
+     * Get an array of how many prompts the user has completed in general.
+     *
+     * @param mixed $user
+     *
+     * @return array
+     */
+    public function getCount($user) {
+        // filter the submissions by hour/day/week/etc and returns count
+        $count['all'] = Submission::submitted($this->id, $user->id)->count();
+        $count['Hour'] = Submission::submitted($this->id, $user->id)->where('created_at', '>=', now()->startOfHour())->count();
+        $count['Day'] = Submission::submitted($this->id, $user->id)->where('created_at', '>=', now()->startOfDay())->count();
+        $count['Week'] = Submission::submitted($this->id, $user->id)->where('created_at', '>=', now()->startOfWeek())->count();
+        $count['BiWeekly'] = Submission::submitted($this->id, $user->id)->where('created_at', '>=', now()->subWeeks(2))->count();
+        $count['Month'] = Submission::submitted($this->id, $user->id)->where('created_at', '>=', now()->startOfMonth())->count();
+        $count['BiMonthly'] = Submission::submitted($this->id, $user->id)->where('created_at', '>=', now()->subMonths(2))->count();
+        $count['Quarter'] = Submission::submitted($this->id, $user->id)->where('created_at', '>=', now()->subMonths(3))->count();
+        $count['Year'] = Submission::submitted($this->id, $user->id)->where('created_at', '>=', now()->startOfYear())->count();
+
+        return $count;
     }
 }

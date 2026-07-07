@@ -10,7 +10,7 @@ use App\Models\Gallery\GallerySubmission;
 use App\Models\Invitation;
 use App\Models\Rank\Rank;
 use App\Models\Submission\Submission;
-use App\Models\Trade;
+use App\Models\Trade\Trade;
 use App\Models\User\User;
 use App\Models\User\UserUpdateLog;
 use Carbon\Carbon;
@@ -168,7 +168,13 @@ class UserService extends Service {
         $user->email_verified_at = null;
         $user->save();
 
-        $user->sendEmailVerificationNotification();
+        try {
+            $user->sendEmailVerificationNotification();
+        } catch (\Exception $e) {
+            $this->setError('error', 'Email updated successfully! However, we couldn\'t send the verification email due to email configuration issues. Please contact an administrator.');
+
+            return false;
+        }
 
         return true;
     }
