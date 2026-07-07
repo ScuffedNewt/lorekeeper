@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\Skill\Skill;
 use App\Models\Skill\SkillCategory;
-use App\Models\Species\Species;
 use Illuminate\Support\Facades\DB;
 
 class SkillService extends Service {
