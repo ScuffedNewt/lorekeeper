@@ -2,15 +2,14 @@
 
 namespace App\Services;
 
+use App\Facades\Notifications;
 use App\Models\Character\CharacterItem;
 use App\Models\Item\Item;
 use App\Models\User\User;
 use App\Models\User\UserItem;
 use Carbon\Carbon;
-use Config;
-use DB;
 use Illuminate\Support\Arr;
-use Notifications;
+use Illuminate\Support\Facades\DB;
 
 class InventoryManager extends Service {
     /*
@@ -25,8 +24,8 @@ class InventoryManager extends Service {
     /**
      * Grants an item to multiple users.
      *
-     * @param array                 $data
-     * @param \App\Models\User\User $staff
+     * @param array $data
+     * @param User  $staff
      *
      * @return bool
      */
@@ -90,7 +89,7 @@ class InventoryManager extends Service {
      *
      * @param array                           $data
      * @param \App\Models\Character\Character $character
-     * @param \App\Models\User\User           $staff
+     * @param User                            $staff
      *
      * @return bool
      */
@@ -154,11 +153,11 @@ class InventoryManager extends Service {
     /**
      * Transfers items between a user and character.
      *
-     * @param \App\Models\Character\Character|\App\Models\User\User         $sender
-     * @param \App\Models\Character\Character|\App\Models\User\User         $recipient
-     * @param \App\Models\Character\CharacterItem|\App\Models\User\UserItem $stacks
-     * @param int                                                           $quantities
-     * @param mixed                                                         $user
+     * @param \App\Models\Character\Character|User $sender
+     * @param \App\Models\Character\Character|User $recipient
+     * @param CharacterItem|UserItem               $stacks
+     * @param int                                  $quantities
+     * @param mixed                                $user
      *
      * @return bool
      */
@@ -209,7 +208,7 @@ class InventoryManager extends Service {
                     throw new \Exception('Quantity to transfer exceeds item count.');
                 }
 
-                //Check that hold count isn't being exceeded
+                // Check that hold count isn't being exceeded
                 if ($stack->item->category->character_limit > 0) {
                     $limit = $stack->item->category->character_limit;
                 }
@@ -240,10 +239,10 @@ class InventoryManager extends Service {
     /**
      * Transfers items between user stacks.
      *
-     * @param \App\Models\User\User     $sender
-     * @param \App\Models\User\User     $recipient
-     * @param \App\Models\User\UserItem $stacks
-     * @param int                       $quantities
+     * @param User     $sender
+     * @param User     $recipient
+     * @param UserItem $stacks
+     * @param int      $quantities
      *
      * @return bool
      */
@@ -311,10 +310,10 @@ class InventoryManager extends Service {
     /**
      * Deletes items from stack.
      *
-     * @param \App\Models\Character\Character|\App\Models\User\User         $owner
-     * @param \App\Models\Character\CharacterItem|\App\Models\User\UserItem $stacks
-     * @param int                                                           $quantities
-     * @param mixed                                                         $user
+     * @param \App\Models\Character\Character|User $owner
+     * @param CharacterItem|UserItem               $stacks
+     * @param int                                  $quantities
+     * @param mixed                                $user
      *
      * @return bool
      */
@@ -393,9 +392,9 @@ class InventoryManager extends Service {
     /**
      * Sells items from stack.
      *
-     * @param \App\Models\User\User     $user
-     * @param \App\Models\User\UserItem $stacks
-     * @param int                       $quantities
+     * @param User     $user
+     * @param UserItem $stacks
+     * @param int      $quantities
      *
      * @return bool
      */
@@ -420,7 +419,7 @@ class InventoryManager extends Service {
                 if (!isset($stack->item->data['resell'])) {
                     throw new \Exception('This item cannot be sold.');
                 }
-                if (!Config::get('lorekeeper.extensions.item_entry_expansion.resale_function')) {
+                if (!config('lorekeeper.extensions.item_entry_expansion.resale_function')) {
                     throw new \Exception('This function is not currently enabled.');
                 }
 
@@ -459,12 +458,12 @@ class InventoryManager extends Service {
     /**
      * Credits an item to a user or character.
      *
-     * @param \App\Models\Character\Character|\App\Models\User\User $sender
-     * @param \App\Models\Character\Character|\App\Models\User\User $recipient
-     * @param string                                                $type
-     * @param array                                                 $data
-     * @param \App\Models\Item\Item                                 $item
-     * @param int                                                   $quantity
+     * @param \App\Models\Character\Character|User $sender
+     * @param \App\Models\Character\Character|User $recipient
+     * @param string                               $type
+     * @param array                                $data
+     * @param Item                                 $item
+     * @param int                                  $quantity
      *
      * @return bool
      */
@@ -472,17 +471,15 @@ class InventoryManager extends Service {
         DB::beginTransaction();
 
         try {
-            $encoded_data = \json_encode($data);
-
             if ($recipient->logType == 'User') {
                 $recipient_stack = UserItem::where([
                     ['user_id', '=', $recipient->id],
                     ['item_id', '=', $item->id],
-                    ['data', '=', $encoded_data],
+                    ['data', '=', json_encode($data)], // this must be encoded since eloquent hasn't casted it yet
                 ])->first();
 
                 if (!$recipient_stack) {
-                    $recipient_stack = UserItem::create(['user_id' => $recipient->id, 'item_id' => $item->id, 'data' => $encoded_data]);
+                    $recipient_stack = UserItem::create(['user_id' => $recipient->id, 'item_id' => $item->id, 'data' => $data]);
                 }
                 $recipient_stack->count += $quantity;
                 $recipient_stack->save();
@@ -490,15 +487,22 @@ class InventoryManager extends Service {
                 $recipient_stack = CharacterItem::where([
                     ['character_id', '=', $recipient->id],
                     ['item_id', '=', $item->id],
-                    ['data', '=', $encoded_data],
+                    ['data', '=', json_encode($data)],
                 ])->first();
 
                 if (!$recipient_stack) {
-                    $recipient_stack = CharacterItem::create(['character_id' => $recipient->id, 'item_id' => $item->id, 'data' => $encoded_data]);
+                    $recipient_stack = CharacterItem::create(['character_id' => $recipient->id, 'item_id' => $item->id, 'data' => $data]);
                 }
                 $recipient_stack->count += $quantity;
                 $recipient_stack->save();
             }
+
+            if (!$item->is_released) {
+                $item->update([
+                    'is_released' => 1,
+                ]);
+            }
+
             if ($type && !$this->createLog($sender ? $sender->id : null, $sender ? $sender->logType : null, $recipient ? $recipient->id : null, $recipient ? $recipient->logType : null, null, $type, $data['data'], $item->id, $quantity)) {
                 throw new \Exception('Failed to create log.');
             }
@@ -514,12 +518,12 @@ class InventoryManager extends Service {
     /**
      * Moves items from one user or character stack to another.
      *
-     * @param \App\Models\Character\Character|\App\Models\User\User $sender
-     * @param \App\Models\Character\Character|\App\Models\User\User $recipient
-     * @param string                                                $type
-     * @param array                                                 $data
-     * @param mixed                                                 $stack
-     * @param mixed                                                 $quantity
+     * @param \App\Models\Character\Character|User $sender
+     * @param \App\Models\Character\Character|User $recipient
+     * @param string                               $type
+     * @param array                                $data
+     * @param mixed                                $stack
+     * @param mixed                                $quantity
      *
      * @return bool
      */
@@ -530,11 +534,11 @@ class InventoryManager extends Service {
             $recipient_stack = UserItem::where([
                 ['user_id', '=', $recipient->id],
                 ['item_id', '=', $stack->item_id],
-                ['data', '=', json_encode($stack->data)],
+                ['data', '=', $stack->data],
             ])->first();
 
             if (!$recipient_stack) {
-                $recipient_stack = UserItem::create(['user_id' => $recipient->id, 'item_id' => $stack->item_id, 'data' => json_encode($stack->data)]);
+                $recipient_stack = UserItem::create(['user_id' => $recipient->id, 'item_id' => $stack->item_id, 'data' => $stack->data]);
             }
 
             $stack->count -= $quantity;
@@ -557,11 +561,11 @@ class InventoryManager extends Service {
     /**
      * Debits an item from a user or character.
      *
-     * @param \App\Models\Character\Character|\App\Models\User\User $owner
-     * @param string                                                $type
-     * @param array                                                 $data
-     * @param \App\Models\Item\UserItem                             $stack
-     * @param mixed                                                 $quantity
+     * @param \App\Models\Character\Character|User $owner
+     * @param string                               $type
+     * @param array                                $data
+     * @param \App\Models\Item\UserItem            $stack
+     * @param mixed                                $quantity
      *
      * @return bool
      */
@@ -585,12 +589,62 @@ class InventoryManager extends Service {
     }
 
     /**
+     * Returns an array of debitable stacks for a user or character.
+     *
+     * @param mixed $owner
+     * @param mixed $itemId
+     * @param mixed $quantityRequired
+     */
+    public function getDebitableStacks($owner, $itemId, $quantityRequired) {
+        $stacks = [];
+        $totalAvailable = 0;
+
+        if ($owner->logType == 'User') {
+            $ownedStacks = UserItem::where([
+                ['user_id', '=', $owner->id],
+                ['item_id', '=', $itemId],
+                ['count', '>', 0],
+            ])->get()->filter(function ($stack) {
+                return $stack->getAvailableQuantityAttribute() > 0;
+            });
+        } else {
+            $ownedStacks = CharacterItem::where([
+                ['character_id', '=', $owner->id],
+                ['item_id', '=', $itemId],
+                ['count', '>', 0],
+            ])->get()->filter(function ($stack) {
+                return $stack->getAvailableQuantityAttribute() > 0;
+            });
+        }
+
+        foreach ($ownedStacks as $stack) {
+            $availableQuantity = $stack->getAvailableQuantityAttribute();
+            if ($availableQuantity > 0) {
+                $stacks[] = [
+                    'stack'    => $stack,
+                    'quantity' => min($availableQuantity, $quantityRequired - $totalAvailable),
+                ];
+                $totalAvailable += $availableQuantity;
+                if ($totalAvailable >= $quantityRequired) {
+                    break;
+                }
+            }
+        }
+
+        if ($totalAvailable < $quantityRequired) {
+            return false;
+        }
+
+        return $stacks;
+    }
+
+    /**
      * Names an item stack.
      *
-     * @param \App\Models\Character\Character|\App\Models\User\User         $owner
-     * @param \App\Models\Character\CharacterItem|\App\Models\User\UserItem $stacks
-     * @param mixed                                                         $name
-     * @param mixed                                                         $user
+     * @param \App\Models\Character\Character|User $owner
+     * @param CharacterItem|UserItem               $stacks
+     * @param mixed                                $name
+     * @param mixed                                $user
      *
      * @return bool
      */
@@ -658,7 +712,7 @@ class InventoryManager extends Service {
     /**
      * Consolidates a user's item stacks.
      *
-     * @param \App\Models\User\User $user
+     * @param User $user
      *
      * @return bool
      */

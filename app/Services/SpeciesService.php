@@ -3,9 +3,10 @@
 namespace App\Services;
 
 use App\Models\Character\CharacterImage;
+use App\Models\Character\CharacterImageSubtype;
 use App\Models\Species\Species;
 use App\Models\Species\Subtype;
-use DB;
+use Illuminate\Support\Facades\DB;
 
 class SpeciesService extends Service {
     /*
@@ -23,7 +24,7 @@ class SpeciesService extends Service {
      * @param array                 $data
      * @param \App\Models\User\User $user
      *
-     * @return \App\Models\Species\Species|bool
+     * @return bool|Species
      */
     public function createSpecies($data, $user) {
         DB::beginTransaction();
@@ -34,6 +35,7 @@ class SpeciesService extends Service {
             $image = null;
             if (isset($data['image']) && $data['image']) {
                 $data['has_image'] = 1;
+                $data['hash'] = randomString(10);
                 $image = $data['image'];
                 unset($data['image']);
             } else {
@@ -57,11 +59,11 @@ class SpeciesService extends Service {
     /**
      * Updates a species.
      *
-     * @param \App\Models\Species\Species $species
-     * @param array                       $data
-     * @param \App\Models\User\User       $user
+     * @param Species               $species
+     * @param array                 $data
+     * @param \App\Models\User\User $user
      *
-     * @return \App\Models\Species\Species|bool
+     * @return bool|Species
      */
     public function updateSpecies($species, $data, $user) {
         DB::beginTransaction();
@@ -74,17 +76,23 @@ class SpeciesService extends Service {
 
             $data = $this->populateData($data, $species);
 
+            $oldImageFileName = null;
+            if ($species->has_image) {
+                $oldImageFileName = $species->speciesImageFileName;
+            }
+
             $image = null;
             if (isset($data['image']) && $data['image']) {
                 $data['has_image'] = 1;
+                $data['hash'] = randomString(10);
                 $image = $data['image'];
                 unset($data['image']);
             }
 
             $species->update($data);
 
-            if ($species) {
-                $this->handleImage($image, $species->speciesImagePath, $species->speciesImageFileName);
+            if ($image) {
+                $this->handleImage($image, $species->speciesImagePath, $species->speciesImageFileName, $oldImageFileName);
             }
 
             return $this->commitReturn($species);
@@ -98,7 +106,7 @@ class SpeciesService extends Service {
     /**
      * Deletes a species.
      *
-     * @param \App\Models\Species\Species $species
+     * @param Species $species
      *
      * @return bool
      */
@@ -111,9 +119,7 @@ class SpeciesService extends Service {
                 throw new \Exception('A character image with this species exists. Please change its species first.');
             }
 
-            if ($species->has_image) {
-                $this->deleteImage($species->speciesImagePath, $species->speciesImageFileName);
-            }
+            $this->deleteImage($species->speciesImagePath, $species->speciesImageFileName);
             $species->delete();
 
             return $this->commitReturn(true);
@@ -156,7 +162,7 @@ class SpeciesService extends Service {
      * @param array                 $data
      * @param \App\Models\User\User $user
      *
-     * @return \App\Models\Species\Subtype|bool
+     * @return bool|Subtype
      */
     public function createSubtype($data, $user) {
         DB::beginTransaction();
@@ -167,6 +173,7 @@ class SpeciesService extends Service {
             $image = null;
             if (isset($data['image']) && $data['image']) {
                 $data['has_image'] = 1;
+                $data['hash'] = randomString(10);
                 $image = $data['image'];
                 unset($data['image']);
             } else {
@@ -190,11 +197,11 @@ class SpeciesService extends Service {
     /**
      * Updates a subtype.
      *
-     * @param \App\Models\Species\Subtype $subtype
-     * @param array                       $data
-     * @param \App\Models\User\User       $user
+     * @param Subtype               $subtype
+     * @param array                 $data
+     * @param \App\Models\User\User $user
      *
-     * @return \App\Models\Species\Subtype|bool
+     * @return bool|Subtype
      */
     public function updateSubtype($subtype, $data, $user) {
         DB::beginTransaction();
@@ -202,17 +209,23 @@ class SpeciesService extends Service {
         try {
             $data = $this->populateSubtypeData($data, $subtype);
 
+            $oldImageFileName = null;
+            if ($subtype->has_image) {
+                $oldImageFileName = $subtype->subtypeImageFileName;
+            }
+
             $image = null;
             if (isset($data['image']) && $data['image']) {
                 $data['has_image'] = 1;
+                $data['hash'] = randomString(10);
                 $image = $data['image'];
                 unset($data['image']);
             }
 
             $subtype->update($data);
 
-            if ($subtype) {
-                $this->handleImage($image, $subtype->subtypeImagePath, $subtype->subtypeImageFileName);
+            if ($image) {
+                $this->handleImage($image, $subtype->subtypeImagePath, $subtype->subtypeImageFileName, $oldImageFileName);
             }
 
             return $this->commitReturn($subtype);
@@ -226,7 +239,7 @@ class SpeciesService extends Service {
     /**
      * Deletes a subtype.
      *
-     * @param \App\Models\Species\Subtype $subtype
+     * @param Subtype $subtype
      *
      * @return bool
      */
@@ -235,13 +248,11 @@ class SpeciesService extends Service {
 
         try {
             // Check first if characters with this subtype exists
-            if (CharacterImage::where('subtype_id', $subtype->id)->exists()) {
+            if (CharacterImageSubtype::where('subtype_id', $subtype->id)->exists()) {
                 throw new \Exception('A character image with this subtype exists. Please change or remove its subtype first.');
             }
 
-            if ($subtype->has_image) {
-                $this->deleteImage($subtype->subtypeImagePath, $subtype->subtypeImageFileName);
-            }
+            $this->deleteImage($subtype->subtypeImagePath, $subtype->subtypeImageFileName);
             $subtype->delete();
 
             return $this->commitReturn(true);
@@ -281,8 +292,8 @@ class SpeciesService extends Service {
     /**
      * Processes user input for creating/updating a species.
      *
-     * @param array                       $data
-     * @param \App\Models\Species\Species $species
+     * @param array   $data
+     * @param Species $species
      *
      * @return array
      */
@@ -308,8 +319,8 @@ class SpeciesService extends Service {
     /**
      * Processes user input for creating/updating a subtype.
      *
-     * @param array                       $data
-     * @param \App\Models\Species\Subtype $subtype
+     * @param array   $data
+     * @param Subtype $subtype
      *
      * @return array
      */
@@ -321,54 +332,6 @@ class SpeciesService extends Service {
         if (!isset($data['is_visible'])) {
             $data['is_visible'] = 0;
         }
-        if (isset($data['remove_image'])) {
-            if ($subtype && $subtype->has_image && $data['remove_image']) {
-                $data['has_image'] = 0;
-                $this->deleteImage($subtype->subtypeImagePath, $subtype->subtypeImageFileName);
-            }
-            unset($data['remove_image']);
-        }
-
-        return $data;
-    }
-
-    /**
-     * Processes user input for creating/updating a species.
-     *
-     * @param array                       $data
-     * @param \App\Models\Species\Species $species
-     *
-     * @return array
-     */
-    private function populateData($data, $species = null) {
-        if (isset($data['description']) && $data['description']) {
-            $data['parsed_description'] = parse($data['description']);
-        }
-
-        if (isset($data['remove_image'])) {
-            if ($species && $species->has_image && $data['remove_image']) {
-                $data['has_image'] = 0;
-                $this->deleteImage($species->speciesImagePath, $species->speciesImageFileName);
-            }
-            unset($data['remove_image']);
-        }
-
-        return $data;
-    }
-
-    /**
-     * Processes user input for creating/updating a subtype.
-     *
-     * @param array                       $data
-     * @param \App\Models\Species\Subtype $subtype
-     *
-     * @return array
-     */
-    private function populateSubtypeData($data, $subtype = null) {
-        if (isset($data['description']) && $data['description']) {
-            $data['parsed_description'] = parse($data['description']);
-        }
-
         if (isset($data['remove_image'])) {
             if ($subtype && $subtype->has_image && $data['remove_image']) {
                 $data['has_image'] = 0;

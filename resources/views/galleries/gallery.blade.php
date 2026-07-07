@@ -10,7 +10,7 @@
 
     <h1>
         {{ $gallery->name }}
-        @if (Auth::check() && $gallery->canSubmit(Auth::user()))
+        @if (Auth::check() && $gallery->canSubmit(Settings::get('gallery_submissions_open'), Auth::user()))
             <a href="{{ url('gallery/submit/' . $gallery->id) }}" class="btn btn-primary float-right"><i class="fas fa-plus mr-1"></i> Submit</a>
         @endif
     </h1>
@@ -32,7 +32,7 @@
         <p><a href="{{ url('oekaki') }}" class="btn btn-primary"><i class="fas fa-paint-brush mr-1"></i> Draw</a></p>
     @endif
     <p>{!! $gallery->description !!}</p>
-    @if (!$gallery->submissions->count() && $gallery->children->count() && $childSubmissions->count())
+    @if (!$gallery->submissions_count && $gallery->children->count() && $childSubmissions->count())
         <p>This gallery has no submissions; instead, displayed is a selection of the most recent submissions from its sub-galleries. Please navigate to one of the sub-galleries to view more.</p>
     @endif
 
@@ -65,7 +65,7 @@
         {!! Form::close() !!}
     </div>
 
-    @if ($gallery->submissions->count())
+    @if ($gallery->submissions_count)
         {!! $submissions->render() !!}
 
         <div class="d-flex align-content-around flex-wrap mb-2">

@@ -1,6 +1,5 @@
 {
-    "/js/app.js": "/js/app.js",
-    "/chickenpaint/chickenpaint.js": "/chickenpaint/chickenpaint.js",
-    "/css/app.css": "/css/app.css",
-    "/chickenpaint/chickenpaint.css": "/chickenpaint/chickenpaint.css"
+    "/js/app.js": "/js/app.js?id=89ad8f725de1c9b061be29f6a109846a",
+    "/js/app-secondary.js": "/js/app-secondary.js?id=5e53cf244f7b8cc45815b851a4c35a45",
+    "/css/app.css": "/css/app.css?id=6a66aed7a807322933661fa151738910"
 }

@@ -23,7 +23,7 @@ return [
             ],
             [
                 'name' => 'Admin Logs',
-                'url'  => 'admin/logs',
+                'url'  => 'admin/admin-logs',
             ],
             [
                 'name' => 'Staff Reward Settings',
@@ -40,17 +40,27 @@ return [
             ],
         ],
     ],
-    'Site'       => [
-        'power' => 'edit_pages',
+    'News' => [
+        'power' => 'manage_news',
         'links' => [
             [
                 'name' => 'News',
                 'url'  => 'admin/news',
             ],
+        ],
+    ],
+    'Sales' => [
+        'power' => 'manage_sales',
+        'links' => [
             [
                 'name' => 'Sales',
                 'url'  => 'admin/sales',
             ],
+        ],
+    ],
+    'Pages'       => [
+        'power' => 'edit_pages',
+        'links' => [
             [
                 'name' => 'Pages',
                 'url'  => 'admin/pages',
@@ -89,6 +99,10 @@ return [
                 'name' => 'Claim Submissions',
                 'url'  => 'admin/claims',
             ],
+            [
+                'name' => 'Trades',
+                'url'  => 'admin/trades/incoming',
+            ],
         ],
     ],
     'Grants'     => [
@@ -101,6 +115,18 @@ return [
             [
                 'name' => 'Item Grants',
                 'url'  => 'admin/grants/items',
+            ],
+            [
+                'name' => 'Loot Table Grants',
+                'url'  => 'admin/grants/loot-tables',
+            ],
+            [
+                'name' => 'User Reward Grants',
+                'url'  => 'admin/grants/user-rewards',
+            ],
+            [
+                'name' => 'Character Reward Grants',
+                'url'  => 'admin/grants/character-rewards',
             ],
         ],
     ],
@@ -118,10 +144,6 @@ return [
             [
                 'name' => 'Character Transfers',
                 'url'  => 'admin/masterlist/transfers/incoming',
-            ],
-            [
-                'name' => 'Character Trades',
-                'url'  => 'admin/masterlist/trades/incoming',
             ],
             [
                 'name' => 'Design Updates',
@@ -184,6 +206,10 @@ return [
                 'name' => 'Items',
                 'url'  => 'admin/data/items',
             ],
+            [
+                'name' => 'Dynamic Limits',
+                'url'  => 'admin/data/limits',
+            ],
         ],
     ],
     'Raffles'    => [
@@ -209,6 +235,10 @@ return [
             [
                 'name' => 'File Manager',
                 'url'  => 'admin/files',
+            ],
+            [
+                'name' => 'Log Viewer',
+                'url'  => 'admin/logs',
             ],
         ],
     ],

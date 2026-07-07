@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Models\News;
 use App\Models\User\User;
-use DB;
+use Illuminate\Support\Facades\DB;
 
 class NewsService extends Service {
     /*
@@ -19,10 +19,10 @@ class NewsService extends Service {
     /**
      * Creates a news post.
      *
-     * @param array                 $data
-     * @param \App\Models\User\User $user
+     * @param array $data
+     * @param User  $user
      *
-     * @return \App\Models\News|bool
+     * @return bool|News
      */
     public function createNews($data, $user) {
         DB::beginTransaction();
@@ -34,7 +34,30 @@ class NewsService extends Service {
                 $data['is_visible'] = 0;
             }
 
+            $image = null;
+            if (isset($data['image']) && $data['image']) {
+                $data['has_image'] = 1;
+                $data['hash'] = randomString(10);
+                $image = $data['image'];
+                unset($data['image']);
+            } else {
+                $data['has_image'] = 0;
+            }
+
             $news = News::create($data);
+
+            if (isset($data['remove_image'])) {
+                if ($news && $news->has_image && $data['remove_image']) {
+                    $data['has_image'] = 0;
+                    $image = null;
+                    $this->deleteImage($news->imagePath, $news->imageFileName);
+                }
+                unset($data['remove_image']);
+            }
+
+            if ($image) {
+                $this->handleImage($image, $news->imagePath, $news->imageFileName);
+            }
 
             if ($news->is_visible) {
                 $this->alertUsers();
@@ -51,11 +74,11 @@ class NewsService extends Service {
     /**
      * Updates a news post.
      *
-     * @param \App\Models\News      $news
-     * @param array                 $data
-     * @param \App\Models\User\User $user
+     * @param News  $news
+     * @param array $data
+     * @param User  $user
      *
-     * @return \App\Models\News|bool
+     * @return bool|News
      */
     public function updateNews($news, $data, $user) {
         DB::beginTransaction();
@@ -70,7 +93,33 @@ class NewsService extends Service {
                 $this->alertUsers();
             }
 
+            $oldImageFileName = null;
+            if ($news->has_image) {
+                $oldImageFileName = $news->imageFileName;
+            }
+
+            $image = null;
+            if (isset($data['image']) && $data['image']) {
+                $data['has_image'] = 1;
+                $data['hash'] = randomString(10);
+                $image = $data['image'];
+                unset($data['image']);
+            }
+
             $news->update($data);
+
+            if (isset($data['remove_image'])) {
+                if ($news && $news->has_image && $data['remove_image']) {
+                    $data['has_image'] = 0;
+                    $image = null;
+                    $this->deleteImage($news->imagePath, $news->imageFileName);
+                }
+                unset($data['remove_image']);
+            }
+
+            if ($image) {
+                $this->handleImage($image, $news->imagePath, $news->imageFileName, $oldImageFileName);
+            }
 
             return $this->commitReturn($news);
         } catch (\Exception $e) {
@@ -83,7 +132,7 @@ class NewsService extends Service {
     /**
      * Deletes a news post.
      *
-     * @param \App\Models\News $news
+     * @param News $news
      *
      * @return bool
      */
@@ -91,9 +140,33 @@ class NewsService extends Service {
         DB::beginTransaction();
 
         try {
+            $this->deleteImage($news->imagePath, $news->imageFileName);
             $news->delete();
 
             return $this->commitReturn(true);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
+    }
+
+    /**
+     * Regenerates a news post.
+     *
+     * @param News $news
+     *
+     * @return bool
+     */
+    public function regenNews($news) {
+        DB::beginTransaction();
+
+        try {
+            $news->parsed_text = parse($news->text);
+
+            $news->save();
+
+            return $this->commitReturn($news);
         } catch (\Exception $e) {
             $this->setError('error', $e->getMessage());
         }

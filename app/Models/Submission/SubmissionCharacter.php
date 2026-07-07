@@ -2,6 +2,7 @@
 
 namespace App\Models\Submission;
 
+use App\Models\Character\Character;
 use App\Models\Model;
 
 class SubmissionCharacter extends Model {
@@ -21,6 +22,15 @@ class SubmissionCharacter extends Model {
      */
     protected $table = 'submission_characters';
 
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'data' => 'array',
+    ];
+
     /**********************************************************************************************
 
         RELATIONS
@@ -31,14 +41,14 @@ class SubmissionCharacter extends Model {
      * Get the submission this is attached to.
      */
     public function submission() {
-        return $this->belongsTo('App\Models\Submission\Submission', 'submission_id');
+        return $this->belongsTo(Submission::class, 'submission_id');
     }
 
     /**
      * Get the character being attached to the submission.
      */
     public function character() {
-        return $this->belongsTo('App\Models\Character\Character', 'character_id');
+        return $this->belongsTo(Character::class, 'character_id');
     }
 
     /**********************************************************************************************
@@ -46,15 +56,6 @@ class SubmissionCharacter extends Model {
         ACCESSORS
 
     **********************************************************************************************/
-
-    /**
-     * Get the data attribute as an associative array.
-     *
-     * @return array
-     */
-    public function getDataAttribute() {
-        return json_decode($this->attributes['data'], true);
-    }
 
     /**
      * Get the rewards for the character.

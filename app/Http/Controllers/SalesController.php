@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Sales\Sales;
-use Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
 
 class SalesController extends Controller {
@@ -35,7 +35,7 @@ class SalesController extends Controller {
             Auth::user()->update(['is_sales_unread' => 0]);
         }
 
-        $query = Sales::visible();
+        $query = Sales::visible(Auth::user() ?? null);
         $data = $request->only(['title', 'is_open', 'sort']);
         if (isset($data['is_open']) && $data['is_open'] != 'none') {
             $query->where('is_open', $data['is_open']);
@@ -56,7 +56,7 @@ class SalesController extends Controller {
                     $query->sortNewest();
                     break;
                 case 'oldest':
-                    $query->sortOldest();
+                    $query->sortNewest(true);
                     break;
                 case 'bump':
                     $query->sortBump();
@@ -83,7 +83,7 @@ class SalesController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getSales($id, $slug = null) {
-        $sales = Sales::where('id', $id)->where('is_visible', 1)->first();
+        $sales = Sales::where('id', $id)->visible(Auth::user() ?? null)->first();
         if (!$sales) {
             abort(404);
         }

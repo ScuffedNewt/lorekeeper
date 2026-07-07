@@ -6,11 +6,9 @@ use App\Models\Gallery\GallerySubmission;
 use App\Models\SitePage;
 use App\Services\LinkService;
 use App\Services\UserService;
-use Auth;
-use Carbon\Carbon;
-use Config;
-use DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Laravel\Socialite\Facades\Socialite;
 
 class HomeController extends Controller {
@@ -29,8 +27,8 @@ class HomeController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getIndex() {
-        if (Config::get('lorekeeper.extensions.show_all_recent_submissions.enable')) {
-            $query = GallerySubmission::visible(Auth::check() ? Auth::user() : null)->accepted()->orderBy('created_at', 'DESC');
+        if (config('lorekeeper.extensions.show_all_recent_submissions.enable')) {
+            $query = GallerySubmission::visible(Auth::user() ?? null)->accepted()->orderBy('created_at', 'DESC');
             $gallerySubmissions = $query->get()->take(8);
         } else {
             $gallerySubmissions = [];
@@ -48,9 +46,9 @@ class HomeController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getLink(Request $request) {
-        // If the user already has a username associated with their account, redirect them
+        // If the user already has an alias associated with their account, redirect them
         if (Auth::check() && Auth::user()->hasAlias) {
-            redirect()->to('home');
+            return redirect()->route('home');
         }
 
         // Display the login link
@@ -70,7 +68,7 @@ class HomeController extends Controller {
         }
 
         // Redirect to the provider's authentication page
-        return $service->getAuthRedirect($provider); //Socialite::driver($provider)->redirect();
+        return $service->getAuthRedirect($provider); // Socialite::driver($provider)->redirect();
     }
 
     /**
@@ -106,6 +104,45 @@ class HomeController extends Controller {
     }
 
     /**
+     * Shows the email page.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getEmail(Request $request) {
+        // If the user already has an email associated with their account, redirect them
+        if (Auth::check() && Auth::user()->hasEmail) {
+            return redirect()->route('home');
+        }
+
+        if (config('lorekeeper.settings.allow_unverified_users_to_modify_emails') && $request->is('email/update')) {
+            return view('auth.update_email');
+        }
+
+        // Step 1: display a login email
+        return view('auth.email');
+    }
+
+    /**
+     * Posts the email page.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function postEmail(UserService $service, Request $request) {
+        $data = $request->input('email');
+        if ($service->updateEmail(['email' => $data], Auth::user())) {
+            flash('Email added successfully!');
+
+            return redirect()->route('home');
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
+
+            return redirect()->back();
+        }
+    }
+
+    /**
      * Shows the birthdaying page.
      *
      * @return \Illuminate\Contracts\Support\Renderable
@@ -129,10 +166,8 @@ class HomeController extends Controller {
         $service = new UserService;
         // Make birthday into format we can store
         $data = $request->input('dob');
-        $date = $data['day'].'-'.$data['month'].'-'.$data['year'];
-        $formatDate = Carbon::parse($date);
 
-        if ($service->updateBirthday($formatDate, Auth::user())) {
+        if ($service->updateBirthday($data, Auth::user())) {
             flash('Birthday added successfully!');
 
             return redirect()->to('/');
@@ -167,7 +202,7 @@ class HomeController extends Controller {
     private function checkProvider($provider, $user) {
         // Check if the site can be used for authentication
         $isAllowed = false;
-        foreach (Config::get('lorekeeper.sites') as $key => $site) {
+        foreach (config('lorekeeper.sites') as $key => $site) {
             if ($key == $provider && isset($site['auth'])) {
                 // require a primary alias if the user does not already have one
                 if (!Auth::user()->has_alias && (!isset($site['primary_alias']) || !$site['primary_alias'])) {
@@ -189,10 +224,10 @@ class HomeController extends Controller {
         // I think there's no harm in linking multiple of the same site as people may want their activity separated into an ARPG account.
         // Uncomment the following to restrict to one account per site, however.
         // Check if the user already has a username associated with their account
-        //if(DB::table('user_aliases')->where('site', $provider)->where('user_id', $user->id)->exists()) {
+        // if(DB::table('user_aliases')->where('site', $provider)->where('user_id', $user->id)->exists()) {
         //    $this->error = 'You already have a username associated with this website linked to your account.';
         //    return false;
-        //}
+        // }
 
         return true;
     }

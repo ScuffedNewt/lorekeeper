@@ -15,10 +15,10 @@
     </style>
 @endpush
 
-@push('head')
+@section('head')
     <script src="{{ asset('chickenpaint/chickenpaint.js') }}"></script>
     <meta name="viewport" content="width=device-width,user-scalable=no">
-@endpush
+@endsection
 
 @section('gallery-content')
     {!! breadcrumbs(['Oekaki' => 'oekaki']) !!}

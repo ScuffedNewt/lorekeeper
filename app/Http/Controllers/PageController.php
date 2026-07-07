@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\SitePage;
-use DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class PageController extends Controller {
     /*
@@ -23,7 +24,7 @@ class PageController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getPage($key) {
-        $page = SitePage::where('key', $key)->where('is_visible', 1)->first();
+        $page = SitePage::where('key', $key)->visible(Auth::user() ?? null)->first();
         if (!$page) {
             abort(404);
         }
@@ -41,5 +42,14 @@ class PageController extends Controller {
             'credits'    => SitePage::where('key', 'credits')->first(),
             'extensions' => DB::table('site_extensions')->get(),
         ]);
+    }
+
+    /**
+     * Shows the RSS feeds page.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getFeedsPage() {
+        return view('pages.feeds');
     }
 }

@@ -5,11 +5,12 @@ namespace App\Services;
 use App;
 use App\Models\AdminLog;
 use App\Models\Currency\Currency;
-use Auth;
-use Config;
-use DB;
-use File;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\MessageBag;
+use Intervention\Image\Facades\Image;
 
 abstract class Service {
     /*
@@ -92,7 +93,7 @@ abstract class Service {
      * Empty the errors MessageBag.
      */
     public function resetErrors() {
-        $this->errors = new MessageBag();
+        $this->errors = new MessageBag;
     }
 
     public function remember($key = null, $fn = null) {
@@ -117,38 +118,6 @@ abstract class Service {
         return $this->user ? $this->user : Auth::user();
     }
 
-    // 1. Old image exists, want to move it to a new location.
-    // 2. Given new image, want to upload it to new location.
-    //    (old image may or may not exist)
-    // 3. Nothing happens (no changes required)
-    public function handleImage($image, $dir, $name, $oldName = null, $copy = false) {
-        if (!$oldName && !$image) {
-            return true;
-        }
-
-        if (!$image) {
-            // Check if we're moving an old image, and move it if it does.
-            if ($oldName) {
-                return $this->moveImage($dir, $name, $oldName, $copy);
-            }
-        } else {
-            // Don't want to leave a lot of random images lying around,
-            // so move the old image first if it exists.
-            if ($oldName) {
-                $this->moveImage($dir, $name, $oldName, $copy);
-            }
-
-            // Then overwrite the old image.
-            return $this->saveImage($image, $dir, $name, $copy);
-        }
-
-        return false;
-    }
-
-    public function deleteImage($dir, $name) {
-        unlink($dir.'/'.$name);
-    }
-
     /**
      * Creates an admin log entry after an action is performed.
      * If staff rewards are enabled, also checks for and grants any
@@ -164,7 +133,7 @@ abstract class Service {
         if ($user->isStaff) {
             // If staff rewards are enabled, check if the action
             // is eligible for a reward, and if so, grant it
-            if (Config::get('lorekeeper.extensions.staff_rewards.enabled')) {
+            if (config('lorekeeper.extensions.staff_rewards.enabled')) {
                 // Ensure that the user only receives rewards for the action once
                 if (!AdminLog::where('user_id', $user->id)->where('action', $action)->where('action_details', $action_details)->exists()) {
                     // Fetch all configured actions
@@ -199,7 +168,7 @@ abstract class Service {
                     // Grant the calculated reward to the user
                     if ($reward) {
                         // Check that the currency exists, first
-                        $currency = Currency::find(Config::get('lorekeeper.extensions.staff_rewards.currency_id'));
+                        $currency = Currency::find(config('lorekeeper.extensions.staff_rewards.currency_id'));
                         if ($currency) {
                             if (!(new CurrencyManager)->creditCurrency(null, $user, 'Staff Reward', $action_details, $currency, $reward)) {
                                 return false;
@@ -224,6 +193,223 @@ abstract class Service {
             return true;
         }
     }
+
+    /**********************************************************************************************
+
+        PUBLIC IMAGE HANDLING METHODS
+
+    **********************************************************************************************/
+
+    // 1. Old image exists, want to move it to a new location.
+    // 2. Given new image, want to upload it to new location.
+    //    (old image may or may not exist)
+    // 3. Nothing happens (no changes required)
+    public function handleImage($image, $dir, $name, $oldName = null, $copy = false) {
+        if (!$oldName && !$image) {
+            return true;
+        }
+
+        if (!$image) {
+            // Check if we're moving an old image, and move it if it does.
+            if ($oldName) {
+                return $this->moveImage($dir, $name, $oldName, $copy);
+            }
+        } else {
+            // Don't want to leave a lot of random images lying around,
+            // so move the old image first if it exists.
+            if ($oldName) {
+                $this->deleteImage($dir, $oldName);
+            }
+
+            // Then save the new image.
+            return $this->saveImage($image, $dir, $name, $copy);
+        }
+
+        return false;
+    }
+
+    /**
+     * Delete an image file.
+     *
+     * @param string $dir
+     * @param string $name
+     */
+    public function deleteImage($dir, $name) {
+        if (empty($name) || empty($dir)) {
+            return false;
+        }
+
+        $fullPath = $dir.'/'.$name;
+
+        if (file_exists($fullPath)) {
+            try {
+                unlink($fullPath);
+
+                return true;
+            } catch (\Exception $e) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Apply watermark to an image.
+     *
+     * @param mixed  $image            Image instance from Intervention Image
+     * @param string $watermarkPath    Path to watermark image file
+     * @param bool   $resizeWatermark  Whether to resize watermark
+     * @param float  $watermarkPercent Percentage of image to use for watermark size
+     *
+     * @return mixed Image instance with watermark applied
+     */
+    public function applyWatermark($image, $watermarkPath = 'images/watermark.png', $resizeWatermark = false, $watermarkPercent = 0.9) {
+        if (!file_exists($watermarkPath)) {
+            flash('Watermark file not found: '.$watermarkPath)->error();
+
+            return $image;
+        }
+
+        try {
+            $watermark = Image::make($watermarkPath);
+
+            if ($resizeWatermark) {
+                $maxSize = max($image->width(), $image->height()) * $watermarkPercent;
+
+                if ($watermark->width() > $watermark->height()) {
+                    $watermark->resize($maxSize, null, function ($constraint) {
+                        $constraint->aspectRatio();
+                    });
+                } else {
+                    $watermark->resize(null, $maxSize, function ($constraint) {
+                        $constraint->aspectRatio();
+                    });
+                }
+            }
+
+            $image->insert($watermark, 'center');
+
+            return $image;
+        } catch (\Throwable $e) {
+            flash('Error applying watermark: '.$e->getMessage())->error();
+
+            return $image;
+        }
+    }
+
+    /**
+     * Configure image driver for large images.
+     *
+     * @param string $imagePath Path to image file
+     */
+    public function configureImageDriver($imagePath) {
+        try {
+            $imageProperties = getimagesize($imagePath);
+            if ($imageProperties && ($imageProperties[0] > 2000 || $imageProperties[1] > 2000)) {
+                Config::set('image.driver', 'imagick');
+            }
+        } catch (\Exception $e) {
+            // continue with default driver on error
+        }
+    }
+
+    /**
+     * Add background fill to image if it doesn't support transparency.
+     *
+     * @param mixed  $image           Image instance
+     * @param string $backgroundColor Hex color code
+     *
+     * @return mixed Image with background
+     */
+    public function addImageBackground($image, $backgroundColor) {
+        if (!$backgroundColor) {
+            return $image;
+        }
+
+        try {
+            $canvas = Image::canvas($image->width(), $image->height(), $backgroundColor);
+            $image = $canvas->insert($image, 'center');
+
+            return $image;
+        } catch (\Exception $e) {
+            return $image; // return unmodified image on error
+        }
+    }
+
+    /**
+     * Resize image with aspect ratio constraints.
+     *
+     * @param mixed  $image        Image instance from Intervention Image
+     * @param int    $maxDimension Maximum dimension (width or height)
+     * @param string $target       'shorter' or 'longer' - which dimension to target
+     * @param bool   $upsize       Whether to upsize smaller images
+     *
+     * @return mixed Image instance with applied resizing
+     */
+    public function resizeImage($image, $maxDimension, $target = 'shorter', $upsize = false) {
+        if ($maxDimension <= 0) {
+            return $image;
+        }
+
+        try {
+            $imageWidth = $image->width();
+            $imageHeight = $image->height();
+
+            $isLandscape = $imageWidth > $imageHeight;
+
+            // decide whether width should be constrained based on target and image orientation
+            $constrainWidth = ($target == 'shorter') ? !$isLandscape : $isLandscape;
+
+            $width = $constrainWidth ? $maxDimension : null;
+            $height = $constrainWidth ? null : $maxDimension;
+
+            $image->resize($width, $height, function ($constraint) use ($upsize) {
+                $constraint->aspectRatio();
+                if ($upsize) {
+                    $constraint->upsize();
+                }
+            });
+
+            return $image;
+        } catch (\Exception $e) {
+            return $image; // Return unmodified image on error
+        }
+    }
+
+    /**
+     * Makes an image square by applying a background fill to the shorter dimension.
+     *
+     * @param mixed $image Image instance from Intervention Image
+     *
+     * @return mixed Image instance with applied resizing
+     */
+    public function makeImageSquare($image) {
+        try {
+            $imageWidth = $image->width();
+            $imageHeight = $image->height();
+
+            if ($imageWidth > $imageHeight) {
+                // Landscape
+                $canvas = Image::canvas($image->width(), $image->width());
+                $image = $canvas->insert($image, 'center');
+            } else {
+                // Portrait
+                $canvas = Image::canvas($image->height(), $image->height());
+                $image = $canvas->insert($image, 'center');
+            }
+
+            return $image;
+        } catch (\Exception $e) {
+            return $image; // return unmodified image on error
+        }
+    }
+
+    /**********************************************************************************************
+
+        END PUBLIC IMAGE HANDLING METHODS
+
+    **********************************************************************************************/
 
     /**
      * Calls a service method and injects the required dependencies.
@@ -303,18 +489,53 @@ abstract class Service {
         }
     }
 
-    // Moves an old image within the same directory.
-    private function moveImage($dir, $name, $oldName, $copy = false) {
-        if ($copy) {
-            File::copy($dir.'/'.$oldName, $dir.'/'.$name);
-        } else {
-            File::move($dir.'/'.$oldName, $dir.'/'.$name);
+    /**********************************************************************************************
+
+        PRIVATE IMAGE HANDLING METHODS
+
+    **********************************************************************************************/
+
+    /**
+     * Moves an old image within the same directory.
+     *
+     * @param string $dir
+     * @param string $newName
+     * @param string $oldName
+     * @param bool   $copy
+     *
+     * @return bool
+     */
+    private function moveImage($dir, $newName, $oldName, $copy = false) {
+        $oldPath = $dir.'/'.$oldName;
+        $newPath = $dir.'/'.$newName;
+
+        if (!file_exists($oldPath)) {
+            return false;
         }
 
-        return true;
+        try {
+            if ($copy) {
+                File::copy($oldPath, $newPath);
+            } else {
+                File::move($oldPath, $newPath);
+            }
+
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 
-    // Moves an uploaded image into a directory, checking if it exists.
+    /**
+     * Moves an uploaded image into a directory, checking if it exists.
+     *
+     * @param mixed  $image
+     * @param string $dir
+     * @param string $name
+     * @param bool   $copy
+     *
+     * @return bool
+     */
     private function saveImage($image, $dir, $name, $copy = false) {
         if (!file_exists($dir)) {
             // Create the directory.
@@ -325,13 +546,20 @@ abstract class Service {
             }
             chmod($dir, 0755);
         }
-        if ($copy) {
-            File::copy($image, $dir.'/'.$name);
-        } else {
-            File::move($image, $dir.'/'.$name);
-        }
-        chmod($dir.'/'.$name, 0755);
 
-        return true;
+        try {
+            if ($copy) {
+                File::copy($image, $dir.'/'.$name);
+            } else {
+                File::move($image, $dir.'/'.$name);
+            }
+            chmod($dir.'/'.$name, 0755);
+
+            return true;
+        } catch (\Exception $e) {
+            $this->setError('error', 'Failed to save image: '.$e->getMessage());
+
+            return false;
+        }
     }
 }

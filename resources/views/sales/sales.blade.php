@@ -4,12 +4,18 @@
     {{ $sales->title }}
 @endsection
 
+@if ($sales->has_image)
+    @section('meta-img')
+        {{ $sales->imageUrl }}
+    @endsection
+@endif
+
 @section('sales-content')
     {!! breadcrumbs(['Site Sales' => 'sales', $sales->title => $sales->url]) !!}
     @include('sales._sales', ['sales' => $sales, 'page' => true])
 
-    @if ((isset($sales->comments_open_at) && $sales->comments_open_at < Carbon\Carbon::now()) || (Auth::check() && Auth::user()->hasPower('edit_pages')) || !isset($sales->comments_open_at))
-        <hr class="mb-5" />
+    <hr class="mb-5" />
+    @if ((isset($sales->comments_open_at) && $sales->comments_open_at < Carbon\Carbon::now()) || (Auth::check() && (Auth::user()->hasPower('manage_sales') || Auth::user()->hasPower('comment_on_sales'))) || !isset($sales->comments_open_at))
         @comments(['model' => $sales, 'perPage' => 5])
     @else
         <div class="alert alert-warning text-center">

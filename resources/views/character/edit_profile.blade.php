@@ -4,10 +4,6 @@
     Editing {{ $character->fullName }}'s Profile
 @endsection
 
-@section('meta-img')
-    {{ $character->image->thumbnailUrl }}
-@endsection
-
 @section('profile-content')
     @if ($character->is_myo_slot)
         {!! breadcrumbs(['MYO Slot Masterlist' => 'myos', $character->fullName => $character->url, 'Editing Profile' => $character->url . '/profile/edit']) !!}
@@ -33,7 +29,7 @@
             {!! Form::label('name', 'Name') !!}
             {!! Form::text('name', $character->name, ['class' => 'form-control']) !!}
         </div>
-        @if (Config::get('lorekeeper.extensions.character_TH_profile_link'))
+        @if (config('lorekeeper.extensions.character_TH_profile_link'))
             <div class="form-group">
                 {!! Form::label('link', 'Profile Link') !!}
                 {!! Form::text('link', $character->profile->link, ['class' => 'form-control']) !!}
@@ -80,4 +76,9 @@
     </div>
     {!! Form::close() !!}
 
+@endsection
+
+@section('scripts')
+    @parent
+    @include('js._tinymce_wysiwyg')
 @endsection

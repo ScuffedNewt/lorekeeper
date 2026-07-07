@@ -2,6 +2,7 @@
 
 namespace App\Models\User;
 
+use App\Models\Item\Item;
 use App\Models\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -25,6 +26,15 @@ class UserItem extends Model {
     protected $table = 'user_items';
 
     /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'data' => 'array',
+    ];
+
+    /**
      * Whether the model contains timestamps to be saved and updated.
      *
      * @var string
@@ -41,14 +51,14 @@ class UserItem extends Model {
      * Get the user who owns the stack.
      */
     public function user() {
-        return $this->belongsTo('App\Models\User\User');
+        return $this->belongsTo(User::class);
     }
 
     /**
      * Get the item associated with this item stack.
      */
     public function item() {
-        return $this->belongsTo('App\Models\Item\Item');
+        return $this->belongsTo(Item::class);
     }
 
     /**********************************************************************************************
@@ -58,21 +68,12 @@ class UserItem extends Model {
     **********************************************************************************************/
 
     /**
-     * Get the data attribute as an associative array.
-     *
-     * @return array
-     */
-    public function getDataAttribute() {
-        return json_decode($this->attributes['data'], true);
-    }
-
-    /**
      * Checks if the stack is transferrable.
      *
      * @return array
      */
     public function getIsTransferrableAttribute() {
-        if (!isset($this->data['disallow_transfer']) && $this->item->allow_transfer) {
+        if ((!isset($this->data['disallow_transfer']) || !$this->data['disallow_transfer']) && $this->item->allow_transfer) {
             return true;
         }
 

@@ -11,14 +11,14 @@
             <!-- Left Side Of Navbar -->
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item">
-                    @if (Auth::check() && Auth::user()->is_news_unread && Config::get('lorekeeper.extensions.navbar_news_notif'))
+                    @if (Auth::check() && Auth::user()->is_news_unread && config('lorekeeper.extensions.navbar_news_notif'))
                         <a class="nav-link d-flex text-warning" href="{{ url('news') }}"><strong>News</strong><i class="fas fa-bell"></i></a>
                     @else
                         <a class="nav-link" href="{{ url('news') }}">News</a>
                     @endif
                 </li>
                 <li class="nav-item">
-                    @if (Auth::check() && Auth::user()->is_sales_unread && Config::get('lorekeeper.extensions.navbar_news_notif'))
+                    @if (Auth::check() && Auth::user()->is_sales_unread && config('lorekeeper.extensions.navbar_news_notif'))
                         <a class="nav-link d-flex text-warning" href="{{ url('sales') }}"><strong>Sales</strong><i class="fas fa-bell"></i></a>
                     @else
                         <a class="nav-link" href="{{ url('sales') }}">Sales</a>
@@ -61,7 +61,7 @@
                                 Claims
                             </a>
                             <a class="dropdown-item" href="{{ url('reports') }}">
-                                My Reports
+                                Reports
                             </a>
                             <a class="dropdown-item" href="{{ url('designs') }}">
                                 Design Approvals
@@ -148,11 +148,11 @@
                     @endif
 
                     <li class="nav-item dropdown">
-                        <a id="browseDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                        <a id="submitDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
                             Submit
                         </a>
 
-                        <div class="dropdown-menu" aria-labelledby="browseDropdown">
+                        <div class="dropdown-menu" aria-labelledby="submitDropdown">
                             <a class="dropdown-item" href="{{ url('submissions/new') }}">
                                 Submit Prompt
                             </a>
@@ -166,11 +166,11 @@
                     </li>
 
                     <li class="nav-item dropdown">
-                        <a id="navbarDropdown" class="nav-link dropdown-toggle" href="{{ Auth::user()->url }}" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                        <a id="userDropdown" class="nav-link dropdown-toggle" href="{{ Auth::user()->url }}" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
                             {{ Auth::user()->name }} <span class="caret"></span>
                         </a>
 
-                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
                             <a class="dropdown-item" href="{{ Auth::user()->url }}">
                                 Profile
                             </a>
