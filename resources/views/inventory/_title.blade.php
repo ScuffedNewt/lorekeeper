@@ -5,12 +5,7 @@
 
         <div class="form-group">
             {!! Form::label('title_character_id', 'Character:', ['class' => 'form-control-label']) !!}
-            {!! Form::select(
-                'title_character_id',
-                Auth::user()->characters()->get()->pluck('fullName', 'id'),
-                null,
-                ['class' => 'form-control'],
-            ) !!}
+            {!! Form::select('title_character_id', Auth::user()->characters()->get()->pluck('fullName', 'id'), null, ['class' => 'form-control']) !!}
         </div>
 
         @if ($tag->getData()['type'] == 'choice')
