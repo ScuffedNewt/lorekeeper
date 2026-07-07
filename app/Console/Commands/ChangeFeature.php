@@ -2,14 +2,12 @@
 
 namespace App\Console\Commands;
 
-use DB;
-use Settings;
-use Log;
-use Illuminate\Console\Command;
 use App\Models\Character\Character;
+use DB;
+use Illuminate\Console\Command;
+use Settings;
 
-class ChangeFeature extends Command
-{
+class ChangeFeature extends Command {
     /**
      * The name and signature of the console command.
      *
@@ -26,11 +24,8 @@ class ChangeFeature extends Command
 
     /**
      * Create a new command instance.
-     *
-     * @return void
      */
-    public function __construct()
-    {
+    public function __construct() {
         parent::__construct();
     }
 
@@ -39,14 +34,13 @@ class ChangeFeature extends Command
      *
      * @return mixed
      */
-    public function handle()
-    {
-        $id = Character::myo()->random()->id;
+    public function handle() {
+        $slug = Character::myo()->random()->slug;
         $setting = Settings::get('featured_character');
-        while($id == $setting) {
-            $id = Character::myo()->random()->id;
+        while ($slug == $setting) {
+            $slug = Character::myo()->random()->slug;
         }
 
-        DB::table('site_settings')->where('key', 'featured_character')->update(['value' => $id]);
+        DB::table('site_settings')->where('key', 'featured_character')->update(['value' => $slug]);
     }
 }
