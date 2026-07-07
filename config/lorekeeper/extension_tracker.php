@@ -17,7 +17,7 @@ return [
         'key'      => 'Levels_&_Stats',
         'wiki_key' => 'Levels_%26_Stats',
         'creators' => json_encode([
-            'Newt' => 'https://github.com/ne-wt/',
+            'ScuffedNewt' => 'https://github.com/ScuffedNewt/',
         ]),
         'version' => '1.0.0',
     ],
@@ -26,9 +26,9 @@ return [
         'key'      => 'Claymores and Companions',
         'wiki_key' => 'Claymores_and_Companions',
         'creators' => json_encode([
-            'Newt'    => 'https://github.com/ne-wt/',
-            'Mercury' => 'https://github.com/itinerare/',
-            'Uri'     => 'https://github.com/preimpression/',
+            'ScuffedNewt' => 'https://github.com/ScuffedNewt/',
+            'Mercury'     => 'https://github.com/itinerare/',
+            'Uri'         => 'https://github.com/preimpression/',
         ]),
         'version' => '1.1.0',
     ],
@@ -37,7 +37,7 @@ return [
         'key'          => 'character_skills',
         'wiki_key'     => 'Character_Skills',
         'creators'     => json_encode([
-            'Newt' => 'https://github.com/ne-wt/',
+            'ScuffedNewt' => 'https://github.com/ScuffedNewt/',
         ]),
         'version' => '1.0.0',
     ],
