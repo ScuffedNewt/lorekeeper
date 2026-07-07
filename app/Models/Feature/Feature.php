@@ -207,7 +207,7 @@ class Feature extends Model {
      * @return string
      */
     public function getDisplayNameAttribute() {
-        return '<a href="'.$this->url.'" class="display-trait">'.$this->name.'</a>'.($this->rarity ? ' ('.$this->rarity->displayName.')' : '');
+        return '<a href="'.$this->idUrl.'" class="display-trait">'.$this->name.'</a>'.($this->rarity ? ' ('.$this->rarity->displayName.')' : '');
     }
 
     /**
@@ -257,6 +257,15 @@ class Feature extends Model {
      */
     public function getUrlAttribute() {
         return url('world/traits?name='.$this->name);
+    }
+
+    /**
+     * Gets the URL of the individual trait's page, by ID.
+     *
+     * @return string
+     */
+    public function getIdUrlAttribute() {
+        return url('world/traits/'.$this->id);
     }
 
     /**
@@ -327,7 +336,7 @@ class Feature extends Model {
         if (config('lorekeeper.extensions.organised_traits_dropdown.enable')) {
             $sorted_feature_categories = collect(FeatureCategory::all()->where('is_visible', '>=', $visibleOnly)->sortBy('sort')->pluck('name')->toArray());
 
-            if (config('show_exlusively_species_traits_in_dropdown') && $withSpecies) {
+            if (config('lorekeeper.extensions.show_exclusively_species_traits_in_dropdown') && $withSpecies) {
                 $grouped = self::where('is_visible', '>=', $visibleOnly)
                     ->when($withSpecies, function (Builder $query, int $withSpecies) {
                         $query->where('species_id', '=', $withSpecies)
@@ -390,7 +399,7 @@ class Feature extends Model {
                     ).
                     ( // rarity
                         config('lorekeeper.extensions.organised_traits_dropdown.rarity.enable') && $feature['rarity'] ?
-                        ' (<span '.($feature['rarity']['color'] ? 'style="color: #'.$feature['rarity']['color'].';"' : '').'>'.Rarity::find($feature['rarity']['id'])->name.'</span>)'
+                        ' (<span '.($feature['rarity']['color'] ? 'style="color: #'.$feature['rarity']['color'].';"' : '').'>'.$feature['rarity']['name'].'</span>)'
                         : ''
                     );
                 }
@@ -401,7 +410,7 @@ class Feature extends Model {
 
             return $features_by_category;
         } else {
-            if (config('show_exlusively_species_traits_in_dropdown') && $withSpecies) {
+            if (config('lorekeeper.extensions.show_exclusively_species_traits_in_dropdown') && $withSpecies) {
                 return self::where('is_visible', '>=', $visibleOnly)
                     ->when($withSpecies, function (Builder $query, int $withSpecies) {
                         $query->where('species_id', '=', $withSpecies)

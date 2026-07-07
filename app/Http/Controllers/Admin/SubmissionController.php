@@ -65,6 +65,14 @@ class SubmissionController extends Controller {
             abort(404);
         }
 
+        $prompt = $submission->prompt;
+
+        if ($prompt->limit_character) {
+            $limit = $prompt->limit * Character::visible()->where('is_myo_slot', 0)->where('user_id', $submission->user_id)->count();
+        } else {
+            $limit = $prompt->limit;
+        }
+
         return view('admin.submissions.submission', [
             'submission'       => $submission,
             'inventory'        => $inventory,
@@ -80,7 +88,8 @@ class SubmissionController extends Controller {
             'tables'              => LootTable::orderBy('name')->pluck('name', 'id'),
             'raffles'             => Raffle::where('rolled_at', null)->where('is_active', 1)->orderBy('name')->pluck('name', 'id'),
             'recipes'             => Recipe::orderBy('name')->pluck('name', 'id'),
-            'count'               => Submission::where('prompt_id', $submission->prompt_id)->where('status', 'Approved')->where('user_id', $submission->user_id)->count(),
+            'count'               => $prompt->getCount($submission->user),
+            'limit'               => $limit,
         ] : []));
     }
 

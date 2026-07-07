@@ -13,7 +13,7 @@
     $showData = [
         'isTradeable' => isset($isTradeable) && $isTradeable ? $isTradeable : false,
         'showLootTables' => isset($showLootTables) && $showLootTables ? $showLootTables : false,
-        'showRaffles' => isset($showRaffles) && $showLootTables ? $showRaffles : false,
+        'showRaffles' => isset($showRaffles) && $showRaffles ? $showRaffles : false,
     ];
 @endphp
 <script>
@@ -51,6 +51,12 @@
             var $rewardTypeCell = $(this).parent().parent().find('.{{ $prefix }}loot-row-type');
             var $rewardIdsCell = $(this).parent().parent().find('.{{ $prefix }}loot-row-select');
             var $recipient = $(this).val();
+
+            if ($recipient === '') {
+                $rewardTypeCell.html('');
+                $rewardIdsCell.html('');
+                return;
+            }
 
             //Update the lootRow with the new types
             $.ajax({
