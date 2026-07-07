@@ -5,12 +5,7 @@
             {!! Form::hidden('tag', $tag->tag) !!}
             <p><b>Select a Character to apply this potion to:</b></p>
             <div class="form-group">
-                {!! Form::select(
-                    'character_id',
-                    Auth::user()->characters()->get()->pluck('fullName', 'id'),
-                    null,
-                    ['class' => 'form-control'],
-                ) !!}
+                {!! Form::select('character_id', Auth::user()->characters()->get()->pluck('fullName', 'id'), null, ['class' => 'form-control']) !!}
             </div>
             <p>This action is not reversible. Are you sure you want to use this potion?</p>
             <div class="text-right">
