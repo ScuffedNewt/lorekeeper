@@ -58,14 +58,8 @@
                         </div>
                         <div class="col-12 col-md">
                             <div class="logs-table-cell">
-                                {!! $user->ips()->first() &&
-                                count(
-                                    $user->ips()->first()->users->where('id', '!=', $user->id)->pluck('displayName')->toArray(),
-                                )
-                                    ? implode(
-                                        ', ',
-                                        $user->ips()->first()->users->where('id', '!=', $user->id)->pluck('displayName')->toArray(),
-                                    )
+                                {!! $user->ips()->first() && count($user->ips()->first()->users->where('id', '!=', $user->id)->pluck('displayName')->toArray())
+                                    ? implode(', ', $user->ips()->first()->users->where('id', '!=', $user->id)->pluck('displayName')->toArray())
                                     : '<span class="text-muted">---</span>' !!}
                             </div>
                         </div>

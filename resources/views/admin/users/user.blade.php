@@ -185,14 +185,7 @@
                             </div>
                             <div class="col-12 col-md-3">
                                 <div class="logs-table-cell">
-                                    {!! count(
-                                        $ip->users->where('id', '!=', $user->id)->pluck('displayName')->toArray(),
-                                    )
-                                        ? implode(
-                                            ', ',
-                                            $ip->users->where('id', '!=', $user->id)->pluck('displayName')->toArray(),
-                                        )
-                                        : '<span class="text-muted">---</span>' !!}
+                                    {!! count($ip->users->where('id', '!=', $user->id)->pluck('displayName')->toArray()) ? implode(', ', $ip->users->where('id', '!=', $user->id)->pluck('displayName')->toArray()) : '<span class="text-muted">---</span>' !!}
                                 </div>
                             </div>
                         </div>
