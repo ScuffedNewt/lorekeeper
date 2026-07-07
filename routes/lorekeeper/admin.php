@@ -358,6 +358,10 @@ Route::group(['prefix' => 'grants', 'namespace' => 'Users', 'middleware' => 'pow
 
     Route::get('awards', 'GrantController@getAwards');
     Route::post('awards', 'GrantController@postAwards');
+
+    Route::get('user-rewards', 'GrantController@getUserRewardGrant');
+    Route::get('character-rewards', 'GrantController@getCharacterRewardGrant');
+    Route::post('rewards/{type}', 'GrantController@postRewardGrant')->where('type', 'user|character');
 });
 
 // TRADES

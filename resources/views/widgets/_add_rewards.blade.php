@@ -6,6 +6,9 @@
     if (!isset($useForm)) {
         $useForm = true;
     }
+    if (!isset($type)) {
+        $type = 'Reward';
+    }
 
     // View options
     if (!isset($showRecipient)) {
@@ -20,16 +23,19 @@
     if (!isset($hideTitle)) {
         $hideTitle = false;
     }
+    if (!isset($loots)) {
+        $loots = getRewards($object);
+    }
 @endphp
 
 <div class="card p-4 mb-3 mt-3" id="reward-card">
     @if (!$hideTitle)
-        <h3>Rewards</h3>
+        <h3>{{ ucFirst($type) }}s</h3>
 
         <p>
-            You can add rewards to this object by clicking "Add Reward" & selecting a reward from the dropdown below.
+            You can add {{ $type }}s to this object by clicking "Add {{ ucfirst($type) }}" & selecting a {{ $type }} from the dropdown below.
             <br />
-            <br /><b>Note that the checks for rewards are automatic, but their granting needs to be defined in the code.</b>
+            <br /><b>Note that the checks for {{ $type }}s are automatic, but their granting needs to be defined in the code.</b>
         </p>
     @endif
     {!! isset($info) ? '<div class="alert alert-info">' . $info . '</div>' : '' !!}
@@ -41,10 +47,11 @@
 
         @include('widgets._loot_select', [
             'prefix' => $prefix ?? '',
-            'loots' => $loots ?? getRewards($object),
+            'loots' => $loots,
             'showRecipient' => $showRecipient,
             'showRaffles' => $showRaffles,
             'showLootTables' => $showLootTables,
+            'type' => $type,
         ])
 
         <div>
@@ -58,10 +65,11 @@
     @else
         @include('widgets._loot_select', [
             'prefix' => $prefix ?? '',
-            'loots' => $loots ?? getRewards($object),
+            'loots' => $loots,
             'showRecipient' => $showRecipient,
             'showRaffles' => $showRaffles,
             'showLootTables' => $showLootTables,
+            'type' => $type,
         ])
     @endif
 </div>
@@ -72,6 +80,7 @@
         'showRecipient' => $showRecipient,
         'showRaffles' => $showRaffles,
         'showLootTables' => $showLootTables,
+        'type' => $type,
     ])
     @include('js._loot_js', [
         'prefix' => $prefix ?? '',

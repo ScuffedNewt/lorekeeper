@@ -19,7 +19,6 @@ use App\Models\Item\ItemLog;
 use App\Models\Limit\UserUnlockedLimit;
 use App\Models\Notification;
 use App\Models\Rank\Rank;
-use App\Models\Rank\RankPower;
 use App\Models\Shop\ShopLog;
 use App\Models\Submission\Submission;
 use App\Traits\Commenter;
@@ -28,7 +27,9 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use Throwable;
 
 class User extends Authenticatable implements MustVerifyEmail {
     use Commenter, Notifiable, TwoFactorAuthenticatable;
@@ -86,6 +87,28 @@ class User extends Authenticatable implements MustVerifyEmail {
      * @var string
      */
     public $timestamps = true;
+
+    /**
+     * Validation rules for updating.
+     *
+     * @var array
+     */
+    public static $avatarUpdateRules = [
+        'avatar'      => 'required|mimes:jpeg,jpg,gif,png,webp|max:1024',
+    ];
+
+    /**
+     * Send the email verification notification.
+     *
+     * @throws \Exception
+     */
+    public function sendEmailVerificationNotification() {
+        try {
+            parent::sendEmailVerificationNotification();
+        } catch (Throwable $e) {
+            throw new \Exception('Failed to send verification email. Please try again or contact an administrator.');
+        }
+    }
 
     /**********************************************************************************************
 
@@ -320,7 +343,7 @@ class User extends Authenticatable implements MustVerifyEmail {
      * @return bool
      */
     public function getIsStaffAttribute() {
-        return RankPower::where('rank_id', $this->rank_id)->exists() || $this->isAdmin;
+        return $this->isAdmin || $this->rank->powers->count();
     }
 
     /**

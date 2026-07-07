@@ -124,6 +124,14 @@ return [
                 'name' => 'Award Grants',
                 'url'  => 'admin/grants/awards',
             ],
+            [
+                'name' => 'User Reward Grants',
+                'url'  => 'admin/grants/user-rewards',
+            ],
+            [
+                'name' => 'Character Reward Grants',
+                'url'  => 'admin/grants/character-rewards',
+            ],
         ],
     ],
     'Masterlist' => [
