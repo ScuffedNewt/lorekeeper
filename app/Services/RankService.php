@@ -19,8 +19,8 @@ class RankService extends Service {
     /**
      * Creates a user rank.
      *
-     * @param array                 $data
-     * @param \App\Models\User\User $user
+     * @param array $data
+     * @param User  $user
      *
      * @return bool
      */
@@ -38,6 +38,10 @@ class RankService extends Service {
                 foreach ($data['powers'] as $power) {
                     if (!config('lorekeeper.powers.'.$power)) {
                         throw new \Exception('Invalid power selected.');
+                    }
+
+                    if ($power == 'admin') {
+                        $data['is_secondary_admin'] = true;
                     }
                 }
 
@@ -78,9 +82,9 @@ class RankService extends Service {
     /**
      * Updates a user rank.
      *
-     * @param \App\Models\Rank\Rank $rank
-     * @param array                 $data
-     * @param \App\Models\User\User $user
+     * @param Rank  $rank
+     * @param array $data
+     * @param User  $user
      *
      * @return bool
      */
@@ -99,10 +103,18 @@ class RankService extends Service {
                     if (!config('lorekeeper.powers.'.$power)) {
                         throw new \Exception('Invalid power selected.');
                     }
+
+                    if ($power == 'admin') {
+                        $data['is_secondary_admin'] = true;
+                    }
                 }
 
                 $powers = array_unique($data['powers']);
                 unset($data['powers']);
+            }
+
+            if (!isset($data['is_secondary_admin']) || !in_array('admin', $powers)) {
+                $data['is_secondary_admin'] = false;
             }
 
             $data['color'] = isset($data['color']) ? str_replace('#', '', $data['color']) : null;
@@ -133,8 +145,8 @@ class RankService extends Service {
     /**
      * Deletes a user rank.
      *
-     * @param \App\Models\Rank\Rank $rank
-     * @param \App\Models\User\User $user
+     * @param Rank $rank
+     * @param User $user
      *
      * @return bool
      */
@@ -161,8 +173,8 @@ class RankService extends Service {
     /**
      * Sorts user ranks.
      *
-     * @param array                 $data
-     * @param \App\Models\User\User $user
+     * @param array $data
+     * @param User  $user
      *
      * @return bool
      */
@@ -174,14 +186,14 @@ class RankService extends Service {
             $sort = array_reverse(explode(',', $data));
 
             // Check if the array contains the admin rank, or anything non-numeric
-            $adminRank = Rank::orderBy('sort', 'DESC')->first();
+            $adminRank = Rank::where('is_admin', 1)->first();
             $count = 0;
             foreach ($sort as $key => $s) {
                 if (!is_numeric($s) || !is_numeric($key)) {
                     throw new \Exception('Invalid sort order.');
                 }
                 if ($s == $adminRank->id) {
-                    throw new \Exception('Sort order of admin rank cannot be changed.');
+                    throw new \Exception('The sort order of the admin rank cannot be changed.');
                 }
 
                 Rank::where('id', $s)->update(['sort' => $key]);
