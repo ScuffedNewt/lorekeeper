@@ -41,6 +41,6 @@ return new class extends Migration {
      */
     public function down(): void {
         // This migration is not reversible
-        throw new \RuntimeException('This migration is not reversible.');
+        throw new RuntimeException('This migration is not reversible.');
     }
 };
