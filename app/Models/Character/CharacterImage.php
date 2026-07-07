@@ -300,7 +300,7 @@ class CharacterImage extends Model {
         return $contentWarnings;
     }
 
-        /**
+    /**
      * Displays all of the images titles.
      *
      * @return string
