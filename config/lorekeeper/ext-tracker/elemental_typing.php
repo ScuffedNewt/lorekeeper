@@ -3,7 +3,7 @@
 return [
     'wiki_key' => 'Elemental_Typing',
     'creators' => json_encode([
-        'Newt' => 'https://github.com/ne-wt/',
+        'ScuffedNewt' => 'https://github.com/ScuffedNewt/',
     ]),
-    'version'  => '1.0.0',
+    'version'  => '1.0.1',
 ];
