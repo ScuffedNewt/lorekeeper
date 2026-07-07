@@ -4,15 +4,11 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddCoOwnerToCharacter extends Migration
-{
+class AddCoOwnerToCharacter extends Migration {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
-    {
+    public function up() {
         Schema::table('characters', function (Blueprint $table) {
             //
             $table->unsignedInteger('coowner_id')->nullable()->default(null);
@@ -26,11 +22,8 @@ class AddCoOwnerToCharacter extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
-    {
+    public function down() {
         Schema::table('characters', function (Blueprint $table) {
             //
             $table->dropColumn('coowner_id');
