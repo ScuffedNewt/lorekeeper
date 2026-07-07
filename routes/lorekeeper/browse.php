@@ -142,6 +142,7 @@ Route::group(['prefix' => 'world'], function () {
     Route::get('pet-categories', 'WorldController@getPetCategories');
     Route::get('pets', 'WorldController@getPets');
     Route::get('pets/{id}', 'WorldController@getPet');
+    Route::get('traits/{id}', 'WorldController@getFeature');
     Route::get('traits/modal/{id}', 'WorldController@getFeatureDetail')->where(['id' => '[0-9]+']);
     Route::get('character-categories', 'WorldController@getCharacterCategories');
     Route::get('levels', 'WorldController@getLevels');
