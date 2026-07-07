@@ -28,7 +28,7 @@
     {{-- tags --}}
     <div class="form-group">
         {!! Form::label('Categories / Tags') !!}
-        {!! Form::select('tags[]', $tags, (array) json_decode($faq->tags), ['class' => 'form-control', 'multiple', 'id' => 'tags', 'placeholder' => 'Select Categories']) !!}
+        {!! Form::select('tags[]', $tags, $faq->tags, ['class' => 'form-control', 'multiple', 'id' => 'tags', 'placeholder' => 'Select Categories']) !!}
     </div>
 
     <div class="form-group">

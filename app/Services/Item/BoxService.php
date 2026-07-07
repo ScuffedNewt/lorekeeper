@@ -5,7 +5,7 @@ namespace App\Services\Item;
 use App\Models\Item\Item;
 use App\Services\InventoryManager;
 use App\Services\Service;
-use DB;
+use Illuminate\Support\Facades\DB;
 
 class BoxService extends Service {
     /*
@@ -29,7 +29,7 @@ class BoxService extends Service {
     /**
      * Processes the data attribute of the tag and returns it in the preferred format.
      *
-     * @param string $tag
+     * @param object $tag
      *
      * @return mixed
      */
@@ -41,9 +41,10 @@ class BoxService extends Service {
                 $class = getAssetModelString($type, false);
                 foreach ($a as $id => $asset) {
                     $rewards[] = (object) [
-                        'rewardable_type' => $class,
-                        'rewardable_id'   => $id,
-                        'quantity'        => $asset['quantity'],
+                        'rewardable_recipient' => 'User',
+                        'rewardable_type'      => $class,
+                        'rewardable_id'        => $id,
+                        'quantity'             => $asset['quantity'],
                     ];
                 }
             }
@@ -55,7 +56,7 @@ class BoxService extends Service {
     /**
      * Processes the data attribute of the tag and returns it in the preferred format.
      *
-     * @param string $tag
+     * @param object $tag
      * @param array  $data
      *
      * @return bool
@@ -69,7 +70,7 @@ class BoxService extends Service {
                 return true;
             }
 
-            // The data will be stored as an asset table, json_encode()d.
+            // The data will be stored as an asset table.
             // First build the asset table, then prepare it for storage.
             $assets = createAssetsArray();
             foreach ($data['rewardable_type'] as $key => $r) {
@@ -92,7 +93,7 @@ class BoxService extends Service {
             }
             $assets = getDataReadyAssets($assets);
 
-            $tag->update(['data' => json_encode($assets)]);
+            $tag->update(['data' => $assets]);
 
             return $this->commitReturn(true);
         } catch (\Exception $e) {
@@ -152,16 +153,6 @@ class BoxService extends Service {
      * @return string
      */
     private function getBoxRewardsString($rewards) {
-        $results = 'You have received: ';
-        $result_elements = [];
-        foreach ($rewards as $assetType) {
-            if (isset($assetType)) {
-                foreach ($assetType as $asset) {
-                    array_push($result_elements, $asset['asset']->name.(class_basename($asset['asset']) == 'Raffle' ? ' (Raffle Ticket)' : '').' x'.$asset['quantity']);
-                }
-            }
-        }
-
-        return $results.implode(', ', $result_elements);
+        return 'You have received: '.createRewardsString($rewards);
     }
 }

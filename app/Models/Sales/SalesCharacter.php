@@ -2,9 +2,9 @@
 
 namespace App\Models\Sales;
 
+use App\Models\Character\Character;
 use App\Models\Character\CharacterImage;
 use App\Models\Model;
-use Config;
 
 class SalesCharacter extends Model {
     /**
@@ -22,6 +22,16 @@ class SalesCharacter extends Model {
      * @var string
      */
     protected $table = 'sales_characters';
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'data' => 'array',
+    ];
+
     /**
      * Validation rules.
      *
@@ -50,21 +60,21 @@ class SalesCharacter extends Model {
      * Get the sale this is attached to.
      */
     public function sales() {
-        return $this->belongsTo('App\Models\Sales\Sales', 'sales_id');
+        return $this->belongsTo(Sales::class, 'sales_id');
     }
 
     /**
      * Get the character being attached to the sale.
      */
     public function character() {
-        return $this->belongsTo('App\Models\Character\Character', 'character_id');
+        return $this->belongsTo(Character::class, 'character_id')->withTrashed();
     }
 
     /**
      * Get the image being attached to the sale.
      */
     public function image() {
-        return $this->belongsTo('App\Models\Character\CharacterImage', 'image_id');
+        return $this->belongsTo(CharacterImage::class, 'image_id');
     }
 
     /**********************************************************************************************
@@ -72,15 +82,6 @@ class SalesCharacter extends Model {
         ACCESSORS
 
     **********************************************************************************************/
-
-    /**
-     * Get the data attribute as an associative array.
-     *
-     * @return array
-     */
-    public function getDataAttribute() {
-        return json_decode($this->attributes['data'], true);
-    }
 
     /**
      * Get the data attribute as an associative array.
@@ -153,7 +154,7 @@ class SalesCharacter extends Model {
         if ($this->type == 'raffle') {
             return null;
         }
-        $symbol = Config::get('lorekeeper.settings.currency_symbol');
+        $symbol = config('lorekeeper.settings.currency_symbol');
 
         switch ($this->type) {
             case 'flatsale':
@@ -165,16 +166,18 @@ class SalesCharacter extends Model {
                 (isset($this->data['autobuy']) ? '<br/>Autobuy: '.$symbol.$this->data['autobuy'] : '');
                 break;
             case 'ota':
-                return isset($this->data['autobuy']) ? '<br/>Autobuy: '.$symbol.$this->data['autobuy'] : '';
+                return (isset($this->data['autobuy']) ? 'Autobuy: '.$symbol.$this->data['autobuy'].'<br/>' : '').
+                (isset($this->data['minimum']) ? 'Minimum: '.$symbol.$this->data['minimum'].'<br/>' : '');
                 break;
             case 'xta':
-                return isset($this->data['autobuy']) ? '<br/>Autobuy: '.$symbol.$this->data['autobuy'] : '';
+                return (isset($this->data['autobuy']) ? 'Autobuy: '.$symbol.$this->data['autobuy'].'<br/>' : '').
+                (isset($this->data['minimum']) ? 'Minimum: '.$symbol.$this->data['minimum'].'<br/>' : '');
                 break;
             case 'flaffle':
                 return 'Price: '.$symbol.$this->data['price'];
                 break;
             case 'pwyw':
-                return 'Minimum: '.$symbol.$this->data['minimum'];
+                return isset($this->data['minimum']) ? 'Minimum: '.$symbol.$this->data['minimum'].'<br/>' : '';
                 break;
         }
     }

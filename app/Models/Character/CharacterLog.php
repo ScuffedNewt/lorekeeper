@@ -3,6 +3,7 @@
 namespace App\Models\Character;
 
 use App\Models\Model;
+use App\Models\User\User;
 
 class CharacterLog extends Model {
     /**
@@ -21,6 +22,17 @@ class CharacterLog extends Model {
      * @var string
      */
     protected $table = 'character_log';
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'data'       => 'array',
+        'change_log' => 'array',
+    ];
+
     /**
      * Whether the model contains timestamps to be saved and updated.
      *
@@ -38,21 +50,21 @@ class CharacterLog extends Model {
      * Get the user who initiated the logged action.
      */
     public function sender() {
-        return $this->belongsTo('App\Models\User\User', 'sender_id');
+        return $this->belongsTo(User::class, 'sender_id');
     }
 
     /**
      * Get the user who received the logged action.
      */
     public function recipient() {
-        return $this->belongsTo('App\Models\User\User', 'recipient_id');
+        return $this->belongsTo(User::class, 'recipient_id');
     }
 
     /**
      * Get the character that is the target of the action.
      */
     public function character() {
-        return $this->belongsTo('App\Models\Character\Character');
+        return $this->belongsTo(Character::class);
     }
 
     /**********************************************************************************************
@@ -72,14 +84,5 @@ class CharacterLog extends Model {
         } else {
             return '---';
         }
-    }
-
-    /**
-     * Retrieves the changed data as an associative array.
-     *
-     * @return array
-     */
-    public function getChangedDataAttribute() {
-        return json_decode($this->change_log, true);
     }
 }

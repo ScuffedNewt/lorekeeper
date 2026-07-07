@@ -11,6 +11,10 @@ return [
     |
     */
 
+    'admin' => [
+        'name'        => 'Administrator Access',
+        'description' => 'Grants all powers automatically. Grant this power wisely.',
+    ],
     'edit_site_settings' => [
         'name'        => 'Edit Site Settings',
         'description' => 'Allow rank to modify site settings and upload new images to replace the site layout images.',
@@ -55,5 +59,16 @@ return [
         'name'        => 'Has Maintenance Access',
         'description' => 'Allow rank to browse the site normally during maintenance mode.',
     ],
-
+    'manage_news' => [
+        'name'        => 'Manage News',
+        'description' => 'Allow rank to create/edit news posts.',
+    ],
+    'manage_sales' => [
+        'name'        => 'Manage Sales',
+        'description' => 'Allow rank to create/edit sales and comment on sales in preview mode.',
+    ],
+    'comment_on_sales' => [
+        'name'        => 'Comment on Sales',
+        'description' => 'Allow rank to comment on sales in preview mode.',
+    ],
 ];

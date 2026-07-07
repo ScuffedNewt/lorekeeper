@@ -6,7 +6,7 @@
         <a href="#" data-id="{{ $faq->id }}" class="faq-link">{{ $faq->question }}</a>
         @if ($faq->tags)
             @php
-                $question_tags = json_decode($faq->tags);
+                $question_tags = $faq->tags;
                 ksort($question_tags);
             @endphp
             @foreach ($question_tags as $tag)

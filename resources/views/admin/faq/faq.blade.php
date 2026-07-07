@@ -65,7 +65,7 @@
                             <div class="col-2 col-md-2">
                                 <div class="logs-table-cell">
                                     @if ($faq->tags)
-                                        {{ implode(', ', json_decode($faq->tags)) }}
+                                        {{ implode(', ', $faq->tags) }}
                                     @endif
                                 </div>
                             </div>

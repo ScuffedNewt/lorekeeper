@@ -2,8 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Facades\Settings;
 use Closure;
-use Settings;
 
 class CheckAlias {
     /**
@@ -20,6 +20,9 @@ class CheckAlias {
         }
         if (!$request->user()->hasAlias) {
             return redirect('/link');
+        }
+        if (!$request->user()->hasEmail) {
+            return redirect('/email');
         }
         if (!$request->user()->birthday) {
             return redirect('/birthday');

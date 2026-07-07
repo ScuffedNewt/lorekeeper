@@ -1,7 +1,7 @@
 @extends('admin.layout')
 
 @section('admin-title')
-    Loot Tables
+    {{ $table->id ? 'Edit' : 'Create' }} Loot Table
 @endsection
 
 @section('admin-content')
@@ -56,7 +56,7 @@
                     <tr class="loot-row">
                         <td>{!! Form::select(
                             'rewardable_type[]',
-                            Config::get('lorekeeper.extensions.item_entry_expansion.loot_tables.enable')
+                            config('lorekeeper.extensions.item_entry_expansion.loot_tables.enable')
                                 ? ['Item' => 'Item', 'ItemRarity' => 'Item Rarity', 'Currency' => 'Currency', 'LootTable' => 'Loot Table', 'ItemCategory' => 'Item Category', 'ItemCategoryRarity' => 'Item Category (Conditional)', 'None' => 'None']
                                 : ['Item' => 'Item', 'Currency' => 'Currency', 'LootTable' => 'Loot Table', 'ItemCategory' => 'Item Category', 'None' => 'None'],
                             $loot->rewardable_type,
@@ -67,7 +67,7 @@
                                 {!! Form::select('rewardable_id[]', $items, $loot->rewardable_id, ['class' => 'form-control item-select selectize', 'placeholder' => 'Select Item']) !!}
                             @elseif($loot->rewardable_type == 'ItemRarity')
                                 <div class="item-rarity-select d-flex">
-                                    {!! Form::select('criteria[]', ['=' => '=', '<' => '<', '>' => '>', '<=' => '<=', '>=' => '>='], isset($loot->data['criteria']) ? $loot->data['criteria'] : null, ['class' => 'form-control', 'placeholder' => 'Criteria']) !!}
+                                    {!! Form::select('criteria[]', ['==' => '=', '<' => '<', '>' => '>', '<=' => '<=', '>=' => '>='], isset($loot->data['criteria']) ? $loot->data['criteria'] : null, ['class' => 'form-control', 'placeholder' => 'Criteria']) !!}
                                     {!! Form::select('rarity[]', $rarities, isset($loot->data['rarity']) ? $loot->data['rarity'] : null, ['class' => 'form-control', 'placeholder' => 'Rarity']) !!}
                                 </div>
                             @elseif($loot->rewardable_type == 'Currency')
@@ -77,7 +77,7 @@
                             @elseif($loot->rewardable_type == 'ItemCategoryRarity')
                                 <div class="category-rarity-select d-flex">
                                     {!! Form::select('rewardable_id[]', $categories, $loot->rewardable_id, ['class' => 'form-control selectize', 'placeholder' => 'Category']) !!}
-                                    {!! Form::select('criteria[' . $loop->index . ']', ['=' => '=', '<' => '<', '>' => '>', '<=' => '<=', '>=' => '>='], isset($loot->data['criteria']) ? $loot->data['criteria'] : null, ['class' => 'form-control', 'placeholder' => 'Criteria']) !!}
+                                    {!! Form::select('criteria[' . $loop->index . ']', ['==' => '=', '<' => '<', '>' => '>', '<=' => '<=', '>=' => '>='], isset($loot->data['criteria']) ? $loot->data['criteria'] : null, ['class' => 'form-control', 'placeholder' => 'Criteria']) !!}
                                     {!! Form::select('rarity[' . $loop->index . ']', $rarities, isset($loot->data['rarity']) ? $loot->data['rarity'] : null, ['class' => 'form-control', 'placeholder' => 'Rarity']) !!}
                                 </div>
                             @elseif($loot->rewardable_type == 'ItemCategory')
@@ -108,7 +108,7 @@
                 <tr class="loot-row">
                     <td>{!! Form::select(
                         'rewardable_type[]',
-                        Config::get('lorekeeper.extensions.item_entry_expansion.loot_tables.enable')
+                        config('lorekeeper.extensions.item_entry_expansion.loot_tables.enable')
                             ? ['Item' => 'Item', 'ItemRarity' => 'Item Rarity', 'Currency' => 'Currency', 'LootTable' => 'Loot Table', 'ItemCategory' => 'Item Category', 'ItemCategoryRarity' => 'Item Category (Conditional)', 'None' => 'None']
                             : ['Item' => 'Item', 'Currency' => 'Currency', 'LootTable' => 'Loot Table', 'ItemCategory' => 'Item Category', 'None' => 'None'],
                         null,
@@ -124,7 +124,7 @@
         </table>
         {!! Form::select('rewardable_id[]', $items, null, ['class' => 'form-control item-select', 'placeholder' => 'Select Item']) !!}
         <div class="item-rarity-select d-flex">
-            {!! Form::select('criteria[]', ['=' => '=', '<' => '<', '>' => '>', '<=' => '<=', '>=' => '>='], null, ['class' => 'form-control criteria-select', 'placeholder' => 'Criteria']) !!}
+            {!! Form::select('criteria[]', ['==' => '=', '<' => '<', '>' => '>', '<=' => '<=', '>=' => '>='], null, ['class' => 'form-control criteria-select', 'placeholder' => 'Criteria']) !!}
             {!! Form::select('rarity[]', $rarities, null, ['class' => 'form-control criteria-select', 'placeholder' => 'Rarity']) !!}
         </div>
         {!! Form::select('rewardable_id[]', $currencies, null, ['class' => 'form-control currency-select', 'placeholder' => 'Select Currency']) !!}
@@ -132,7 +132,7 @@
         {!! Form::select('rewardable_id[]', $categories, null, ['class' => 'form-control category-select', 'placeholder' => 'Select Item Category']) !!}
         <div class="category-rarity-select d-flex">
             {!! Form::select('rewardable_id[]', $categories, null, ['class' => 'form-control', 'placeholder' => 'Category']) !!}
-            {!! Form::select('criteria[]', ['=' => '=', '<' => '<', '>' => '>', '<=' => '<=', '>=' => '>='], null, ['class' => 'form-control criteria-select', 'placeholder' => 'Criteria']) !!}
+            {!! Form::select('criteria[]', ['==' => '=', '<' => '<', '>' => '>', '<=' => '<=', '>=' => '>='], null, ['class' => 'form-control criteria-select', 'placeholder' => 'Criteria']) !!}
             {!! Form::select('rarity[]', $rarities, null, ['class' => 'form-control criteria-select', 'placeholder' => 'Rarity']) !!}
         </div>
         {!! Form::select('rewardable_id[]', [1 => 'No reward given.'], null, ['class' => 'form-control none-select']) !!}
@@ -171,6 +171,7 @@
             refreshChances();
             $('#lootTableBody .selectize').selectize();
             attachRemoveListener($('#lootTableBody .remove-loot-button'));
+            attachWeightListener(($('#lootTableBody .loot-weight')));
 
             $('.delete-table-button').on('click', function(e) {
                 e.preventDefault();

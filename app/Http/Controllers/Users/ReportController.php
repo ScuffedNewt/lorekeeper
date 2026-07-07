@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Users;
 
+use App\Facades\Settings;
 use App\Http\Controllers\Controller;
 use App\Models\Report\Report;
 use App\Models\User\User;
 use App\Services\ReportManager;
-use Auth;
 use Illuminate\Http\Request;
-use Settings;
+use Illuminate\Support\Facades\Auth;
 
 class ReportController extends Controller {
     /**********************************************************************************************
@@ -63,7 +63,7 @@ class ReportController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getReport($id) {
-        $report = Report::viewable(Auth::check() ? Auth::user() : null)->where('id', $id)->first();
+        $report = Report::viewable(Auth::user() ?? null)->where('id', $id)->first();
         if (!$report) {
             abort(404);
         }
