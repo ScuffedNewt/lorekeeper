@@ -34,6 +34,10 @@
                 e.preventDefault();
                 $(this).parent().parent().parent().remove();
             });
+            node.find('.remove-reward').on('click', function(e) {
+                e.preventDefault();
+                $(this).parent().parent().remove();
+            });
             node.find('.add-reward').on('click', function(e) {
                 e.preventDefault();
                 $clone = $components.find('.character-reward-row').clone();
@@ -82,6 +86,5 @@
             node.find('.character-table-id').attr('name', 'character_rewardable_id[' + id + '][]');
             node.find('.character-element-id').attr('name', 'character_rewardable_id[' + id + '][]');
         }
-
     });
 </script>

@@ -37,11 +37,11 @@ class SubmissionController extends Controller {
                     $submissions->sortNewest();
                     break;
                 case 'oldest':
-                    $submissions->sortOldest();
+                    $submissions->sortNewest(true);
                     break;
             }
         } else {
-            $submissions->sortOldest();
+            $submissions->sortNewest(true);
         }
 
         return view('admin.submissions.index', [
@@ -65,6 +65,14 @@ class SubmissionController extends Controller {
             abort(404);
         }
 
+        $prompt = $submission->prompt;
+
+        if ($prompt->limit_character) {
+            $limit = $prompt->limit * Character::visible()->where('is_myo_slot', 0)->where('user_id', $submission->user_id)->count();
+        } else {
+            $limit = $prompt->limit;
+        }
+
         return view('admin.submissions.submission', [
             'submission'       => $submission,
             'inventory'        => $inventory,
@@ -72,15 +80,16 @@ class SubmissionController extends Controller {
             'itemsrow'         => Item::all()->keyBy('id'),
             'page'             => 'submission',
             'expanded_rewards' => config('lorekeeper.extensions.character_reward_expansion.expanded'),
-            'characters'       => Character::visible(Auth::check() ? Auth::user() : null)->myo(0)->orderBy('slug', 'DESC')->get()->pluck('fullName', 'slug')->toArray(),
+            'characters'       => Character::visible(Auth::user() ?? null)->myo(0)->orderBy('slug', 'DESC')->get()->pluck('fullName', 'slug')->toArray(),
         ] + ($submission->status == 'Pending' ? [
             'characterCurrencies' => Currency::where('is_character_owned', 1)->orderBy('sort_character', 'DESC')->pluck('name', 'id'),
             'items'               => Item::orderBy('name')->pluck('name', 'id'),
             'currencies'          => Currency::where('is_user_owned', 1)->orderBy('name')->pluck('name', 'id'),
             'tables'              => LootTable::orderBy('name')->pluck('name', 'id'),
             'raffles'             => Raffle::where('rolled_at', null)->where('is_active', 1)->orderBy('name')->pluck('name', 'id'),
-            'count'               => Submission::where('prompt_id', $submission->prompt_id)->where('status', 'Approved')->where('user_id', $submission->user_id)->count(),
             'elements'            => Element::orderBy('name')->pluck('name', 'id'),
+            'count'               => $prompt->getCount($submission->user),
+            'limit'               => $limit,
         ] : []));
     }
 
@@ -100,11 +109,11 @@ class SubmissionController extends Controller {
                     $submissions->sortNewest();
                     break;
                 case 'oldest':
-                    $submissions->sortOldest();
+                    $submissions->sortNewest(true);
                     break;
             }
         } else {
-            $submissions->sortOldest();
+            $submissions->sortNewest(true);
         }
 
         return view('admin.submissions.index', [
@@ -132,7 +141,7 @@ class SubmissionController extends Controller {
             'inventory'        => $inventory,
             'itemsrow'         => Item::all()->keyBy('id'),
             'expanded_rewards' => config('lorekeeper.extensions.character_reward_expansion.expanded'),
-            'characters'       => Character::visible(Auth::check() ? Auth::user() : null)->myo(0)->orderBy('slug', 'DESC')->get()->pluck('fullName', 'slug')->toArray(),
+            'characters'       => Character::visible(Auth::user() ?? null)->myo(0)->orderBy('slug', 'DESC')->get()->pluck('fullName', 'slug')->toArray(),
         ] + ($submission->status == 'Pending' ? [
             'characterCurrencies' => Currency::where('is_character_owned', 1)->orderBy('sort_character', 'DESC')->pluck('name', 'id'),
             'items'               => Item::orderBy('name')->pluck('name', 'id'),

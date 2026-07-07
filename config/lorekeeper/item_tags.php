@@ -25,6 +25,12 @@ return [
         'background_color' => '#1fd1a7',
     ],
 
+    'coupon' => [
+        'name'             => 'Coupon',
+        'text_color'       => '#ffffff',
+        'background_color' => '#ff5ca8',
+    ],
+
     'elemental_potion' => [
         'name'             => 'Elemental Potion',
         'text_color'       => '#f5f3d3',
