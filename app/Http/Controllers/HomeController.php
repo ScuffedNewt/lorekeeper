@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Facades\Settings;
+use App\Models\Character\Character;
 use App\Models\Gallery\GallerySubmission;
 use App\Models\SitePage;
 use App\Services\LinkService;
@@ -33,7 +34,7 @@ class HomeController extends Controller {
             if (is_numeric(Settings::get('featured_character'))) {
                 $character = Character::find(Settings::get('featured_character'));
             } else {
-                $character = Character::where('slug', Settings::get('featured_character'))->first();
+                $character = Character::where('slug', 'like', '%'.Settings::get('featured_character').'%')->first();
             }
         } else {
             $character = null;
