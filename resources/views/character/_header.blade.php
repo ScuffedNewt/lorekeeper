@@ -61,7 +61,7 @@
 </h1>
 <div class="mb-3">
     Owned by {!! $character->displayOwner !!}
-    @if(isset($character->coowner_id) || isset($character->coowner_url))
+    @if (isset($character->coowner_id) || isset($character->coowner_url))
         <br /><small>(Co-owned by {!! $character->displayCoOwner !!})</small>
     @endif
 </div>

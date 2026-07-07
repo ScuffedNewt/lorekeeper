@@ -41,7 +41,7 @@
         </div>
 
         @if (!$isMyo)
-           <hr>
+            <hr>
             <div class="row">
                 <div class="col-md-6 form-group">
                     {!! Form::label('Co-Owner (Optional)') !!}

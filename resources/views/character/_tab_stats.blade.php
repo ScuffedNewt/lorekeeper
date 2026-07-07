@@ -12,7 +12,7 @@
         <div class="col-lg-9 col-7">{!! $character->displayCoOwner !!}</div>
         @if (Auth::check() && Auth::user()->id == $character->user_id)
             <div class="text-info col-lg-6 col-4">To update Co-ownership, please contact a member of staff.</div>
-        @endif 
+        @endif
     </div>
 @endif
 @if (!$character->is_myo_slot)
