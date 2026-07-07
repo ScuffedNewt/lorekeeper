@@ -42,24 +42,16 @@ return [
         'version' => '1.0.0',
     ],
 
-    'shop_features' => [
-        'key'      => 'shop_features',
-        'wiki_key' => 'Shop_Features',
-        'creators' => json_encode([
-            'Newt' => 'https://github.com/ne-wt/',
-        ]),
-        'version' => '1.0.4',
-    ],
-
     'pets' => [
         'wiki_key' => 'Pets',
         'creators' => json_encode([
-            'Newt'      => 'https://github.com/ne-wt/',
-            'Mercury'   => 'https://github.com/itinerare/',
-            'Uri'       => 'https://github.com/preimpression/',
-            'SUPERCOOL' => 'https://github.com/CH3RVB/',
+            'ScuffedNewt' => 'https://github.com/ScuffedNewt/',
+            'Mercury'     => 'https://github.com/itinerare/',
+            'Uri'         => 'https://github.com/preimpression/',
+            'SUPERCOOL'   => 'https://github.com/CH3RVB/',
+            'Perappu'     => 'https://github.com/Perappu/',
         ]),
-        'version' => '2.0.0',
+        'version' => '2.0.1',
     ],
 
     'status_effects' => [
