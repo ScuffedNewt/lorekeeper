@@ -11,6 +11,25 @@ Looking for support? You can find me on Discord or email me directly. I will do 
 - Ko-fi: [Newt](https://ko-fi.com/scuffednewt)
 - My Development Discord (DM or email me for an invite)
 
+## Maintaining Extension Branches
+
+If you intend to maintain a separate branch for an extension in this repository, please prefix your maintenance branch as `extension/newt/<extension-name>`.
+
+This naming convention helps distinguish maintenance branches from the upstream branch.
+
+These branch naming conventions are recommended for consistency across community-maintained extensions.
+
+### Backports
+
+If you intend to maintain a backport of an extension targeting a different version of Lorekeeper than the upstream branch, please prefix your maintenance branch as `extension/<version>/newt/<extension-name>`.
+
+This naming convention helps distinguish backports from the primary extension and allows users to identify compatibility targets more easily.
+
+> [!IMPORTANT]
+> Backport maintainers are requested, where practical, to submit pull requests for any general improvements, bug fixes, security fixes, performance improvements, or documentation changes that are applicable to the upstream branch. Doing so reduces duplicated effort and benefits users across all supported versions.
+>
+> Changes that exist solely to maintain compatibility with a different version of Lorekeeper are not expected to be submitted upstream.
+
 ## Attribution License
 
 The Lorekeeper framework is licensed under the [MIT License](./THIRD_PARTY_LICENSES.md).
