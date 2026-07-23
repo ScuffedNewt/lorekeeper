@@ -618,7 +618,7 @@ class Character extends Model {
     public function getLevelLogs($limit = 10) {
         $character = $this;
         $query = LevelLog::where(function ($query) use ($character) {
-            $query->with('recipient')->where('leveller_type', 'Character')->where('recipient_id', $character->id);
+            $query->with(['sender', 'recipient', 'previousLevel', 'newLevel'])->where('leveller_type', 'Character')->where('recipient_id', $character->id);
         })->orderBy('id', 'DESC');
         if ($limit) {
             return $query->take($limit)->get();

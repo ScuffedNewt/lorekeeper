@@ -121,6 +121,10 @@ return [
                 'url'  => 'admin/grants/experience',
             ],
             [
+                'name' => 'Level Grants',
+                'url'  => 'admin/grants/levels',
+            ],
+            [
                 'name' => 'Stat Point Grants',
                 'url'  => 'admin/grants/stat-points',
             ],

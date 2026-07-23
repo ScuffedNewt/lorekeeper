@@ -98,9 +98,9 @@
         <p>
             Here you can level up the stat. Points on the character are consumed first, then points on the user.
             <br />
-            <b>Current Available Points:</b> {{ $character->level->current_points ?? 0 }} + {{ Auth::user()->level->current_points ?? 0 }} = {{ ($character->level->current_points ?? 0) + (Auth::user()->level->current_points ?? 0) }}
+            <b>Current Available Points:</b> {{ $character->level->stat_points ?? 0 }} Character Points + {{ Auth::user()->level->stat_points ?? 0 }} User Points = {{ ($character->level->stat_points ?? 0) + (Auth::user()->level->stat_points ?? 0) }}
         </p>
-        @if (Auth::check() && ($character->level->current_points || Auth::user()->level->current_points) && (Auth::user()->id == $character->user_id || Auth::user()->hasPower('edit_claymores')))
+        @if (Auth::check() && ($character->level->stat_points || Auth::user()->level->stat_points) && (Auth::user()->id == $character->user_id || Auth::user()->hasPower('edit_claymores')))
             {!! Form::open(['url' => 'character/' . $character->slug . '/stats/' . $stat->stat->id . '/level']) !!}
 
             <div class="text-right">

@@ -73,7 +73,7 @@ function calculateGroupCurrency($data) {
 function getAssetKeys($isCharacter = false) {
     if (!$isCharacter) {
         return ['items', 'currencies', 'pets', 'raffle_tickets', 'loot_tables', 'user_items', 'characters',
-            ...(config('lorekeeper.claymores_and_companions.visibility_settings.user_levels') ? ['experience'] : []),
+            ...(config('lorekeeper.claymores_and_companions.visibility_settings.user_levels') ? ['experience', 'user_levels', 'user_specific_levels'] : []),
             ...(config('lorekeeper.claymores_and_companions.visibility_settings.weapons') ? ['weapons'] : []),
             ...(config('lorekeeper.claymores_and_companions.visibility_settings.gear') ? ['gears'] : []),
             ...(config('lorekeeper.claymores_and_companions.visibility_settings.character_stats') ? ['points'] : []),
@@ -83,7 +83,7 @@ function getAssetKeys($isCharacter = false) {
             'currencies', 'items', 'character_items', 'loot_tables', 'elements', 'statuses',
             ...(config('lorekeeper.claymores_and_companions.visibility_settings.character_classes') ? ['class'] : []),
             ...(config('lorekeeper.claymores_and_companions.visibility_settings.character_stats') ? ['points'] : []),
-            ...(config('lorekeeper.claymores_and_companions.visibility_settings.character_levels') ? ['experience'] : []),
+            ...(config('lorekeeper.claymores_and_companions.visibility_settings.character_levels') ? ['experience', 'character_levels', 'character_specific_levels'] : []),
             ...(config('lorekeeper.claymores_and_companions.visibility_settings.character_skills') ? ['character_skills'] : []),
         ];
     }
@@ -233,6 +233,38 @@ function getAssetModelString($type, $namespaced = true) {
                 return '\App\Models\Stat\Experience';
             } else {
                 return 'Experience';
+            }
+            break;
+
+        case 'userlevel': case 'user_level': case 'user_levels':
+            if ($namespaced) {
+                return '\App\Models\Level\UserLevel';
+            } else {
+                return 'UserLevel';
+            }
+            break;
+
+        case 'characterlevel': case 'character_level': case 'character_levels':
+            if ($namespaced) {
+                return '\App\Models\Level\CharacterLevel';
+            } else {
+                return 'CharacterLevel';
+            }
+            break;
+
+        case 'userspecificlevel': case 'user_specific_level': case 'user_specific_levels':
+            if ($namespaced) {
+                return '\App\Models\Level\UserSpecificLevel';
+            } else {
+                return 'UserSpecificLevel';
+            }
+            break;
+
+        case 'characterspecificlevel': case 'character_specific_level': case 'character_specific_levels':
+            if ($namespaced) {
+                return '\App\Models\Level\CharacterSpecificLevel';
+            } else {
+                return 'CharacterSpecificLevel';
             }
             break;
     }
@@ -524,7 +556,7 @@ function fillUserAssets($assets, $sender, $recipient, $logType, $data) {
         } elseif ($key == 'currencies' && count($contents)) {
             $service = new App\Services\CurrencyManager;
             foreach ($contents as $asset) {
-                if (!$service->creditCurrency($sender, $recipient, $logType, $data['data'], $asset['asset'], $asset['quantity'])) {
+                if (!$service->creditCurrency($sender, $recipient, $logType, $data['data'] ?? null, $asset['asset'], $asset['quantity'])) {
                     foreach ($service->errors()->getMessages()['error'] as $error) {
                         flash($error)->error();
                     }
@@ -586,10 +618,33 @@ function fillUserAssets($assets, $sender, $recipient, $logType, $data) {
                     return false;
                 }
             }
+        } elseif (in_array($key, ['user_levels', 'character_levels']) && count($contents)) {
+            $service = new App\Services\Stat\LevelManager;
+            foreach ($contents as $asset) {
+                if ($asset['asset']->level_type != $recipient->logType ||
+                    !$service->creditLevels($recipient, $asset['quantity'])) {
+                    foreach ($service->errors()->getMessages()['error'] as $error) {
+                        flash($error)->error();
+                    }
+                    flash('Failed to grant levels. Check the recipient and available progression.')->error();
+
+                    return false;
+                }
+            }
+        } elseif (in_array($key, ['user_specific_levels', 'character_specific_levels']) && count($contents)) {
+            $service = new App\Services\Stat\LevelManager;
+            foreach ($contents as $asset) {
+                if ($asset['asset']->level_type != $recipient->logType ||
+                    !$service->creditSpecificLevel($recipient, $asset['asset'], $sender, $logType, $data['data'] ?? null)) {
+                    flash('Failed to grant a specific level. Check the recipient and level progression.')->error();
+
+                    return false;
+                }
+            }
         } elseif ($key == 'experience' && count($contents)) {
             $service = new App\Services\Stat\ExperienceManager;
             foreach ($contents as $asset) {
-                if (!$service->creditExperience($sender, $recipient, $logType, $data['data'], $asset['asset'], $asset['quantity'])) {
+                if (!$service->creditExperience($sender, $recipient, $logType, $data['data'] ?? null, $asset['asset'], $asset['quantity'])) {
                     foreach ($service->errors()->getMessages()['error'] as $error) {
                         flash($error)->error();
                     }
@@ -600,7 +655,7 @@ function fillUserAssets($assets, $sender, $recipient, $logType, $data) {
         } elseif ($key == 'points' && count($contents)) {
             $service = new App\Services\Stat\StatManager;
             foreach ($contents as $asset) {
-                if (!$service->creditStat($sender, $recipient, $logType, $data['data'], $asset['asset'], $asset['quantity'])) {
+                if (!$service->creditStat($sender, $recipient, $logType, $data['data'] ?? null, $asset['asset'], $asset['quantity'])) {
                     foreach ($service->errors()->getMessages()['error'] as $error) {
                         flash($error)->error();
                     }
@@ -749,7 +804,7 @@ function fillCharacterAssets($assets, $sender, $recipient, $logType, $data, $sub
         if ($key == 'currencies' && count($contents)) {
             $service = new App\Services\CurrencyManager;
             foreach ($contents as $asset) {
-                if (!$service->creditCurrency($sender, ($asset['asset']->is_character_owned ? $recipient : $item_recipient), $logType, $data['data'], $asset['asset'], $asset['quantity'])) {
+                if (!$service->creditCurrency($sender, ($asset['asset']->is_character_owned ? $recipient : $item_recipient), $logType, $data['data'] ?? null, $asset['asset'], $asset['quantity'])) {
                     return false;
                 }
             }
@@ -767,24 +822,47 @@ function fillCharacterAssets($assets, $sender, $recipient, $logType, $data, $sub
                     return false;
                 }
             }
+        } elseif (in_array($key, ['user_levels', 'character_levels']) && count($contents)) {
+            $service = new App\Services\Stat\LevelManager;
+            foreach ($contents as $asset) {
+                if ($asset['asset']->level_type != $recipient->logType ||
+                    !$service->creditLevels($recipient, $asset['quantity'])) {
+                    foreach ($service->errors()->getMessages()['error'] as $error) {
+                        flash($error)->error();
+                    }
+                    flash('Failed to grant levels. Check the recipient and available progression.')->error();
+
+                    return false;
+                }
+            }
+        } elseif (in_array($key, ['user_specific_levels', 'character_specific_levels']) && count($contents)) {
+            $service = new App\Services\Stat\LevelManager;
+            foreach ($contents as $asset) {
+                if ($asset['asset']->level_type != $recipient->logType ||
+                    !$service->creditSpecificLevel($recipient, $asset['asset'], $sender, $logType, $data['data'] ?? null)) {
+                    flash('Failed to grant a specific level. Check the recipient and level progression.')->error();
+
+                    return false;
+                }
+            }
         } elseif ($key == 'experience' && count($contents)) {
             $service = new App\Services\Stat\ExperienceManager;
             foreach ($contents as $asset) {
-                if (!$service->creditExperience($sender, $recipient, $logType, $data['data'], $asset['asset'], $asset['quantity'])) {
+                if (!$service->creditExperience($sender, $recipient, $logType, $data['data'] ?? null, $asset['asset'], $asset['quantity'])) {
                     return false;
                 }
             }
         } elseif ($key == 'points' && count($contents)) {
             $service = new App\Services\Stat\StatManager;
             foreach ($contents as $asset) {
-                if (!$service->creditStat($sender, $recipient, $logType, $data['data'], $asset['asset'], $asset['quantity'])) {
+                if (!$service->creditStat($sender, $recipient, $logType, $data['data'] ?? null, $asset['asset'], $asset['quantity'])) {
                     return false;
                 }
             }
         } elseif ($key == 'statuses' && count($contents)) {
             $service = new App\Services\StatusEffectManager;
             foreach ($contents as $asset) {
-                if (!$service->creditStatusEffect($sender, $recipient, $logType, $data['data'], $asset['asset'], $asset['quantity'])) {
+                if (!$service->creditStatusEffect($sender, $recipient, $logType, $data['data'] ?? null, $asset['asset'], $asset['quantity'])) {
                     return false;
                 }
             }
@@ -867,7 +945,7 @@ function getRewardTypes($showData, $recipient) {
         (config('lorekeeper.claymores_and_companions.visibility_settings.character_stats') ? ['Points'   => 'Stat Points'] : []) +
         (config('lorekeeper.claymores_and_companions.visibility_settings.weapons') ? ['Weapon' => 'Weapon'] : []) +
         (config('lorekeeper.claymores_and_companions.visibility_settings.gear') ? ['Gear' => 'Gear'] : []) +
-        (config('lorekeeper.claymores_and_companions.visibility_settings.user_levels') ? ['Experience' => 'Experience'] : []);
+        (config('lorekeeper.claymores_and_companions.visibility_settings.user_levels') ? ['Experience' => 'Experience', 'UserLevel' => 'Level Increment', 'UserSpecificLevel' => 'Specific Level'] : []);
     } elseif ($recipient == 'Character') {
         return [
             'Item'     => 'Item',
@@ -876,7 +954,7 @@ function getRewardTypes($showData, $recipient) {
         ] +
             ($showData['showLootTables'] ? ['LootTable' => 'Loot Table'] : []) +
             (config('lorekeeper.claymores_and_companions.visibility_settings.character_classes') ? ['Class' => 'Class'] : []) +
-            (config('lorekeeper.claymores_and_companions.visibility_settings.character_levels') ? ['Experience' => 'Experience'] : []) +
+            (config('lorekeeper.claymores_and_companions.visibility_settings.character_levels') ? ['Experience' => 'Experience', 'CharacterLevel' => 'Level Increment', 'CharacterSpecificLevel' => 'Specific Level'] : []) +
             (config('lorekeeper.claymores_and_companions.visibility_settings.character_stats') ? ['Points' => 'Stat Points'] : []) +
             (config('lorekeeper.claymores_and_companions.visibility_settings.character_skills') ? ['Skill' => 'Skill'] : []);
     } else {
@@ -976,13 +1054,38 @@ function getRewardLootData($showData, $recipient = 'User', $useCustomSelectize =
                     $query = App\Models\Stat\Stat::orderBy('name');
                 }
                 break;
+            case 'UserLevel':
+                $query = App\Models\Level\UserLevel::query();
+                break;
+            case 'CharacterLevel':
+                $query = App\Models\Level\CharacterLevel::query();
+                break;
+            case 'UserSpecificLevel':
+                $query = App\Models\Level\UserSpecificLevel::ordered('User');
+                break;
+            case 'CharacterSpecificLevel':
+                $query = App\Models\Level\CharacterSpecificLevel::ordered('Character');
+                break;
             case 'Experience':
                 $query = App\Models\Stat\Experience::orderBy('name');
                 break;
         }
 
         // If your asset type does not have a model with an id and name value, then you may need to add special handling here.
-        if ($useCustomSelectize) {
+        if (in_array($rewardKey, ['UserSpecificLevel', 'CharacterSpecificLevel'])) {
+            if ($useCustomSelectize) {
+                $data = $query->mapWithKeys(function ($item) {
+                    return [
+                        $item->id => json_encode([
+                            'name'      => $item->name,
+                            'image_url' => $item->imageUrl ?? null,
+                        ]),
+                    ];
+                });
+            } else {
+                $data = $query->pluck('name', 'id')->toArray();
+            }
+        } elseif ($useCustomSelectize) {
             $data = $query->get()->mapWithKeys(function ($item) {
                 return [
                     $item->id => json_encode([
@@ -991,6 +1094,8 @@ function getRewardLootData($showData, $recipient = 'User', $useCustomSelectize =
                     ]),
                 ];
             });
+        } elseif (in_array($rewardKey, ['UserLevel', 'CharacterLevel'])) {
+            $data = $query->get()->pluck('name', 'id')->toArray();
         } elseif ($rewardKey == 'Pet') {
             $data = $query->get()->sortBy(['parent_id', 'fullName'])->pluck('fullName', 'id')->toArray();
         } else {

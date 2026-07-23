@@ -27,11 +27,11 @@
             <div class="card-header h2">
                 Stat Information
                 <span class="badge badge-dark text-white mx-1 float-right" data-toggle="tooltip" title="Current Stat Points">
-                    Available Stat Points: {{ $character->level->current_points ?? 0 }}
+                    Available Stat Points: {{ $character->level->stat_points ?? 0 }}
                 </span>
             </div>
             <div class="card-body">
-                @foreach ($character->stats->chunk(4) as $chunk)
+                @foreach ($character->stats()->where('stat_id', '!=', config('lorekeeper.claymores_and_companions.stat_points.general_id'))->get()->chunk(4) as $chunk)
                     <div class="row justify-content-center no-gutters">
                         @foreach ($chunk as $stat)
                             <div class="col-md-2 p-1 m-2 rounded p-2 stat-entry" style="background-color: {{ $stat->stat->colour }};" data-id="{{ $stat->id }}">

@@ -12,18 +12,24 @@
     </h1>
 
     {!! $logs->render() !!}
-    <table class="table table-sm">
-        <thead>
-            <th></th>
-            <th>Old Level</th>
-            <th>New Level</th>
-            <th>Date</th>
-        </thead>
-        <tbody>
+    <div class="mb-4 logs-table">
+        <div class="logs-table-header">
+            <div class="row">
+                <div class="col-6 col-md-2"><div class="logs-table-cell">Sender</div></div>
+                <div class="col-6 col-md-2"><div class="logs-table-cell">Recipient</div></div>
+                <div class="col-6 col-md-2"><div class="logs-table-cell">Old Level</div></div>
+                <div class="col-6 col-md-2"><div class="logs-table-cell">New Level</div></div>
+                <div class="col-6 col-md-2"><div class="logs-table-cell">Log</div></div>
+                <div class="col-6 col-md-2"><div class="logs-table-cell">Date</div></div>
+                </div>
+            </div>
+        <div class="logs-table-body">
             @foreach ($logs as $log)
-                @include('character.stats._level_log_row', ['level' => $log, 'owner' => $character])
+                <div class="logs-table-row">
+                    @include('character.stats._level_log_row', ['level' => $log, 'owner' => $character])
+                </div>
             @endforeach
-        </tbody>
-    </table>
+        </div>
+    </div>
     {!! $logs->render() !!}
 @endsection

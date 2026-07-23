@@ -72,7 +72,7 @@ class RewardService extends Service {
                         'rewardable_recipient' => $data['rewardable_recipient'][$key] ?? 'User',
                         'rewardable_type'      => $data['rewardable_type'][$key],
                         'rewardable_id'        => $data['rewardable_id'][$key] ?? null,
-                        'quantity'             => $data['quantity'][$key],
+                        'quantity'             => in_array($type, ['UserSpecificLevel', 'CharacterSpecificLevel']) ? 1 : $data['quantity'][$key],
                         'data'                 => $rewardableData[$key] ?? (count($rewardableData) > 0 ? $rewardableData : null),
                     ];
 

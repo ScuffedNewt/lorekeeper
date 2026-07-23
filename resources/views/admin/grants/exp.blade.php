@@ -19,12 +19,12 @@
 
     <div class="row">
         <div class="col-md-6 form-group">
-            {!! Form::label('Experience') !!} {!! add_help('Must select an experience and Quantity must be at least 1.') !!}
+            {!! Form::label('Experience') !!} {!! add_help('Select an experience type. Use a positive whole quantity to grant EXP or a negative quantity to remove it. Balances cannot fall below zero.') !!}
             {!! Form::select('experience_id', $experiences, null, ['class' => 'form-control', 'placeholder' => 'Select Experience']) !!}
         </div>
         <div class="col-md-6 form-group">
             {!! Form::label('Quantity') !!}
-            {!! Form::number('quantity', 1, ['class' => 'form-control mr-2', 'placeholder' => 'Quantity']) !!}
+            {!! Form::number('quantity', 1, ['class' => 'form-control mr-2', 'placeholder' => 'Quantity', 'required', 'step' => 1]) !!}
         </div>
     </div>
 

@@ -139,7 +139,7 @@
                                             @foreach (parseAssetData($character->data, true) as $key => $type)
                                                 @foreach ($type as $asset)
                                                     <tr>
-                                                        <td>{!! $asset['asset']->displayName !!} ({!! ucfirst($key) !!})</td>
+                                                        <td>{!! $asset['asset']->displayName !!} ({!! ucwords(str_replace('_', ' ', $key)) !!})</td>
                                                         <td>{{ $asset['quantity'] }}</td>
                                                     </tr>
                                                 @endforeach

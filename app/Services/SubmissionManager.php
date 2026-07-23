@@ -552,7 +552,7 @@ class SubmissionManager extends Service {
                     'class'        => $classes,
                     'points'       => $points,
                     'experience'   => $experiences,
-                ], true);
+                ], true, true);
 
                 if (!$assets = fillCharacterAssets($assets, $user, $c, $promptLogType, $promptData, $submission->user)) {
                     throw new \Exception('Failed to distribute rewards to character.');
@@ -705,6 +705,24 @@ class SubmissionManager extends Service {
                         case 'LootTable': if ($data['character_rewardable_quantity'][$data['character_id']][$key]) {
                             addAsset($assets, $data['tables'][$reward], $data['character_rewardable_quantity'][$data['character_id']][$key]);
                         } break;
+                        case 'CharacterLevel':
+                            if ($isStaff && $data['character_rewardable_quantity'][$data['character_id']][$key]) {
+                                $levelReward = \App\Models\Level\CharacterLevel::find($reward);
+                                if (!$levelReward) {
+                                    throw new \Exception('Invalid character level reward.');
+                                }
+                                addAsset($assets, $levelReward, $data['character_rewardable_quantity'][$data['character_id']][$key]);
+                            }
+                            break;
+                        case 'CharacterSpecificLevel':
+                            if ($isStaff && $data['character_rewardable_quantity'][$data['character_id']][$key]) {
+                                $levelReward = \App\Models\Level\CharacterSpecificLevel::find($reward);
+                                if (!$levelReward) {
+                                    throw new \Exception('Invalid specific character level reward.');
+                                }
+                                addAsset($assets, $levelReward, 1);
+                            }
+                            break;
                         case 'Experience': if ($data['character_rewardable_quantity'][$data['character_id']][$key]) {
                             addAsset($assets, $data['experience'][$reward], $data['character_rewardable_quantity'][$data['character_id']][$key]);
                         } break;
@@ -776,6 +794,18 @@ class SubmissionManager extends Service {
                                 break;
                             }
                             $reward = Stat::find($data['rewardable_id'][$key]);
+                            break;
+                        case 'UserLevel':
+                            if (!$isStaff) {
+                                break;
+                            }
+                            $reward = \App\Models\Level\UserLevel::find($data['rewardable_id'][$key]);
+                            break;
+                        case 'UserSpecificLevel':
+                            if (!$isStaff) {
+                                break;
+                            }
+                            $reward = \App\Models\Level\UserSpecificLevel::find($data['rewardable_id'][$key]);
                             break;
                         case 'Experience':
                             if (!$isStaff) {

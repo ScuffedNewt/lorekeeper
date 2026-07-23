@@ -11,7 +11,7 @@ return [
     ],
 
     'stat_points' => [
-        'general_id' => null, // the ID of the general stat point that is used for leveling up characters and users
+        'general_id' => 4, // the ID of the general stat point that is used for leveling up characters and users
     ],
 
     'visibility_settings' => [

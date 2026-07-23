@@ -435,6 +435,9 @@ Route::group(['prefix' => 'grants', 'namespace' => 'Users', 'middleware' => 'pow
     Route::get('experience', 'GrantController@getExp');
     Route::post('experience', 'GrantController@postExp');
 
+    Route::get('levels', 'GrantController@getLevels');
+    Route::post('levels', 'GrantController@postLevels');
+
     Route::get('stat-points', 'GrantController@getStatPoints');
     Route::post('stat-points', 'GrantController@postStatPoints');
 

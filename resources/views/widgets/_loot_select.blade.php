@@ -100,7 +100,7 @@
                             'placeholder' => 'Select ' . ($rewardTypes[$loot->rewardable_recipient ?? $recipient][$loot->rewardable_type] ?? 'Reward'),
                         ]) !!}
                     </td>
-                    <td>{!! Form::text($prefix . 'quantity[]', $loot->quantity, ['class' => 'form-control']) !!}</td>
+                    <td>{!! Form::text($prefix . 'quantity[]', $loot->quantity, ['class' => 'form-control reward-quantity']) !!}</td>
                     @if (isset($extra_fields))
                         @foreach ($extra_fields as $field => $data)
                             <td>

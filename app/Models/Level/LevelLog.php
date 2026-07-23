@@ -13,7 +13,9 @@ class LevelLog extends Model {
      * @var array
      */
     protected $fillable = [
-        'leveller_type', 'recipient_id', 'previous_level', 'new_level', 'created_at', 'updated_at',
+        'sender_id', 'sender_type', 'recipient_id', 'leveller_type',
+        'previous_level', 'new_level', 'log', 'log_type', 'data',
+        'created_at', 'updated_at',
     ];
 
     /**
@@ -39,12 +41,23 @@ class LevelLog extends Model {
     /**
      * Get the user who received the logged action.
      */
-    public function recipient() {
-        if ($this->recipient_type == 'User') {
-            return $this->belongsTo(User::class, 'leveller_type');
+    public function sender() {
+        if ($this->sender_type == 'User') {
+            return $this->belongsTo(User::class, 'sender_id');
         }
 
-        return $this->belongsTo(Character::class, 'leveller_type');
+        return $this->belongsTo(Character::class, 'sender_id');
+    }
+
+    /**
+     * Get the user who received the logged action.
+     */
+    public function recipient() {
+        if ($this->leveller_type == 'User') {
+            return $this->belongsTo(User::class, 'recipient_id');
+        }
+
+        return $this->belongsTo(Character::class, 'recipient_id');
     }
 
     /**

@@ -28,6 +28,7 @@ use App\Services\PetManager;
 use App\Services\RewardManager;
 use App\Services\SkillManager;
 use App\Services\Stat\ExperienceManager;
+use App\Services\Stat\LevelManager;
 use App\Services\Stat\StatManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -127,6 +128,42 @@ class GrantController extends Controller {
         $data = $request->only(['names', 'experience_id', 'quantity', 'data']);
         if ($service->grantExp($data, Auth::user())) {
             flash('EXP granted successfully.')->success();
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
+        }
+
+        return redirect()->back();
+    }
+
+    /**
+     * Grants or removes levels (show).
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function getLevels() {
+        $options = [
+            'Users' => User::orderBy('id')->pluck('name', 'id')->mapWithKeys(function ($item, $key) {
+                return ['user-'.$key => $item];
+            })->toArray(),
+            'Characters' => Character::orderBy('name')->get()->pluck('fullName', 'id')->mapWithKeys(function ($item, $key) {
+                return ['character-'.$key => $item];
+            })->toArray(),
+        ];
+
+        return view('admin.grants.levels', ['options' => $options]);
+    }
+
+    /**
+     * Grants or removes levels.
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function postLevels(Request $request, LevelManager $service) {
+        $data = $request->only(['names', 'quantity', 'data']);
+        if ($service->grantLevels($data, Auth::user())) {
+            flash('Levels granted successfully.')->success();
         } else {
             foreach ($service->errors()->getMessages()['error'] as $error) {
                 flash($error)->error();

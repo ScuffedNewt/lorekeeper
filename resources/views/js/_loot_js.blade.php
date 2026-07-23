@@ -33,6 +33,9 @@
             $('#{{ $prefix }}lootTableBody .selectize').selectize();
         @endif
         attachRemoveListener($('#{{ $prefix }}lootTableBody .remove-loot-button'));
+        $('#{{ $prefix }}lootTableBody .reward-type').each(function() {
+            updateReadOnlyQuantity($(this));
+        });
 
         $('#{{ $prefix }}addLoot').on('click', function(e) {
             e.preventDefault();
@@ -92,6 +95,7 @@
 
             $cell.html('');
             $cell.append($clone);
+            updateReadOnlyQuantity($(this));
         });
 
         function attachRewardRecipientListener(node) {
@@ -136,6 +140,7 @@
 
                 $cell.html('');
                 $cell.append($clone);
+                updateReadOnlyQuantity($(this));
                 @if (isset($useCustomSelectize) && $useCustomSelectize)
                     $clone.selectize({
                         render: {
@@ -147,6 +152,18 @@
                     $clone.selectize();
                 @endif
             });
+        }
+
+        function updateReadOnlyQuantity(typeSelect) {
+            var isReadOnly = [
+                'UserSpecificLevel',
+                'CharacterSpecificLevel',
+            ].includes(typeSelect.val());
+            var quantity = typeSelect.closest('.loot-row').find('.reward-quantity');
+            quantity.prop('readonly', isReadOnly);
+            if (isReadOnly) {
+                quantity.val(1);
+            }
         }
 
         function attachRemoveListener(node) {

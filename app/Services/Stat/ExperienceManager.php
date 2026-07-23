@@ -11,6 +11,7 @@ use App\Models\User\UserExperience;
 use App\Services\Service;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class ExperienceManager extends Service {
     /**
@@ -25,6 +26,14 @@ class ExperienceManager extends Service {
         DB::beginTransaction();
 
         try {
+            Validator::make($data, [
+                'names'         => 'required|array|min:1|max:10',
+                'names.*'       => ['required', 'string', 'distinct', 'regex:/^(user|character)-[1-9][0-9]*$/'],
+                'experience_id' => 'required|integer|exists:experience_points,id',
+                'quantity'      => 'required|integer|not_in:0',
+                'data'          => 'nullable|string|max:400',
+            ])->validate();
+            $data['data'] ??= null;
             $usernames = array_filter($data['names'], function ($name) {
                 return substr($name, 0, 5) == 'user-';
             });
@@ -67,13 +76,17 @@ class ExperienceManager extends Service {
                 }
 
                 if ($this->creditExperience($staff, $character, 'Staff Grant', $data['data'], $experience, $data['quantity'])) {
-                    Notifications::create('EXP_GRANT', $character->user, [
-                        'quantity'         => $data['quantity'],
-                        'experience_name'  => $experience->name,
-                        'sender_url'       => $staff->url,
-                        'sender_name'      => $staff->name,
-                        'stat_url'         => url('character/'.$character->slug.'/stats'),
-                    ]);
+                    if ($character->user) {
+                        Notifications::create('CHARACTER_EXP_GRANT', $character->user, [
+                            'character_name'   => e($character->fullName),
+                            'character_url'    => $character->url,
+                            'quantity'         => $data['quantity'],
+                            'experience_name'  => $experience->name,
+                            'sender_url'       => $staff->url,
+                            'sender_name'      => $staff->name,
+                            'stat_url'         => url('character/'.$character->slug.'/stats'),
+                        ]);
+                    }
                 } else {
                     throw new \Exception('Failed to credit exp to '.$character->fullName.'.');
                 }
@@ -101,6 +114,10 @@ class ExperienceManager extends Service {
         DB::beginTransaction();
 
         try {
+            if (!$quantity || $quantity === 0 || !is_int($quantity)) {
+                throw new \Exception('Experience quantity must be a non-zero whole number.');
+            }
+            $recipient->newQuery()->whereKey($recipient->id)->lockForUpdate()->firstOrFail();
             $recipient_stack = null;
             if ($recipient->logType == 'User') {
                 $recipient_stack = UserExperience::where('user_id', $recipient->id)->where('experience_id', $experience->id)->first();
@@ -119,6 +136,9 @@ class ExperienceManager extends Service {
                 throw new \Exception('Failed to create experience stack.');
             }
 
+            if ($recipient_stack->quantity + $quantity < 0) {
+                throw new \Exception('The recipient does not have enough experience.');
+            }
             $recipient_stack->quantity += $quantity;
             $recipient_stack->save();
 
@@ -147,6 +167,13 @@ class ExperienceManager extends Service {
         DB::beginTransaction();
 
         try {
+            if (filter_var($quantity, FILTER_VALIDATE_INT) === false || $quantity < 0) {
+                throw new \Exception('Experience cost must be a non-negative whole number.');
+            }
+            $owner->newQuery()->whereKey($owner->id)->lockForUpdate()->firstOrFail();
+            if ($quantity == 0) {
+                return $this->commitReturn(true);
+            }
             $experience_stack = null;
             if ($owner->logType == 'User') {
                 $experience_stack = UserExperience::where('user_id', $owner->id)->where('experience_id', $experience->id)->first();

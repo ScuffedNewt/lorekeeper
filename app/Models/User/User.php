@@ -705,7 +705,7 @@ class User extends Authenticatable implements MustVerifyEmail {
     public function getLevelLogs($limit = 10) {
         $user = $this;
         $query = LevelLog::where(function ($query) use ($user) {
-            $query->with('recipient')->where('leveller_type', 'User')->where('recipient_id', $user->id);
+            $query->with(['sender', 'recipient', 'previousLevel', 'newLevel'])->where('leveller_type', 'User')->where('recipient_id', $user->id);
         })->orderBy('id', 'DESC');
         if ($limit) {
             return $query->take($limit)->get();

@@ -1,10 +1,14 @@
-<tr class="{{ $level->recipient_id == $character->id ? 'inflow' : 'outflow' }}">
-    <td>
-        <i class="btn py-1 m-0 px-2 btn-success fas fa-arrow-up mr-2"></i>
-        {!! $level->recipient ? $level->recipient->displayName : '' !!}
-    </td>
-    <td>{!! $level->previous_level !!}</td>
-    <td> {{ $level->new_level }}</td>
-    <td>{!! pretty_date($level->created_at) !!}</td>
-    </td>
-</tr>
+@php($isLevelUp = $level->newLevel?->previous_level_id == $level->previous_level)
+<div class="row flex-wrap">
+    <div class="col-6 col-md-2">
+        <div class="logs-table-cell">
+            <i class="{{ $isLevelUp ? 'in' : 'out' }}flow bg-{{ $isLevelUp ? 'success' : 'danger' }} fas {{ $isLevelUp ? 'fa-arrow-up' : 'fa-arrow-down' }} mr-2"></i>
+            {!! $level->sender ? $level->sender->displayName : 'System' !!}
+        </div>
+    </div>
+    <div class="col-6 col-md-2"><div class="logs-table-cell">{!! $level->recipient ? $level->recipient->displayName : '' !!}</div></div>
+    <div class="col-6 col-md-2"><div class="logs-table-cell">{{ $level->previousLevel?->name ?? 'Unknown Level' }}</div></div>
+    <div class="col-6 col-md-2"><div class="logs-table-cell">{{ $level->newLevel?->name ?? 'Unknown Level' }}</div></div>
+    <div class="col-6 col-md-2"><div class="logs-table-cell">{{ $level->log ?? 'Level Up' }}</div></div>
+    <div class="col-6 col-md-2"><div class="logs-table-cell">{!! pretty_date($level->created_at) !!}</div></div>
+</div>

@@ -408,6 +408,27 @@ return [
         'url'     => '',
     ],
 
+    // CHARACTER EXP GRANT
+    247 => [
+        'name'    => 'Character EXP Grant',
+        'message' => 'Your character <a href="{character_url}">{character_name}</a> has received a staff grant of {quantity} {experience_name} from <a href="{sender_url}">{sender_name}</a>. (<a href="{stat_url}">View Character Stats</a>)',
+        'url'     => '',
+    ],
+
+    // LEVEL GRANT
+    248 => [
+        'name'    => 'Level Grant',
+        'message' => 'Your levels have been adjusted by {quantity} by <a href="{sender_url}">{sender_name}</a>. (<a href="{stat_url}">View Stat Information</a>)',
+        'url'     => '',
+    ],
+
+    // CHARACTER LEVEL GRANT
+    249 => [
+        'name'    => 'Character Level Grant',
+        'message' => 'Your character <a href="{character_url}">{character_name}</a> has had their levels adjusted by {quantity} by <a href="{sender_url}">{sender_name}</a>. (<a href="{stat_url}">View Character Stats</a>)',
+        'url'     => '',
+    ],
+
     // GEAR GRANT
     250 => [
         'name'    => 'Gear Grant',

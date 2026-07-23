@@ -230,7 +230,7 @@
                             {!! Form::select(
                                 'character_rewardable_type[]',
                                 ['Item' => 'Item', 'Currency' => 'Currency', 'LootTable' => 'Loot Table', 'Element' => 'Element', 'StatusEffect' => 'Status Effect'] +
-                                    (config('lorekeeper.claymores_and_companions.visibility_settings.character_levels') ? ['Experience' => 'Experience'] : []) +
+                                    (config('lorekeeper.claymores_and_companions.visibility_settings.character_levels') ? ['Experience' => 'Experience', 'CharacterLevel' => 'Level Increment', 'CharacterSpecificLevel' => 'Specific Level'] : []) +
                                     (config('lorekeeper.claymores_and_companions.visibility_settings.character_stats') ? ['Points' => 'Stat Points'] : []) +
                                     (config('lorekeeper.claymores_and_companions.visibility_settings.character_skills') ? ['Skill' => 'Skill'] : []) +
                                     (config('lorekeeper.claymores_and_companions.visibility_settings.character_classes') ? ['Class' => 'Class'] : []),
@@ -246,12 +246,14 @@
                             <div class="character-items hide">{!! Form::select('character_rewardable_id[]', $items, 0, ['class' => 'form-control character-item-id', 'placeholder' => 'Select Item']) !!}</div>
                             <div class="character-tables hide">{!! Form::select('character_rewardable_id[]', $tables, 0, ['class' => 'form-control character-table-id', 'placeholder' => 'Select Loot Table']) !!}</div>
                             <div class="character-exp hide">{!! Form::select('character_rewardable_id[]', [], null, ['class' => 'form-control character-exp-id']) !!}</div>
+                            <div class="character-specific-level hide">{!! Form::select('character_rewardable_id[]', \App\Models\Level\CharacterSpecificLevel::ordered('Character')->pluck('name', 'id'), 0, ['class' => 'form-control character-specific-level-id', 'placeholder' => 'Select Specific Level']) !!}</div>
                             <div class="character-elements hide">{!! Form::select('character_rewardable_id[]', $elements, 0, ['class' => 'form-control character-element-id', 'placeholder' => 'Select Element']) !!}</div>
                             <div class="character-statuses hide">{!! Form::select('character_rewardable_id[]', $statuses, 0, ['class' => 'form-control character-status-id', 'placeholder' => 'Select Status Effect']) !!}</div>
                             <div class="character-skills hide">{!! Form::select('character_rewardable_id[]', $skills, 0, ['class' => 'form-control character-skill-id', 'placeholder' => 'Select Skill']) !!}</div>
                             <div class="character-classes hide">{!! Form::select('character_rewardable_id[]', $classes, 0, ['class' => 'form-control character-class-id', 'placeholder' => 'Select Class']) !!}</div>
                             <div class="character-points hide">{!! Form::select('character_rewardable_id[]', $points, 0, ['class' => 'form-control character-point-id', 'placeholder' => 'Select Stat Point Type']) !!}</div>
                             <div class="character-experience hide">{!! Form::select('character_rewardable_id[]', $experiences, 0, ['class' => 'form-control character-experience-id', 'placeholder' => 'Select Experience']) !!}</div>
+                            <div class="character-level hide">{!! Form::select('character_rewardable_id[]', \App\Models\Level\CharacterLevel::get()->pluck('name', 'id'), 0, ['class' => 'form-control character-level-id', 'placeholder' => 'Select Levels']) !!}</div>
                         </td>
                     @else
                         <td class="lootDivs">
