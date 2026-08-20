@@ -46,7 +46,7 @@
         @endif
     </div>
 
-    @if ($object->id)
+    @if ($object->id && in_array($object->type, ['seed', 'animal']))
         @include('admin.gardens.objects._lifecycle_preview', ['object' => $object])
     @endif
 
@@ -69,6 +69,18 @@
                 'label' => 'Chance (%)',
                 'attributes' => ['step' => '0.01', 'min' => '0', 'max' => '100'],
                 'default' => 100,
+            ],
+        ],
+    ])
+    @include('widgets._loot_select_row', [
+        'prefix' => 'tool_',
+        'type' => 'Tool',
+        'extra_fields' => [
+            'stage' => [
+                'type' => 'number',
+                'label' => 'Required at Stage',
+                'attributes' => ['min' => 0, 'step' => 1],
+                'default' => 0,
             ],
         ],
     ])

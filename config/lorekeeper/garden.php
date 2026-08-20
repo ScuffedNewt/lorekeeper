@@ -45,6 +45,15 @@ return [
                 'place' => 'Apply',
             ],
         ],
+        // applied before placing a seed or animal; degradable items lose uses
+        // according to the Garden activity configured on their Degradable tag
+        'tool'       => [
+            'displayName' => 'Tool',
+            'type'        => 'modifier',
+            'mode_text'   => [
+                'place' => 'Use',
+            ],
+        ],
         // You can add more object types here with custom interactions, just be sure to create the relevant views and logic.
     ],
 

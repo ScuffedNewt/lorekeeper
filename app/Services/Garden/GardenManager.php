@@ -7,6 +7,7 @@ use App\Models\Garden\Garden;
 use App\Models\Garden\GardenObject;
 use App\Models\Garden\GardenPlot;
 use App\Models\Garden\UserGardenPlot;
+use App\Models\Item\Item;
 use App\Models\User\UserActivity;
 use App\Models\User\UserItem;
 use App\Services\InventoryManager;
@@ -91,6 +92,11 @@ class GardenManager extends Service {
                         throw new \Exception('Failed to use fertiliser.');
                     }
                     break;
+                case 'tool':
+                    if (!$this->useTool($user, $userPlot, $garden, $object)) {
+                        throw new \Exception('Failed to use tool.');
+                    }
+                    break;
                 default:
                     throw new \Exception('Invalid object type.');
             }
@@ -134,6 +140,10 @@ class GardenManager extends Service {
             $object = $userPlot->object;
             if (!$object) {
                 throw new \Exception('Garden object not found.');
+            }
+
+            foreach ($object->toolsForStage($userPlot->interactedCount) as $tool) {
+                $this->debitGardenTool($user, $tool['asset'], $userPlot->garden, $tool['quantity']);
             }
 
             if ($object->type == 'animal' && !empty($object->data['food'])) {
@@ -320,6 +330,9 @@ class GardenManager extends Service {
             $limit = max(0, (int) config('lorekeeper.garden.user_guest_water_limit'));
             if ($limit && $activity->garden_guest_waters_today >= $limit) {
                 throw new \Exception('You have reached today\'s guest watering limit.');
+            }
+            foreach ($userPlot->object->toolsForStage($userPlot->interactedCount) as $tool) {
+                $this->debitGardenTool($guest, $tool['asset'], $userPlot->garden, $tool['quantity']);
             }
             $plotData = $userPlot->data;
             $plotData['interacted_at'] = Carbon::now();
@@ -711,6 +724,52 @@ class GardenManager extends Service {
         return $this->rollbackReturn(false);
     }
 
+    /**
+     * Uses a tool to prepare a plot before an object is placed.
+     *
+     * @param User           $user
+     * @param UserGardenPlot $userPlot
+     * @param Garden         $garden
+     * @param GardenObject   $object
+     *
+     * @return bool
+     */
+    private function useTool($user, $userPlot, $garden, $object) {
+        DB::beginTransaction();
+
+        try {
+            if ($userPlot->started_at) {
+                throw new \Exception('Tools must be used before placing an object.');
+            }
+            if ($object->object_model !== 'App\\Models\\Item\\Item') {
+                throw new \Exception('Garden tools must use an item object.');
+            }
+
+            $modifiers = $userPlot->data['modifiers'] ?? [];
+            if (isset($modifiers['tool'])) {
+                throw new \Exception('This plot has already been prepared with a tool.');
+            }
+
+            $item = $object->object;
+            if (!$item) {
+                throw new \Exception('The selected tool item could not be found.');
+            }
+
+            $this->debitGardenTool($user, $item, $garden);
+
+            $modifiers['tool'] = $object->id;
+            $userPlot->update([
+                'data' => array_merge($userPlot->data ?? [], ['modifiers' => $modifiers]),
+            ]);
+
+            return $this->commitReturn(true);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
+    }
+
     /**********************************************************************************************
 
         PLOT FUNCTIONS
@@ -747,6 +806,52 @@ class GardenManager extends Service {
         PRIVATE FUNCTIONS
 
     **********************************************************************************************/
+
+    /**
+     * Debits or degrades a garden tool from a user's inventory.
+     *
+     * @param User   $user
+     * @param Item   $item
+     * @param Garden $garden
+     * @param int    $quantity
+     *
+     * @return bool
+     */
+    private function debitGardenTool($user, $item, $garden, $quantity = 1) {
+        if (!$item instanceof Item || $quantity < 1) {
+            throw new \Exception('Invalid garden tool requirement.');
+        }
+        $degradable = $item->tag('degradable');
+        $usageRate = $degradable ? (int) ($degradable->data['usage_rate']['Garden'] ?? 0) : 0;
+
+        for ($use = 0; $use < $quantity; $use++) {
+            $stacks = UserItem::where('user_id', $user->id)
+                ->where('item_id', $item->id)
+                ->where('count', '>', 0)
+                ->lockForUpdate()
+                ->get()
+                ->filter(fn ($stack) => $stack->availableQuantity > 0);
+            if ($degradable && $usageRate > 0) {
+                $stacks = $stacks->filter(function ($stack) use ($degradable, $usageRate) {
+                    return (int) ($stack->data['uses'] ?? $degradable->data['uses']) >= $usageRate;
+                });
+            }
+            $stack = $stacks->sortByDesc(function ($stack) use ($degradable) {
+                return (int) ($stack->data['uses'] ?? ($degradable->data['uses'] ?? 0));
+            })->first();
+            if (!$stack) {
+                throw new \Exception('You do not have an available copy of '.$item->name.' with enough durability.');
+            }
+
+            if (!(new InventoryManager)->debitStack($user, 'Used in Garden', [
+                'data' => 'Used '.$item->displayName.' in the '.$garden->displayName.' garden',
+            ], $stack, 1, 'Garden')) {
+                throw new \Exception('Failed to use '.$item->name.' in the garden.');
+            }
+        }
+
+        return true;
+    }
 
     /**
      * Debits the specified assets from the user, with error handling and logging.

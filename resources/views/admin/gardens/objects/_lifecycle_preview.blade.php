@@ -19,5 +19,13 @@
         @else
             <p class="mt-3 mb-0"><strong>Collection:</strong> {{ ucfirst($object->data['collection_options']) }} · <strong>Food:</strong> {{ $object->displayFood ?: 'None' }}</p>
         @endif
+        @if (in_array($object->type, ['seed', 'animal']) && count($object->tools))
+            <p class="mt-3 mb-0"><strong>Required tools:</strong></p>
+            <ul class="mb-0">
+                @foreach ($object->tools as $tool)
+                    <li>Stage {{ $tool->data['stage'] }}: {{ $tool->quantity }}x {!! App\Models\Item\Item::find($tool->rewardable_id)?->displayName ?? 'Missing Item' !!}</li>
+                @endforeach
+            </ul>
+        @endif
     </div>
 </div>

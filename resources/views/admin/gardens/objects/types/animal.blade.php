@@ -30,6 +30,8 @@
             </div>
         @endif
 
+        @include('admin.gardens.objects._tool_requirements', ['object' => $object ?? null])
+
         <hr />
 
         <div class="row">
@@ -71,6 +73,7 @@
 @include('js._loot_js', ['showLootTables' => true, 'showRaffles' => true, 'prefix' => 'stay_'])
 @include('js._loot_js', ['showLootTables' => true, 'showRaffles' => true, 'prefix' => 'remove_'])
 @include('js._loot_js', ['showLootTables' => true, 'showRaffles' => true, 'prefix' => 'potential_'])
+@include('js._loot_js', ['prefix' => 'tool_'])
 
 <script>
     $('[data-toggle="tooltip"]').tooltip({

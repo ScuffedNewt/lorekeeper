@@ -28,6 +28,9 @@
         @if ($object->type == 'animal' && !empty($object->displayFood))
             <div><small>Needs {!! $object->displayFood !!}</small></div>
         @endif
+        @if ($requiredTools = $object->displayToolsForStage($userPlot->interactedCount))
+            <div><small>Requires tool: {!! $requiredTools !!}</small></div>
+        @endif
     @elseif ($userPlot->interactedCount >= $userPlot->actionsRequired)
         <div style="top: 10px; right: 5px; z-index: 1; font-size: 1.5em; position: absolute; pointer-events: all;"
             data-toggle="tooltip" title="Ready to {{ strtolower(config('lorekeeper.garden.garden_object_types.' . $object->type . '.mode_text.collect')) }} at {!! str_replace('"', '', format_date($userPlot->timeUntilReady)) !!}!">

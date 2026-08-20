@@ -345,7 +345,7 @@
                 applyPlotResponse($plot, response);
             } catch (error) {
                 updatePlotUI($plot, '<i class="fas fa-plus" aria-hidden="true"></i>', 'Empty plot', 'empty');
-                statusElement.text(`Could not place ${draggedItem.name}. Please try again.`);
+                statusElement.text(error.message || `Could not place ${draggedItem.name}. Please try again.`);
                 console.error('Garden action failed:', error);
             }
         });
@@ -392,7 +392,7 @@
                     statusElement.text(`Watered ${plotId.replace('plot-', 'Plot ')}.`);
                     applyPlotResponse($plot, response);
                 } catch (error) {
-                    statusElement.text(`Could not water ${plotId.replace('plot-', 'Plot ')}.`);
+                statusElement.text(error.message || `Could not water ${plotId.replace('plot-', 'Plot ')}.`);
                     console.error('Garden action failed:', error);
                 }
 

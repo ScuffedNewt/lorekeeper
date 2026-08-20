@@ -531,6 +531,27 @@ class GardenService extends Service {
             $data['remove_rewards'] = getDataReadyAssets(processRewardableData($data, true, 'remove_'));
         }
 
+        if (in_array($data['type'], ['seed', 'animal'])) {
+            foreach ($data['tool_rewardable_type'] ?? [] as $key => $type) {
+                if ($type !== 'Item') {
+                    throw new \Exception('Garden tool requirements must use item assets.');
+                }
+                $toolId = $data['tool_rewardable_id'][$key] ?? null;
+                if (!GardenObject::where('type', 'tool')->where('object_model', 'App\\Models\\Item\\Item')->where('object_id', $toolId)->exists()) {
+                    throw new \Exception('Each required tool item must also be configured as a garden tool object.');
+                }
+                $quantity = $data['tool_quantity'][$key] ?? null;
+                if (filter_var($quantity, FILTER_VALIDATE_INT) === false || (int) $quantity < 1) {
+                    throw new \Exception('Required tool quantities must be whole numbers of one or greater.');
+                }
+                $stage = $data['tool_stage'][$key] ?? null;
+                if (filter_var($stage, FILTER_VALIDATE_INT) === false || (int) $stage < 0 || (int) $stage >= (int) ($data['interactions'] ?? 1)) {
+                    throw new \Exception('Required tool stages must be whole numbers from 0 to one less than the number of interactions.');
+                }
+            }
+            $data['tools'] = getDataReadyAssets(processRewardableData($data, true, 'tool_', ['stage']));
+        }
+
         if ($data['type'] != 'animal') {
             $data['rewards'] = getDataReadyAssets(processRewardableData($data, true));
         }
@@ -547,6 +568,7 @@ class GardenService extends Service {
             'potential_rewardable_type', 'potential_rewardable_id', 'potential_quantity', 'potential_chance',
             // animal exclusive
             'food_rewardable_type', 'food_rewardable_id', 'food_quantity',
+            'tool_rewardable_type', 'tool_rewardable_id', 'tool_quantity', 'tool_stage',
             'stay_rewardable_type', 'stay_rewardable_id', 'stay_quantity',
             'remove_rewardable_type', 'remove_rewardable_id', 'remove_quantity',
         ]);

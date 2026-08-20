@@ -594,23 +594,25 @@ class InventoryManager extends Service {
                 // Check if the item is degradable and has a usage rate for the activity.
                 $usageRate = $degradable->data['usage_rate'][$activity] ?? null;
                 $consumptionType = $degradable->data['consumption_type'][$activity] ?? null;
-                if ($usageRate || (!$usageRate && ($consumptionType && $consumptionType != 'consume'))) {
-                    $uses = $stack->data['uses'] ?? $degradable->data['uses'];
+                if ($usageRate !== null && (int) $usageRate > 0) {
+                    $uses = (int) ($stack->data['uses'] ?? $degradable->data['uses']);
+                    $remainingUses = $uses - (int) $usageRate;
 
-                    if ($uses - $quantity < 0) {
+                    if ($remainingUses < 0) {
                         throw new \Exception('This item ('.$stack->item->name.') does not have enough uses left for this activity.');
                     }
 
-                    if ($uses - $quantity > 0) {
-                        $stack->data = array_merge($stack->data, ['uses' => $uses - $usageRate]);
+                    if ($remainingUses > 0) {
+                        $stack->data = array_merge($stack->data ?? [], ['uses' => $remainingUses]);
                         $stack->save();
-
-                        $data['data'] = $data['data'].' (Consumed '.$usageRate.' Uses, '.$uses.' Remaining)';
+                        $data['data'] = $data['data'].' (Consumed '.$usageRate.' Uses, '.$remainingUses.' Remaining)';
                     } else {
                         // if all uses are consumed, delete the stack
                         $stack->count -= $quantity;
                         $stack->save();
                     }
+                } elseif ($consumptionType === 'none' || ($usageRate !== null && (int) $usageRate === 0)) {
+                    // This activity is explicitly configured not to consume durability.
                 } else {
                     $stack->count -= $quantity;
                     $stack->save();

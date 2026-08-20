@@ -15,7 +15,7 @@ class DegradableService extends Service {
     public function getEditData() {
         return [
             'activities' => [
-                'Prompts', 'Design Update',
+                'Prompts', 'Design Update', 'Garden',
             ],
         ];
     }

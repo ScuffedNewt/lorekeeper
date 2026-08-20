@@ -61,7 +61,7 @@ class GardenController extends Controller {
 
                     return response()->json([
                         'success' => false,
-                        'message' => 'Failed to place item.',
+                        'message' => $service->errors()->first('error') ?: 'Failed to place item.',
                         'errors'  => $service->errors()->getMessages()['error'],
                     ]);
                 }
@@ -73,7 +73,7 @@ class GardenController extends Controller {
 
                     return response()->json([
                         'success' => false,
-                        'message' => 'Failed to tend to plot.',
+                        'message' => $service->errors()->first('error') ?: 'Failed to tend to plot.',
                         'errors'  => $service->errors()->getMessages()['error'],
                     ]);
                 }

@@ -166,6 +166,66 @@ class GardenObject extends Model {
     }
 
     /**
+     * Gets tools formatted for the admin reward widget.
+     *
+     * @return array
+     */
+    public function getToolsAttribute() {
+        $tools = [];
+        foreach (parseAssetData($this->data['tools'] ?? []) as $type => $assets) {
+            foreach ($assets as $id => $asset) {
+                if (!$asset['asset']) {
+                    continue;
+                }
+                $tools[] = (object) [
+                    'rewardable_type' => getAssetModelString($type, false),
+                    'rewardable_id'   => $id,
+                    'quantity'        => $asset['quantity'],
+                    'data'            => $asset['data'],
+                ];
+            }
+        }
+
+        return $tools;
+    }
+
+    /**
+     * Gets required tool assets for an interaction stage.
+     *
+     * @param int $stage
+     *
+     * @return array
+     */
+    public function toolsForStage($stage) {
+        $tools = [];
+        foreach (parseAssetData($this->data['tools'] ?? []) as $assets) {
+            foreach ($assets as $asset) {
+                if ($asset['asset'] && (int) ($asset['data']['stage'] ?? -1) === (int) $stage) {
+                    $tools[] = $asset;
+                }
+            }
+        }
+
+        return $tools;
+    }
+
+    /**
+     * Displays required tools for an interaction stage.
+     *
+     * @param int $stage
+     *
+     * @return string|null
+     */
+    public function displayToolsForStage($stage) {
+        $display = [];
+        foreach ($this->toolsForStage($stage) as $tool) {
+            $display[] = $tool['quantity'].'x '.$tool['asset']->displayName;
+        }
+
+        return $display ? implode(', ', $display) : null;
+    }
+
+    /**
      * Displays the object's independently rolled potential rewards.
      *
      * @return array

@@ -39,6 +39,10 @@
 
         <hr />
 
+        @include('admin.gardens.objects._tool_requirements', ['object' => $object ?? null])
+
+        <hr />
+
         <h2 class="h5">Seasons (Optional)</h2>
         <p>If you want to limit the growth of this seed to a certain season, select the months it should be grown between below.</p>
         <p>The user will be able to grow from the start month through till the end of the end month, ex: if the start month is April and the end month is October, the user will be able to be planted from April to October.
@@ -121,6 +125,7 @@
 
 @include('js._loot_js', ['showLootTables' => true, 'showRaffles' => true])
 @include('js._loot_js', ['showLootTables' => true, 'showRaffles' => true, 'prefix' => 'potential_'])
+@include('js._loot_js', ['prefix' => 'tool_'])
 
 <script>
     $('[data-toggle="tooltip"]').tooltip({

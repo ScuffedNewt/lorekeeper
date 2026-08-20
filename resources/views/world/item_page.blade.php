@@ -15,6 +15,25 @@
 @section('content')
     {!! breadcrumbs(['World' => 'world', 'Items' => 'world/items', $item->name => $item->idUrl]) !!}
 
+    @php
+        $degradableTag = $item->tag('degradable');
+        $gardenUsageRate = $degradableTag?->data['usage_rate']['Garden'] ?? null;
+        $gardenConsumptionType = $degradableTag?->data['consumption_type']['Garden'] ?? null;
+    @endphp
+    @if ($degradableTag)
+        <div class="alert alert-info">
+            <strong><i class="fas fa-hourglass-half mr-1" aria-hidden="true"></i> Degradable item:</strong>
+            This item has {{ $degradableTag->data['uses'] }} base {{ Str::plural('use', $degradableTag->data['uses']) }}.
+            @if ($gardenUsageRate !== null && (int) $gardenUsageRate > 0)
+                Using it as a garden tool consumes {{ $gardenUsageRate }} {{ Str::plural('use', $gardenUsageRate) }}.
+            @elseif ($gardenConsumptionType === 'none' || $gardenUsageRate !== null)
+                Using it as a garden tool does not reduce its durability.
+            @else
+                If configured as a garden tool, one copy is consumed per use unless a Garden usage rate is configured.
+            @endif
+        </div>
+    @endif
+
     <div class="row">
         <div class="col-sm">
         </div>
