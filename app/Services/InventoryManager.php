@@ -566,10 +566,11 @@ class InventoryManager extends Service {
      * @param array                                $data
      * @param \App\Models\Item\UserItem            $stack
      * @param mixed                                $quantity
+     * @param mixed|null                           $activity
      *
      * @return bool
      */
-    public function debitStack($owner, $type, $data, $stack, $quantity) {
+    public function debitStack($owner, $type, $data, $stack, $quantity, $activity = null) {
         DB::beginTransaction();
 
         try {
@@ -588,8 +589,36 @@ class InventoryManager extends Service {
                 }
             }
 
-            $stack->count -= $quantity;
-            $stack->save();
+            $degradable = $stack->item->tag('degradable');
+            if ($activity && $degradable) {
+                // Check if the item is degradable and has a usage rate for the activity.
+                $usageRate = $degradable->data['usage_rate'][$activity] ?? null;
+                $consumptionType = $degradable->data['consumption_type'][$activity] ?? null;
+                if ($usageRate || (!$usageRate && ($consumptionType && $consumptionType != 'consume'))) {
+                    $uses = $stack->data['uses'] ?? $degradable->data['uses'];
+
+                    if ($uses - $quantity < 0) {
+                        throw new \Exception('This item ('.$stack->item->name.') does not have enough uses left for this activity.');
+                    }
+
+                    if ($uses - $quantity > 0) {
+                        $stack->data = array_merge($stack->data, ['uses' => $uses - $usageRate]);
+                        $stack->save();
+
+                        $data['data'] = $data['data'].' (Consumed '.$usageRate.' Uses, '.$uses.' Remaining)';
+                    } else {
+                        // if all uses are consumed, delete the stack
+                        $stack->count -= $quantity;
+                        $stack->save();
+                    }
+                } else {
+                    $stack->count -= $quantity;
+                    $stack->save();
+                }
+            } else {
+                $stack->count -= $quantity;
+                $stack->save();
+            }
 
             if ($type && !$this->createLog($owner ? $owner->id : null, $owner ? $owner->logType : null, null, null, $stack->id, $type, $data['data'], $stack->item->id, $quantity)) {
                 throw new \Exception('Failed to create log.');
