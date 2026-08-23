@@ -1,5 +1,5 @@
-@if($map)
-    {!! Form::open(['url' => 'admin/maps/delete/'.$map->id]) !!}
+@if ($map)
+    {!! Form::open(['url' => 'admin/maps/delete/' . $map->id]) !!}
 
     <p>Are you sure you want to delete <strong>{{ $map->name }}</strong>?</p>
 
@@ -8,6 +8,6 @@
     </div>
 
     {!! Form::close() !!}
-@else 
+@else
     Invalid map selected.
 @endif

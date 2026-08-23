@@ -194,14 +194,17 @@
                 placement: "top"
             });
 
-            $(document).mousemove( function(e) {
+            $(document).mousemove(function(e) {
                 // check if $('#Image-Maps-Com-process-map') exists
-                if($('#Image-Maps-Com-process-map').length == 0) {
+                if ($('#Image-Maps-Com-process-map').length == 0) {
                     return;
                 }
-                var mouseX = e.pageX - $('#Image-Maps-Com-process-map').offset().left ;
+                var mouseX = e.pageX - $('#Image-Maps-Com-process-map').offset().left;
                 var mouseY = e.pageY - $('#Image-Maps-Com-process-map').offset().top - 5;
-                $('.tooltip').css({'top':mouseY,'left':mouseX}).fadeIn('slow');
+                $('.tooltip').css({
+                    'top': mouseY,
+                    'left': mouseX
+                }).fadeIn('slow');
             });
         </script>
     </div>
