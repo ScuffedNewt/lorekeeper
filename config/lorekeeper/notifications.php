@@ -484,13 +484,13 @@ return [
         'url'     => 'gallery/view/{submission_id}',
     ],
     520 => [
-        'name' => 'Garden Plot Ready',
+        'name'    => 'Garden Plot Ready',
         'message' => 'Your garden plot containing <strong>{object}</strong> is ready for attention. (<a href="{url}">Visit Gardens</a>)',
-        'url' => 'gardens',
+        'url'     => 'gardens',
     ],
     521 => [
-        'name' => 'Garden Seed Perished',
+        'name'    => 'Garden Seed Perished',
         'message' => 'Your <strong>{object}</strong> has perished and needs to be cleared. (<a href="{url}">Visit Gardens</a>)',
-        'url' => 'gardens',
+        'url'     => 'gardens',
     ],
 ];

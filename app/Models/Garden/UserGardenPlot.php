@@ -191,7 +191,7 @@ class UserGardenPlot extends Model {
     /**
      * When the current seed perishes if it is not tended to or collected.
      *
-     * @return \Carbon\Carbon|null
+     * @return Carbon|null
      */
     public function getPerishesAtAttribute() {
         if (!$this->canPerish || !$this->timeUntilReady) {

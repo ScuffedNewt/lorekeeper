@@ -444,19 +444,25 @@ class GardenService extends Service {
     public function deleteGardenObject($object, $user) {
         DB::beginTransaction();
         try {
-            if (!$object) throw new \Exception('Garden object not found.');
+            if (!$object) {
+                throw new \Exception('Garden object not found.');
+            }
             if (UserGardenPlot::where('data->object_id', $object->id)->exists()) {
                 throw new \Exception('This object is currently in use in at least one garden plot.');
             }
             foreach (glob(public_path('images/data/gardens/objects/'.$object->id.'-*')) ?: [] as $file) {
-                if (is_file($file)) unlink($file);
+                if (is_file($file)) {
+                    unlink($file);
+                }
             }
             $object->delete();
             $this->logAdminAction($user, 'Deleted Garden Object', 'Deleted garden object #'.$object->id);
+
             return $this->commitReturn(true);
         } catch (\Exception $e) {
             $this->setError('error', $e->getMessage());
         }
+
         return $this->rollbackReturn(false);
     }
 

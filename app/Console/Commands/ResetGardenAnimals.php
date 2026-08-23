@@ -23,6 +23,7 @@ class ResetGardenAnimals extends Command {
             });
         });
         $this->info('All garden animals were returned.');
+
         return self::SUCCESS;
     }
 }

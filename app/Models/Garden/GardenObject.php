@@ -306,7 +306,7 @@ class GardenObject extends Model {
             return true;
         }
 
-        $month = $month ?? now()->month;
+        $month ??= now()->month;
 
         return $start <= $end
             ? $month >= $start && $month <= $end
