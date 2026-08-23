@@ -2,19 +2,16 @@
 
 namespace App\Models\Map;
 
-use Config;
-use DB;
 use App\Models\Model;
 
-class MapLocation extends Model
-{
+class MapLocation extends Model {
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'name', 'map_id', 'description',  'cords', 'shape', 'link', 'link_type', 'is_active'
+        'name', 'map_id', 'description',  'cords', 'shape', 'link', 'link_type', 'is_active',
     ];
 
     /**
@@ -25,7 +22,7 @@ class MapLocation extends Model
     protected $table = 'map_locations';
 
     /**********************************************************************************************
-    
+
         RELATIONS
 
     **********************************************************************************************/
@@ -33,13 +30,12 @@ class MapLocation extends Model
     /**
      * Get the locations that belong to the map.
      */
-    public function map() 
-    {
+    public function map() {
         return $this->belongsTo('App\Models\Map\Map');
     }
 
     /**********************************************************************************************
-    
+
         SCOPES
 
     **********************************************************************************************/
@@ -47,11 +43,11 @@ class MapLocation extends Model
     /**
      * Scope a query to retrieve only active tags.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeActive($query)
-    {
+    public function scopeActive($query) {
         return $query->where('is_active', 1);
     }
 }

@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\SitePage;
 use App\Models\Map\Map;
+use App\Models\SitePage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -24,8 +24,7 @@ class PageController extends Controller {
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function getPage($key)
-    {
+    public function getPage($key) {
         $page = SitePage::where('key', $key)->visible(Auth::user() ?? null)->first();
         if (!$page) {
             abort(404);
@@ -33,7 +32,7 @@ class PageController extends Controller {
 
         // replace @map(int) with the map's HTML
         $text = $page->parsed_text;
-        $text = preg_replace_callback('/@map\((\d+)\)/', function($matches) {
+        $text = preg_replace_callback('/@map\((\d+)\)/', function ($matches) {
             $map = Map::find($matches[1]);
             if ($map) {
                 return view('widgets._map', ['map' => $map])->render();

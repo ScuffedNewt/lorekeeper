@@ -9,12 +9,12 @@ use App\Models\Feature\Feature;
 use App\Models\Feature\FeatureCategory;
 use App\Models\Item\Item;
 use App\Models\Item\ItemCategory;
+use App\Models\Map\Map;
 use App\Models\Rarity;
 use App\Models\Shop\Shop;
 use App\Models\Species\Species;
 use App\Models\Species\Subtype;
 use App\Models\User\User;
-use App\Models\Map\Map;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -659,22 +659,25 @@ class WorldController extends Controller {
     }
 
     /**
-     * shows all maps
+     * shows all maps.
      */
-    public function getMaps()
-    {
+    public function getMaps() {
         return view('world.maps', [
             'maps' => Map::active()->orderBy('name', 'DESC')->get(),
         ]);
     }
 
     /**
-     * Gets a map by its name
+     * Gets a map by its name.
+     *
+     * @param mixed $name
      */
-    public function getMap($name)
-    {
+    public function getMap($name) {
         $map = Map::active()->where('name', $name)->first();
-        if(!$map) abort(404);
+        if (!$map) {
+            abort(404);
+        }
+
         return view('world.map', [
             'map' => $map,
         ]);

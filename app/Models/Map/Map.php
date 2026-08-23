@@ -2,19 +2,16 @@
 
 namespace App\Models\Map;
 
-use Config;
-use DB;
 use App\Models\Model;
 
-class Map extends Model
-{
+class Map extends Model {
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'name', 'description', 'is_active'
+        'name', 'description', 'is_active',
     ];
 
     /**
@@ -30,9 +27,9 @@ class Map extends Model
      * @var array
      */
     public static $createRules = [
-        'name' => 'required|unique:items|between:3,100',
+        'name'        => 'required|unique:items|between:3,100',
         'description' => 'nullable',
-        'image' => 'mimes:png,jpg,jpeg,gif',
+        'image'       => 'mimes:png,jpg,jpeg,gif',
     ];
 
     /**
@@ -41,13 +38,13 @@ class Map extends Model
      * @var array
      */
     public static $updateRules = [
-        'name' => 'required|between:3,100',
+        'name'        => 'required|between:3,100',
         'description' => 'nullable',
-        'image' => 'mimes:png,jpg,jpeg,gif',
+        'image'       => 'mimes:png,jpg,jpeg,gif',
     ];
 
     /**********************************************************************************************
-    
+
         RELATIONS
 
     **********************************************************************************************/
@@ -55,13 +52,12 @@ class Map extends Model
     /**
      * Get the locations that belong to the map.
      */
-    public function locations() 
-    {
+    public function locations() {
         return $this->hasMany('App\Models\Map\MapLocation');
     }
 
     /**********************************************************************************************
-    
+
         SCOPES
 
     **********************************************************************************************/
@@ -69,16 +65,16 @@ class Map extends Model
     /**
      * Scope a query to retrieve only active tags.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeActive($query)
-    {
+    public function scopeActive($query) {
         return $query->where('is_active', 1);
     }
 
     /**********************************************************************************************
-    
+
         ACCESSORS
 
     **********************************************************************************************/
@@ -93,8 +89,7 @@ class Map extends Model
      *
      * @return string
      */
-    public function getImageDirectoryAttribute()
-    {
+    public function getImageDirectoryAttribute() {
         return 'images/data/maps';
     }
 
@@ -103,9 +98,8 @@ class Map extends Model
      *
      * @return string
      */
-    public function getImageFileNameAttribute()
-    {
-        return $this->id . '-image.png';
+    public function getImageFileNameAttribute() {
+        return $this->id.'-image.png';
     }
 
     /**
@@ -113,8 +107,7 @@ class Map extends Model
      *
      * @return string
      */
-    public function getImagePathAttribute()
-    {
+    public function getImagePathAttribute() {
         return public_path($this->imageDirectory);
     }
 
@@ -123,9 +116,8 @@ class Map extends Model
      *
      * @return string
      */
-    public function getImageUrlAttribute()
-    {
-        return asset($this->imageDirectory . '/' . $this->imageFileName);
+    public function getImageUrlAttribute() {
+        return asset($this->imageDirectory.'/'.$this->imageFileName);
     }
 
     /**
@@ -133,31 +125,27 @@ class Map extends Model
      *
      * @return string
      */
-    public function getUrlAttribute()
-    {
-        return url('world/maps/' . $this->name);
+    public function getUrlAttribute() {
+        return url('world/maps/'.$this->name);
     }
 
     /**
-     * Gets the display
+     * Gets the display.
      *
      * @return string
      */
-    public function getDisplayAttribute()
-    {
+    public function getDisplayAttribute() {
         $locations = [];
-        foreach($this->locations as $location)
-        {
-           $locations[] =
-            '<area target="" alt="'.$location->name.'" title="'.$location->name.'"'
-            . ($location->link_type == 'GET' ? ' href="'.$location->link.'"' : '') .
-            ' data-toggle="tooltip" class="tooltip-bot" href="'.$location->url.'" coords="'.$location->cords.'" shape="'.$location->shape.'" data-original-title="'.$location->name.'">';
+        foreach ($this->locations as $location) {
+            $locations[] =
+             '<area target="" alt="'.$location->name.'" title="'.$location->name.'"'
+             .($location->link_type == 'GET' ? ' href="'.$location->link.'"' : '').
+             ' data-toggle="tooltip" class="tooltip-bot" href="'.$location->url.'" coords="'.$location->cords.'" shape="'.$location->shape.'" data-original-title="'.$location->name.'">';
         }
+
         return
             ('<img src="'.$this->imageUrl.'" id="Image-Maps-Com-process-map" class="img-fluid border" usemap="#'.$this->name.'">')
-            . ('<map name="'.$this->name.'" class="image-map">')
-            . (implode('', $locations) . '</map>')
-        ;
+            .('<map name="'.$this->name.'" class="image-map">')
+            .(implode('', $locations).'</map>');
     }
-
 }
