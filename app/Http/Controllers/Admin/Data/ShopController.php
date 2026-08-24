@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin\Data;
 
 use App\Http\Controllers\Controller;
-use App\Models\Currency\Currency;
 use App\Models\Item\Item;
 use App\Models\Shop\Shop;
 use App\Models\Shop\ShopStock;
@@ -45,7 +44,6 @@ class ShopController extends Controller {
 
         return view('admin.shops.create_edit_shop', [
             'shop'    => new Shop,
-            'items'   => Item::orderBy('name')->pluck('name', 'id'),
             'coupons' => $coupons,
         ]);
     }
@@ -70,8 +68,6 @@ class ShopController extends Controller {
 
         return view('admin.shops.create_edit_shop', [
             'shop'       => $shop,
-            'items'      => Item::orderBy('name')->pluck('name', 'id'),
-            'currencies' => Currency::orderBy('name')->pluck('name', 'id'),
             'coupons'    => $coupons,
         ]);
     }
@@ -118,7 +114,6 @@ class ShopController extends Controller {
 
         return view('admin.shops._stock_modal', [
             'shop'       => $shop,
-            'currencies' => Currency::orderBy('name')->pluck('name', 'id'),
             'stock'      => new ShopStock,
         ]);
     }
@@ -149,7 +144,11 @@ class ShopController extends Controller {
                 $type.'Category' => $categories->toArray(),
             ];
         } else {
-            $items = $model::orderBy('name')->pluck('name', 'id')->toArray();
+            if ($model == '\App\Models\Raffle\Raffle') {
+                $items = $model::orderBy('name')->where('is_active', '!=', 2)->pluck('name', 'id')->toArray();
+            } else {
+                $items = $model::orderBy('name')->pluck('name', 'id')->toArray();
+            }
         }
 
         return view('admin.shops._stock_modal', [
@@ -182,7 +181,11 @@ class ShopController extends Controller {
                 $type.'Category' => $categories->toArray(),
             ];
         } else {
-            $items = $model::orderBy('name')->pluck('name', 'id')->toArray();
+            if ($model == '\App\Models\Raffle\Raffle') {
+                $items = $model::orderBy('name')->where('is_active', '!=', 2)->pluck('name', 'id')->toArray();
+            } else {
+                $items = $model::orderBy('name')->pluck('name', 'id')->toArray();
+            }
         }
 
         return view('admin.shops._stock_item', [

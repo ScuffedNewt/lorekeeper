@@ -31,6 +31,20 @@
     </div>
 
     <div class="form-group">
+        {!! Form::label('Header Image (Optional)') !!} {!! add_help('This image will show up above the sales content and on the meta-image.') !!}
+        <div class="custom-file">
+            {!! Form::label('image', 'Choose file...', ['class' => 'custom-file-label']) !!}
+            {!! Form::file('image', ['class' => 'custom-file-input']) !!}
+        </div>
+        @if ($sales->has_image)
+            <div class="form-check">
+                {!! Form::checkbox('remove_image', 1, false, ['class' => 'form-check-input']) !!}
+                {!! Form::label('remove_image', 'Remove current image', ['class' => 'form-check-label']) !!}
+            </div>
+        @endif
+    </div>
+
+    <div class="form-group">
         {!! Form::label('Post Content') !!}
         {!! Form::textarea('text', $sales->text, ['class' => 'form-control wysiwyg']) !!}
     </div>
@@ -89,10 +103,9 @@
 
 @section('scripts')
     @parent
-
     @include('admin.sales._character_select_js')
     @include('widgets._datetimepicker_js')
-
+    @include('js._tinymce_wysiwyg')
     <script>
         $(document).ready(function() {
             $('.delete-sales-button').on('click', function(e) {

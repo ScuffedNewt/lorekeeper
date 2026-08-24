@@ -39,6 +39,10 @@ class RankService extends Service {
                     if (!config('lorekeeper.powers.'.$power)) {
                         throw new \Exception('Invalid power selected.');
                     }
+
+                    if ($power == 'admin') {
+                        $data['is_secondary_admin'] = true;
+                    }
                 }
 
                 $powers = array_unique($data['powers']);
@@ -54,6 +58,8 @@ class RankService extends Service {
             $data['color'] = isset($data['color']) ? str_replace('#', '', $data['color']) : null;
             if (isset($data['description']) && $data['description']) {
                 $data['parsed_description'] = parse($data['description']);
+            } else {
+                $data['parsed_description'] = null;
             }
 
             $data['icon'] ??= 'fas fa-user';
@@ -97,15 +103,25 @@ class RankService extends Service {
                     if (!config('lorekeeper.powers.'.$power)) {
                         throw new \Exception('Invalid power selected.');
                     }
+
+                    if ($power == 'admin') {
+                        $data['is_secondary_admin'] = true;
+                    }
                 }
 
                 $powers = array_unique($data['powers']);
                 unset($data['powers']);
             }
 
+            if (!isset($data['is_secondary_admin']) || !in_array('admin', $powers)) {
+                $data['is_secondary_admin'] = false;
+            }
+
             $data['color'] = isset($data['color']) ? str_replace('#', '', $data['color']) : null;
             if (isset($data['description']) && $data['description']) {
                 $data['parsed_description'] = parse($data['description']);
+            } else {
+                $data['parsed_description'] = null;
             }
 
             $data['icon'] ??= 'fas fa-user';

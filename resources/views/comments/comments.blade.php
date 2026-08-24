@@ -105,24 +105,7 @@
                             window.history.pushState({}, '', url);
                         }
                         $('#{{ $commentType }}-comments').fadeIn();
-                        tinymce.init({
-                            selector: '.comment-wysiwyg',
-                            height: 250,
-                            menubar: false,
-                            convert_urls: false,
-                            plugins: [
-                                'advlist autolink lists link image charmap print preview anchor',
-                                'searchreplace visualblocks code fullscreen spoiler',
-                                'insertdatetime media table paste code help wordcount'
-                            ],
-                            toolbar: 'undo redo | formatselect | bold italic backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | spoiler-add spoiler-remove | removeformat | code',
-                            content_css: [
-                                '{{ asset('css/app.css') }}',
-                                '{{ asset('css/lorekeeper.css') }}'
-                            ],
-                            spoiler_caption: 'Toggle Spoiler',
-                            target_list: false
-                        });
+                        @include('js._tinymce_wysiwyg', ['tinymceSelector' => '.comment-wysiwyg', 'tinymceHeight' => '250', 'tinymceScript' => false])
                     }
                 });
             }

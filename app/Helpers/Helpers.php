@@ -450,17 +450,6 @@ function prettyProfileName($url) {
 }
 
 /**
- * Returns the given objects limits, if any.
- *
- * @param mixed $object
- *
- * @return bool
- */
-function getLimits($object) {
-    return App\Models\Limit\Limit::where('object_model', get_class($object))->where('object_id', $object->id)->get();
-}
-
-/**
  * Checks the site setting and returns the appropriate FontAwesome version.
  *
  * @return string
@@ -482,4 +471,79 @@ function faVersion() {
     }
 
     return asset($directory.'/'.$version.'.min.css');
+}
+
+/**
+ * Returns the given objects limits, if any.
+ *
+ * @param mixed $object
+ *
+ * @return mixed
+ */
+function getLimits($object) {
+    if (in_array(App\Traits\Limitable::class, class_uses_recursive(get_class($object)))) {
+        return $object->limits;
+    } else {
+        return null;
+    }
+}
+
+/**
+ * checks if a certain object has any limits.
+ *
+ * @param mixed $object
+ *
+ * @return bool
+ */
+function hasLimits($object) {
+    if (in_array(App\Traits\Limitable::class, class_uses_recursive(get_class($object)))) {
+        return $object->hasLimits;
+    } else {
+        return false;
+    }
+}
+
+/**
+ * Checks if a user has a limit unlocked.
+ *
+ * @param mixed $object
+ * @param mixed $user
+ */
+function hasUnlockedLimits($user, $object) {
+    if (!hasLimits($object)) {
+        return true;
+    }
+
+    return $user->unlockedLimits
+        ->where('object_model', get_class($object))
+        ->where('object_id', $object->id)
+        ->count();
+}
+
+/**
+ * Returns the given objects rewards, if any.
+ *
+ * @param mixed $object
+ *
+ * @return bool
+ */
+function getRewards($object) {
+    if (in_array(App\Traits\Rewardable::class, class_uses_recursive(get_class($object)))) {
+        return $object->rewards;
+    } else {
+        return null;
+    }
+}
+
+/**
+ * checks if a certain object has any rewards.
+ *
+ * @param mixed $object
+ */
+function hasRewards($object) {
+    if (in_array(App\Traits\Rewardable::class, class_uses_recursive(get_class($object)))) {
+        return $object->hasRewards;
+    } else {
+        return false;
+    }
 }

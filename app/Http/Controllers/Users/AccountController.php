@@ -86,6 +86,7 @@ class AccountController extends Controller {
      * @return \Illuminate\Http\RedirectResponse
      */
     public function postAvatar(Request $request, UserService $service) {
+        $request->validate(User::$avatarUpdateRules);
         $data = $request->only([
             'avatar', 'x0', 'x1', 'y0', 'y1',
         ]);
@@ -163,6 +164,8 @@ class AccountController extends Controller {
             foreach ($service->errors()->getMessages()['error'] as $error) {
                 flash($error)->error();
             }
+
+            return redirect()->to('email/verify');
         }
 
         return redirect()->back();

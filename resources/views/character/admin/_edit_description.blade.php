@@ -9,8 +9,4 @@
 </div>
 {!! Form::close() !!}
 
-<script>
-    $(document).ready(function() {
-        @include('js._modal_wysiwyg')
-    });
-</script>
+@include('js._tinymce_wysiwyg', ['tinymceSelector' => '.descriptioneditingparse .wysiwyg'])

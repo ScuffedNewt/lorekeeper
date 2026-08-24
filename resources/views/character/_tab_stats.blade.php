@@ -37,7 +37,7 @@
             <h5>Sale Value</h5>
         </div>
         <div class="col-lg-9 col-7 pl-1">
-            {{ Config::get('lorekeeper.settings.currency_symbol') }}{{ $character->sale_value }}
+            {{ config('lorekeeper.settings.currency_symbol') }}{{ $character->sale_value }}
         </div>
     </div>
 @endif
@@ -51,6 +51,6 @@
 @endif
 @if (Auth::check() && Auth::user()->hasPower('manage_characters'))
     <div class="mt-3">
-        <a href="#" class="btn btn-outline-info btn-sm edit-stats" data-{{ $character->is_myo_slot ? 'id' : 'slug' }}="{{ $character->is_myo_slot ? $character->id : $character->slug }}"><i class="fas fa-cog"></i> Edit</a>
+        <a href="#" class="btn btn-outline-info btn-sm edit-stats" data-{{ $character->is_myo_slot ? 'id' : 'slug' }}="{{ $character->is_myo_slot ? $character->id : $character->slug }}"><i class="fas fa-cog"></i> Edit Stats</a>
     </div>
 @endif

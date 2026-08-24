@@ -27,12 +27,14 @@ return [
      *  Species Trait Index - Mercury
      *  Subtype Trait Index - Speedy
      *  Universal Trait Index - CHERVB
+     *  All Traits Index (Kitchen Sink Index) - Speedy
      *  Trait Modals addition - Moif
      */
     'visual_trait_index' => [
         'enable_species_index'   => 0, // Enables the Species Trait Index
         'enable_subtype_index'   => 0, // Enables the Subtype Trait Index
         'enable_universal_index' => 0, // Enables the Universal Trait Index
+        'enable_all_trait_index' => 0, // Enables the All Traits Index
         'trait_modals'           => 0, // Enables modals when you click on a trait for more info instead of linking to the traits page
     ],
 
@@ -81,13 +83,21 @@ return [
         'currency_id' => 1,
     ],
 
-    // Organised Traits Dropdown - Draginraptor
-    'organised_traits_dropdown' => 0,
+    // Organised Traits Dropdown - Draginraptor, ScuffedNewt
+    'organised_traits_dropdown' => [
+        'enable'           => 1,
+        'display_species'  => 0, // displays species
+        'display_subtype'  => 0, // displays subtype
+        'rarity'           => [
+            'enable'         => 1, // If enabled, displays trait rarity in the dropdown.
+            'sort_by_rarity' => 1, // If enabled, sorts traits by rarity in the dropdown. Rarity display does not need to be enabled for this to function.
+        ],
+    ],
 
     // Previous & Next buttons on Character pages - Speedy
     // Adds buttons linking to the previous character as well as the next character on all character pages.
     'previous_and_next_characters' => [
-        'display' => 0,
+        'display' => 1,
         'reverse' => 0, // By default, 0 has the lower number on the 'Next' side and the higher number on the 'Previous' side, reflecting the default masterlist order. Setting this to 1 reverses this.
     ],
 
@@ -124,4 +134,32 @@ return [
     // Multiple Subtypes - Newt
     'exclusionary_search'    => 0, // If enabled, searching for multiple subtypes will only return results that have all of the subtypes specified. If disabled, it will return results that have any of the subtypes specified.
     'multiple_subtype_limit' => 10, // The maximum number of subtypes a character can have.
+
+    // TinyMCE Code Editor - Moif
+    'tinymce_code_editor'   => 1, // If enabled, uses the more advanced code editor instead of TinyMCE's default.
+
+    // Unmerge Item Page and Item Entry - Speedy
+    'unmerge_item_page_and_entry' => 0, // If enabled, uses the html on world/item_page.blade.php instead of the include that links to world/_item_entry.blade.php
+
+    // Unmerge Trait Page and Trait Entry - Speedy
+    'unmerge_feature_page_and_entry' => 0, // If enabled, uses the html on world/feature_page.blade.php instead of the include that links to world/_feature_entry.blade.php
+
+    // Show Species-only traits in dropdown - Speedy
+    'show_exclusively_species_traits_in_dropdown' => 0, // If enabled, will only show traits from the associated species as well as traits that aren't species-limited in the dropdown menus.
+
+    // Prompt Submission Limits (Time Based) - Juni
+    'limit_periods' => [
+        null        => 'None',
+        'Hour'      => 'Hour',
+        'Day'       => 'Day',
+        'Week'      => 'Week',
+        'BiWeekly'  => 'Bi-Weekly', // This is once every two weeks.
+        'Month'     => 'Month',
+        'BiMonthly' => 'Bi-Monthly', // This is once every two months.
+        'Quarter'   => 'Quarter', // This is once every three months.
+        'Year'      => 'Year',
+    ],
+
+    // Limit Userpage Sublists to Characters - Speedy
+    'limit_userpage_sublists_to_characters' => 0, // If enabled, will only show sub masterlists on user pages that the characters owned by the user belong to.
 ];

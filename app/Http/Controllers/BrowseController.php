@@ -199,7 +199,7 @@ class BrowseController extends Controller {
 
         return view('browse.myo_masterlist', [
             'isMyo'       => true,
-            'slots'       => $query->paginate(30)->appends($request->query()),
+            'slots'       => $query->paginate(24)->appends($request->query()),
             'specieses'   => [0 => 'Any Species'] + Species::visible(Auth::user() ?? null)->orderBy('specieses.sort', 'DESC')->pluck('name', 'id')->toArray(),
             'rarities'    => [0 => 'Any Rarity'] + Rarity::orderBy('rarities.sort', 'DESC')->pluck('name', 'id')->toArray(),
             'features'    => Feature::getDropdownItems(),

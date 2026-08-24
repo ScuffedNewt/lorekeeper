@@ -79,7 +79,7 @@ return [
     |       This is used in the automatic generation of character codes.
     |       {category}: This is replaced by the character category code.
     |       {number}: This is replaced by the character number.
-    /       {year}: This is replaced by the current year.
+    |       {year}: This is replaced by the current year.
     |
     |       e.g. Under the default setting ({category}-{number}),
     |       a character in a category called "MYO" (code "MYO") with number 001
@@ -297,14 +297,17 @@ return [
     | Size, in pixels, to cap gallery images at.
     | Images above this cap in either dimension will be resized to suit. Enter "0" to disable resizing.
     |
+    | Formates excluded from gallery image resizing. This is for formats that do not handle resizing well, such as animated GIFs.
+    |
     | File format to encode gallery image uploads to.
     | Set to null to leave images in their original formats.
     | Example:
     | 'gallery_images_format' => null,
     |
     */
-    'gallery_images_cap'    => 0,
-    'gallery_images_format' => null,
+    'gallery_images_cap'             => 0,
+    'gallery_images_exclude_formats' => ['gif'],
+    'gallery_images_format'          => null,
 
     /*
     |--------------------------------------------------------------------------
@@ -429,4 +432,14 @@ return [
     |
     */
     'enable_character_content_warnings'                 => 1,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Allow Unverified Users to Modify their Email Addresses
+    |--------------------------------------------------------------------------
+    |
+    | Allows users who have not yet verified their email addresses
+    | to modify their email address, in order to correct mistakes.
+    */
+    'allow_unverified_users_to_modify_emails'           => 1,
 ];

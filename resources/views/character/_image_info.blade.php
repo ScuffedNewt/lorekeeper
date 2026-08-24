@@ -15,7 +15,7 @@
                 <div>{!! implode(', ', $image->content_warnings) !!}</div>
             </div>
         @endif
-        <div class="card character-bio w-100">
+        <div class="card character-bio w-100 h-100">
             <div class="card-header">
                 <ul class="nav nav-tabs card-header-tabs">
                     <li class="nav-item">
@@ -131,7 +131,7 @@
 
                     @if (Auth::check() && Auth::user()->hasPower('manage_characters'))
                         <div class="mt-3">
-                            <a href="#" class="btn btn-outline-info btn-sm edit-features" data-id="{{ $image->id }}"><i class="fas fa-cog"></i> Edit</a>
+                            <a href="#" class="btn btn-outline-info btn-sm edit-features" data-id="{{ $image->id }}"><i class="fas fa-cog"></i> Edit Traits</a>
                         </div>
                     @endif
                 </div>
@@ -145,7 +145,7 @@
                     @endif
                     @if (Auth::check() && Auth::user()->hasPower('manage_characters'))
                         <div class="mt-3">
-                            <a href="#" class="btn btn-outline-info btn-sm edit-notes" data-id="{{ $image->id }}"><i class="fas fa-cog"></i> Edit</a>
+                            <a href="#" class="btn btn-outline-info btn-sm edit-notes" data-id="{{ $image->id }}"><i class="fas fa-cog"></i> Edit Notes</a>
                         </div>
                     @endif
                 </div>
@@ -176,7 +176,7 @@
 
                     @if (Auth::check() && Auth::user()->hasPower('manage_characters'))
                         <div class="mt-3">
-                            <a href="#" class="btn btn-outline-info btn-sm edit-credits" data-id="{{ $image->id }}"><i class="fas fa-cog"></i> Edit</a>
+                            <a href="#" class="btn btn-outline-info btn-sm edit-credits" data-id="{{ $image->id }}"><i class="fas fa-cog"></i> Edit Credits</a>
                         </div>
                     @endif
                 </div>

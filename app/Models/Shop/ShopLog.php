@@ -136,6 +136,8 @@ class ShopLog extends Model {
 
         if (isset($this->cost['user']) && isset($this->cost['character'])) {
             $assets = mergeAssetsArrays(parseAssetData($this->cost['user']), parseAssetData($this->cost['character']));
+        } elseif (isset($this->cost['user']) || isset($this->cost['character'])) {
+            $assets = isset($this->cost['user']) ? parseAssetData($this->cost['user']) : parseAssetData($this->cost['character']);
         } else {
             $assets = parseAssetData($this->cost);
         }
@@ -160,6 +162,8 @@ class ShopLog extends Model {
     public function getDisplayCostAttribute() {
         if (isset($this->cost['user']) && isset($this->cost['character'])) {
             $assets = mergeAssetsArrays(parseAssetData($this->cost['user']), parseAssetData($this->cost['character']));
+        } elseif (isset($this->cost['user']) || isset($this->cost['character'])) {
+            $assets = isset($this->cost['user']) ? parseAssetData($this->cost['user']) : parseAssetData($this->cost['character']);
         } else {
             $assets = parseAssetData($this->cost);
         }

@@ -54,6 +54,7 @@
                             'cost_type[]',
                             [
                                 'Currency' => 'Currency',
+                                'Item' => 'Item',
                             ],
                             $cost->cost_type ?? null,
                             ['class' => 'form-control cost-type', 'placeholder' => 'Select Cost Type'],
@@ -235,6 +236,7 @@
                     'cost_type[]',
                     [
                         'Currency' => 'Currency',
+                        'Item' => 'Item',
                     ],
                     null,
                     ['class' => 'form-control cost-type', 'placeholder' => 'Select Cost Type'],

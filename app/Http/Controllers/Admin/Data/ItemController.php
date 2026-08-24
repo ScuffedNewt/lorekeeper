@@ -210,11 +210,11 @@ class ItemController extends Controller {
                     $query->sortNewest();
                     break;
                 case 'oldest':
-                    $query->sortOldest();
+                    $query->sortNewest(true);
                     break;
             }
         } else {
-            $query->sortOldest();
+            $query->sortNewest(true);
         }
 
         return view('admin.items.items', [

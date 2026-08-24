@@ -81,6 +81,11 @@ class ShopService extends Service {
 
             $data = $this->populateShopData($data, $shop);
 
+            $oldImageFileName = null;
+            if ($shop->has_image) {
+                $oldImageFileName = $shop->shopImageFileName;
+            }
+
             $image = null;
             if (isset($data['image']) && $data['image']) {
                 $data['has_image'] = 1;
@@ -93,8 +98,8 @@ class ShopService extends Service {
 
             $shop->update($data);
 
-            if ($shop) {
-                $this->handleImage($image, $shop->shopImagePath, $shop->shopImageFileName);
+            if ($image) {
+                $this->handleImage($image, $shop->shopImagePath, $shop->shopImageFileName, $oldImageFileName);
             }
 
             return $this->commitReturn($shop);
@@ -325,6 +330,7 @@ class ShopService extends Service {
         DB::beginTransaction();
 
         try {
+            $stock->costs()->delete();
             $stock->delete();
 
             return $this->commitReturn(true);
@@ -348,10 +354,7 @@ class ShopService extends Service {
         try {
             // Delete shop stock
             $shop->stock()->delete();
-
-            if ($shop->has_image) {
-                $this->deleteImage($shop->shopImagePath, $shop->shopImageFileName);
-            }
+            $this->deleteImage($shop->shopImagePath, $shop->shopImageFileName);
             $shop->delete();
 
             return $this->commitReturn(true);
@@ -403,6 +406,7 @@ class ShopService extends Service {
         $data['is_active'] = isset($data['is_active']);
         $data['is_hidden'] = isset($data['is_hidden']);
         $data['is_staff'] = isset($data['is_staff']);
+        $data['is_fto'] = isset($data['is_fto']);
         $data['use_coupons'] = isset($data['use_coupons']);
         $data['allowed_coupons'] ??= null;
         $data['data'] = [

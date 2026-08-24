@@ -106,7 +106,7 @@ class CharacterImageController extends Controller {
             'rarities'  => ['0' => 'Select Rarity'] + Rarity::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
             'specieses' => ['0' => 'Select Species'] + Species::orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
             'subtypes'  => Subtype::where('species_id', '=', $image->species_id)->orderBy('sort', 'DESC')->pluck('name', 'id')->toArray(),
-            'features'  => Feature::getDropdownItems(1),
+            'features'  => Feature::getDropdownItems(Auth::user()->hasPower('edit_data'), $image->species_id),
         ]);
     }
 
@@ -158,7 +158,7 @@ class CharacterImageController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getEditImageNotes($id) {
-        return view('character.admin._edit_notes_modal', [
+        return view('character.admin._edit_notes', [
             'image' => CharacterImage::find($id),
         ]);
     }
