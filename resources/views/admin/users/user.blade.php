@@ -133,11 +133,9 @@
         @endif
     </div>
 
-    @php
-        $ips = $user->ips()->paginate(15);
-    @endphp
     <div class="card p-3 mb-2">
         <h3>Logged IPs</h3>
+        <p class="mb-2">Ordered by most recently used.</p>
         {!! $ips->render() !!}
         <div class="logs-table">
             <div class="logs-table-header">
@@ -170,6 +168,9 @@
                         <div class="row flex-wrap">
                             <div class="col-12 col-md-3">
                                 <div class="logs-table-cell">
+                                    {!! $ip->isProxy ?? '' !!}
+                                    {!! $ip->isMobile ?? '' !!}
+                                    {!! $ip->isBanned ?? '' !!}
                                     {{ $ip->ip }}
                                 </div>
                             </div>
@@ -185,14 +186,7 @@
                             </div>
                             <div class="col-12 col-md-3">
                                 <div class="logs-table-cell">
-                                    {!! count(
-                                        $ip->users->where('id', '!=', $user->id)->pluck('displayName')->toArray(),
-                                    )
-                                        ? implode(
-                                            ', ',
-                                            $ip->users->where('id', '!=', $user->id)->pluck('displayName')->toArray(),
-                                        )
-                                        : '<span class="text-muted">---</span>' !!}
+                                    {!! $ip->usersString($user) !!}
                                 </div>
                             </div>
                         </div>
@@ -201,5 +195,68 @@
             </div>
         </div>
         {!! $ips->render() !!}
+    </div>
+
+    <div class="card p-3 mb-2">
+        <a class="h3 d-block mb-0" href="#sharedIpsCollapse" data-toggle="collapse">
+            Shared IPs ({{ $sharedIps->count() }}) <i class="fas fa-caret-down"></i>
+        </a>
+        <div class="collapse" id="sharedIpsCollapse">
+            <p class="mt-2 mb-2">IPs this user has in common with other accounts.</p>
+            <div class="logs-table">
+                <div class="logs-table-header">
+                    <div class="row">
+                        <div class="col-12 col-md-3">
+                            <div class="logs-table-cell">
+                                IP
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="logs-table-cell">
+                                Last Used
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="logs-table-cell">
+                                Shared With
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="logs-table-body">
+                    @foreach ($sharedIps as $ip)
+                        <div class="logs-table-row">
+                            <div class="row flex-wrap">
+                                <div class="col-12 col-md-3">
+                                    <div class="logs-table-cell">
+                                        {!! $ip->isProxy ?? '' !!}
+                                        {!! $ip->isMobile ?? '' !!}
+                                        {!! $ip->isBanned ?? '' !!}
+                                        {{ $ip->ip }}
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="logs-table-cell">
+                                        {!! $ip->updated_at ? pretty_date($ip->updated_at) : 'Unknown' !!}
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <div class="logs-table-cell">
+                                        {!! $ip->usersString($user) !!}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                    @if (!$sharedIps->count())
+                        <div class="logs-table-row">
+                            <div class="logs-table-cell">
+                                <span class="font-italic text-muted">No shared IPs.</span>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
     </div>
 @endsection

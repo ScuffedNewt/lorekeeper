@@ -80,9 +80,17 @@ class UserController extends Controller {
             abort(404);
         }
 
+        $ips = $user->ips()->orderBy('updated_at', 'DESC')->paginate(10);
+
+        $sharedIps = $user->ips()->orderBy('updated_at', 'DESC')->whereExists(function ($query) use ($user) {
+            $query->select(DB::raw(1))->from('user_ips as shared')->whereColumn('shared.ip', 'user_ips.ip')->where('shared.user_id', '!=', $user->id);
+        })->get();
+
         return view('admin.users.user', [
-            'user'     => $user,
-            'ranks'    => Rank::orderBy('ranks.sort')->pluck('name', 'id')->toArray(),
+            'user'      => $user,
+            'ranks'     => Rank::orderBy('ranks.sort')->pluck('name', 'id')->toArray(),
+            'ips'       => $ips,
+            'sharedIps' => $sharedIps,
         ]);
     }
 
@@ -451,6 +459,11 @@ class UserController extends Controller {
         if ($request->get('user_id')) {
             $query->where('user_id', $request->get('user_id'));
         }
+        if ($request->get('banned')) {
+            $query->whereIn('ip', function ($q) {
+                $q->select('ip')->from('user_ips')->where('is_user_banned', 1);
+            });
+        }
         if ($request->get('sort')) {
             switch ($request->get('sort')) {
                 case 'newest':
@@ -460,7 +473,7 @@ class UserController extends Controller {
                     $query->orderBy('updated_at', 'ASC');
                     break;
                 case 'most_users':
-                    $query->select('ip', DB::raw('COUNT(ip) as user_count'), DB::raw('MAX(updated_at) as updated_at'))
+                    $query->select('ip', DB::raw('COUNT(ip) as user_count'), DB::raw('MAX(updated_at) as updated_at'), DB::raw('MAX(is_known_proxy) as is_known_proxy'), DB::raw('MAX(is_mobile_network) as is_mobile_network'), DB::raw('MAX(is_user_banned) as is_user_banned'))
                         ->groupBy('ip')
                         ->orderBy('user_count', 'DESC');
                     break;
@@ -475,12 +488,57 @@ class UserController extends Controller {
                     break;
             }
         } else {
-            $query->select('ip', DB::raw('MAX(updated_at) as updated_at'))->groupBy('ip')->orderBy('updated_at', 'DESC');
+            $query->select('ip', DB::raw('MAX(updated_at) as updated_at'), DB::raw('MAX(is_known_proxy) as is_known_proxy'), DB::raw('MAX(is_mobile_network) as is_mobile_network'), DB::raw('MAX(is_user_banned) as is_user_banned'))->groupBy('ip')->orderBy('updated_at', 'DESC');
         }
 
         return view('admin.users.user_ips', [
             'ips'   => $query->paginate(30)->appends($request->query()),
             'users' => User::orderBy('name')->pluck('name', 'id')->toArray(),
         ]);
+    }
+
+    /**
+     * Sets the proxy flag for an IP address.
+     */
+    public function postIpProxy(Request $request, UserService $service) {
+        $request->validate(['ip' => 'required|string']);
+        if ($service->setIpProxyFlag($request->get('ip'), $request->get('value'), Auth::user())) {
+            flash('Updated proxy flag successfully.')->success();
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
+        }
+
+        return redirect()->back();
+    }
+
+    public function postIpMobile(Request $request, UserService $service) {
+        $request->validate(['ip' => 'required|string']);
+        if ($service->setIpMobileFlag($request->get('ip'), $request->get('value'), Auth::user())) {
+            flash('Updated mobile network flag successfully.')->success();
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
+        }
+
+        return redirect()->back();
+    }
+
+    /**
+     * Clears the ban for an IP address.
+     */
+    public function postClearIpBan(Request $request, UserService $service) {
+        $request->validate(['ip' => 'required|string']);
+        if ($service->clearIpBan($request->get('ip'), Auth::user())) {
+            flash('Cleared IP ban successfully.')->success();
+        } else {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
+            }
+        }
+
+        return redirect()->back();
     }
 }

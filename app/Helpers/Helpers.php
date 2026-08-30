@@ -456,18 +456,44 @@ function prettyProfileName($url) {
  * @param mixed  $id
  */
 function storeIp($ip, $id) {
-    $query = App\Models\User\UserIp::where('user_id', $id)->where('ip', $ip)->first();
+    if (!$ip || !filter_var($ip, FILTER_VALIDATE_IP) || in_array($ip, ['127.0.0.1', '::1'])) {
+        return;
+    }
 
-    if ($query) {
-        $query->updated_at = Carbon\Carbon::now();
-        $query->save();
-    } else {
-        App\Models\User\UserIp::create([
-            'user_id'    => $id,
-            'ip'         => $ip,
-            'created_at' => Carbon\Carbon::now(),
-            'updated_at' => Carbon\Carbon::now(),
-        ]);
+    $ipStore = Illuminate\Support\Facades\Cache::get('user_ip_'.$id);
+    if ($ipStore === $ip) {
+        return;
+    }
+
+    if (!Illuminate\Support\Facades\Cache::add('user_ip_touched:'.$id.':'.$ip, 1, now()->addMinutes(5))) {
+        return;
+    }
+
+    $isProxy = Illuminate\Support\Facades\Cache::get('proxy_check_'.$ip);
+    if (!isset($isProxy) && config('lorekeeper.user-ips.trustip.enabled') && config('lorekeeper.user-ips.trustip.api_key') && class_exists('Trustip')) {
+        try {
+            $result = Trustip::check($ip);
+            $proxyValue = data_get($result, 'data.is_proxy');
+            if (isset($proxyValue)) {
+                $isProxy = (bool) $proxyValue;
+                Illuminate\Support\Facades\Cache::forever('proxy_check_'.$ip, $isProxy);
+            }
+        } catch (Throwable $e) {
+            report($e);
+        }
+    }
+
+    try {
+        $userIp = App\Models\User\UserIp::firstOrNew(['user_id' => $id, 'ip' => $ip]);
+        // Automated proxy checks only fill unclassified rows so staff overrides stand.
+        if (!isset($userIp->is_known_proxy) && isset($isProxy)) {
+            $userIp->is_known_proxy = $isProxy;
+        }
+        $userIp->updated_at = Carbon\Carbon::now();
+        $userIp->save();
+        Illuminate\Support\Facades\Cache::put('user_ip_'.$id, $ip, now()->addMinutes(15));
+    } catch (Illuminate\Database\QueryException $e) {
+        Illuminate\Support\Facades\Log::error('storeIp failed for user '.$id.' ip '.$ip.': '.$e->getMessage());
     }
 }
 

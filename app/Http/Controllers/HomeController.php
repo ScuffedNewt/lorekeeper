@@ -206,8 +206,8 @@ class HomeController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getIpBlocked(Request $request) {
-        // if the ip has never been logged
-        if (!UserIp::where('ip', $request->ip())->exists()) {
+        // Only banned IPs should be able to access this notice.
+        if (!UserIp::isBannedForRegistration($request->ip())) {
             return redirect()->to('/');
         }
 

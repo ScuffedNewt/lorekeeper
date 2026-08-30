@@ -752,4 +752,32 @@ class User extends Authenticatable implements MustVerifyEmail {
     public function hasBookmarked($character) {
         return CharacterBookmark::where('user_id', $this->id)->where('character_id', $character->id)->first();
     }
+
+    /**
+     * Checks the user's IP addresses and returns a string indicating any shared IPs.
+     *
+     * @return string
+     */
+    public function ipsCheck() {
+        $thisIps = UserIp::where('user_id', $this->id)->pluck('ip');
+
+        $othersIps = UserIp::whereIn('ip', $thisIps)->where('user_id', '!=', $this->id)->get();
+        if (!$othersIps) {
+            return '<span class="faded">Does not share IPs with other users.</span>';
+        } else {
+            if ($othersIps->count() < 1) {
+                return '<span class="faded">Does not share IPs with other users.</span>';
+            }
+
+            $string = '';
+            $uniqueIps = $othersIps->unique('user_id');
+            $string .= '<span class="text-danger font-weight-bold">(Shared with '.$uniqueIps->count().')</span> ';
+
+            foreach ($uniqueIps as $ip) {
+                $string .= '['.$ip->user->displayName.'] ';
+            }
+
+            return $string;
+        }
+    }
 }

@@ -44,6 +44,12 @@ Route::group(['prefix' => 'users', 'namespace' => 'Users'], function () {
         Route::post('{name}/reactivate', 'UserController@postReactivate');
 
         // USER IPS
+        Route::group(['prefix' => 'ips'], function () {
+            Route::get('/', 'UserController@getUserIpList');
+            Route::post('proxy', 'UserController@postIpProxy');
+            Route::post('mobile', 'UserController@postIpMobile');
+            Route::post('clear-ban', 'UserController@postClearIpBan');
+        });
         Route::get('ips', 'UserController@getUserIpList');
     });
 

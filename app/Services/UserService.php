@@ -12,8 +12,10 @@ use App\Models\Rank\Rank;
 use App\Models\Submission\Submission;
 use App\Models\Trade\Trade;
 use App\Models\User\User;
+use App\Models\User\UserIp;
 use App\Models\User\UserUpdateLog;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
@@ -559,6 +561,103 @@ class UserService extends Service {
                 $user->settings->banned_at = null;
                 $user->settings->save();
                 UserUpdateLog::create(['staff_id' => $staff->id, 'user_id' => $user->id, 'data' => ['is_banned' => 'No'], 'type' => 'Unban']);
+            }
+
+            return $this->commitReturn(true);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
+    }
+
+    /**
+     * Sets the known-proxy flag on every record for a given IP.
+     *
+     * @param string $ip
+     * @param bool   $value
+     * @param User   $staff
+     *
+     * @return bool
+     */
+    public function setIpProxyFlag($ip, $value, $staff) {
+        DB::beginTransaction();
+
+        try {
+            if (!UserIp::where('ip', $ip)->exists()) {
+                throw new \Exception('No records exist for that IP.');
+            }
+
+            // DB::table (not the model) so the flag write doesn't bump updated_at, which represents "last used".
+            DB::table('user_ips')->where('ip', $ip)->update(['is_known_proxy' => $value]);
+            // Keep the automated-check cache aligned so storeIp can't later stamp a stale value onto a new row for this IP.
+            Cache::forever('proxy_check_'.$ip, (bool) $value);
+
+            if (!$this->logAdminAction($staff, 'Edited IP Flag', 'Set proxy flag for '.$ip.' to '.($value ? 'Yes' : 'No'))) {
+                throw new \Exception('Failed to log admin action.');
+            }
+
+            return $this->commitReturn(true);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
+    }
+
+    /**
+     * Sets the mobile-network flag on every record for a given IP.
+     *
+     * @param string $ip
+     * @param bool   $value
+     * @param User   $staff
+     *
+     * @return bool
+     */
+    public function setIpMobileFlag($ip, $value, $staff) {
+        DB::beginTransaction();
+
+        try {
+            if (!UserIp::where('ip', $ip)->exists()) {
+                throw new \Exception('No records exist for that IP.');
+            }
+
+            // DB::table (not the model) so the flag write doesn't bump updated_at, which represents "last used".
+            DB::table('user_ips')->where('ip', $ip)->update(['is_mobile_network' => $value ? 1 : 0]);
+
+            if (!$this->logAdminAction($staff, 'Edited IP Flag', 'Set mobile-network flag for '.$ip.' to '.($value ? 'Yes' : 'No'))) {
+                throw new \Exception('Failed to log admin action.');
+            }
+
+            return $this->commitReturn(true);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
+    }
+
+    /**
+     * Clears the ban flag from every record for a given IP.
+     *
+     * @param string $ip
+     * @param User   $staff
+     *
+     * @return bool
+     */
+    public function clearIpBan($ip, $staff) {
+        DB::beginTransaction();
+
+        try {
+            if (!UserIp::where('ip', $ip)->where('is_user_banned', 1)->exists()) {
+                throw new \Exception('That IP is not currently banned.');
+            }
+
+            // DB::table (not the model) so the flag write doesn't bump updated_at, which represents "last used".
+            DB::table('user_ips')->where('ip', $ip)->update(['is_user_banned' => 0]);
+
+            if (!$this->logAdminAction($staff, 'Cleared IP Ban', 'Cleared ban flag from IP '.$ip)) {
+                throw new \Exception('Failed to log admin action.');
             }
 
             return $this->commitReturn(true);

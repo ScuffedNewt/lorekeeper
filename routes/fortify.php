@@ -23,7 +23,7 @@ Route::group(['middleware' => config('fortify.middleware', ['web'])], function (
     // Authentication...
     if ($enableViews) {
         Route::get('/login', [AuthenticatedSessionController::class, 'create'])
-            ->middleware(['guest', 'ip'])
+            ->middleware(['guest'])
             ->name('login');
     }
 
@@ -32,7 +32,7 @@ Route::group(['middleware' => config('fortify.middleware', ['web'])], function (
 
     Route::post('/login', [AuthenticatedSessionController::class, 'store'])
         ->middleware(array_filter([
-            'guest', 'ip',
+            'guest',
             $limiter ? 'throttle:'.$limiter : null,
         ]));
 

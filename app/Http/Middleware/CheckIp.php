@@ -15,10 +15,8 @@ class CheckIp {
      */
     public function handle($request, Closure $next) {
         if (!$request->user()) {
-            if (UserIp::where('ip', $request->ip())->exists()) {
-                if (UserIp::where('ip', $request->ip())->where('is_user_banned', 1)->exists()) {
-                    return redirect('ip-block');
-                }
+            if (UserIp::isBannedForRegistration($request->ip())) {
+                return redirect('ip-block');
             }
         } else {
             if ($request->user()->is_banned) {

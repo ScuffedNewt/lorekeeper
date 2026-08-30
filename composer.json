@@ -41,6 +41,9 @@
         "phpunit/phpunit": "^10.1",
         "spatie/laravel-ignition": "^2.0"
     },
+    "suggest": {
+        "trustip/trustip": "Provides optional VPN and proxy detection for tracked user IP addresses."
+    },
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",

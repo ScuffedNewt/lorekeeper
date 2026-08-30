@@ -108,6 +108,11 @@
                                 @endif
                             </div>
                         @endif
+                        @if (config('lorekeeper.user-ips.show_banned_ip_warning') && !Auth::check() && \App\Models\User\UserIp::isBannedForRegistration(request()->ip()))
+                            <div class="alert alert-danger">
+                                Your current IP address is banned. You may log in to an existing account, but you cannot register a new account from this IP address.
+                            </div>
+                        @endif
                         @if (Auth::check() && !config('lorekeeper.extensions.navbar_news_notif'))
                             @if (Auth::user()->is_news_unread)
                                 <div class="alert alert-info"><a href="{{ url('news') }}">There is a new news post!</a></div>
