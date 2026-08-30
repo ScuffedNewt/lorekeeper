@@ -9,16 +9,23 @@ rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
 sell copies of the Software, subject to the following conditions:
 
 1. The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
+   all copies or substantial portions of the Software.
 
-2. Attribution Requirement:
+2. Attribution Requirement: Attribution to ScuffedNewt (Newt) as an author 
+   must be retained in the source and in any user-facing credits.
 
-If any extension from this repository is installed, enabled, or made available
-in a public deployment, the application must display attribution to
-"ScuffedNewt" and the extension name in a publicly accessible credits,
-acknowledgements, or about page.
+   If any extension from this repository is installed, enabled, or made available
+   in a public deployment, the application must display attribution to
+   "ScuffedNewt" and the extension name in a publicly accessible credits,
+   acknowledgements, or about page.
 
-This attribution requirement applies to modified versions of these extensions.
+   This attribution requirement applies to modified versions of these extensions.
+
+3. No permission is granted to Symprites (symprites.com), Alchens (alchens.com),
+   or to any site, project, or entity operated or controlled by them, whether directly 
+   or through any intermediary. This restriction expressly prohibits these parties from
+   hosting, displaying, executing, distributing, frankensteining, or utilising
+   this extension or its modifications from the source code in any capacity.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
