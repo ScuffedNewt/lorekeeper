@@ -1,7 +1,7 @@
 @extends('admin.layout')
 
 @section('admin-title')
-    Prompt Categories
+    {{ $category->id ? 'Edit' : 'Create' }} Prompt Category
 @endsection
 
 @section('admin-content')
@@ -11,7 +11,7 @@
         ($category->id ? 'Edit' : 'Create') . ' Category' => $category->id ? 'admin/data/prompt-categories/edit/' . $category->id : 'admin/data/prompt-categories/create',
     ]) !!}
 
-    <h1>{{ $category->id ? 'Edit' : 'Create' }} Category
+    <h1>{{ $category->id ? 'Edit' : 'Create' }} Prompt Category
         @if ($category->id)
             <a href="#" class="btn btn-danger float-right delete-category-button">Delete Category</a>
         @endif
@@ -21,14 +21,23 @@
 
     <h3>Basic Information</h3>
 
-    <div class="form-group">
-        {!! Form::label('Name') !!}
-        {!! Form::text('name', $category->name, ['class' => 'form-control']) !!}
+    <div class="row">
+        <div class="form-group col-md-6">
+            {!! Form::label('Name') !!}
+            {!! Form::text('name', $category->name, ['class' => 'form-control']) !!}
+        </div>
+        <div class="form-group col-md-6">
+            {!! Form::label('Parent Category (Optional)') !!}
+            {!! Form::select('parent_id', $categories, $category->parent_id, ['class' => 'form-control', 'placeholder' => 'Select Parent Category']) !!}
+        </div>
     </div>
 
     <div class="form-group">
         {!! Form::label('World Page Image (Optional)') !!} {!! add_help('This image is used only on the world information pages.') !!}
-        <div>{!! Form::file('image') !!}</div>
+        <div class="custom-file">
+            {!! Form::label('image', 'Choose file...', ['class' => 'custom-file-label']) !!}
+            {!! Form::file('image', ['class' => 'custom-file-input']) !!}
+        </div>
         <div class="text-muted">Recommended size: 200px x 200px</div>
         @if ($category->has_image)
             <div class="form-check">
@@ -53,7 +62,9 @@
         <h3>Preview</h3>
         <div class="card mb-3">
             <div class="card-body">
-                @include('prompts._entry', ['imageUrl' => $category->categoryImageUrl, 'name' => $category->displayName, 'description' => $category->parsed_description])
+                @include('prompts._entry', [
+                    'category' => $category,
+                ])
             </div>
         </div>
     @endif
@@ -61,6 +72,7 @@
 
 @section('scripts')
     @parent
+    @include('js._tinymce_wysiwyg')
     <script>
         $(document).ready(function() {
             $('.delete-category-button').on('click', function(e) {
