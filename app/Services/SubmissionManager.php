@@ -65,22 +65,16 @@ class SubmissionManager extends CommonSubmissionManager {
                 if ($prompt->limit) {
                     // check that the user hasn't hit the prompt submission limit
                     // filter the submissions by hour/day/week/etc and count
-                    $count['all'] = Submission::submitted($prompt->id, $user->id)->count();
-                    $count['Hour'] = Submission::submitted($prompt->id, $user->id)->where('created_at', '>=', now()->startOfHour())->count();
-                    $count['Day'] = Submission::submitted($prompt->id, $user->id)->where('created_at', '>=', now()->startOfDay())->count();
-                    $count['Week'] = Submission::submitted($prompt->id, $user->id)->where('created_at', '>=', now()->startOfWeek())->count();
-                    $count['BiWeekly'] = Submission::submitted($prompt->id, $user->id)->where('created_at', '>=', now()->subWeeks(2))->count();
-                    $count['Month'] = Submission::submitted($prompt->id, $user->id)->where('created_at', '>=', now()->startOfMonth())->count();
-                    $count['BiMonthly'] = Submission::submitted($prompt->id, $user->id)->where('created_at', '>=', now()->subMonths(2))->count();
-                    $count['Quarter'] = Submission::submitted($prompt->id, $user->id)->where('created_at', '>=', now()->subMonths(3))->count();
-                    $count['Year'] = Submission::submitted($prompt->id, $user->id)->where('created_at', '>=', now()->startOfYear())->count();
 
-                    // if limit by character is on... multiply by # of chars. otherwise, don't
+                    // if limit by character is on, filter submission count by attached characters. otherwise, don't
                     if ($prompt->limit_character) {
-                        $limit = $prompt->limit * Character::visible()->where('is_myo_slot', 0)->where('user_id', $user->id)->count();
+                        $characters = Character::myo(0)->visible()->whereIn('slug', $data['slug'])->get();
+                        $count = $prompt->getCount($user, $characters);
                     } else {
-                        $limit = $prompt->limit;
+                        $count = $prompt->getCount($user);
                     }
+                    $limit = $prompt->limit;
+
                     // if limit by time period is on
                     if ($prompt->limit_period) {
                         if ($count[$prompt->limit_period] >= $limit) {
@@ -177,22 +171,16 @@ class SubmissionManager extends CommonSubmissionManager {
                 ) {
                     // check that the user hasn't hit the prompt submission limit
                     // filter the submissions by hour/day/week/etc and count
-                    $count['all'] = Submission::submitted($prompt->id, $user->id)->count();
-                    $count['Hour'] = Submission::submitted($prompt->id, $user->id)->where('created_at', '>=', now()->startOfHour())->count();
-                    $count['Day'] = Submission::submitted($prompt->id, $user->id)->where('created_at', '>=', now()->startOfDay())->count();
-                    $count['Week'] = Submission::submitted($prompt->id, $user->id)->where('created_at', '>=', now()->startOfWeek())->count();
-                    $count['BiWeekly'] = Submission::submitted($prompt->id, $user->id)->where('created_at', '>=', now()->subWeeks(2))->count();
-                    $count['Month'] = Submission::submitted($prompt->id, $user->id)->where('created_at', '>=', now()->startOfMonth())->count();
-                    $count['BiMonthly'] = Submission::submitted($prompt->id, $user->id)->where('created_at', '>=', now()->subMonths(2))->count();
-                    $count['Quarter'] = Submission::submitted($prompt->id, $user->id)->where('created_at', '>=', now()->subMonths(3))->count();
-                    $count['Year'] = Submission::submitted($prompt->id, $user->id)->where('created_at', '>=', now()->startOfYear())->count();
 
-                    // if limit by character is on... multiply by # of chars. otherwise, don't
+                    // if limit by character is on, filter submission count by attached characters. otherwise, don't
                     if ($prompt->limit_character) {
-                        $limit = $prompt->limit * Character::visible()->where('is_myo_slot', 0)->where('user_id', $user->id)->count();
+                        $characters = Character::myo(0)->visible()->whereIn('slug', $data['slug'])->get();
+                        $count = $prompt->getCount($user, $characters);
                     } else {
-                        $limit = $prompt->limit;
+                        $count = $prompt->getCount($user);
                     }
+                    $limit = $prompt->limit;
+
                     // if limit by time period is on
                     if ($prompt->limit_period) {
                         if ($count[$prompt->limit_period] >= $limit) {
@@ -478,7 +466,10 @@ class SubmissionManager extends CommonSubmissionManager {
             ];
 
             // Distribute user rewards
-            if (!$rewards = fillUserAssets($rewards, $user, $submission->user, $promptLogType, $promptData)) {
+            // $lootRolls keyed by id which is technically unneccessary for submissions,
+            // but is useful for situations where multiple users are receiving rewards and for consistent implementation
+            $lootRolls = [];
+            if (!$rewards = fillUserAssets($rewards, $user, $submission->user, $promptLogType, $promptData, $lootRolls)) {
                 throw new \Exception('Failed to distribute rewards to user.');
             }
 
@@ -518,11 +509,12 @@ class SubmissionManager extends CommonSubmissionManager {
             $submission->characters()->delete();
 
             // Distribute character rewards
+            $characterLootRolls = [];
             foreach ($characters as $c) {
                 // Users might not pass in clean arrays (may contain redundant data) so we need to clean that up
                 $assets = $this->processRewards($data + ['character_id' => $c->id, 'currencies' => $currencies, 'items' => $items, 'tables' => $tables], true);
 
-                if (!$assets = fillCharacterAssets($assets, $user, $c, $promptLogType, $promptData, $submission->user)) {
+                if (!$assets = fillCharacterAssets($assets, $user, $c, $promptLogType, $promptData, $submission->user, $characterLootRolls)) {
                     throw new \Exception('Failed to distribute rewards to character.');
                 }
 
@@ -556,9 +548,13 @@ class SubmissionManager extends CommonSubmissionManager {
                 'staff_id'              => $user->id,
                 'status'                => 'Approved',
                 'data'                  => [
-                    'user'                  => $addonData,
-                    'rewards'               => getDataReadyAssets($rewards),
-                    'gallery_submission_id' => $submission->data['gallery_submission_id'] ?? null,
+                    'user'                   => $addonData,
+                    'rewards'                => getDataReadyAssets($rewards),
+                    'gallery_submission_id'  => $submission->data['gallery_submission_id'] ?? null,
+                    'loot_rolls'             => [
+                        'user'       => $lootRolls[$submission->user_id] ?? [],
+                        'characters' => $characterLootRolls,
+                    ],
                 ], // list of rewards
             ]);
 
