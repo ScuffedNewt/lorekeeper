@@ -3,10 +3,10 @@
     <hr class="w-50 ml-0 mb-1" />
     <ul>
         {{-- exclude form_id --}}
-        @foreach(config('lorekeeper.submission_checklists.'.$type) as $key=>$item)
+        @foreach (config('lorekeeper.submission_checklists.' . $type) as $key => $item)
             <li>
                 {{ Form::checkbox('checklist[]', $item, false, ['class' => 'form-check-input submission-checklist-box']) }}
-                {{ Form::label('checklist_'.$item, $item, ['class' => 'form-check-label']) }}
+                {{ Form::label('checklist_' . $item, $item, ['class' => 'form-check-label']) }}
             </li>
         @endforeach
     </ul>
