@@ -36,9 +36,32 @@
                 </div>
                 <div class="row">
                     <div class="col-md-2 col-4">
-                        <h5>Previous Submissions</h5>
+                        <h5>
+                            @if ($prompt->limit_character)
+                                Previous Submissions{!! add_help('This is the number of times the user has submitted this prompt before with the attached characters, pending or approved.') !!}
+                            @else
+                                Previous Submissions{!! add_help('This is the number of times the user has submitted this prompt before, pending or approved.') !!}
+                            @endif
+                        </h5>
                     </div>
-                    <div class="col-md-10 col-8">{{ $count }} {!! add_help('This is the number of times the user has submitted this prompt before and had their submission approved.') !!}</div>
+                    <div class="col-md-10 col-8">
+                        <div class="row text-center">
+                            <div class="col"><strong>All Time</strong></div>
+                            <div class="col"><strong>Past Hour</strong></div>
+                            <div class="col"><strong>Past Day</strong></div>
+                            <div class="col"><strong>Past Week</strong></div>
+                            <div class="col"><strong>Past Month</strong></div>
+                            <div class="col"><strong>Past Year</strong></div>
+                        </div>
+                        <div class="row text-center">
+                            <div class="col">{{ $count['all'] }}</div>
+                            <div class="col">{{ $count['Hour'] }}</div>
+                            <div class="col">{{ $count['Day'] }}</div>
+                            <div class="col">{{ $count['Week'] }}</div>
+                            <div class="col">{{ $count['Month'] }}</div>
+                            <div class="col">{{ $count['Year'] }}</div>
+                        </div>
+                    </div>
                 </div>
             @endif
             <div class="row">
@@ -97,7 +120,14 @@
                 </div>
             @endif
             @foreach ($submission->characters()->whereRelation('character', 'deleted_at', null)->get() as $character)
-                @include('widgets._character_select_entry', ['characterCurrencies' => $characterCurrencies, 'items' => $items, 'tables' => $tables, 'character' => $character, 'expanded_rewards' => $expanded_rewards])
+                @include('widgets._character_select_entry', [
+                    'characterCurrencies' => $characterCurrencies,
+                    'items' => $items,
+                    'tables' => $tables,
+                    'character' => $character,
+                    'expanded_rewards' => $expanded_rewards,
+                    'showLootTables' => true,
+                ])
             @endforeach
         </div>
         <div class="text-right mb-3">

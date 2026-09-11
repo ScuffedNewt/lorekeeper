@@ -62,6 +62,29 @@ class SubmissionManager extends Service {
                 if ($prompt->staff_only && !$user->isStaff) {
                     throw new \Exception('This prompt may only be submitted to by staff members.');
                 }
+
+                if ($prompt->limit) {
+                    // check that the user hasn't hit the prompt submission limit
+                    // filter the submissions by hour/day/week/etc and count
+
+                    // if limit by character is on, filter submission count by attached characters. otherwise, don't
+                    if ($prompt->limit_character) {
+                        $characters = Character::myo(0)->visible()->whereIn('slug', $data['slug'])->get();
+                        $count = $prompt->getCount($user, $characters);
+                    } else {
+                        $count = $prompt->getCount($user);
+                    }
+                    $limit = $prompt->limit;
+
+                    // if limit by time period is on
+                    if ($prompt->limit_period) {
+                        if ($count[$prompt->limit_period] >= $limit) {
+                            throw new \Exception('You have already submitted to this prompt the maximum number of times.');
+                        }
+                    } elseif ($count['all'] >= $limit) {
+                        throw new \Exception('You have already submitted to this prompt the maximum number of times.');
+                    }
+                }
             } else {
                 $prompt = null;
             }
@@ -129,9 +152,44 @@ class SubmissionManager extends Service {
                 throw new \Exception('Please select a prompt.');
             }
             if (!$isClaim) {
-                $prompt = Prompt::active()->where('id', $data['prompt_id'])->with('rewards')->first();
+                $prompt = ($submission->status == 'Draft' && $submission->prompt_id && $submission->staff_comments) ?
+                            Prompt::with('rewards')->find($submission->prompt_id)
+                            : Prompt::active()->where('id', $data['prompt_id'])->with('rewards')->first();
                 if (!$prompt) {
                     throw new \Exception('Invalid prompt selected.');
+                }
+
+                if ($prompt->staff_only && !$user->isStaff) {
+                    throw new \Exception('This prompt may only be submitted to by staff members.');
+                }
+
+                // check that the prompt limit hasn't been hit
+                if ($prompt->limit &&
+                    // allow any draft to be submitted if it was sent back by staff
+                    !($submission->status == 'Draft' && $submission->prompt_id && $submission->staff_comments ||
+                    // only allow drafts of active prompts to be submitted from first principle
+                    ($submission->status == 'Draft' && $submission->prompt && Prompt::active()->where('id', $submission->prompt_id)->exists()))
+                ) {
+                    // check that the user hasn't hit the prompt submission limit
+                    // filter the submissions by hour/day/week/etc and count
+
+                    // if limit by character is on, filter submission count by attached characters. otherwise, don't
+                    if ($prompt->limit_character) {
+                        $characters = Character::myo(0)->visible()->whereIn('slug', $data['slug'])->get();
+                        $count = $prompt->getCount($user, $characters);
+                    } else {
+                        $count = $prompt->getCount($user);
+                    }
+                    $limit = $prompt->limit;
+
+                    // if limit by time period is on
+                    if ($prompt->limit_period) {
+                        if ($count[$prompt->limit_period] >= $limit) {
+                            throw new \Exception('You have already submitted to this prompt the maximum number of times.');
+                        }
+                    } elseif ($count['all'] >= $limit) {
+                        throw new \Exception('You have already submitted to this prompt the maximum number of times.');
+                    }
                 }
             } else {
                 $prompt = null;
@@ -409,7 +467,10 @@ class SubmissionManager extends Service {
             ];
 
             // Distribute user rewards
-            if (!$rewards = fillUserAssets($rewards, $user, $submission->user, $promptLogType, $promptData)) {
+            // $lootRolls keyed by id which is technically unneccessary for submissions,
+            // but is useful for situations where multiple users are receiving rewards and for consistent implementation
+            $lootRolls = [];
+            if (!$rewards = fillUserAssets($rewards, $user, $submission->user, $promptLogType, $promptData, $lootRolls)) {
                 throw new \Exception('Failed to distribute rewards to user.');
             }
 
@@ -449,18 +510,19 @@ class SubmissionManager extends Service {
             $submission->characters()->delete();
 
             // Distribute character rewards
+            $characterLootRolls = [];
             foreach ($characters as $c) {
                 // Users might not pass in clean arrays (may contain redundant data) so we need to clean that up
                 $assets = $this->processRewards($data + ['character_id' => $c->id, 'currencies' => $currencies, 'items' => $items, 'tables' => $tables], true);
 
-                if (!$assets = fillCharacterAssets($assets, $user, $c, $promptLogType, $promptData, $submission->user)) {
+                if (!$assets = fillCharacterAssets($assets, $user, $c, $promptLogType, $promptData, $submission->user, $characterLootRolls)) {
                     throw new \Exception('Failed to distribute rewards to character.');
                 }
 
                 SubmissionCharacter::create([
                     'character_id'  => $c->id,
                     'submission_id' => $submission->id,
-                    'data'          => getDataReadyAssets($assets),
+                    'data'          => getDataReadyAssets($assets, true),
                 ]);
             }
 
@@ -487,9 +549,13 @@ class SubmissionManager extends Service {
                 'staff_id'              => $user->id,
                 'status'                => 'Approved',
                 'data'                  => [
-                    'user'                  => $addonData,
-                    'rewards'               => getDataReadyAssets($rewards),
-                    'gallery_submission_id' => $submission->data['gallery_submission_id'] ?? null,
+                    'user'                   => $addonData,
+                    'rewards'                => getDataReadyAssets($rewards),
+                    'gallery_submission_id'  => $submission->data['gallery_submission_id'] ?? null,
+                    'loot_rolls'             => [
+                        'user'       => $lootRolls[$submission->user_id] ?? [],
+                        'characters' => $characterLootRolls,
+                    ],
                 ], // list of rewards
             ]);
 
@@ -708,7 +774,7 @@ class SubmissionManager extends Service {
 
         // Get a list of rewards, then create the submission itself
         $promptRewards = createAssetsArray();
-        $characterRewards = createAssetsArray();
+        $characterRewards = createAssetsArray(true);
         if ($submission->status == 'Pending' && isset($submission->prompt_id) && $submission->prompt_id) {
             foreach ($submission->prompt->rewards as $reward) {
                 if ($reward->rewardable_recipient == 'User') {
@@ -747,14 +813,14 @@ class SubmissionManager extends Service {
 
             // Remove character default rewards
             foreach ($submission->characters as $c) {
-                $cRewards = parseAssetData($c->data);
+                $cRewards = parseAssetData($c->data, true);
                 foreach ($submission->prompt->rewards as $reward) {
                     if ($reward->rewardable_recipient != 'Character') {
                         continue;
                     }
                     removeAsset($cRewards, $reward->reward, $reward->quantity);
                 }
-                $c->update(['data' => getDataReadyAssets($cRewards)]);
+                $c->update(['data' => getDataReadyAssets($cRewards, true)]);
             }
         }
 
@@ -820,7 +886,7 @@ class SubmissionManager extends Service {
             $assets = $this->processRewards($data + ['character_id' => $c->id, 'currencies' => $currencies, 'items' => $items, 'tables' => $tables], true);
 
             if ($defaultRewards) {
-                $assets = mergeAssetsArrays($assets, $defaultRewards);
+                $assets = mergeAssetsArrays($assets, $defaultRewards, true);
             }
 
             // Now we have a clean set of assets (redundant data is gone, duplicate entries are merged)
@@ -828,7 +894,7 @@ class SubmissionManager extends Service {
             SubmissionCharacter::create([
                 'character_id'  => $c->id,
                 'submission_id' => $submission->id,
-                'data'          => getDataReadyAssets($assets),
+                'data'          => getDataReadyAssets($assets, true),
             ]);
         }
 
