@@ -20,25 +20,22 @@
             setView('list');
         });
 
-        function initView()
-        {
+        function initView() {
             view = window.localStorage.getItem('lorekeeper_masterlist_view');
-            if(!view) view = 'grid';
+            if (!view) view = 'grid';
             setView(view);
         }
 
-        function setView(status)
-        {
+        function setView(status) {
             view = status;
 
-            if(view == 'grid') {
+            if (view == 'grid') {
                 $gridView.removeClass('hide');
                 $gridButton.addClass('active');
                 $listView.addClass('hide');
                 $listButton.removeClass('active');
                 window.localStorage.setItem('lorekeeper_masterlist_view', 'grid');
-            }
-            else if (view == 'list') {
+            } else if (view == 'list') {
                 $listView.removeClass('hide');
                 $listButton.addClass('active');
                 $gridView.addClass('hide');
@@ -47,29 +44,38 @@
             }
         }
 
-        var $featureBody = $('#featureBody');
-        var $featureSelect = $('#featureContent .feature-block');
-        var $addFeatureButton = $('.add-feature-button');
 
-        // handle the ones that were already there
-        var $existingFeatures = $('#featureBody .feature-block');
-        $existingFeatures.find('.selectize').selectize();
-        addRemoveListener($existingFeatures);
+        var $featureSelect = $('.feature-select');
 
-        $addFeatureButton.on('click', function(e) {
-            e.preventDefault();
-            var $clone = $featureSelect.clone();
-            $featureBody.append($clone);
-            $clone.find('.selectize').selectize();
-            addRemoveListener($clone);
-        });
-
-        function addRemoveListener($node)
-        {
-            $node.find('.feature-remove').on('click', function(e) {
-                e.preventDefault();
-                $(this).parent().parent().parent().remove();
+        @if (config('lorekeeper.extensions.organised_traits_dropdown.enable'))
+            let renderOptions = {};
+            @if (config('lorekeeper.extensions.organised_traits_dropdown.rarity.enable'))
+                renderOptions = {
+                    option: featureOptionRender,
+                    item: featureSelectedRender
+                }
+            @else
+                renderOptions = {
+                    item: featureSelectedRender
+                }
+            @endif
+            $featureSelect.selectize({
+                render: renderOptions
             });
+        @else
+            $featureSelect.selectize();
+        @endif
+
+        function featureOptionRender(item, escape) {
+            return '<div class="option"><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + (item["text"].trim()) + '</span></div>';
         }
+
+        function featureSelectedRender(item, escape) {
+            @if (config('lorekeeper.extensions.organised_traits_dropdown.rarity.enable'))
+                return '<div><span>' + (item["text"].trim()) + ' (' + (item["optgroup"].trim()) + ')' + '</span></div>';
+            @endif
+            return '<div><span>' + escape(item["text"].trim()) + ' (' + escape(item["optgroup"].trim()) + ')' + '</span></div>';
+        }
+
     });
 </script>

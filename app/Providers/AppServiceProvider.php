@@ -2,36 +2,32 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Collection;
+use App\Providers\Socialite\ToyhouseProvider;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\ServiceProvider;
 
-class AppServiceProvider extends ServiceProvider
-{
+class AppServiceProvider extends ServiceProvider {
     /**
      * Register any application services.
-     *
-     * @return void
      */
-    public function register()
-    {
+    public function register() {
         //
     }
 
     /**
      * Bootstrap any application services.
-     *
-     * @return void
      */
-    public function boot()
-    {
+    public function boot() {
         //
         Schema::defaultStringLength(191);
-        Paginator::useBootstrap();
+        Paginator::defaultView('layouts._pagination');
+        Paginator::defaultSimpleView('layouts._simple-pagination');
 
-        /**
+        /*
          * Paginate a standard Laravel Collection.
          *
          * @param int $perPage
@@ -40,7 +36,7 @@ class AppServiceProvider extends ServiceProvider
          * @param string $pageName
          * @return array
          */
-        Collection::macro('paginate', function($perPage, $total = null, $page = null, $pageName = 'page') {
+        Collection::macro('paginate', function ($perPage, $total = null, $page = null, $pageName = 'page') {
             $page = $page ?: LengthAwarePaginator::resolveCurrentPage($pageName);
 
             return new LengthAwarePaginator(
@@ -49,10 +45,44 @@ class AppServiceProvider extends ServiceProvider
                 $perPage,
                 $page,
                 [
-                    'path' => LengthAwarePaginator::resolveCurrentPath(),
+                    'path'     => LengthAwarePaginator::resolveCurrentPath(),
                     'pageName' => $pageName,
                 ]
             );
         });
+
+        $this->bootToyhouseSocialite();
+
+        // Set custom polymorphic types for rewards and limits dynamically based on asset keys
+
+        // prevent errors if config is not present (due to optimize, etc)
+        $limit_types = config('lorekeeper.limits.limit_types') !== null ? array_keys(config('lorekeeper.limits.limit_types')) : [];
+        $loot_types = config('lorekeeper.loot_types') !== null ? array_map('strtolower', array_keys(config('lorekeeper.loot_types'))) : [];
+
+        // Merge both kinds of asset arrays, all of the limit types, and all of the loot types into one array
+        $models = array_unique(array_merge(getAssetKeys(), getAssetKeys(true), $limit_types, $loot_types));
+        // Create the initial morph map by feeding the above into getAssetModelString()
+        $morphMap = array_combine(array_values($models), array_map('getAssetModelString', array_values($models)));
+        // Take all the model strings above and pair them with their class base name
+        $modelStrings = array_map('getAssetModelString', array_map('strtolower', array_values($models)));
+        // Finally, combine it all into a final morph map of alias => model string
+        $morphMap = array_merge($morphMap, array_combine(array_map(fn ($model) => class_basename($model), $modelStrings), $modelStrings));
+
+        Relation::morphMap($morphMap);
+    }
+
+    /**
+     * Boot Toyhouse Socialite provider.
+     */
+    private function bootToyhouseSocialite() {
+        $socialite = $this->app->make('Laravel\Socialite\Contracts\Factory');
+        $socialite->extend(
+            'toyhouse',
+            function ($app) use ($socialite) {
+                $config = $app['config']['services.toyhouse'];
+
+                return $socialite->buildProvider(ToyhouseProvider::class, $config);
+            }
+        );
     }
 }
