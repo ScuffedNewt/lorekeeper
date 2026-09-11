@@ -25,11 +25,11 @@
                 <div class="card-header">
                     <h4>
                         {!! $gallery->displayName !!}
-                        @if (Auth::check() && $gallery->canSubmit(Auth::user()))
+                        @if (Auth::check() && $gallery->canSubmit($submissionsOpen, Auth::user()))
                             <a href="{{ url('gallery/submit/' . $gallery->id) }}" class="btn btn-primary float-right"><i class="fas fa-plus"></i></a>
                         @endif
                     </h4>
-                    @if ($gallery->children->count() || (isset($gallery->start_at) || isset($gallery->end_at)))
+                    @if ($gallery->children_count || (isset($gallery->start_at) || isset($gallery->end_at)))
                         <p>
                             @if (isset($gallery->start_at) || isset($gallery->end_at))
                                 @if ($gallery->start_at)
@@ -37,13 +37,13 @@
                                 @endif
                                 {{ $gallery->start_at && $gallery->end_at ? ' ・ ' : '' }}
                                 @if ($gallery->end_at)
-                                    <strong>Close{{ $gallery->end_at->isFuture() ? 's' : 'ed' }}: </strong>{!! pretty_date($gallery->end_at) !!}
+                                    <strong>Close{{ $gallery->end_at->isFuture() ? 's' : 'd' }}: </strong>{!! pretty_date($gallery->end_at) !!}
                                 @endif
                             @endif
-                            {{ $gallery->children->count() && (isset($gallery->start_at) || isset($gallery->end_at)) ? ' ・ ' : '' }}
-                            @if ($gallery->children->count())
+                            {{ $gallery->children_count && (isset($gallery->start_at) || isset($gallery->end_at)) ? ' ・ ' : '' }}
+                            @if ($gallery->children_count)
                                 Sub-galleries:
-                                @foreach ($gallery->children()->visible()->get() as $count => $child)
+                                @foreach ($gallery->children as $child)
                                     {!! $child->displayName !!}{{ !$loop->last ? ', ' : '' }}
                                 @endforeach
                             @endif
@@ -51,22 +51,20 @@
                     @endif
                 </div>
                 <div class="card-body">
-                    @if ($gallery->submissions()->where('status', 'Accepted')->count())
+                    @if ($gallery->submissions_count)
                         <div class="row">
-                            @foreach ($gallery->submissions()->where('is_visible', 1)->where('status', 'Accepted')->take(4)->get() as $submission)
+                            @foreach ($gallery->submissions()->with('collaborators', 'participants')->withDisplayData(Auth::user() ?? null)->limit(4)->get() as $submission)
                                 <div class="col-md-3 text-center align-self-center">
                                     @include('galleries._thumb', ['submission' => $submission, 'gallery' => true])
                                 </div>
                             @endforeach
                         </div>
-                        @if ($gallery->submissions()->where('status', 'Accepted')->count() > 4)
+                        @if ($gallery->submissions_count > 4)
                             <div class="text-right"><a href="{{ url('gallery/' . $gallery->id) }}">See More...</a></div>
                         @endif
-                    @elseif(
-                        $gallery->children->count() &&
-                            App\Models\Gallery\GallerySubmission::whereIn('gallery_id', $gallery->children->pluck('id')->toArray())->where('is_visible', 1)->where('status', 'Accepted')->count())
+                    @elseif($gallery->children_count && $gallery->childSubmissions()->exists())
                         <div class="row">
-                            @foreach (App\Models\Gallery\GallerySubmission::whereIn('gallery_id', $gallery->children->pluck('id')->toArray())->where('is_visible', 1)->where('status', 'Accepted')->orderBy('created_at', 'DESC')->get()->take(4) as $submission)
+                            @foreach ($gallery->childSubmissions()->with('gallery', 'collaborators', 'participants')->withDisplayData(Auth::user() ?? null)->limit(4)->get() as $submission)
                                 <div class="col-md-3 text-center align-self-center">
                                     @include('galleries._thumb', ['submission' => $submission, 'gallery' => false])
                                 </div>

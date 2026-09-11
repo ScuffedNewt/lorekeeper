@@ -4,9 +4,13 @@ namespace App\Models\Prompt;
 
 use App\Models\Model;
 use App\Models\Submission\Submission;
+use App\Traits\Limitable;
+use App\Traits\Rewardable;
 use Carbon\Carbon;
 
 class Prompt extends Model {
+    use Limitable, Rewardable;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -15,7 +19,9 @@ class Prompt extends Model {
     protected $fillable = [
         'prompt_category_id', 'name', 'summary', 'description', 'parsed_description', 'is_active',
         'start_at', 'end_at', 'hide_before_start', 'hide_after_end', 'has_image', 'prefix',
-        'hide_submissions', 'staff_only', 'hash', 'parent_id', 'parent_quantity', 'is_details_visible',
+        'hide_submissions', 'staff_only', 'hash',
+        'limit', 'limit_period', 'limit_character',
+        'parent_id', 'parent_quantity', 'is_details_visible',
     ];
 
     /**
@@ -77,24 +83,17 @@ class Prompt extends Model {
     }
 
     /**
-     * Get the rewards attached to this prompt.
-     */
-    public function rewards() {
-        return $this->hasMany(PromptReward::class, 'prompt_id');
-    }
-
-    /**
      * Get the prompts parent.
      */
     public function parent() {
-        return $this->belongsTo('App\Models\Prompt\Prompt', 'parent_id');
+        return $this->belongsTo(self::class, 'parent_id');
     }
 
     /**
      * Get the prompts children.
      */
     public function children() {
-        return $this->hasMany('App\Models\Prompt\Prompt', 'parent_id');
+        return $this->hasMany(self::class, 'parent_id');
     }
 
     /**
@@ -205,22 +204,12 @@ class Prompt extends Model {
      * Scope a query to sort features by newest first.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param mixed                                 $reverse
      *
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeSortNewest($query) {
-        return $query->orderBy('id', 'DESC');
-    }
-
-    /**
-     * Scope a query to sort features oldest first.
-     *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     *
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeSortOldest($query) {
-        return $query->orderBy('id');
+    public function scopeSortNewest($query, $reverse = false) {
+        return $query->orderBy('id', $reverse ? 'ASC' : 'DESC');
     }
 
     /**
@@ -259,7 +248,7 @@ class Prompt extends Model {
      * @return string
      */
     public function getDisplayNameAttribute() {
-        return '<a href="'.$this->url.'" class="display-prompt">'.$this->name.'</a>';
+        return '<a href="'.$this->idUrl.'" class="display-prompt">'.$this->name.'</a>';
     }
 
     /**
@@ -277,7 +266,7 @@ class Prompt extends Model {
      * @return string
      */
     public function getImageFileNameAttribute() {
-        return $this->hash.$this->id.'-image.png';
+        return $this->id.'-'.$this->hash.'-image.png';
     }
 
     /**
@@ -309,6 +298,15 @@ class Prompt extends Model {
      */
     public function getUrlAttribute() {
         return url('prompts/prompts?name='.$this->name);
+    }
+
+    /**
+     * Gets the URL of the individual prompt's page, by ID.
+     *
+     * @return string
+     */
+    public function getIdUrlAttribute() {
+        return url('prompts/'.$this->id);
     }
 
     /**
@@ -351,5 +349,37 @@ class Prompt extends Model {
      */
     public function getSubmissionCount($user) {
         return $this->submissions()->where('user_id', $user->id)->where('status', 'approved')->count();
+    }
+
+    /**
+     * Get an array of how many prompts the user has completed in general.
+     *
+     * @param mixed $user
+     * @param mixed $characters
+     *
+     * @return array
+     */
+    public function getCount($user, $characters = null) {
+        // filter the submissions by hour/day/week/etc and returns count
+        if ($characters && count($characters)) {
+            $ids = $characters->pluck('id');
+            $submissions = Submission::submitted($this->id, $user->id)->whereHas('characters', function ($q) use ($ids) {
+                $q->whereIn('character_id', $ids);
+            })->get();
+        } else {
+            $submissions = Submission::submitted($this->id, $user->id)->get();
+        }
+
+        $count['all'] = $submissions->count();
+        $count['Hour'] = $submissions->where('created_at', '>=', now()->startOfHour())->count();
+        $count['Day'] = $submissions->where('created_at', '>=', now()->startOfDay())->count();
+        $count['Week'] = $submissions->where('created_at', '>=', now()->startOfWeek())->count();
+        $count['BiWeekly'] = $submissions->where('created_at', '>=', now()->subWeeks(2))->count();
+        $count['Month'] = $submissions->where('created_at', '>=', now()->startOfMonth())->count();
+        $count['BiMonthly'] = $submissions->where('created_at', '>=', now()->subMonths(2))->count();
+        $count['Quarter'] = $submissions->where('created_at', '>=', now()->subMonths(3))->count();
+        $count['Year'] = $submissions->where('created_at', '>=', now()->startOfYear())->count();
+
+        return $count;
     }
 }

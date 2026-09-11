@@ -34,7 +34,10 @@
 
     <div class="form-group">
         {!! Form::label('World Page Image (Optional)') !!} {!! add_help('This image is used only on the world information pages.') !!}
-        <div>{!! Form::file('image') !!}</div>
+        <div class="custom-file">
+            {!! Form::label('image', 'Choose file...', ['class' => 'custom-file-label']) !!}
+            {!! Form::file('image', ['class' => 'custom-file-input']) !!}
+        </div>
         <div class="text-muted">Recommended size: 200px x 200px</div>
         @if ($rarity->has_image)
             <div class="form-check">
@@ -63,8 +66,13 @@
                     'imageUrl' => $rarity->rarityImageUrl,
                     'name' => $rarity->displayName,
                     'description' => $rarity->parsed_description,
+                    'searchItemsUrl' => $rarity->searchItemsUrl,
                     'searchFeaturesUrl' => $rarity->searchFeaturesUrl,
                     'searchCharactersUrl' => $rarity->searchCharactersUrl,
+                    'edit' => [
+                        'title' => 'Edit Rarity',
+                        'object' => $rarity,
+                    ],
                 ])
             </div>
         </div>
@@ -73,6 +81,7 @@
 
 @section('scripts')
     @parent
+    @include('js._tinymce_wysiwyg')
     <script>
         $(document).ready(function() {
             $('.delete-rarity-button').on('click', function(e) {

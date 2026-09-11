@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Models\Loot\Loot;
 use App\Models\Loot\LootTable;
-use App\Models\Prompt\PromptReward;
+use App\Models\Reward\Reward;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
@@ -23,7 +23,7 @@ class LootService extends Service {
      *
      * @param array $data
      *
-     * @return \App\Models\Loot\LootTable|bool
+     * @return bool|LootTable
      */
     public function createLootTable($data) {
         DB::beginTransaction();
@@ -68,10 +68,10 @@ class LootService extends Service {
     /**
      * Updates a loot table.
      *
-     * @param \App\Models\Loot\LootTable $table
-     * @param array                      $data
+     * @param LootTable $table
+     * @param array     $data
      *
-     * @return \App\Models\Loot\LootTable|bool
+     * @return bool|LootTable
      */
     public function updateLootTable($table, $data) {
         DB::beginTransaction();
@@ -82,7 +82,7 @@ class LootService extends Service {
                 if (!$type) {
                     throw new \Exception('Loot type is required.');
                 }
-                if ($type != 'ItemRarity' && !$data['rewardable_id'][$key]) {
+                if (($type != 'ItemRarity' && $type != 'ItemCategoryRarity') && !$data['rewardable_id'][$key]) {
                     throw new \Exception('Reward is required.');
                 }
                 if (!$data['quantity'][$key] || $data['quantity'][$key] < 1) {
@@ -116,7 +116,7 @@ class LootService extends Service {
     /**
      * Deletes a loot table.
      *
-     * @param \App\Models\Loot\LootTable $table
+     * @param LootTable $table
      *
      * @return bool
      */
@@ -127,7 +127,7 @@ class LootService extends Service {
             // Check first if the table is currently in use
             // - Prompts
             // - Box rewards (unfortunately this can't be checked easily)
-            if (PromptReward::where('rewardable_type', 'LootTable')->where('rewardable_id', $table->id)->exists()) {
+            if (Reward::where('rewardable_type', 'LootTable')->where('rewardable_id', $table->id)->exists()) {
                 throw new \Exception('A prompt uses this table to distribute rewards. Please remove it from the rewards list first.');
             }
 
@@ -145,8 +145,8 @@ class LootService extends Service {
     /**
      * Handles the creation of loot for a loot table.
      *
-     * @param \App\Models\Loot\LootTable $table
-     * @param array                      $data
+     * @param LootTable $table
+     * @param array     $data
      */
     private function populateLootTable($table, $data) {
         // Clear the old loot...
@@ -166,7 +166,7 @@ class LootService extends Service {
                 'rewardable_id'   => $data['rewardable_id'][$key] ?? 1,
                 'quantity'        => $data['quantity'][$key],
                 'weight'          => $data['weight'][$key],
-                'data'            => isset($lootData) ? json_encode($lootData) : null,
+                'data'            => $lootData ?? null,
             ]);
         }
     }

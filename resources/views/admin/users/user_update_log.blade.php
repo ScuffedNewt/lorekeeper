@@ -1,7 +1,7 @@
 @extends('admin.layout')
 
 @section('admin-title')
-    User: {{ $user->name }}
+    User Account Updates: {{ $user->name }}
 @endsection
 
 @section('admin-content')

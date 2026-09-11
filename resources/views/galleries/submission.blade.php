@@ -18,17 +18,19 @@
         <div class="float-right">
             @if (Auth::check())
                 {!! Form::open(['url' => '/gallery/favorite/' . $submission->id]) !!}
-                @if ($submission->user->id != Auth::user()->id && $submission->collaborators->where('user_id', Auth::user()->id)->first() == null && $submission->isVisible)
+                @if ($submission->user->id != Auth::user()->id && !$submission->is_collaborator && $submission->isVisible)
                     {!! Form::button('<i class="fas fa-star"></i> ', [
-                        'class' => 'btn ' . ($submission->favorites->where('user_id', Auth::user()->id)->first() == null ? 'btn-outline-primary' : 'btn-primary'),
+                        'class' => 'btn ' . (!$submission->favorited ? 'btn-outline-primary' : 'btn-primary'),
                         'data-toggle' => 'tooltip',
-                        'title' => ($submission->favorites->where('user_id', Auth::user()->id)->first() == null ? 'Add to' : 'Remove from') . ' your Favorites',
+                        'title' => (!$submission->favorited ? 'Add to' : 'Remove from') . ' your Favorites',
                         'type' => 'submit',
                     ]) !!}
                 @endif
                 @if ($submission->user->id == Auth::user()->id || Auth::user()->hasPower('manage_submissions'))
                     <a class="btn btn-outline-primary" href="/gallery/queue/{{ $submission->id }}" data-toggle="tooltip" title="View Log Details"><i class="fas fa-clipboard-list"></i></a>
-                    <a class="btn btn-outline-primary" href="/gallery/edit/{{ $submission->id }}"><i class="fas fa-edit"></i> Edit</a>
+                    @if ($submission->status != 'Rejected')
+                        <a class="btn btn-outline-primary" href="/gallery/edit/{{ $submission->id }}"><i class="fas fa-edit"></i> Edit</a>
+                    @endif
                 @endif
                 {!! Form::close() !!}
             @endif
@@ -41,7 +43,8 @@
                 By {!! $submission->credits !!}
             </div>
             <div class="col-md text-right">
-                {{ $submission->favorites->count() }} Favorite{{ $submission->favorites->count() != 1 ? 's' : '' }} ・ {{ $commentCount }} Comment{{ $commentCount != 1 ? 's' : '' }}
+                {{ $submission->favorites_count }} Favorite{{ $submission->favorites_count != 1 ? 's' : '' }} ・ {{ $submission->user_comments_count }}
+                Comment{{ $submission->user_comments_count != 1 ? 's' : '' }}
             </div>
         </diV>
     </div>
@@ -82,18 +85,18 @@
                                 <a class="float-right" href="{{ url('reports/new?url=') . $submission->url }}"><i class="fas fa-exclamation-triangle" data-toggle="tooltip" title="Click here to report this submission." style="opacity: 50%;"></i></a>
                             </h5>
                             <div class="float-right">
-                                @if (Auth::check() && ($submission->user->id != Auth::user()->id && $submission->collaborators->where('user_id', Auth::user()->id)->first() == null) && $submission->isVisible)
+                                @if (Auth::check() && ($submission->user->id != Auth::user()->id && !$submission->is_collaborator) && $submission->isVisible)
                                     {!! Form::open(['url' => '/gallery/favorite/' . $submission->id]) !!}
-                                    {{ $submission->favorites->count() }} {!! Form::button('<i class="fas fa-star"></i> ', [
+                                    {{ $submission->favorites_count }} {!! Form::button('<i class="fas fa-star"></i> ', [
                                         'style' => 'border:0; border-radius:.5em;',
-                                        'class' => $submission->favorites->where('user_id', Auth::user()->id)->first() != null ? 'btn-success' : '',
+                                        'class' => $submission->favorited ? 'btn-success' : '',
                                         'data-toggle' => 'tooltip',
-                                        'title' => ($submission->favorites->where('user_id', Auth::user()->id)->first() == null ? 'Add to' : 'Remove from') . ' your Favorites',
+                                        'title' => (!$submission->favorited ? 'Add to' : 'Remove from') . ' your Favorites',
                                         'type' => 'submit',
-                                    ]) !!} ・ {{ $commentCount }} <i class="fas fa-comment"></i>
+                                    ]) !!} ・ {{ $submission->user_comments_count }} <i class="fas fa-comment"></i>
                                     {!! Form::close() !!}
                                 @else
-                                    {{ $submission->favorites->count() }} <i class="fas fa-star" data-toggle="tooltip" title="Favorites"></i> ・ {{ $commentCount }} <i class="fas fa-comment" data-toggle="tooltip" title="Comments"></i>
+                                    {{ $submission->favorites_count }} <i class="fas fa-star" data-toggle="tooltip" title="Favorites"></i> ・ {{ $submission->user_comments_count }} <i class="fas fa-comment" data-toggle="tooltip" title="Comments"></i>
                                 @endif
                             </div>
                             In {!! $submission->gallery->displayName !!} ・ By {!! $submission->credits !!}
@@ -110,7 +113,7 @@
                                 @if ($submission->prompt_id)
                                     <strong>for</strong> {!! $submission->prompt->displayName !!}
                                 @endif
-                                @if ($submission->favorites->count())
+                                @if ($submission->favorites_count)
                                     ・ <a class="view-favorites" href="#">View Favorites</a>
                                 @endif
                                 <br />
@@ -129,7 +132,7 @@
                         <h5>Collaborators</h5>
                     </div>
                     <div class="card-body">
-                        @if ($submission->status == 'Pending' && Auth::check() && $submission->collaborators->where('user_id', Auth::user()->id)->first() != null)
+                        @if ($submission->status == 'Pending' && Auth::check() && $submission->is_collaborator)
                             <p>Check that your role in the collaboration is correct as listed, and if not, make any changes. You can also remove yourself from the collaborator list if necessary. When you are done, or if the record is already accurate,
                                 press "submit" to make any changes and mark yourself as having approved. You will be able to edit this until the submission is approved.</p>
                             {!! Form::open(['url' => '/gallery/collaborator/' . $submission->id]) !!}
@@ -217,15 +220,17 @@
                     <div class="alert alert-secondary">
                         [thumb={{ $submission->id }}]
                     </div>
-                    In a comment:
-                    <div class="alert alert-secondary">
-                        @if (isset($submission->hash) && !isset($submission->content_warning))
-                            [![Image]({{ $submission->thumbnailUrl }})]({{ $submission->url }})
-                        @else
-                            [{{ $submission->displayTitle }} by {{ $submission->creditsPlain }}
-                            {{ isset($submission->hash) ? '(Art)' : '(Literature)' }}{{ isset($submission->content_warning) ? ' ・ **Content Warning:** ' . nl2br(htmlentities($submission->content_warning)) : '' }}]({{ $submission->url }})
-                        @endif
-                    </div>
+                    @if (!config('lorekeeper.settings.wysiwyg_comments'))
+                        In a comment:
+                        <div class="alert alert-secondary">
+                            @if (isset($submission->hash) && !isset($submission->content_warning))
+                                [![Image]({{ $submission->thumbnailUrl }})]({{ $submission->url }})
+                            @else
+                                [{{ $submission->displayTitle }} by {{ $submission->creditsPlain }}
+                                {{ isset($submission->hash) ? '(Art)' : '(Literature)' }}{{ isset($submission->content_warning) ? ' ・ **Content Warning:** ' . nl2br(htmlentities($submission->content_warning)) : '' }}]({{ $submission->url }})
+                            @endif
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

@@ -22,7 +22,7 @@ class CharacterCategoryService extends Service {
      * @param array $data
      * @param mixed $user
      *
-     * @return \App\Models\Character\CharacterCategory|bool
+     * @return bool|CharacterCategory
      */
     public function createCharacterCategory($data, $user) {
         DB::beginTransaction();
@@ -61,11 +61,11 @@ class CharacterCategoryService extends Service {
     /**
      * Update a category.
      *
-     * @param \App\Models\Character\CharacterCategory $category
-     * @param array                                   $data
-     * @param mixed                                   $user
+     * @param CharacterCategory $category
+     * @param array             $data
+     * @param mixed             $user
      *
-     * @return \App\Models\Character\CharacterCategory|bool
+     * @return bool|CharacterCategory
      */
     public function updateCharacterCategory($category, $data, $user) {
         DB::beginTransaction();
@@ -79,6 +79,11 @@ class CharacterCategoryService extends Service {
             }
 
             $data = $this->populateCategoryData($data, $category);
+
+            $oldImageFileName = null;
+            if ($category->has_image) {
+                $oldImageFileName = $category->categoryImageFileName;
+            }
 
             $image = null;
             if (isset($data['image']) && $data['image']) {
@@ -94,8 +99,8 @@ class CharacterCategoryService extends Service {
                 throw new \Exception('Failed to log admin action.');
             }
 
-            if ($category) {
-                $this->handleImage($image, $category->categoryImagePath, $category->categoryImageFileName);
+            if ($image) {
+                $this->handleImage($image, $category->categoryImagePath, $category->categoryImageFileName, $oldImageFileName);
             }
 
             return $this->commitReturn($category);
@@ -109,8 +114,8 @@ class CharacterCategoryService extends Service {
     /**
      * Delete a category.
      *
-     * @param \App\Models\Character\CharacterCategory $category
-     * @param mixed                                   $user
+     * @param CharacterCategory $category
+     * @param mixed             $user
      *
      * @return bool
      */
@@ -127,9 +132,7 @@ class CharacterCategoryService extends Service {
                 throw new \Exception('Failed to log admin action.');
             }
 
-            if ($category->has_image) {
-                $this->deleteImage($category->categoryImagePath, $category->categoryImageFileName);
-            }
+            $this->deleteImage($category->categoryImagePath, $category->categoryImageFileName);
             $category->delete();
 
             return $this->commitReturn(true);
@@ -169,8 +172,8 @@ class CharacterCategoryService extends Service {
     /**
      * Handle category data.
      *
-     * @param array                                        $data
-     * @param \App\Models\Character\CharacterCategory|null $category
+     * @param array                  $data
+     * @param CharacterCategory|null $category
      *
      * @return array
      */

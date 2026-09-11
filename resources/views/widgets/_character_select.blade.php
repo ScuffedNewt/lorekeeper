@@ -1,5 +1,5 @@
 @php
-    $characters = \App\Models\Character\Character::visible(Auth::check() ? Auth::user() : null)
+    $characters = \App\Models\Character\Character::visible(Auth::user() ?? null)
         ->myo(0)
         ->orderBy('slug', 'DESC')
         ->get()
@@ -51,7 +51,6 @@
     </div>
     <table>
         <tr class="character-reward-row">
-
             @if ($expanded_rewards)
                 <td>
                     {!! Form::select('character_rewardable_type[]', ['Item' => 'Item', 'Currency' => 'Currency'] + (isset($showLootTables) && $showLootTables ? ['LootTable' => 'Loot Table'] : []), null, [

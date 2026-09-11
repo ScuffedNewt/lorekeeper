@@ -2,7 +2,6 @@
 
 namespace App\Models\Gallery;
 
-use App\Facades\Settings;
 use App\Models\Model;
 use Carbon\Carbon;
 
@@ -104,6 +103,18 @@ class Gallery extends Model {
         return $this->hasMany(GallerySubmission::class, 'gallery_id')->visible()->orderBy('created_at', 'DESC');
     }
 
+    /**
+     * Get the submissions that belong specifically
+     * to children of this gallery.
+     * (This is a builder, not a relation. Just put
+     * up here to be next to the submissions relation.).
+     *
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function childSubmissions() {
+        return GallerySubmission::whereIn('gallery_id', $this->children->pluck('id'))->visible()->orderBy('created_at', 'DESC');
+    }
+
     /**********************************************************************************************
 
         SCOPES
@@ -202,12 +213,13 @@ class Gallery extends Model {
     /**
      * Gets whether or not the user can submit to the gallery.
      *
+     * @param bool       $submissionsOpen
      * @param mixed|null $user
      *
      * @return string
      */
-    public function canSubmit($user = null) {
-        if (Settings::get('gallery_submissions_open')) {
+    public function canSubmit($submissionsOpen, $user = null) {
+        if ($submissionsOpen) {
             if ((isset($this->start_at) && $this->start_at->isFuture()) || (isset($this->end_at) && $this->end_at->isPast())) {
                 return false;
             } elseif ($user && $user->hasPower('manage_submissions')) {
