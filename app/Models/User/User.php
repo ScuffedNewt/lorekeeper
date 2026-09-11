@@ -238,10 +238,9 @@ class User extends Authenticatable implements MustVerifyEmail {
     }
 
     /**
-     * gets all the user's character folders
+     * gets all the user's character folders.
      */
-    public function folders()
-    {
+    public function folders() {
         return $this->hasMany('App\Models\Character\CharacterFolder');
     }
 

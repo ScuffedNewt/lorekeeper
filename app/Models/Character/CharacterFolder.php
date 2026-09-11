@@ -2,19 +2,16 @@
 
 namespace App\Models\Character;
 
-use Config;
-use Settings;
 use App\Models\Model;
 
-class CharacterFolder extends Model
-{
+class CharacterFolder extends Model {
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'name', 'description', 'user_id'
+        'name', 'description', 'user_id',
     ];
 
     /**
@@ -31,18 +28,16 @@ class CharacterFolder extends Model
     **********************************************************************************************/
 
     /**
-     * Get the user this folder belongs to
+     * Get the user this folder belongs to.
      */
-    public function user()
-    {
+    public function user() {
         return $this->belongsTo('App\Models\User\User', 'user_id');
     }
 
     /**
-     * Get all characters in this folder
+     * Get all characters in this folder.
      */
-    public function characters()
-    {
+    public function characters() {
         return $this->hasMany('App\Models\Character\Character', 'folder_id');
     }
 
@@ -53,10 +48,9 @@ class CharacterFolder extends Model
     **********************************************************************************************/
 
     /**
-     * returns the folder url
+     * returns the folder url.
      */
-    public function getUrlAttribute()
-    {
-        return url('user/'.$this->user->name.'/characters/' . $this->name);
+    public function getUrlAttribute() {
+        return url('user/'.$this->user->name.'/characters/'.$this->name);
     }
 }
