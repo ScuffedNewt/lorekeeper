@@ -54,7 +54,7 @@ return [
     'twitter'    => [
         'full_name'     => 'Twitter',
         'display_name'  => 'twitter',
-        'regex'         => '/twitter\.com\/([A-Za-z0-9_-]+)/',
+        'regex'         => '/(x|twitter)\.com\/([A-Za-z0-9_-]+)/',
         'link'          => 'twitter.com',
         'icon'          => 'fab fa-twitter',
         'auth'          => 0,
@@ -125,6 +125,7 @@ return [
         'full_name'    => 'Artstation',
         'display_name' => 'artstation',
         'regex'        => '/artstation\.com\/([A-Za-z0-9_-]+)/',
+        'icon'         => 'fab fa-artstation',
         'link'         => 'artstation.com',
     ],
 
@@ -132,6 +133,15 @@ return [
         'full_name'    => 'Picarto',
         'display_name' => 'picarto',
         'regex'        => '/picarto\.tv\/([A-Za-z0-9_-]+)/',
+        'icon'         => 'fas fa-brush',
         'link'         => 'picarto.tv',
+    ],
+
+    'furaffinity' => [
+        'full_name'    => 'Furaffinity',
+        'display_name' => 'FA',
+        'regex'        => '/furaffinity\.net\/user\/([A-Za-z0-9_-]+)/',
+        'icon'         => 'fas fa-paw',
+        'link'         => 'furaffinity.net',
     ],
 ];

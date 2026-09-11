@@ -75,7 +75,7 @@
         @endif
 
         @if (($report->status == 'Assigned' && $report->user_id == Auth::user()->id) || Auth::user()->hasPower('manage_reports'))
-            @comments([ 'type' => 'Staff-User', 'model' => $report, 'perPage' => 5 ])
+            @comments(['type' => 'Staff-User', 'model' => $report, 'perPage' => 5])
         @endif
 
         {!! Form::open(['url' => url()->current(), 'id' => 'reportForm']) !!}
@@ -134,8 +134,9 @@
 @endsection
 
 @if ($report->status !== 'Closed')
-    @parent
-	@section('scripts')
+    @section('scripts')
+        @parent
+        @include('js._tinymce_wysiwyg')
         <script>
             $(document).ready(function() {
                 $('#closalButton').on('click', function(e) {
@@ -165,5 +166,5 @@
                 });
             });
         </script>
-	@endsection
+    @endsection
 @endif

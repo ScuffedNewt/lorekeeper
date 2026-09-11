@@ -97,19 +97,45 @@
                 <div class="col-sm-6">
                     <div class="card mb-3">
                         <div class="card-body">
-                            <h5 class="card-title">Character Transfers @if ($transferCount + $tradeCount)
-                                    <span class="badge badge-primary">{{ $transferCount + $tradeCount }}</span>
+                            <h5 class="card-title">
+                                Character Transfers
+                                @if ($transferCount)
+                                    <span class="badge badge-primary">{{ $transferCount }}</span>
                                 @endif
                             </h5>
                             <p class="card-text">
-                                @if ($transferCount + $tradeCount)
-                                    {{ $transferCount + $tradeCount }} character transfer{{ $transferCount + $tradeCount == 1 ? '' : 's' }} and/or trade{{ $transferCount + $tradeCount == 1 ? '' : 's' }} awaiting processing.
+                                @if ($transferCount)
+                                    {{ $transferCount }} character transfer{{ $transferCount == 1 ? '' : 's' }} awaiting processing.
                                 @else
                                     The character transfer/trade queue is clear. Hooray!
                                 @endif
                             </p>
                             <div class="text-right">
                                 <a href="{{ url('admin/masterlist/transfers/incoming') }}" class="card-link">View Queue <span class="fas fa-caret-right ml-1"></span></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+            @if ($openTradesQueue)
+                <div class="col-sm-6">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                Trades
+                                @if ($tradeCount)
+                                    <span class="badge badge-primary">{{ $tradeCount }}</span>
+                                @endif
+                            </h5>
+                            <p class="card-text">
+                                @if ($tradeCount)
+                                    {{ $tradeCount }} trade{{ $tradeCount == 1 ? '' : 's' }} awaiting processing.
+                                @else
+                                    The trade queue is clear. Hooray!
+                                @endif
+                            </p>
+                            <div class="text-right">
+                                <a href="{{ url('admin/trades/incoming') }}" class="card-link">View Queue <span class="fas fa-caret-right ml-1"></span></a>
                             </div>
                         </div>
                     </div>
@@ -155,49 +181,51 @@
                 </p>
             </div>
         @endif
-        @if ($galleryRequireApproval)
-            <div class="col-sm-6">
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <h5 class="card-title">Gallery Submissions @if ($gallerySubmissionCount)
-                                <span class="badge badge-primary">{{ $gallerySubmissionCount }}</span>
-                            @endif
-                        </h5>
-                        <p class="card-text">
-                            @if ($gallerySubmissionCount)
-                                {{ $gallerySubmissionCount }} gallery submission{{ $gallerySubmissionCount == 1 ? '' : 's' }} awaiting processing.
-                            @else
-                                The gallery submission queue is clear. Hooray!
-                            @endif
-                        </p>
-                        <div class="text-right">
-                            <a href="{{ url('admin/gallery/submissions/pending') }}" class="card-link">View Queue <span class="fas fa-caret-right ml-1"></span></a>
+        @if (Auth::user()->hasPower('manage_submissions'))
+            @if ($galleryRequireApproval)
+                <div class="col-sm-6">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Gallery Submissions @if ($gallerySubmissionCount)
+                                    <span class="badge badge-primary">{{ $gallerySubmissionCount }}</span>
+                                @endif
+                            </h5>
+                            <p class="card-text">
+                                @if ($gallerySubmissionCount)
+                                    {{ $gallerySubmissionCount }} gallery submission{{ $gallerySubmissionCount == 1 ? '' : 's' }} awaiting processing.
+                                @else
+                                    The gallery submission queue is clear. Hooray!
+                                @endif
+                            </p>
+                            <div class="text-right">
+                                <a href="{{ url('admin/gallery/submissions/pending') }}" class="card-link">View Queue <span class="fas fa-caret-right ml-1"></span></a>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        @endif
-        @if ($galleryCurrencyAwards)
-            <div class="col-sm-6">
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <h5 class="card-title">Gallery Currency Awards @if ($galleryAwardCount)
-                                <span class="badge badge-primary">{{ $galleryAwardCount }}</span>
-                            @endif
-                        </h5>
-                        <p class="card-text">
-                            @if ($galleryAwardCount)
-                                {{ $galleryAwardCount }} gallery submission{{ $galleryAwardCount == 1 ? '' : 's' }} awaiting currency rewards.
-                            @else
-                                The gallery currency award queue is clear. Hooray!
-                            @endif
-                        </p>
-                        <div class="text-right">
-                            <a href="{{ url('admin/gallery/currency/pending') }}" class="card-link">View Queue <span class="fas fa-caret-right ml-1"></span></a>
+            @endif
+            @if ($galleryCurrencyAwards)
+                <div class="col-sm-6">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Gallery Currency Awards @if ($galleryAwardCount)
+                                    <span class="badge badge-primary">{{ $galleryAwardCount }}</span>
+                                @endif
+                            </h5>
+                            <p class="card-text">
+                                @if ($galleryAwardCount)
+                                    {{ $galleryAwardCount }} gallery submission{{ $galleryAwardCount == 1 ? '' : 's' }} awaiting currency rewards.
+                                @else
+                                    The gallery currency award queue is clear. Hooray!
+                                @endif
+                            </p>
+                            <div class="text-right">
+                                <a href="{{ url('admin/gallery/currency/pending') }}" class="card-link">View Queue <span class="fas fa-caret-right ml-1"></span></a>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            @endif
         @endif
     </div>
 @endsection

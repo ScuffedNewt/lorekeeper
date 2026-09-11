@@ -1,10 +1,12 @@
 @php
-    $characters = \App\Models\Character\Character::visible(Auth::check() ? Auth::user() : null)
-        ->myo(0)
-        ->orderBy('slug', 'DESC')
-        ->get()
-        ->pluck('fullName', 'slug')
-        ->toArray();
+    if (!isset($characters)) {
+        $characters = \App\Models\Character\Character::visible(Auth::user() ?? null)
+            ->myo(0)
+            ->orderBy('slug', 'DESC')
+            ->get()
+            ->pluck('fullName', 'slug')
+            ->toArray();
+    }
 @endphp
 
 <div class="submission-character mb-3">
@@ -18,7 +20,6 @@
             </div>
         </div>
         <div class="col-md-7">
-            <a href="#" class="float-right fas fa-close"></a>
             <div class="form-group">
                 {!! Form::select('slug[]', $characters, $character->character ? $character->character->slug : $character->slug, ['class' => 'form-control character-code', 'placeholder' => 'Select Character']) !!}
             </div>
