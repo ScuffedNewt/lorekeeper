@@ -1,10 +1,10 @@
 @php
     $labels = [];
     foreach (config('lorekeeper.character_labels') as $key => $value) {
-        $labels[$key] =  $key . ": " . $value;
+        $labels[$key] = $key . ': ' . $value;
     }
 
-    $image = (isset($image) && $image?->label) ? $image : null;
+    $image = isset($image) && $image?->label ? $image : null;
 @endphp
 
 <hr />
@@ -20,7 +20,7 @@
     </div>
 @endif
 
-<div class="{{ ($isStaff || $image) ? '' : 'hide'}}" id="inspired-info">
+<div class="{{ $isStaff || $image ? '' : 'hide' }}" id="inspired-info">
     <p>The labels section are used to identify anything of note about a character's design. It is saved per-image, and is preserved until manually changed.</p>
 
     <div class="form-group">
