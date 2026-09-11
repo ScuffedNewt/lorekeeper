@@ -60,17 +60,17 @@
 @section('scripts')
     <script>
         $(document).ready(function() {
-            $('.create-folder').click(function(e){
+            $('.create-folder').click(function(e) {
                 e.preventDefault();
                 loadModal("{{ url('/characters/folder/create') }}", "Create New Folder");
             });
 
-            $('.edit-folder').click(function(e){
+            $('.edit-folder').click(function(e) {
                 e.preventDefault();
                 $('#folders').collapse('toggle');
             });
 
-            $('.edit-get-button').click(function(e){
+            $('.edit-get-button').click(function(e) {
                 e.preventDefault();
                 var folder_id = $('#folders select').val();
                 var url = "{{ url('/characters/folder/edit') }}/" + folder_id;
