@@ -7,10 +7,11 @@ use App\Models\Rarity;
 use App\Models\Species\Species;
 use App\Models\Species\Subtype;
 use App\Models\User\User;
+use App\Traits\Typeable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CharacterImage extends Model {
-    use SoftDeletes;
+    use SoftDeletes, Typeable;
 
     /**
      * The attributes that are mass assignable.
@@ -337,5 +338,41 @@ class CharacterImage extends Model {
         }
 
         return count($this->content_warnings ?? []) > 0;
+    }
+    
+    /**
+     * Override the typings attribute so we can get subtype/species typings
+     */
+    public function getTypingsAttribute() {
+        if($this->getRelationValue('typings')->count()) {
+            return $this->getRelationValue('typings');
+        }
+        if($this->subtypes->count() && $this->subtypes->pluck('subtype')->pluck('typings')->count()) {
+            return $this->subtypes->pluck('subtype')->pluck('typings')->flatten()->unique();
+        }
+        if(isset($this->species) && $this->species->typings->count()) {
+            return $this->species->typings;
+        }
+        return null;
+    }
+    
+    /**
+     * Override the display elements attribute so we can show if the typing comes from species/subtype or not
+     */
+    public function getDisplayElementsAttribute() {
+        if($this->typings) {
+            $badges = $this->typings->pluck('element')->pluck('displayNameBadge')->toArray();
+            if($this->getRelationValue('typings')->count()) {
+                return implode(' ', $badges) . ' ' . add_help('Typing specific to this character');
+            }
+            if($this->subtypes->count() && $this->subtypes->pluck('subtype')->pluck('typings')->count()) {
+                return implode(' ', $badges) . ' ' . add_help('Typing from subtype(s)');
+            }
+            if(isset($this->species) && $this->species->typings->count()) {
+                return implode(' ', $badges) . ' ' . add_help('Typing from species');
+            }
+        }
+
+        return null;
     }
 }

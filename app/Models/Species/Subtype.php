@@ -4,8 +4,12 @@ namespace App\Models\Species;
 
 use App\Models\Feature\Feature;
 use App\Models\Model;
+use App\Traits\Typeable;
+use Illuminate\Support\Facades\DB;
 
 class Subtype extends Model {
+    use Typeable;
+
     /**
      * The attributes that are mass assignable.
      *

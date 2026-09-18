@@ -11,7 +11,7 @@ class Typing extends Model {
      * @var array
      */
     protected $fillable = [
-        'typing_model', 'typing_id', 'element_ids',
+        'typing_model', 'typing_id', 'element_id',
     ];
 
     /**
@@ -43,51 +43,33 @@ class Typing extends Model {
         return $this->belongsTo($this->typing_model, 'typing_id');
     }
 
+    /**
+     * get the object of this type.
+     */
+    public function element() {
+        return $this->belongsTo(Element::class, 'element_id');
+    }
+    
     /**********************************************************************************************
 
         OTHER FUNCTIONS
 
     **********************************************************************************************/
-
+    
     /**
-     * checks if a certain object has a typing.
+     * Returns the element IDs assigned to an object.
      *
      * @param mixed $object
      */
-    public static function hasTyping($object) {
-        return self::where('typing_model', get_class($object))->where('typing_id', $object->id)->exists();
-    }
+    public static function elementIdsForObject($object): array {
+        if (!$object) {
+            return [];
+        }
 
-    /**
-     * returns a collection of element objects from the typing.
-     */
-    public function elements() {
-        return Element::whereIn('id', $this->element_ids)->get();
-    }
+        $typing = self::where('typing_model', get_class($object))
+            ->where('typing_id', $object->id)
+            ->first();
 
-    /**
-     * returns an imploded string of element names from the typing.
-     */
-    public function getElementNamesAttribute() {
-        // get the displayName attribute from each element
-        $names = $this->elements()->map(function ($element) {
-            return $element->displayName;
-        });
-
-        return implode(', ', $names->toArray());
-    }
-
-    /**
-     * displays the elements as pill badges.
-     */
-    public function getDisplayElementsAttribute() {
-        // get the displayName attribute from each element
-        $elements = $this->elements()->map(function ($element) {
-            // check if first in loop
-            return '<a href="'.$element->idUrl.'"><span class="badge '.($element->id == $this->elements()->first()->id ? '' : 'ml-1')
-            .'" style="color: white; background-color: '.$element->colour.';">'.$element->name.'</span></a>';
-        });
-
-        return implode(' ', $elements->toArray());
+        return $typing ? ($typing->element_ids ?? []) : [];
     }
 }

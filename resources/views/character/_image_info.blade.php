@@ -59,7 +59,7 @@
                             <div class="col-lg-8 col-7 pl-1">
                                 {!! $image->character->class_id ? $image->character->class->displayName : 'None' !!}
                                 @if (Auth::check() && Auth::user()->hasPower('manage_characters'))
-                                    <a href="#" class="btn btn-outline-info btn-sm edit-class ml-1" data-id="{{ $image->character->id }}">
+                                    <a href="#" class="btn btn-outline-info badge btn-sm edit-class ml-1" data-id="{{ $image->character->id }}">
                                         <i class="fas fa-cog"></i>
                                     </a>
                                 @endif
@@ -88,30 +88,17 @@
                         </div>
                         <div class="col-lg-8 col-7 pl-1">{!! $image->rarity_id ? $image->rarity->displayName : 'None' !!}</div>
                     </div>
-                    @php
-                        // check if there is a type for this object if not passed
-                        // for characters first check subtype (since it takes precedence)
-                        $type = \App\Models\Element\Typing::where('typing_model', 'App\Models\Character\CharacterImage')->where('typing_id', $image->id)->first();
-                        if (!isset($type) && $image->subtype_id) {
-                            $type = \App\Models\Element\Typing::where('typing_model', 'App\Models\Species\Subtype')->where('typing_id', $image->subtype_id)->first();
-                        }
-                        if (!isset($type)) {
-                            $type = \App\Models\Element\Typing::where('typing_model', 'App\Models\Species\Species')->where('typing_id', $image->species_id)->first();
-                        }
-                        $type = $type ?? null;
-                    @endphp
-                    @if ($type || (Auth::check() && Auth::user()->hasPower('manage_characters')))
+                    @if ($image->typings || (Auth::check() && Auth::user()->hasPower('manage_characters')))
                         <div class="row no-gutters">
                             <div class="col-lg-4 col-5">
                                 <h5>Typing</h5>
                             </div>
                             <div class="col-lg-8 col-7 pl-1 row no-gutters">
-                                <h5>{!! $type?->displayElements !!}</h5>
+                                <h5 class="d-flex align-items-center" style="line-height: 1;">{!! $image->typings ? $image->displayElements : '' !!}</h5>
                                 @if (Auth::check() && Auth::user()->hasPower('manage_characters'))
-                                    {!! add_help('Typing is assigned on an image basis') !!}
-                                    <div class="ml-auto">
-                                        <a href="#" class="btn btn-outline-info btn-sm edit-typing" data-id="{{ $image->id }}">
-                                            <i class="fas fa-cog"></i> {{ $type ? 'Edit' : 'Create' }}
+                                    <div>
+                                        <a href="#" class="btn btn-outline-info badge btn-sm edit-typing" data-id="{{ $image->id }}">
+                                            <i class="fas fa-cog"></i> {{ $image->typings ? 'Edit' : 'Create' }}
                                         </a>
                                     </div>
                                 @endif

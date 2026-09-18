@@ -1,10 +1,6 @@
 @php
     $elements = \App\Models\Element\Element::orderBy('name')->pluck('name', 'id');
-    // check if there is a type for this object if not passed
-    if (!isset($type)) {
-        $type = \App\Models\Element\Typing::where('typing_model', get_class($object))->where('typing_id', $object->id)->first();
-    }
-    $type = $type ?? null;
+    $typings = isset($typings) ? $typings : $object->typings;
 @endphp
 
 <div class="card p-4 mb-2 mt-2" id="typing-card">
@@ -16,55 +12,77 @@
     {!! isset($info) ? '<p class="alert alert-info">' . $info . '</p>' : '' !!}
 
     <div class="typing">
+        <div class="d-flex justify-content-between mb-3">
+            <div>
+                <h5 class="mb-0">Typing for {!! $object->displayName !!}</h5>
+                Current Typing: {!! implode(', ', $typings->pluck('element')->pluck('displayName')->toArray()) !!}
+            </div>
+            <div class="text-right">
+                <div class="btn btn-secondary" id="add-element">Add Element</div>
+            </div>
+        </div>
+        <hr>
         <div id="elements">
-            @if ($type)
-                <h5>Typing for {!! $type->object->displayName !!}</h5>
-                Current Typing: {!! $type->elementNames !!}
-                @foreach ($type->element_ids as $id)
-                    <div class="form-group">
-                        {!! Form::label('Element') !!}
-                        {!! Form::select('element_ids[]', $elements, $id, ['class' => 'form-control selectize', 'placeholder' => 'Select Element']) !!}
+            @if ($typings)
+                @foreach ($typings as $typing)
+                    <div class="row no-gutters">
+                        <div class="col-11 form-group">
+                            {!! Form::select('element_ids[]', $elements, $typing->element_id, ['class' => 'form-control element-selectize', 'placeholder' => 'Select Element']) !!}
+                        </div>
+                        <div class="col-1 pl-1 form-group text-center">
+                            <div class="btn btn-danger remove-element mx-auto">X</div>
+                        </div>
                     </div>
                 @endforeach
             @endif
         </div>
-        <div class="btn btn-secondary" id="add-element">Add Element</div>
-        <div class="btn btn-primary float-right" id="submit-typing">{{ $type ? 'Edit' : 'Create' }} Typing</div>
-        @if ($type)
-            <div class="btn btn-danger float-right mr-2" id="delete-typing">Delete Typing</div>
-        @endif
+        <hr>
+        <div class="text-right">
+            <div class="btn btn-primary" id="submit-typing">{{ $typings ? 'Edit' : 'Create' }} Typing</div>
+            @if ($typings)
+                <i class="fas fa-trash text-danger float-right mt-2 mx-2 fa-2x" data-toggle="tooltip" title="To delete typings, simply remove all existing typings and click 'Edit Typings'"></i>
+            @endif
+        </div>
     </div>
 </div>
 
-<div class="form-group hide element-row">
-    {!! Form::label('Element') !!}
-    {!! Form::select('element_ids[]', $elements, null, ['class' => 'form-control select', 'placeholder' => 'Select Element']) !!}
+<div class="row no-gutters hide element-row">
+    <div class="col-11 form-group">
+        {!! Form::select('element_ids[]', $elements, null, ['class' => 'form-control select', 'placeholder' => 'Select Element']) !!}
+    </div>
+    <div class="col-1 pl-1 form-group text-center">
+        <div class="btn btn-danger remove-element mx-auto">X</div>
+    </div>
 </div>
 
 <script>
     $(document).ready(function() {
-        $('.selectize').selectize();
+        $('.element-selectize').selectize();
 
         // add element
         $('#add-element').on('click', function(e) {
             e.preventDefault();
             // make sure there are less than 2 elements
-            if ($('#elements').find('.form-group').length >= 2) {
+            if ($('#elements').find('select').length >= 2) {
                 return;
             }
             var $clone = $('.element-row').clone();
             $('#elements').append($clone);
             $clone.removeClass('hide element-row');
-            $clone.find('select').selectize();
+            $clone.find('.select').selectize();
+            attachRemoveListener($clone.find('.remove-element'));
         });
 
-        // delete typing
-        @if ($type)
-            $('#delete-typing').on('click', function(e) {
+        $('.remove-element').each(function() {
+            attachRemoveListener($(this));
+        });
+
+        function attachRemoveListener(node) {
+            node.on('click', function(e) {
                 e.preventDefault();
-                loadModal("{{ url('admin/typing/delete/' . $type->id) }}", "Delete Typing");
+                $(this).closest('.row').remove();
             });
-        @endif
+        }
 
         // ajax on add typing
         $('#submit-typing').on('click', function(e) {
@@ -83,7 +101,6 @@
                 method: 'POST',
                 data: {
                     _token: '{{ csrf_token() }}',
-                    type: '{{ $type ? $type->id : null }}',
                     typing_model: '{{ urlencode(get_class($object)) }}',
                     typing_id: '{{ $object->id }}',
                     element_ids: $('#elements').find('select').map(function() {

@@ -149,29 +149,14 @@ class ElementController extends Controller {
      * Adds typing row for a model.
      */
     public function postTyping(Request $request, TypingManager $service) {
-        $data = $request->only(['type', 'typing_model', 'typing_id', 'element_ids']);
-        if (isset($data['type']) && $data['type']) {
-            $type = Typing::find($data['type']);
-            if (!$type) {
-                flash('Invalid typing.')->error();
-
-                return response()->json([
-                    'error'   => 'Invalid typing.',
-                ], 400);
+        $data = $request->only(['typing_model', 'typing_id', 'element_ids']);
+        if (!$type = $service->createTyping(urldecode($data['typing_model']), $data['typing_id'], $data['element_ids'] ?? null, Auth::user())) {
+            foreach ($service->errors()->getMessages()['error'] as $error) {
+                flash($error)->error();
             }
-            if (!$service->editTyping($type, $data['element_ids'] ?? null, Auth::user())) {
-                flash('Failed to edit typing.')->error();
-
-                return response()->json([
-                    'error'   => $service->errors()->getMessages()['error'][0],
-                ], 400);
-            }
-        } elseif (!$type = $service->createTyping(urldecode($data['typing_model']), $data['typing_id'], $data['element_ids'] ?? null, Auth::user())) {
             flash('Failed to create typing.')->error();
 
-            return response()->json([
-                'error'   => $service->errors()->getMessages()['error'][0],
-            ], 400);
+            return response()->json(400);
         }
 
         flash('Typing '.($type ? 'edited' : 'created').' successfully.')->success();
@@ -179,38 +164,5 @@ class ElementController extends Controller {
         return response()->json([
             'success' => 'Typing added successfully.',
         ]);
-    }
-
-    /**
-     * gets the delete typing modal.
-     *
-     * @param mixed $id
-     */
-    public function getDeleteTyping($id) {
-        $typing = Typing::find($id);
-        if (!$typing) {
-            abort(404);
-        }
-
-        return view('admin.elements._delete_typing', [
-            'typing' => $typing,
-        ]);
-    }
-
-    /**
-     * deletes a typing.
-     *
-     * @param mixed $id
-     */
-    public function postDeleteTyping(Request $request, TypingManager $service, $id) {
-        if ($id && $service->deleteTyping(Typing::find($id), Auth::user())) {
-            flash('Typing deleted successfully.')->success();
-        } else {
-            foreach ($service->errors()->getMessages()['error'] as $error) {
-                flash($error)->error();
-            }
-        }
-
-        return redirect()->back();
     }
 }

@@ -2,14 +2,8 @@
 
 namespace App\Models\Limit;
 
-use App\Models\Character\CharacterClass;
-use App\Models\Currency\Currency;
-use App\Models\Element\Element;
-use App\Models\Item\Item;
 use App\Models\Level\Level;
 use App\Models\Model;
-use App\Models\Prompt\Prompt;
-use App\Models\Stat\Stat;
 
 class Limit extends Model {
     /**
@@ -28,6 +22,15 @@ class Limit extends Model {
      */
     protected $table = 'limits';
 
+    /**
+     * The relationships that should always be loaded.
+     *
+     * @var array
+     */
+    protected $with = [
+        'limit',
+    ];
+
     /**********************************************************************************************
 
         RELATIONS
@@ -35,36 +38,51 @@ class Limit extends Model {
     **********************************************************************************************/
 
     /**
-     * get the object of this type.
+     * Get the object that this limit is attached to as something that morphMany will accept.
+     */
+    public function limitable() {
+        return $this->morphTo('limitable', 'object_model', 'object_id');
+    }
+
+    /**
+     * Get the object that this limit is attached to.
      */
     public function object() {
-        return $this->belongsTo($this->object_model, 'object_id');
+        return $this->morphTo('object', 'object_model', 'object_id');
     }
 
     /**
      * gets the limit of this ... limit.
      */
     public function limit() {
-        switch ($this->limit_type) {
-            case 'prompt':
-                return $this->belongsTo(Prompt::class, 'limit_id');
-            case 'item':
-                return $this->belongsTo(Item::class, 'limit_id');
-            case 'currency':
-                return $this->belongsTo(Currency::class, 'limit_id');
-            case 'dynamic':
-                return $this->belongsTo(DynamicLimit::class, 'limit_id');
-            case 'character_level':
-                return $this->belongsTo(Level::class, 'limit_id')->where('level_type', 'character');
-            case 'user_level':
-                return $this->belongsTo(Level::class, 'limit_id')->where('level_type', 'user');
-            case 'element':
-                return $this->belongsTo(Element::class, 'limit_id');
-            case 'stat':
-                return $this->belongsTo(Stat::class, 'limit_id');
-            case 'class':
-                return $this->belongsTo(CharacterClass::class, 'limit_id');
-        }
+        return $this->morphTo('limit', 'limit_type', 'limit_id')
+            ->constrain([
+                Level::class => function ($query) {
+                    if ($this->limit_type === 'user_level') {
+                        $query->where('level_type', 'user');
+                    } elseif ($this->limit_type === 'character_level') {
+                        $query->where('level_type', 'character');
+                    }
+                },
+            ]);
+
+        /*
+         * If you have specific logic per limit_type (such as, if you have multiple limits that share the same model),
+         * you can use ->constrain([]) to handle that extra logic.
+         *
+         * For example, if you were to have a generic "Model" that needs to be separated between character and user:
+         *
+         * ->constrain([
+         *     Model::class => function ($query) {
+         *         if ($this->limit_type === 'user_model') {
+         *             $query->where('type', 'user');
+         *         } elseif ($this->limit_type === 'character_model') {
+         *             $query->where('type', 'character');
+         *         }
+         *     }
+         * ]);
+         *
+         */
     }
 
     /**********************************************************************************************
@@ -74,21 +92,23 @@ class Limit extends Model {
     **********************************************************************************************/
 
     /**
-     * checks if a certain object has any limits.
+     * Checks if a certain object has any limits.
+     * This is kept for backwards compatibility, and forwards to the helper function.
      *
      * @param mixed $object
      */
     public static function hasLimits($object) {
-        return self::where('object_model', get_class($object))->where('object_id', $object->id)->exists();
+        return hasLimits($object);
     }
 
     /**
-     * get the limits of a certain object.
+     * Get the limits of a certain object.
+     * This is kept for backwards compatibility, and forwards to the helper function.
      *
      * @param mixed $object
      */
     public static function getLimits($object) {
-        return self::where('object_model', get_class($object))->where('object_id', $object->id)->get();
+        return getLimits($object);
     }
 
     /**
@@ -101,6 +121,6 @@ class Limit extends Model {
             return false;
         }
 
-        return $this->is_unlocked && $user->unlockedLimits()->where('object_model', $this->object_model)->where('object_id', $this->object_id)->exists();
+        return $this->is_unlocked && $user->unlockedLimits->where('object_model', $this->object_model)->where('object_id', $this->object_id)->count();
     }
 }

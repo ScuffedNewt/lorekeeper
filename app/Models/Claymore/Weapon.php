@@ -6,8 +6,11 @@ use App\Models\Currency\Currency;
 use App\Models\Model;
 use App\Models\User\User;
 use App\Models\User\UserWeapon;
+use App\Traits\Typeable;
 
 class Weapon extends Model {
+    use Typeable;
+    
     /**
      * The attributes that are mass assignable.
      *

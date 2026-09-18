@@ -8,6 +8,7 @@ use App\Models\Element\Typing;
 use App\Services\InventoryManager;
 use App\Services\Service;
 use App\Services\TypingManager;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class ElementalPotionService extends Service {
@@ -47,8 +48,8 @@ class ElementalPotionService extends Service {
     /**
      * Processes the data attribute of the tag and returns it in the preferred format.
      *
-     * @param mixed $tag
-     * @param array $data
+     * @param object $tag
+     * @param array  $data
      *
      * @return bool
      */
@@ -58,7 +59,7 @@ class ElementalPotionService extends Service {
         DB::beginTransaction();
 
         try {
-            $tag->update(['data' => json_encode($potionData)]);
+            $tag->update(['data' => $potionData]);
 
             return $this->commitReturn(true);
         } catch (\Exception $e) {
@@ -91,27 +92,21 @@ class ElementalPotionService extends Service {
                     throw new \Exception('You can only apply one element at a time.');
                 }
 
+                $element_id = $stack->item->tag($data['tag'])->data['element_id'];
+
                 // Next, try to delete the box item. If successful, we can start distributing rewards.
                 if ((new InventoryManager)->debitStack($stack->user, 'Potion Consumed', ['data' => 'Potion used on '.$character->displayName], $stack, $data['quantities'][$key])) {
                     for ($q = 0; $q < $data['quantities'][$key]; $q++) {
                         $service = new TypingManager;
                         // check if typing exists on character
-                        $typing = Typing::where('typing_model', get_class($character->image))->where('typing_id', $character->image->id)->first();
+                        $typing = $character->image->typings->where('element_id', $element_id)->first();
                         if (!$typing) {
-                            if (!$service->createTyping(get_class($character->image), $character->image->id, [$stack->item->tag($data['tag'])->data['element_id']])) {
+                            if (!$service->creditTyping($character, Element::find($element_id), Auth::user())) {
                                 foreach ($service->errors()->getMessages()['error'] as $error) {
                                     flash($error)->error();
                                 }
 
                                 throw new \Exception('Failed to create typing.');
-                            }
-                        } else {
-                            if (!$service->editTyping($typing, array_merge($typing->element_ids, [$stack->item->tag($data['tag'])->data['element_id']]))) {
-                                foreach ($service->errors()->getMessages()['error'] as $error) {
-                                    flash($error)->error();
-                                }
-
-                                throw new \Exception('Failed to edit typing.');
                             }
                         }
                     }

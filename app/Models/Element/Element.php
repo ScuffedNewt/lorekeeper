@@ -141,6 +141,15 @@ class Element extends Model {
     }
 
     /**
+     * Displays the model's name as a badge, linked to its encyclopedia page.
+     *
+     * @return string
+     */
+    public function getDisplayNameBadgeAttribute() {
+        return '<a href="'.$this->idUrl.'"><span class="badge" style="color: white; background-color: '.$this->colour.';">'.$this->name.'</span></a>';
+    }
+
+    /**
      * Gets the file directory containing the model's image.
      *
      * @return string

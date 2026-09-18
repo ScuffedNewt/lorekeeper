@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\Character\CharacterImage;
 use App\Models\Element\Typing;
+use App\Traits\Typeable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -35,35 +37,70 @@ class TypingManager extends Service {
         DB::beginTransaction();
 
         try {
-            if (!$element_ids) {
-                throw new \Exception('No elements provided.');
+            $object = $typing_model::find($typing_id);
+            if(!$object) {
+                throw new \Exception('Object does not exist.');
+            }
+            if(!in_array(Typeable::class, class_uses_recursive($object))) {
+                throw new \Exception('Object can not have elements.');
             }
             // check that there is not more than two element ids
-            if (count($element_ids) > 2) {
+            if (!empty($element_ids) && count($element_ids) > 2) {
                 throw new \Exception('Too many elements provided.');
             }
-            // check that there is not duplicate element ids
-            if (count($element_ids) != count(array_unique($element_ids))) {
-                throw new \Exception('Duplicate elements provided.');
-            }
-            // check that a typing with this model and id doesn't already exist
-            if (Typing::where('typing_model', $typing_model)->where('typing_id', $typing_id)->exists()) {
-                throw new \Exception('A typing with this model and id already exists.');
+
+            // get old typings for logging
+            if($object->typings) {
+                $oldData = $object->typings->pluck('element_id')->toArray();
+            } else {
+                $oldData = [];
             }
 
             // create the typing
-            $typing = Typing::create([
-                'typing_model' => $typing_model,
-                'typing_id'    => $typing_id,
-                'element_ids'  => $element_ids,
-            ]);
+            $object->typings()->delete();
+            $newData = collect();
+            if(!empty($element_ids)) {
+                // check that there is not duplicate element ids
+                $element_ids = array_unique($element_ids);
+                foreach($element_ids as $id) {
+                    $typing = Typing::create([
+                        'typing_model' => $typing_model,
+                        'typing_id'    => $typing_id,
+                        'element_id'  => $id,
+                    ]);
+                    $newData->push($typing->element);
+                }
+            }
+
+            // get new typings for logging
+            if($newData->isEmpty()) {
+                $log = 'Typings Deleted';
+            } else {
+                $log = implode(', ', $newData->pluck('displayName')->toArray());
+            }
 
             // log the action
-            if ($log && !$this->logAdminAction(Auth::user(), 'Created Typing', 'Created '.$typing->object->displayName.' typing')) {
+            if ($log && !$this->logAdminAction(Auth::user(), 'Created Typing', 'Created '.$object->displayName.' '.$log)) {
                 throw new \Exception('Failed to log admin action.');
             }
 
-            return $this->commitReturn($typing);
+            if(get_class($object) == CharacterImage::class) {
+                $characterManager = new CharacterManager;
+                if(!$characterManager->createLog(Auth::user()->id, 
+                    null, 
+                    null, null, 
+                    $object->character->id, 
+                    'Typing Edited', 
+                    $log, 
+                    'character',
+                    true,
+                    $oldData,
+                    $newData)) {
+                    throw new \Exception('Failed to create log.');
+                }
+            }
+
+            return $this->commitReturn($object);
         } catch (\Exception $e) {
             $this->setError('error', $e->getMessage());
         }
@@ -72,68 +109,23 @@ class TypingManager extends Service {
     }
 
     /**
-     * edits an existing typing on a model.
-     *
-     * @param mixed      $typing
-     * @param mixed|null $element_ids
-     * @param mixed      $log
-     */
-    public function editTyping($typing, $element_ids = null, $log = true) {
-        DB::beginTransaction();
-
-        try {
-            if (!$element_ids) {
-                throw new \Exception('No elements provided.');
-            }
-            // check that there is not more than two element ids
-            if (count($element_ids) > 2) {
-                throw new \Exception('Too many elements provided.');
-            }
-            // check that there is not duplicate element ids
-            if (count($element_ids) != count(array_unique($element_ids))) {
-                throw new \Exception('Duplicate elements provided.');
-            }
-            // check that a typing with this model and id doesn't already exist
-            if (Typing::where('typing_model', $typing->typing_model)->where('typing_id', $typing->typing_id)->where('id', '!=', $typing->id)->exists()) {
-                throw new \Exception('A typing with this model and id already exists.');
-            }
-
-            // create the typing
-            $typing->update([
-                'element_ids'  => $element_ids,
-            ]);
-
-            // log the action
-            if ($log && !$this->logAdminAction(Auth::user(), 'Edited Typing', 'Edited '.$typing->object->displayName.' typing')) {
-                throw new \Exception('Failed to log admin action.');
-            }
-
-            return $this->commitReturn($typing);
-        } catch (\Exception $e) {
-            $this->setError('error', $e->getMessage());
-        }
-
-        return $this->rollbackReturn(false);
-    }
-
-    /**
-     * deletes a typing.
+     * deletes a object's typings.
      *
      * @param mixed $typing
      */
-    public function deleteTyping($typing) {
+    public function deleteTyping($object) {
         DB::beginTransaction();
 
         try {
             // delete the typing
-            $typing->delete();
+            $object->typings()->delete();
 
             // log the action
-            if (!$this->logAdminAction(Auth::user(), 'Deleted Typing', 'Deleted '.$typing->object->displayName.' typing')) {
+            if (!$this->logAdminAction(Auth::user(), 'Deleted Typing', 'Deleted '.$object->displayName.' typings')) {
                 throw new \Exception('Failed to log admin action.');
             }
 
-            return $this->commitReturn($typing);
+            return $this->commitReturn(true);
         } catch (\Exception $e) {
             $this->setError('error', $e->getMessage());
         }
@@ -153,31 +145,32 @@ class TypingManager extends Service {
         DB::beginTransaction();
 
         try {
-            $model = get_class($recipient->image);
+            $image = $recipient->image;
             $id = $recipient->image->id;
 
-            // log the action
-            if (!$this->logAdminAction(
-                Auth::user(),
-                'Credited Typing',
-                'Credited '.$element->displayName.' to '.$recipient->displayName.''.
-                ($sender ? ' from '.$sender->displayName : '').
-                ($origin ? ' ('.$origin.')' : '')
-            )) {
-                throw new \Exception('Failed to log admin action.');
+            if($image->typings->where('element_id', $element->id)->count()) {
+                throw new \Exception('Element already exists.');
             }
 
-            $typing = Typing::where('typing_model', $model)->where('typing_id', $id)->first();
+            $oldData = $image->typings->pluck('element_id')->toArray();
 
-            if ($typing) {
-                if (!$this->editTyping($typing, [$element->id], false)) {
-                    throw new \Exception('Failed to edit typing.');
-                }
-            } else {
-                if (!$this->createTyping($model, $id, [$element->id], false)) {
-                    throw new \Exception('Failed to create typing.');
-                }
+            if (!$this->createTyping(get_class($image), $id, array_merge($image->typings->pluck('element_id')->toArray(), [$element->id]), false)) {
+                throw new \Exception('Failed to add typing.');
             }
+
+            $characterManager = new CharacterManager;
+            if(!$characterManager->createLog(Auth::user()->id, 
+                    null, 
+                    null, null, 
+                    $recipient->id, 
+                    'Typing Credited', 
+                    $element->displayName . ' typing added', 
+                    'character',
+                    true,
+                    $oldData,
+                    $oldData + [$element->id])) {
+                    throw new \Exception('Failed to create log.');
+                }
 
             return $this->commitReturn(true);
         } catch (\Exception $e) {

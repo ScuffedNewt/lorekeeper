@@ -405,8 +405,11 @@ class CharacterImageController extends Controller {
             abort(404);
         }
 
+        // need to getRelationValue otherwise it will fill with typing from subtype/species
         return view('widgets._add_typing', [
             'object' => $image,
+            'typings' => $image->getRelationValue('typings'),
+            'info' => "This will set the typing for specifically this character's image (#" . $image->id . "). It will override typing inherited from the subtype or species."
         ]);
     }
 }
