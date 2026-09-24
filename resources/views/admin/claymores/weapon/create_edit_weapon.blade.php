@@ -110,7 +110,7 @@
         @include('widgets._add_limits', [
             'object' => $weapon,
             'info' => 'Limits are used to upgrade weapons.',
-            'showUnlocked' => false,
+            'hideIsUnlocked' => true,
             'customHeader' => 'Weapon Upgrade Limits',
         ])
 

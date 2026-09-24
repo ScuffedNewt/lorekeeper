@@ -85,7 +85,7 @@
     @if ($level->id)
         @include('widgets._add_limits', [
             'object' => $level,
-            'showUnlocked' => false,
+            'hideIsUnlocked' => true,
         ])
     @else
         <h3>Limits</h3>

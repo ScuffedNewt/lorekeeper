@@ -606,7 +606,7 @@ class UserController extends Controller {
     public function getUserGallery(Request $request, $name) {
         return view('user.gallery', [
             'user'        => $this->user,
-            'submissions' => $this->user->gallerySubmissions()->visible(Auth::user() ?? null)->paginate(20)->appends($request->query()),
+            'submissions' => $this->user->gallerySubmissions()->visible(Auth::user() ?? null)->with('collaborators', 'participants')->withDisplayData(Auth::user() ?? null)->paginate(20)->appends($request->query()),
         ]);
     }
 
@@ -671,7 +671,7 @@ class UserController extends Controller {
         return view('user.favorites', [
             'user'       => $this->user,
             'characters' => false,
-            'favorites'  => GallerySubmission::whereIn('id', $this->user->galleryFavorites()->pluck('gallery_submission_id')->toArray())->visible(Auth::user() ?? null)->orderBy('created_at', 'DESC')->paginate(20)->appends($request->query()),
+            'favorites'  => GallerySubmission::whereIn('id', $this->user->galleryFavorites()->pluck('gallery_submission_id')->toArray())->visible(Auth::check() ? Auth::user() : null)->orderBy('created_at', 'DESC')->paginate(20)->appends($request->query()),
         ]);
     }
 
@@ -690,7 +690,7 @@ class UserController extends Controller {
         return view('user.favorites', [
             'user'       => $this->user,
             'characters' => true,
-            'favorites'  => $this->user->characters->count() ? GallerySubmission::whereIn('id', $userFavorites)->whereIn('id', GalleryCharacter::whereIn('character_id', $userCharacters)->pluck('gallery_submission_id')->toArray())->visible(Auth::user() ?? null)->orderBy('created_at', 'DESC')->paginate(20)->appends($request->query()) : null,
+            'favorites'  => $this->user->characters->count() ? GallerySubmission::whereIn('id', $userFavorites)->whereIn('id', GalleryCharacter::whereIn('character_id', $userCharacters)->pluck('gallery_submission_id')->toArray())->visible(Auth::user() ?? null)->with('collaborators', 'participants')->favoritedCount(Auth::user() ?? null)->withCommentCount()->orderBy('created_at', 'DESC')->paginate(20)->appends($request->query()) : null,
         ]);
     }
 }

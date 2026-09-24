@@ -2,12 +2,8 @@
 
 namespace App\Models\Loot;
 
-use App\Models\Currency\Currency;
-use App\Models\Item\Item;
-use App\Models\Item\ItemCategory;
 use App\Models\Model;
-use App\Models\Pet\Pet;
-use App\Models\Status\StatusEffect;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Loot extends Model {
     /**
@@ -42,8 +38,8 @@ class Loot extends Model {
      * @var array
      */
     public static $createRules = [
-        'rewardable_type' => 'required',
-        'rewardable_id'   => 'required',
+        'rewardable_type' => 'nullable',
+        'rewardable_id'   => 'nullable',
         'quantity'        => 'required|integer|min:1',
         'weight'          => 'required|integer|min:1',
     ];
@@ -54,8 +50,8 @@ class Loot extends Model {
      * @var array
      */
     public static $updateRules = [
-        'rewardable_type' => 'required',
-        'rewardable_id'   => 'required',
+        'rewardable_type' => 'nullable',
+        'rewardable_id'   => 'nullable',
         'quantity'        => 'required|integer|min:1',
         'weight'          => 'required|integer|min:1',
     ];
@@ -70,28 +66,24 @@ class Loot extends Model {
      * Get the reward attached to the loot entry.
      */
     public function reward() {
-        switch ($this->rewardable_type) {
-            case 'Item':
-                return $this->belongsTo(Item::class, 'rewardable_id');
-            case 'ItemRarity':
-                return $this->belongsTo(Item::class, 'rewardable_id');
-            case 'Currency':
-                return $this->belongsTo(Currency::class, 'rewardable_id');
-            case 'LootTable':
-                return $this->belongsTo(LootTable::class, 'rewardable_id');
-            case 'Pet':
-                return $this->belongsTo(Pet::class, 'rewardable_id');
-            case 'ItemCategory':
-                return $this->belongsTo(ItemCategory::class, 'rewardable_id');
-            case 'ItemCategoryRarity':
-                return $this->belongsTo(ItemCategory::class, 'rewardable_id');
-            case 'Status':
-                return $this->belongsTo(StatusEffect::class, 'rewardable_id');
-            case 'None':
-                // Laravel requires a relationship instance to be returned (cannot return null), so returning one that doesn't exist here.
-                return $this->belongsTo(self::class, 'rewardable_id', 'loot_table_id')->whereNull('loot_table_id');
-        }
+        return $this->morphTo('reward', 'rewardable_type', 'rewardable_id');
+        // 'None' is implicitly handled by morphTo.
+    }
 
-        return null;
+    /**********************************************************************************************
+
+        ACCESSORS
+
+    **********************************************************************************************/
+
+    /**
+     * Override the rewardable type value
+     * we get None for site functions, but null for database relationship.
+     */
+    protected function rewardableType(): Attribute {
+        return Attribute::make(
+            get: fn (?string $value) => $value ? $value : 'None',
+            set: fn (?string $value) => $value,
+        );
     }
 }

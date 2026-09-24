@@ -36,6 +36,10 @@
                         </span>
                         {!! Form::select('character_is_focus[]', [0 => 'No', 1 => 'Yes'], 0, ['class' => 'form-control character-is-focus']) !!}
                     </div>
+                    @if (isset($submission) && (isset($isClaim) && !$isClaim))
+                        <div class="character-prompt-count">
+                        </div>
+                    @endif
                     <div class="character-rewards hide">
                         <h4>Character Rewards</h4>
                         <table class="table table-sm">

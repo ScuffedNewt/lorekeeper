@@ -110,7 +110,7 @@
         @include('widgets._add_limits', [
             'object' => $gear,
             'info' => 'Limits are used to upgrade gears.',
-            'showUnlocked' => false,
+            'hideIsUnlocked' => true,
             'customHeader' => 'Gear Upgrade Limits',
         ])
 

@@ -167,7 +167,7 @@ class ExperienceManager extends Service {
         DB::beginTransaction();
 
         try {
-            if (filter_var($quantity, FILTER_VALIDATE_INT) === false || $quantity < 0) {
+            if (!is_int($quantity) || $quantity < 0) {
                 throw new \Exception('Experience cost must be a non-negative whole number.');
             }
             $owner->newQuery()->whereKey($owner->id)->lockForUpdate()->firstOrFail();
