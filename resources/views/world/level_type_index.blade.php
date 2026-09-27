@@ -16,11 +16,7 @@
                     {{ $level->name }}
                     <x-admin-edit title="Level" :object="$level" />
                 </h1>
-                @if ($level->previousLevel)
-                    <p><strong>Previous Level:</strong> {{ $level->previousLevel?->name }}</p>
-                @else
-                    <p><strong>The beginner level!</strong></p>
-                @endif
+                @include('world._level_details', ['level' => $level])
                 {!! $level->parsed_description !!}
                 <hr class="my-3">
                 <div class="row">
@@ -38,7 +34,7 @@
                             <table class="table table-sm">
                                 <thead>
                                     <tr>
-                                        <th width="70%">Requires</th>
+                                        <th width="70%">Reward</th>
                                         <th width="30%">Amount</th>
                                     </tr>
                                 </thead>

@@ -231,18 +231,25 @@ class LevelManager extends Service {
             if (!$next) {
                 throw new \Exception('You are at the max level!');
             }
-            if (!$isGrant && ($level->experience?->quantity ?? 0) < $next->exp_required) {
+            if (!$isGrant && $next->exp_required === null && !hasLimits($next)) {
+                throw new \Exception('This level can only be obtained through rewards or grants.');
+            }
+            if (!$isGrant && $next->exp_required !== null && ($level->experience?->quantity ?? 0) < $next->exp_required) {
                 throw new \Exception('You do not have enough exp to level up!');
             }
 
-            $experience = Experience::find(config('lorekeeper.claymores_and_companions.levels.experience_id.'.($recipient->logType == 'User' ? 'users' : 'characters')));
-            if (!$isGrant && !$experience) {
+            $experience = !$isGrant && $next->exp_required !== null
+                ? Experience::find(config('lorekeeper.claymores_and_companions.levels.experience_id.'.($recipient->logType == 'User' ? 'users' : 'characters')))
+                : null;
+            if (!$isGrant && $next->exp_required !== null && !$experience) {
                 throw new \Exception('Experience required for leveling up is not set up correctly. Please contact an administrator.');
             }
 
-            if (!$isGrant && count(getLimits($next))) {
-                $limitService = new LimitManager;
-                if (!$limitService->checkLimits($next, false, null, 'Level Up', 'Used to level up '.$recipient->displayName.' to level '.$next->name)) {
+            // Grants bypass limit validation and any configured limit debits.
+            if (!$isGrant && hasLimits($next)) {
+                $limitService = app(LimitManager::class);
+                $limitData = $recipient->logType == 'Character' ? ['character_ids' => [$recipient->id]] : null;
+                if (!$limitService->checkLimits($next, false, $limitData, 'Level Up', 'Used to level up '.$recipient->displayName.' to '.$next->name)) {
                     foreach ($limitService->errors()->getMessages()['error'] as $error) {
                         flash($error)->error();
                     }
@@ -251,7 +258,7 @@ class LevelManager extends Service {
                 }
             }
 
-            if (!$isGrant && !$service->debitExp($recipient, 'Level Up', 'Used '.$next->exp_required.' '.$experience->name.' in level up', $experience, $next->exp_required)) {
+            if (!$isGrant && $next->exp_required !== null && !$service->debitExp($recipient, 'Level Up', 'Used '.$next->exp_required.' '.$experience->name.' in level up', $experience, $next->exp_required)) {
                 throw new \Exception('Error debiting exp.');
             }
 

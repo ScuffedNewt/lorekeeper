@@ -93,6 +93,13 @@ class UserLevel extends Model {
             return 100;
         }
 
-        return ($this->experience?->quantity / $nextLevel->exp_required) * 100;
+        if ($nextLevel->exp_required === null) {
+            return 0;
+        }
+        if ($nextLevel->exp_required == 0) {
+            return 100;
+        }
+
+        return (($this->experience?->quantity ?? 0) / $nextLevel->exp_required) * 100;
     }
 }

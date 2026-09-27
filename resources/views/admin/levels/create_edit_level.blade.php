@@ -8,7 +8,7 @@
     {!! breadcrumbs([
         'Admin Panel' => 'admin',
         ucfirst($type) . ' Levels' => 'admin/levels/' . $type,
-        ($level->id ? 'Edit' : 'Create ') . ucfirst($type) . ' Level' => $level->id ? 'admin/levels/' . $type . '/edit/' . $level->id : 'admin/levels/' . $type . '/create',
+        ($level->id ? 'Edit ' : 'Create ') . ucfirst($type) . ' Level' => $level->id ? 'admin/levels/' . $type . '/edit/' . $level->id : 'admin/levels/' . $type . '/create',
     ]) !!}
 
     <h1>{{ $level->id ? 'Edit' : 'Create' }} {{ ucfirst($type) }} Level
@@ -35,8 +35,9 @@
             </div>
         @endif
         <div class="col-md form-group">
-            {!! Form::label('EXP Required') !!}
-            {!! Form::number('exp_required', $level->exp_required, ['class' => 'form-control', 'min' => 1]) !!}
+            {!! Form::label('exp_required', 'EXP Required (Optional)') !!}
+            <p class="text-muted"><small>Leave blank to allow this level through its limits, rewards, or grants. Without limits, only rewards or grants can award it.</small></p>
+            {!! Form::number('exp_required', $level->exp_required, ['class' => 'form-control', 'min' => 1, 'placeholder' => 'Input EXP']) !!}
         </div>
     </div>
 
@@ -86,6 +87,7 @@
         @include('widgets._add_limits', [
             'object' => $level,
             'hideIsUnlocked' => true,
+            'hideAutoUnlock' => true,
         ])
     @else
         <h3>Limits</h3>

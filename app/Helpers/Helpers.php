@@ -619,6 +619,21 @@ function getLimitData() {
             case 'dynamic':
                 $query = App\Models\Limit\DynamicLimit::orderBy('name')->orderBy('name');
                 break;
+            case 'element':
+                $query = App\Models\Element\Element::orderBy('name');
+                break;
+            case 'class':
+                $query = App\Models\Character\CharacterClass::orderBy('name');
+                break;
+            case 'character_level':
+                $query = App\Models\Level\CharacterLevel::query();
+                break;
+            case 'user_level':
+                $query = App\Models\Level\UserLevel::query();
+                break;
+            case 'stat':
+                $query = App\Models\Stat\Stat::orderBy('name');
+                break;
                 // Add the query builder for your other limits here, set with the matching key in config('lorekeeper.limits.limit_types')
                 // If your limit type does not have a model, you may need to add special handling here.
                 //

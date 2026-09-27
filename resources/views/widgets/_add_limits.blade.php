@@ -28,10 +28,10 @@
     // Hide "is unlocked" option when it makes sense for a limit to always be one or the other, much like the above
     if (!isset($hideIsUnlocked)) {
         $hideIsUnlocked = false;
-        // Opinionated choice, if "Is Unlocked" is hidden, then the limit will be assume to always be a one-time unlock
-        if (!isset($isUnlocked)) {
-            $isUnlocked = true;
-        }
+    }
+    // Opinionated choice, if "Is Unlocked" is hidden, then the limit will be assume to always be a one-time unlock
+    if (!isset($isUnlocked)) {
+        $isUnlocked = true;
     }
 @endphp
 
@@ -75,11 +75,17 @@
                     <div class="col-md form-group border-left">
                         {!! Form::label('is_auto_unlocked', 'Automatically Unlock?', ['class' => 'form-label font-weight-bold']) !!} {!! add_help("This only affects objects with 'Is Unlocked?' set to 'Yes'.") !!}
                         <p>
-                            If this is set to "No", the object will continue to be locked until all requirements are met, every time the user attempts to use or interact with it.
-                            <br />
-                            If this is set to "Yes", the object will be unlocked for the user to interact with indefinitely after the requirements are met once.
-                            <br />
-                            The "Yes" option is good for one-time unlocks such as shops, locations, certain prompts, etc.
+                            If this is set to "No", the user must manually unlock the object by interacting with it - ex. clicking on the "Unlock" button.
+                        <div class="text-warning">
+                            This will prevent the limits from being used as part of a series of actions, ex. prompt submissions.
+                        </div>
+                        <br />
+                        If this is set to "Yes", the object will be automatically unlocked when the user attempts to access them - ex. when a user enters a shop.
+                        <br />
+                        This setting is good for preventing users from being debited before being certain they want to interact with the object.
+                        <div class="text-danger">
+                            This option is not suitable for objects that should have limits as part of an action workflow, ex. prompt submissions.
+                        </div>
                         </p>
                         {!! Form::select('is_auto_unlocked', [true => 'Yes', false => 'No'], $limits ? $limits->first()->is_auto_unlocked : false, ['class' => 'form-control']) !!}
                     </div>
@@ -142,6 +148,7 @@
             </div>
             <div class="form-group hide debit">
                 {!! Form::label('Debit') !!}
+                {!! Form::select('debit[]', [true => 'Debit', false => 'Don\'t Debit'], false, ['class' => 'form-control']) !!}
             </div>
         </div>
         <div class="limit-delete col-md-1 d-flex align-items-center">

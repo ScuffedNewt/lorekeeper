@@ -27,7 +27,7 @@ class LevelService extends Service {
             $level = Level::create([
                 'previous_level_id'  => $data['previous_level_id'],
                 'level_type'         => $type,
-                'exp_required'       => $data['exp_required'],
+                'exp_required'       => (($data['exp_required'] ?? '') === '' ? null : $data['exp_required']),
                 'description'        => $data['description'],
                 'name'               => $data['name'],
                 'parsed_description' => $data['description'],
@@ -70,7 +70,7 @@ class LevelService extends Service {
 
             $level->update([
                 'previous_level_id' => $data['previous_level_id'],
-                'exp_required'      => $data['exp_required'],
+                'exp_required'      => (($data['exp_required'] ?? '') === '' ? null : $data['exp_required']),
                 'description'       => $data['description'],
             ]);
 

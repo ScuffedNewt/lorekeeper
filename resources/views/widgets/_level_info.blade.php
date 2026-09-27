@@ -9,24 +9,42 @@
         <div class="container text-center">
             @if ($level->nextLevel)
                 <p><b>Next Level:</b> {{ $level->nextLevel->name }}</p>
-                {{ $level->experience?->quantity ?? 0 }}/{{ $level->nextLevel->exp_required }}
-                <div class="progress">
-                    <div class="progress-bar progress-bar-striped active progress-bar-animated" role="progressbar" aria-valuenow="{{ $level->experience?->quantity ?? 0 }}" aria-valuemin="0" aria-valuemax="{{ $level->nextLevel->exp_required }}"
-                        style="width:{{ $level->progressBarWidth }}%">
-                        {{ $level->experience?->quantity ?? 0 }}/{{ $level->nextLevel->exp_required }}
+                @if ($level->nextLevel->exp_required === null)
+                    @if (hasLimits($level->nextLevel))
+                        <div class="alert alert-info" role="alert">
+                            Complete the requirements below to advance. No EXP is needed. This level can also be obtained through rewards or grants.
+                        </div>
+                        @include('widgets._limits', ['object' => $level->nextLevel, 'hideUnlock' => true])
+                        @if (Auth::check() && ($level->user ? Auth::id() == $level->user->id : Auth::id() == $level->character?->user_id))
+                            {!! Form::open(['url' => $level->user ? '/user-stats/level' : $level->character->url . '/stats/level']) !!}
+                            {!! Form::submit('Level Up!', ['class' => 'btn btn-success']) !!}
+                            {!! Form::close() !!}
+                        @endif
+                    @else
+                        <div class="alert alert-info mb-0" role="alert">
+                            This level can only be obtained through rewards or grants.
+                        </div>
+                    @endif
+                @else
+                    {{ $level->experience?->quantity ?? 0 }}/{{ $level->nextLevel->exp_required }}
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-striped active progress-bar-animated" role="progressbar" aria-valuenow="{{ $level->experience?->quantity ?? 0 }}" aria-valuemin="0" aria-valuemax="{{ $level->nextLevel->exp_required }}"
+                            style="width:{{ $level->progressBarWidth }}%">
+                            {{ $level->experience?->quantity ?? 0 }}/{{ $level->nextLevel->exp_required }}
+                        </div>
                     </div>
-                </div>
-                @if ($level->experience?->quantity >= $level->nextLevel->exp_required && Auth::check() && ($level->user ?? Auth::user()->id == $level->character?->user_id))
-                    <div class="text-center m-1">
-                        <b>
-                            <p>You have enough EXP to advance to the next level!</p>
-                        </b>
-                    </div>
-                    {!! Form::open(['url' => $level->user ? '/user-stats/level' : $level->character->url . '/stats/level']) !!}
+                    @if ($level->experience?->quantity >= $level->nextLevel->exp_required && Auth::check() && ($level->user ?? Auth::user()->id == $level->character?->user_id))
+                        <div class="text-center m-1">
+                            <b>
+                                <p>You have enough EXP to advance to the next level!</p>
+                            </b>
+                        </div>
+                        {!! Form::open(['url' => $level->user ? '/user-stats/level' : $level->character->url . '/stats/level']) !!}
 
-                    {!! Form::submit('Level Up!', ['class' => 'btn btn-success']) !!}
+                        {!! Form::submit('Level Up!', ['class' => 'btn btn-success']) !!}
 
-                    {!! Form::close() !!}
+                        {!! Form::close() !!}
+                    @endif
                 @endif
             @else
                 {{ $level->experience?->quantity ?? 0 }} Exp (Max Level)

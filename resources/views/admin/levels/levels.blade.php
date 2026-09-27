@@ -50,7 +50,7 @@
                     <tr class="sort-item" data-id="{{ $level->id }}">
                         <td>{{ $level->name }}</td>
                         <td>{{ $level->nextLevel ? $level->nextLevel->name : 'N/A' }}</td>
-                        <td>{{ $level->exp_required }}</td>
+                        <td>{{ $level->exp_required ?? (hasLimits($level) ? 'Limits, rewards, or grants' : 'Rewards or grants only') }}</td>
                         <td>
                             @if (!count($level->rewards))
                                 <p>No rewards.</p>

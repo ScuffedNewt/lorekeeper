@@ -35,7 +35,7 @@
         <li class="sidebar-section">
             <div class="sidebar-section-header">Levels</div>
             @if (config('lorekeeper.claymores_and_companions.visibility_settings.user_levels'))
-                <div class="sidebar-item"><a href="{{ url('world/levels') }}" class="{{ set_active('world/levels/user*') }}">User Levels</a></div>
+                <div class="sidebar-item"><a href="{{ url('world/levels/user') }}" class="{{ set_active('world/levels/user*') }}">User Levels</a></div>
             @endif
             @if (config('lorekeeper.claymores_and_companions.visibility_settings.character_levels'))
                 <div class="sidebar-item"><a href="{{ url('world/levels/character') }}" class="{{ set_active('world/levels/character*') }}">Character Levels</a></div>

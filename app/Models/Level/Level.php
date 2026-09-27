@@ -4,8 +4,11 @@ namespace App\Models\Level;
 
 use App\Models\Model;
 use App\Models\Reward\Reward;
+use App\Traits\Limitable;
 
 class Level extends Model {
+    use Limitable;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -28,7 +31,8 @@ class Level extends Model {
      * @var array
      */
     public static $createRules = [
-        'name'  => 'required',
+        'name'         => 'required',
+        'exp_required' => 'nullable|integer|min:0',
     ];
 
     /**
@@ -37,7 +41,8 @@ class Level extends Model {
      * @var array
      */
     public static $updateRules = [
-        'name'  => 'required',
+        'name'         => 'required',
+        'exp_required' => 'nullable|integer|min:0',
     ];
 
     /**********************************************************************************************
