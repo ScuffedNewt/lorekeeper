@@ -98,10 +98,15 @@
                                                 'class' => 'form-control character-level-id',
                                                 'placeholder' => 'Select Levels',
                                             ]) !!}</div>
-                                            <div class="character-specific-level {{ $reward->rewardable_type == 'CharacterSpecificLevel' ? 'show' : 'hide' }}">{!! Form::select('character_rewardable_id[' . $character->character_id . '][]', \App\Models\Level\CharacterSpecificLevel::ordered('Character')->pluck('name', 'id'), $reward->rewardable_type == 'CharacterSpecificLevel' ? $reward->rewardable_id : null, [
-                                                'class' => 'form-control character-specific-level-id',
-                                                'placeholder' => 'Select Specific Level',
-                                            ]) !!}</div>
+                                            <div class="character-specific-level {{ $reward->rewardable_type == 'CharacterSpecificLevel' ? 'show' : 'hide' }}">{!! Form::select(
+                                                'character_rewardable_id[' . $character->character_id . '][]',
+                                                \App\Models\Level\CharacterSpecificLevel::ordered('Character')->pluck('name', 'id'),
+                                                $reward->rewardable_type == 'CharacterSpecificLevel' ? $reward->rewardable_id : null,
+                                                [
+                                                    'class' => 'form-control character-specific-level-id',
+                                                    'placeholder' => 'Select Specific Level',
+                                                ],
+                                            ) !!}</div>
                                             <div class="character-elements {{ $reward->rewardable_type == 'Element' ? 'show' : 'hide' }}">{!! Form::select('character_rewardable_id[' . $character->character_id . '][]', $elements, $reward->rewardable_type == 'Element' ? $reward->rewardable_id : null, [
                                                 'class' => 'form-control character-element-id',
                                                 'placeholder' => 'Select Element',

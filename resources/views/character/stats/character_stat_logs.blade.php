@@ -72,14 +72,26 @@
     <div class="mb-4 logs-table">
         <div class="logs-table-header">
             <div class="row">
-                <div class="col-6 col-md-2"><div class="logs-table-cell">Sender</div></div>
-                <div class="col-6 col-md-2"><div class="logs-table-cell">Recipient</div></div>
-                <div class="col-6 col-md-2"><div class="logs-table-cell">Old Level</div></div>
-                <div class="col-6 col-md-2"><div class="logs-table-cell">New Level</div></div>
-                <div class="col-6 col-md-2"><div class="logs-table-cell">Log</div></div>
-                <div class="col-6 col-md-2"><div class="logs-table-cell">Date</div></div>
+                <div class="col-6 col-md-2">
+                    <div class="logs-table-cell">Sender</div>
+                </div>
+                <div class="col-6 col-md-2">
+                    <div class="logs-table-cell">Recipient</div>
+                </div>
+                <div class="col-6 col-md-2">
+                    <div class="logs-table-cell">Old Level</div>
+                </div>
+                <div class="col-6 col-md-2">
+                    <div class="logs-table-cell">New Level</div>
+                </div>
+                <div class="col-6 col-md-2">
+                    <div class="logs-table-cell">Log</div>
+                </div>
+                <div class="col-6 col-md-2">
+                    <div class="logs-table-cell">Date</div>
                 </div>
             </div>
+        </div>
         <div class="logs-table-body">
             @foreach ($levels as $level)
                 <div class="logs-table-row">
