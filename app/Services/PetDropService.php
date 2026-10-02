@@ -2,15 +2,11 @@
 
 namespace App\Services;
 
-use App\Models\Currency\Currency;
-use App\Models\Item\Item;
-use App\Models\Loot\LootTable;
 use App\Models\Pet\Pet;
-use App\Models\Pet\PetDrop;
 use App\Models\Pet\PetDropData;
 use App\Models\User\UserPet;
 use Carbon\Carbon;
-use DB;
+use Illuminate\Support\Facades\DB;
 
 class PetDropService extends Service {
     /*
@@ -45,6 +41,9 @@ class PetDropService extends Service {
             // Collect parameter data and encode it
             $paramData = [];
             foreach ($data['label'] as $key => $param) {
+                if (preg_match('/\s/', $param)) {
+                    throw new \Exception('Group labels can not have spaces.');
+                }
                 $paramData[$param] = $data['weight'][$key];
             }
 
@@ -58,6 +57,19 @@ class PetDropService extends Service {
                 'name'       => $data['drop_name'] ?? 'drop',
                 'override'   => $data['override'] ?? 0,
             ]);
+
+            // update existing pets to have the new drop data
+            $existingPets = UserPet::where('pet_id', $data['pet_id'])->get();
+            foreach ($existingPets as $pet) {
+                $pet->drops->update([
+                    'drop_id'         => $drop->id,
+                    'parameters'      => $drop->rollParameters(),
+                    'drops_available' => 0,
+                    'next_day'        => Carbon::now()
+                        ->add($drop->frequency, $drop->interval)
+                        ->startOf($drop->interval),
+                ]);
+            }
 
             return $this->commitReturn($drop);
         } catch (\Exception $e) {
@@ -79,17 +91,13 @@ class PetDropService extends Service {
         DB::beginTransaction();
 
         try {
-            // UPDATE 2023 - pet id can no longer change to avoid unwanted repercussion related to the pet's drop data
-
-            // Check to see if pet exists and if drop data already exists for it.
-            // $pet = Pet::find($data['pet_id']);
-            // if(!$pet) throw new \Exception('The selected pet is invalid.');
-            // if(PetDropData::where('pet_id', $data['pet_id'])->where('id', '!=', $drop->id)->exists()) throw new \Exception('This pet already has drop data. Consider editing the existing data instead.');
-
             // Collect parameter data and encode it
             $paramData = [];
             if (isset($data['label'])) {
                 foreach ($data['label'] as $key => $param) {
+                    if (preg_match('/\s/', $param)) {
+                        throw new \Exception('Group labels can not have spaces.');
+                    }
                     $paramData[$param] = $data['weight'][$key];
                 }
             }
@@ -109,6 +117,19 @@ class PetDropService extends Service {
                 'data'       => $this->populateAssetData($data['rewardable_type'], $data['rewardable_id'], $data['min_quantity'], $data['max_quantity']),
                 'override'   => $data['override'] ?? 0,
             ]);
+            $drop->refresh();
+
+            // update existing pets to have the new drop data
+            // the changes are limited to avoid removing things from players
+            $existingPets = UserPet::where('pet_id', $drop->pet_id)->get();
+            foreach ($existingPets as $pet) {
+                $petDrop = $pet->drops;
+                // update the parameters if parameter no longer exists
+                if (!in_array($petDrop->parameters, $data['label'])) {
+                    $petDrop->parameters = $drop->rollParameters();
+                }
+                $petDrop->save();
+            }
 
             return $this->commitReturn($drop);
         } catch (\Exception $e) {
@@ -129,11 +150,16 @@ class PetDropService extends Service {
         DB::beginTransaction();
 
         try {
-            // if (PetDrop::where('drop_id', $drop->id)->exists()) {
-            //     throw new \Exception('A pet has drops using this data. Consider disabling drops instead.');
-            // }
-
-            $drop->petDrops()->delete();
+            // instead of deleting pet drops now, we set all of the relevant ones to null
+            $drops = $drop->petDrops;
+            foreach ($drops as $drop) {
+                $drop->update([
+                    'drop_id'         => null,
+                    'parameters'      => null,
+                    'drops_available' => 0,
+                    'next_day'        => null,
+                ]);
+            }
             $drop->delete();
 
             return $this->commitReturn(true);
@@ -165,7 +191,7 @@ class PetDropService extends Service {
 
         try {
             if (!$pet->drops->drops_available) {
-                throw new \Exception('This pet doesn\'t have any available drops.');
+                throw new \Exception($pet->displayName.' pet doesn\'t have any available drops.');
             }
             if (!$pet->drops->dropData->isActive) {
                 throw new \Exception('Drops are not currently active for this pet.');
@@ -178,20 +204,7 @@ class PetDropService extends Service {
                 if (isset($drops->rewards(false)[strtolower($pet->drops->parameters)])) {
                     foreach ($drops->rewards(false)[strtolower($pet->drops->parameters)] as $data) {
                         // get object
-                        switch ($data->rewardable_type) {
-                            case 'Item':
-                                $reward = Item::find($data->rewardable_id);
-                                break;
-                            case 'Currency':
-                                $reward = Currency::find($data->rewardable_id);
-                                if (!$reward->is_user_owned) {
-                                    throw new \Exception('Invalid currency selected.');
-                                }
-                                break;
-                            case 'LootTable':
-                                $reward = LootTable::find($data->rewardable_id);
-                                break;
-                        }
+                        $reward = getAssetModelString(strtolower($data->rewardable_type))::find($data->rewardable_id);
                         if (!$reward) {
                             continue;
                         }
@@ -209,7 +222,7 @@ class PetDropService extends Service {
             }
 
             if ($flash) {
-                flash('You received: '.createRewardsString($final_rewards))->info();
+                flash($pet->displayName.' dropped: '.createRewardsString($final_rewards))->info();
             }
 
             // Clear the number of available drops
@@ -239,21 +252,7 @@ class PetDropService extends Service {
                     if (!isset($assets[$group])) {
                         $assets[$group] = createAssetsArray();
                     }
-                    $reward = null;
-                    switch ($type) {
-                        case 'Item':
-                            $reward = Item::find($rewardable_id[$group][$key]);
-                            break;
-                        case 'Currency':
-                            $reward = Currency::find($rewardable_id[$group][$key]);
-                            if (!$reward->is_user_owned) {
-                                throw new \Exception('Invalid currency selected.');
-                            }
-                            break;
-                        case 'LootTable':
-                            $reward = LootTable::find($rewardable_id[$group][$key]);
-                            break;
-                    }
+                    $reward = getAssetModelString(strtolower($type))::find($rewardable_id[$group][$key]);
                     if (!$reward) {
                         continue;
                     }

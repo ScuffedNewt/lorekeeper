@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
+use App\Facades\Notifications;
 use App\Models\Character\Character;
 use App\Models\Pet\Pet;
-use App\Models\Pet\PetDrop;
 use App\Models\User\User;
 use App\Models\User\UserItem;
 use App\Models\User\UserPet;
@@ -12,7 +12,6 @@ use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Notifications;
 
 class PetManager extends Service {
     /*
@@ -461,15 +460,11 @@ class PetManager extends Service {
         try {
             // find parent if id is default
             if ($id == 0) {
-                $default = true;
+                $isDefault = true;
                 $pet_type = Pet::find($pet->pet_id);
                 $id = $pet_type->parent == null ? null : $pet_type->parent->id;
             } else {
-                $default = false;
-            }
-
-            if ($id == null) {
-                throw new \Exception('Pet is already the default variant.');
+                $isDefault = false;
             }
 
             if (!$isStaff || !Auth::user()->isStaff) {
@@ -483,11 +478,14 @@ class PetManager extends Service {
                 if (!$tag) {
                     throw new \Exception('Item is not a splice.');
                 }
-                if ($default == true && $tag->data['variant_ids'] && !in_array('default', $tag->data['variant_ids'])) {
+                if ($isDefault && $tag->data['variant_ids'] && !in_array('default', $tag->data['variant_ids'])) {
                     throw new \Exception('Item can not change pet into the default variant.');
                 }
-                if ($default == false && $tag->data['variant_ids'] && !in_array($id, $tag->data['variant_ids'])) {
+                if (!$isDefault && $tag->data['variant_ids'] && !in_array($id, $tag->data['variant_ids'])) {
                     throw new \Exception('Item is not a splice for this variant.');
+                }
+                if ($isDefault && $id == null) {
+                    throw new \Exception('Pet is already the default variant.');
                 }
                 if ($id == $pet->pet_id) {
                     throw new \Exception('Pet is already this variant.');
@@ -501,24 +499,34 @@ class PetManager extends Service {
                     throw new \Exception('Could not debit item.');
                 }
             } else {
-                $this->logAdminAction($pet->user, 'Pet Variant Changed', 'Changed pet id #'.$pet->id.'/'.$pet->pet->name.' to variant '.Pet::find($id)->name);
+                if ($isDefault && $id == null) {
+                    throw new \Exception('Pet is already the default variant.');
+                }
+
+                $this->logAdminAction($pet->user, 'Pet Variant Changed', 'Changed pet to '.$pet->pet->name.' variant');
             }
 
             $pet->pet_id = $id;
             $pet->save();
 
             // update pet drop, if relevant
-            if (isset($pet->drops)) {
-                $newPet = Pet::find($id);
-                if (isset($newPet->dropData)) {
-                    if ($pet->drops->drop_id !== $newPet->dropData->id) {
-                        $pet->drops->drop_id = $newPet->dropData->id;
-                        $pet->drops->save();
-                    }
-                } else {
-                    // the new variant does not have drops, so we discard the old drops row
-                    $pet->drops()->delete();
-                }
+            $pet->refresh();
+            if ($pet->drops && isset($pet->pet->dropData)) {
+                $pet->drops->update([
+                    'drop_id'         => $pet->pet->dropData->id,
+                    'parameters'      => $pet->pet->dropData->rollParameters(),
+                    'drops_available' => 0,
+                    'next_day'        => Carbon::now()
+                        ->add($pet->pet->dropData->frequency, $pet->pet->dropData->interval)
+                        ->startOf($pet->pet->dropData->interval),
+                ]);
+            } else {
+                $pet->drops->update([
+                    'drop_id'         => null,
+                    'parameters'      => null,
+                    'drops_available' => 0,
+                    'next_day'        => null,
+                ]);
             }
 
             return $this->commitReturn(true);
@@ -541,10 +549,6 @@ class PetManager extends Service {
         DB::beginTransaction();
 
         try {
-            if ($id == 0) {
-                $id = null;
-            }
-
             if (!$isStaff || !Auth::user()->isStaff) {
                 if (!$stack_id) {
                     throw new \Exception('No item selected.');
@@ -561,7 +565,7 @@ class PetManager extends Service {
                     throw new \Exception('Could not debit item.');
                 }
             } else {
-                $this->logAdminAction($pet->user, 'Pet Evolution Changed', 'Changed pet id #'.$pet->id.'/'.$pet->pet->name.' to evolution #'.$id);
+                $this->logAdminAction($pet->user, 'Pet Evolution Changed', ['pet' => $pet->id, 'evolution' => $id]);
             }
 
             $pet->evolution_id = $id;
@@ -694,26 +698,31 @@ class PetManager extends Service {
                     'data'         => $data,
                     'evolution_id' => $evolution?->id,
                 ]);
-            }
 
-            // Create drop information for the pet, if relevant
-            if ($pet->hasDrops) {
-                $drop = PetDrop::create([
-                    'drop_id'         => $user_pet->pet->dropData->id,
-                    'user_pet_id'     => $user_pet->id,
-                    'parameters'      => $user_pet->pet->dropData->rollParameters(),
-                    'drops_available' => 0,
-                    'next_day'        => Carbon::now()
-                        ->add($user_pet->pet->dropData->frequency, $user_pet->pet->dropData->interval)
-                        ->startOf($user_pet->pet->dropData->interval),
-                ]);
-                if (!$drop) {
-                    throw new \Exception('Failed to create drop.');
+                // Create drop information for the pet, if relevant
+                if ($user_pet->pet->hasDrops) {
+                    $user_pet->drops()->create([
+                        'drop_id'         => $user_pet->pet->dropData->id,
+                        'user_pet_id'     => $user_pet->id,
+                        'parameters'      => $user_pet->pet->dropData->rollParameters(),
+                        'drops_available' => 0,
+                        'next_day'        => Carbon::now()
+                            ->add($user_pet->pet->dropData->frequency, $user_pet->pet->dropData->interval)
+                            ->startOf($user_pet->pet->dropData->interval),
+                    ]);
+                } else {
+                    $user_pet->drops()->create([
+                        'drop_id'         => null,
+                        'user_pet_id'     => $user_pet->id,
+                        'parameters'      => null,
+                        'drops_available' => 0,
+                        'next_day'        => null,
+                    ]);
                 }
-            }
 
-            if ($type && !$this->createLog($sender ? $sender->id : null, $recipient->id, null, $type, $data['data'], $pet->id, $quantity)) {
-                throw new \Exception('Failed to create log.');
+                if ($type && !$this->createLog($sender ? $sender->id : null, $recipient->id, null, $type, $data['data'], $pet->id, $quantity)) {
+                    throw new \Exception('Failed to create log.');
+                }
             }
 
             return $this->commitReturn(true);

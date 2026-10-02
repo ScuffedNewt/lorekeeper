@@ -7,7 +7,6 @@ use App\Models\Character\Character;
 use App\Models\Item\ItemTag;
 use App\Models\Pet\Pet;
 use App\Models\Pet\PetCategory;
-use App\Models\Pet\PetDrop;
 use App\Models\User\User;
 use App\Models\User\UserItem;
 use App\Models\User\UserPet;
@@ -343,26 +342,27 @@ class PetController extends Controller {
      * @return \Illuminate\Http\RedirectResponse
      */
     public function postClaimAllPetDrops(PetDropService $service) {
-        $user_pet_ids = UserPet::where('user_id', Auth::user()->id)->pluck('id');
-        $pet_drops = PetDrop::whereIn('user_pet_id', $user_pet_ids)->where('drops_available', '>', 0)->pluck('user_pet_id');
-        $pets = UserPet::whereIn('id', $pet_drops)->get();
+        $user_pets = UserPet::where('user_id', Auth::user()->id)->whereHas('drops.dropData')->whereRelation('drops', 'drops_available', '>', 0)->get();
 
-        $rewards = createAssetsArray();
-        foreach ($pets as $pet) {
-            if ($assets = $service->claimPetDrops($pet, false)) {
-                $rewards = mergeAssetsArrays($rewards, $assets);
-            } else {
-                foreach ($service->errors()->getMessages()['error'] as $error) {
-                    flash($error)->error();
+        if (!($user_pets->count())) {
+            flash('No drops to claim.')->info();
+        } else {
+            $rewards = createAssetsArray();
+            foreach ($user_pets as $pet) {
+                // set the below to "true" to flash the individual drops from each pet
+                if ($assets = $service->claimPetDrops($pet, false)) {
+                    $rewards = mergeAssetsArrays($rewards, $assets);
+                } else {
+                    foreach ($service->errors()->getMessages()['error'] as $error) {
+                        flash($error)->error();
+                    }
                 }
             }
+            if (createRewardsString($rewards)) {
+                flash('You received: '.createRewardsString($rewards))->info();
+            }
+            flash('Drops claimed successfully.')->success();
         }
-        if (createRewardsString($rewards)) {
-            flash('You received: '.createRewardsString($rewards))->info();
-        } else {
-            flash('No drops to claim.')->info();
-        }
-        flash('Drops claimed successfully.')->success();
 
         return redirect()->back();
     }

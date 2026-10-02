@@ -10,7 +10,7 @@
     @endif
 </h4>
 <div class="alert alert-info mt-3">
-    <i class="fas fa-info-circle"></i> Drops every {{ $pet->drops->dropData->interval }}.
+    <i class="fas fa-info-circle"></i> Drops every {{ $pet->drops->dropData->frequency > 1 ? $pet->drops->dropData->frequency . ' ' . Str::plural($pet->drops->dropData->interval) : $pet->drops->dropData->interval }}.
 </div>
 <a class="btn btn-primary mb-2" data-toggle="collapse" href="#drops" role="button" aria-expanded="false" aria-controls="drops">
     View Drops
@@ -18,16 +18,16 @@
 
 <div class="card card-body mb-4 collapse" id="drops">
     @if ($pet->availableDrops)
-        <p>This pet produces these {{ isset($pet->drops->dropData->name) ? strtolower($pet->drops->dropData->name) . 's' : 'drops' }}, based on their type of pet and/or variant:</p>
-        <table class="table table-sm category-table">
-            <thead>
-                <tr>
-                    <th width="50%">Reward</th>
-                    <th>Quantity</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (isset($pet->availableDrops->rewards(true)[strtolower($pet->drops->parameters)]))
+        @if (isset($pet->availableDrops->rewards(true)[strtolower($pet->drops->parameters)]))
+            <p>This pet produces these {{ isset($pet->drops->dropData->name) ? strtolower($pet->drops->dropData->name) . 's' : 'drops' }}, based on their type of pet and/or variant:</p>
+            <table class="table table-sm category-table">
+                <thead>
+                    <tr>
+                        <th width="50%">Reward</th>
+                        <th>Quantity</th>
+                    </tr>
+                </thead>
+                <tbody>
                     @foreach ($pet->availabledrops->rewards(true)[strtolower($pet->drops->parameters)] as $reward)
                         <tr>
                             @php $reward_object = $reward->rewardable_type::find($reward->rewardable_id); @endphp
@@ -40,13 +40,11 @@
                             <td>Between {{ $reward->min_quantity . ' and ' . $reward->max_quantity }}</td>
                         </tr>
                     @endforeach
-                @else
-                    <tr>
-                        <td>No drops available for this pet.</td>
-                    </tr>
-                @endif
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        @else
+            <div class="alert alert-info">No rewards are currently assigned to this pet drop. An update is likely in progress. Check back later!</div>
+        @endif
     @else
         <p>This pet {{ isset($pet->drops->dropData->name) ? 'doesn\'t produce any ' . strtolower($pet->drops->dropData->name) . 's' : 'isn\'t eligible for any drops' }}.</p>
     @endif
