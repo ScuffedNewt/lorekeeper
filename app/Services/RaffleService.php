@@ -85,6 +85,8 @@ class RaffleService extends Service {
         DB::beginTransaction();
 
         try {
+            $raffle->rewards()->delete();
+            $raffle->limits()->delete();
             $raffle->tickets()->delete();
             $raffle->delete();
 

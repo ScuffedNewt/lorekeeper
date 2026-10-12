@@ -53,6 +53,7 @@ class ConvertRewards extends Command {
             $this->info('No prompt rewards to convert.');
         }
 
+        $this->line("\nConverting raffle entry rewards...\n");
         if (Schema::hasTable('raffle_entry_rewards')) {
             $raffleRewards = DB::table('raffle_entry_rewards')->get();
             $bar = $this->output->createProgressBar(count($raffleRewards));
@@ -64,6 +65,7 @@ class ConvertRewards extends Command {
                     'rewardable_type' => $raffleReward->rewardable_type,
                     'rewardable_id'   => $raffleReward->rewardable_id,
                     'quantity'        => $raffleReward->quantity,
+                    'data'            => ['type' => 'winner_reward', 'position' => null], // required to allow rewards to display
                 ]);
 
                 $bar->advance();

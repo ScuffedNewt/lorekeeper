@@ -754,16 +754,31 @@ function getRewardLootData($showData, $recipient = 'User', $useCustomSelectize =
 
         // If your asset type does not have a model with an id and name value, then you may need to add special handling here.
         if ($useCustomSelectize) {
-            $data = $query->get()->mapWithKeys(function ($item) {
-                return [
-                    $item->id => json_encode([
-                        'name'      => $rewardKey == 'Character' ? $item->slug : $item->name,
-                        'image_url' => $item->imageUrl ?? null,
-                    ]),
-                ];
-            });
+            if ($rewardKey == 'Character') {
+                $data = $query->get()->mapWithKeys(function ($item) {
+                    return [
+                        $item->id => [
+                            'name'      => $item->fullName,
+                            'image_url' => $item->imageUrl ?? null,
+                        ],
+                    ];
+                })->toArray();
+            } else {
+                $data = $query->get()->mapWithKeys(function ($item) {
+                    return [
+                        $item->id => [
+                            'name'      => $item->name,
+                            'image_url' => $item->imageUrl ?? null,
+                        ],
+                    ];
+                })->toArray();
+            }
         } else {
-            $data = $query->pluck(($rewardKey == 'Character' ? 'slug' : 'name'), 'id')->toArray();
+            if ($rewardKey == 'Character') {
+                $data = $query->get()->pluck('fullName', 'id')->toArray();
+            } else {
+                $data = $query->pluck('name', 'id')->toArray();
+            }
         }
 
         // Finally, add the data to the array.

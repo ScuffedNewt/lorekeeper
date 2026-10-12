@@ -35,7 +35,7 @@
     </div>
     <div class="col-md-6 form-group">
         {!! Form::checkbox('allow_entry', 1, $raffle->allow_entry, ['class' => 'form-check-input mr-2', 'data-toggle' => 'toggle']) !!}
-        {!! Form::label('allow_entry', 'Allow users to enter?', ['class' => 'form-check-label ml-3']) !!} {!! add_help('Allows users to enter themselves into the raffle.') !!}
+        {!! Form::label('allow_entry', 'Allow Users to Enter?', ['class' => 'form-check-label ml-3']) !!} {!! add_help('Allows users to enter themselves into the raffle.') !!}
     </div>
     <div class="col-md-6 form-group">
         {!! Form::checkbox('is_fto', 1, $raffle->is_fto, ['class' => 'form-check-input mr-2', 'data-toggle' => 'toggle']) !!}

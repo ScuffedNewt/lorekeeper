@@ -78,8 +78,14 @@ class RaffleController extends Controller {
         ]);
     }
 
-    // allows self entry
-    public function selfEnter($id, RaffleManager $service) {
+    /**
+     * Allows a user to enter a raffle.
+     *
+     * @param int $id
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function postSelfEnter($id, RaffleManager $service) {
         $raffle = Raffle::find($id);
         if (!$raffle || !$raffle->is_active) {
             abort(404);

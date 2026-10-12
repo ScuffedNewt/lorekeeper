@@ -86,7 +86,15 @@
                                         @endif
                                         @if ($r->allow_entry && !$r->rolled_at)
                                             @if (Auth::user())
-                                                <a href="{{ url('raffles/enter/' . $r->id) }}" class="btn btn-primary float-right @if ($r->tickets()->where('user_id', Auth::user()->id)->count() >= 1) disabled @endif">Join Raffle</a>
+                                                @if ($r->tickets()->where('user_id', Auth::user()->id)->count() >= 1)
+                                                    <div class="btn btn-primary float-right disabled" data-toggle="tooltip" title="You have already entered this raffle.">Join Raffle</div>
+                                                @else
+                                                    {!! Form::open(['url' => 'raffles/enter/' . $raffle->id, 'method' => 'POST']) !!}
+                                                    <div class="text-right">
+                                                        {!! Form::submit('Join Raffle', ['class' => 'btn btn-primary']) !!}
+                                                    </div>
+                                                    {!! Form::close() !!}
+                                                @endif
                                             @else
                                                 <div class="float-right"><i>You must be logged in to join the raffle.</i></div>
                                             @endif

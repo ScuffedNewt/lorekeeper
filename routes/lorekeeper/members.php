@@ -269,4 +269,4 @@ Route::group(['prefix' => 'rewards'], function () {
 });
 
 // RAFFLE SELF ENTRY - NEWT
-Route::post('/raffles/enter/{id}', 'RaffleController@selfEnter');
+Route::post('raffles/enter/{id}', 'RaffleController@postSelfEnter');

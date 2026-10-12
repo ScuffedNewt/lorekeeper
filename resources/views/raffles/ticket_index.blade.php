@@ -87,11 +87,15 @@
                         <div class="alert alert-info">You have already self-entered into this raffle!</div>
                     @else
                         <div class="alert alert-success">This raffle allows you to enter yourself!</div>
-                        {!! Form::open(['url' => 'raffles/enter/' . $raffle->id]) !!}
-                        <div class="text-right">
-                            {!! Form::submit('Enter', ['class' => 'btn btn-primary']) !!}
-                        </div>
-                        {!! Form::close() !!}
+                        @if ($raffle->tickets()->where('user_id', Auth::user()->id)->count() >= 1)
+                            <div class="btn btn-primary float-right disabled mb-3">Join Raffle</div>
+                        @else
+                            {!! Form::open(['url' => 'raffles/enter/' . $raffle->id, 'method' => 'POST']) !!}
+                            <div class="text-right mb-3">
+                                {!! Form::submit('Join Raffle', ['class' => 'btn btn-primary']) !!}
+                            </div>
+                            {!! Form::close() !!}
+                        @endif
                     @endif
                 @endif
             @else
@@ -142,7 +146,9 @@
         <div class="card-header h2">Tickets</div>
         <div class="card-body">
             @if (Auth::check() && count($tickets))
-                <?php $chance = number_format((float) (($userCount / $count) * 100), 1, '.', ''); // Change 1 to 0 if you want no decimal place. ?>
+                @php
+                    $chance = number_format((float) (($userCount / $count) * 100), 1, '.', ''); // Change 1 to 0 if you want no decimal place.
+                @endphp
                 <p class="text-center mb-0">You {{ $raffle->is_active == 2 ? 'had' : 'have' }} <strong>{{ $userCount }}</strong> out of <strong>{{ $count }} tickets</strong> in this raffle.</p>
                 <p class="text-center"> That's a <strong>{{ $chance }}%</strong> chance! </p>
             @endif
