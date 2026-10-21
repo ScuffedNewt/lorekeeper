@@ -89,7 +89,7 @@
                                                 @if ($r->tickets()->where('user_id', Auth::user()->id)->count() >= 1)
                                                     <div class="btn btn-primary float-right disabled" data-toggle="tooltip" title="You have already entered this raffle.">Join Raffle</div>
                                                 @else
-                                                    {!! Form::open(['url' => 'raffles/enter/' . $raffle->id, 'method' => 'POST']) !!}
+                                                    {!! Form::open(['url' => 'raffles/enter/' . $r->id, 'method' => 'POST']) !!}
                                                     <div class="text-right">
                                                         {!! Form::submit('Join Raffle', ['class' => 'btn btn-primary']) !!}
                                                     </div>
