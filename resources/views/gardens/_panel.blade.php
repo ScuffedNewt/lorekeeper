@@ -39,63 +39,63 @@
                     {!! Form::submit('Collect All Ready', ['class' => 'btn btn-outline-success']) !!}
                     {!! Form::close() !!}
                 </div>
-            <div class="toolbar-top d-flex justify-content-between align-items-center flex-wrap">
-                <strong>Inventory Bar</strong>
-                <div class="hint" id="toolbarHint">
-                    Tools are click-to-equip. Seeds are drag-to-plant.
+                <div class="toolbar-top d-flex justify-content-between align-items-center flex-wrap">
+                    <strong>Inventory Bar</strong>
+                    <div class="hint" id="toolbarHint">
+                        Tools are click-to-equip. Seeds are drag-to-plant.
+                    </div>
                 </div>
-            </div>
 
-            <div class="inventory">
-                <div class="section h-100">
-                    <h3>Tools</h3>
-                    <div class="tool-row d-flex">
-                        <button class="slot tool active btn" data-mode="place" data-type="tool" data-name="None">
-                            <div class="icon"><i class="fas fa-ban" aria-hidden="true"></i></div>
-                            <div class="name">None</div>
-                        </button>
-                        <button class="slot tool btn" data-mode="tend" data-type="tool" data-name="Love & Affection">
-                            <div class="icon"><i class="fas fa-tint" aria-hidden="true"></i></div>
-                            <div class="name">Tend</div>
-                        </button>
-                        <button class="slot tool btn" data-mode="collect" data-type="tool" data-name="Collecting Basket">
-                            <div class="icon"><i class="fas fa-shopping-basket" aria-hidden="true"></i></div>
-                            <div class="name">Collect</div>
-                        </button>
-                        {{-- other tools here --}}
-                        @foreach ($modifiers as $gardenObjectType => $objectModel)
-                            @foreach ($objectModel as $model => $object)
-                                @foreach ($object as $id => $quantity)
-                                    @include('gardens.selectors._modifier_selector', [
-                                        'id' => $id,
-                                        'object' => $object,
-                                        'quantity' => $quantity,
-                                        'gardenObjectType' => $gardenObjectType,
-                                    ])
+                <div class="inventory">
+                    <div class="section h-100">
+                        <h3>Tools</h3>
+                        <div class="tool-row d-flex">
+                            <button class="slot tool active btn" data-mode="place" data-type="tool" data-name="None">
+                                <div class="icon"><i class="fas fa-ban" aria-hidden="true"></i></div>
+                                <div class="name">None</div>
+                            </button>
+                            <button class="slot tool btn" data-mode="tend" data-type="tool" data-name="Love & Affection">
+                                <div class="icon"><i class="fas fa-tint" aria-hidden="true"></i></div>
+                                <div class="name">Tend</div>
+                            </button>
+                            <button class="slot tool btn" data-mode="collect" data-type="tool" data-name="Collecting Basket">
+                                <div class="icon"><i class="fas fa-shopping-basket" aria-hidden="true"></i></div>
+                                <div class="name">Collect</div>
+                            </button>
+                            {{-- other tools here --}}
+                            @foreach ($modifiers as $gardenObjectType => $objectModel)
+                                @foreach ($objectModel as $model => $object)
+                                    @foreach ($object as $id => $quantity)
+                                        @include('gardens.selectors._modifier_selector', [
+                                            'id' => $id,
+                                            'object' => $object,
+                                            'quantity' => $quantity,
+                                            'gardenObjectType' => $gardenObjectType,
+                                        ])
+                                    @endforeach
                                 @endforeach
                             @endforeach
-                        @endforeach
+                        </div>
                     </div>
-                </div>
-                <div class="section h-100">
-                    <h3>Placeable Objects</h3>
-                    <div class="asset-row d-flex" id="seedRow">
-                        @foreach ($placeables as $gardenObjectType => $objectModel)
-                            @foreach ($objectModel as $model => $object)
-                                @foreach ($object as $id => $quantity)
-                                    @include('gardens.selectors._placeable_selector', [
-                                        'id' => $id,
-                                        'object' => $object,
-                                        'quantity' => $quantity,
-                                        'gardenObjectType' => $gardenObjectType,
-                                    ])
+                    <div class="section h-100">
+                        <h3>Placeable Objects</h3>
+                        <div class="asset-row d-flex" id="seedRow">
+                            @foreach ($placeables as $gardenObjectType => $objectModel)
+                                @foreach ($objectModel as $model => $object)
+                                    @foreach ($object as $id => $quantity)
+                                        @include('gardens.selectors._placeable_selector', [
+                                            'id' => $id,
+                                            'object' => $object,
+                                            'quantity' => $quantity,
+                                            'gardenObjectType' => $gardenObjectType,
+                                        ])
+                                    @endforeach
                                 @endforeach
                             @endforeach
-                        @endforeach
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="garden-status status alert alert-light mb-0 mt-3">Mode: Plant. Selected tool: None</div>
+                <div class="garden-status status alert alert-light mb-0 mt-3">Mode: Plant. Selected tool: None</div>
             </div>
         @elseif (Auth::check() && Auth::id() != $user->id && config('lorekeeper.garden.allow_users_to_water_gardens'))
             @php

@@ -35,7 +35,9 @@
                         @endif
                         <div>{!! $garden->description !!}</div>
                         <p><strong>Plots:</strong> {{ $garden->plots->count() }} · <strong>Perishing:</strong> {{ $garden->can_perish ? 'Enabled' : 'Disabled' }}</p>
-                        <p><strong>Allowed objects:</strong> {{ collect($garden->allowed_object_types ?: array_keys(config('lorekeeper.garden.garden_object_types')))->map(fn ($type) => config('lorekeeper.garden.garden_object_types.' . $type . '.displayName', ucfirst($type)))->implode(', ') }}</p>
+                        <p><strong>Allowed objects:</strong>
+                            {{ collect($garden->allowed_object_types ?: array_keys(config('lorekeeper.garden.garden_object_types')))->map(fn($type) => config('lorekeeper.garden.garden_object_types.' . $type . '.displayName', ucfirst($type)))->implode(', ') }}
+                        </p>
                     </div>
                 </div>
             </div>
@@ -49,14 +51,16 @@
         <div class="row">
             @foreach ($gardenObjects as $gardenObject)
                 <div class="col-md-4 mb-3">
-                    <div class="card h-100"><div class="card-body text-center">
-                        @if ($gardenObject->object?->imageUrl)
-                            <img src="{{ $gardenObject->object->imageUrl }}" style="max-height: 100px" alt="{{ $gardenObject->object->name }}">
-                        @endif
-                        <h4 class="h5 mt-2">{!! $gardenObject->object?->displayName ?? 'Missing Asset' !!}</h4>
-                        <small class="d-block"><strong>Season:</strong> {{ $gardenObject->seasonLabel }}</small>
-                        <small>{{ $gardenObject->data['interactions'] ?? 0 }} interactions · {{ $gardenObject->data['growth_time'] ?? 0 }} hours each</small>
-                    </div></div>
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            @if ($gardenObject->object?->imageUrl)
+                                <img src="{{ $gardenObject->object->imageUrl }}" style="max-height: 100px" alt="{{ $gardenObject->object->name }}">
+                            @endif
+                            <h4 class="h5 mt-2">{!! $gardenObject->object?->displayName ?? 'Missing Asset' !!}</h4>
+                            <small class="d-block"><strong>Season:</strong> {{ $gardenObject->seasonLabel }}</small>
+                            <small>{{ $gardenObject->data['interactions'] ?? 0 }} interactions · {{ $gardenObject->data['growth_time'] ?? 0 }} hours each</small>
+                        </div>
+                    </div>
                 </div>
             @endforeach
         </div>

@@ -29,7 +29,7 @@
             </div>
             <div class="col-md form-group">
                 {!! Form::label('Perish Grace Period (Hours)') !!} {!! add_help('In gardens or plots where perishing is enabled, the seed dies this many hours after a watering or harvest becomes ready.') !!}
-                {!! Form::number('perish_time', isset($object) ? ($object->data['perish_time'] ?? 24) : 24, ['class' => 'form-control', 'min' => 1]) !!}
+                {!! Form::number('perish_time', isset($object) ? $object->data['perish_time'] ?? 24 : 24, ['class' => 'form-control', 'min' => 1]) !!}
             </div>
             <div class="col-md form-group">
                 {!! Form::label('Minimum Fertiliser Quality (Optional)') !!} {!! add_help('The minimum quality of fertiliser required to grow this seed. Leave at 0 for no requirement.') !!}

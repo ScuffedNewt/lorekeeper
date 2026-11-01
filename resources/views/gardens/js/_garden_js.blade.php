@@ -60,7 +60,9 @@
                 const canvas = document.createElement('canvas');
                 canvas.width = 48;
                 canvas.height = 48;
-                const context = canvas.getContext('2d', {willReadFrequently: true});
+                const context = canvas.getContext('2d', {
+                    willReadFrequently: true
+                });
                 context.drawImage(image, 0, 0, canvas.width, canvas.height);
 
                 const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
@@ -256,10 +258,13 @@
         $asset.addClass('active');
         selectedPlaceable = $asset;
         draggedItem = {
-            id: $asset.data('id'), name: $asset.data('name'),
+            id: $asset.data('id'),
+            name: $asset.data('name'),
             icon: $asset.data('icon') ? `<img src='${$asset.data('icon')}' class='garden-object-image'>` : null,
-            currentGardenId: $asset.data('currentGardenId'), assetType: $asset.data('assetType'),
-            objectType: $asset.data('objectType'), element: $asset
+            currentGardenId: $asset.data('currentGardenId'),
+            assetType: $asset.data('assetType'),
+            objectType: $asset.data('objectType'),
+            element: $asset
         };
         setMode('place');
         statusElement.text(`Selected ${draggedItem.name}. Click or tap an empty plot to place it.`);
@@ -358,7 +363,16 @@
             if ($plot.data('readOnly') && $plot.hasClass('tend')) {
                 const $guestStatus = $plot.closest('.scene').find('.garden-status');
                 try {
-                    const response = await $.ajax({url: "{{ url('gardens/guest-tend') }}", type: 'POST', headers: {'X-CSRF-TOKEN': "{{ csrf_token() }}"}, data: {plot_id: plotId}});
+                    const response = await $.ajax({
+                        url: "{{ url('gardens/guest-tend') }}",
+                        type: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': "{{ csrf_token() }}"
+                        },
+                        data: {
+                            plot_id: plotId
+                        }
+                    });
                     $guestStatus.text(response.message);
                     if (response.remaining !== null) {
                         $('.guest-waters-remaining').text(response.remaining);
@@ -392,7 +406,7 @@
                     statusElement.text(`Watered ${plotId.replace('plot-', 'Plot ')}.`);
                     applyPlotResponse($plot, response);
                 } catch (error) {
-                statusElement.text(error.message || `Could not water ${plotId.replace('plot-', 'Plot ')}.`);
+                    statusElement.text(error.message || `Could not water ${plotId.replace('plot-', 'Plot ')}.`);
                     console.error('Garden action failed:', error);
                 }
 
@@ -437,7 +451,9 @@
         $plot.toggleClass('full', response.state !== 'empty');
         $plot.toggleClass('tend', !!response.actionReady);
         $plot.toggleClass('collect', !!response.canCollect);
-        $('[data-toggle="tooltip"]').tooltip({html: true});
+        $('[data-toggle="tooltip"]').tooltip({
+            html: true
+        });
     }
 
     async function refreshPlot($plot) {
@@ -451,7 +467,9 @@
         e.stopPropagation();
         if (!confirm('Return this animal to your available inventory without collecting rewards?')) return;
         const $plot = $(this).closest('.plot');
-        const response = await sendGardenAction('remove_animal', {plot_id: $(this).data('plotId')});
+        const response = await sendGardenAction('remove_animal', {
+            plot_id: $(this).data('plotId')
+        });
         if (response.success) applyPlotResponse($plot, response);
     });
 
@@ -471,7 +489,9 @@
     }
     updateCountdowns();
     setInterval(updateCountdowns, 1000);
-    setInterval(() => plots.each(function() { refreshPlot($(this)); }), 30000);
+    setInterval(() => plots.each(function() {
+        refreshPlot($(this));
+    }), 30000);
 
     setMode(currentMode);
 </script>

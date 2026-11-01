@@ -3,9 +3,7 @@
         $userPlot = $user->gardenPlots()->where('plot_id', $plot->id)->first();
         $guestWaterLimit = (int) config('lorekeeper.garden.user_guest_water_limit');
         $guestWithinWaterLimit = !$guestWaterLimit || (Auth::user()?->activity?->garden_guest_waters_today ?? 0) < $guestWaterLimit;
-        $canGuestTend = $readOnly && Auth::check() && Auth::id() != $user->id
-            && config('lorekeeper.garden.allow_users_to_water_gardens') && $guestWithinWaterLimit
-            && $userPlot?->object?->type == 'seed' && $userPlot?->actionReady;
+        $canGuestTend = $readOnly && Auth::check() && Auth::id() != $user->id && config('lorekeeper.garden.allow_users_to_water_gardens') && $guestWithinWaterLimit && $userPlot?->object?->type == 'seed' && $userPlot?->actionReady;
         $canInteract = (!$readOnly && $userPlot?->actionReady && !$userPlot?->canCollect) || $canGuestTend;
         $canCollect = !$readOnly && $userPlot?->canCollect;
         $empty = !($userPlot?->started_at && $userPlot?->object);
@@ -19,15 +17,13 @@
     $plotBackgroundImage = null;
     if ($plot->has_image) {
         $plotBackgroundImage = asset($plot->imageUrl);
-    } else if ($garden->has_plot_image) {
+    } elseif ($garden->has_plot_image) {
         $plotBackgroundImage = asset($garden->plotImageUrl);
     }
 @endphp
 
 <div class="plot {{ $empty ? 'empty' : '' }} {{ $canCollect ? 'collect' : ($canInteract ? 'tend' : '') }} {{ $plotBackgroundImage ? 'has-plot-image' : '' }}"
-    data-plot-id="{{ $userPlot ? $userPlot->id : ($isPlotUnlocked ? 'plot-' . $plot->id : 'unowned-' . $plot->id) }}"
-    data-state="{{ $empty ? 'empty' : 'filled' }}"
-    data-read-only="{{ $readOnly ? 1 : 0 }}"
+    data-plot-id="{{ $userPlot ? $userPlot->id : ($isPlotUnlocked ? 'plot-' . $plot->id : 'unowned-' . $plot->id) }}" data-state="{{ $empty ? 'empty' : 'filled' }}" data-read-only="{{ $readOnly ? 1 : 0 }}"
     style="{{ $plotBackgroundImage ? 'background-image: url(' . $plotBackgroundImage . ');' : '' }}">
     <div class="plot-label">
         {{ $userPlot?->plot?->name }}

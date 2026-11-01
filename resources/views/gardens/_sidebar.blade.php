@@ -10,7 +10,7 @@
         </div>
         @if (Auth::check())
             <div class="sidebar-item">
-                <a href="{{ Auth::user()->url.'/garden' }}">My Garden</a>
+                <a href="{{ Auth::user()->url . '/garden' }}">My Garden</a>
             </div>
         @endif
         <div class="sidebar-item">
