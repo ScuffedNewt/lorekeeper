@@ -219,6 +219,18 @@ class Character extends Model {
         return $this->hasMany(CharacterRelation::class, 'character_1_id')->orWhere('character_2_id', $this->id);
     }
 
+    /*
+    * Get the links for this character
+    */
+    public function acceptedLinks() {
+        // character id can be in either column
+        return $this->hasMany(CharacterRelation::class, 'character_1_id')
+            ->orWhere('character_2_id', $this->id)
+            ->where(function ($query) {
+                $query->where('character_1_accepted', true)->where('character_2_accepted', true);
+            });
+    }
+
     /**********************************************************************************************
 
         SCOPES

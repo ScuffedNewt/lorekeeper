@@ -46,17 +46,31 @@ class CharacterLinkService extends Service {
                 }
 
                 if ($user->id == $otherCharacter->user_id) {
-                    CharacterRelation::create([
-                        'character_1_id' => $lowerId,
-                        'character_2_id' => $higherId,
-                        'status'         => 'Approved',
-                    ]);
+                    $relation = CharacterRelation::create([
+                            'character_1_id'       => $lowerId,
+                            'character_2_id'       => $higherId,
+                            'status'               => 'Approved',
+                            'character_1_accepted' => true,
+                            'character_2_accepted' => true,
+                        ]);
                 } else {
                     $relation = CharacterRelation::create([
-                        'character_1_id' => $lowerId,
-                        'character_2_id' => $higherId,
-                    ]);
+                            'character_1_id' => $lowerId,
+                            'character_2_id' => $higherId,
+                            'status'         => 'Pending',
+                        ]);
 
+                    if ($otherCharacter->id == $lowerId) {
+                        $relation->update([
+                            'character_1_accepted' => false,
+                            'character_2_accepted' => true,
+                        ]);
+                    } else {
+                        $relation->update([
+                            'character_1_accepted' => true,
+                            'character_2_accepted' => false,
+                        ]);
+                    }
                     // notify the other user
                     Notifications::create('LINK_REQUESTED', $otherCharacter->user, [
                         'character' => $character->fullname,
@@ -91,19 +105,27 @@ class CharacterLinkService extends Service {
                 throw new \Exception('Link not found.');
             }
 
-            if ($link->status != 'Pending') {
-                throw new \Exception('Link is not pending.');
-            }
-
             if ($action == 'accept') {
+                $otherUserCharacter = $link->getOtherCharacter($link->getCharacterForUser(Auth::user()->id)->id);
+
                 $link->status = 'Approved';
+
+                if ($link->getCharacterForUser(Auth::user()->id)->id == $link->character_1_id) {
+                    $link->update([
+                        'character_1_accepted' => true,
+                    ]);
+                } else {
+                    $link->update([
+                        'character_2_accepted' => true,
+                    ]);
+                }
+
                 $link->save();
 
-                $otherUserCharacter = $link->getOtherCharacter($link->getCharacterForUser(Auth::user()->id)->id);
                 Notifications::create('LINK_ACCEPTED', $otherUserCharacter->user, [
                     'link'      => Auth::user()->url,
                     'user'      => Auth::user()->name,
-                    'requested' => $link->getCharacterForUser(Auth::user()->id)->fullname,
+                    'requested' => $link->getCharacterForUser(Auth::user()->id)->displayName,
                     'character' => $otherUserCharacter->url,
                 ]);
             } else {
@@ -167,15 +189,61 @@ class CharacterLinkService extends Service {
 
             if ($character->id == $link->character_1_id) {
                 $link->info = [$data['info'], $link->info ? $link->info[1] : ''];
+                $link->parsed_info = [parse($data['info']), $link->parsed_info ? $link->parsed_info[1] : ''];
             } else {
                 $link->info = [$link->info ? $link->info[0] : '', $data['info']];
+                $link->parsed_info = [$link->parsed_info ? $link->parsed_info[0] : '', parse($data['info'])];
             }
 
-            if (isset($data['type'])) {
-                $link->type = $data['type'];
+            if ($character->id == $link->character_1_id) {
+                $link->type = [$data['type'], $link->type ? $link->type[1] : ''];
+            } else {
+                $link->type = [$link->type ? $link->type[0] : '', $data['type']];
+            }
+
+            $data['is_visible'] = isset($data['is_visible']) ? 1 : 0;
+
+            if ($character->id == $link->character_1_id) {
+                $link->is_visible = [$data['is_visible'], $link->is_visible ? $link->is_visible[1] : 1];
+            } else {
+                $link->is_visible = [$link->is_visible ? $link->is_visible[0] : 1, $data['is_visible']];
             }
 
             $link->save();
+
+            return $this->commitReturn(true);
+        } catch (\Exception $e) {
+            $this->setError('error', $e->getMessage());
+        }
+
+        return $this->rollbackReturn(false);
+    }
+
+    /**
+     * Sorts a character's links.
+     *
+     * @param array $data
+     * @param User  $user
+     * @param mixed $character
+     *
+     * @return bool
+     */
+    public function sortLinks($data, $character, $user) {
+        DB::beginTransaction();
+
+        try {
+            $ids = explode(',', $data['sort']);
+            $links = $character->links()->whereIn('id', $ids)->get();
+
+            if (count($links) != count($ids)) {
+                throw new \Exception('Invalid link included in sorting order.');
+            }
+
+            $order = array_flip($ids);
+            foreach ($links as $link) {
+                $link->sort = $order[$link->id];
+                $link->save();
+            }
 
             return $this->commitReturn(true);
         } catch (\Exception $e) {

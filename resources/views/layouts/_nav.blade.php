@@ -47,6 +47,9 @@
                             <a class="dropdown-item" href="{{ url('comments/liked') }}">
                                 Liked Comments
                             </a>
+                            <a class="dropdown-item" href="{{ url('characters/link-requests') }}">
+                                Character Link Requests
+                            </a>
                         </div>
                     </li>
                     <li class="nav-item dropdown">
