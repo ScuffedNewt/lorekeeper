@@ -11,7 +11,8 @@ class CharacterRelation extends Model {
      * @var array
      */
     protected $fillable = [
-        'character_1_id', 'character_2_id', 'info', 'type', 'status',
+        'character_1_id', 'character_2_id', 'info', 'parsed_info', 'type', 'status', 'is_visible',
+        'character_1_accepted', 'character_2_accepted',
     ];
 
     /**
@@ -27,7 +28,10 @@ class CharacterRelation extends Model {
      * @var array
      */
     protected $casts = [
-        'info' => 'array',
+        'info'        => 'array',
+        'parsed_info' => 'array',
+        'type'        => 'array',
+        'is_visible'  => 'array',
     ];
 
     /**
@@ -64,6 +68,15 @@ class CharacterRelation extends Model {
     **********************************************************************************************/
 
     /**
+     * Returns the character in the relation based on the given character id.
+     *
+     * @param mixed $id
+     */
+    public function getCharacter($id) {
+        return $this->character_1_id == $id ? $this->characterOne : $this->characterTwo;
+    }
+
+    /**
      * Returns the other character in the relation based on the given character id.
      *
      * @param mixed $id
@@ -77,8 +90,35 @@ class CharacterRelation extends Model {
      *
      * @param mixed $id
      */
+    public function getRelationshipType($id) {
+        return $this->type ? $this->type[$id == $this->character_1_id ? 0 : 1] : null;
+    }
+
+    /**
+     * Gets the information for the relation based on the given character id.
+     *
+     * @param mixed $id
+     */
     public function getRelationshipInfo($id) {
         return $this->info ? $this->info[$id == $this->character_1_id ? 0 : 1] : null;
+    }
+
+    /**
+     * Gets the information for the relation based on the given character id.
+     *
+     * @param mixed $id
+     */
+    public function getRelationshipParsedInfo($id) {
+        return $this->parsed_info ? $this->parsed_info[$id == $this->character_1_id ? 0 : 1] : null;
+    }
+
+    /**
+     * Gets the visibility for the relation based on the given character id.
+     *
+     * @param mixed $id
+     */
+    public function getRelationshipVisibility($id) {
+        return $this->is_visible ? $this->is_visible[$id == $this->character_1_id ? 0 : 1] : null;
     }
 
     /**
@@ -88,5 +128,23 @@ class CharacterRelation extends Model {
      */
     public function getCharacterForUser($id) {
         return $this->characterOne->user_id == $id ? $this->characterOne : ($this->characterTwo->user_id == $id ? $this->characterTwo : null);
+    }
+
+    /**
+     * Get the character in the relation belonging to opposite of the given user id.
+     *
+     * @param mixed $id
+     */
+    public function getOtherCharacterForUser($id) {
+        return $this->characterOne->user_id == $id ? $this->characterTwo : ($this->characterTwo->user_id == $id ? $this->characterOne : null);
+    }
+
+    /**
+     * Get the other user in a relationship, given the user id.
+     *
+     * @param mixed $id
+     */
+    public function getOtherUser($id) {
+        return $this->characterOne->user_id == $id ? $this->characterTwo->user : ($this->characterTwo->user_id == $id ? $this->characterOne->user : null);
     }
 }

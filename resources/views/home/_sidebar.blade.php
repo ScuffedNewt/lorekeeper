@@ -14,6 +14,7 @@
         <div class="sidebar-item"><a href="{{ url('characters/transfers/incoming') }}" class="{{ set_active('characters/transfers*') }}">Character Transfers</a></div>
         <div class="sidebar-item"><a href="{{ url('trades/open') }}" class="{{ set_active('trades*') }}">Trades</a></div>
         <div class="sidebar-item"><a href="{{ url('comments/liked') }}" class="{{ set_active('comments/liked*') }}">Liked Comments</a></div>
+        <div class="sidebar-item"><a href="{{ url('characters/link-requests') }}" class="{{ set_active('characters/link-requests*') }}">Character Link Requests</a></div>
     </li>
     <li class="sidebar-section">
         <div class="sidebar-section-header">Reports</div>

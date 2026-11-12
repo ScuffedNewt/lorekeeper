@@ -591,9 +591,13 @@ class CharacterController extends Controller {
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function getCharacterLinks($slug) {
+        $links = $this->character->acceptedLinks()->with('characterOne', 'characterTwo')->orderBy('sort')->get();
+
         return view('character.links', [
             'character' => $this->character,
+            'links'     => $links,
             'types'     => config('lorekeeper.character_relationships'),
+            'canManage' => Auth::check() && (Auth::user()->hasPower('manage_characters') || Auth::user()->id === $this->character->user_id),
         ]);
     }
 
@@ -658,7 +662,7 @@ class CharacterController extends Controller {
      * @return \Illuminate\Http\RedirectResponse
      */
     public function postEditCharacterLinkInfo(Request $request, CharacterLinkService $service, $slug, $id) {
-        $data = $request->only(['info', 'type']);
+        $data = $request->only(['info', 'type', 'is_visible']);
         if ($service->updateCharacterRelationLinkInfo($data + ['slug' => $slug], $id, Auth::user())) {
             flash('Info updated successfully!')->success();
         } else {

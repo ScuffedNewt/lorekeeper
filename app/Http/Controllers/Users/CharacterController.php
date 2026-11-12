@@ -130,4 +130,28 @@ class CharacterController extends Controller {
 
         return redirect()->back();
     }
+
+    public function getPendingLinkRequests() {
+        $user = Auth::user();
+
+        $incoming = $user->getPendingLinkRequests()
+            ->with('characterOne', 'characterTwo')
+            ->where(function ($query) use ($user) {
+                $query->whereRelation('characterOne', 'user_id', $user->id)->where('character_1_accepted', false);
+            })->orWhere(function ($query) use ($user) {
+                $query->whereRelation('characterTwo', 'user_id', $user->id)->where('character_2_accepted', false);
+            })->get();
+        $outgoing = $user->getPendingLinkRequests()
+            ->with('characterOne', 'characterTwo')
+            ->where(function ($query) use ($user) {
+                $query->whereRelation('characterOne', 'user_id', $user->id)->where('character_2_accepted', false);
+            })->orWhere(function ($query) use ($user) {
+                $query->whereRelation('characterTwo', 'user_id', $user->id)->where('character_1_accepted', false);
+            })->get();
+
+        return view('home.pending_links', [
+            'incomings' => $incoming,
+            'outgoings' => $outgoing,
+        ]);
+    }
 }
