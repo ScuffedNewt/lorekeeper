@@ -19,21 +19,6 @@ return new class extends Migration {
 
             $table->unique(['character_1_id', 'character_2_id']);
         });
-
-        DB::statement('ALTER TABLE character_relations ADD CONSTRAINT check_chara_order CHECK (character_1_id < character_2_id)');
-
-        DB::unprepared('
-            CREATE TRIGGER before_insert_character_relations 
-            BEFORE INSERT ON character_relations
-            FOR EACH ROW
-            BEGIN
-                IF NEW.character_1_id > NEW.character_2_id THEN
-                    SET @temp = NEW.character_1_id;
-                    SET NEW.character_1_id = NEW.character_2_id;
-                    SET NEW.character_2_id = @temp;
-                END IF;
-            END
-        ');
     }
 
     /**

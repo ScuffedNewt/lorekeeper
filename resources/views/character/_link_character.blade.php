@@ -1,4 +1,4 @@
-<div class="col-md-4 mb-2 text-center">
+<div class="text-center">
     <div>
         <a href="{{ $character->url }}"><img src="{{ $character->image->thumbnailUrl }}" class="img-thumbnail" /></a>
     </div>
@@ -10,6 +10,6 @@
         </a>
     </div>
     <div class="small">
-        {!! $character->image->species_id ? $character->image->species->displayName : 'No Species' !!} ・ {!! $character->image->rarity_id ? $character->image->rarity->displayName : 'No Rarity' !!} ・ {!! $character->displayOwner !!}
+        {!! $character->displayOwner !!}
     </div>
 </div>

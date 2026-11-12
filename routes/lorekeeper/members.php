@@ -73,6 +73,8 @@ Route::group(['prefix' => 'characters', 'namespace' => 'Users'], function () {
     Route::post('transfer/act/{id}', 'CharacterController@postHandleTransfer');
 
     Route::get('myos', 'CharacterController@getMyos');
+
+    Route::get('link-requests', 'CharacterController@getPendingLinkRequests');
 });
 
 Route::group(['prefix' => 'bank', 'namespace' => 'Users'], function () {
@@ -122,7 +124,7 @@ Route::group(['prefix' => 'character', 'namespace' => 'Characters'], function ()
 });
 
 // CHARACTER RELATIONSHIPS
-Route::post('links/{action}/{id}', 'LinkController@postHandleLink')->where('action', 'accept|reject');
+Route::post('links/{action}', 'LinkController@postHandleLink')->where('action', 'accept|delete');
 
 Route::group(['prefix' => 'myo', 'namespace' => 'Characters'], function () {
     Route::get('{id}/profile/edit', 'MyoController@getEditCharacterProfile');

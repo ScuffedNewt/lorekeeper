@@ -5,6 +5,7 @@ namespace App\Models\User;
 use App\Models\Character\Character;
 use App\Models\Character\CharacterBookmark;
 use App\Models\Character\CharacterImageCreator;
+use App\Models\Character\CharacterRelation;
 use App\Models\Comment\CommentLike;
 use App\Models\Currency\Currency;
 use App\Models\Currency\CurrencyLog;
@@ -672,5 +673,20 @@ class User extends Authenticatable implements MustVerifyEmail {
      */
     public function hasBookmarked($character) {
         return CharacterBookmark::where('user_id', $this->id)->where('character_id', $character->id)->first();
+    }
+
+    /**
+     * Gets a user's pending character link requests as a query
+     *
+     * @return Illuminate\Database\Query\Builder
+     */
+    public function getPendingLinkRequests() {
+        $ids = $this->characters->pluck('id')->toArray();
+
+        return CharacterRelation::where(function ($query) use ($ids) {
+            $query->whereIn('character_1_id', $ids)->orWhere(function ($q) use ($ids) {
+                $q->whereIn('character_2_id', $ids);
+            });
+        })->where('status', 'Pending');
     }
 }
