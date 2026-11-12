@@ -748,7 +748,7 @@ class User extends Authenticatable implements MustVerifyEmail {
     }
 
     /**
-     * Gets a user's pending character link requests as a query
+     * Gets a user's pending character link requests as a query.
      *
      * @return Illuminate\Database\Query\Builder
      */

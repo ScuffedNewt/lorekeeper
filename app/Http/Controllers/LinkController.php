@@ -3,15 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Services\CharacterLinkService;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class LinkController extends Controller {
     /**
      * Accepts or rejects a link request.
      *
      * @param mixed $action
-     * @param mixed $id
      *
      * @return response 200
      */
@@ -20,12 +19,13 @@ class LinkController extends Controller {
             foreach ($service->errors()->getMessages()['error'] as $error) {
                 flash($error)->error();
             }
+
             return redirect()->back();
         }
 
-        if($action == 'accept') {
+        if ($action == 'accept') {
             flash('Link request accepted successfully!', 'success');
-        } elseif($action == 'delete') {
+        } elseif ($action == 'delete') {
             flash('Link request deleted successfully!', 'success');
         }
 

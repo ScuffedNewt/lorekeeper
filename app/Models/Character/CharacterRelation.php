@@ -120,7 +120,7 @@ class CharacterRelation extends Model {
     public function getRelationshipVisibility($id) {
         return $this->is_visible ? $this->is_visible[$id == $this->character_1_id ? 0 : 1] : null;
     }
-    
+
     /**
      * Get the character in the relation belonging to the given user id, if any.
      *
@@ -131,7 +131,7 @@ class CharacterRelation extends Model {
     }
 
     /**
-     * Get the character in the relation belonging to opposite of the given user id
+     * Get the character in the relation belonging to opposite of the given user id.
      *
      * @param mixed $id
      */
@@ -140,7 +140,7 @@ class CharacterRelation extends Model {
     }
 
     /**
-     * Get the other user in a relationship, given the user id
+     * Get the other user in a relationship, given the user id.
      *
      * @param mixed $id
      */

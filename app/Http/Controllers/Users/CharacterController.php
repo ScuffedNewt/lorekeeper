@@ -133,7 +133,7 @@ class CharacterController extends Controller {
 
     public function getPendingLinkRequests() {
         $user = Auth::user();
-    
+
         $incoming = $user->getPendingLinkRequests()
             ->with('characterOne', 'characterTwo')
             ->where(function ($query) use ($user) {

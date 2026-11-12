@@ -592,7 +592,7 @@ class CharacterController extends Controller {
      */
     public function getCharacterLinks($slug) {
         $links = $this->character->acceptedLinks()->with('characterOne', 'characterTwo')->orderBy('sort')->get();
-        
+
         return view('character.links', [
             'character' => $this->character,
             'links'     => $links,
