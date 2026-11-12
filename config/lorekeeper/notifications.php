@@ -340,7 +340,7 @@ return [
     // LINK_REQUESTED
     200 => [
         'message' => '<a href="{link}">{user}</a> has requested to link your character {requested} to {character}. (<a href="{url}">View Request</a>)',
-        'url'  => 'characters/link-requests',
+        'url'     => 'characters/link-requests',
     ],
 
     // LINK_ACCEPTED

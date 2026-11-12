@@ -47,18 +47,18 @@ class CharacterLinkService extends Service {
 
                 if ($user->id == $otherCharacter->user_id) {
                     $relation = CharacterRelation::create([
-                            'character_1_id'       => $lowerId,
-                            'character_2_id'       => $higherId,
-                            'status'               => 'Approved',
-                            'character_1_accepted' => true,
-                            'character_2_accepted' => true,
-                        ]);
+                        'character_1_id'       => $lowerId,
+                        'character_2_id'       => $higherId,
+                        'status'               => 'Approved',
+                        'character_1_accepted' => true,
+                        'character_2_accepted' => true,
+                    ]);
                 } else {
                     $relation = CharacterRelation::create([
-                            'character_1_id' => $lowerId,
-                            'character_2_id' => $higherId,
-                            'status'         => 'Pending',
-                        ]);
+                        'character_1_id' => $lowerId,
+                        'character_2_id' => $higherId,
+                        'status'         => 'Pending',
+                    ]);
 
                     if ($otherCharacter->id == $lowerId) {
                         $relation->update([
